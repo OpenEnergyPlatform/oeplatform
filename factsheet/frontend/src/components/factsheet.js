@@ -2508,7 +2508,7 @@ function getStepContent(step: number) {
       alignItems="center"
       >
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
-        <Container maxWidth="xl">
+        <Container maxWidth="lg">
 
           <Grid item xs={12}>
             <Backdrop
@@ -2889,7 +2889,7 @@ function getStepContent(step: number) {
                   </span>
                 </Grid>
                 <Grid item xs={9} style={{ paddingTop: '10px' }}>
-                  <div  style={{ width:'90%' }}> {abstract !== undefined && abstract}  </div>
+                  <div>{abstract !== undefined && abstract}</div>
                 </Grid>
               </InfoListItem>
             </Grid>

@@ -71,6 +71,7 @@ export const FirstRowTableCell = styled(TableCell)(({ theme }) => ({
   ...theme.components.MuiTableCell.variants.find(v => v.props.variant === 'border').style,
   padding: `${variables.spacing[3]} ${variables.spacing[4]}`,
   fontWeight: theme.typography.fontWeightBold,
+  width: '10rem',
   '& > div': {
     'display': 'flex',
     'flex-direction': 'row',
