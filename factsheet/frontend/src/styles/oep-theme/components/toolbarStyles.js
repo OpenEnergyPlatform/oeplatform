@@ -9,6 +9,7 @@ const toolbarStyles = {
         padding: 0,
 
         "& > .MuiGrid-container": {
+          padding: '0 0 1rem',
 
           "& > .MuiGrid-item:nth-of-type(1)": {
             display: 'flex',
