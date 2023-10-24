@@ -58,6 +58,7 @@ export default function CustomTabs(props) {
       fontWeight: theme.typography.fontWeightBold,
       border: `1px solid ${palette.border}`,
       minHeight: 'fit-content',
+      padding: theme.spacing(1),
 
       '&:first-of-type': {
         borderTopLeftRadius: variables.borderRadius,
