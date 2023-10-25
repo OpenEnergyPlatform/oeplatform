@@ -60,7 +60,7 @@ const BundleScenariosGridItem = ({
           </LabelItem>
         </Grid>
         <Grid item xs={10}>
-          {renderField()}
+          {typeof renderField === 'function' ? renderField() : null}
         </Grid>
       </Grid>
     </BundleScenariosGrid>
