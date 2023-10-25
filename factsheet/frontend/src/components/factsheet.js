@@ -1397,121 +1397,90 @@ const renderBasicInformation = () => (
 
   const renderStudyPublications= () =>  (
     <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
-      
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Report title: </b> </span>
-        <span >
-        <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A name given to the resource.'}
-                <br />
-                <a href="http://purl.org/dc/elements/1.1/title">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '5px', overflow: "auto", marginBottom:'10px'  }}>
-        <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant="outlined" style={{ width: '70%' }} id="outlined-basic" label=""  value={report_title} onChange={handleReportTitle} />
-      </Grid>
 
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Authors: </b> </span>
-        <span >
-        <HtmlTooltip
-          title={
-          <React.Fragment>
-            <Typography color="inherit" variant="subtitle1">
-              {'An author is an agent that creates or has created written work.'}
-              <br />
-              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
-            </Typography>
-          </React.Fragment>
-        }
-        >
-        <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-        </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <CustomAutocomplete width="70%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='' handler={authorsHandler} selectedElements={selectedAuthors}  />
-      </Grid>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>DOI: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant="outlined" style={{ width: '70%' }} id="outlined-basic" label="" value={doi} onChange={handleDOI} />
-      </Grid>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Link to study report: </b> </span>
-        <span >
-        {/* <HtmlTooltip
-          style={{ marginLeft: '10px' }}
-          placement="top"
-          title={
-            <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A funder is a sponsor that supports by giving money.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
-              </Typography>
-            </React.Fragment>
-          }
-        >
-          <HelpOutlineIcon sx={{ color: '#708696' }}/>
-        </HtmlTooltip> */}
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <TextField InputProps={{ sx: { borderRadius: 0 } }}  size="small" variant="outlined" style={{ width: '70%', marginTop:'10px' }} id="outlined-basic" label="" value={link_to_study} onChange={handleLinkToStudy} />
-      </Grid>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Date of publication: </b> </span>
-        <span >
-        {/* <HtmlTooltip
-          style={{ marginLeft: '10px' }}
-          placement="top"
-          title={
-            <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A funder is a sponsor that supports by giving money.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
-              </Typography>
-            </React.Fragment>
-          }
-        >
-          <HelpOutlineIcon sx={{ color: '#708696' }}/>
-        </HtmlTooltip> */}
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Stack spacing={3}  style={{ marginTop:'10px', width: '70%', marginBottom:'40px' }}>
-            <DesktopDatePicker
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Report title"
+        tooltipText="A name given to the resource."
+        hrefLink="http://purl.org/dc/elements/1.1/title"
+        linkText="More info..."
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined"
+            value={report_title}
+            onChange={handleReportTitle}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Authors"
+        tooltipText="An author is an agent that creates or has created written work."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000064"
+        renderField={() => (
+          <CustomAutocomplete 
+            width="100%" 
+            type="author" 
+            showSelectedElements={true} 
+            editHandler={HandleEditAuthors} 
+            addNewHandler={HandleAddNewAuthor} 
+            manyItems 
+            optionsSet={authors} 
+            handler={authorsHandler} 
+            selectedElements={selectedAuthors}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="DOI"
+        tooltipText="A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO)."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000133"
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined"
+            value={doi}
+            onChange={handleDOI}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        showTooltip={false}
+        spanValue="Link to study report"
+        tooltipText="A funder is a sponsor that supports by giving money."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined"
+            value={link_to_study}
+            onChange={handleLinkToStudy}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        showTooltip={false}
+        spanValue="Date of publication"
+        tooltipText="A funder is a sponsor that supports by giving money."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        renderField={() => (
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Stack spacing={3} style={{ width: '10rem' }}>
+              <DesktopDatePicker
                 label=''
                 inputFormat="YYYY/MM/DD"
                 value={date_of_publication}
@@ -1526,9 +1495,12 @@ const renderBasicInformation = () => (
                 }}
                 renderInput={(params) => <TextField {...params} size="small" variant="outlined" />}
               />
-          </Stack>
-        </LocalizationProvider>
-      </Grid>
+            </Stack>
+          </LocalizationProvider>
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+
     </Grid>
   );
 
