@@ -3,6 +3,11 @@ import { styled } from '@mui/system';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import palette from '../palette';
+
+const BundleScenariosGrid = styled(Grid)({
+  color: palette.text.primary
+});
 
 const LabelItem = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -11,7 +16,8 @@ const LabelItem = styled('div')(({ theme }) => ({
   height: '100%',
 
   '& span:first-of-type': {
-    paddingRight: theme.spacing(1)
+    paddingRight: theme.spacing(1),
+    fontWeight: theme.typography.fontWeightBold
   },
   '& svg': {
     transform: 'translateY(3px)'
@@ -28,7 +34,7 @@ const BundleScenariosGridItem = ({
   linkText = "More info from Open Energy Ontology (OEO)..."
 }) => {
   return (
-    <Grid item xs={12}>
+    <BundleScenariosGrid item xs={12}>
       <Grid container>
         <Grid item xs={2}>
           <LabelItem>
@@ -56,7 +62,7 @@ const BundleScenariosGridItem = ({
           {renderField()}
         </Grid>
       </Grid>
-    </Grid>
+    </BundleScenariosGrid>
   );
 };
 

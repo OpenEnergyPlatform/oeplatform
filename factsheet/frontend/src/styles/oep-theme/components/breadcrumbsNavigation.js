@@ -7,6 +7,7 @@ import variables from '../variables';
 
 const BreadcrumbsNav = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.grey[100],
+  color: palette.text.primary,
   paddingBottom: variables.spacing[5],
   marginBottom: variables.spacing[4],
 
