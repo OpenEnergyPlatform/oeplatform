@@ -1565,56 +1565,50 @@ const renderBasicInformation = () => (
         )}
         TooltipComponent={HtmlTooltip}
       />
-      
+
     </Grid>
   );
 
   const renderModelsAndFrameworks = () => (
     <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
-      
-    <Grid item xs={2}  style={{ padding: '5px'}}>
-      <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Models: </b> </span>
-      <span >
-      <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-      </HtmlTooltip>
-      </span>
-    </Grid>
-    <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <CustomAutocompleteWithoutEdit  type="Model" manyItems showSelectedElements={true} optionsSet={oep_models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
-    </Grid>
 
-    <Grid item xs={2}  style={{ padding: '5px'}}>
-      <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Frameworks: </b> </span>
-      <span >
-        <HtmlTooltip
-              title={
-              <React.Fragment>
-                <Typography color="inherit" variant="subtitle1">
-                  {'A software framework is a Software that is generic and can be adapted to a specific application.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
-                </Typography>
-              </React.Fragment>
-            }
-            >
-            <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-        </HtmlTooltip>
-      </span>
-    </Grid>
-    <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <CustomAutocompleteWithoutEdit  type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
-    </Grid>
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Models"
+        tooltipText="A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000274"
+        renderField={() => (
+          <CustomAutocompleteWithoutEdit
+            type="Model"
+            manyItems
+            showSelectedElements={true}
+            optionsSet={oep_models}
+            kind='Models'
+            handler={modelsHandler}
+            selectedElements={selectedModels}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Frameworks"
+        tooltipText="A software framework is a Software that is generic and can be adapted to a specific application."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000382"
+        renderField={() => (
+          <CustomAutocompleteWithoutEdit
+            type="Frameworks"
+            manyItems
+            showSelectedElements={true}
+            optionsSet={oep_frameworks}
+            kind='Frameworks'
+            handler={frameworksHandler}
+            selectedElements={selectedFrameworks}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+
     </Grid>
   );
 
