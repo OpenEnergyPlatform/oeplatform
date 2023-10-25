@@ -39,7 +39,7 @@ export default function CustomTreeViewWithCheckBox(props) {
   
   return (
     <Box>
-      <Box style={{  marginTop :'5px', height: size, overflow: 'auto', 'border':'1px solid #cecece', width: '95%' }}>
+      <Box style={{ height: size, overflow: 'auto', 'border':'1px solid #cecece', width: '100%' }}>
         <CheckboxTree
             nodes={data}
             checked={checked}

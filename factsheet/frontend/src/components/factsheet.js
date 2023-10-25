@@ -1507,91 +1507,65 @@ const renderBasicInformation = () => (
 
   const renderSectorsAndTecnology = () => (
     <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
+
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Sector divisions"
+        tooltipText="A sector division is a specific way to subdivide a system."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000368"
+        renderField={() => (
+          <CustomAutocompleteWithoutAddNew 
+            showSelectedElements={true}
+            optionsSet={sectorDivisions}
+            kind=''
+            handler={sectorDivisionsHandler}
+            selectedElements={selectedSectorDivisions}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Sectors"
+        tooltipText="A sector is generically dependent continuant that is a subdivision of a system."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000367"
+        renderField={() => (
+          <CustomTreeViewWithCheckBox 
+            flat={true} 
+            showFilter={false} 
+            size="360px" 
+            checked={selectedSectors} 
+            expanded={expandedSectors} 
+            handler={sectorsHandler} 
+            expandedHandler={expandedSectorsHandler} 
+            data={filteredSectors} 
+            title={"Which sectors are considered in the study?"} 
+            toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Technology"
+        tooltipText="A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000407"
+        renderField={() => (
+          <CustomTreeViewWithCheckBox
+            showFilter={false}
+            size="360px" 
+            checked={selectedTechnologies} 
+            expanded={getNodeIds(technologies['children'])} 
+            handler={technologyHandler} 
+            expandedHandler={expandedTechnologyHandler} 
+            data={technologies} 
+            title={"What technologies are considered?"} 
+            toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000407']} 
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
       
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Sector divisions: </b> </span>
-        <span >
-          <HtmlTooltip
-              title={
-              <React.Fragment>
-                <Typography color="inherit" variant="subtitle1">
-                  {'A sector division is a specific way to subdivide a system.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info...</a>
-                </Typography>
-              </React.Fragment>
-            }
-            >
-            <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <CustomAutocompleteWithoutAddNew showSelectedElements={true} optionsSet={sectorDivisions} kind='' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
-      </Grid>
-
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Sectors: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A sector is generically dependent continuant that is a subdivision of a system.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000367">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <CustomTreeViewWithCheckBox flat={true} 
-                                    showFilter={false} 
-                                    size="360px" 
-                                    checked={selectedSectors} 
-                                    expanded={expandedSectors} 
-                                    handler={sectorsHandler} 
-                                    expandedHandler={expandedSectorsHandler} 
-                                    data={filteredSectors} 
-                                    title={"Which sectors are considered in the study?"} 
-                                    toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
-      </Grid>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Technology: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000407">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <CustomTreeViewWithCheckBox showFilter={false}
-                                    size="260px" 
-                                    checked={selectedTechnologies} 
-                                    expanded={getNodeIds(technologies['children'])} 
-                                    handler={technologyHandler} 
-                                    expandedHandler={expandedTechnologyHandler} 
-                                    data={technologies} 
-                                    title={"What technologies are considered?"} 
-                                    toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000407']} 
-                                    />
-      </Grid>
     </Grid>
   );
 
