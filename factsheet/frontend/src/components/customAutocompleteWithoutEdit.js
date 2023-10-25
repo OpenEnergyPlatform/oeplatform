@@ -32,9 +32,6 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const useStyles = makeStyles((theme) => ({
-  inputRoot: {
-    borderRadius: 0,  
-  },
 }));
 
 export default function CustomAutocompleteWithoutEdit(parameters) {
@@ -140,7 +137,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
  
 
   return (
-    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '10px' :'10px', marginBottom: '20px'}}>
+    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '0px' :'0px', marginBottom: '20px'}}>
       <Autocomplete
         size="small" 
         multiple
@@ -298,7 +295,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
           'height': '100%',
           // 'border': '1px dashed #cecece',
           'overflow': 'scroll',
-          'borderRadius': '5px',
+          'borderRadius': '4px',
           // 'backgroundColor':'#FCFCFC'
         }}
       >

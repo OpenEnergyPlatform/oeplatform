@@ -17,9 +17,6 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const useStyles = makeStyles((theme) => ({
-  inputRoot: {
-    borderRadius: 0,  
-  },
 }));
 
 export default function CustomAutocompleteWithoutAddNew(parameters) {
@@ -101,7 +98,7 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
           'height': '100%',
           // 'border': '1px dashed #cecece',
           'overflow': 'scroll',
-          'borderRadius': '5px',
+          'borderRadius': '4px',
           // 'backgroundColor':'#FCFCFC'
         }}
       >

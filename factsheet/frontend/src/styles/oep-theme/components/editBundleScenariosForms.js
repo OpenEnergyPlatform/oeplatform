@@ -12,7 +12,8 @@ const BundleScenariosGrid = styled(Grid)({
 const LabelItem = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
-  alignItems: 'center',
+  alignItems: 'baseline',
+  transform: 'translateY(1rem)',
   height: '100%',
 
   '& span:first-of-type': {
