@@ -13,7 +13,7 @@ const LabelItem = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'baseline',
-  transform: 'translateY(1rem)',
+  transform: 'translateY(0.5rem)',
   height: '100%',
 
   '& span:first-of-type': {

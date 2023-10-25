@@ -43,7 +43,7 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
   }));
 
   return (
-    <Box style={{ width: width,  marginTop: '10px', }}>
+    <Box style={{ width: width }}>
       <Autocomplete
         size="small" 
         multiple
