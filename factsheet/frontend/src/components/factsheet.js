@@ -1184,7 +1184,7 @@ function Factsheet(props) {
 
   const renderScenario = () => {
     return  <div>
-              <Box sx={{ flexGrow: 1, display: 'flex', height:'72vh', overflow: 'auto' }} >
+              <Box sx={{ flexGrow: 1, display: 'flex', overflow: 'auto' }} >
                 <Tabs
                   orientation="vertical"
                   value={scenarioTabValue}

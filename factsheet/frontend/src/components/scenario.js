@@ -317,7 +317,7 @@ export default function Scenario(props) {
           </span>
         </Grid>
         <Grid item xs={9} >
-          <TextField size="small" variant='outlined' style={{  width: '95%' }} id="outlined-basic" label="" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
+          <TextField size="small" variant='outlined' style={{  width: '100%' }} id="outlined-basic" label="" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
         </Grid>
 
         <Grid item xs={3} >
@@ -339,7 +339,7 @@ export default function Scenario(props) {
           </span>
         </Grid>
         <Grid item xs={9} >
-          <TextField size="small" variant='outlined' style={{  width: '95%' }} id="outlined-basic" label="" name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
+          <TextField size="small" variant='outlined' style={{  width: '100%' }} id="outlined-basic" label="" name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
         </Grid>
 
         <Grid item xs={3} >
@@ -361,7 +361,7 @@ export default function Scenario(props) {
           </span>
         </Grid>
         <Grid item xs={9} >
-          <TextField size="small" variant='outlined' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px' }} id="outlined-basic" label="" multiline rows={8} maxRows={14} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
+          <TextField size="small" variant='outlined' style={{ width: '100%', MarginBottom: '10px', MarginTop: '20px' }} id="outlined-basic" label="" multiline rows={8} maxRows={14} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
         </Grid>
 
         <Grid item xs={3} >
@@ -384,7 +384,7 @@ export default function Scenario(props) {
         </Grid>
         <Grid item xs={9} >
           <CustomAutocompleteWithoutAddNew  
-            width="95%"
+            width="100%"
             showSelectedElements={true}
             optionsSet={options_LCC}
             kind=''
@@ -414,7 +414,7 @@ export default function Scenario(props) {
         </Grid>
         <Grid item xs={9} >
         <CustomAutocompleteWithoutAddNew  
-            width="95%"
+            width="100%"
             showSelectedElements={true}
             optionsSet={options_LCC}
             kind=''
@@ -422,7 +422,7 @@ export default function Scenario(props) {
             selectedElements={data.interacting_regions}
             noTooltip={true}
           />
-          {/* <CustomAutocomplete  width="95%" type="interacting region" 
+          {/* <CustomAutocomplete  width="100%" type="interacting region" 
            editHandler={HandleEditInteractingRegion}
             addNewHandler={HandleAddNewInteractingRegion}
              showSelectedElements={true} 
@@ -450,7 +450,7 @@ export default function Scenario(props) {
           </span>
         </Grid>
         <Grid item xs={9} >
-          <CustomAutocomplete  width="95%" type="scenario year" editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
+          <CustomAutocomplete  width="100%" type="scenario year" editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
         </Grid>
          
         <Grid item xs={3}  >
