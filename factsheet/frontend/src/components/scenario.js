@@ -32,7 +32,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
-import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
@@ -82,19 +82,6 @@ function a11yProps(index: number) {
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
-
-const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: '#e3eaef',
-    color: 'black',
-    maxWidth: 520,
-    fontSize: theme.typography.pxToRem(20),
-    border: '1px solid black',
-    padding: '20px'
-  },
-}));
 
 export default function Scenario(props) {
   const {

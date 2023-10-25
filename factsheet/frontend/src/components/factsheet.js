@@ -31,7 +31,8 @@ import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import conf from "../conf.json";
-import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
+import { Tooltip } from '@mui/material';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { styled } from '@mui/material/styles';
 import SaveIcon from '@mui/icons-material/Save';
@@ -157,19 +158,6 @@ function Factsheet(props) {
   const handleStepClick = (i) => {
     setActiveStep(i);
   };
-
-  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: '#e3eaef',
-      color: 'black',
-      maxWidth: 520,
-      fontSize: theme.typography.pxToRem(20),
-      border: '1px solid black',
-      padding: '20px'
-    },
-  }));
 
   const wrapInTooltip = (name, description, link) => <span> <HtmlTooltip
               placement="top"

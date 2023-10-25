@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Typography from '@mui/material/Typography';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import { makeStyles } from '@material-ui/core/styles';
@@ -28,19 +29,6 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
     setValue(newValue);
     handler(newValue);
   }
-
-  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      color: 'white',
-      maxWidth: 520,
-      fontSize: theme.typography.pxToRem(20),
-      border: '1px solid black',
-      padding: '20px'
-    },
-  }));
 
   return (
     <Box style={{ width: width }}>
