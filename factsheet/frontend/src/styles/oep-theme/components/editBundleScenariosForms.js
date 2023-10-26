@@ -36,33 +36,35 @@ const BundleScenariosGridItem = ({
 }) => {
   return (
     <BundleScenariosGrid item xs={12}>
-      <Grid container>
-        <Grid item xs={2}>
-          <LabelItem>
-            <span>{spanValue}</span>
-            {showTooltip && TooltipComponent && (
-            <span>
-              <TooltipComponent
-                title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {tooltipText}
-                      <br />
-                      <a href={hrefLink}>{linkText}</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-              >
-                <InfoOutlinedIcon sx={{ color: '#708696' }} />
-              </TooltipComponent>
-            </span>
-            )}
-          </LabelItem>
+      <Typography variant="small">
+        <Grid container>
+          <Grid item xs={2}>
+            <LabelItem>
+              <span>{spanValue}</span>
+              {showTooltip && TooltipComponent && (
+              <span>
+                <TooltipComponent
+                  title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {tooltipText}
+                        <br />
+                        <a href={hrefLink}>{linkText}</a>
+                      </Typography>
+                    </React.Fragment>
+                  }
+                >
+                  <InfoOutlinedIcon sx={{ color: '#708696' }} />
+                </TooltipComponent>
+              </span>
+              )}
+            </LabelItem>
+          </Grid>
+          <Grid item xs={10}>
+            {typeof renderField === 'function' ? renderField() : null}
+          </Grid>
         </Grid>
-        <Grid item xs={10}>
-          {typeof renderField === 'function' ? renderField() : null}
-        </Grid>
-      </Grid>
+      </Typography>
     </BundleScenariosGrid>
   );
 };

@@ -279,7 +279,8 @@ export default function Scenario(props) {
   const tabClasses = {root: classes.tab};
 
   return (
-      <Grid container
+    <Typography variant="small">
+<Grid container
             direction="row"
             justifyContent="space-between"
             alignItems="start"
@@ -611,7 +612,7 @@ export default function Scenario(props) {
           )}
         </Grid>
       </Grid>
-
+    </Typography>
   );
 }
 
