@@ -171,4 +171,4 @@ After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be cr
 
 ## Next steps
 
-Have a look at the steps described in the [Development & Collaboration](../dev/developement.md) section.
+Have a look at the steps described in the [Development & Collaboration](development-setup.md) section.
