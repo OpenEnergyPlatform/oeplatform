@@ -26,10 +26,13 @@ const LabelItem = styled('div')(({ theme }) => ({
 }));
 
 const BundleScenariosGridItem = ({
+  labelGridSize = 2,
+  fieldGridSize = 10,
   spanValue,
   tooltipText,
   hrefLink,
   TooltipComponent,
+  customSpan = null,
   renderField,
   showTooltip = true,
   linkText = "More info from Open Energy Ontology (OEO)..."
@@ -38,7 +41,7 @@ const BundleScenariosGridItem = ({
     <BundleScenariosGrid item xs={12}>
       <Typography variant="small">
         <Grid container>
-          <Grid item xs={2}>
+          <Grid item xs={labelGridSize}>
             <LabelItem>
               <span>{spanValue}</span>
               {showTooltip && TooltipComponent && (
@@ -58,9 +61,10 @@ const BundleScenariosGridItem = ({
                 </TooltipComponent>
               </span>
               )}
+              {customSpan}
             </LabelItem>
           </Grid>
-          <Grid item xs={10}>
+          <Grid item xs={fieldGridSize}>
             {typeof renderField === 'function' ? renderField() : null}
           </Grid>
         </Grid>
