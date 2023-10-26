@@ -55,7 +55,6 @@ class TablesView(View):
             {
                 "reviewed_tables": reviewed_tables,
                 "not_reviewed_tables": not_reviewed_tables,
-                "in_progress_tables": in_progress_tables,
                 "profile_user": user
             }
         )
