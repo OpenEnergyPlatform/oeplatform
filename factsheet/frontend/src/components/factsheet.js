@@ -62,7 +62,13 @@ import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import Container from '@mui/material/Container';
 import Backdrop from '@mui/material/Backdrop';
 
+import CSRFToken from './csrftoken';
+
 import '../styles/App.css';
+
+axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+axios.defaults.xsrfCookieName = "csrftoken";
+// axios.defaults.withCredentials = true;
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -320,7 +326,8 @@ function Factsheet(props) {
           scenarios: JSON.stringify(scenarios),
           models: JSON.stringify(selectedModels),
           frameworks: JSON.stringify(selectedFrameworks),
-        }).then(response => {
+        },).then(response => {
+          console.log(response.data)
         if (response.data === 'Factsheet saved') {
           navigate('/factsheet/fs/' + new_uid);
           setIsCreated(true);
