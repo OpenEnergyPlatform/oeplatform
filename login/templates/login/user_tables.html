@@ -2,22 +2,28 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% block main-content-body %}
-    {% if profile_user == request.user %}
-    {% include "login/user_nav.html" %}
-    <div>
+{% if profile_user == request.user %}
+{% include "login/user_nav.html" %}
+<div>
+    <h2>Published</h2>
     <ul>
-    {% for table in tables %}
-        <!-- fix the url -->
-        <li>
-        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }} - {{ table.schema }}{% if table.created %}{{ table.created }}{% endif %}</a>
-        </li>
-	{% empty %}
-		No tables found for this user.</li>
-	{% endfor %}
+    {% for table in reviewed_tables %}
+        <li><a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }} - {{ table.schema }}</a></li>
+    {% endfor %}
     </ul>
-    </div>
-    {% endif %}
+
+    <h2>Draft</h2>
+    <ul>
+    {% for table in not_reviewed_tables %}
+        <li><a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }} - {{ table.schema }}</a></li>
+    {% endfor %}
+    </ul>
+
+
+</div>
+{% endif %}
 {% endblock %}
+
 
 
 {% block main-right-sidebar-content %}
