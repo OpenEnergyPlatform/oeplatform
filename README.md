@@ -23,4 +23,4 @@ Follow the detailed [installation guide](https://openenergyplatform.github.io/oe
 
 Please read carefully the `CONTRIBUTING.md` [file](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) before you start contributing!
 
-For further information visit our [developement & contribution guide](https://openenergyplatform.github.io/oeplatform/dev/developement/)
+For further information visit our [developement & contribution guide](https://openenergyplatform.github.io/oeplatform/dev/)
