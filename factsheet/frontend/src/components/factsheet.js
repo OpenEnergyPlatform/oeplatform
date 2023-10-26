@@ -1836,304 +1836,298 @@ const renderScenariosOverview = () => (
 )
 
 const renderPublicationOverview = () => (
-  <Container maxWidth="lg">
-    <TableContainer>
-      <Table>
-        <TableBody>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Report title</span>
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A name given to the resource.'}
-                      <br />
-                      <a href="http://purl.org/dc/elements/1.1/title">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {report_title !== undefined ? report_title : ""} 
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Authors</span>
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'An author is an agent that creates or has created written work.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {selectedAuthors.map((v, i) => (
-                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>DOI</span>
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {selectedAuthors.map((v, i) => (
-                <span> <span> {doi !== undefined ? doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span> 
-              ))}
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Date of publication</span>
-                {/* <HtmlTooltip
+  <TableContainer>
+    <Table>
+      <TableBody>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Report title</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A name given to the resource.'}
+                    <br />
+                    <a href="http://purl.org/dc/elements/1.1/title">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {report_title !== undefined ? report_title : ""} 
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Authors</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'An author is an agent that creates or has created written work.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedAuthors.map((v, i) => (
+              <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>DOI</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedAuthors.map((v, i) => (
+              <span> <span> {doi !== undefined ? doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span> 
+            ))}
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Date of publication</span>
+              {/* <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A study is a project with the goal to investigate something.'}
+                    <br />
+                    <a href="http://www.geneontology.org/formats/oboInOwl#date">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip> */}
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+          <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+            <span>Link to study report</span>
+              {/* <HtmlTooltip
                   title={
                   <React.Fragment>
                     <Typography color="inherit" variant="subtitle1">
                       {'A study is a project with the goal to investigate something.'}
                       <br />
-                      <a href="http://www.geneontology.org/formats/oboInOwl#date">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip> */}
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-            <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-              <span>Link to study report</span>
-                {/* <HtmlTooltip
-                    title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'A study is a project with the goal to investigate something.'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                  </HtmlTooltip>
-                */}
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-            </ContentTableCell>
-          </TableRow>
-          {/* <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Citation</span>
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A citation reference is a reference stating where a citation was taken from.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                     </Typography>
                   </React.Fragment>
                 }
                 >
                 <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                 </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-            </ContentTableCell>
-          </TableRow> */}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Container>
+              */}
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+          </ContentTableCell>
+        </TableRow>
+        {/* <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Citation</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A citation reference is a reference stating where a citation was taken from.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+          </ContentTableCell>
+        </TableRow> */}
+      </TableBody>
+    </Table>
+  </TableContainer>
 )
   
 const renderSectorsAndTechnology = () => (
-  <Container maxWidth="lg">
-    <TableContainer>
-      <Table>
-        <TableBody>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Sector divisions</span>
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A sector division is a specific way to subdivide a system.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {selectedSectorDivisions.map((v, i) => (
-                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Sectors</span>
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A sector is generically dependent continuant that is a subdivision of a system.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000367">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {selectedSectors.map((v, i) => (
-                <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Technologies</span>
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000407">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {selectedTechnologies.map((v, i) => (
-                <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
-            </ContentTableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Container>
+  <TableContainer>
+    <Table>
+      <TableBody>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Sector divisions</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A sector division is a specific way to subdivide a system.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedSectorDivisions.map((v, i) => (
+              <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Sectors</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A sector is generically dependent continuant that is a subdivision of a system.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000367">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedSectors.map((v, i) => (
+              <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Technologies</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000407">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedTechnologies.map((v, i) => (
+              <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </TableContainer>
 )
 
 const renderModelsAndFrameworksOverview = () => (
-  <Container maxWidth="lg">
-    <TableContainer>
-      <Table>
-        <TableBody>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Models</span>
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {selectedModels.map((v, i) => (
-                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Frameworks</span>
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A software framework is a Software that is generic and can be adapted to a specific application.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {selectedFrameworks.map((v, i) => (
-                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
-            </ContentTableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Container>
+  <TableContainer>
+    <Table>
+      <TableBody>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Models</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedModels.map((v, i) => (
+              <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Frameworks</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A software framework is a Software that is generic and can be adapted to a specific application.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedFrameworks.map((v, i) => (
+              <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </TableContainer>
 )
 
 const overview_items = {
