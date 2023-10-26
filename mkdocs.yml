@@ -67,7 +67,7 @@ nav:
   - Installation & Setup: 
     - Installation Guide: install/installation.md
     - Manual database setup: install/manual_db_setup.md
-  - Development & Collaboration: dev/index2.md
+  - Development & Collaboration: dev/development.md
   - Code Documentation: 
     - oeplatform-code/index.md
     - Architecture:
