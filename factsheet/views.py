@@ -148,8 +148,13 @@ def get_history(request, *args, **kwargs):
     return response
 
 
+# from django.views.decorators.csrf import ensure_csrf_cookie
+
+
+# @ensure_csrf_cookie
 @login_required
-@csrf_exempt
+# @ensure_csrf_cookie
+# @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
     print("###########user###########")
     print(request.user)
@@ -692,7 +697,6 @@ def create_factsheet(request, *args, **kwargs):
             "Factsheet saved", safe=False, content_type="application/json"
         )
         patch_response_headers(response, cache_timeout=1)
-
         return response
 
 
@@ -1185,7 +1189,7 @@ def update_factsheet(request, *args, **kwargs):
         return response
 
 
-@login_required
+# @login_required
 @csrf_exempt
 def factsheet_by_name(request, *args, **kwargs):
     name = request.GET.get("name")
