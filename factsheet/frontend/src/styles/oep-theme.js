@@ -3,6 +3,7 @@ import palette from './oep-theme/palette';
 import buttonStyles from './oep-theme/components/buttonStyles';
 import { tableContainerStyles, tableHeaderStyles, tableRowStyles, tableCellStyles } from './oep-theme/components/tableStyles';
 import toolbarStyles from './oep-theme/components/toolbarStyles';
+import { typographyStyles, inputLabelStyles, inputBaseStyles, textareaAutosizeStyles, formGroupStyles } from './oep-theme/components/typographyStyles';
 import variables from './oep-theme/variables';
 
 const theme = createTheme({
@@ -14,51 +15,11 @@ const theme = createTheme({
     },
   },
   components: {
-    MuiTypography: {
-      styleOverrides: {
-        small: {
-          '& .MuiFormControlLabel-label': {
-            fontSize: variables.fontSize.sm,
-            color: palette.text.primary,
-          },
-          '& label, & span': {
-            fontSize: variables.fontSize.sm,
-            color: palette.text.primary,
-          },
-        },
-      },
-    },
-    MuiInputLabel: {
-      styleOverrides: {
-        root: {
-          fontSize: variables.fontSize.sm,
-          color: palette.text.primary,
-        },
-      },
-    },
-    MuiInputBase: {
-      styleOverrides: {
-        input: {
-          fontSize: variables.fontSize.sm,
-          color: palette.text.primary
-        },
-      },
-    },
-    MuiTextareaAutosize: {
-      styleOverrides: {
-        root: {
-          fontSize: variables.fontSize.sm,
-          color: palette.text.primary,
-        },
-      },
-    },
-    MuiFormGroup: {
-      styleOverrides: {
-        '& label span': {
-          fontSize: variables.fontSize.sm
-        }
-      } 
-    },
+    MuiTypography: typographyStyles,
+    MuiInputLabel: inputLabelStyles,
+    MuiInputBase: inputBaseStyles,
+    MuiTextareaAutosize: textareaAutosizeStyles,
+    MuiFormGroup: formGroupStyles,
     MuiButton: buttonStyles,
     MuiTableContainer: tableContainerStyles,
     MuiTableHead: tableHeaderStyles,
