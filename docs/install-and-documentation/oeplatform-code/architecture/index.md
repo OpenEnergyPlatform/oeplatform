@@ -1,8 +1,6 @@
 # Architecture
 
-
-
-# Sturcute of the django project 
+## Structure of the django project
 
 Landing page: index
 -------------------
@@ -18,14 +16,12 @@ presentation of such datasets. The underlying OpenEnergyDatabase (OEDB)
 stores datasets of different open-data projects. The visual presentation
 is implemented in the **dataedit** app.
 
-
 App: api
 --------
 
 The data stored in the OEDB is also used in several projects. In order
 to ease the access to required datasets the OEP provides a RESTful
 HTTP-interface in the **api** app:
-
 
 App: modelview
 --------------
