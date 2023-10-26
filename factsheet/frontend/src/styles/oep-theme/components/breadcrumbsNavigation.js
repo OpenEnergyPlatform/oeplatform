@@ -46,7 +46,7 @@ const BreadcrumbsNav = styled(Grid)(({ theme }) => ({
 export default function BreadcrumbsNavGrid({ acronym, id, mode }) {
   return (
     <BreadcrumbsNav container>
-      <Container maxWidth="lg">
+      <Container maxWidth="false">
         <Grid item xs={12} className='header-style'>
           <span>
             <ListAltOutlinedIcon />
