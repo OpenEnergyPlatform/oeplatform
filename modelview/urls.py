@@ -3,12 +3,6 @@ from django.conf.urls import url
 from modelview import views
 
 urlpatterns = [
-    url(r"rdf/instances/$", views.RDFInstanceView.as_view()),
-    url(r"rdf/(?P<factory_id>[\w\d_]*)/$", views.RDFView.as_view()),
-    url(
-        r"rdf/(?P<factory_id>[\w\d_]*)/(?P<identifier>[\w\d_-]*)/$",
-        views.RDFFactoryView.as_view(),
-    ),
     url(r"^(?P<sheettype>[\w\d_]+)s/$", views.listsheets, {}, name="modellist"),
     url(r"^overview/$", views.overview, {}),
     url(

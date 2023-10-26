@@ -19,13 +19,12 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 const ComparisonBoardMain = (props) => {
   const { params } = props;
   const [scenarios, setScenarios] = useState([]);
-  console.log(params);
-  const scenario_acronyms = params.split('-');
-  const scenario_acronyms_json = JSON.stringify(scenario_acronyms);
+  const scenarios_uid = params.split('#');
+  const scenarios_uid_json = JSON.stringify(scenarios_uid);
   const [selectedCriteria, setselectedCriteria] = useState(['Descriptors']);
 
   const getScenarios = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_scenarios/`, { params: { scenarios_acronym: scenario_acronyms_json } });
+    const { data } = await axios.get(conf.toep + `sirop/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
     return data;
   };
 
@@ -35,9 +34,10 @@ const ComparisonBoardMain = (props) => {
       });
   }, []);
 
-  console.log(scenarios);
 
   const Criteria = [
+    'Study name',
+    'Study abstract',
     'Descriptors',
     'Regions',
     'Interacting regions',
@@ -65,20 +65,20 @@ const ComparisonBoardMain = (props) => {
       alignItems="center"
     >
         <Grid item xs={12} >
-          <div style={{ backgroundColor: '#e3eaef', height: '150px', marginBottom: '10px' }}>
+          <div style={{ backgroundColor: '#e3eaef', height: '100px', marginBottom: '10px' }}>
             <div id='headerStyle'>
             <span>
               <ListAltOutlinedIcon />
             </span>
-            <p>Scenario Bundle</p>
+            <span>Scenario Bundle</span>
             </div>
           <div id='headerSubStyle'> <span> Comparison </span> </div>
           </div>
         </Grid>
-        <Container maxWidth="xl">
+        <Container maxWidth="false">
             <Box sx={{ 
-              padding: '10px',
-              margin: '10px',
+              padding: '5px',
+              margin: '5px',
               display: 'block'}}
             >
             <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -100,9 +100,11 @@ const ComparisonBoardMain = (props) => {
             </Box>
             {/* <ComparisonControl /> */}
             <Box sx={{ 
-              padding: '20px',
-              margin: '20px',
+              padding: '5px',
+              paddingLeft: '15px',
+              margin: '5px',
               backgroundColor: '#F6F9FB',
+              overflow: 'auto',
               display: 'block'}}
               >
               <b>Criteria</b>

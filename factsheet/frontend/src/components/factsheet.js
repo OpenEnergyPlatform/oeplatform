@@ -38,10 +38,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import StepContent from '@mui/material/StepContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import Badge from '@mui/material/Badge';
 import { Route, Routes, useNavigate } from 'react-router-dom';
@@ -497,7 +493,9 @@ function Factsheet(props) {
       obj[name] = selectedList
     console.log(newScenarios);
     setScenarios(newScenarios);
+
   };
+  
   
   const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, id) => {
     const newScenarios = [...scenarios];
@@ -1539,10 +1537,16 @@ const renderBasicInformation = () => (
           <Stack spacing={3}  style={{ marginTop:'10px', width: '70%', marginBottom:'40px' }}>
             <DesktopDatePicker
                 label=''
-                inputFormat="YYYY-MM-DD"
+                inputFormat="YYYY/MM/DD"
                 value={date_of_publication}
                 onChange={(newValue) => {
-                  setDateOfPublication(newValue);
+                  const dateObj = new Date(newValue);
+                  const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate() )
+                  const d = new Date(dateString);
+                  console.log(d);
+                  console.log(dateString);
+
+                  setDateOfPublication(dateString);
                 }}
                 renderInput={(params) => <TextField {...params} size="small" variant="outlined" />}
               />
@@ -2058,7 +2062,7 @@ const renderPublicationOverview = () => (
       <Grid item xs={12} style={{ padding: '0px' }}>
         <Divider />
       </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
+      {/* <Grid item xs={2}  style={{ padding: '5px' }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Citation: </b> </span>
         <span >
           <HtmlTooltip
@@ -2078,7 +2082,7 @@ const renderPublicationOverview = () => (
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
         {}
-      </Grid>
+      </Grid> */}
 
     </Grid>
 )
@@ -2494,12 +2498,12 @@ function getStepContent(step: number) {
       alignItems="center"
       >
         <Grid item xs={12} >
-        <div style={{ backgroundColor: '#e3eaef', height: '150px', marginBottom: '10px' }}>
+        <div style={{ backgroundColor: '#e3eaef', height: '100px', marginBottom: '10px' }}>
           <div id='headerStyle'>
             <span>
               <ListAltOutlinedIcon />
             </span>
-            <p>Scenario Bundle</p>
+            <span>Scenario Bundle</span>
           </div>
           <div id='headerSubStyle'> <span> {id === "new" ? "new/" : mode + "/" } </span> {acronym} </div>
         </div>

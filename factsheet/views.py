@@ -151,6 +151,8 @@ def get_history(request, *args, **kwargs):
 @login_required
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
+    print("###########user###########")
+    print(request.user)
     request_body = json.loads(request.body)
     name = request_body["name"]
     uid = request_body["uid"]
@@ -228,13 +230,13 @@ def create_factsheet(request, *args, **kwargs):
                 (
                     study_URI,
                     OEKG["date_of_publication"],
-                    Literal(date_of_publication[:10], datatype=XSD.date),
+                    Literal(date_of_publication),
                 )
             )
             add_history(
                 study_URI,
                 OEKG["date_of_publication"],
-                Literal(date_of_publication[:10], datatype=XSD.date),
+                Literal(date_of_publication),
                 "add",
                 request.user,
             )
@@ -694,7 +696,7 @@ def create_factsheet(request, *args, **kwargs):
         return response
 
 
-@login_required
+#@login_required
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -814,7 +816,7 @@ def update_factsheet(request, *args, **kwargs):
                         region_URI = URIRef(region["iri"])
                         scenario_region = URIRef(
                             "http://openenergy-platform.org/ontology/oekg/region/"
-                            + region["iri"]
+                            + region["iri"].rsplit("/", 1)[1]
                         )
                         oekg.add((scenario_region, RDF.type, OEO.OEO_00020032))
                         oekg.add((scenario_region, RDFS.label, Literal(region["name"])))
@@ -822,8 +824,7 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 scenario_region,
                                 OEKG["reference"],
-                                "http://openenergy-platform.org/ontology/oekg/region/"
-                                + region_URI,
+                                region_URI,
                             )
                         )
                         # TODO- set in settings
@@ -1040,12 +1041,13 @@ def update_factsheet(request, *args, **kwargs):
 
         for s, p, o in oekg.triples((study_URI, OEKG["date_of_publication"], None)):
             oekg.remove((s, p, o))
+
         if date_of_publication != "01-01-1900" and date_of_publication != "":
             oekg.add(
                 (
                     study_URI,
                     OEKG["date_of_publication"],
-                    Literal(date_of_publication[:10], datatype=XSD.date),
+                    Literal(date_of_publication),
                 )
             )
 
@@ -1194,18 +1196,22 @@ def factsheet_by_name(request, *args, **kwargs):
     return response
 
 
-@login_required
+#@login_required
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
     uid = request.GET.get("id")
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
     factsheet = {}
 
+    print('############################start')
+    print(study_URI)
+    print(oekg.value(study_URI, OEKG["date_of_publication"]))
+    
     acronym = ""
     study_name = ""
     abstract = ""
     report_title = ""
-    date_of_publication = "01-01-1900"
+    date_of_publication = ""
     place_of_publication = ""
     link_to_study = ""
     report_doi = ""
@@ -1221,7 +1227,6 @@ def factsheet_by_id(request, *args, **kwargs):
 
     for s, p, o in oekg.triples((study_URI, OEKG["report_title"], None)):
         report_title = o
-        print(report_title)
 
     for s, p, o in oekg.triples((study_URI, OEKG["date_of_publication"], None)):
         date_of_publication = o
@@ -1356,7 +1361,7 @@ def factsheet_by_id(request, *args, **kwargs):
             o1_type = oekg.value(o1, RDF.type)
             o1_label = oekg.value(o1, RDFS.label)
             scenario["regions"].append(
-                {"iri": str(o1).split("/")[-1], "id": o1_label, "name": o1_label}
+                {"iri": o1, "name": o1_label}
             )
 
         for s1, p1, o1 in oekg.triples((o, OEO.OEO_00020222, None)):
@@ -1482,7 +1487,6 @@ def query_oekg(request, *args, **kwargs):
     )
     return response
 
-
 @login_required
 @csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
@@ -1500,8 +1504,19 @@ def delete_factsheet_by_id(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
+@csrf_exempt
+def test_query(request, *args, **kwargs):
+    scenario_region = URIRef("http://openenergy-platform.org/ontology/oekg/region/UnitedKingdomOfGreatBritainAndNorthernIreland")
+    for s, p, o in oekg.triples((scenario_region, RDFS.label, None)):
+        if (str(o) == "None"):
+            oekg.remove((s, p, o))
+    response = JsonResponse(
+        "Done!", safe=False, content_type="application/json"
+    )
+    patch_response_headers(response, cache_timeout=1)
+    return response
 
-@login_required
+#@login_required
 @csrf_exempt
 def get_entities_by_type(request, *args, **kwargs):
     entity_type = request.GET.get("entity_type")
@@ -1674,13 +1689,15 @@ def get_all_factsheets(request, *args, **kwargs):
         element["date_of_publication"] = oekg.value(
             study_URI, OEKG["date_of_publication"]
         )
+
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
             label = oekg.value(o, RDFS.label)
             abstract = oekg.value(o, DC.abstract)
             full_name = oekg.value(o, OEKG.has_full_name)
+            uid = oekg.value(o, OEKG.scenario_uuid)
             if label != None:
                 element["scenarios"].append(
-                    {"label": label, "abstract": abstract, "full_name": full_name}
+                    {"label": label, "abstract": abstract, "full_name": full_name, "uid": uid}
                 )
 
         all_factsheets.append(element)
@@ -1691,16 +1708,16 @@ def get_all_factsheets(request, *args, **kwargs):
 
 
 @csrf_exempt
-@login_required
+#@login_required
 def get_scenarios(request, *args, **kwargs):
-    scenarios_acronym = [
-        i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_acronym"))
+    scenarios_uid = [
+        i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_uid"))
     ]
-
     scenarios = []
 
     for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00000365)):
-        if str(oekg.value(s, RDFS.label)) in scenarios_acronym:
+        scenario_uid = str(s).split("/")[-1]
+        if str(scenario_uid) in scenarios_uid:
             descriptors = []
             regions = []
             interacting_regions = []
@@ -1717,12 +1734,10 @@ def get_scenarios(request, *args, **kwargs):
 
             for s1, p1, o1 in oekg.triples((s, OEO.OEO_00020220, None)):
                 o1_label = oekg.value(o1, RDFS.label)
-                # regions.append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
                 regions.append(o1_label)
 
             for s1, p1, o1 in oekg.triples((s, OEO.OEO_00020222, None)):
                 o1_label = oekg.value(o1, RDFS.label)
-                # interacting_regions.append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
                 interacting_regions.append(o1_label)
 
             for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020224, None)):
@@ -1732,10 +1747,16 @@ def get_scenarios(request, *args, **kwargs):
             for s6, p6, o6 in oekg.triples((s, OEO.RO_0002234, None)):
                 output_datasets.append(oekg.value(o6, RDFS.label))
 
+            for s1, p1, o1 in oekg.triples((None, OEKG["has_scenario"], s)):
+                study_label = oekg.value(s1, OEKG["has_full_name"])
+                study_abstract = oekg.value(s1, DC.abstract)
+
+
             scenarios.append(
                 {
                     "acronym": oekg.value(s, RDFS.label),
                     "data": {
+                        "uid": scenario_uid,
                         "descriptors": descriptors,
                         "regions": regions,
                         "interacting_regions": interacting_regions,
@@ -1743,9 +1764,16 @@ def get_scenarios(request, *args, **kwargs):
                         "input_datasets": input_datasets,
                         "output_datasets": output_datasets,
                         "abstract": abstract,
+                        "study_label": study_label,
+                        "study_abstract": study_abstract,
+
                     },
                 }
             )
+
+    
+            
+        
 
     response = JsonResponse(scenarios, safe=False, content_type="application/json")
     return response
@@ -1803,7 +1831,7 @@ def get_all_sub_classes(cls, visited=None):
 
 
 @csrf_exempt
-@login_required
+#@login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     scenario_class = oeo_owl.search_one(
         iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"

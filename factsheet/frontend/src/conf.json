@@ -1,7 +1,6 @@
 {
     "localhost": "http://localhost:8000/",
-    "toep1": "https://oep.iks.cs.ovgu.de/",
     "toep1": "http://toep.iks.cs.ovgu.de/",
-    "toep1": "http://localhost:8000/",
+    "toep3": "http://localhost:8000/",
     "toep": "https://openenergy-platform.org/"
   }
