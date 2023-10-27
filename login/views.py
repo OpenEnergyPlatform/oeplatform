@@ -27,7 +27,6 @@ from .models import myuser as OepUser
 class TablesView(View):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-
         tables = Table.objects.all().select_related()
 
         reviewed_tables = []
@@ -49,15 +48,26 @@ class TablesView(View):
                 else:
                     not_reviewed_tables.append(table_data)
 
+        if request.is_ajax():
+            return render(
+                request,
+                "login/user_tables.html",
+                {
+                    "reviewed_tables": reviewed_tables,
+                    "not_reviewed_tables": not_reviewed_tables,
+                }
+            )
+
         return render(
             request,
             "login/user_tables.html",
             {
+                "profile_user": user,
                 "reviewed_tables": reviewed_tables,
                 "not_reviewed_tables": not_reviewed_tables,
-                "profile_user": user
             }
         )
+
 
 
 class ReviewsView(View):

@@ -4,7 +4,7 @@
 {% block main-content-body %}
 {% if profile_user == request.user %}
 {% include "login/user_nav.html" %}
-<div>
+<div id="tableContainer" hx-get="/profile/{{ profile_user.id }}/tables" hx-trigger="load">
     <h2>Published</h2>
     <ul>
     {% for table in reviewed_tables %}
@@ -18,9 +18,8 @@
         <li><a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }} - {{ table.schema }}</a></li>
     {% endfor %}
     </ul>
-
-
 </div>
+
 {% endif %}
 {% endblock %}
 
