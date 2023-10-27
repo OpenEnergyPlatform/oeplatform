@@ -2585,7 +2585,6 @@ function getStepContent(step: number) {
             <div className='wizard'>
                 <Grid container style={{ marginTop: '10px' }}>
                   <Grid item xs={12} style={{ 'overflow': 'auto' }}>
-                    <Divider style={{ marginBottom: '40px' }}/>
                     <CustomTabs
                       items={items}
                     />
