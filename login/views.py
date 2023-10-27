@@ -48,13 +48,13 @@ class TablesView(View):
                 else:
                     not_reviewed_tables.append(table_data)
 
-        if request.is_ajax():
+        if request.is_ajax() :
             return render(
                 request,
-                "login/user_tables.html",
+                "login/user_tables.html" ,
                 {
-                    "reviewed_tables": reviewed_tables,
-                    "not_reviewed_tables": not_reviewed_tables,
+                    "reviewed_tables": reviewed_tables ,
+                    "not_reviewed_tables": not_reviewed_tables ,
                 }
             )
 
