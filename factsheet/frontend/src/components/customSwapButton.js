@@ -22,12 +22,12 @@ export default function ColorToggleButton(props) {
     <div style={{ 'display':'flex' }}>
       <Tooltip title="Back to main page">
         <Link to={`sirop/`} onClick={() => this.forceUpdate}>
-          <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }}>
+          <Button variant="outlined" size="small" sx={{ mr: 1 }}>
             <ArrowBackIcon />
           </Button>
         </Link>  
       </Tooltip>
-      <ButtonGroup variant="contained" aria-label="outlined primary button group" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }}>
+      <ButtonGroup variant="contained" aria-label="outlined primary button group" sx={{ mr: 1 }}>
         <Tooltip title="Overview!">
           <Button size="small" name="overview"  onClick={(e) => handleChange(e, 'overview')} > <FactCheckOutlinedIcon /> </Button>
         </Tooltip>

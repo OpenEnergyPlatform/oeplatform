@@ -57,6 +57,7 @@ import TableContainer from '@mui/material/TableContainer';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Toolbar from '@mui/material/Toolbar';
 import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/components/tableStyles.js';
 import InfoListItem from '../styles/oep-theme/components/infoListItem.js'
 import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
@@ -2399,6 +2400,8 @@ function getStepContent(step: number) {
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
         <Container maxWidth="lg">
 
+        
+
           <Grid item xs={12}>
             <Backdrop
               sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -2408,49 +2411,50 @@ function getStepContent(step: number) {
               <CircularProgress color="inherit" />
             </Backdrop>
           </Grid>
-        
+          <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
 
-          <Grid item xs={12}>
-            <Grid container
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              >
-          <CustomSwap handleSwap={handleSwap} />
-          <div style={{ 'textAlign': 'center' }}>
-            {/* <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-              <CircularProgress variant="determinate" value={60} size={60} />
-              <Box
-                sx={{
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  position: 'absolute',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-              <Typography variant="h6" component="div">
-                <b>{`${Math.round(60)}%`}</b>
-              </Typography>
-              </Box>
-            </Box> */}
-          </div>
-          <div style={{ 'textAlign': 'right' }}>
-            {mode === 'edit' && <Tooltip title="Save factsheet">
-              <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} startIcon={<SaveIcon />}> Save </Button>
-            </Tooltip>}
-            <Tooltip title="Share this factsheet">
-              <Button  disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" startIcon={<ShareIcon/>} disabled> Share </Button>
-            </Tooltip>
-            <Tooltip title="Delete factsheet">
-              <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon/>}> Delete </Button>
-            </Tooltip>
-          </div >
-          </Grid>
-        </Grid>
+            <Grid item xs={12}>
+              <Grid container
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                >
+                <CustomSwap handleSwap={handleSwap} />
+                <div style={{ 'textAlign': 'center' }}>
+                  {/* <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                    <CircularProgress variant="determinate" value={60} size={60} />
+                    <Box
+                      sx={{
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        position: 'absolute',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                    <Typography variant="h6" component="div">
+                      <b>{`${Math.round(60)}%`}</b>
+                    </Typography>
+                    </Box>
+                  </Box> */}
+                </div>
+                <div style={{ 'textAlign': 'right' }}>
+                  {mode === 'edit' && <Tooltip title="Save factsheet">
+                    <Button disableElevation={true} size="small" sx={{ mr: 1 }} variant="contained" color="primary" onClick={handleSaveFactsheet} startIcon={<SaveIcon />}> Save </Button>
+                  </Tooltip>}
+                  <Tooltip title="Share this factsheet">
+                    <Button  disableElevation={true} size="small" sx={{ mr: 1 }} variant="outlined" color="primary" startIcon={<ShareIcon/>} disabled> Share </Button>
+                  </Tooltip>
+                  <Tooltip title="Delete factsheet">
+                    <Button disableElevation={true} size="small" variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon/>}> Delete </Button>
+                  </Tooltip>
+                </div >
+              </Grid>
+            </Grid>
+          </Toolbar>
 
         <Grid item xs={12}>
           <Snackbar
@@ -2627,9 +2631,6 @@ function getStepContent(step: number) {
             <Grid container justifyContent="space-between"
               alignItems="start"
               spacing={2}>
-              <Grid item xs={12} >
-                <Divider style={{ marginBottom: '20px', marginTop: '20px' }}/>
-              </Grid>
               <Grid item xs={12}  >
                 <b style={{ fontSize: variables.fontSize.lg }}>{studyName !== undefined && studyName}</b> 
               </Grid>

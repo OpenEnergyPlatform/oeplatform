@@ -1,4 +1,5 @@
 import palette from '../palette';
+import variables from '../variables';
 
 const toolbarStyles = {
   styleOverrides: {
@@ -6,15 +7,13 @@ const toolbarStyles = {
       "&.MuiToolbar-root": {
         backgroundColor: palette.background.white,
         borderBottom: `1px solid ${palette.divider}`,
-        padding: 0,
+        padding: `${variables.spacing[4]} ${variables.spacing[0]} ${variables.spacing[0]}`,
 
         "& > .MuiGrid-container": {
-          padding: '0 0 1rem',
-
           "& > .MuiGrid-item:nth-of-type(1)": {
             display: 'flex',
             flexDirection: 'row',
-            justifyContent: 'flex-start'
+            justifyContent: 'flex-start',
           },
 
           "& > .MuiGrid-item:nth-of-type(2)": {
@@ -28,6 +27,9 @@ const toolbarStyles = {
             flexDirection: 'row',
             justifyContent: 'flex-end'
           }
+        },
+        "& .MuiButton-root": {
+          height: '32px'
         }
       }
     }
@@ -35,3 +37,4 @@ const toolbarStyles = {
 }
 
 export default toolbarStyles;
+
