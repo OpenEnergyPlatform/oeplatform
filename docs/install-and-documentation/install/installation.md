@@ -10,6 +10,15 @@ The installation steps have been proofed on linux and windows for python 3.6 and
 
     [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
 
+!!! tip
+    Use our Make script to automate most of the installation and setup process and get started in a simple and reusable way. Don't forget to familiarize yourself with the structure of the oeplattform architecture and know the credentials for each component (e.g. the user information of the databases).
+
+    ``` bash
+        make -f script/ all
+    ```
+
+    !!! info "Only proven on Linux based systems."
+
 ??? Info "All steps & commands in one list"
 
     1. Get code & install dependencies.
