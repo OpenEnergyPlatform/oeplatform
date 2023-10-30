@@ -45,7 +45,7 @@ const GreenButton = withStyles((theme) => ({
 const BlueButton = withStyles((theme) => ({
   root: {
     color: 'white',
-    backgroundColor: '#667292',
+    backgroundColor: '#1f567d',
     '&:hover': {
       backgroundColor: 'black',
     },
@@ -107,49 +107,51 @@ export default function LayoutActions(props) {
   } = props;
 
   return (
-      <div>
         <Grid container
-              direction="row"
-              >
+          direction="row"
+        >
+              <Grid item xs={6}>
+                {search && <CustomSearchInput searchHandler={searchHandler} />}
+              </Grid>
               <Grid item xs={6}>
                   <ButtonGroup color="primary" aria-label="outlined primary button group">
                       {annotate &&
-                        <GreenButton
+                        <BlueButton
                           variant="contained"
                           component="span"
                           onClick={annotateDatabaseHandler}
                           startIcon={<StorageIcon />}>
                         Annotate My Data
-                        </GreenButton>
+                        </BlueButton>
                       }
-                      <RedButton
+                      <BlueButton
                         variant="contained"
                         component="span"
                         startIcon={<ExpandLessIcon />}
                         onClick={shrinkHandler}>
                           Shrink
-                      </RedButton>
-                      <OrangeButton
+                      </BlueButton>
+                      <BlueButton
                         variant="contained"
                         component="span"
                         startIcon={<ExpandMoreIcon />}
                         onClick={expandHandler}>
                           Expand
-                      </OrangeButton>
-                      <GreenButton
+                      </BlueButton>
+                      <BlueButton
                         variant="contained"
                         component="span"
                         onClick={showParentHandler}
                         startIcon={<ArrowDropUpIcon />}>
                           Parent
-                      </GreenButton>
-                      <PurpleButton
+                      </BlueButton>
+                      <BlueButton
                         variant="contained"
                         component="span"
                         startIcon={<CenterFocusWeakIcon />}
                         onClick={focusHandler}>
                           Focus
-                      </PurpleButton>
+                      </BlueButton>
                       <BlueButton
                         variant="contained"
                         component="span"
@@ -157,22 +159,16 @@ export default function LayoutActions(props) {
                         onClick={fitAllHandler}>
                           Fit
                       </BlueButton>
-                      {viewAll && <DarkGreenButton
+                      {viewAll && <BlueButton
                         variant="contained"
                         component="span"
                         startIcon={<SelectAllIcon />}
                         onClick={viewAllHandler}>
                           View All
-                      </DarkGreenButton>}
+                      </BlueButton>}
+                      {hierarchicalView && <CustomSwitch toggleRenderMode={HierarchicalViewHandler}/>}
                     </ButtonGroup>
-                </Grid>
-                <Grid item xs={1}>
-                  {hierarchicalView && <CustomSwitch toggleRenderMode={HierarchicalViewHandler}/>}
-                </Grid>
-                <Grid item xs={5}>
-                  {search && <CustomSearchInput searchHandler={searchHandler} />}
-                </Grid>
+              </Grid>
         </Grid>
-      </div>
   );
 }

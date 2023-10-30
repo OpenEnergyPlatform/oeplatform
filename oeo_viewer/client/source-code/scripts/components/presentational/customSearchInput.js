@@ -2,7 +2,7 @@
 import React from 'react';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import GraphData from "../../../statics/oeo_info_1_8.json";
+import GraphData from "../../../statics/oeo_info.json";
 
 const filter = createFilterOptions();
 
@@ -59,7 +59,7 @@ export default function CustomSearchInput(props) {
         return option.name;
       }}
       renderOption={(option) => option.name}
-      style={{ width: "100%" }}
+      style={{ width: "95%" }}
       freeSolo
       renderInput={(params) => (
         <TextField {...params} label="Search for OEO classes..." variant="outlined" size="small" />

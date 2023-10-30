@@ -9,6 +9,23 @@
 {% endblock after-head %}
 
 {% block site-header %}
+<div class="main-header">
+  <h1 class="main-header__title">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+      <path d="m22.06,4.25L17.83,0H7.45h0v1.23h-2.42v2.07h-2.39v20.7h15.53v-2.07h2.39v-2.24h1.49V4.25Zm-3.91-2.36l2.04,2.04h-2.04V1.89Zm-1.07,21.01H3.73V4.4h1.29v17.53h12.05v.97Zm2.39-2.07H6.12V2.33h1.33v17.36h12.02v1.14Zm-10.92-2.24V1.11h8.51v3.92h3.9v13.56h-12.41Z" fill="#293B46"></path>
+      <rect x="10.77" y="10.41" width="7.57" height="1.1" fill="#293B46"/>
+      <rect x="10.77" y="12.78" width="7.57" height="1.1" fill="#293B46"/>
+      <rect x="10.77" y="15.17" width="7.57" height="1.1" fill="#293B46"/>
+      <rect x="10.68" y="4.18" width="1.09" height="4.19" fill="#293B46"/>
+      <rect x="12.58" y="3.16" width="1.09" height="5.2" fill="#293B46"/>
+      <rect x="14.48" y="6.14" width="1.09" height="2.23" fill="#293B46"/>
+    </svg>
+      {{ displaySheetType }} Factsheet
+  </h1>
+  <div class="main-header__wizard">
+    <a href="/factsheets/{{ displaySheetType | lower }}s">Overview</a> / {% if model.model_name %} {{ model.model_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %}{% endif %}
+  </div>
+</div>
   <h2 class="site-header">
     {{ displaySheetType }}
     {% if model.model_name %} {{ model.model_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %}{% endif %}

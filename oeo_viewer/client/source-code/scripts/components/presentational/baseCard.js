@@ -12,7 +12,7 @@ const useStyles = makeStyles({
     backgroundColor: "#f7f7f7",
     borderColor: "#00688B",
     overflow: "auto",
-    height: '75%',
+    height: '100%',
   }
 });
 

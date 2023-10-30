@@ -56,6 +56,9 @@ INSTALLED_APPS = (
     "fontawesome_5",
     "django_better_admin_arrayfield",
     "oeo_viewer",
+    "factsheet",
+    "corsheaders",
+    "owlready2",
     "compressor",
 )
 
@@ -70,6 +73,7 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
 )
 
@@ -122,6 +126,7 @@ try:
     ONTOLOGY_FOLDER  # noqa
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

@@ -36,11 +36,31 @@ class Tagable(models.Model):
 
 
 class Schema(Tagable):
+    """
+    Represents a schema in the database.
+
+    Attributes:
+        name (str): The name of the schema. Must be unique.
+    """
+
     class Meta:
         unique_together = (("name"),)
 
 
 class Table(Tagable):
+    """
+    Represents a table within a schema in the database.
+
+    Attributes:
+        schema (Schema): The schema to which the table belongs.
+        search (SearchVectorField): A field for full-text search.
+        oemetadata (JSONField): A field to store oemetadata related to the table.
+        is_reviewed (BooleanField): A flag indicating whether the table is reviewed.
+
+    Note:
+        The oemetadata field helps avoid performance issues due to JSON string parsing.
+    """
+
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
     search = SearchVectorField(default="")
     # Add field to store oemetadata related to the table and avoide performance issues
@@ -50,6 +70,20 @@ class Table(Tagable):
 
     @classmethod
     def load(cls, schema, table):
+        """
+        Load a table object from the database given its schema and table name.
+
+        Args:
+            schema (str): The name of the schema.
+            table (str): The name of the table.
+
+        Returns:
+            Table: The loaded table object.
+
+        Raises:
+            DoesNotExist: If no table with the given schema and name exists in the database.
+        """
+
         table_obj = Table.objects.get(
             name=table, schema=Schema.objects.get_or_create(name=schema)[0]
         )
@@ -57,6 +91,9 @@ class Table(Tagable):
         return table_obj
 
     def set_is_reviewed(self):
+        """
+        Mark the table as reviewed and save the change to the database.
+        """
         self.is_reviewed = True
         self.save()
 
@@ -88,6 +125,21 @@ class Filter(models.Model):
 
 
 class PeerReview(models.Model):
+    """
+    Represents a peer review in the database.
+
+    Attributes:
+        table (CharField): Name of the table being reviewed.
+        schema (CharField): Name of the schema where the table is located.
+        reviewer (ForeignKey): The user who reviews.
+        contributor (ForeignKey): The user who contributes.
+        is_finished (BooleanField): Whether the review is finished.
+        date_started (DateTimeField): When the review started.
+        date_submitted (DateTimeField): When the review was submitted.
+        date_finished (DateTimeField): When the review finished.
+        review (JSONField): The review data in JSON format.
+    """
+
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
     reviewer = ForeignKey(
@@ -254,16 +306,21 @@ class Reviewer(Enum):
 
 class PeerReviewManager(models.Model):
     """
-    Model representing the manager of a peer review.
+    Manages peer review processes.
 
-        - It handles the 1:n relation between table and open peer reviews.
-        - It tracks the days open for the peer review.
-        - It tracks the state of the peer review as it can be SAVED, SUBMITTED (stated)
-          or FINISHED.
-        - It determines who is next in the process between reviewer and contributor.
-        - it provides information about the previous and next review.
-        - It provides several methods that provide generic filters for the peerReviews
-            (like filter by table, contributor ...)
+    This model handles the 1:n relation between table and open peer reviews.
+    It tracks the days open for the peer review and its state.
+    It determines who is next in the process between reviewer and contributor.
+    It provides information about the previous and next review.
+    It offers several methods that provide generic filters for the peer reviews.
+
+    Attributes:
+        opr (ForeignKey): The associated peer review.
+        current_reviewer (CharField): The current reviewer.
+        status (CharField): The current status of the review.
+        is_open_since (CharField): How long the review has been open.
+        prev_review (ForeignKey): The previous review in the process.
+        next_review (ForeignKey): The next review in the process.
     """
 
     REVIEW_STATUS = [(status.value, status.name) for status in ReviewDataStatus]
@@ -350,7 +407,7 @@ class PeerReviewManager(models.Model):
 
     def set_next_reviewer(self):
         """
-        Set the order on which peer will be requred to perform a action to
+        Set the order on which peer will be required to perform a action to
         continue with the process.
         """
         # TODO:check for user identifies as ...
