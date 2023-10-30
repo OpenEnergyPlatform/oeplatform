@@ -40,6 +40,7 @@ import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
 import RuleIcon from '@mui/icons-material/Rule';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -225,9 +226,8 @@ function EnhancedTableToolbar(props) {
   return (
     <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
       <Grid container justifyContent="space-between"
-        alignItems="start"
         spacing={2}>
-        <Grid item xs={4} >
+        <Grid item xs={12} md={4}>
             {/* <Tooltip title="Show all">
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
             </Tooltip> */}
@@ -259,10 +259,7 @@ function EnhancedTableToolbar(props) {
             
           </Tooltip>
         </Grid>
-        <Grid item xs={1} >
-
-        </Grid>
-        <Grid item xs={2} >
+        <Grid item xs={6} md={4}>
           <ToggleButtonGroup
             color="primary"
             value={alignment}
@@ -276,11 +273,8 @@ function EnhancedTableToolbar(props) {
             <ToggleButton value="list">List</ToggleButton>
           </ToggleButtonGroup>
         </Grid>
-        <Grid item xs={3} >
-
-        </Grid>
-        <Grid item xs={2}>
-          <Button sx ={{ marginLeft:"110px" }} component={Link} variant="contained" size="small" className="linkButton" to={`sirop/factsheet/new`} onClick={() => this.forceUpdate}>
+        <Grid item xs={6} md={4}>
+          <Button component={Link} variant="contained" size="small" className="linkButton" to={`sirop/factsheet/new`} onClick={() => this.forceUpdate}>
             <AddIcon/>
             Create new
           </Button>
@@ -559,19 +553,6 @@ export default function CustomTable(props) {
     "Output datasets",
   ];
 
-  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: '#f6f9fb',
-      color: 'Black',
-      maxWidth: 720,
-      fontSize: theme.typography.pxToRem(16),
-      border: '1px solid black',
-      padding: '20px'
-    },
-  }));
-
   const renderRows = (rs) => {
     const rowsToRender =  filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
     return <TableBody >
@@ -656,22 +637,22 @@ export default function CustomTable(props) {
 
                                 <Grid item xs={12}>
                                   <b>Institutions: </b>{row.institutions.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                 </Grid>
 
                                 <Grid item xs={12}>
                                  <b>Funding sources: </b>{row.funding_sources.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                 </Grid>
 
                                 <Grid item xs={12} >
                                 <b>Models and frameworks: </b>{row.models.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                   {row.frameworks.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                 </Grid>
                             </Grid>
@@ -679,10 +660,11 @@ export default function CustomTable(props) {
                       </Collapse>
                     </TableCell>
                 </TableRow>
-            </React.Fragment>
+              </React.Fragment>
             );
-      })}
-    </TableBody>
+          })}
+        </TableBody>
+
   }
 
   const renderCards= (rs) => {
@@ -713,16 +695,16 @@ export default function CustomTable(props) {
                   </Stack>
                   <p><b>Abstract: </b> {row.abstract}</p>
                   <p><b>Institutions: </b>{row.institutions.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} </p>
                   <p><b>Funding sources: </b>{row.funding_sources.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} </p>
                   <p><b>Models and frameworks: </b>{row.models.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                   {row.frameworks.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} </p>
                   <p><b>Scenarios: </b>{row.scenarios.map((v) => (
                         <HtmlTooltip
@@ -856,7 +838,7 @@ export default function CustomTable(props) {
         </DialogActions>
       </Dialog>
 
-      <Container maxWidth="xl">
+      <Container maxWidth="lg">
         <EnhancedTableToolbar numSelected={selected.size} selected={selected} alignment={alignment} handleChangeView={handleChangeView} handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}/>
         {alignment == "list" && <TableContainer>
           <Table

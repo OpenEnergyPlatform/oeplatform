@@ -1,15 +1,10 @@
-# Development & Collaboration
-
-!!! warning
-    This page will be updated soon.
-
-## Getting started with the development 
+# Development setup
 
 See our [developer guidelines](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) and get in touch with our [developer team](https://openenergyplatform.github.io/organisation/family_community/contact/).
 
-### Deploy locally
+## Deploy locally
 
-You can run your own local copy of the OEP website with
+You can run your own local copy of the OEP website server with
 
     python manage.py runserver
 
@@ -21,7 +16,7 @@ This way you can insert your changes without worrying about breaking anything in
 To create a dummy user for functionality testing purposes
 
 Then execute this python code (either directly in a terminal or from a file)
-    
+
     import django
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "oeplatform.settings")
     django.setup()
