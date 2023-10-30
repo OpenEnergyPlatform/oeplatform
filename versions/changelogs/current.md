@@ -3,8 +3,10 @@
 ### Features
 
 - Add navigation header to model and framework factsheet pages [(#1409)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1409)
+- Update styling of scenario bundles detail view [(#1435)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1435)
 - Improve installation instructions: Setup oeo [(#1396)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1396)
 - Enhance documentation structure for development practice, code and architectural information [(#1441)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1441)
+
 
 ### Bugs
 

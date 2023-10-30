@@ -44,7 +44,8 @@ const palette = {
   grey: greyPalette,
   text: {
     primary: greyPalette[700],
-    secondary: '#5F7484'
+    secondary: '#5F7484',
+    link: primaryPalette[700]
   },
   divider: '#E3EAEF',
   border: greyPalette[300],
