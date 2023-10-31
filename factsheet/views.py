@@ -58,8 +58,8 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-#query_endpoint = 'http://localhost:3030/ds/query'
-#update_endpoint = 'http://localhost:3030/ds/update'
+# query_endpoint = 'http://localhost:3030/ds/query'
+# update_endpoint = 'http://localhost:3030/ds/update'
 
 #query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
 #update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
@@ -696,7 +696,7 @@ def create_factsheet(request, *args, **kwargs):
         return response
 
 
-#@login_required
+@login_required
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -1196,7 +1196,7 @@ def factsheet_by_name(request, *args, **kwargs):
     return response
 
 
-#@login_required
+@login_required
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
     uid = request.GET.get("id")
@@ -1487,6 +1487,7 @@ def query_oekg(request, *args, **kwargs):
     )
     return response
 
+
 @login_required
 @csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
@@ -1516,7 +1517,7 @@ def test_query(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def get_entities_by_type(request, *args, **kwargs):
     entity_type = request.GET.get("entity_type")
@@ -1647,7 +1648,7 @@ def update_an_entity(request, *args, **kwargs):
     return response
 
 
-#@login_required
+@login_required
 @csrf_exempt
 def get_all_factsheets(request, *args, **kwargs):
     all_factsheets = []
@@ -1708,7 +1709,7 @@ def get_all_factsheets(request, *args, **kwargs):
 
 
 @csrf_exempt
-#@login_required
+@login_required
 def get_scenarios(request, *args, **kwargs):
     scenarios_uid = [
         i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_uid"))
@@ -1831,7 +1832,7 @@ def get_all_sub_classes(cls, visited=None):
 
 
 @csrf_exempt
-#@login_required
+@login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     scenario_class = oeo_owl.search_one(
         iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
