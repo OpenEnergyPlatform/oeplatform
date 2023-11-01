@@ -46,10 +46,6 @@ def getClasses(sheettype):
     return c, f
 
 
-def overview(request):
-    return render(request, "modelview/overview.html")
-
-
 def load_tags():
     engine = _get_engine()
     Session = sessionmaker(bind=engine)
@@ -213,11 +209,12 @@ def processPost(post, c, f, files=None, pk=None, key=None):
     if "new" in fields and fields["new"] == "True":
         fields["study"] = key
     for field in c._meta.get_fields():
-        if type(field) == ArrayField: # noqa
+        if type(field) == ArrayField:  # noqa
             parts = []
             for fi in fields.keys():
                 if (
-                    re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi] # noqa
+                    re.match(r"^{}_\d$".format(field.name), str(fi))
+                    and fields[fi]  # noqa
                 ):
                     parts.append(fi)
             parts.sort()
