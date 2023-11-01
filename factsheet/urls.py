@@ -27,5 +27,4 @@ urlpatterns = [
     path(r"get_scenarios/", views.get_scenarios),
     path(r"test_query/", views.test_query),
     path(r"get_oekg_modifications/", views.get_oekg_modifications),
-   
 ]
