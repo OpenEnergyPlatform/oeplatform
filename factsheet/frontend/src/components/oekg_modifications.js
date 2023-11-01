@@ -32,15 +32,15 @@ export default function Diff() {
                     <Box>
                        <div style={{ backgroundColor: "#001c30e6", color: "white" }}>
                             <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-                                <Typography variant="h6" gutterBottom style={{ margin: "10px" }}>
+                                <p style={{ margin: "10px" }}>
                                     {index + 1 }
-                                </Typography>
-                                <Typography variant="h6" gutterBottom style={{ margin: "10px" }}>
+                                </p>
+                                <p style={{ margin: "10px" }}>
                                     {row.fields.timestamp}
-                                </Typography>
-                                <Typography variant="h6" gutterBottom style={{ margin: "10px" }}>
+                                </p>
+                                <p style={{ margin: "10px" }}>
                                     {row.fields.user}
-                                </Typography>
+                                </p>
                             </Stack>
                         </div>
                         <ReactDiffViewer oldValue={row.fields.old_state} newValue={row.fields.new_state} splitView={true} />
