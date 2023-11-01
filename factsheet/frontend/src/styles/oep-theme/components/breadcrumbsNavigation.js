@@ -43,7 +43,7 @@ const BreadcrumbsNav = styled(Grid)(({ theme }) => ({
   },
 }));
 
-export default function BreadcrumbsNavGrid({ acronym, id, mode }) {
+export default function BreadcrumbsNavGrid({ acronym, id, mode, subheaderContent }) {
   return (
     <BreadcrumbsNav container>
       <Container maxWidth="false">
@@ -54,9 +54,13 @@ export default function BreadcrumbsNavGrid({ acronym, id, mode }) {
           <p>Scenario Bundle</p>
         </Grid>
         <Grid item xs={12} className='header-substyle'>
-          <span> 
-            {id === "new" ? "new/" : mode + " /"} 
-          </span> 
+          {subheaderContent ? (
+            <span>{subheaderContent}</span>
+          ) : (
+            <span> 
+              {id === "new" ? "new/" : mode + " /"} 
+            </span> 
+          )}
           {acronym}
         </Grid>
       </Container>

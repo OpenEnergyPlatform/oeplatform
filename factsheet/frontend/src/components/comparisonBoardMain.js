@@ -15,6 +15,7 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
 
 const ComparisonBoardMain = (props) => {
   const { params } = props;
@@ -64,17 +65,7 @@ const ComparisonBoardMain = (props) => {
       justifyContent="space-between"
       alignItems="center"
     >
-        <Grid item xs={12} >
-          <div style={{ backgroundColor: '#e3eaef', height: '100px', marginBottom: '10px' }}>
-            <div id='headerStyle'>
-            <span>
-              <ListAltOutlinedIcon />
-            </span>
-            <span>Scenario Bundle</span>
-            </div>
-          <div id='headerSubStyle'> <span> Comparison </span> </div>
-          </div>
-        </Grid>
+        <BreadcrumbsNavGrid subheaderContent="Comparison" />
         <Container maxWidth="false">
             <Box sx={{ 
               padding: '5px',
