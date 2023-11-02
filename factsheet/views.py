@@ -1203,10 +1203,6 @@ def factsheet_by_id(request, *args, **kwargs):
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
     factsheet = {}
 
-    print('############################start')
-    print(study_URI)
-    print(oekg.value(study_URI, OEKG["date_of_publication"]))
-    
     acronym = ""
     study_name = ""
     abstract = ""
@@ -1413,6 +1409,14 @@ def factsheet_by_id(request, *args, **kwargs):
     response = JsonResponse(factsheet, safe=False, content_type="application/json")
     patch_response_headers(response, cache_timeout=1)
 
+
+    print('#####update#####')
+    scenario_region = URIRef("http://openenergy-platform.org/ontology/oekg/region/Germany")
+    for s, p, o in oekg.triples((scenario_region, RDFS.label, None)):
+        if (str(o) == "None"):
+            oekg.remove((s, p, o))
+            oekg.add((s, p, Literal("Germany")))
+
     return response
 
 
@@ -1507,10 +1511,12 @@ def delete_factsheet_by_id(request, *args, **kwargs):
 
 @csrf_exempt
 def test_query(request, *args, **kwargs):
-    scenario_region = URIRef("http://openenergy-platform.org/ontology/oekg/region/UnitedKingdomOfGreatBritainAndNorthernIreland")
+    print('#######')
+    scenario_region = URIRef("http://openenergy-platform.org/ontology/oekg/region/Germany")
     for s, p, o in oekg.triples((scenario_region, RDFS.label, None)):
         if (str(o) == "None"):
             oekg.remove((s, p, o))
+            oekg.add((s, p, "Germany"))
     response = JsonResponse(
         "Done!", safe=False, content_type="application/json"
     )
