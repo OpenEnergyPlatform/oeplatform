@@ -4,7 +4,6 @@ from modelview import views
 
 urlpatterns = [
     url(r"^(?P<sheettype>[\w\d_]+)s/$", views.listsheets, {}, name="modellist"),
-    url(r"^overview/$", views.overview, {}),
     url(
         r"^(?P<sheettype>[\w\d_]+)s/add/$",
         views.FSAdd.as_view(),

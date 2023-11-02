@@ -6,7 +6,7 @@
 - Update styling of scenario bundles detail view [(#1435)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1435)
 - Improve installation instructions: Setup oeo [(#1396)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1396)
 - Enhance documentation structure for development practice, code and architectural information [(#1441)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1441)
-
+- Update homepage: Replace the Factsheet box with Scenario Bundles and update the text & remove the factsheet overview page and add a updated version of the text to the scenario bundle overview page. Also update and harmonize the several versions of the navigation bar and add external link icons. [(#1449)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1449)
 
 ### Bugs
 
