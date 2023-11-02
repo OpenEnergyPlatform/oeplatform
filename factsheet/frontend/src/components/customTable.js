@@ -350,6 +350,8 @@ export default function CustomTable(props) {
   };
 
   const handleClick = (event, name) => {
+    console.log(name);
+    
     const newSelected = new Set(selected);
     if (newSelected.has(name)) newSelected.delete(name);
     else newSelected.add(name);
@@ -838,7 +840,7 @@ export default function CustomTable(props) {
         </DialogActions>
       </Dialog>
 
-      <Container maxWidth="lg">
+      <Container maxWidth="xl">
         <EnhancedTableToolbar numSelected={selected.size} selected={selected} alignment={alignment} handleChangeView={handleChangeView} handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}/>
         {alignment == "list" && <TableContainer>
           <Table
