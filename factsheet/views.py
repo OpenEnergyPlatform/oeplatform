@@ -32,6 +32,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 
 from .models import OEKG_Modifications
+from login import models as login_models
+
 
 
 versions = os.listdir(
@@ -155,7 +157,6 @@ def get_oekg_modifications(request, *args, **kwargs):
 @login_required
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
-
     request_body = json.loads(request.body)
     name = request_body["name"]
     uid = request_body["uid"]
@@ -772,9 +773,10 @@ def update_factsheet(request, *args, **kwargs):
             oekg.add(( s, p, o ))
 
         OEKG_Modifications_instance = OEKG_Modifications(
+            bundle_id = uid,
+            user = login_models.myuser.objects.filter(name=request.user).first(),
             old_state = in_first.serialize(format="json-ld"),
             new_state = in_second.serialize(format="json-ld"),
-            user=request.user,
         )
         OEKG_Modifications_instance.save()
 
