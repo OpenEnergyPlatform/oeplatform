@@ -9,17 +9,21 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/oep-theme.js';
 import ComparisonBoardMain from "./components/comparisonBoardMain";
 import HistoryTable from './components/historyTable.js';
+import Diff from './components/oekg_modifications.js';
 
 function App() {
   const [factsheet, setFactsheet] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const url_params = String(window.location.href).split('/').pop();
-  const url_page = String(window.location.href).split('/').at(-2);
+  const param_1 = String(window.location.href).split('/')[4];
+  const param_2 = String(window.location.href).split('/')[5];
+  const param_3 = String(window.location.href).split('/')[6];
+
+  console.log(param_1, param_2, param_3)
 
   const getData = async () => {
-    if (url_page === 'factsheet') {
-      const { data } = await axios.get(conf.toep + `sirop/get/`, { params: { id: url_params } });
+    if (param_1 === 'id' && param_2 !== 'undefined') {
+      const { data } = await axios.get(conf.toep + `scenario-bundles/get/`, { params: { id: param_2 } });
       return data;
     }
   };
@@ -31,7 +35,7 @@ function App() {
   });
   }, []);
 
-  if (url_page === 'sirop' && url_params === '') {
+  if (param_1 === 'main') {
     return (
       <ThemeProvider theme={theme}>
         <Home />
@@ -40,17 +44,21 @@ function App() {
   } 
 
 
-  if (url_params === 'oekg_history') {
-    return <ThemeProvider theme={theme}><HistoryTable/></ThemeProvider>
+  if (param_1 === 'oekg_history') {
+    return <ThemeProvider theme={theme}><HistoryTable /></ThemeProvider>
+  }
+
+  if (param_1 === 'oekg_modifications') {
+    return <ThemeProvider theme={theme}><Diff /></ThemeProvider>
   }
 
   if (loading === false) {
    
-    if (url_page === 'compare') {
-      return <ThemeProvider theme={theme}><ComparisonBoardMain params={url_params} /></ThemeProvider>
+    if (param_1 === 'compare') {
+      return <ThemeProvider theme={theme}><ComparisonBoardMain params={param_2} /></ThemeProvider>
     }
-    if (url_page === 'factsheet') {
-      return <ThemeProvider theme={theme}><Factsheet id={url_params} fsData={factsheet}/></ThemeProvider>
+    if (param_1 === 'id') {
+      return <ThemeProvider theme={theme}><Factsheet id={param_2} fsData={factsheet}/></ThemeProvider>
     } 
   } else {
     return <LinearProgress />
