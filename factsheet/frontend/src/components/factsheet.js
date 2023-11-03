@@ -105,6 +105,7 @@ function Factsheet(props) {
   
   console.log(id);
 
+
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
@@ -1186,7 +1187,7 @@ function Factsheet(props) {
                 >
                 {scenarios.map((item, i) =>
                   <Tab
-                    label={item.acronym !== '' ? item.acronym.substring(0,16) : 'Scenario ' + (Number(i) + Number(1)) }
+                    label={item.acronym !== undefined && item.acronym !== '' ? item.acronym.substring(0,16) : 'Scenario ' + (Number(i) + Number(1)) }
                     key={'Scenario_tab_' + item.id}
                     classes={tabClasses}
                     style={{ border: '1px solid #cecece', marginBottom: '5px' }}
