@@ -1,0 +1,76 @@
+# Makefile for Django Project Setup
+
+# First Database Configuration
+LOCAL_DB_NAME = oedb
+LOCAL_DB_USER = postgres
+LOCAL_DB_PASSWORD = postgres
+
+# Second Database Configuration
+OEP_DJANGO_NAME = oep_django
+OEP_DB_PW = postgres
+
+# Set system variables
+export OEP_DJANGO_NAME
+export OEP_DB_PW
+export LOCAL_DB_NAME
+export LOCAL_DB_USER
+export LOCAL_DB_PASSWORD
+
+
+# Rename securitysettings.py.default to securitysettings.py
+rename_security_settings:
+	mv ../oeplatform/securitysettings.py.default ../oeplatform/securitysettings.py
+
+	@echo "Database variables in securitysettings.py have been automatically set."
+	
+
+.PHONY: setup-db create-db migrate include_security_settings
+
+setup-db: include_security_settings
+	# Install PostgreSQL and PostGIS
+	sudo apt-get update
+	sudo apt-get install postgresql postgresql-contrib postgis
+
+	# Create a PostgreSQL user and set a password
+	sudo -u postgres createuser --interactive
+	sudo -u postgres psql -c "ALTER USER $(DB_USER) WITH ENCRYPTED PASSWORD '$(DB_PASSWORD)';"
+
+	# Create the first database
+	sudo -u postgres createdb $(OEP_DJANGO_NAME) -O $(LOCAL_DB_USER)
+	# Enable PostGIS extension for the first database
+	sudo -u postgres psql -d $(OEP_DJANGO_NAME) -c "CREATE EXTENSION postgis;"
+
+	# Create the second database
+	sudo -u postgres createdb $(LOCAL_DB_NAME) -O $(LOCAL_DB_USER)
+	# Enable PostGIS extension for the second database
+	sudo -u postgres psql -d $(LOCAL_DB_NAME) -c "CREATE EXTENSION postgis;"
+
+create-db:
+	# Create Django databases and apply migrations
+	python manage.py migrate
+
+migrate:
+	# Apply Django migrations
+	python manage.py migrate
+
+.PHONY: run-fuseki
+
+run-fuseki:
+	# Download Apache Jena Fuseki (replace with the actual download link)
+	wget http://apache.cs.utah.edu/jena/binaries/apache-jena-fuseki-4.0.0.tar.gz
+	tar -zxvf apache-jena-fuseki-4.0.0.tar.gz
+
+	# Start Apache Jena Fuseki with the configuration file
+	cd apache-jena-fuseki-4.0.0
+	./fuseki-server --config=config.ttl
+
+.PHONY: clean
+
+clean:
+	# Remove Apache Jena Fuseki and downloaded files
+	rm -rf apache-jena-fuseki-4.0.0 apache-jena-fuseki-4.0.0.tar.gz
+
+.PHONY: all
+
+all: rename_security_settings setup-db create-db migrate run-fuseki
+
