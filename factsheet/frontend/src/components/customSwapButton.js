@@ -21,7 +21,7 @@ export default function ColorToggleButton(props) {
   return (
     <div style={{ 'display':'flex' }}>
       <Tooltip title="Back to main page">
-        <Link to={`sirop/`} onClick={() => this.forceUpdate}>
+        <Link to={`scenario-bundles/`} onClick={() => this.forceUpdate}>
           <Button variant="outlined" size="small" sx={{ mr: 1 }}>
             <ArrowBackIcon />
           </Button>

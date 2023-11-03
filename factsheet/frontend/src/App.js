@@ -19,7 +19,7 @@ function App() {
 
   const getData = async () => {
     if (url_page === 'factsheet') {
-      const { data } = await axios.get(conf.toep + `sirop/get/`, { params: { id: url_params } });
+      const { data } = await axios.get(conf.toep + `scenario-bundles/get/`, { params: { id: url_params } });
       return data;
     }
   };
@@ -31,7 +31,7 @@ function App() {
   });
   }, []);
 
-  if (url_page === 'sirop' && url_params === '') {
+  if (url_page === 'scenario-bundles' && url_params === '') {
     return (
       <ThemeProvider theme={theme}>
         <Home />

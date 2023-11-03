@@ -235,7 +235,7 @@ function EnhancedTableToolbar(props) {
             <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px'}} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
             <Tooltip title="Compare">
 
-            {numSelected > 1 ? <Link to={`sirop/compare/${[...selected].join('#')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }}>
+            {numSelected > 1 ? <Link to={`scenario-bundles/compare/${[...selected].join('#')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }}>
               <Button size="small" 
                   style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
                   variant="contained" 
@@ -274,7 +274,7 @@ function EnhancedTableToolbar(props) {
           </ToggleButtonGroup>
         </Grid>
         <Grid item xs={6} md={4}>
-          <Button component={Link} variant="contained" size="small" className="linkButton" to={`sirop/factsheet/new`} onClick={() => this.forceUpdate}>
+          <Button component={Link} variant="contained" size="small" className="linkButton" to={`scenario-bundles/factsheet/new`} onClick={() => this.forceUpdate}>
             <AddIcon/>
             Create new
           </Button>
@@ -427,17 +427,17 @@ export default function CustomTable(props) {
   }
 
   const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
     return data;
   };
 
   const getAuthors = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
     return data;
   };
 
   const getFundingSources = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
     return data;
   };
 
@@ -488,7 +488,7 @@ export default function CustomTable(props) {
       'studyKewords': selectedStudyKewords,
       'scenarioYearValue': scenarioYearValue,
     }
-    axios.post(conf.toep + 'sirop/query/',
+    axios.post(conf.toep + 'scenario-bundles/query/',
     {
       'criteria': criteria,
     }).then(response => {
@@ -571,12 +571,12 @@ export default function CustomTable(props) {
                   sx={{ cursor: 'pointer', height: '60px' }}
                 >
                   <TableCell style={{ width: '400px' }}>
-                  <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                  <Link to={`scenario-bundles/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
                     <Typography variant="body1" style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}><b style={{ fontSize: '16px' }}>{row.study_name}</b></Typography>
                   </Link> 
                   </TableCell >
                   <TableCell style={{ width: '100px' }}>
-                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`scenario-bundles/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
                       <Typography variant="subtitle1" gutterBottom  style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}>
                         {row.acronym}
                       </Typography>
@@ -681,14 +681,14 @@ export default function CustomTable(props) {
               <Grid item xs={12} sx={{ border: '1px solid #cadff5', marginBottom: "10px"}} >
                 <div style={{ backgroundColor: "#f6f9fb", padding: "15px" }}>
                   <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
-                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`scenario-bundles/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
                       <Typography variant="body1"><b style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}> {row.study_name} </b></Typography>
                     </Link> 
                   </Stack>
                 </div>
                 <div style={{ padding: "15px" }}>
                   <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`scenario-bundles/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
                       <p style={{ fontSize: '16px', cursor: 'pointer', color: "black" }}><b>Acronym: </b>{row.acronym}</p>
                     </Link> 
                     {row.date_of_publication !== null && <p><b>Date of publication: </b>{row.date_of_publication}</p>}
