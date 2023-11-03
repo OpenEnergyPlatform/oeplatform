@@ -4,7 +4,7 @@ from factsheet import views
 
 urlpatterns = [
     path(r'', views.factsheets_index),
-    re_path(r'^factsheet/*', views.factsheets_index),
+    re_path(r'^id/*', views.factsheets_index),
     re_path(r'^compare/*', views.factsheets_index),
     re_path(r'^oekg_history/*', views.factsheets_index),
     re_path(r'^oekg_modifications/*', views.factsheets_index),

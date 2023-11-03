@@ -274,7 +274,7 @@ function EnhancedTableToolbar(props) {
           </ToggleButtonGroup>
         </Grid>
         <Grid item xs={6} md={4}>
-          <Button component={Link} variant="contained" size="small" className="linkButton" to={`scenario-bundles/factsheet/new`} onClick={() => this.forceUpdate}>
+          <Button component={Link} variant="contained" size="small" className="linkButton" to={`scenario-bundles/id/new`} onClick={() => this.forceUpdate}>
             <AddIcon/>
             Create new
           </Button>
@@ -573,12 +573,12 @@ export default function CustomTable(props) {
                   sx={{ cursor: 'pointer', height: '60px' }}
                 >
                   <TableCell style={{ width: '400px' }}>
-                  <Link to={`scenario-bundles/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                  <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
                     <Typography variant="body1" style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}><b style={{ fontSize: '16px' }}>{row.study_name}</b></Typography>
                   </Link> 
                   </TableCell >
                   <TableCell style={{ width: '100px' }}>
-                    <Link to={`scenario-bundles/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
                       <Typography variant="subtitle1" gutterBottom  style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}>
                         {row.acronym}
                       </Typography>
@@ -683,14 +683,14 @@ export default function CustomTable(props) {
               <Grid item xs={12} sx={{ border: '1px solid #cadff5', marginBottom: "10px"}} >
                 <div style={{ backgroundColor: "#f6f9fb", padding: "15px" }}>
                   <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
-                    <Link to={`scenario-bundles/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
                       <Typography variant="body1"><b style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}> {row.study_name} </b></Typography>
                     </Link> 
                   </Stack>
                 </div>
                 <div style={{ padding: "15px" }}>
                   <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-                    <Link to={`scenario-bundles/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
                       <p style={{ fontSize: '16px', cursor: 'pointer', color: "black" }}><b>Acronym: </b>{row.acronym}</p>
                     </Link> 
                     {row.date_of_publication !== null && <p><b>Date of publication: </b>{row.date_of_publication}</p>}

@@ -13,7 +13,7 @@ export default function Diff() {
     const [loading, setLoading] = useState(true);
 
     const getModifications= async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_oekg_modifications/`);
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_oekg_modifications/`);
         return data;
     };
 

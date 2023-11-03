@@ -103,7 +103,8 @@ function Factsheet(props) {
 
   const { id, fsData } = props;
   
-  
+  console.log(id);
+
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
@@ -2569,7 +2570,7 @@ function getStepContent(step: number) {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Link to={`scenario-bundles/`} onClick={() => { axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+              <Link to={`scenario-bundles/main`} onClick={() => { axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
                 this.reloadRoute();}} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
               <Button variant="contained" color="error" >
                 Yes
