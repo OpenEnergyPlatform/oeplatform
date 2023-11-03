@@ -82,7 +82,7 @@ const ComparisonBoardMain = (props) => {
               display: 'block'}}
             >
             <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Link to={`scenario-bundles/`} onClick={() => this.forceUpdate}>
+              <Link to={`scenario-bundles/main`} onClick={() => this.forceUpdate}>
                 <Button color="primary" 
                         variant="outlined" 
                         size="small" 
