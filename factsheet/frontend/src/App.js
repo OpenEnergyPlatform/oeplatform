@@ -9,6 +9,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/oep-theme.js';
 import ComparisonBoardMain from "./components/comparisonBoardMain";
 import HistoryTable from './components/historyTable.js';
+import Diff from './components/oekg_modifications.js';
 
 function App() {
   const [factsheet, setFactsheet] = useState({});
@@ -41,7 +42,11 @@ function App() {
 
 
   if (url_params === 'oekg_history') {
-    return <ThemeProvider theme={theme}><HistoryTable/></ThemeProvider>
+    return <ThemeProvider theme={theme}><HistoryTable /></ThemeProvider>
+  }
+
+  if (url_params === 'oekg_modifications') {
+    return <ThemeProvider theme={theme}><Diff /></ThemeProvider>
   }
 
   if (loading === false) {

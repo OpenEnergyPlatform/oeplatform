@@ -40,6 +40,7 @@ function Home(props) {
     axios.get(conf.toep + `scenario-bundles/all/`).then(response => {
       const token = response.data.token;
       setFactsheets(response.data);
+      console.log(response.data);
       setLoading(false);
     });
   }, [setFactsheets, setLoading]);
