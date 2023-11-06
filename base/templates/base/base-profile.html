@@ -44,13 +44,14 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFS" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Factsheets
+                            Scenario Bundles
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownFS">
-                            <a class="dropdown-item" href="/factsheets/overview/">Overview</a>
+                            <!-- <a class="dropdown-item" href="/factsheets/overview/">Overview</a> -->
+                            <a class="dropdown-item" href="/scenario-bundles/main">Scenario Bundle<sup class="small text-muted">Early Access</sup></a>
                             <a class="dropdown-item" href="/factsheets/frameworks/">Framework Factsheet</a>
                             <a class="dropdown-item" href="/factsheets/models/">Model Factsheet</a>
-                            <a class="dropdown-item" href="/sirop/">Scenario Bundle<sup class="small text-muted">Early Access</sup></a>
+                            
                             <!-- <a class="dropdown-item" href="/factsheets/scenarios/">Scenario Factsheet</a> -->
                         </div>
                     </li>
@@ -67,7 +68,7 @@
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ EXTERNAL_URLS.tutorials_index }}">Academy</a>
+                        <a class="nav-link" href="{{ EXTERNAL_URLS.tutorials_index }}" target="_blank">Academy <i class="fas fa-external-link-alt"></i></a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAbout" role="button"
@@ -76,8 +77,10 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
                             <a class="dropdown-item" href="/about/">Overview</a>
-                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.compendium }}">Compendium</a>
-                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.readthedocs }}" target="_blank">Developer Documentation</a>
+                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.compendium }}" target="_blank"><i class="fas fa-external-link-alt"></i> Compendium</a>
+                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.mkdocs }}" target="_blank"><i class="fas fa-external-link-alt"></i> Developer Documentation</a>
+                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.readthedocs }}" target="_blank"><i class="fas fa-external-link-alt"></i> REST-API Documentation</a>
+                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.tutorials_faq }}" target="_blank"><i class="fas fa-external-link-alt"></i> FAQ</a>
                         </div>
                     </li>
                 </ul>
