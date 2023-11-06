@@ -33,19 +33,30 @@
 {% include 'modelview/error_snipet.html' with errors=errors %}
 
 <ul class="nav nav-tabs">
-    <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Overview">Overview</a>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#Overview" type="button" role="tab" aria-controls="Overview" aria-selected="true">Overview</button>
     </li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#General">General Information</a></li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#MathematicalDescription">Mathematical
-        Description</a></li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Openness">Openness</a></li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#ModelBuilding">Model Building</a></li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#References">References</a></li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Tags">Tags</a></li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="general-tab" data-bs-toggle="tab" data-bs-target="#General" type="button" role="tab" aria-controls="General" aria-selected="false">General</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="openness-tab" data-bs-toggle="tab" data-bs-target="#Openness" type="button" role="tab" aria-controls="Openness" aria-selected="false">Openness</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="mathematical-description-tab" data-bs-toggle="tab" data-bs-target="#MathematicalDescription" type="button" role="tab" aria-controls="MathematicalDescription" aria-selected="false">MathematicalDescription</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="model-building-tab" data-bs-toggle="tab" data-bs-target="#ModelBuilding" type="button" role="tab" aria-controls="Overview" aria-selected="false">ModelBuilding</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="references-tab" data-bs-toggle="tab" data-bs-target="#References" type="button" role="tab" aria-controls="Overview" aria-selected="false">References</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tags-tab" data-bs-toggle="tab" data-bs-target="#Tags" type="button" role="tab" aria-controls="Overview" aria-selected="false">Tags</button>
+    </li>
     <span onclick="window.onbeforeunload = function (e) {};">
-  <input class="btn btn-info right" type="submit" value="Submit all"/>
-  </span>
-
+        <input class="btn btn-info right" type="submit" value="Submit all"/>
+    </span>
 </ul>
 <div class="tab-content">
     <div id="Overview" class="tab-pane fade show active">

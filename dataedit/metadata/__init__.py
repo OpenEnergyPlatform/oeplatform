@@ -7,7 +7,7 @@ from dataedit.metadata.v1_5 import TEMPLATE_V1_5
 from .error import MetadataException
 
 METADATA_TEMPLATE = {
-    5: TEMPLATE_V1_5, 
+    5: TEMPLATE_V1_5,
     4: TEMPLATE_V1_4,
     3: TEMPLATE_v1_3,
 }
@@ -118,19 +118,56 @@ def assign_content_values_to_metadata(content, template=None, parent=""):
     return template
 
 
-def load_metadata_from_db(schema, table):
-    """Get comment for a table in OEP database (contains the metadata)
-
-    :param schema: name of the OEP schema
-    :param table: name of the OEP table in the OEP schema
-    :return:
+def save_metadata_to_db(schema, table, updated_metadata):
     """
+    Save updated metadata for a specific table in the OEP database.
+
+    Args:
+        schema (str): The name of the OEP schema.
+        table (str): The name of the table in the OEP schema.
+        updated_metadata (dict): The updated metadata dictionary.
+
+    Note:
+        This function loads the table object from the database, updates its metadata field,
+        and then saves the updated table object back to the database.
+    """
+
     from dataedit.models import Table
-    
-    # TODO maybe change this function to load metadata from Table.oemetadata(JSONB) field? or keep old functionality?
+
+    # Load the table object
+    table_obj = Table.load(schema=schema, table=table)
+
+    # Update the oemetadata field
+    table_obj.oemetadata = updated_metadata
+
+    # Save the updated table object
+    table_obj.save()
+
+
+def load_metadata_from_db(schema, table):
+    """
+    Load metadata for a specific table from the OEP database.
+
+    Args:
+        schema (str): The name of the OEP schema.
+        table (str): The name of the table in the OEP schema.
+
+    Returns:
+        dict: The loaded metadata dictionary.
+
+    Note:
+        The function currently loads metadata from the Table.oemetadata field.
+        There is a consideration to change this function to use a different approach
+        or keep the old functionality (TODO).
+    """
+
+    from dataedit.models import Table
+
+    # TODO maybe change this function to load metadata from Table.oemetadata
+    # (JSONB)field? or keep old functionality?
     # metadata = actions.get_comment_table(schema, table)
-    metadata = Table.load(schema=schema, table=table).oemetadata  
-    
+    metadata = Table.load(schema=schema, table=table).oemetadata
+
     metadata = parse_meta_data(metadata, schema, table)
     return metadata
 

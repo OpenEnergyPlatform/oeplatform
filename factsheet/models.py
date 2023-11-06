@@ -1,11 +1,17 @@
 from django.db import models
 from django.utils import timezone
 
-
-class HistoryOfOEKG(models.Model):
-    triple_subject = models.TextField()
-    triple_predicate = models.TextField()
-    triple_object = models.TextField()
-    type_of_action = models.CharField(max_length=100)
-    user = models.CharField(max_length=200)
-    timestamp = models.DateTimeField(default=timezone.now)
+from django.db.models import (
+    CharField,
+    DateTimeField,
+    ForeignKey,
+    JSONField,
+)
+class OEKG_Modifications(models.Model):
+    bundle_id = CharField(max_length=400, default="none")
+    old_state = JSONField()
+    new_state = JSONField()
+    user = ForeignKey(
+        "login.myuser", on_delete=models.CASCADE, null=True
+        )
+    timestamp = DateTimeField(default=timezone.now)
