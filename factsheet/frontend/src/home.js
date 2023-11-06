@@ -37,7 +37,7 @@ function Home(props) {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(conf.toep + `scenario-bundles/all/`).then(response => {
+    axios.get(conf.toep + `sirop/all/`).then(response => {
       const token = response.data.token;
       setFactsheets(response.data);
       setLoading(false);
