@@ -253,9 +253,6 @@ class OntologyOverview(View):
                 )
             else:
                 main_module = collect_modules(path) #TODO fix varname - not clear what path this is
-                print('#####')
-                print(path)
-                print(main_module)
                 main_module_name = list(main_module.keys())[0]
                 main_module = main_module[main_module_name]
                 main_module["name"] = main_module_name
