@@ -32,7 +32,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
-import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
@@ -40,6 +40,7 @@ import oedb_iris from '../data/datasets_iris.json';
 import oedb_names from '../data/datasets_names.json';
 import LCC from '../data/countries.json';
 import { makeStyles, Theme } from '@material-ui/core/styles';
+import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -82,19 +83,6 @@ function a11yProps(index: number) {
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
-
-const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: '#e3eaef',
-    color: 'black',
-    maxWidth: 520,
-    fontSize: theme.typography.pxToRem(20),
-    border: '1px solid black',
-    padding: '20px'
-  },
-}));
 
 export default function Scenario(props) {
   const {
@@ -292,218 +280,184 @@ export default function Scenario(props) {
   const tabClasses = {root: classes.tab};
 
   return (
-      <Grid container
-            direction="row"
-            justifyContent="space-between"
-            alignItems="start"
-            spacing={2} 
+    <Typography variant="small">
+      <Grid 
+        container
+        direction="row"
+        justifyContent="space-between"
+        alignItems="start"
+        spacing={2} 
       >
-        <Grid item xs={3} >
-          <span style={{ color: '#294456' }}> <b>Name</b> </span>
-          <span >
-            <HtmlTooltip
-              title={
-              <React.Fragment>
-                <Typography color="inherit" variant="subtitle1">
-                  {'A study is a project with the goal to investigate something.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info...</a>
-                </Typography>
-              </React.Fragment>
-            }
-            >
-            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-            </HtmlTooltip>
-          </span>
-        </Grid>
-        <Grid item xs={9} >
-          <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant='outlined' style={{  width: '95%' }} id="outlined-basic" label="" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
-        </Grid>
-
-        <Grid item xs={3} >
-          <span style={{ color: '#294456'}}> <b>Acronym</b>  </span>
-          <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-          </span>
-        </Grid>
-        <Grid item xs={9} >
-          <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant='outlined' style={{  width: '95%' }} id="outlined-basic" label="" name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
-        </Grid>
-
-        <Grid item xs={3} >
-          <span style={{ color: '#294456'}}>  <b>Abstract </b>  </span>
-          <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A summary of the resource.'}
-                <br />
-                <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-          </span>
-        </Grid>
-        <Grid item xs={9} >
-          <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant='outlined' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px' }} id="outlined-basic" label="" multiline rows={8} maxRows={14} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
-        </Grid>
-
-        <Grid item xs={3} >
-          <span style={{ color: '#294456'}}> <b>Spatial regions </b>  </span>
-          <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A study region is a spatial region that is under investigation and consists entirely of one or more subregions.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020032">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-          </span>
-        </Grid>
-        <Grid item xs={9} >
-          <CustomAutocompleteWithoutAddNew  
-            width="95%"
-            showSelectedElements={true}
-            optionsSet={options_LCC}
-            kind=''
-            handler={(e) => handleScenariosAutoCompleteChange(e, 'regions', data.id)}
-            selectedElements={data.regions}
-            noTooltip={true}
-          />
-        </Grid>
-
-        <Grid item xs={3} >
-          <span style={{ color: '#294456'}}><b>Iinteracting regions</b> </span>
-          <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'An interacting region is a spatial region that interacts with a study region. It is part of a considered region, but not a study region.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020036">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-          </span>
-        </Grid>
-        <Grid item xs={9} >
-        <CustomAutocompleteWithoutAddNew  
-            width="95%"
-            showSelectedElements={true}
-            optionsSet={options_LCC}
-            kind=''
-            handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}
-            selectedElements={data.interacting_regions}
-            noTooltip={true}
-          />
-          {/* <CustomAutocomplete  width="95%" type="interacting region" 
+        
+        <BundleScenariosGridItem
+          {...props}
+          labelGridSize = {3}
+          fieldGridSize = {9}
+          spanValue="Name"
+          tooltipText="A study is a project with the goal to investigate something."
+          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020011"
+          renderField={() => (
+            <TextField 
+              size="small"
+              variant='outlined'
+              style={{  width: '100%' }}
+              id="outlined-basic"
+              label=""
+              name={'name_' + data.id}
+              key={'name_' + data.id}
+              onChange={handleScenariosInputChange}
+              value={data.name}
+            />
+          )}
+          TooltipComponent={HtmlTooltip}
+        />
+        <BundleScenariosGridItem
+          {...props}
+          labelGridSize = {3}
+          fieldGridSize = {9}
+          spanValue="Acronym"
+          tooltipText="An acronym is an abbreviation of the title by using the first letters of each part of the title."
+          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000048"
+          renderField={() => (
+            <TextField 
+              size="small"
+              variant='outlined'
+              style={{  width: '100%' }}
+              id="outlined-basic"
+              label=""
+              name={'acronym_' + data.id}
+              key={'acronym_' + data.id}
+              onChange={handleScenariosInputChange}
+              value={data.acronym}
+            />
+          )}
+          TooltipComponent={HtmlTooltip}
+        />
+        <BundleScenariosGridItem
+          {...props}
+          labelGridSize = {3}
+          fieldGridSize = {9}
+          spanValue="Abstract"
+          tooltipText="A summary of the resource."
+          hrefLink="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract"
+          linkText="More info..."
+          renderField={() => (
+            <TextField 
+              size="small"
+              variant='outlined'
+              style={{  width: '100%' }}
+              id="outlined-basic"
+              label=""
+              multiline
+              rows={8}
+              maxRows={14}
+              name={'abstract_' + data.id}
+              key={'abstract_' + data.id}
+              onChange={handleScenariosInputChange}
+              value={data.abstract}
+            />
+          )}
+          TooltipComponent={HtmlTooltip}
+        />
+        <BundleScenariosGridItem
+          {...props}
+          labelGridSize = {3}
+          fieldGridSize = {9}
+          spanValue="Spatial regions"
+          tooltipText="A study region is a spatial region that is under investigation and consists entirely of one or more subregions."
+          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020032"
+          renderField={() => (
+            <CustomAutocompleteWithoutAddNew  
+              width="100%"
+              showSelectedElements={true}
+              optionsSet={options_LCC}
+              kind=''
+              handler={(e) => handleScenariosAutoCompleteChange(e, 'regions', data.id)}
+              selectedElements={data.regions}
+              noTooltip={true}
+            />
+          )}
+          TooltipComponent={HtmlTooltip}
+        />
+        <BundleScenariosGridItem
+          {...props}
+          labelGridSize = {3}
+          fieldGridSize = {9}
+          spanValue="Interacting regions"
+          tooltipText="An interacting region is a spatial region that interacts with a study region. It is part of a considered region, but not a study region."
+          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020036"
+          renderField={() => (
+            <CustomAutocompleteWithoutAddNew  
+              width="100%"
+              showSelectedElements={true}
+              optionsSet={options_LCC}
+              kind=''
+              handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}
+              selectedElements={data.interacting_regions}
+              noTooltip={true}
+            />
+          )}
+          /* <CustomAutocomplete  width="100%" type="interacting region" 
            editHandler={HandleEditInteractingRegion}
             addNewHandler={HandleAddNewInteractingRegion}
              showSelectedElements={true} 
              selectedElements={data.interacting_regions} 
              manyItems optionsSet={scenarioInteractingRegion} 
-             kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/> */}
-        </Grid>
-
-        <Grid item xs={3} >
-          <span style={{ color: '#294456'}}><b>Scenario years</b> </span>
-          <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A scenario year is a time step that has a duration of one year and is part of a scenario horizon.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020097">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-          </span>
-        </Grid>
-        <Grid item xs={9} >
-          <CustomAutocomplete  width="95%" type="scenario year" editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
-        </Grid>
-         
-        <Grid item xs={3}  >
-          <span style={{ color: '#294456'}}> <b>Scenario descriptors</b> </span>
-          <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000364">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-          </span>
-        </Grid>
-        <Grid item xs={9} >
-        <CustomTreeViewWithCheckBox 
-          showFilter={true} 
-          size="300px" 
-          checked={data.descriptors} 
-          expanded={getNodeIds(descriptors)}
-          handler={(list, nodes, id) => scenarioDescriptorHandler(list, nodes, data.id)} 
-          expandedHandler={expandDescriptorsHandler} 
-          data={descriptors} 
-          title={""} 
-          toolTipInfo={['A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000364']} 
+             kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/> */
+          TooltipComponent={HtmlTooltip}
         />
-        </Grid>
-
-          
-        <Grid item xs={3} style={{ marginTop: '10px' }}>
-          <div>
-            <span style={{ color: '#294456'}}> <b> Input dataset(s) </b> </span>
-            <span >
-            <HtmlTooltip
-              title={
-              <React.Fragment>
-                <Typography color="inherit" variant="subtitle1">
-                  {'Endogenous data is a data item whose quantity value is determined by a model.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030030">More info...</a>
-                </Typography>
-              </React.Fragment>
-            }
-            >
-            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-            </HtmlTooltip>
-            </span>
+        <BundleScenariosGridItem
+          {...props}
+          labelGridSize = {3}
+          fieldGridSize = {9}
+          spanValue="Scenario years"
+          tooltipText="A scenario year is a time step that has a duration of one year and is part of a scenario horizon."
+          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020097"
+          renderField={() => (
+            <CustomAutocomplete
+              width="100%"
+              type="scenario year"
+              editHandler={HandleEditScenarioYear}
+              addNewHandler={HandleAddNNewScenarioYear}
+              showSelectedElements={true}
+              selectedElements={data.scenario_years}
+              manyItems optionsSet={scenarioYears}
+              kind=''
+              handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)} 
+            />
+          )}
+          TooltipComponent={HtmlTooltip}
+        />
+        <BundleScenariosGridItem
+          {...props}
+          labelGridSize = {3}
+          fieldGridSize = {9}
+          spanValue="Scenario descriptors"
+          tooltipText="A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation."
+          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
+          renderField={() => (
+            <CustomTreeViewWithCheckBox 
+              showFilter={true} 
+              size="300px" 
+              checked={data.descriptors} 
+              expanded={getNodeIds(descriptors)}
+              handler={(list, nodes, id) => scenarioDescriptorHandler(list, nodes, data.id)} 
+              expandedHandler={expandDescriptorsHandler} 
+              data={descriptors} 
+              title={""} 
+              toolTipInfo={['A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000364']} 
+            />
+          )}
+          TooltipComponent={HtmlTooltip}
+        />
+        <BundleScenariosGridItem
+          {...props}
+          labelGridSize = {3}
+          fieldGridSize = {9}
+          spanValue="Input dataset(s)"
+          tooltipText="Endogenous data is a data item whose quantity value is determined by a model."
+          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
+          customSpan = {
             <span>
               <IconButton
                 color="primary"
@@ -512,68 +466,55 @@ export default function Scenario(props) {
                 >
                 <AddIcon />
               </IconButton>
-            </span>
-          </div>
-          
-        </Grid>
-
-        <Grid item xs={9} style={{ marginTop: '10px' }}>
-          {Object.keys(scenariosInputDatasetsObj).length > 0 &&  scenariosInputDatasetsObj.map((item, index) =>
-                <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
-                  <Grid item xs={5} >
-                    <Autocomplete
-                      disableCloseOnSelect
-                      options={options_db_names}
-                      renderInput={(params) => <TextField {...params} label="Name" size="small"  variant='outlined' />}
-                      onChange={(event, value) => updateInputDatasetName(value, item.key, index)}
-                      value={item.value.label}
-                      size="small"
-                      variant='standard'
-                    />
-                  </Grid>
-                  <Grid item xs={1} sx={{ textAlign: "center"}} >
-                    <b style={{ verticalAlign: "sub"}}>OR</b>
-                  </Grid>
-                  <Grid item xs={5} >
-                    <Autocomplete
-                      disableCloseOnSelect
-                      options={options_db_iris}
-                      renderInput={(params) => <TextField {...params} label="IRI" size="small"  variant='outlined' />}
-                      onChange={(event, value) => updateInputDatasetIRI(value, item.key, index)}
-                      value={ item.value.iri}
-                    />
-                  </Grid>
-                  <Grid item xs={1} >
-                    <IconButton
-                      color="primary"
-                      aria-label="add"
-                      onClick={() => removeInputDataset(item.key, data.index)}
-                    >
-                      <DeleteOutlineIcon />
-                    </IconButton>
-                  </Grid>
-                </Grid>)
+            </span>}
+          renderField={() => 
+            Object.keys(scenariosInputDatasetsObj).length > 0 &&  scenariosInputDatasetsObj.map((item, index) => (
+              <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
+                <Grid item xs={5} >
+                  <Autocomplete
+                    disableCloseOnSelect
+                    options={options_db_names}
+                    renderInput={(params) => <TextField {...params} label="Name" size="small"  variant='outlined' />}
+                    onChange={(event, value) => updateInputDatasetName(value, item.key, index)}
+                    value={item.value.label}
+                    size="small"
+                    variant='standard'
+                  />
+                </Grid>
+                <Grid item xs={1} sx={{ textAlign: "center"}} >
+                  <b style={{ verticalAlign: "sub"}}>OR</b>
+                </Grid>
+                <Grid item xs={5} >
+                  <Autocomplete
+                    disableCloseOnSelect
+                    options={options_db_iris}
+                    renderInput={(params) => <TextField {...params} label="IRI" size="small"  variant='outlined' />}
+                    onChange={(event, value) => updateInputDatasetIRI(value, item.key, index)}
+                    value={ item.value.iri}
+                  />
+                </Grid>
+                <Grid item xs={1} >
+                  <IconButton
+                    color="primary"
+                    aria-label="add"
+                    onClick={() => removeInputDataset(item.key, data.index)}
+                  >
+                    <DeleteOutlineIcon />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            ))
           }
-        </Grid>
-
-        <Grid item xs={3} style={{ marginTop: '10px' }}>
-          <div>
-            <span style={{ color: '#294456'}}> <b> Output dataset(s) </b> </span>
-            <span >
-            <HtmlTooltip
-              title={
-              <React.Fragment>
-                <Typography color="inherit" variant="subtitle1">
-                  {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info...</a>
-                </Typography>
-              </React.Fragment>
-            }
-            >
-            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-            </HtmlTooltip>
-            </span>
+          TooltipComponent={HtmlTooltip}
+        />
+        <BundleScenariosGridItem
+          {...props}
+          labelGridSize = {3}
+          fieldGridSize = {9}
+          spanValue="Output dataset(s)"
+          tooltipText="Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model."
+          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00030029"
+          customSpan = {
             <span>
               <IconButton
                 color="primary"
@@ -582,13 +523,9 @@ export default function Scenario(props) {
               >
                 <AddIcon />
               </IconButton>
-            </span>
-          </div>
-        
-        </Grid>
-
-        <Grid item xs={9} style={{ marginTop: '10px' }}>
-          {Object.keys(scenariosOutputDatasetsObj).length > 0 && scenariosOutputDatasetsObj.map((item, index) =>
+            </span>}
+          renderField={() => 
+            Object.keys(scenariosOutputDatasetsObj).length > 0 && scenariosOutputDatasetsObj.map((item, index) => (
              <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
               <Grid item xs={5} >
                 <Autocomplete
@@ -621,10 +558,13 @@ export default function Scenario(props) {
                 </IconButton>
               </Grid>
             </Grid>
-          )}
-        </Grid>
-      </Grid>
+            ))
+          }
+          TooltipComponent={HtmlTooltip}
+        />
 
+      </Grid>
+    </Typography>
   );
 }
 

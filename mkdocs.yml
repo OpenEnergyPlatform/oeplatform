@@ -64,13 +64,53 @@ extra_css:
 # Navigation
 nav:
   - Home: index.md
-  - Installation & Setup: 
-    - Installation Guide: install/installation.md
-    - Manual database setup: install/manual_db_setup.md
-  - Development & Collaboration: dev/development.md
-  - Code Documentation: 
-    - oeplatform-code/index.md
-    - Architecture:
-      - oeplatform-code/architecture/index.md
-    - Application Programming Interface:
-      - oeplatform-code/api/index.md
+  - Development: 
+    - dev/index.md
+    - Context:
+      - Use Cases: dev/use-case.md
+      - Users: dev/personas.md
+    - Best Practices:
+      - dev/best-practice.md
+    - Collaboration: 
+      - Community: dev/community.md
+      - Git & GitHub: dev/git-github.md
+    #   - Users: development/collaboration/users.md
+      - Planning & Communication: dev/collaboration/planning-communication.md
+      - Code of Conduct: dev/collaboration/code-of-conduct.md
+      - License and Citation: dev/collaboration/license-and-citation.md
+  # - Git:
+  #   - development/git/index.md
+  #   - Gitignore: development/git/gitignore.md
+  #   - Pre-commit: development/git/pre-commit.md
+    # - Continuous Integration:
+    #   - development/continuous-integration/index.md
+    #   - Test-Driven-Development: development/best-practice/test-driven-development-workflow.md
+    # - Documentation:
+    #   - development/documentation/index.md
+    # - Release:
+    #   - development/release/index.md
+  - Installation & Code Documentation: 
+    - install-and-documentation/index.md
+    - Installation: 
+      - Installation Guide: install-and-documentation/install/installation.md
+      - Manual database setup: install-and-documentation/install/manual-db-setup.md
+      - Development setup: install-and-documentation/install/development-setup.md
+    - Documentation:
+      - Overview: 
+        - install-and-documentation/oeplatform-code/index.md
+      - Architecture:
+        - install-and-documentation/oeplatform-code/architecture/index.md
+        - Infrastructure: install-and-documentation/oeplatform-code/architecture/infrastructure.md
+        - Software Project: install-and-documentation/oeplatform-code/architecture/project-structure.md
+      - Web-API's:
+        - install-and-documentation/oeplatform-code/web-api/index.md
+        - OEDB REST-API: 
+          - install-and-documentation/oeplatform-code/web-api/oedb-rest-api/index.md
+        - OEKG API:
+          - install-and-documentation/oeplatform-code/web-api/oekg-api/index.md 
+      - Features:
+        - install-and-documentation/oeplatform-code/features/index.md
+        - Open Peer Review Process:
+          - install-and-documentation/oeplatform-code/features/open-peer-review-process/index.md
+          - Technical docs: install-and-documentation/oeplatform-code/features/open-peer-review-process/technical-docs.md
+        - Scenario Bundles: install-and-documentation/oeplatform-code/features/scenario-bundles/index.md

@@ -19,7 +19,7 @@ const ComparisonControl = (props) => {
       marginRight: '40px',
       backgroundColor: '#4372a41a',
       border: '1px solid',
-      borderRadius: '5px',
+      borderRadius: '4px',
       display: 'block',
 
      }}>
