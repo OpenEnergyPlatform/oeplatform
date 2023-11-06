@@ -253,6 +253,9 @@ class OntologyOverview(View):
                 )
             else:
                 main_module = collect_modules(path) #TODO fix varname - not clear what path this is
+                print('#####')
+                print(path)
+                print(main_module)
                 main_module_name = list(main_module.keys())[0]
                 main_module = main_module[main_module_name]
                 main_module["name"] = main_module_name
@@ -329,11 +332,10 @@ class OntologyStatics(View):
                 key=lambda d: [int(x) for x in d.split(".")],
             )
         if imports:
-            file_path = (
-                 onto_base_path / imports / (file + "." + extension) 
-            )
+            file_path = onto_base_path / version / "imports" / f"{file}.{extension}" 
         else:
-            file_path = onto_base_path / version / (file + "." + extension)
+            file_path = onto_base_path / version /  f"{file}.{extension}" 
+
         if os.path.exists(file_path):
             with open(file_path, "br") as f:
                 response = HttpResponse(
@@ -344,9 +346,7 @@ class OntologyStatics(View):
                 ] = f'attachment; filename="{file}.{extension}"'
                 return response
         else:
-            file_path = (
-                onto_base_path / version / "modules" / (file + "." + extension)
-            )
+            file_path = onto_base_path / version / "modules" / f"{file}.{extension}"
             if not os.path.exists(file_path):
                 raise Http404
             with open(file_path, "br") as f:
@@ -357,3 +357,4 @@ class OntologyStatics(View):
                     "Content-Disposition"
                 ] = f'attachment; filename="{file}.{extension}"'
                 return response
+            
