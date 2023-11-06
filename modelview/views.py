@@ -14,10 +14,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles import finders
-from django.http import Http404, HttpResponse  # noqa
+from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
-from django.views.decorators.cache import never_cache
 from scipy import stats
 from sqlalchemy.orm import sessionmaker
 
@@ -27,23 +26,36 @@ from dataedit.structures import Tag
 from .forms import (
     EnergyframeworkForm,
     EnergymodelForm,
+    EnergyscenarioForm,
+    EnergystudyForm,
 )
-from .models import Energyframework, Energymodel
+from .models import Energyframework, Energymodel, Energyscenario, Energystudy
+from .rdf import connection, factory, namespace
+
+_factory_mappings = {"study": factory.Study, "scenario": factory.Scenario}
 
 
 def getClasses(sheettype):
     """
     Returns the model and form class w.r.t sheettype.
     """
-    c = None
-    f = None
     if sheettype == "model":
         c = Energymodel
         f = EnergymodelForm
     elif sheettype == "framework":
         c = Energyframework
         f = EnergyframeworkForm
+    elif sheettype == "scenario":
+        c = Energyscenario
+        f = EnergyscenarioForm
+    elif sheettype == "studie":
+        c = Energystudy
+        f = EnergystudyForm
     return c, f
+
+
+def overview(request):
+    return render(request, "modelview/overview.html")
 
 
 def load_tags():
@@ -67,43 +79,38 @@ def load_tags():
 
 def listsheets(request, sheettype):
     """
-    Lists all available model, framework factsheet objects.
+    Lists all available model, framework or scenario factsheet objects.
     """
     c, _ = getClasses(sheettype)
-    if c is None:
-        # Handle the case where getClasses returned None
-        # You can return an error message or take appropriate action here.
-        # For example, you can return an HttpResponse indicating that the requested sheettype is not supported.
-        sheettype_error_message = "Invalid sheettype"
-        return render(
-            request,
-            "modelview/error_template.html",
-            {"sheettype_error_message": sheettype_error_message},
-        )
-
     tags = []
     fields = {}
     defaults = set()
+    if sheettype == "scenario":
+        models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
+    elif sheettype == "studie":
+        raise Http404
+    else:
+        fields = FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
+        defaults = (
+            FRAMEWORK_DEFAULT_COLUMNS
+            if sheettype == "framework"
+            else MODEL_DEFAULT_COLUMNS
+        )
+        d = load_tags()
+        tags = sorted(d.values(), key=lambda d: d["name"])
+        models = []
 
-    fields = (
-        FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
-    )  # noqa
-    defaults = (
-        FRAMEWORK_DEFAULT_COLUMNS if sheettype == "framework" else MODEL_DEFAULT_COLUMNS
-    )
-    d = load_tags()
-    tags = sorted(d.values(), key=lambda d: d["name"])
-    models = []
-
-    for model in c.objects.all():
-        model.tags = [d[tag_id] for tag_id in model.tags]
-        models.append(model)
-
-    if sheettype == "framework":
+        for model in c.objects.all():
+            model.tags = [d[tag_id] for tag_id in model.tags]
+            models.append(model)
+    if sheettype == "scenario":
+        label = "Scenario"
+    elif sheettype == "studie":
+        label = "Study"
+    elif sheettype == "framework":
         label = "Framework"
     else:
         label = "Model"
-
     return render(
         request,
         "modelview/modellist.html",
@@ -117,39 +124,43 @@ def listsheets(request, sheettype):
     )
 
 
-@never_cache
 def show(request, sheettype, model_name):
     """
     Loads the requested factsheet
     """
     c, _ = getClasses(sheettype)
     model = get_object_or_404(c, pk=model_name)
-    d = load_tags()
-    model.tags = [d[tag_id] for tag_id in model.tags]
+    model_study = []
+    if sheettype == "scenario":
+        c_study, _ = getClasses("studie")
+        model_study = get_object_or_404(c_study, pk=model.study.pk)
+    else:
+        d = load_tags()
+        model.tags = [d[tag_id] for tag_id in model.tags]
 
     user_agent = {"user-agent": "oeplatform"}
     urllib3.PoolManager(headers=user_agent)
     org = None
     repo = None
-
-    if model.gitHub and model.link_to_source_code:
-        try:
-            match = re.match(
-                r".*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*",
-                model.link_to_source_code,
-            )
-            org = match.group("org")
-            repo = match.group("repo")
-            _handle_github_contributions(org, repo)
-        except Exception:
-            org = None
-            repo = None
-
+    if sheettype != "scenario" and sheettype != "studie":
+        if model.gitHub and model.link_to_source_code:
+            try:
+                match = re.match(
+                    r".*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*",
+                    model.link_to_source_code,
+                )
+                org = match.group("org")
+                repo = match.group("repo")
+                _handle_github_contributions(org, repo)
+            except Exception:
+                org = None
+                repo = None
     return render(
         request,
         ("modelview/{0}.html".format(sheettype)),
         {
             "model": model,
+            "model_study": model_study,
             "gh_org": org,
             "gh_repo": repo,
             "displaySheetType": sheettype.capitalize(),
@@ -181,15 +192,11 @@ def model_to_csv(request, sheettype):
             tags.append(int(match.group("tid")))
     c, f = getClasses(sheettype)
     header = list(
-        field.attname
-        for field in c._meta.get_fields()
-        if hasattr(field, "attname")  # noqa
+        field.attname for field in c._meta.get_fields() if hasattr(field, "attname")
     )
 
     response = HttpResponse(content_type="text/csv")
-    response[
-        "Content-Disposition"
-    ] = 'attachment; filename="{filename}s.csv"'.format(  # noqa
+    response["Content-Disposition"] = 'attachment; filename="{filename}s.csv"'.format(
         filename=c.__name__
     )
 
@@ -209,18 +216,13 @@ def processPost(post, c, f, files=None, pk=None, key=None):
     if "new" in fields and fields["new"] == "True":
         fields["study"] = key
     for field in c._meta.get_fields():
-        if type(field) == ArrayField:  # noqa
+        if type(field) == ArrayField:
             parts = []
             for fi in fields.keys():
-                if (
-                    re.match(r"^{}_\d$".format(field.name), str(fi))
-                    and fields[fi]  # noqa
-                ):
+                if re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi]:
                     parts.append(fi)
             parts.sort()
-            fields[field.name] = ",".join(
-                fields[k].replace(",", ";") for k in parts
-            )  # noqa
+            fields[field.name] = ",".join(fields[k].replace(",", ";") for k in parts)
             for fi in parts:
                 del fields[fi]
         else:
@@ -234,7 +236,6 @@ def processPost(post, c, f, files=None, pk=None, key=None):
 
 
 @login_required
-@never_cache
 def editModel(request, model_name, sheettype):
     """
     Constructs a form accoring to existing model
@@ -243,8 +244,12 @@ def editModel(request, model_name, sheettype):
 
     model = get_object_or_404(c, pk=model_name)
 
-    d = load_tags()
-    tags = [d[tag_id] for tag_id in model.tags]
+    tags = []
+    if sheettype in ["scenario", "studie"]:
+        pass
+    else:
+        d = load_tags()
+        tags = [d[tag_id] for tag_id in model.tags]
 
     form = f(instance=model)
 
@@ -260,12 +265,20 @@ class FSAdd(LoginRequiredMixin, View):
         c, f = getClasses(sheettype)
         if method == "add":
             form = f()
-
-            return render(
-                request,
-                "modelview/edit{}.html".format(sheettype),
-                {"form": form, "method": method},
-            )
+            if sheettype == "scenario":
+                _c_study, f_study = getClasses("studie")
+                formstudy = f_study()
+                return render(
+                    request,
+                    "modelview/new{}.html".format(sheettype),
+                    {"form": form, "formstudy": formstudy, "method": method},
+                )
+            else:
+                return render(
+                    request,
+                    "modelview/edit{}.html".format(sheettype),
+                    {"form": form, "method": method},
+                )
         else:
             raise NotImplementedError()  # FIXME: model_name not defined
             # model = get_object_or_404(c, pk=model_name)
@@ -279,54 +292,92 @@ class FSAdd(LoginRequiredMixin, View):
     def post(self, request, sheettype, method="add", pk=None):
         c, f = getClasses(sheettype)
         form = processPost(request.POST, c, f, files=request.FILES, pk=pk)
-
-        if form.is_valid():
-            model = form.save()
-            if hasattr(model, "license") and model.license:
-                if model.license != "Other":
-                    model.license_other_text = None
-            ids = {
-                int(field[len("tag_") :])
-                for field in request.POST
-                if field.startswith("tag_")
-            }
-
-            model.tags = sorted(list(ids))
-            model.save()
-
-            return redirect(
-                "/factsheets/{sheettype}s/{model}".format(
-                    sheettype=sheettype, model=model.pk
+        if sheettype == "scenario" and method == "add":
+            c_study, f_study = getClasses("studie")
+            formstudy = processPost(
+                request.POST, c_study, f_study, files=request.FILES, pk=pk
+            )
+            errorsStudy = []
+            if request.POST["new"] == "True":
+                if formstudy.is_valid():
+                    n = formstudy.save()
+                    form = processPost(
+                        request.POST, c, f, files=request.FILES, pk=pk, key=n.pk
+                    )
+                else:
+                    errorsStudy = [
+                        (field.label, str(field.errors.data[0].message))
+                        for field in formstudy
+                        if field.errors
+                    ]
+            if form.is_valid() and errorsStudy == []:
+                m = form.save()
+                return redirect(
+                    "/factsheets/{sheettype}s/{model}".format(
+                        sheettype=sheettype, model=m.pk
+                    )
                 )
-            )
-        else:
-            errors = []
-            for field in form.errors:
-                e = form.errors[field]
-                error = e[0]
-                field = form.fields[field].label
-                errors.append((field, str(error)))
+            else:
+                errors = []
+                for field in form.errors:
+                    e = form.errors[field]
+                    error = e[0]
+                    field = form.fields[field].label
+                    errors.append((field, str(error)))
 
-            return render(
-                request,
-                "modelview/edit{}.html".format(sheettype),
-                {
-                    "form": form,
-                    "name": pk,
-                    "method": method,
-                    "errors": errors,
-                },
-            )
+                errors = errors + errorsStudy
+                return render(
+                    request,
+                    "modelview/new{}.html".format(sheettype),
+                    {
+                        "form": form,
+                        "formstudy": formstudy,
+                        "name": pk,
+                        "method": method,
+                        "errors": errors,
+                    },
+                )
+        else:
+            if form.is_valid():
+                model = form.save()
+                if hasattr(model, "license") and model.license:
+                    if model.license != "Other":
+                        model.license_other_text = None
+                ids = {
+                    int(field[len("tag_") :])
+                    for field in request.POST
+                    if field.startswith("tag_")
+                }
+
+                if sheettype == "scenario":
+                    pass
+                else:
+                    model.tags = sorted(list(ids))
+                    model.save()
+                return redirect(
+                    "/factsheets/{sheettype}s/{model}".format(
+                        sheettype=sheettype, model=model.pk
+                    )
+                )
+            else:
+                errors = []
+                for field in form.errors:
+                    e = form.errors[field]
+                    error = e[0]
+                    field = form.fields[field].label
+                    errors.append((field, str(error)))
+
+                return render(
+                    request,
+                    "modelview/edit{}.html".format(sheettype),
+                    {"form": form, "name": pk, "method": method, "errors": errors},
+                )
 
 
 def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     """
     This function returns the url of an image of recent GitHub contributions
     If the image is not present or outdated it will be reconstructed
-
-    Note:
-        Keep in mind that a external (GitHub) API is called and you server need to allow
-        such connections.
     """
     path = "GitHub_{0}_{1}_Contribution.png".format(org, repo)
     full_path = os.path.join(djangoSettings.MEDIA_ROOT, path)
@@ -342,7 +393,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     try:
         reply = http.request(
             "GET",
-            "https://api.github.com/repos/{0}/{1}/stats/commit_activity".format(  # noqa
+            "https://api.github.com/repos/{0}/{1}/stats/commit_activity".format(
                 org, repo
             ),
         ).data.decode("utf8")
@@ -354,7 +405,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     if not reply:
         return None
 
-    # If there are more weeks than necessary, truncate
+    # If there are more weeks than nessecary, truncate
     if weeks_back < len(reply):
         reply = reply[-weeks_back:]
 
@@ -362,9 +413,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     (times, commits) = zip(
         *[
             (
-                datetime.datetime.fromtimestamp(int(week["week"])).strftime(
-                    "%m-%d"
-                ),  # noqa
+                datetime.datetime.fromtimestamp(int(week["week"])).strftime("%m-%d"),
                 sum(map(int, week["days"])),
             )
             for week in reply
@@ -395,15 +444,130 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     ax1.set_frame_on(False)
     ax1.axes.get_xaxis().tick_bottom()
     ax1.axes.get_yaxis().tick_left()
-    plt.yticks(
-        numpy.arange(c_real_max - 0.001, c_real_max), [max_c], size="small"
-    )  # noqa
+    plt.yticks(numpy.arange(c_real_max - 0.001, c_real_max), [max_c], size="small")
     plt.xticks(numpy.arange(0.0, len(times)), times, size="small", rotation=45)
 
     # save the figure
     plt.savefig(full_path, transparent=True, bbox_inches="tight")
     url = finders.find(path)
     return url
+
+
+class RDFFactoryView(View):
+    _template = "modelview/display_rdf.html"
+
+    def get(self, request, factory_id, identifier):
+        format = request.GET.get("format", "html")
+        if format == "json":
+            try:
+                fac = factory.get_factory(factory_id)
+            except KeyError:
+                raise Http404
+
+            context = connection.ConnectionContext()
+            # Build URI, assuming that this is part of this knowledge graph
+            uri = getattr(namespace.OEO_KG, identifier)
+            # TODO: Error handling:
+            #  * What if it is not part of the ?
+            #  * What if it is not of this class?
+            #  * Probably: 404 in both cases!?
+            obj = fac._load_one(uri, context)
+
+            jsn = obj.to_json()
+            return JsonResponse(jsn)
+        else:
+            return render(
+                request,
+                self._template,
+                {
+                    "iri": identifier,
+                    "factory": factory_id,
+                    "rdf_templates": json.dumps(factory.get_factory_templates()),
+                },
+            )
+
+    def post(self, request, factory_id, identifier):
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden()
+        context = connection.ConnectionContext()
+        subject = f"<{getattr(namespace.OEO_KG, identifier)}>"
+        query = json.loads(request.POST["query"])
+        property = query["property"]
+
+        if factory_id == "study" and identifier == "new":
+            context.insert_new_study(property)
+
+        try:
+            fac = factory.get_factory(factory_id)
+            pf = fac._fields[property]
+        except KeyError:
+            raise Http404
+
+        old_value = None
+        new_value = None
+
+        print("=====query====")
+        print(query)
+        raw_old_value = query.get("oldValue")
+        if raw_old_value:
+            old_value = pf.process_data(raw_old_value)
+
+        raw_new_value = query.get("newValue")
+        if raw_new_value:
+            new_value = pf.process_data(raw_new_value)
+
+        if not old_value and not new_value:
+            result = context.insert_new_instance(
+                subject,
+                pf.rdf_name,
+                inverse=pf.inverse,
+                new_name=raw_new_value["literal"],
+            )
+            result = dict(
+                iri=str(result.rpartition("/")[0] + "/" + raw_new_value["literal"])
+            )
+        else:
+            context.update_property(
+                subject, pf.rdf_name, old_value, new_value, inverse=pf.inverse
+            )
+            result = {}
+        return JsonResponse(result)
+
+    def add_study(self, name):
+        # result = context.insert_new_study(name)
+        # return JsonResponse(result)
+        raise NotImplementedError()  # FIXME: context not defined
+
+
+class RDFInstanceView(View):
+    def get(self, request):
+        context = connection.ConnectionContext()
+        cls = request.GET.get("iri")
+        if not cls:
+            raise HttpResponse(status=400)
+        subclass = request.GET.get("subclass", False)
+        result = context.get_all_instances(cls, subclass=subclass)
+        instances = [
+            dict(iri=row["s"]["value"], label=row["l"]["value"])
+            if row.get("l")
+            else dict(iri=row["s"]["value"])
+            for row in result["results"]["bindings"]
+            if not row["s"]["type"] == "bnode"
+        ]
+        return JsonResponse(dict(instances=instances))
+
+
+class RDFView(View):
+    def get(self, request, factory_id=None):
+        try:
+            fac = factory.get_factory(factory_id)
+        except KeyError:
+            raise Http404
+        context = connection.ConnectionContext()
+        instances = fac.load_all_instances(context)
+        return render(
+            request, "modelview/list_rdf_instances.html", {"instances": instances}
+        )
 
 
 BASE_VIEW_PROPS = OrderedDict(
@@ -441,11 +605,7 @@ BASE_VIEW_PROPS = OrderedDict(
                     ("license", ["license", "license_other_text"]),
                     (
                         "source code available",
-                        [
-                            "source_code_available",
-                            "gitHub",
-                            "link_to_source_code",
-                        ],  # noqa
+                        ["source_code_available", "gitHub", "link_to_source_code"],
                     ),
                 ]
             ),
@@ -586,10 +746,7 @@ MODEL_VIEW_PROPS = OrderedDict(
                     ),
                     ("storage heat", ["storage_heat"]),
                     ("storage gas", ["storage_gas"]),
-                    (
-                        "user behaviour",
-                        ["user_behaviour", "user_behaviour_yes_text"],
-                    ),  # noqa
+                    ("user behaviour", ["user_behaviour", "user_behaviour_yes_text"]),
                     ("changes in efficiency", ["changes_in_efficiency"]),
                     ("market models", ["market_models"]),
                     ("geographical coverage", ["geographical_coverage"]),
@@ -679,10 +836,7 @@ MODEL_VIEW_PROPS = OrderedDict(
                             "mathematical_objective_other_text",
                         ],
                     ),
-                    (
-                        "uncertainty deterministic",
-                        ["uncertainty_deterministic"],
-                    ),  # noqa
+                    ("uncertainty deterministic", ["uncertainty_deterministic"]),
                     ("uncertainty Stochastic", ["uncertainty_Stochastic"]),
                     (
                         "uncertainty Other",
@@ -691,10 +845,7 @@ MODEL_VIEW_PROPS = OrderedDict(
                     ("montecarlo", ["montecarlo"]),
                     (
                         "typical computation",
-                        [
-                            "typical_computation_time",
-                            "typical_computation_hardware",
-                        ],  # noqa
+                        ["typical_computation_time", "typical_computation_hardware"],
                     ),
                     (
                         "technical data anchored in the model",
@@ -713,10 +864,7 @@ MODEL_VIEW_PROPS = OrderedDict(
                         ["model_file_format", "model_file_format_other_text"],
                     ),
                     ("model input", ["model_input", "model_input_other_text"]),
-                    (
-                        "model output",
-                        ["model_output", "model_output_other_text"],
-                    ),  # noqa
+                    ("model output", ["model_output", "model_output_other_text"]),
                     ("integrating models", ["integrating_models"]),
                     ("integrated models", ["integrated_models"]),
                 ]
@@ -733,10 +881,7 @@ MODEL_VIEW_PROPS = OrderedDict(
                         ["references_to_reports_produced_using_the_model"],
                     ),
                     ("larger scale usage", ["larger_scale_usage"]),
-                    (
-                        "example research questions",
-                        ["example_research_questions"],
-                    ),
+                    ("example research questions", ["example_research_questions"]),
                     (
                         "model validation",
                         [
@@ -746,10 +891,7 @@ MODEL_VIEW_PROPS = OrderedDict(
                             "validation_others_text",
                         ],
                     ),
-                    (
-                        "model specific properties",
-                        ["model_specific_properties"],
-                    ),
+                    ("model specific properties", ["model_specific_properties"]),
                 ]
             ),
         ),

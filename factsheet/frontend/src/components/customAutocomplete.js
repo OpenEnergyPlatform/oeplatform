@@ -10,7 +10,6 @@ import Chip from '@mui/material/Chip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
@@ -33,6 +32,9 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const useStyles = makeStyles((theme) => ({
+  inputRoot: {
+    borderRadius: 0,  
+  },
 }));
 
 export default function CustomAutocomplete(parameters) {
@@ -93,6 +95,19 @@ export default function CustomAutocomplete(parameters) {
     toggleOpenEdit(false);
   };
 
+  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: 'white',
+      maxWidth: 520,
+      fontSize: theme.typography.pxToRem(20),
+      border: '1px solid black',
+      padding: '20px'
+    },
+  }));
+
   const handleName = e => {
     setDialogValue({
       id: e.target.value,
@@ -126,7 +141,7 @@ export default function CustomAutocomplete(parameters) {
 
 
   return (
-    <Box style={{ width: width }}>
+    <Box style={{ width: width, marginTop: '5px', }}>
       <Autocomplete
         size="small" 
         multiple
@@ -289,7 +304,7 @@ export default function CustomAutocomplete(parameters) {
           'height': '100%',
           // 'border': '1px dashed #cecece',
           'overflow': 'scroll',
-          'borderRadius': '4px',
+          'borderRadius': '5px',
           // 'backgroundColor':'#FCFCFC'
         }}
       >
