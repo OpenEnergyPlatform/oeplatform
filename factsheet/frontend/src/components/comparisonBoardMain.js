@@ -14,6 +14,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Toolbar from '@mui/material/Toolbar';
+import { Tooltip } from '@mui/material';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
 
@@ -71,20 +72,19 @@ const ComparisonBoardMain = (props) => {
           <Grid container justifyContent="space-between"
             spacing={2}>
             <Grid item xs={12} md={4}>
-              <Link to={`sirop/`} onClick={() => this.forceUpdate}>
-                <Button color="primary" 
-                  variant="text" 
-                  size="small" 
-                  startIcon={<ArrowBackIcon />}>
-                  Back
-                </Button>
-              </Link> 
+              <Tooltip title="Back to main page">
+                <Link to={`sirop/`} onClick={() => this.forceUpdate}>
+                  <Button variant="outlined" size="small" sx={{ mr: 1 }}>
+                    <ArrowBackIcon />
+                  </Button>
+                </Link>  
+              </Tooltip>
             </Grid>
             <Grid item xs={6} md={4}>
             </Grid>
             <Grid item xs={6} md={4}>
               <Button color="primary" 
-                variant="outlined" 
+                variant="text" 
                 size="small" 
                 startIcon={<ArrowRightIcon />}>
                 How it works? 
