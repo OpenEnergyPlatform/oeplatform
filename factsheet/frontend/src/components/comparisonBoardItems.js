@@ -34,10 +34,9 @@ const getItemStyle = (isDragging, draggableStyle, index) => ({
 const getListStyle = isDraggingOver => ({
   background: isDraggingOver ? 'white' : 'white',
   display: 'flex',
-  padding: grid,
   overflow: 'auto',
   width: '200%',
-  height: '65vh',
+  minHeight: '20rem',
 });
 
 export default function  ComparisonBoardItems (props) {
@@ -64,7 +63,7 @@ export default function  ComparisonBoardItems (props) {
   const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
   return (
-    <div style={{ overflow: 'auto', padding:'10px' }}>
+    <div style={{ overflow: 'auto' }}>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="droppable" direction="horizontal">
         {(provided, snapshot) => (

@@ -68,8 +68,7 @@ const ComparisonBoardMain = (props) => {
         <BreadcrumbsNavGrid subheaderContent="Comparison" />
         <Container maxWidth="false">
             <Box sx={{ 
-              padding: '5px',
-              margin: '5px',
+              paddingBottom: '5px',
               display: 'block'}}
             >
             <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -93,7 +92,6 @@ const ComparisonBoardMain = (props) => {
             <Box sx={{ 
               padding: '5px',
               paddingLeft: '15px',
-              margin: '5px',
               backgroundColor: '#F6F9FB',
               overflow: 'auto',
               display: 'block'}}
