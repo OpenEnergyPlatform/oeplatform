@@ -8,6 +8,7 @@
 - Enhance documentation structure for development practice, code and architectural information [(#1441)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1441)
 - Update homepage: Replace the Factsheet box with Scenario Bundles and update the text & remove the factsheet overview page and add a updated version of the text to the scenario bundle overview page. Also update and harmonize the several versions of the navigation bar and add external link icons. [(#1449)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1449)
 - Update the link to the scenario bundle (SB) page on the start page. Also change the SB page url to /scenario-bundles/ and update all applications. [(#1453)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1453)
+- Add a delete button & functionality to framework and model factsheet [(#1465)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1465)
 
 ### Bugs
 
