@@ -17,6 +17,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { Tooltip } from '@mui/material';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
+import OptionBox from '../styles/oep-theme/components/optionBox.js';
 
 const ComparisonBoardMain = (props) => {
   const { params } = props;
@@ -93,14 +94,8 @@ const ComparisonBoardMain = (props) => {
           </Grid>   
         </Toolbar>
         {/* <ComparisonControl /> */}
-        <Box sx={{ 
-          padding: '5px',
-          paddingLeft: '15px',
-          backgroundColor: '#F6F9FB',
-          overflow: 'auto',
-          display: 'block'}}
-          >
-          <b>Criteria</b>
+        <OptionBox>
+          <h2>Criteria</h2>
           <FormGroup>
             <div >
               {
@@ -108,7 +103,7 @@ const ComparisonBoardMain = (props) => {
               }
             </div>
           </FormGroup>
-        </Box>
+        </OptionBox>
         <ComparisonBoardItems elements={scenarios} c_aspects={selectedCriteria} />
       </Container>
     </Grid>
