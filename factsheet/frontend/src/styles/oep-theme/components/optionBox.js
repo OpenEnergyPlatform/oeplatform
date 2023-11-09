@@ -7,7 +7,7 @@ const OptionBox = styled(Box)(({ theme }) => ({
   backgroundColor: palette.background.lighter,
   color: palette.text.primary,
   padding: variables.spacing[5],
-  marginBottom: variables.spacing[4],
+  marginBottom: variables.spacing[5],
   fontSize: variables.fontSize.sm,
   lineHeight: theme.typography.body1.lineHeight,
 

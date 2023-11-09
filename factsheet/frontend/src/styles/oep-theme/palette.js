@@ -52,7 +52,8 @@ const palette = {
   background: {
     white: '#FFFFFF',
     lighter: greyPalette[100],
-    light: greyPalette[200]
+    light: greyPalette[200],
+    highlight: primaryPalette[500]
   }
 }
 
