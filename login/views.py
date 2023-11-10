@@ -10,7 +10,7 @@ from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 
 import login.models as models
-from dataedit.models import PeerReviewManager, Table, PeerReview
+from dataedit.models import PeerReviewManager, Table
 
 from .forms import (
     ChangeEmailForm,
@@ -26,48 +26,33 @@ from .models import myuser as OepUser
 
 class TablesView(View):
     def get(self, request, user_id):
+        """
+        Load the user identified by user_id and is OAuth-token.
+            If latter does not exist yet, create one.
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :return: Profile renderer
+        """
         user = get_object_or_404(OepUser, pk=user_id)
+
+        # get all tables and optimize query
         tables = Table.objects.all().select_related()
+        # get all tables the user got write perm on
+        user_tables = [
+            table
+            for table in tables
+            if user.get_table_permission_level(table) >= models.WRITE_PERM
+        ]  # WRITE_PERM = 4
+        # prepare data for template
+        tables = [{"name": table.name, "schema": table.schema} for table in user_tables]
 
-        reviewed_tables = []
-        not_reviewed_tables = []
-
+        # get name of schema form FK object
         for table in tables:
-            if user.get_table_permission_level(table) >= models.WRITE_PERM:
-                schema = table.schema.name
-                table_name = table.name
-                review = PeerReview.load(schema=schema, table=table_name)
-                table_data = {
-                    "name": table_name,
-                    "schema": schema
-                }
-
-                if review:
-                    if review.is_finished:
-                        reviewed_tables.append(table_data)
-                else:
-                    not_reviewed_tables.append(table_data)
-
-        if request.is_ajax() :
-            return render(
-                request,
-                "login/user_tables.html" ,
-                {
-                    "reviewed_tables": reviewed_tables ,
-                    "not_reviewed_tables": not_reviewed_tables ,
-                }
-            )
+            table["schema"] = table["schema"].name
 
         return render(
-            request,
-            "login/user_tables.html",
-            {
-                "profile_user": user,
-                "reviewed_tables": reviewed_tables,
-                "not_reviewed_tables": not_reviewed_tables,
-            }
+            request, "login/user_tables.html", {"tables": tables, "profile_user": user}
         )
-
 
 
 class ReviewsView(View):
