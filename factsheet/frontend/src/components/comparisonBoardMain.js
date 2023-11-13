@@ -36,6 +36,7 @@ const ComparisonBoardMain = (props) => {
 
 
   const Criteria = [
+    'Scenario abstract',
     'Study name',
     'Study abstract',
     'Descriptors',

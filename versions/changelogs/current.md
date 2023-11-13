@@ -10,6 +10,10 @@
 - Update the link to the scenario bundle (SB) page on the start page. Also change the SB page url to /scenario-bundles/ and update all applications. [(#1453)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1453)
 - Add a delete button & functionality to framework and model factsheet [(#1465)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1465)
 - Add intro text to model factsheet page [(#1466)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1466)
+- #1434 Rename "Abstract" to "Scenario abstract" and make it optional [(#1468)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1468)
+- #1451 Updated the description for input data in bundles as [OEO_00030029](http://openenergy-platform.org/ontology/oeo/OEO_00030029) [(#1468)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1468)
+- #1451 Updated the description for output data in bundles as [OEO_00020013](https://openenergy-platform.org/ontology/oeo/OEO_00020013) [(#1468)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1468)
+- #1424 Sorted the country drop down in scenario regions and interacting regions [(#1468)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1468)
 
 ### Bugs
 
