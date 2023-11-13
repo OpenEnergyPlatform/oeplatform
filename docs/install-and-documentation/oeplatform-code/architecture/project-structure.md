@@ -8,15 +8,17 @@ In the following we will dive a bit deeper into the structure of the project. We
 
 ``` plaintext
 .oeplatform
+├── .github         # GitHub test automation & repository configuration
+│   └── ...
 ├── api             # Django app
 │   └── ...
-├── base            # Django app
+├── base            # Django app 
 │   └── ...
 ├── dataedit        # Django app
 │   └── ...
-├── docker
+├── docker          # Docker & docker-compose setup
 │   └── ...
-├── docs
+├── docs            # mkdocs based project & code documentation
 │   └── ...
 ├── factsheet       # Django app with react frontend
 │   └── ...
@@ -26,7 +28,7 @@ In the following we will dive a bit deeper into the structure of the project. We
 │   └── ...
 ├── modelview       # Django app
 │   └── ...
-├── oedb_datamodels
+├── oedb_datamodels # Alembic migrations to manage the database structure
 │   └── ...
 ├── oeo_viewer      # Django app with react frontend
 │   └── ...
@@ -39,7 +41,7 @@ In the following we will dive a bit deeper into the structure of the project. We
 │   └── ... 
 ├── theming         # The general oep design / styling and ui components 
 │   └── ...
-├── versions        
+├── versions        # Changelogs
 │   ├── bumpversion.sh
 │   └── changelogs
 ├── CITATION.cff
@@ -89,6 +91,7 @@ Django app that integrates a react frontend
 
 ``` plaintext
 ├── factsheet
+│   ├── __init__.py
 │   ├── frontend
 │   ├── management
 │   ├── migrations
