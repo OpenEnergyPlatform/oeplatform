@@ -1792,9 +1792,9 @@ const renderScenariosOverview = () => (
                     title={
                     <React.Fragment>
                       <Typography color="inherit" variant="subtitle1">
-                        {'Endogenous data is a data item whose quantity value is determined by a model.'}
+                        {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030030">More info from Open Energy Ontology (OEO)...</a>
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
                       </Typography>
                     </React.Fragment>
                     }
@@ -1815,9 +1815,9 @@ const renderScenariosOverview = () => (
                     title={
                     <React.Fragment>
                       <Typography color="inherit" variant="subtitle1">
-                        {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
+                        {'Output data is endogenous data that is determined by a model calculation and presented as a result.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020013">More info from Open Energy Ontology (OEO)...</a>
                       </Typography>
                     </React.Fragment>
                     }
