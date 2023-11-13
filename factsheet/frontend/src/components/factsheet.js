@@ -31,7 +31,8 @@ import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import conf from "../conf.json";
-import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
+import { Tooltip } from '@mui/material';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { styled } from '@mui/material/styles';
 import SaveIcon from '@mui/icons-material/Save';
@@ -51,6 +52,15 @@ import oep_models from '../data/models.json';
 import oep_frameworks from '../data/frameworks.json';
 import Divider from '@mui/material/Divider';
 import { makeStyles, Theme } from '@material-ui/core/styles';
+import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
+import TableContainer from '@mui/material/TableContainer';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import Toolbar from '@mui/material/Toolbar';
+import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/components/tableStyles.js';
+import InfoListItem from '../styles/oep-theme/components/infoListItem.js'
+import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
 
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -65,6 +75,8 @@ import Backdrop from '@mui/material/Backdrop';
 import CSRFToken from './csrftoken';
 
 import '../styles/App.css';
+import { TableRow } from '@mui/material';
+import variables from '../styles/oep-theme/variables.js';
 
 axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 axios.defaults.xsrfCookieName = "csrftoken";
@@ -97,7 +109,9 @@ function Factsheet(props) {
 
   const { id, fsData } = props;
   
-  
+  console.log(id);
+
+
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
@@ -154,19 +168,6 @@ function Factsheet(props) {
     setActiveStep(i);
   };
 
-  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: '#e3eaef',
-      color: 'black',
-      maxWidth: 520,
-      fontSize: theme.typography.pxToRem(20),
-      border: '1px solid black',
-      padding: '20px'
-    },
-  }));
-
   const wrapInTooltip = (name, description, link) => <span> <HtmlTooltip
               placement="top"
               title={
@@ -179,7 +180,7 @@ function Factsheet(props) {
                 </React.Fragment>
               }
               >
-              <HelpOutlineIcon sx={{ fontSize: '24px', color: '#bdbdbd', marginLeft: '-10px' }}/>
+              <HelpOutlineIcon sx={{ fontSize: '24px', color: '#708696', marginLeft: '-10px' }}/>
           </HtmlTooltip>
           <span
             style={{ marginLeft: '5px', marginTop: '-20px' }}
@@ -261,7 +262,7 @@ function Factsheet(props) {
   }
 
   const populateFactsheetElements = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/populate_factsheets_elements/`);
+    const { data } = await axios.get(conf.toep + `scenario-bundles/populate_factsheets_elements/`);
     return data;
   };
 
@@ -301,7 +302,7 @@ function Factsheet(props) {
     if (acronym !== '') {
       if (id === 'new' && !isCreated) {
         const new_uid = uuid()
-        axios.post(conf.toep + 'sirop/add/',
+        axios.post(conf.toep + 'scenario-bundles/add/',
         {
           id: id,
           uid: new_uid,
@@ -340,8 +341,8 @@ function Factsheet(props) {
         }
       });
       } else {
-        axios.get(conf.toep + `sirop/get/`, { params: { id: uid } }).then(res => {
-          axios.post(conf.toep + 'sirop/update/',
+        axios.get(conf.toep + `scenario-bundles/get/`, { params: { id: uid } }).then(res => {
+          axios.post(conf.toep + 'scenario-bundles/update/',
           {
             fsData: res.data,
             id: id,
@@ -386,7 +387,7 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'sirop/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+    axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseSavedDialog = () => {
@@ -567,47 +568,47 @@ function Factsheet(props) {
   } 
 
   const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
     return data;
   };
 
   const getFundingSources = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
     return data;
   };
 
   const getContactPersons = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000107' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000107' } });
     return data;
   };
 
   const getAuthors = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
     return data;
   };
 
   const getScenarioRegions = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OBO.BFO_0000006' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OBO.BFO_0000006' } });
     return data;
   };
 
   const getScenarioInteractingRegions = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00020036' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00020036' } });
     return data;
   };
 
   const getScenarioYears = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
     return data;
   };
 
   const getModels = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000274' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000274' } });
     return data;
   };
 
   const getFrameworks = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000172' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000172' } });
     return data;
   };
 
@@ -685,7 +686,7 @@ function Factsheet(props) {
 
 
   const HandleAddNewInstitution = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00000238',
       entity_label: newElement.name,
@@ -705,7 +706,7 @@ function Factsheet(props) {
 
 
   const HandleEditInstitution = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000238',
       entity_label: oldElement,
@@ -725,7 +726,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewFundingSource = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundlesrio-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00090001',
       entity_label: newElement.name,
@@ -744,7 +745,7 @@ function Factsheet(props) {
 
   const HandleEditFundingSource = (oldElement, newElement, editIRI) => {
     console.log(editIRI)
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00090001',
       entity_label: oldElement,
@@ -764,7 +765,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewContactPerson = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00000107',
       entity_label: newElement.name,
@@ -783,7 +784,7 @@ function Factsheet(props) {
   } 
 
   const HandleEditContactPerson = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000107',
       entity_label: oldElement,
@@ -803,7 +804,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewAuthor = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00000064',
       entity_label: newElement.name,
@@ -822,7 +823,7 @@ function Factsheet(props) {
   }
 
   const HandleEditAuthors = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000064',
       entity_label: oldElement,
@@ -842,7 +843,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewRegion = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       'entity_type': 'OEO.OEO_00020032', 
       'entity_label': newElement.name,
@@ -861,7 +862,7 @@ function Factsheet(props) {
   }
 
   const HandleEditRegion = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OBO.BFO_0000006',
       entity_label: oldElement,
@@ -881,7 +882,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewInteractingRegion = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundlesrio-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00020036',
       entity_label: newElement.name,
@@ -900,7 +901,7 @@ function Factsheet(props) {
   }
   
   const HandleEditInteractingRegion = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00020036',
       entity_label: oldElement,
@@ -920,7 +921,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNNewScenarioYears = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OBO.OEO_00020097',
       entity_label: newElement.name,
@@ -939,7 +940,7 @@ function Factsheet(props) {
   }
 
   const HandleEditScenarioYears = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OBO.OEO_00020097',
       entity_label: oldElement,
@@ -959,7 +960,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewModel = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00000274',
       entity_label: newElement.name,
@@ -978,7 +979,7 @@ function Factsheet(props) {
   }
 
   const HandleEditModels = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000274',
       entity_label: oldElement,
@@ -998,7 +999,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewFramework = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00000172',
       entity_label: newElement.name,
@@ -1017,7 +1018,7 @@ function Factsheet(props) {
   }
 
   const HandleEditFramework = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000172',
       entity_label: oldElement,
@@ -1181,7 +1182,7 @@ function Factsheet(props) {
 
   const renderScenario = () => {
     return  <div>
-              <Box sx={{ flexGrow: 1, display: 'flex', height:'72vh', overflow: 'auto' }} >
+              <Box sx={{ flexGrow: 1, display: 'flex', overflow: 'auto' }} >
                 <Tabs
                   orientation="vertical"
                   value={scenarioTabValue}
@@ -1193,10 +1194,10 @@ function Factsheet(props) {
                 >
                 {scenarios.map((item, i) =>
                   <Tab
-                    label={item.acronym !== '' ? item.acronym.substring(0,16) : 'Scenario ' + (Number(i) + Number(1)) }
+                    label={item.acronym !== undefined && item.acronym !== '' ? item.acronym.substring(0,16) : 'Scenario ' + (Number(i) + Number(1)) }
                     key={'Scenario_tab_' + item.id}
                     classes={tabClasses}
-                    style={{ border: '1px solid #cecece', marginBottom: '5px',  width:'250px' }}
+                    style={{ border: '1px solid #cecece', marginBottom: '5px' }}
                   />
                 )}
                 <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px', }} >
@@ -1249,171 +1250,136 @@ const renderBasicInformation = () => (
     <Grid container justifyContent="space-between"
       alignItems="start"
       spacing={2}>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Study name: </b> </span>
-        <span >
-        <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A study is a project with the goal to investigate something.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" id="outlined-basic"  style={{  width: '100%' }} variant="outlined" value={studyName} onChange={handleStudyName}/>
-      </Grid>
-
-      <Grid item xs={2}  style={{ paddingTop: '15px', paddingLeft: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym: </b> </span>
-        <span >
-        <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '10px', overflow: "auto"  }}>
-      <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small"  style={{  width: '100%' }} id="outlined-basic"  variant="outlined" value={acronym} onChange={handleAcronym} />
-      </Grid>
-
-      <Grid item xs={2}   style={{ paddingTop: '15px', paddingLeft: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Institutions: </b> </span>
-        <span >
-        <HtmlTooltip
-          title={
-          <React.Fragment>
-            <Typography color="inherit" variant="subtitle1">
-              {'An institution is an organisation that serves a social purpose.'}
-              <br />
-              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info...</a>
-            </Typography>
-          </React.Fragment>
-        }
-        >
-        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-        </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '5px', overflow: "auto"  }}>
-        <CustomAutocomplete width="100%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} handler={institutionHandler} selectedElements={selectedInstitution}/>
-      </Grid>
-
-
-      <Grid item xs={2}  style={{ paddingTop: '15px', paddingLeft: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Contact person: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '5px', overflow: "auto"  }}>
-      <CustomAutocomplete width="100%" type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
-      </Grid>
-
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Study name"
+        tooltipText="A study is a project with the goal to investigate something."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020011"
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined" 
+            value={studyName}
+            onChange={handleStudyName}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Acronym"
+        tooltipText="An acronym is an abbreviation of the title by using the first letters of each part of the title."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000048"
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined" 
+            value={acronym}
+            onChange={handleAcronym}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Institutions"
+        tooltipText="An institution is an organisation that serves a social purpose."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000238"
+        renderField={() => (
+          <CustomAutocomplete 
+            width="100%" 
+            type="institution" 
+            showSelectedElements={true} 
+            editHandler={HandleEditInstitution} 
+            addNewHandler={HandleAddNewInstitution} 
+            manyItems 
+            optionsSet={institutions} 
+            handler={institutionHandler} 
+            selectedElements={selectedInstitution}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Contact person"
+        tooltipText="A contact person is an agent that can be contacted for help or information about a specific service or good."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000107"
+        renderField={() => (
+          <CustomAutocomplete 
+            width="100%" 
+            type="institution" 
+            showSelectedElements={true} 
+            editHandler={HandleEditContactPerson} 
+            addNewHandler={HandleAddNewContactPerson} 
+            manyItems 
+            optionsSet={contactPersons} 
+            handler={contactPersonHandler} 
+            selectedElements={selectedContactPerson}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
     </Grid>
     
   );
 
   const renderStudyDetail = () => (
     <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
-      
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Funding sources: </b> </span>
-        <span >
-        {/* <HtmlTooltip
-          style={{ marginLeft: '10px' }}
-          placement="top"
-          title={
-            <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A funder is a sponsor that supports by giving money.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
-              </Typography>
-            </React.Fragment>
-          }
-        >
-          <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-        </HtmlTooltip> */}
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <CustomAutocomplete width="100%"  type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
-      </Grid>
 
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Abstract: </b> </span>
-        <span >
-        <HtmlTooltip
-          title={
-          <React.Fragment>
-            <Typography color="inherit" variant="subtitle1">
-              {'A summary of the resource.'}
-              <br />
-              <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
-            </Typography>
-          </React.Fragment>
-        }
-        >
-        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-        </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant="outlined" style={{ width: '100%', MarginBottom: '10px', marginTop: '20px' }} id="outlined-basic" label="" multiline rows={6} maxRows={10} value={abstract} onChange={handleAbstract}/>
-      </Grid>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Study descriptors: </b> </span>
-        <span >
-        {/* <HtmlTooltip
-          style={{ marginLeft: '10px' }}
-          placement="top"
-          title={
-            <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A funder is a sponsor that supports by giving money.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
-              </Typography>
-            </React.Fragment>
-          }
-        >
-          <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-        </HtmlTooltip> */}
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <div style={{ marginTop: "10px" }}>
+      <BundleScenariosGridItem
+        {...props}
+        showTooltip={false}
+        spanValue="Funding sources"
+        tooltipText="A funder is a sponsor that supports by giving money."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        renderField={() => (
+          <CustomAutocomplete 
+            width="100%" 
+            type="Funding source" 
+            showSelectedElements={true} 
+            editHandler={HandleEditFundingSource} 
+            addNewHandler={HandleAddNewFundingSource} 
+            manyItems 
+            optionsSet={fundingSources} 
+            handler={fundingSourceHandler} 
+            selectedElements={selectedFundingSource}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Abstract"
+        tooltipText="A summary of the resource."
+        hrefLink="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract"
+        linkText="More info..."
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined"
+            multiline
+            rows={6}
+            maxRows={10}
+            value={abstract}
+            onChange={handleAbstract}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        showTooltip={false}
+        spanValue="Study descriptors"
+        tooltipText="A funder is a sponsor that supports by giving money.."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        renderField={() => (
           <FormGroup>
               <div >
                 {
@@ -1421,128 +1387,98 @@ const renderBasicInformation = () => (
                 }
             </div>
           </FormGroup>
-        </div>
-      </Grid>
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
     </Grid>
   );
 
   const renderStudyPublications= () =>  (
     <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
-      
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Report title: </b> </span>
-        <span >
-        <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A name given to the resource.'}
-                <br />
-                <a href="http://purl.org/dc/elements/1.1/title">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '5px', overflow: "auto", marginBottom:'10px'  }}>
-        <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant="outlined" style={{ width: '70%' }} id="outlined-basic" label=""  value={report_title} onChange={handleReportTitle} />
-      </Grid>
 
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Authors: </b> </span>
-        <span >
-        <HtmlTooltip
-          title={
-          <React.Fragment>
-            <Typography color="inherit" variant="subtitle1">
-              {'An author is an agent that creates or has created written work.'}
-              <br />
-              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
-            </Typography>
-          </React.Fragment>
-        }
-        >
-        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-        </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <CustomAutocomplete width="70%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='' handler={authorsHandler} selectedElements={selectedAuthors}  />
-      </Grid>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>DOI: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant="outlined" style={{ width: '70%' }} id="outlined-basic" label="" value={doi} onChange={handleDOI} />
-      </Grid>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Link to study report: </b> </span>
-        <span >
-        {/* <HtmlTooltip
-          style={{ marginLeft: '10px' }}
-          placement="top"
-          title={
-            <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A funder is a sponsor that supports by giving money.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
-              </Typography>
-            </React.Fragment>
-          }
-        >
-          <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-        </HtmlTooltip> */}
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <TextField InputProps={{ sx: { borderRadius: 0 } }}  size="small" variant="outlined" style={{ width: '70%', marginTop:'10px' }} id="outlined-basic" label="" value={link_to_study} onChange={handleLinkToStudy} />
-      </Grid>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Date of publication: </b> </span>
-        <span >
-        {/* <HtmlTooltip
-          style={{ marginLeft: '10px' }}
-          placement="top"
-          title={
-            <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A funder is a sponsor that supports by giving money.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
-              </Typography>
-            </React.Fragment>
-          }
-        >
-          <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-        </HtmlTooltip> */}
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Stack spacing={3}  style={{ marginTop:'10px', width: '70%', marginBottom:'40px' }}>
-            <DesktopDatePicker
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Report title"
+        tooltipText="A name given to the resource."
+        hrefLink="http://purl.org/dc/elements/1.1/title"
+        linkText="More info..."
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined"
+            value={report_title}
+            onChange={handleReportTitle}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Authors"
+        tooltipText="An author is an agent that creates or has created written work."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000064"
+        renderField={() => (
+          <CustomAutocomplete 
+            width="100%" 
+            type="author" 
+            showSelectedElements={true} 
+            editHandler={HandleEditAuthors} 
+            addNewHandler={HandleAddNewAuthor} 
+            manyItems 
+            optionsSet={authors} 
+            handler={authorsHandler} 
+            selectedElements={selectedAuthors}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="DOI"
+        tooltipText="A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO)."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000133"
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined"
+            value={doi}
+            onChange={handleDOI}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        showTooltip={false}
+        spanValue="Link to study report"
+        tooltipText="A funder is a sponsor that supports by giving money."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined"
+            value={link_to_study}
+            onChange={handleLinkToStudy}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        showTooltip={false}
+        spanValue="Date of publication"
+        tooltipText="A funder is a sponsor that supports by giving money."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        renderField={() => (
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Stack spacing={3} style={{ width: '10rem' }}>
+              <DesktopDatePicker
                 label=''
                 inputFormat="YYYY/MM/DD"
                 value={date_of_publication}
@@ -1557,149 +1493,120 @@ const renderBasicInformation = () => (
                 }}
                 renderInput={(params) => <TextField {...params} size="small" variant="outlined" />}
               />
-          </Stack>
-        </LocalizationProvider>
-      </Grid>
+            </Stack>
+          </LocalizationProvider>
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+
     </Grid>
   );
 
 
   const renderSectorsAndTecnology = () => (
     <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
-      
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Sector divisions: </b> </span>
-        <span >
-          <HtmlTooltip
-              title={
-              <React.Fragment>
-                <Typography color="inherit" variant="subtitle1">
-                  {'A sector division is a specific way to subdivide a system.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info...</a>
-                </Typography>
-              </React.Fragment>
-            }
-            >
-            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <CustomAutocompleteWithoutAddNew showSelectedElements={true} optionsSet={sectorDivisions} kind='' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
-      </Grid>
 
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Sector divisions"
+        tooltipText="A sector division is a specific way to subdivide a system."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000368"
+        renderField={() => (
+          <CustomAutocompleteWithoutAddNew 
+            showSelectedElements={true}
+            optionsSet={sectorDivisions}
+            kind=''
+            handler={sectorDivisionsHandler}
+            selectedElements={selectedSectorDivisions}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Sectors"
+        tooltipText="A sector is generically dependent continuant that is a subdivision of a system."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000367"
+        renderField={() => (
+          <CustomTreeViewWithCheckBox 
+            flat={true} 
+            showFilter={false} 
+            size="360px" 
+            checked={selectedSectors} 
+            expanded={expandedSectors} 
+            handler={sectorsHandler} 
+            expandedHandler={expandedSectorsHandler} 
+            data={filteredSectors} 
+            title={"Which sectors are considered in the study?"} 
+            toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Technology"
+        tooltipText="A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000407"
+        renderField={() => (
+          <CustomTreeViewWithCheckBox
+            showFilter={false}
+            size="360px" 
+            checked={selectedTechnologies} 
+            expanded={getNodeIds(technologies['children'])} 
+            handler={technologyHandler} 
+            expandedHandler={expandedTechnologyHandler} 
+            data={technologies} 
+            title={"What technologies are considered?"} 
+            toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000407']} 
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
 
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Sectors: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A sector is generically dependent continuant that is a subdivision of a system.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000367">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <CustomTreeViewWithCheckBox flat={true} 
-                                    showFilter={false} 
-                                    size="360px" 
-                                    checked={selectedSectors} 
-                                    expanded={expandedSectors} 
-                                    handler={sectorsHandler} 
-                                    expandedHandler={expandedSectorsHandler} 
-                                    data={filteredSectors} 
-                                    title={"Which sectors are considered in the study?"} 
-                                    toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
-      </Grid>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Technology: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000407">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <CustomTreeViewWithCheckBox showFilter={false}
-                                    size="260px" 
-                                    checked={selectedTechnologies} 
-                                    expanded={getNodeIds(technologies['children'])} 
-                                    handler={technologyHandler} 
-                                    expandedHandler={expandedTechnologyHandler} 
-                                    data={technologies} 
-                                    title={"What technologies are considered?"} 
-                                    toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000407']} 
-                                    />
-      </Grid>
     </Grid>
   );
 
   const renderModelsAndFrameworks = () => (
     <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
-      
-    <Grid item xs={2}  style={{ padding: '5px'}}>
-      <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Models: </b> </span>
-      <span >
-      <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-      </HtmlTooltip>
-      </span>
-    </Grid>
-    <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <CustomAutocompleteWithoutEdit  type="Model" manyItems showSelectedElements={true} optionsSet={oep_models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
-    </Grid>
 
-    <Grid item xs={2}  style={{ padding: '5px'}}>
-      <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Frameworks: </b> </span>
-      <span >
-        <HtmlTooltip
-              title={
-              <React.Fragment>
-                <Typography color="inherit" variant="subtitle1">
-                  {'A software framework is a Software that is generic and can be adapted to a specific application.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
-                </Typography>
-              </React.Fragment>
-            }
-            >
-            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-        </HtmlTooltip>
-      </span>
-    </Grid>
-    <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <CustomAutocompleteWithoutEdit  type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
-    </Grid>
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Models"
+        tooltipText="A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000274"
+        renderField={() => (
+          <CustomAutocompleteWithoutEdit
+            type="Model"
+            manyItems
+            showSelectedElements={true}
+            optionsSet={oep_models}
+            kind='Models'
+            handler={modelsHandler}
+            selectedElements={selectedModels}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Frameworks"
+        tooltipText="A software framework is a Software that is generic and can be adapted to a specific application."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000382"
+        renderField={() => (
+          <CustomAutocompleteWithoutEdit
+            type="Frameworks"
+            manyItems
+            showSelectedElements={true}
+            optionsSet={oep_frameworks}
+            kind='Frameworks'
+            handler={frameworksHandler}
+            selectedElements={selectedFrameworks}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+
     </Grid>
   );
 
@@ -1716,526 +1623,521 @@ const items = {
 }
 const scenario_count = 'Scenarios'+' (' + scenarios.length + ')' ;
 const renderScenariosOverview = () => (
-  scenarios.map((v, i) => 
-    v.acronym !== '' && 
-    <Grid container justifyContent="space-between"
-        alignItems="start"
-        spacing={1} 
-        style={{ marginTop:'10px', border: '1px solid #80808038' }} >
-
-      <Grid item xs={2} style={{  padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Name: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A study is a project with the goal to investigate something.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '10px', borderLeft: '1px solid #80808038' }}>
-        {v.name}
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2} style={{  padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '10px', borderLeft: '1px solid #80808038' }}>
-        {v.acronym} 
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Abstract: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A summary of the resource.'}
-                <br />
-                <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }}>
-        {v.abstract}
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Descriptors: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000364">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }}>
-        {v.descriptors.map( (e) =>  <span> <span> {e.label} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>  )}
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2} style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Years: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A scenario year is a time step that has a duration of one year and is part of a scenario horizon.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020097">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-      {v.scenario_years.map( (e) =>  <span> <span> {e.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>  )}
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Regions: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A study region is a spatial region that is under investigation and consists entirely of one or more subregions.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020032">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }}>
-        {v.regions.map( (e) => <span> <span> {e.name} </span> <span> <b style={{ fontSize: '24px' }}>.</b> </span> </span> )}
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{  padding: '5px' }} >
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Interacting regions: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'An interacting region is a spatial region that interacts with a study region. It is part of a considered region, but not a study region.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020036">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }}>
-        {v.interacting_regions.map( (e) =>  <span> <span> {e.name} </span> <span> <b style={{ fontSize: '24px' }}>.</b> </span> </span> )}
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{  padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Input datasets: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'Endogenous data is a data item whose quantity value is determined by a model.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030030">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038'  }}>
-        {v.input_datasets.map( (e) => <span> <span> {e.value.label} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span> )}
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Output datasets: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-       {v.output_datasets.map( (e) =>  <span> <span> {e.value.label} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>)}
-      </Grid>
-    </Grid>
-    )
+  <Container maxWidth="lg" sx={{ padding: '0px !important' }}>
+    {
+      scenarios.map((v, i) => 
+      v.acronym !== '' && 
+      <TableContainer>
+        <Table>
+          <TableBody>
+            <TableRow>
+              <FirstRowTableCell>
+                <div>
+                  <span>Name</span>
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {'A study is a project with the goal to investigate something.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Energy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                  </HtmlTooltip>
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
+                {v.name}
+              </ContentTableCell>
+            </TableRow>
+            <TableRow>
+              <FirstRowTableCell>
+                <div>
+                  <span>Acronym</span>
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Energy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                  </HtmlTooltip>
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
+                {v.acronym} 
+              </ContentTableCell>
+            </TableRow>
+            <TableRow>
+              <FirstRowTableCell>
+                <div>
+                  <span>Abstract</span>
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {'A summary of the resource.'}
+                        <br />
+                        <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
+                      </Typography>
+                    </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                  </HtmlTooltip>
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
+                {v.abstract}
+              </ContentTableCell>
+            </TableRow>
+            <TableRow>
+              <FirstRowTableCell>
+                <div>
+                  <span>Descriptors</span>
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)....</a>
+                      </Typography>
+                    </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                  </HtmlTooltip>
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
+                {v.descriptors.map( (e) =>  <span> <span> {e.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span>  )}
+              </ContentTableCell>
+            </TableRow>
+            <TableRow>
+              <FirstRowTableCell>
+                <div>
+                  <span>Years</span>
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {'A scenario year is a time step that has a duration of one year and is part of a scenario horizon.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020097">More info from Open Energy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                  </HtmlTooltip>
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
+              {v.scenario_years.map( (e) =>  <span> <span> {e.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>  )}
+              </ContentTableCell>
+            </TableRow>
+            <TableRow>
+              <FirstRowTableCell>
+                <div>
+                  <span>Regions</span>
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {'A study region is a spatial region that is under investigation and consists entirely of one or more subregions.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020032">More info from Open Energy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                  </HtmlTooltip>
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
+                {v.regions.map( (e) => <span> <span> {e.name} </span> <span> <b className="separator-dot"> . </b> </span> </span> )}
+              </ContentTableCell>
+            </TableRow>
+            <TableRow>
+              <FirstRowTableCell>
+                <div>
+                  <span>Interacting regions</span>
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {'An interacting region is a spatial region that interacts with a study region. It is part of a considered region, but not a study region.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020036">More info from Open Energy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                  </HtmlTooltip>
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
+                {v.interacting_regions.map( (e) =>  <span> <span> {e.name} </span> <span> <b className="separator-dot"> . </b> </span> </span> )}
+              </ContentTableCell>
+            </TableRow>
+            <TableRow>
+              <FirstRowTableCell>
+                <div>
+                  <span>Input datasets</span>
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                  </HtmlTooltip>
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
+                {v.input_datasets.map( (e) => <span> <span> {e.value.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span> )}
+              </ContentTableCell>
+            </TableRow>
+            <TableRow>
+              <FirstRowTableCell>
+                <div>
+                  <span>Output datasets</span>
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {'Output data is endogenous data that is determined by a model calculation and presented as a result.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020013">More info from Open Energy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                    </HtmlTooltip>
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
+              {v.output_datasets.map( (e) =>  <span> <span> {e.value.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
+              </ContentTableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+      )
+    } 
+  </Container>
 )
 
 const renderPublicationOverview = () => (
-    <Grid container justifyContent="space-between"
-        alignItems="start"
-        spacing={2} 
-        style={{ width: '100%', marginTop:'10px', border: '1px solid #80808038' }} >
-
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Report title: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A name given to the resource.'}
-                <br />
-                <a href="http://purl.org/dc/elements/1.1/title">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-        {report_title !== undefined ? report_title : ""} 
-      </Grid>
-
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Authors: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'An author is an agent that creates or has created written work.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-        {selectedAuthors.map((v, i) => (
-            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
-        ))}
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>DOI: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-        <span> <span> {doi !== undefined ? doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span> 
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Date of publication: </b> </span>
-        {/* <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A study is a project with the goal to investigate something.'}
-                <br />
-                <a href="http://www.geneontology.org/formats/oboInOwl#date">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span> */}
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038'  }}>
-        <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Link to study report: </b> </span>
-        {/* <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A study is a project with the goal to investigate something.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span> */}
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-        <a href={link_to_study} style={{ color: "#04678F" }}> <LinkIcon fontSize="large"/> </a>
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      {/* <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Citation: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A citation reference is a reference stating where a citation was taken from.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-        {}
-      </Grid> */}
-
-    </Grid>
+  <TableContainer>
+    <Table>
+      <TableBody>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Report title</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A name given to the resource.'}
+                    <br />
+                    <a href="http://purl.org/dc/elements/1.1/title">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {report_title !== undefined ? report_title : ""} 
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Authors</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'An author is an agent that creates or has created written work.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedAuthors.map((v, i) => (
+              <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>DOI</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedAuthors.map((v, i) => (
+              <span> <span> {doi !== undefined ? doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span> 
+            ))}
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Date of publication</span>
+              {/* <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A study is a project with the goal to investigate something.'}
+                    <br />
+                    <a href="http://www.geneontology.org/formats/oboInOwl#date">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip> */}
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+          <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+            <span>Link to study report</span>
+              {/* <HtmlTooltip
+                  title={
+                  <React.Fragment>
+                    <Typography color="inherit" variant="subtitle1">
+                      {'A study is a project with the goal to investigate something.'}
+                      <br />
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                    </Typography>
+                  </React.Fragment>
+                }
+                >
+                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                </HtmlTooltip>
+              */}
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+          </ContentTableCell>
+        </TableRow>
+        {/* <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Citation</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A citation reference is a reference stating where a citation was taken from.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+          </ContentTableCell>
+        </TableRow> */}
+      </TableBody>
+    </Table>
+  </TableContainer>
 )
   
 const renderSectorsAndTechnology = () => (
-  <Grid container justifyContent="space-between"
-        alignItems="start"
-        spacing={2} 
-        style={{ width: '100%', marginTop:'10px', border: '1px solid #80808038' }} >
-
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}><b> Sector divisions: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A sector division is a specific way to subdivide a system.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-       {selectedSectorDivisions.map((v, i) => (
-            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
-        ))}
-      </Grid>
-
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Sectors: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A sector is generically dependent continuant that is a subdivision of a system.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000367">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-        {selectedSectors.map((v, i) => (
-            <span> <span> {v.label} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
-        ))}
-      </Grid>
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Technologies: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000407">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-      {selectedTechnologies.map((v, i) => (
-            <span> <span> {v.label} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
-        ))}
-      </Grid>
-    </Grid>
+  <TableContainer>
+    <Table>
+      <TableBody>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Sector divisions</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A sector division is a specific way to subdivide a system.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedSectorDivisions.map((v, i) => (
+              <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Sectors</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A sector is generically dependent continuant that is a subdivision of a system.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000367">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedSectors.map((v, i) => (
+              <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Technologies</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000407">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedTechnologies.map((v, i) => (
+              <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </TableContainer>
 )
 
 const renderModelsAndFrameworksOverview = () => (
-  <Grid container justifyContent="space-between"
-        alignItems="start"
-        spacing={2} 
-        style={{ width: '100%', marginTop:'10px', border: '1px solid #80808038' }} >
-
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}><b> Models: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-       {selectedModels.map((v, i) => (
-            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
-        ))}
-      </Grid>
-
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Frameworks: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A software framework is a Software that is generic and can be adapted to a specific application.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-        {selectedFrameworks.map((v, i) => (
-            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
-        ))}
-      </Grid>
-    </Grid>
+  <TableContainer>
+    <Table>
+      <TableBody>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Models</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedModels.map((v, i) => (
+              <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+        <TableRow>
+          <FirstRowTableCell>
+            <div>
+              <span>Frameworks</span>
+              <HtmlTooltip
+                title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'A software framework is a Software that is generic and can be adapted to a specific application.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
+                  </Typography>
+                </React.Fragment>
+              }
+              >
+              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+              </HtmlTooltip>
+            </div>
+          </FirstRowTableCell>
+          <ContentTableCell>
+            {selectedFrameworks.map((v, i) => (
+              <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+            ))}
+          </ContentTableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </TableContainer>
 )
 
 const overview_items = {
@@ -2298,7 +2200,7 @@ function getStepContent(step: number) {
                       </Typography>
                     }
                   >
-                    <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
                 </div>
                 <TextField  size="small"  style={{  width: '40%', marginTop: '10px',  marginLeft: '15%', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
@@ -2311,7 +2213,7 @@ function getStepContent(step: number) {
                       </Typography>
                     }
                   >
-                    <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
                 </div>
                 <CustomAutocomplete width="40%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
@@ -2324,7 +2226,7 @@ function getStepContent(step: number) {
                     </Typography>
                   }
                 >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                 </HtmlTooltip>
                 </div>
                 <CustomAutocomplete width="40%" type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
@@ -2342,7 +2244,7 @@ function getStepContent(step: number) {
                       </React.Fragment>
                     }
                   >
-                    <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
                 </div>
               </div>
@@ -2371,7 +2273,7 @@ function getStepContent(step: number) {
                     </React.Fragment>
                   }
                 >
-                  <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+                  <HelpOutlineIcon sx={{ color: '#708696' }}/>
                 </HtmlTooltip>
               </div>
               <div style={{ width: '35%' }}></div>
@@ -2391,7 +2293,7 @@ function getStepContent(step: number) {
                       </React.Fragment>
                     }
                   >
-                    <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+                    <HelpOutlineIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
                 </div>
                 <div style={{ marginTop: "10px", width: '80%' }}>
@@ -2504,18 +2406,10 @@ function getStepContent(step: number) {
       justifyContent="space-between"
       alignItems="center"
       >
-        <Grid item xs={12} >
-        <div style={{ backgroundColor: '#e3eaef', height: '100px', marginBottom: '10px' }}>
-          <div id='headerStyle'>
-            <span>
-              <ListAltOutlinedIcon />
-            </span>
-            <span>Scenario Bundle</span>
-          </div>
-          <div id='headerSubStyle'> <span> {id === "new" ? "new/" : mode + "/" } </span> {acronym} </div>
-        </div>
-        </Grid>
-        <Container maxWidth="xl">
+        <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
+        <Container maxWidth="lg">
+
+        
 
           <Grid item xs={12}>
             <Backdrop
@@ -2526,49 +2420,50 @@ function getStepContent(step: number) {
               <CircularProgress color="inherit" />
             </Backdrop>
           </Grid>
-        
+          <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
 
-          <Grid item xs={12}>
-            <Grid container
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              >
-          <CustomSwap handleSwap={handleSwap} />
-          <div style={{ 'textAlign': 'center' }}>
-            {/* <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-              <CircularProgress variant="determinate" value={60} size={60} />
-              <Box
-                sx={{
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  position: 'absolute',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-              <Typography variant="h6" component="div">
-                <b>{`${Math.round(60)}%`}</b>
-              </Typography>
-              </Box>
-            </Box> */}
-          </div>
-          <div style={{ 'textAlign': 'right' }}>
-            {mode === 'edit' && <Tooltip title="Save factsheet">
-              <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} startIcon={<SaveIcon />}> Save </Button>
-            </Tooltip>}
-            <Tooltip title="Share this factsheet">
-              <Button  disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" startIcon={<ShareIcon/>}> Share </Button>
-            </Tooltip>
-            <Tooltip title="Delete factsheet">
-              <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon/>}> Delete </Button>
-            </Tooltip>
-          </div >
-          </Grid>
-        </Grid>
+            <Grid item xs={12}>
+              <Grid container
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                >
+                <CustomSwap handleSwap={handleSwap} />
+                <div style={{ 'textAlign': 'center' }}>
+                  {/* <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                    <CircularProgress variant="determinate" value={60} size={60} />
+                    <Box
+                      sx={{
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        position: 'absolute',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                    <Typography variant="h6" component="div">
+                      <b>{`${Math.round(60)}%`}</b>
+                    </Typography>
+                    </Box>
+                  </Box> */}
+                </div>
+                <div style={{ 'textAlign': 'right' }}>
+                  {mode === 'edit' && <Tooltip title="Save factsheet">
+                    <Button disableElevation={true} size="small" sx={{ mr: 1 }} variant="contained" color="primary" onClick={handleSaveFactsheet} startIcon={<SaveIcon />}> Save </Button>
+                  </Tooltip>}
+                  <Tooltip title="Share this factsheet">
+                    <Button  disableElevation={true} size="small" sx={{ mr: 1 }} variant="outlined" color="primary" startIcon={<ShareIcon/>} disabled> Share </Button>
+                  </Tooltip>
+                  <Tooltip title="Delete factsheet">
+                    <Button disableElevation={true} size="small" variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon/>}> Delete </Button>
+                  </Tooltip>
+                </div >
+              </Grid>
+            </Grid>
+          </Toolbar>
 
         <Grid item xs={12}>
           <Snackbar
@@ -2683,7 +2578,7 @@ function getStepContent(step: number) {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Link to={`factsheet/`} onClick={() => { axios.post(conf.toep + 'sirop/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+              <Link to={`scenario-bundles/main`} onClick={() => { axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
                 this.reloadRoute();}} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
               <Button variant="contained" color="error" >
                 Yes
@@ -2697,9 +2592,8 @@ function getStepContent(step: number) {
 
           {mode === "edit" &&
             <div className='wizard'>
-                <Grid container style={{ marginTop: '10px', marginLeft:'10px' }}>
+                <Grid container style={{ marginTop: '10px' }}>
                   <Grid item xs={12} style={{ 'overflow': 'auto' }}>
-                    <Divider style={{ marginBottom: '40px' }}/>
                     <CustomTabs
                       items={items}
                     />
@@ -2741,165 +2635,174 @@ function getStepContent(step: number) {
           }
 
           {mode === "overview" &&
-             <Grid container justifyContent="space-between"
-             alignItems="start"
-             spacing={2}>
-             <Grid item xs={12} >
-               <Divider style={{ marginBottom: '20px', marginTop: '20px' }}/>
-              </Grid>
+          <>
+            <Grid container justifyContent="space-between"
+              alignItems="start"
+              spacing={2}>
               <Grid item xs={12}  >
-               <b style={{ color: 'clack', marginLeft:'20px', fontSize:'24px' }}>{studyName !== undefined && studyName}</b> 
+                <b style={{ fontSize: variables.fontSize.lg }}>{studyName !== undefined && studyName}</b> 
               </Grid>
-              <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym</b> </span>
-                <span >
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-                </HtmlTooltip>
-                </span>
+            </Grid>
+            <Typography variant='small'>
+              <Grid container sx={{ padding: '1rem 0 2rem' }}>
+                <InfoListItem>
+                  <Grid item xs={3} >
+                    <span>Acronym</span>
+                    <span >
+                    <HtmlTooltip
+                      title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="subtitle1">
+                          {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
+                          <br />
+                          <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
+                        </Typography>
+                      </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                    </HtmlTooltip>
+                    </span>
+                  </Grid>
+                  <Grid item xs={9} >
+                    {acronym}
+                  </Grid>
+                </InfoListItem>
+                <InfoListItem>
+                  <Grid item xs={3} >
+                    <span>Contact person(s)</span>
+                    <span >
+                      <HtmlTooltip
+                        title={
+                        <React.Fragment>
+                          <Typography color="inherit" variant="subtitle1">
+                            {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
+                            <br />
+                            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info...</a>
+                          </Typography>
+                        </React.Fragment>
+                      }
+                      >
+                      <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                      </HtmlTooltip>
+                    </span>
+                  </Grid>
+                  <Grid item xs={9} style={{ paddingTop: '10px' }}>
+                    {selectedContactPerson.map((v, i) => (
+                      <span> <span> {v.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>
+                    ))}
+                  </Grid>
+                </InfoListItem>
+                <InfoListItem>
+                  <Grid item xs={3} >
+                    <span>Institutions</span>
+                    <span >
+                      <HtmlTooltip
+                        title={
+                        <React.Fragment>
+                          <Typography color="inherit" variant="subtitle1">
+                            {'An institution is an organisation that serves a social purpose.'}
+                            <br />
+                            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info...</a>
+                          </Typography>
+                        </React.Fragment>
+                      }
+                      >
+                      <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                      </HtmlTooltip>
+                    </span>
+                  </Grid>
+                  <Grid item xs={9} style={{ paddingTop: '10px' }}>
+                    {selectedInstitution.map((v, i) => (
+                      <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                    ))}
+                  </Grid>
+                </InfoListItem>
+                <InfoListItem>
+                  <Grid item xs={3} >
+                    <span>Funding sources</span>
+                    <span >
+                      {/* <HtmlTooltip
+                        title={
+                        <React.Fragment>
+                          <Typography color="inherit" variant="subtitle1">
+                            {'A study is a project with the goal to investigate something.'}
+                            <br />
+                            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                          </Typography>
+                        </React.Fragment>
+                      }
+                      >
+                      <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                      </HtmlTooltip> */}
+                    </span>
+                  </Grid>
+                  <Grid item xs={9} style={{ paddingTop: '10px' }} >
+                    {selectedFundingSource.map((v, i) => (
+                      <span> <span> {v.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>
+                    ))}
+                  </Grid>
+                </InfoListItem>
+                <InfoListItem>
+                  <Grid item xs={3} >
+                    <span>Descriptors</span>
+                    <span >
+                      {/* <HtmlTooltip
+                        title={
+                        <React.Fragment>
+                          <Typography color="inherit" variant="subtitle1">
+                            {'A study is a project with the goal to investigate something.'}
+                            <br />
+                            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                          </Typography>
+                        </React.Fragment>
+                      }
+                      >
+                      <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                      </HtmlTooltip> */}
+                    </span>
+                  </Grid>
+                  <Grid item xs={9} style={{ paddingTop: '10px' }}>
+                    {selectedStudyKewords.map((v, i) => (
+                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                    ))}
+                  </Grid>
+                </InfoListItem>
+                <InfoListItem>
+                  <Grid item xs={3} >
+                    <span>Abstract</span>
+                    <span >
+                    <HtmlTooltip
+                      title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="subtitle1">
+                          {'A summary of the resource.'}
+                          <br />
+                          <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
+                        </Typography>
+                      </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                    </HtmlTooltip>
+                    </span>
+                  </Grid>
+                  <Grid item xs={9} style={{ paddingTop: '10px' }}>
+                    <div>{abstract !== undefined && abstract}</div>
+                  </Grid>
+                </InfoListItem>
               </Grid>
-              <Grid item xs={9} >
-                {acronym}
-              </Grid>
-
-              <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Contact person(s):</b> </span>
-                <span >
-                  <HtmlTooltip
-                    title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-                  </HtmlTooltip>
-                </span>
-              </Grid>
-              <Grid item xs={9} style={{ paddingTop: '10px' }}>
-                {selectedContactPerson.map((v, i) => (
-                           <span> <span> {v.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>
-                          ))}
-              </Grid>
-
-              <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Institutions: </b> </span>
-                <span >
-                  <HtmlTooltip
-                    title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'An institution is an organisation that serves a social purpose.'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-                  </HtmlTooltip>
-                </span>
-              </Grid>
-              <Grid item xs={9} style={{ paddingTop: '10px' }}>
-                {selectedInstitution.map((v, i) => (
-                           <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
-                ))}
-              </Grid>
-
-              <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Funding sources: </b> </span>
-                <span >
-                  {/* <HtmlTooltip
-                    title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'A study is a project with the goal to investigate something.'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-                  </HtmlTooltip> */}
-                </span>
-              </Grid>
-              <Grid item xs={9} style={{ paddingTop: '10px' }} >
-              {selectedFundingSource.map((v, i) => (
-                            <span> <span> {v.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>
-                          ))}
-              </Grid>
-
-              <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Descriptors: </b> </span>
-                <span >
-                  {/* <HtmlTooltip
-                    title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'A study is a project with the goal to investigate something.'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-                  </HtmlTooltip> */}
-                </span>
-              </Grid>
-              <Grid item xs={9} style={{ paddingTop: '10px' }}>
-               {selectedStudyKewords.map((v, i) => (
-                          <span> <span> {v} </span> <span>   <b style={{ fontSize: '24px' }}>.</b></span> </span>
-                          ))}
-              </Grid>
-
-              <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Abstract: </b> </span>
-                <span >
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A summary of the resource.'}
-                      <br />
-                      <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-                </HtmlTooltip>
-                </span>
-              </Grid>
-              <Grid item xs={9} style={{ paddingTop: '10px' }}>
-               <div  style={{ width:'90%' }}> {abstract !== undefined && abstract}  </div>
-              </Grid>
+            </Typography>
+            <Grid container>
               <Grid item xs={12} >
                 <CustomTabs
                   items={overview_items}
                 />
               </Grid>
-               
-
-            </Grid>}
-
-        
-        </Grid>
+            </Grid>
+          </>
+          }
+          </Grid>
         </Container>
       </Grid>
     </div>

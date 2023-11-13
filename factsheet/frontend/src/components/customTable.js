@@ -40,6 +40,7 @@ import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
 import RuleIcon from '@mui/icons-material/Rule';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -223,11 +224,23 @@ function EnhancedTableToolbar(props) {
   const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected} = props;
 
   return (
+    <div>
+    <Grid container>
+        <Typography variant="body1">
+        
+        <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020227">Scenario bundles</a> weave together important information about one or more <a href="http://openenergyplatform.org/ontology/oeo/OEO_00000364">scenarios</a>. They inform about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020011">studies</a> made based on a scenario, including publications (= <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020012">study report</a>). 
+        
+        If there is quantitative <a href="http://openenergyplatform.org/ontology/oeo/OEO_00030029">input data</a> and / or <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020013">output data</a> available on the OEP, the scenario bundles can link to that data, too. 
+        They can also inform about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020353">models</a> (if available as a <a href="https://openenergyplatform.org/factsheets/models/">model factsheet</a>) and frameworks (if available as a <a href="https://openenergyplatform.org/factsheets/frameworks/">framework factsheet</a>) that were used to project a scenario into the future (= <a href="http://openenergyplatform.org/ontology/oeo/OEO_00010262">scenario projection</a>).
+
+        In a nutshell: A scenario bundle provides you with all relevant information to understand a scenario's context and to ease a potential re-use of quantitative data for your own purposes.
+        </Typography>
+    </Grid>
     <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
       <Grid container justifyContent="space-between"
-        alignItems="start"
         spacing={2}>
-        <Grid item xs={4} >
+       
+        <Grid item xs={12} md={4}>
             {/* <Tooltip title="Show all">
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
             </Tooltip> */}
@@ -235,7 +248,7 @@ function EnhancedTableToolbar(props) {
             <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px'}} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
             <Tooltip title="Compare">
 
-            {numSelected > 1 ? <Link to={`sirop/compare/${[...selected].join('#')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }}>
+            {numSelected > 1 ? <Link to={`scenario-bundles/compare/${[...selected].join('#')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }}>
               <Button size="small" 
                   style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
                   variant="contained" 
@@ -259,10 +272,7 @@ function EnhancedTableToolbar(props) {
             
           </Tooltip>
         </Grid>
-        <Grid item xs={1} >
-
-        </Grid>
-        <Grid item xs={2} >
+        <Grid item xs={6} md={4}>
           <ToggleButtonGroup
             color="primary"
             value={alignment}
@@ -276,17 +286,15 @@ function EnhancedTableToolbar(props) {
             <ToggleButton value="list">List</ToggleButton>
           </ToggleButtonGroup>
         </Grid>
-        <Grid item xs={3} >
-
-        </Grid>
-        <Grid item xs={2}>
-          <Button sx ={{ marginLeft:"110px" }} component={Link} variant="contained" size="small" className="linkButton" to={`sirop/factsheet/new`} onClick={() => this.forceUpdate}>
+        <Grid item xs={6} md={4}>
+          <Button component={Link} variant="contained" size="small" className="linkButton" to={`scenario-bundles/id/new`} onClick={() => this.forceUpdate}>
             <AddIcon/>
             Create new
           </Button>
         </Grid>
       </Grid>   
     </Toolbar>
+    </div>
   );
 }
 
@@ -356,6 +364,8 @@ export default function CustomTable(props) {
   };
 
   const handleClick = (event, name) => {
+    console.log(name);
+    
     const newSelected = new Set(selected);
     if (newSelected.has(name)) newSelected.delete(name);
     else newSelected.add(name);
@@ -433,17 +443,17 @@ export default function CustomTable(props) {
   }
 
   const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
     return data;
   };
 
   const getAuthors = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
     return data;
   };
 
   const getFundingSources = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
     return data;
   };
 
@@ -494,7 +504,7 @@ export default function CustomTable(props) {
       'studyKewords': selectedStudyKewords,
       'scenarioYearValue': scenarioYearValue,
     }
-    axios.post(conf.toep + 'sirop/query/',
+    axios.post(conf.toep + 'scenario-bundles/query/',
     {
       'criteria': criteria,
     }).then(response => {
@@ -559,19 +569,6 @@ export default function CustomTable(props) {
     "Output datasets",
   ];
 
-  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: '#f6f9fb',
-      color: 'Black',
-      maxWidth: 720,
-      fontSize: theme.typography.pxToRem(16),
-      border: '1px solid black',
-      padding: '20px'
-    },
-  }));
-
   const renderRows = (rs) => {
     const rowsToRender =  filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
     return <TableBody >
@@ -590,12 +587,12 @@ export default function CustomTable(props) {
                   sx={{ cursor: 'pointer', height: '60px' }}
                 >
                   <TableCell style={{ width: '400px' }}>
-                  <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                  <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
                     <Typography variant="body1" style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}><b style={{ fontSize: '16px' }}>{row.study_name}</b></Typography>
                   </Link> 
                   </TableCell >
                   <TableCell style={{ width: '100px' }}>
-                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
                       <Typography variant="subtitle1" gutterBottom  style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}>
                         {row.acronym}
                       </Typography>
@@ -656,22 +653,22 @@ export default function CustomTable(props) {
 
                                 <Grid item xs={12}>
                                   <b>Institutions: </b>{row.institutions.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                 </Grid>
 
                                 <Grid item xs={12}>
                                  <b>Funding sources: </b>{row.funding_sources.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                 </Grid>
 
                                 <Grid item xs={12} >
                                 <b>Models and frameworks: </b>{row.models.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                   {row.frameworks.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                 </Grid>
                             </Grid>
@@ -679,10 +676,11 @@ export default function CustomTable(props) {
                       </Collapse>
                     </TableCell>
                 </TableRow>
-            </React.Fragment>
+              </React.Fragment>
             );
-      })}
-    </TableBody>
+          })}
+        </TableBody>
+
   }
 
   const renderCards= (rs) => {
@@ -699,30 +697,30 @@ export default function CustomTable(props) {
               <Grid item xs={12} sx={{ border: '1px solid #cadff5', marginBottom: "10px"}} >
                 <div style={{ backgroundColor: "#f6f9fb", padding: "15px" }}>
                   <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
-                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
                       <Typography variant="body1"><b style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}> {row.study_name} </b></Typography>
                     </Link> 
                   </Stack>
                 </div>
                 <div style={{ padding: "15px" }}>
                   <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
                       <p style={{ fontSize: '16px', cursor: 'pointer', color: "black" }}><b>Acronym: </b>{row.acronym}</p>
                     </Link> 
                     {row.date_of_publication !== null && <p><b>Date of publication: </b>{row.date_of_publication}</p>}
                   </Stack>
                   <p><b>Abstract: </b> {row.abstract}</p>
                   <p><b>Institutions: </b>{row.institutions.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} </p>
                   <p><b>Funding sources: </b>{row.funding_sources.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} </p>
                   <p><b>Models and frameworks: </b>{row.models.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                   {row.frameworks.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} </p>
                   <p><b>Scenarios: </b>{row.scenarios.map((v) => (
                         <HtmlTooltip
