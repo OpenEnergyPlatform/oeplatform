@@ -591,7 +591,7 @@ function Factsheet(props) {
   };
 
   const getScenarioYears = async () => {
-    const { data } = await axios.get(conf.toep + `scenario-bundlesrio-bundles/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
     return data;
   };
 
