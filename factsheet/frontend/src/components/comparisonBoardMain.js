@@ -27,7 +27,7 @@ const ComparisonBoardMain = (props) => {
   const [selectedCriteria, setselectedCriteria] = useState(['Descriptors']);
 
   const getScenarios = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
     return data;
   };
 
@@ -39,6 +39,7 @@ const ComparisonBoardMain = (props) => {
 
 
   const Criteria = [
+    'Scenario abstract',
     'Study name',
     'Study abstract',
     'Descriptors',

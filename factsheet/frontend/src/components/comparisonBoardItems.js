@@ -119,12 +119,12 @@ export default function  ComparisonBoardItems (props) {
                           {item.data.study_abstract}
                       </div>}
 
-                      <div style= {aspectStyle} >
-                        <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Abstract:</b> 
+                      {c_aspects.includes("Scenario abstract") && <div style= {{  marginBottom: '10px', padding: '10px' }} >
+                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                          <b>Scenario abstract:</b> 
                         </Typography>
                           {item.data.abstract}
-                      </div>
+                      </div>}
 
                       {c_aspects.includes("Descriptors") && <div style={aspectStyle}>
                         <Typography variant="subtitle2" gutterBottom component="div">

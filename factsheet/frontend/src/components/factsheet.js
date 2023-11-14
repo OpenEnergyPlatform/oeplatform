@@ -103,7 +103,9 @@ function Factsheet(props) {
 
   const { id, fsData } = props;
   
-  
+  console.log(id);
+
+
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
@@ -254,7 +256,7 @@ function Factsheet(props) {
   }
 
   const populateFactsheetElements = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/populate_factsheets_elements/`);
+    const { data } = await axios.get(conf.toep + `scenario-bundles/populate_factsheets_elements/`);
     return data;
   };
 
@@ -294,7 +296,7 @@ function Factsheet(props) {
     if (acronym !== '') {
       if (id === 'new' && !isCreated) {
         const new_uid = uuid()
-        axios.post(conf.toep + 'sirop/add/',
+        axios.post(conf.toep + 'scenario-bundles/add/',
         {
           id: id,
           uid: new_uid,
@@ -332,8 +334,8 @@ function Factsheet(props) {
         }
       });
       } else {
-        axios.get(conf.toep + `sirop/get/`, { params: { id: uid } }).then(res => {
-          axios.post(conf.toep + 'sirop/update/',
+        axios.get(conf.toep + `scenario-bundles/get/`, { params: { id: uid } }).then(res => {
+          axios.post(conf.toep + 'scenario-bundles/update/',
           {
             fsData: res.data,
             id: id,
@@ -378,7 +380,7 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'sirop/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+    axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseSavedDialog = () => {
@@ -559,47 +561,47 @@ function Factsheet(props) {
   } 
 
   const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
     return data;
   };
 
   const getFundingSources = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
     return data;
   };
 
   const getContactPersons = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000107' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000107' } });
     return data;
   };
 
   const getAuthors = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
     return data;
   };
 
   const getScenarioRegions = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OBO.BFO_0000006' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OBO.BFO_0000006' } });
     return data;
   };
 
   const getScenarioInteractingRegions = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00020036' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00020036' } });
     return data;
   };
 
   const getScenarioYears = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
     return data;
   };
 
   const getModels = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000274' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000274' } });
     return data;
   };
 
   const getFrameworks = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000172' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000172' } });
     return data;
   };
 
@@ -677,7 +679,7 @@ function Factsheet(props) {
 
 
   const HandleAddNewInstitution = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00000238',
       entity_label: newElement.name,
@@ -697,7 +699,7 @@ function Factsheet(props) {
 
 
   const HandleEditInstitution = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000238',
       entity_label: oldElement,
@@ -717,7 +719,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewFundingSource = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundlesrio-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00090001',
       entity_label: newElement.name,
@@ -736,7 +738,7 @@ function Factsheet(props) {
 
   const HandleEditFundingSource = (oldElement, newElement, editIRI) => {
     console.log(editIRI)
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00090001',
       entity_label: oldElement,
@@ -756,7 +758,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewContactPerson = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00000107',
       entity_label: newElement.name,
@@ -775,7 +777,7 @@ function Factsheet(props) {
   } 
 
   const HandleEditContactPerson = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000107',
       entity_label: oldElement,
@@ -795,7 +797,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewAuthor = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00000064',
       entity_label: newElement.name,
@@ -814,7 +816,7 @@ function Factsheet(props) {
   }
 
   const HandleEditAuthors = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000064',
       entity_label: oldElement,
@@ -834,7 +836,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewRegion = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       'entity_type': 'OEO.OEO_00020032', 
       'entity_label': newElement.name,
@@ -853,7 +855,7 @@ function Factsheet(props) {
   }
 
   const HandleEditRegion = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OBO.BFO_0000006',
       entity_label: oldElement,
@@ -873,7 +875,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewInteractingRegion = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundlesrio-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00020036',
       entity_label: newElement.name,
@@ -892,7 +894,7 @@ function Factsheet(props) {
   }
   
   const HandleEditInteractingRegion = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00020036',
       entity_label: oldElement,
@@ -912,7 +914,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNNewScenarioYears = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OBO.OEO_00020097',
       entity_label: newElement.name,
@@ -931,7 +933,7 @@ function Factsheet(props) {
   }
 
   const HandleEditScenarioYears = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OBO.OEO_00020097',
       entity_label: oldElement,
@@ -951,7 +953,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewModel = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00000274',
       entity_label: newElement.name,
@@ -970,7 +972,7 @@ function Factsheet(props) {
   }
 
   const HandleEditModels = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000274',
       entity_label: oldElement,
@@ -990,7 +992,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewFramework = (newElement) => {
-    axios.post(conf.toep + 'sirop/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
     {
       entity_type: 'OEO.OEO_00000172',
       entity_label: newElement.name,
@@ -1009,7 +1011,7 @@ function Factsheet(props) {
   }
 
   const HandleEditFramework = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'sirop/update_an_entity/',
+    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000172',
       entity_label: oldElement,
@@ -1185,7 +1187,7 @@ function Factsheet(props) {
                 >
                 {scenarios.map((item, i) =>
                   <Tab
-                    label={item.acronym !== '' ? item.acronym.substring(0,16) : 'Scenario ' + (Number(i) + Number(1)) }
+                    label={item.acronym !== undefined && item.acronym !== '' ? item.acronym.substring(0,16) : 'Scenario ' + (Number(i) + Number(1)) }
                     key={'Scenario_tab_' + item.id}
                     classes={tabClasses}
                     style={{ border: '1px solid #cecece', marginBottom: '5px' }}
@@ -1790,9 +1792,9 @@ const renderScenariosOverview = () => (
                     title={
                     <React.Fragment>
                       <Typography color="inherit" variant="subtitle1">
-                        {'Endogenous data is a data item whose quantity value is determined by a model.'}
+                        {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030030">More info from Open Energy Ontology (OEO)...</a>
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
                       </Typography>
                     </React.Fragment>
                     }
@@ -1813,9 +1815,9 @@ const renderScenariosOverview = () => (
                     title={
                     <React.Fragment>
                       <Typography color="inherit" variant="subtitle1">
-                        {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
+                        {'Output data is endogenous data that is determined by a model calculation and presented as a result.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020013">More info from Open Energy Ontology (OEO)...</a>
                       </Typography>
                     </React.Fragment>
                     }
@@ -2569,7 +2571,7 @@ function getStepContent(step: number) {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Link to={`factsheet/`} onClick={() => { axios.post(conf.toep + 'sirop/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+              <Link to={`scenario-bundles/main`} onClick={() => { axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
                 this.reloadRoute();}} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
               <Button variant="contained" color="error" >
                 Yes
