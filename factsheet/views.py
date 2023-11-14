@@ -162,12 +162,12 @@ def get_oekg_modifications(request, *args, **kwargs):
     return response
 
 
-# from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 # @ensure_csrf_cookie
 @login_required
-# @ensure_csrf_cookie
+@ensure_csrf_cookie
 # @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -1148,7 +1148,6 @@ def delete_factsheet_by_id(request, *args, **kwargs):
     )
     patch_response_headers(response, cache_timeout=1)
     return response
-
 
 
 @csrf_exempt

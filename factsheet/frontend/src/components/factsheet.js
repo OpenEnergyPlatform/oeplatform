@@ -78,8 +78,8 @@ import '../styles/App.css';
 import { TableRow } from '@mui/material';
 import variables from '../styles/oep-theme/variables.js';
 
-axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
-axios.defaults.xsrfCookieName = "csrftoken";
+// axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+// axios.defaults.xsrfCookieName = "csrftoken";
 // axios.defaults.withCredentials = true;
 
 function TabPanel(props: TabPanelProps) {
@@ -296,6 +296,7 @@ function Factsheet(props) {
 
   }, []);
 
+  console.log("hello" + CSRFToken())
   const handleSaveFactsheet = () => {
     setOpenBackDrop(true);
     factsheetObjectHandler('name', factsheetName);
@@ -368,7 +369,9 @@ function Factsheet(props) {
             scenarios: JSON.stringify(scenarios),
             models: JSON.stringify(selectedModels),
             frameworks: JSON.stringify(selectedFrameworks),
-          }).then(response => {
+          }, 
+          { headers: {'X-CSRFToken': CSRFToken()}},
+          ).then(response => {
             if (response.data === "factsheet updated!") {
               setUID(uid);
               setOpenUpdatedDialog(true);
