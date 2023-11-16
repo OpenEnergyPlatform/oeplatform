@@ -18,6 +18,7 @@ import { Tooltip } from '@mui/material';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
 import OptionBox from '../styles/oep-theme/components/optionBox.js';
+import MultipleSelectChip from '../styles/oep-theme/components/multiselect.js';
 
 const ComparisonBoardMain = (props) => {
   const { params } = props;
@@ -104,6 +105,11 @@ const ComparisonBoardMain = (props) => {
               }
             </div>
           </FormGroup>
+          <MultipleSelectChip
+            sx={{ mt: 2, width : "100%" }}
+            options={['Scenario 1', 'Scenario 2', 'Scenario 3']}
+            label="Scenarios to be compared"
+            />
         </OptionBox>
         <ComparisonBoardItems elements={scenarios} c_aspects={selectedCriteria} />
       </Container>
