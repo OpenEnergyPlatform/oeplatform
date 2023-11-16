@@ -5,7 +5,7 @@ import variables from '../variables';
 
 const StudyChip = ({ index, label, included }) => {
   const chipColor = included ? 'success' : 'error';
-  const backgroundColor = index === 0 ? palette.background.white : palette.background.white;
+  const backgroundColor = index === 0 ? palette.background.white : chipColor === 'success' ? palette.success.lighter : palette.error.lighter;
 
   return (
     <Chip
@@ -13,7 +13,13 @@ const StudyChip = ({ index, label, included }) => {
       size='small'
       label={label}
       variant="outlined"
-      sx={{ 'marginBottom': variables.spacing[2], 'marginTop': variables.spacing[2], 'marginLeft': variables.spacing[2], backgroundColor, fontSize: variables.fontSize.sm }}
+      sx={{ 
+        marginBottom: variables.spacing[1],
+        marginTop: variables.spacing[1],
+        marginRight: variables.spacing[1],
+        backgroundColor,
+        fontSize: variables.fontSize.sm 
+      }}
     />
   );
 };

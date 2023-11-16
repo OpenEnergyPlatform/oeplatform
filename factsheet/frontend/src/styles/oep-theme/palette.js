@@ -34,7 +34,11 @@ const palette = {
     contrastText: '#FFFFFF',
   },
   error: {
+    lighter: '#FFEBED',
     main: '#e53e3e',
+  },
+  success: {
+    lighter: '#EBFFF9'
   },
   neutral: {
     main: '#198BB9',
