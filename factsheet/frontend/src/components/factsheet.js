@@ -2400,7 +2400,7 @@ function getStepContent(step: number) {
       alignItems="center"
       >
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
-        <Container maxWidth="lg">
+        <Container maxWidth="xl">
 
         
 

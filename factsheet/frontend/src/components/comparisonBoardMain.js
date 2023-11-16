@@ -69,7 +69,7 @@ const ComparisonBoardMain = (props) => {
       alignItems="center"
     >
       <BreadcrumbsNavGrid subheaderContent="Comparison" />
-      <Container maxWidth="lg">
+      <Container maxWidth="xl">
         <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
           <Grid container justifyContent="space-between"
             spacing={2}>

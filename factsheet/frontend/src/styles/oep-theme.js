@@ -7,6 +7,12 @@ import { typographyStyles, inputLabelStyles, inputBaseStyles, textareaAutosizeSt
 import variables from './oep-theme/variables';
 
 const theme = createTheme({
+  breakpoints: {
+    values: {
+      xl: 1360,
+      xxl: 1536
+    }
+  },
   palette: palette,
   typography: {
     small: {
