@@ -9,8 +9,12 @@ import variables from './oep-theme/variables';
 const theme = createTheme({
   breakpoints: {
     values: {
-      xl: 1360,
-      xxl: 1536
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1200,
+      lg2: 1360,
+      xl: 1536
     }
   },
   palette: palette,
