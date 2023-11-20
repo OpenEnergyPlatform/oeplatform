@@ -280,7 +280,7 @@ export default function Scenario(props) {
   const tabClasses = {root: classes.tab};
 
   return (
-    <Typography variant="small">
+    <Typography variant="body2">
       <Grid 
         container
         direction="row"

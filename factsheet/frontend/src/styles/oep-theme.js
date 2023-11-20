@@ -15,7 +15,7 @@ const theme = createTheme({
   },
   palette: palette,
   typography: {
-    small: {
+    body2: {
       fontSize: variables.fontSize.sm,
       color: palette.text.primary,
     },
