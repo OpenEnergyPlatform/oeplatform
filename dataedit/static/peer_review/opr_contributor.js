@@ -132,6 +132,7 @@ function peerReview(config) {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
 }
 
 /**
@@ -256,7 +257,6 @@ function clearInputFields() {
 function switchCategoryTab(category) {
   const currentTab = document.querySelector('.tab-pane.active'); // Get the currently active tab
   const tabIdForCategory = getCategoryToTabIdMapping()[category];
-  console.log("tabID", tabIdForCategory);
   if (currentTab.getAttribute('id') !== tabIdForCategory) {
     // The clicked field does not belong to the current tab, switch to the next tab
     const targetTab = document.getElementById(tabIdForCategory);
@@ -333,8 +333,22 @@ function selectField(fieldList, field) {
  */
 function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
-
+  updateClientStateDict(fieldKey = selectedField, state = state);
 }
+
+function updateClientStateDict(fieldKey, state) {
+  state_dict = state_dict ?? {};
+  if (fieldKey in state_dict) {
+    // console.log(`Der Schlüssel '${fieldKey}' ist vorhanden.`);
+    state_dict[fieldKey] = state;
+  } else {
+    // console.log(`Der Schlüssel '${fieldKey}' ist nicht vorhanden.`);
+    state_dict[fieldKey] = state;
+  }
+}
+
+
+
 
 /**
  * Renders fields on the Summary page, sorted by review state
@@ -614,6 +628,7 @@ function saveEntrances() {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay() ;
 }
 
 /**
@@ -727,7 +742,28 @@ function updateTabClasses() {
     }
   }
 }
-window.addEventListener('DOMContentLoaded', updateTabClasses);
+window.addEventListener('DOMContentLoaded', function() {
+    updateTabClasses();
+    updatePercentageDisplay() ;
+});
+
+function calculateOkPercentage(stateDict) {
+  let totalCount = Object.keys(stateDict).length;
+  let okCount = 0;
+
+  for (let key in stateDict) {
+    if (stateDict[key] === "ok") {
+      okCount++;
+    }
+  }
+  return (okCount / totalCount) * 100;
+}
+
+
+function updatePercentageDisplay() {
+  const percentage = calculateOkPercentage(state_dict);
+  document.getElementById("percentageDisplay").textContent = percentage.toFixed(2);
+}
 
 
 /**
