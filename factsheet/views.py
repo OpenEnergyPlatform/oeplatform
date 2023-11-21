@@ -157,6 +157,37 @@ def get_oekg_modifications(request, *args, **kwargs):
 @login_required
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
+    """
+    Creates a scenario bundle based on user's data. Currently, the minimum requirement to create a bundle is the "acronym".
+    The "acronym" must be unique. If the provided acronym already exists in the OEKG, then the function returns a "Duplicate error". 
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        uid (str): The unique ID for the bundle. 
+        acronym (str): The acronym for the bundle. 
+        study_name (str): The study name for the bundle. 
+        abstract (str): The abstract for the bundle. 
+        institution (list of objects): The institutions for the bundle.
+        funding_source (list of objects): The funding sources for the bundle. 
+        authors (list of objects): The authors for the bundle. 
+        contact_person (list of objects): The contact persons for the bundle. 
+        sector_divisions (list of objects): The sector divisions for the bundle. 
+        sectors (list of objects): The sectors for the bundle.
+        technologies (list of objects): The technologies for the bundle.
+        study_keywords (list of strings): The study keywords for the bundle.
+        report_doi (str): The report_doi for the bundle.
+        place_of_publication (str): The place of publication for the bundle.
+        link_to_study (str): The link to study for the bundle.
+        scenarios (list of objects): The scenarios for the bundle.
+        models (list of strings): The models for the bundle.
+        frameworks (list of strings): The frameworks for the bundle.
+        date_of_publication (str): The date of publication for the bundle.
+        report_title (str): The report title for the bundle.
+
+    Returns:
+        "Factsheet saved" if successful, "Duplicate error" if the bundle's acronym exists.
+
+    """
     request_body = json.loads(request.body)
     name = request_body["name"]
     uid = request_body["uid"]
@@ -458,6 +489,33 @@ def create_factsheet(request, *args, **kwargs):
 @login_required
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
+    """
+    Updates a scenario bundle with new data.
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        uid (str): The unique ID for the bundle. 
+        acronym (str): The acronym for the bundle. 
+        study_name (str): The study name for the bundle. 
+        abstract (str): The abstract for the bundle. 
+        institution (list of objects): The institutions for the bundle.
+        funding_source (list of objects): The funding sources for the bundle. 
+        authors (list of objects): The authors for the bundle. 
+        contact_person (list of objects): The contact persons for the bundle. 
+        sector_divisions (list of objects): The sector divisions for the bundle. 
+        sectors (list of objects): The sectors for the bundle.
+        technologies (list of objects): The technologies for the bundle.
+        study_keywords (list of strings): The study keywords for the bundle.
+        report_doi (str): The report_doi for the bundle.
+        place_of_publication (str): The place of publication for the bundle.
+        link_to_study (str): The link to study for the bundle.
+        scenarios (list of objects): The scenarios for the bundle.
+        models (list of strings): The models for the bundle.
+        frameworks (list of strings): The frameworks for the bundle.
+        date_of_publication (str): The date of publication for the bundle.
+        report_title (str): The report title for the bundle.
+        
+    """
     request_body = json.loads(request.body)
     fsData = request_body["fsData"]
     id = request_body["id"]
@@ -801,14 +859,13 @@ def factsheet_by_name(request, *args, **kwargs):
 #@login_required
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
+    """
+    Returns a scenario bundle based based on the provided ID. 
+    """
     uid = request.GET.get("id")
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
     factsheet = {}
 
-    print('############################start')
-    print(study_URI)
-    print(oekg.value(study_URI, OEKG["date_of_publication"]))
-    
     acronym = ""
     study_name = ""
     abstract = ""
@@ -1027,6 +1084,9 @@ def factsheet_by_id(request, *args, **kwargs):
 # @login_required
 @csrf_exempt
 def query_oekg(request, *args, **kwargs):
+    """
+    Takes user-supplied filter objects and uses them to build a SPARQL query. 
+    """
     request_body = json.loads(request.body)
     criteria = request_body["criteria"]
 
@@ -1099,6 +1159,9 @@ def query_oekg(request, *args, **kwargs):
 # @login_required
 @csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
+    """
+    Removes a scenario bundle based on the provided ID.
+    """
     id = request.GET.get("id")
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + id)
 
@@ -1128,6 +1191,9 @@ def test_query(request, *args, **kwargs):
 #@login_required
 @csrf_exempt
 def get_entities_by_type(request, *args, **kwargs):
+    """
+    Returns all entities (from OEKG) with a certain type. The type should be supplied by the user.
+    """
     entity_type = request.GET.get("entity_type")
     vocab = entity_type.split(".")[0]
     classId = entity_type.split(".")[1]
@@ -1152,6 +1218,9 @@ def get_entities_by_type(request, *args, **kwargs):
 # @login_required
 @csrf_exempt
 def add_entities(request, *args, **kwargs):
+    """
+    Add entities to OEKG. The minimum requirement for adding an entity is the type and label.
+    """
     request_body = json.loads(request.body)
     entity_type = request_body["entity_type"]
     entity_label = request_body["entity_label"]
@@ -1209,6 +1278,9 @@ def add_a_fact(request, *args, **kwargs):
 # @login_required
 @csrf_exempt
 def delete_entities(request, *args, **kwargs):
+    """
+    Removes an entity from OEKG. The minimum requirement for removing an entity is the type and label.
+    """
     entity_type = request.GET.get("entity_type")
     entity_label = request.GET.get("entity_label")
 
@@ -1229,6 +1301,9 @@ def delete_entities(request, *args, **kwargs):
 # @login_required
 @csrf_exempt
 def update_an_entity(request, *args, **kwargs):
+    """
+    Updates an entity in OEKG. The minimum requirements for updating an entity are the type, the old label, and the new label.
+    """
     request_body = json.loads(request.body)
     entity_type = request_body["entity_type"]
     entity_label = request_body["entity_label"]
