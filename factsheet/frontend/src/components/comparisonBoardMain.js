@@ -76,7 +76,7 @@ const ComparisonBoardMain = (props) => {
             spacing={2}>
             <Grid item xs={12} md={4}>
               <Tooltip title="Back to main page">
-                <Link to={`sirop/`} onClick={() => this.forceUpdate}>
+                <Link to={`scenario-bundles/main`} onClick={() => this.forceUpdate}>
                   <Button variant="outlined" size="small" sx={{ mr: 1 }}>
                     <ArrowBackIcon />
                   </Button>
