@@ -29,7 +29,7 @@ function getStyles(name, selectOption, theme) {
   };
 }
 
-export default function MultipleSelectChip({ options, label, sx }) {
+export default function MultipleSelectChip({ options, label, sx, disabled }) {
   const theme = useTheme();
   const [selectOption, setSelectOption] = React.useState([]);
 
@@ -71,6 +71,7 @@ export default function MultipleSelectChip({ options, label, sx }) {
               key={name}
               value={name}
               style={getStyles(name, selectOption, theme)}
+              disabled={disabled}
             >
               {name}
             </MenuItem>
