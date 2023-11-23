@@ -5,6 +5,9 @@ const variables = {
   border: {
     'light': `1px solid ${palette.border}`
   },
+  buttonHeight: {
+    'small': '32px'
+  },
   fontSize: {
     'xs': '0.75rem',
     'sm': '0.875rem',

@@ -4,7 +4,7 @@ import variables from '../variables';
 const toggleButtonGroupStyles = {
   styleOverrides: {
     grouped: {
-      height: '32px',
+      height: variables.buttonHeight.small,
       width: '6rem',
       '& svg': {
         marginRight: variables.spacing[1]
