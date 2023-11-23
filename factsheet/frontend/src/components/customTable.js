@@ -60,6 +60,7 @@ import FormatListBulletedOutlinedIcon from '@mui/icons-material/FormatListBullet
 import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import CardRow from '../styles/oep-theme/components/cardView.js';
 import '../styles/App.css';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -720,101 +721,104 @@ export default function CustomTable(props) {
                   </Stack>
                 </div>
                 <div style={{ padding: "15px" }}>
-                  <Link
-                    to={`scenario-bundles/id/${row.uid}`}
-                    onClick={() => this.forceUpdate}
-                  >
-                    <p style={{ fontSize: '16px', cursor: 'pointer', color: "black" }}>
-                      <span>Acronym</span>
-                      <span>{row.acronym}</span>
-                    </p>
-                  </Link> 
-                  {row.date_of_publication !== null &&
-                    <div>
-                      <span>Date of publication</span>
-                      <span>{row.date_of_publication}</span>
-                    </div>
+                <CardRow
+                  rowKey="Acronym"
+                  rowValue={
+                    <Link
+                      to={`scenario-bundles/id/${row.uid}`}
+                      onClick={() => this.forceUpdate}
+                    >
+                      {row.acronym}
+                    </Link>
                   }
-                  <div>
-                    <span>Abstract</span>
-                    <span>{row.abstract}</span>
-                  </div>
-                  <div>
-                    <span>Institutions</span>
-                    <span>
-                      {row.institutions.map((v) => (
+                />
+                  {row.date_of_publication !== null &&
+                    <CardRow
+                      rowKey='Date of publication'
+                      rowValue={row.date_of_publication}
+                    />
+                  }
+                  <CardRow
+                    rowKey='Abstract'
+                    rowValue={row.abstract}
+                  >
+                  </CardRow>
+                  <CardRow
+                    rowKey='Institutions'
+                    rowValue={
+                      row.institutions.map((v) => (
                         <span>
                           <span> {v} </span>
                           <span>
                             <b className="separator-dot"> . </b>
                           </span>
                         </span>
-                      ))}
-                    </span>
-                  </div>
-                  <div>
-                    <span>Funding sources</span>
-                    <span>
-                      {row.funding_sources.map((v) => (
+                      ))
+                    }
+                  />
+                  <CardRow
+                    rowKey='Funding sources'
+                    rowValue={
+                      row.funding_sources.map((v) => (
                         <span>
                           <span> {v} </span>
                           <span>
                             <b className="separator-dot"> . </b>
                           </span>
                         </span>
-                      ))}
-                    </span>
-                  </div>
-                  <div>
-                    <span>Models and frameworks</span>
-                    <span>
-                      {row.models.map((v) => (
-                        <span>
-                          <span> {v} </span>
+                      ))
+                    }
+                  />
+                  <CardRow
+                    rowKey='Models and frameworks'
+                    rowValue={
+                      <>
+                        {row.models.map((v) => (
                           <span>
-                            <b className="separator-dot"> . </b>
+                            <span> {v} </span>
+                            <span>
+                              <b className="separator-dot"> . </b>
+                            </span>
                           </span>
-                        </span>
-                      ))} 
-                      {row.frameworks.map((v) => (
-                        <span>
-                          <span> {v} </span>
+                        ))} 
+                        {row.frameworks.map((v) => (
                           <span>
-                            <b className="separator-dot"> . </b>
+                            <span> {v} </span>
+                            <span>
+                              <b className="separator-dot"> . </b>
+                            </span>
                           </span>
-                        </span>
-                      ))} 
-                    </span>
-                  </div>
-                  <div>
-                    <span>Scenarios</span>
-                    <span>
-                      {row.scenarios.map((v) => (
-                        <HtmlTooltip
-                          style={{ marginLeft: '10px' }}
-                          placement="top"
-                          title={
-                            <React.Fragment>
-                              <div>
-                                <b>Full name: </b> {v.full_name}
-                                <Divider  style={{ marginTop: '10px',  marginBottom: '10px' }}/>
-                                <b>Abstract:</b> {v.abstract}
-                              </div>
-                            </React.Fragment>
-                          }
-                        >
-                          <Chip
-                            size="small"
-                            color="primary"
-                            label={v.label}
-                            variant={selected.has(v.uid) ? "filled" : "outlined"}
-                            sx={{ 'marginLeft': '5px', 'marginTop': '4px' }}
-                            onClick={(event) => handleClick(event, v.uid)}
-                          />
-                        </HtmlTooltip>
-                      ))}
-                    </span>
-                  </div>
+                        ))} 
+                      </>
+                    }
+                  />
+                  <CardRow
+                    rowKey="Scenarios"
+                    rowValue={row.scenarios.map((v) => (
+                      <HtmlTooltip
+                        style={{ marginLeft: '10px' }}
+                        placement="top"
+                        title={
+                          <React.Fragment>
+                            <div>
+                              <b>Full name: </b> {v.full_name}
+                              <Divider  style={{ marginTop: '10px',  marginBottom: '10px' }}/>
+                              <b>Abstract:</b> {v.abstract}
+                            </div>
+                          </React.Fragment>
+                        }
+                      >
+                        <Chip
+                          size="small"
+                          color="primary"
+                          label={v.label}
+                          variant={selected.has(v.uid) ? "filled" : "outlined"}
+                          sx={{ 'marginLeft': '5px', 'marginTop': '4px' }}
+                          onClick={(event) => handleClick(event, v.uid)}
+                        />
+                      </HtmlTooltip>
+                    ))}
+                  />
                 </div>
               </Grid>
             );
