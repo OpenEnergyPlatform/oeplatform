@@ -56,6 +56,8 @@ import Divider from '@mui/material/Divider';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import ArrowCircleRightOutlinedIcon from '@mui/icons-material/ArrowCircleRightOutlined';
+import FormatListBulletedOutlinedIcon from '@mui/icons-material/FormatListBulletedOutlined';
+import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import '../styles/App.css';
@@ -280,10 +282,9 @@ function EnhancedTableToolbar(props) {
             onChange={handleChangeView}
             aria-label="Platform"
             size="small"
-            sx ={{ height:"32px" }}
           >
-            <ToggleButton value="cards">Cards</ToggleButton>
-            <ToggleButton value="list">List</ToggleButton>
+            <ToggleButton value="list"><FormatListBulletedOutlinedIcon />List</ToggleButton>
+            <ToggleButton value="cards"><ViewAgendaOutlinedIcon />Cards</ToggleButton>
           </ToggleButtonGroup>
         </Grid>
         <Grid item xs={6} md={4}>

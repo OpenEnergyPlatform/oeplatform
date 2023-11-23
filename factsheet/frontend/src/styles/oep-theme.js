@@ -2,6 +2,7 @@ import { createTheme } from '@mui/material/styles';
 import palette from './oep-theme/palette';
 import { buttonStyles, buttonGroupStyles } from './oep-theme/components/buttonStyles';
 import { tableContainerStyles, tableHeaderStyles, tableRowStyles, tableCellStyles } from './oep-theme/components/tableStyles';
+import toggleButtonGroupStyles from './oep-theme/components/toggleButtonGroupStyles';
 import toolbarStyles from './oep-theme/components/toolbarStyles';
 import { typographyStyles, inputLabelStyles, inputBaseStyles, textareaAutosizeStyles, formGroupStyles } from './oep-theme/components/typographyStyles';
 import variables from './oep-theme/variables';
@@ -32,6 +33,7 @@ const theme = createTheme({
     MuiFormGroup: formGroupStyles,
     MuiButton: buttonStyles,
     MuiButtonGroup: buttonGroupStyles,
+    MuiToggleButtonGroup: toggleButtonGroupStyles,
     MuiTableContainer: tableContainerStyles,
     MuiTableHead: tableHeaderStyles,
     MuiTableRow: tableRowStyles,
