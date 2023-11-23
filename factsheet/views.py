@@ -1119,7 +1119,7 @@ def query_oekg(request, *args, **kwargs):
     return response
 
 
-# @login_required
+@login_required
 @csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get("id")
@@ -1173,7 +1173,7 @@ def get_entities_by_type(request, *args, **kwargs):
     return response
 
 
-# @login_required
+@login_required
 @csrf_exempt
 def add_entities(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -1203,7 +1203,7 @@ def add_entities(request, *args, **kwargs):
     return response
 
 
-# @login_required
+@login_required
 @csrf_exempt
 def add_a_fact(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -1230,7 +1230,7 @@ def add_a_fact(request, *args, **kwargs):
     return response
 
 
-# @login_required
+@login_required
 @csrf_exempt
 def delete_entities(request, *args, **kwargs):
     entity_type = request.GET.get("entity_type")
@@ -1250,7 +1250,7 @@ def delete_entities(request, *args, **kwargs):
     return response
 
 
-# @login_required
+@login_required
 @csrf_exempt
 def update_an_entity(request, *args, **kwargs):
     request_body = json.loads(request.body)

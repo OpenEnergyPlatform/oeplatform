@@ -1616,7 +1616,7 @@ const items = {
 }
 const scenario_count = 'Scenarios'+' (' + scenarios.length + ')' ;
 const renderScenariosOverview = () => (
-  <Container maxWidth="lg" sx={{ padding: '0px !important' }}>
+  <Container maxWidth="lg2" sx={{ padding: '0px !important' }}>
     {
       scenarios.map((v, i) => 
       v.acronym !== '' && 
@@ -2400,7 +2400,7 @@ function getStepContent(step: number) {
       alignItems="center"
       >
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
-        <Container maxWidth="lg">
+        <Container maxWidth="lg2">
 
         
 
