@@ -686,7 +686,8 @@ export default function CustomTable(props) {
 
   const renderCards= (rs) => {
     const rowsToRender =  filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
-    return  <Grid container 
+    return  <Grid 
+              container 
               justifyContent="space-between"
               alignItems="start"
               direction="row"
@@ -695,35 +696,100 @@ export default function CustomTable(props) {
               const isItemSelected = isSelected(row.study_name);
               const labelId = `enhanced-table-checkbox-${index}`;
               return (
-              <Grid item xs={12} sx={{ border: '1px solid #cadff5', marginBottom: "10px"}} >
+              <Grid
+                item xs={12}
+                sx={{ border: '1px solid #cadff5', marginBottom: "10px"}}
+              >
                 <div style={{ backgroundColor: "#f6f9fb", padding: "15px" }}>
-                  <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
-                    <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
-                      <Typography variant="body1"><b style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}> {row.study_name} </b></Typography>
+                  <Stack
+                    direction="row"
+                    justifyContent="flex-start"
+                    alignItems="center"
+                    spacing={2}
+                  >
+                    <Link
+                      to={`scenario-bundles/id/${row.uid}`}
+                      onClick={() => this.forceUpdate}
+                    >
+                      <Typography variant="body1">
+                        <span style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}>
+                          {row.study_name}
+                        </span>
+                      </Typography>
                     </Link> 
                   </Stack>
                 </div>
                 <div style={{ padding: "15px" }}>
-                  <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-                    <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
-                      <p style={{ fontSize: '16px', cursor: 'pointer', color: "black" }}><b>Acronym: </b>{row.acronym}</p>
-                    </Link> 
-                    {row.date_of_publication !== null && <p><b>Date of publication: </b>{row.date_of_publication}</p>}
-                  </Stack>
-                  <p><b>Abstract: </b> {row.abstract}</p>
-                  <p><b>Institutions: </b>{row.institutions.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
-                                  ))} </p>
-                  <p><b>Funding sources: </b>{row.funding_sources.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
-                                  ))} </p>
-                  <p><b>Models and frameworks: </b>{row.models.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
-                                  ))} 
-                                  {row.frameworks.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
-                                  ))} </p>
-                  <p><b>Scenarios: </b>{row.scenarios.map((v) => (
+                  <Link
+                    to={`scenario-bundles/id/${row.uid}`}
+                    onClick={() => this.forceUpdate}
+                  >
+                    <p style={{ fontSize: '16px', cursor: 'pointer', color: "black" }}>
+                      <span>Acronym</span>
+                      <span>{row.acronym}</span>
+                    </p>
+                  </Link> 
+                  {row.date_of_publication !== null &&
+                    <div>
+                      <span>Date of publication</span>
+                      <span>{row.date_of_publication}</span>
+                    </div>
+                  }
+                  <div>
+                    <span>Abstract</span>
+                    <span>{row.abstract}</span>
+                  </div>
+                  <div>
+                    <span>Institutions</span>
+                    <span>
+                      {row.institutions.map((v) => (
+                        <span>
+                          <span> {v} </span>
+                          <span>
+                            <b className="separator-dot"> . </b>
+                          </span>
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                  <div>
+                    <span>Funding sources</span>
+                    <span>
+                      {row.funding_sources.map((v) => (
+                        <span>
+                          <span> {v} </span>
+                          <span>
+                            <b className="separator-dot"> . </b>
+                          </span>
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                  <div>
+                    <span>Models and frameworks</span>
+                    <span>
+                      {row.models.map((v) => (
+                        <span>
+                          <span> {v} </span>
+                          <span>
+                            <b className="separator-dot"> . </b>
+                          </span>
+                        </span>
+                      ))} 
+                      {row.frameworks.map((v) => (
+                        <span>
+                          <span> {v} </span>
+                          <span>
+                            <b className="separator-dot"> . </b>
+                          </span>
+                        </span>
+                      ))} 
+                    </span>
+                  </div>
+                  <div>
+                    <span>Scenarios</span>
+                    <span>
+                      {row.scenarios.map((v) => (
                         <HtmlTooltip
                           style={{ marginLeft: '10px' }}
                           placement="top"
@@ -737,12 +803,19 @@ export default function CustomTable(props) {
                             </React.Fragment>
                           }
                         >
-                          <Chip size="small" color="primary" label={v.label} variant={selected.has(v.uid) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '4px' }} onClick={(event) => handleClick(event, v.uid)}/>
+                          <Chip
+                            size="small"
+                            color="primary"
+                            label={v.label}
+                            variant={selected.has(v.uid) ? "filled" : "outlined"}
+                            sx={{ 'marginLeft': '5px', 'marginTop': '4px' }}
+                            onClick={(event) => handleClick(event, v.uid)}
+                          />
                         </HtmlTooltip>
                       ))}
-                  </p>
+                    </span>
+                  </div>
                 </div>
-
               </Grid>
             );
       })}
