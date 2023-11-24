@@ -490,7 +490,7 @@ def create_factsheet(request, *args, **kwargs):
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
     """
-    Updates a scenario bundle with new data.
+    Updates a scenario bundle based on user's data. 
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
@@ -861,7 +861,12 @@ def factsheet_by_name(request, *args, **kwargs):
 def factsheet_by_id(request, *args, **kwargs):
     """
     Returns a scenario bundle based based on the provided ID. 
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        id (str): The unique ID for the bundle. 
     """
+
     uid = request.GET.get("id")
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
     factsheet = {}
@@ -1085,7 +1090,13 @@ def factsheet_by_id(request, *args, **kwargs):
 @csrf_exempt
 def query_oekg(request, *args, **kwargs):
     """
-    Takes user-supplied filter objects and uses them to build a SPARQL query. 
+    This function takes filter objects provided by the user and utilises them to construct a SPARQL query.
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        criteria (str): An object that contains institutions, authors, funding sources, start date of the publications, end date of publications
+        study descriptors, and a range for scenario years. All of these fields are utilised to construct a SPARQL query for execution on the OEKG.
+
     """
     request_body = json.loads(request.body)
     criteria = request_body["criteria"]
@@ -1161,6 +1172,11 @@ def query_oekg(request, *args, **kwargs):
 def delete_factsheet_by_id(request, *args, **kwargs):
     """
     Removes a scenario bundle based on the provided ID.
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        id (str): The unique ID for the bundle. 
+
     """
     id = request.GET.get("id")
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + id)
@@ -1193,6 +1209,10 @@ def test_query(request, *args, **kwargs):
 def get_entities_by_type(request, *args, **kwargs):
     """
     Returns all entities (from OEKG) with a certain type. The type should be supplied by the user.
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        entity_type (str): The type(OEO class) of the entity.
     """
     entity_type = request.GET.get("entity_type")
     vocab = entity_type.split(".")[0]
@@ -1219,7 +1239,13 @@ def get_entities_by_type(request, *args, **kwargs):
 @csrf_exempt
 def add_entities(request, *args, **kwargs):
     """
-    Add entities to OEKG. The minimum requirement for adding an entity is the type and label.
+    Add entities to OEKG. The minimum requirements for adding an entity are the type and label.
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        entity_type (str): The type(OEO class) of the entity.
+        entity_label (str): The label of the entity.
+        entity_iri (str): The IRI of the entity.
     """
     request_body = json.loads(request.body)
     entity_type = request_body["entity_type"]
@@ -1279,7 +1305,12 @@ def add_a_fact(request, *args, **kwargs):
 @csrf_exempt
 def delete_entities(request, *args, **kwargs):
     """
-    Removes an entity from OEKG. The minimum requirement for removing an entity is the type and label.
+    Removes an entity from OEKG. The minimum requirements for removing an entity are the type and label.
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        entity_type (str): The type(OEO class) of the entity.
+        entity_label (str): The label of the entity.
     """
     entity_type = request.GET.get("entity_type")
     entity_label = request.GET.get("entity_label")
@@ -1303,7 +1334,14 @@ def delete_entities(request, *args, **kwargs):
 def update_an_entity(request, *args, **kwargs):
     """
     Updates an entity in OEKG. The minimum requirements for updating an entity are the type, the old label, and the new label.
-    """
+   
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        entity_type (str): The type(OEO class) of the entity.
+        entity_label (str): The label of the entity.   
+        new_entity_label (str): The new label of the entity.   
+        entity_id (str): The IRI of the entity.
+   """
     request_body = json.loads(request.body)
     entity_type = request_body["entity_type"]
     entity_label = request_body["entity_label"]
