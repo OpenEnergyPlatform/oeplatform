@@ -60,6 +60,7 @@ import FormatListBulletedOutlinedIcon from '@mui/icons-material/FormatListBullet
 import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
 import { CardItem, CardHeader, CardBody, CardRow} from '../styles/oep-theme/components/cardView.js';
 import '../styles/App.css';
 import variables from '../styles/oep-theme/variables.js';
@@ -821,6 +822,7 @@ export default function CustomTable(props) {
 
   return (
     <Box sx={{ width: '100%' }}>
+      <BreadcrumbsNavGrid subheaderContent="Overview" />
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={openBackDrop}
