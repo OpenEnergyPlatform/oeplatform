@@ -6,6 +6,18 @@ const fontSizeSmallStyles = {
   color: palette.text.primary
 }
 
+export const typographyVariants = {
+  body2: {
+    fontSize: variables.fontSize.sm,
+    color: palette.text.primary,
+  },
+  link: {
+    fontWeight: variables.fontWeight.bold,
+    cursor: 'pointer',
+    color: palette.link
+  }
+};
+
 export const typographyStyles = {
   styleOverrides: {
     small: {

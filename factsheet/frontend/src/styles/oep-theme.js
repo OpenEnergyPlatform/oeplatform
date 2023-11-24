@@ -4,8 +4,7 @@ import { buttonStyles, buttonGroupStyles } from './oep-theme/components/buttonSt
 import { tableContainerStyles, tableHeaderStyles, tableRowStyles, tableCellStyles } from './oep-theme/components/tableStyles';
 import toggleButtonGroupStyles from './oep-theme/components/toggleButtonGroupStyles';
 import toolbarStyles from './oep-theme/components/toolbarStyles';
-import { typographyStyles, inputLabelStyles, inputBaseStyles, textareaAutosizeStyles, formGroupStyles } from './oep-theme/components/typographyStyles';
-import variables from './oep-theme/variables';
+import { typographyVariants, typographyStyles, inputLabelStyles, inputBaseStyles, textareaAutosizeStyles, formGroupStyles } from './oep-theme/components/typographyStyles';
 
 const theme = createTheme({
   breakpoints: {
@@ -19,12 +18,7 @@ const theme = createTheme({
     }
   },
   palette: palette,
-  typography: {
-    body2: {
-      fontSize: variables.fontSize.sm,
-      color: palette.text.primary,
-    },
-  },
+  typography: typographyVariants,
   components: {
     MuiTypography: typographyStyles,
     MuiInputLabel: inputLabelStyles,

@@ -16,6 +16,11 @@ const variables = {
     'xl': '1.5rem',
     'xl1': '2rem'
   },
+  fontWeight: {
+    'light': 300,
+    'normal': 400,
+    'bold': 700
+  },
   lineHeight: {
     'sm': '1.25rem',
   },
