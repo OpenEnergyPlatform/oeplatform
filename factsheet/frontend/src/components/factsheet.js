@@ -591,7 +591,7 @@ function Factsheet(props) {
   };
 
   const getScenarioYears = async () => {
-    const { data } = await axios.get(conf.toep + `scenario-bundlesrio-bundles/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
     return data;
   };
 
@@ -1616,7 +1616,7 @@ const items = {
 }
 const scenario_count = 'Scenarios'+' (' + scenarios.length + ')' ;
 const renderScenariosOverview = () => (
-  <Container maxWidth="lg" sx={{ padding: '0px !important' }}>
+  <Container maxWidth="lg2" sx={{ padding: '0px !important' }}>
     {
       scenarios.map((v, i) => 
       v.acronym !== '' && 
@@ -1792,9 +1792,9 @@ const renderScenariosOverview = () => (
                     title={
                     <React.Fragment>
                       <Typography color="inherit" variant="subtitle1">
-                        {'Endogenous data is a data item whose quantity value is determined by a model.'}
+                        {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030030">More info from Open Energy Ontology (OEO)...</a>
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
                       </Typography>
                     </React.Fragment>
                     }
@@ -1815,9 +1815,9 @@ const renderScenariosOverview = () => (
                     title={
                     <React.Fragment>
                       <Typography color="inherit" variant="subtitle1">
-                        {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
+                        {'Output data is endogenous data that is determined by a model calculation and presented as a result.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020013">More info from Open Energy Ontology (OEO)...</a>
                       </Typography>
                     </React.Fragment>
                     }
@@ -2400,7 +2400,7 @@ function getStepContent(step: number) {
       alignItems="center"
       >
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
-        <Container maxWidth="lg">
+        <Container maxWidth="lg2">
 
         
 

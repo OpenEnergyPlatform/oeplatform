@@ -13,8 +13,12 @@ import Container from '@mui/material/Container';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Stack from '@mui/material/Stack';
+import Toolbar from '@mui/material/Toolbar';
+import { Tooltip } from '@mui/material';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
+import OptionBox from '../styles/oep-theme/components/optionBox.js';
+import MultipleSelectChip from '../styles/oep-theme/components/multiselect.js';
 
 const ComparisonBoardMain = (props) => {
   const { params } = props;
@@ -36,6 +40,7 @@ const ComparisonBoardMain = (props) => {
 
 
   const Criteria = [
+    'Scenario abstract',
     'Study name',
     'Study abstract',
     'Descriptors',
@@ -64,62 +69,53 @@ const ComparisonBoardMain = (props) => {
       justifyContent="space-between"
       alignItems="center"
     >
-        <Grid item xs={12} >
-          <div style={{ backgroundColor: '#e3eaef', height: '100px', marginBottom: '10px' }}>
-            <div id='headerStyle'>
-            <span>
-              <ListAltOutlinedIcon />
-            </span>
-            <span>Scenario Bundle</span>
-            </div>
-          <div id='headerSubStyle'> <span> Comparison </span> </div>
-          </div>
-        </Grid>
-        <Container maxWidth="false">
-            <Box sx={{ 
-              padding: '5px',
-              margin: '5px',
-              display: 'block'}}
-            >
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Link to={`scenario-bundles/main`} onClick={() => this.forceUpdate}>
-                <Button color="primary" 
-                        variant="outlined" 
-                        size="small" 
-                        startIcon={<ArrowBackIcon />}>
-                  Back
-                </Button>
-              </Link> 
+      <BreadcrumbsNavGrid subheaderContent="Comparison" />
+      <Container maxWidth="lg2">
+        <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
+          <Grid container justifyContent="space-between"
+            spacing={2}>
+            <Grid item xs={12} md={4}>
+              <Tooltip title="Back to main page">
+                <Link to={`scenario-bundles/main`} onClick={() => this.forceUpdate}>
+                  <Button variant="outlined" size="small" sx={{ mr: 1 }}>
+                    <ArrowBackIcon />
+                  </Button>
+                </Link>  
+              </Tooltip>
+            </Grid>
+            <Grid item xs={6} md={4}>
+            </Grid>
+            <Grid item xs={6} md={4}>
               <Button color="primary" 
-                      variant="outlined" 
-                      size="small" 
-                      startIcon={<ArrowRightIcon />}>
+                variant="text" 
+                size="small" 
+                startIcon={<ArrowRightIcon />}>
                 How it works? 
               </Button>
-            </Stack>
-            </Box>
-            {/* <ComparisonControl /> */}
-            <Box sx={{ 
-              padding: '5px',
-              paddingLeft: '15px',
-              margin: '5px',
-              backgroundColor: '#F6F9FB',
-              overflow: 'auto',
-              display: 'block'}}
-              >
-              <b>Criteria</b>
-              <FormGroup>
-                <div >
-                  {
-                    Criteria.map((item) => <FormControlLabel control={<Checkbox size="medium" color="primary" />} checked={selectedCriteria.includes(item)} onChange={handleCriteria} label={item} name={item} />)
-                  }
-                </div>
-              </FormGroup>
-            </Box>
-            <ComparisonBoardItems elements={scenarios} c_aspects={selectedCriteria} />
-        </Container>
-      </Grid>
-    );
+            </Grid>
+          </Grid>   
+        </Toolbar>
+        {/* <ComparisonControl /> */}
+        <OptionBox>
+          <h2>Criteria</h2>
+          <FormGroup>
+            <div >
+              {
+                Criteria.map((item) => <FormControlLabel control={<Checkbox size="medium" color="primary" />} checked={selectedCriteria.includes(item)} onChange={handleCriteria} label={item} name={item} />)
+              }
+            </div>
+          </FormGroup>
+          <MultipleSelectChip
+            sx={{ mt: 2, width : "100%" }}
+            options={['Scenario 1', 'Scenario 2', 'Scenario 3']}
+            label="Scenarios to be compared"
+            disabled={true}
+            />
+        </OptionBox>
+        <ComparisonBoardItems elements={scenarios} c_aspects={selectedCriteria} />
+      </Container>
+    </Grid>
+  );
 };
 
 export default ComparisonBoardMain;
