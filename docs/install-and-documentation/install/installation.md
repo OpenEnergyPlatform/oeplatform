@@ -38,7 +38,7 @@ The installation steps have been proofed on linux and windows for python 3.6 and
             - start docker container
 
         ??? info "Option 2: Manual database setup"
-            - [install manually](manual_db_setup.md)
+            - [install manually](./manual-db-setup.md)
 
     3. Setup the OEO integration
         - Instructions on [Section 4](#41-include-the-full-oeo)
@@ -61,13 +61,13 @@ The installation steps have been proofed on linux and windows for python 3.6 and
         - `python manage.py runserver`
         - Open Browser URL: 127.0.0.1:8000
 
-        - [create a test user.](../dev/developement.md#user-management)
+        - [create a test user.](./development-setup.md#user-management)
 
 ## 1 Setup the repository
 
 Clone the repository locally
 
-``` bash
+```bash
 git clone https://github.com/OpenEnergyPlatform/oeplatform.
 git oep-website
 ```
@@ -108,7 +108,7 @@ Additional we use a graph database:
 
 You have two options:
 
-1. You chose to install the databases manually by installing PostgreSQL and complete the setup. In this case you can follow our [manual database setup guide](manual_db_setup.md).
+1. You chose to install the databases manually by installing PostgreSQL and complete the setup. In this case you can follow our [manual database setup guide](./manual-db-setup.md).
 
 2. You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system.
 [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
@@ -139,7 +139,7 @@ It is necessary to include the source files of the OpenEnergyOntology (OEO) in t
 Currently you have to manually create the following folder structure:
 
 ```
-# Add this in the "oeplatform" directory. Not in the "oeplatform/oeplatform" directory. 
+# Add "ontologies" folder and insert the oeo build files (see info below) in the "oeplatform" directory. Not in the "oeplatform/oeplatform" directory. 
 ontologies/
 └── oeo
     └── 1 # in production this will be the version of a specific OEO release
@@ -149,14 +149,14 @@ ontologies/
 ```
 
 !!! info
-    Get the current release of the oeo `full-oeo.owl` from the [openenergyplatform.org](https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl)
+    Download the [full oeo release from GitHub: Assets - build-files.zip](https://github.com/OpenEnergyPlatform/ontology/releases) and extract the oeo directory to match the pattern provided above.
 
-    Modules and Imports can also be downloaded from [openenergyplatform.org/ontology/oeo/](https://openenergyplatform.org/ontology/oeo/)
+    Get only the oeo `full-oeo.owl` from the [openenergyplatform.org](https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl)
 
 #### 4.2 Setup the OEO-viewer app
 
-!!! note
-    This step is not mandatory to run the oeplatform. If you don't include this step you can access the oeplatform website including most ontology pages except for the oeo-viewer and scenario-bundle as well as scenario-comparison React modules.
+!!! note "Optional Step"
+    This step is not mandatory to run the oeplatform-core as it is a pluggable React-App. If you don't include this step you can access the oeplatform website including most ontology pages except for the oeo-viewer.
 
 The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see the oeo-viewer, follow the steps below:
 
@@ -168,7 +168,7 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 
 - On windows see [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
 
-2- Get the ontology files (full description missing)
+2- Get the ontology files (see [Section 4.1](#41-include-the-full-oeo))
 
 3- Build the oeo-viewer:
 
@@ -177,6 +177,51 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
     npm run build
 
 After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
+
+### 5 Setup the Scenario-Bundles app
+
+!!! note "Optional Step"
+    This step is not mandatory to run the oeplatform-core as it is a pluggable React-App. If you don't include this step you can access the oeplatform website except scenario-bundle pages including the scenario-comparison React modules.
+
+In the django app directory `oeplatform/factsheet` we Provide a Web-API to access the OEKG and the Scenario-Bundle feature. Similar to the oeo-viewer we need to use npm to install & build the Scenario-Bundle app and integrate the build in the django app.
+
+1. Make sure npm is installed.
+2. Start the jenna-fuseki database (see [instructions](./manual-db-setup.md#12-install-apache-jena-fuseki) from the installation).
+
+    The connection to the database API is setup in the factsheet/views.py you have to make sure that you provide the correct URL to you database instance. In developement mode it should be something like:
+
+    ``` python
+    query_endpoint = 'http://localhost:3030/ds/query'
+    update_endpoint = 'http://localhost:3030/ds/update'
+    ```
+
+3. Configure the the React app:
+
+    To be able to construct the API URLS that are necessary for communication between the react frontend and the django backend in the react code we have to configure the URL where our django application is available. In development mode this should be:
+
+    `"toep": "http://127.0.0.1:8000/"`
+
+    Add this line to `factsheet/frontend/src/conf.json`
+
+4. Build the scenario bundle app:
+
+    ``` bash
+    cd factsheet/frontend
+    npm install
+    cd ../..
+    # Use the django management command
+    python manage.py build_factsheet_app
+    ```
+
+5. Serve the React build on a django website
+
+    To serve the React build on a website that is provided by django you have to include the build files from the `factsheet/static` directory in the django template in `factsheet/templates/index.html`. In the html template the you must make sure that the JavaScript bundle file is imported. The name of the file changes after each new build and it should read like `main.5654a0e0.js`.
+
+    The tamplate should then include this line:
+    ```html
+    <script src="{% static 'factsheet/js/main.55586e26.js' %}"></script>
+    ```
+
 
 ## Next steps
 

@@ -102,6 +102,7 @@ nav:
         - install-and-documentation/oeplatform-code/architecture/index.md
         - Infrastructure: install-and-documentation/oeplatform-code/architecture/infrastructure.md
         - Software Project: install-and-documentation/oeplatform-code/architecture/project-structure.md
+        - oeplatform Modules: install-and-documentation/oeplatform-code/architecture/modules.md
       - Web-API's:
         - install-and-documentation/oeplatform-code/web-api/index.md
         - OEDB REST-API: 
