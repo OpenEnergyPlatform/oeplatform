@@ -153,11 +153,10 @@ ontologies/
 
     Get only the oeo `full-oeo.owl` from the [openenergyplatform.org](https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl)
 
-
 #### 4.2 Setup the OEO-viewer app
 
-!!! note
-    This step is not mandatory to run the oeplatform. If you don't include this step you can access the oeplatform website including most ontology pages except for the oeo-viewer and scenario-bundle as well as scenario-comparison React modules.
+!!! note "Optional Step"
+    This step is not mandatory to run the oeplatform-core as it is a pluggable React-App. If you don't include this step you can access the oeplatform website including most ontology pages except for the oeo-viewer.
 
 The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see the oeo-viewer, follow the steps below:
 
@@ -169,7 +168,7 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 
 - On windows see [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
 
-2- Get the ontology files (full description missing)
+2- Get the ontology files (see [Section 4.1](#41-include-the-full-oeo))
 
 3- Build the oeo-viewer:
 
@@ -178,6 +177,51 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
     npm run build
 
 After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
+
+### 5 Setup the Scenario-Bundles app
+
+!!! note "Optional Step"
+    This step is not mandatory to run the oeplatform-core as it is a pluggable React-App. If you don't include this step you can access the oeplatform website except scenario-bundle pages including the scenario-comparison React modules.
+
+In the django app directory `oeplatform/factsheet` we Provide a Web-API to access the OEKG and the Scenario-Bundle feature. Similar to the oeo-viewer we need to use npm to install & build the Scenario-Bundle app and integrate the build in the django app.
+
+1. Make sure npm is installed.
+2. Start the jenna-fuseki database (see [instructions](./manual-db-setup.md#12-install-apache-jena-fuseki) from the installation).
+
+    The connection to the database API is setup in the factsheet/views.py you have to make sure that you provide the correct URL to you database instance. In developement mode it should be something like:
+
+    ``` python
+    query_endpoint = 'http://localhost:3030/ds/query'
+    update_endpoint = 'http://localhost:3030/ds/update'
+    ```
+
+3. Configure the the React app:
+
+    To be able to construct the API URLS that are necessary for communication between the react frontend and the django backend in the react code we have to configure the URL where our django application is available. In development mode this should be:
+
+    `"toep": "http://127.0.0.1:8000/"`
+
+    Add this line to `factsheet/frontend/src/conf.json`
+
+4. Build the scenario bundle app:
+
+    ``` bash
+    cd factsheet/frontend
+    npm install
+    cd ../..
+    # Use the django management command
+    python manage.py build_factsheet_app
+    ```
+
+5. Serve the React build on a django website
+
+    To serve the React build on a website that is provided by django you have to include the build files from the `factsheet/static` directory in the django template in `factsheet/templates/index.html`. In the html template the you must make sure that the JavaScript bundle file is imported. The name of the file changes after each new build and it should read like `main.5654a0e0.js`.
+
+    The tamplate should then include this line:
+    ```html
+    <script src="{% static 'factsheet/js/main.55586e26.js' %}"></script>
+    ```
+
 
 ## Next steps
 
