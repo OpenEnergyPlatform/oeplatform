@@ -38,7 +38,7 @@ The installation steps have been proofed on linux and windows for python 3.6 and
             - start docker container
 
         ??? info "Option 2: Manual database setup"
-            - [install manually](manual_db_setup.md)
+            - [install manually](./manual-db-setup.md)
 
     3. Setup the OEO integration
         - Instructions on [Section 4](#41-include-the-full-oeo)
@@ -61,13 +61,13 @@ The installation steps have been proofed on linux and windows for python 3.6 and
         - `python manage.py runserver`
         - Open Browser URL: 127.0.0.1:8000
 
-        - [create a test user.](../dev/developement.md#user-management)
+        - [create a test user.](./development-setup.md#user-management)
 
 ## 1 Setup the repository
 
 Clone the repository locally
 
-``` bash
+```bash
 git clone https://github.com/OpenEnergyPlatform/oeplatform.
 git oep-website
 ```
@@ -108,7 +108,7 @@ Additional we use a graph database:
 
 You have two options:
 
-1. You chose to install the databases manually by installing PostgreSQL and complete the setup. In this case you can follow our [manual database setup guide](manual_db_setup.md).
+1. You chose to install the databases manually by installing PostgreSQL and complete the setup. In this case you can follow our [manual database setup guide](./manual-db-setup.md).
 
 2. You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system.
 [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
@@ -139,7 +139,7 @@ It is necessary to include the source files of the OpenEnergyOntology (OEO) in t
 Currently you have to manually create the following folder structure:
 
 ```
-# Add this in the "oeplatform" directory. Not in the "oeplatform/oeplatform" directory. 
+# Add "ontologies" folder and insert the oeo build files (see info below) in the "oeplatform" directory. Not in the "oeplatform/oeplatform" directory. 
 ontologies/
 └── oeo
     └── 1 # in production this will be the version of a specific OEO release
@@ -149,9 +149,10 @@ ontologies/
 ```
 
 !!! info
-    Get the current release of the oeo `full-oeo.owl` from the [openenergyplatform.org](https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl)
+    Download the [full oeo release from GitHub: Assets - build-files.zip](https://github.com/OpenEnergyPlatform/ontology/releases) and extract the oeo directory to match the pattern provided above.
 
-    Modules and Imports can also be downloaded from [openenergyplatform.org/ontology/oeo/](https://openenergyplatform.org/ontology/oeo/)
+    Get only the oeo `full-oeo.owl` from the [openenergyplatform.org](https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl)
+
 
 #### 4.2 Setup the OEO-viewer app
 
