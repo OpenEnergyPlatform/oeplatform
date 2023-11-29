@@ -24,7 +24,7 @@ The installation steps have been proofed on linux and windows for python 3.6 and
     1. Get code & install dependencies.
         - `git clone https://github.com/OpenEnergyPlatform/oeplatform.git`
         - `cd oeplatform`
-        - `pip -m venv env`
+        - `python -m venv env`
         - `pip install -r requirements.txt`
 
     2. Install databases & setup connection
