@@ -72,6 +72,8 @@ import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import Container from '@mui/material/Container';
 import Backdrop from '@mui/material/Backdrop';
 
+import CSRFToken from './csrfToken';
+
 import '../styles/App.css';
 import { TableRow } from '@mui/material';
 import variables from '../styles/oep-theme/variables.js';
@@ -321,7 +323,11 @@ function Factsheet(props) {
           scenarios: JSON.stringify(scenarios),
           models: JSON.stringify(selectedModels),
           frameworks: JSON.stringify(selectedFrameworks),
-        }).then(response => {
+        },
+        { 
+          headers: {'X-CSRFToken': CSRFToken()}
+        }
+        ).then(response => {
         if (response.data === 'Factsheet saved') {
           navigate('/factsheet/fs/' + new_uid);
           setIsCreated(true);
@@ -361,7 +367,11 @@ function Factsheet(props) {
             scenarios: JSON.stringify(scenarios),
             models: JSON.stringify(selectedModels),
             frameworks: JSON.stringify(selectedFrameworks),
-          }).then(response => {
+          },
+          { 
+            headers: {'X-CSRFToken': CSRFToken()}
+          }
+          ).then(response => {
             if (response.data === "factsheet updated!") {
               setUID(uid);
               setOpenUpdatedDialog(true);
@@ -380,7 +390,8 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+    axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }, { headers: {'X-CSRFToken': CSRFToken()}}
+    ).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseSavedDialog = () => {
@@ -684,7 +695,11 @@ function Factsheet(props) {
       entity_type: 'OEO.OEO_00000238',
       entity_label: newElement.name,
       entity_iri: newElement.iri
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'A new entity added!') {
       setOpenAddedDialog(true);
       setAddedEntity(['Institution', newElement.name ]);
@@ -705,7 +720,11 @@ function Factsheet(props) {
       entity_label: oldElement,
       new_entity_label: newElement,
       entity_iri: editIRI
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Institution', oldElement, newElement ]);
@@ -724,7 +743,11 @@ function Factsheet(props) {
       entity_type: 'OEO.OEO_00090001',
       entity_label: newElement.name,
       entity_iri: newElement.iri
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
       setAddedEntity(['Funding source', newElement.name ]);
@@ -744,7 +767,11 @@ function Factsheet(props) {
       entity_label: oldElement,
       new_entity_label: newElement,
       entity_iri: editIRI
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Funding source', oldElement, newElement ]);
@@ -763,7 +790,11 @@ function Factsheet(props) {
       entity_type: 'OEO.OEO_00000107',
       entity_label: newElement.name,
       entity_iri: newElement.iri
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
       setAddedEntity(['Contact person', newElement.name ]);
@@ -783,7 +814,11 @@ function Factsheet(props) {
       entity_label: oldElement,
       new_entity_label: newElement,
       entity_iri: editIRI
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Contact person', oldElement, newElement ]);
@@ -802,7 +837,11 @@ function Factsheet(props) {
       entity_type: 'OEO.OEO_00000064',
       entity_label: newElement.name,
       entity_iri: newElement.iri
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
       setAddedEntity(['Author', newElement.name ]);
@@ -822,7 +861,11 @@ function Factsheet(props) {
       entity_label: oldElement,
       new_entity_label: newElement,
       entity_iri: editIRI
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Author', oldElement, newElement ]);
@@ -841,7 +884,11 @@ function Factsheet(props) {
       'entity_type': 'OEO.OEO_00020032', 
       'entity_label': newElement.name,
       'entity_iri': newElement.iri,
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
       setAddedEntity(['Spatial region', newElement.name ]);
@@ -861,7 +908,11 @@ function Factsheet(props) {
       entity_label: oldElement,
       new_entity_label: newElement,
       entity_iri: editIRI
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Spatial region', oldElement, newElement ]);
@@ -880,7 +931,11 @@ function Factsheet(props) {
       entity_type: 'OEO.OEO_00020036',
       entity_label: newElement.name,
       entity_iri: newElement.iri
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
       setAddedEntity(['Interacting region', newElement.name ]);
@@ -900,7 +955,11 @@ function Factsheet(props) {
       entity_label: oldElement,
       new_entity_label: newElement,
       entity_iri: editIRI
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Interacting region', oldElement, newElement ]);
@@ -919,7 +978,11 @@ function Factsheet(props) {
       entity_type: 'OBO.OEO_00020097',
       entity_label: newElement.name,
       entity_iri: newElement.iri
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
       setAddedEntity(['Scenario year', newElement.name ]);
@@ -939,7 +1002,11 @@ function Factsheet(props) {
       entity_label: oldElement,
       new_entity_label: newElement,
       entity_iri: editIRI
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Scenario year', oldElement, newElement ]);
@@ -958,7 +1025,11 @@ function Factsheet(props) {
       entity_type: 'OEO.OEO_00000274',
       entity_label: newElement.name,
       entity_iri: newElement.iri
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
       setAddedEntity(['Model', newElement.name ]);
@@ -978,7 +1049,11 @@ function Factsheet(props) {
       entity_label: oldElement,
       new_entity_label: newElement,
       entity_iri: editIRI
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Model', oldElement, newElement ]);
@@ -997,7 +1072,11 @@ function Factsheet(props) {
       entity_type: 'OEO.OEO_00000172',
       entity_label: newElement.name,
       entity_iri: newElement.iri
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
       setAddedEntity(['Framework', newElement.name ]);
@@ -1017,7 +1096,11 @@ function Factsheet(props) {
       entity_label: oldElement,
       new_entity_label: newElement,
       entity_iri: editIRI
-    }).then(response => {
+    },
+    { 
+      headers: {'X-CSRFToken': CSRFToken()}
+    }
+    ).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Framework', oldElement, newElement ]);
@@ -2571,7 +2654,7 @@ function getStepContent(step: number) {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Link to={`scenario-bundles/main`} onClick={() => { axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+              <Link to={`scenario-bundles/main`} onClick={() => { axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }, { headers: {'X-CSRFToken': CSRFToken()}}).then(response => setOpenRemovedDialog(true));
                 this.reloadRoute();}} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
               <Button variant="contained" color="error" >
                 Yes
