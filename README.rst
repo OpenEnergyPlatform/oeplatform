@@ -1,6 +1,8 @@
 
 .. figure:: https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4
     :align: left
+    :width: 200
+    :height: 200
     :target: https://openenergy-platform.org/
     :alt: Repo logo
 
