@@ -1,33 +1,23 @@
 
-.. figure:: https://user-images.githubusercontent.com/14353512/185425447-85dbcde9-f3a2-4f06-a2db-0dee43af2f5f.png
+.. figure:: https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4
     :align: left
-    :target: https://github.com/rl-institut/super-repo/
+    :target: https://openenergy-platform.org/
     :alt: Repo logo
 
 ===================
 oeplatform
 ===================
 
-.. table::
-   :align: center
-
-   +---------------------------------------------+-----------------------------------------------------------------------------------------------------------+
-   | Workflow                                    | Status-Badge & Link                                                                                       |
-   +=============================================+===========================================================================================================+
-   | Automated tests                             | |Automated tests|                                                                                         |
-   +---------------------------------------------+-----------------------------------------------------------------------------------------------------------+
-   | Docs                                        | |Documentation Status|                                                                                    |
-   +---------------------------------------------+-----------------------------------------------------------------------------------------------------------+
 
 .. list-table::
    :widths: auto
 
-    * - Automated tests
-      - |Automated tests|
-    * - Build Docs
-      - |Documentation Status|
-    * - Build docker
-      - |Create and publish a Docker image|
+   * - Automated tests
+     - |Automated tests|
+   * - Build Docs
+     - |Documentation Status|
+   * - Build docker
+     - |Create and publish a Docker image|
 
 
 .. |Automated tests| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/automated-testing.yaml/badge.svg
@@ -39,12 +29,12 @@ oeplatform
 -- |Create and publish a Docker image| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/image-build.yaml/badge.svg
     :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/image-build.yaml
 
-.. |OpenEnergyPlatform| image:: https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4
-   :align: right
-   :width: 200
-   :height: 200
-   :alt: OpenEnergyPlatform
-   :target: https://openenergy-platform.org/
+.. .. |OpenEnergyPlatform| image:: https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4
+..    :align: right
+..    :width: 200
+..    :height: 200
+..    :alt: OpenEnergyPlatform
+..    :target: https://openenergy-platform.org/
 
 .. list-table::
    :widths: auto
