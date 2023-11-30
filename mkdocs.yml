@@ -96,8 +96,6 @@ nav:
       - Manual database setup: install-and-documentation/install/manual-db-setup.md
       - Development setup: install-and-documentation/install/development-setup.md
     - Documentation:
-      - Overview: 
-        - install-and-documentation/oeplatform-code/index.md
       - Architecture:
         - install-and-documentation/oeplatform-code/architecture/index.md
         - Infrastructure: install-and-documentation/oeplatform-code/architecture/infrastructure.md
