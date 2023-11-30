@@ -10,6 +10,7 @@
 oeplatform
 ===================
 
+Repository for the code of the Open Energy Platform (OEP) website `https://openenergy-platform.org/ <https://openenergy-platform.org/>`_.
 
 .. list-table::
    :widths: auto
@@ -21,22 +22,6 @@ oeplatform
    * - Build docker
      - |Create and publish a Docker image|
 
-
-.. |Automated tests| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/automated-testing.yaml/badge.svg
-   :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/automated-testing.yaml
-
-.. |Documentation Status| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/deploy-docs.yaml/badge.svg
-   :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/pages/pages-build-deployment
-
-.. |Create and publish a Docker image| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/image-build.yaml/badge.svg
-    :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/image-build.yaml
-
-.. .. |OpenEnergyPlatform| image:: https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4
-..    :align: right
-..    :width: 200
-..    :height: 200
-..    :alt: OpenEnergyPlatform
-..    :target: https://openenergy-platform.org/
 
 .. list-table::
    :widths: auto
@@ -60,7 +45,7 @@ oeplatform
 Open Energy Family - Open Energy Platform (OEP)
 ===============================================
 
-Repository for the code of the Open Energy Platform (OEP) website `https://openenergy-platform.org/ <https://openenergy-platform.org/>`_. This repository does not contain data, for data access please consult `this page <https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md>`_.
+The Open Energy Platform is a Website that serves as an interfaces for the Open Energy Family. It provides several features to manage and publish scenario data in the context of energy system modelling. This repository does not contain data, for data access please consult `this page <https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md>`_.
 
 License / Copyright
 ===============================================
@@ -80,6 +65,14 @@ Please read carefully the `CONTRIBUTING.md <https://github.com/OpenEnergyPlatfor
 For further information visit our `development & contribution guide <https://openenergyplatform.github.io/oeplatform/dev/>`_.
 
 
+.. |Automated tests| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/automated-testing.yaml/badge.svg
+   :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/automated-testing.yaml
+
+.. |Documentation Status| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/deploy-docs.yaml/badge.svg
+   :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/pages/pages-build-deployment
+
+.. |Create and publish a Docker image| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/image-build.yaml/badge.svg
+    :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/image-build.yaml
 
 .. |badge_license| image:: https://img.shields.io/github/license/OpenEnergyPlatform/oeplatform
     :target: LICENSE.txt
