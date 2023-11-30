@@ -155,7 +155,6 @@ def get_oekg_modifications(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def create_factsheet(request, *args, **kwargs):
     """
     Creates a scenario bundle based on user's data. Currently, the minimum requirement to create a bundle is the "acronym".
@@ -493,7 +492,6 @@ def create_factsheet(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def update_factsheet(request, *args, **kwargs):
     """
     Updates a scenario bundle based on user's data.
@@ -867,8 +865,6 @@ def update_factsheet(request, *args, **kwargs):
         return response
 
 
-# @login_required
-@csrf_exempt
 def factsheet_by_name(request, *args, **kwargs):
     name = request.GET.get("name")
     factsheet = Factsheet.objects.get(name=name)
@@ -878,8 +874,6 @@ def factsheet_by_name(request, *args, **kwargs):
     return response
 
 
-# @login_required
-@csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
     """
     Returns a scenario bundle based based on the provided ID.
@@ -1112,9 +1106,7 @@ def factsheet_by_id(request, *args, **kwargs):
 
     return response
 
-
-# @login_required
-@csrf_exempt
+@login_required
 def query_oekg(request, *args, **kwargs):
     """
     This function takes filter objects provided by the user and utilises them to construct a SPARQL query.
@@ -1195,7 +1187,6 @@ def query_oekg(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
     """
     Removes a scenario bundle based on the provided ID.
@@ -1219,7 +1210,6 @@ def delete_factsheet_by_id(request, *args, **kwargs):
     return response
 
 
-@csrf_exempt
 def test_query(request, *args, **kwargs):
     scenario_region = URIRef(
         "http://openenergy-platform.org/ontology/oekg/region/UnitedKingdomOfGreatBritainAndNorthernIreland"
@@ -1232,8 +1222,6 @@ def test_query(request, *args, **kwargs):
     return response
 
 
-# @login_required
-@csrf_exempt
 def get_entities_by_type(request, *args, **kwargs):
     """
     Returns all entities (from OEKG) with a certain type. The type should be supplied by the user.
@@ -1264,7 +1252,6 @@ def get_entities_by_type(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def add_entities(request, *args, **kwargs):
     """
     Add entities to OEKG. The minimum requirements for adding an entity are the type and label.
@@ -1303,7 +1290,6 @@ def add_entities(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def add_a_fact(request, *args, **kwargs):
     request_body = json.loads(request.body)
     _subject = request_body["subject"]
@@ -1330,7 +1316,6 @@ def add_a_fact(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def delete_entities(request, *args, **kwargs):
     """
     Removes an entity from OEKG. The minimum requirements for removing an entity are the type and label.
@@ -1358,7 +1343,6 @@ def delete_entities(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def update_an_entity(request, *args, **kwargs):
     """
     Updates an entity in OEKG. The minimum requirements for updating an entity are the type, the old label, and the new label.
@@ -1397,8 +1381,6 @@ def update_an_entity(request, *args, **kwargs):
     return response
 
 
-# @login_required
-@csrf_exempt
 def get_all_factsheets(request, *args, **kwargs):
     all_factsheets = []
     for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
@@ -1462,8 +1444,6 @@ def get_all_factsheets(request, *args, **kwargs):
     return response
 
 
-@csrf_exempt
-# @login_required
 def get_scenarios(request, *args, **kwargs):
     scenarios_uid = [
         i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_uid"))
@@ -1528,8 +1508,6 @@ def get_scenarios(request, *args, **kwargs):
     return response
 
 
-@csrf_exempt
-# @login_required
 def get_all_factsheets_as_turtle(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="ttl")
     response = JsonResponse(
@@ -1540,8 +1518,6 @@ def get_all_factsheets_as_turtle(request, *args, **kwargs):
     return response
 
 
-@csrf_exempt
-# @login_required
 def get_all_factsheets_as_json_ld(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="json-ld")
     response = JsonResponse(
@@ -1579,8 +1555,7 @@ def get_all_sub_classes(cls, visited=None):
     return dict
 
 
-@csrf_exempt
-# @login_required
+@login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     scenario_class = oeo_owl.search_one(
         iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
