@@ -26,7 +26,7 @@ oeplatform
 .. |Documentation Status| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/deploy-docs.yaml/badge.svg
    :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/pages/pages-build-deployment
 
--- |Create and publish a Docker image| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/image-build.yaml/badge.svg
+.. |Create and publish a Docker image| image:: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/image-build.yaml/badge.svg
     :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/image-build.yaml
 
 .. .. |OpenEnergyPlatform| image:: https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4
