@@ -56,14 +56,14 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-# query_endpoint = 'http://localhost:3030/ds/query'
-# update_endpoint = 'http://localhost:3030/ds/update'
+query_endpoint = "http://localhost:3030/ds/query"
+update_endpoint = "http://localhost:3030/ds/update"
 
 # query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
 # update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
+# query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
+# update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -159,19 +159,19 @@ def get_oekg_modifications(request, *args, **kwargs):
 def create_factsheet(request, *args, **kwargs):
     """
     Creates a scenario bundle based on user's data. Currently, the minimum requirement to create a bundle is the "acronym".
-    The "acronym" must be unique. If the provided acronym already exists in the OEKG, then the function returns a "Duplicate error". 
+    The "acronym" must be unique. If the provided acronym already exists in the OEKG, then the function returns a "Duplicate error".
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
-        uid (str): The unique ID for the bundle. 
-        acronym (str): The acronym for the bundle. 
-        study_name (str): The study name for the bundle. 
-        abstract (str): The abstract for the bundle. 
+        uid (str): The unique ID for the bundle.
+        acronym (str): The acronym for the bundle.
+        study_name (str): The study name for the bundle.
+        abstract (str): The abstract for the bundle.
         institution (list of objects): The institutions for the bundle.
-        funding_source (list of objects): The funding sources for the bundle. 
-        authors (list of objects): The authors for the bundle. 
-        contact_person (list of objects): The contact persons for the bundle. 
-        sector_divisions (list of objects): The sector divisions for the bundle. 
+        funding_source (list of objects): The funding sources for the bundle.
+        authors (list of objects): The authors for the bundle.
+        contact_person (list of objects): The contact persons for the bundle.
+        sector_divisions (list of objects): The sector divisions for the bundle.
         sectors (list of objects): The sectors for the bundle.
         technologies (list of objects): The technologies for the bundle.
         study_keywords (list of strings): The study keywords for the bundle.
@@ -496,19 +496,19 @@ def create_factsheet(request, *args, **kwargs):
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
     """
-    Updates a scenario bundle based on user's data. 
+    Updates a scenario bundle based on user's data.
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
-        uid (str): The unique ID for the bundle. 
-        acronym (str): The acronym for the bundle. 
-        study_name (str): The study name for the bundle. 
-        abstract (str): The abstract for the bundle. 
+        uid (str): The unique ID for the bundle.
+        acronym (str): The acronym for the bundle.
+        study_name (str): The study name for the bundle.
+        abstract (str): The abstract for the bundle.
         institution (list of objects): The institutions for the bundle.
-        funding_source (list of objects): The funding sources for the bundle. 
-        authors (list of objects): The authors for the bundle. 
-        contact_person (list of objects): The contact persons for the bundle. 
-        sector_divisions (list of objects): The sector divisions for the bundle. 
+        funding_source (list of objects): The funding sources for the bundle.
+        authors (list of objects): The authors for the bundle.
+        contact_person (list of objects): The contact persons for the bundle.
+        sector_divisions (list of objects): The sector divisions for the bundle.
         sectors (list of objects): The sectors for the bundle.
         technologies (list of objects): The technologies for the bundle.
         study_keywords (list of strings): The study keywords for the bundle.
@@ -520,7 +520,7 @@ def update_factsheet(request, *args, **kwargs):
         frameworks (list of strings): The frameworks for the bundle.
         date_of_publication (str): The date of publication for the bundle.
         report_title (str): The report title for the bundle.
-        
+
     """
     request_body = json.loads(request.body)
     fsData = request_body["fsData"]
@@ -882,11 +882,11 @@ def factsheet_by_name(request, *args, **kwargs):
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
     """
-    Returns a scenario bundle based based on the provided ID. 
+    Returns a scenario bundle based based on the provided ID.
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
-        id (str): The unique ID for the bundle. 
+        id (str): The unique ID for the bundle.
     """
 
     uid = request.GET.get("id")
@@ -1202,7 +1202,7 @@ def delete_factsheet_by_id(request, *args, **kwargs):
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
-        id (str): The unique ID for the bundle. 
+        id (str): The unique ID for the bundle.
 
     """
     id = request.GET.get("id")
@@ -1362,14 +1362,14 @@ def delete_entities(request, *args, **kwargs):
 def update_an_entity(request, *args, **kwargs):
     """
     Updates an entity in OEKG. The minimum requirements for updating an entity are the type, the old label, and the new label.
-   
+
     Args:
         request (HttpRequest): The incoming HTTP GET request.
         entity_type (str): The type(OEO class) of the entity.
-        entity_label (str): The label of the entity.   
-        new_entity_label (str): The new label of the entity.   
+        entity_label (str): The label of the entity.
+        new_entity_label (str): The new label of the entity.
         entity_id (str): The IRI of the entity.
-   """
+    """
     request_body = json.loads(request.body)
     entity_type = request_body["entity_type"]
     entity_label = request_body["entity_label"]
