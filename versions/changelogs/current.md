@@ -4,6 +4,8 @@
 
 ### Features
 
+- Implement access control (owner & permission group) for editing scenario bundles [(#1484)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1484)
+
 ### Bugs
 
 ### Removed
