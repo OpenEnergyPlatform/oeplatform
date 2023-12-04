@@ -25,8 +25,6 @@ const ColorToggleButton = (props) => {
   useEffect(() => {
     // Replace 'bundle_id' with the actual ID of the ScenarioBundle you want to check
     const bundleId = param_2; // Assuming you pass the uid as a prop
-    console.log("is correct id?");
-    console.log(bundleId);
     // Make the API call to check if the user is the owner
     axios.post(conf.toep + `scenario-bundles/check-owner/${bundleId}/`, 
       {
@@ -38,10 +36,6 @@ const ColorToggleButton = (props) => {
       .then(response => {
         // Assuming the response.data contains the ownership information
         setIsOwner(response.data.isOwner);
-        console.log("edit?");
-        console.log(response);
-        console.log(response.data.isOwner);
-        console.log(setIsOwner(response.data.isOwner));
       })
       .catch(error => {
         console.error('Error checking ownership:', error);
