@@ -67,6 +67,19 @@ class Table(Tagable):
     # due to oem string (json) parsing like when reading the oem form comment on table
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
+    is_publish = BooleanField(null=False, default=True)
+
+    def save(self, *args, **kwargs):
+        """
+        Save the table object, automatically setting is_publish based on the schema.
+        """
+        # Устанавливаем is_publish в зависимости от схемы
+        if self.schema.name == "model_draft":
+            self.is_publish = False
+        else:
+            self.is_publish = True
+
+        super().save(*args, **kwargs)
 
     @classmethod
     def load(cls, schema, table):
@@ -96,6 +109,7 @@ class Table(Tagable):
         """
         self.is_reviewed = True
         self.save()
+
 
     class Meta:
         unique_together = (("name",),)
