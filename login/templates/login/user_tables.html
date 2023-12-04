@@ -138,72 +138,7 @@
     {% endif %}
 {% endblock %}
 
-{% block after-body-bottom-js %}
 
-<script type="text/javascript">
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.startsWith(name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  const schemaWhitelist = JSON.parse(document.querySelector('#schemaWhitelistData').textContent);
-
-  document.querySelectorAll('.publish-button').forEach(button => {
-    button.addEventListener('click', function () {
-      const publishOptions = this.nextElementSibling;
-      const dropdown = publishOptions.querySelector('.schema-dropdown');
-      dropdown.innerHTML = '';
-      schemaWhitelist.forEach(schema => {
-        dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
-      });
-      publishOptions.style.display = 'block';
-    });
-  });
-
-  document.querySelectorAll('.confirm-publish').forEach(button => {
-    button.addEventListener('click', function () {
-      const publishOptions = this.parentElement;
-      const dropdown = publishOptions.querySelector('.schema-dropdown');
-      const schema = this.closest('li').querySelector('.publish-button').getAttribute('data-schema');
-      const tableName = this.closest('li').querySelector('.publish-button').getAttribute('data-tableName');
-      const toSchema = dropdown.value;
-      publishTable(schema, tableName, toSchema);
-      publishOptions.style.display = 'none';
-    });
-  });
-});
-
-function publishTable(schema, tableName, toSchema) {
-  fetch(`/api/v0/schema/${schema}/tables/${tableName}/move/${toSchema}/`, {
-    method: 'POST',
-    headers: {
-      'X-CSRFToken': getCookie("csrftoken"),
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({ 'toSchema': toSchema })
-  }).then(response => {
-    if (response.ok) {
-      alert('Table published successfully.');
-    } else {
-      response.text().then(text => { alert(`Error publishing table: ${text}`); });
-    }
-  });
-}
-</script>
-
-{% endblock after-body-bottom-js %}
 
 
 
