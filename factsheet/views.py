@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
 from rest_framework import status
@@ -31,9 +32,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 
-from .models import OEKG_Modifications
+from .models import OEKG_Modifications, ScenarioBundleAccessControl
 from login import models as login_models
 
+from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, "oeo")
@@ -124,6 +126,35 @@ def undo_clean_name(name):
 
 def factsheets_index(request, *args, **kwargs):
     return render(request, "factsheet/index.html")
+
+
+def set_ownership(bundle_uid, user):
+    model = ScenarioBundleAccessControl()
+    model.owner_user = user
+    model.bundle_id = bundle_uid
+    model.save()
+    return f"The ownership of bundle {bundle_uid} is now set to User {user.name}"
+
+
+def is_owner(user, bundle_id):
+    bundle = ScenarioBundleAccessControl.load_by_uid(uid=bundle_id)
+    if bundle is not None:
+        eval = user == bundle.owner_user.id
+    else:
+        eval = False
+
+    return eval
+
+
+def check_ownership(request, bundle_id):
+    if is_owner(request.user.id, bundle_id):
+        return JsonResponse(
+            {"isOwner": True}, safe=False, content_type="application/json"
+        )
+    else:
+        return JsonResponse(
+            {"isOwner": False}, safe=False, content_type="application/json"
+        )
 
 
 def add_history(triple_subject, triple_predicate, triple_object, type_of_action, user):
@@ -486,12 +517,15 @@ def create_factsheet(request, *args, **kwargs):
         response = JsonResponse(
             "Factsheet saved", safe=False, content_type="application/json"
         )
+        result = set_ownership(bundle_uid=uid, user=request.user)
+        logging.info(result)
         patch_response_headers(response, cache_timeout=1)
 
         return response
 
 
 @login_required
+@only_if_user_is_owner_of_scenario_bundle
 def update_factsheet(request, *args, **kwargs):
     """
     Updates a scenario bundle based on user's data.
@@ -1105,6 +1139,7 @@ def factsheet_by_id(request, *args, **kwargs):
             oekg.add((s, p, Literal("Germany")))
 
     return response
+
 
 @login_required
 def query_oekg(request, *args, **kwargs):
