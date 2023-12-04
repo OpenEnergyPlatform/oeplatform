@@ -112,6 +112,7 @@ function Factsheet(props) {
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
   const [emptyAcronym, setEmptyAcronym] = useState(false);
+  const [notTheOwner, setNotTheOwner] = useState(false);
   const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
   const [mode, setMode] = useState(id === "new" ? "edit" : "overview");
   const [factsheetObject, setFactsheetObject] = useState({});
@@ -380,6 +381,17 @@ function Factsheet(props) {
             else if (response.data === 'Factsheet exists') {
               setOpenExistDialog(true);
             }
+          })
+          .catch(error => {
+            console.error('API Error:', error.message);
+            if (error.response && error.response.status === 403) {
+              // Handle "Access Denied" error
+              setNotTheOwner(true);
+            }
+          })
+          .finally(() => {
+            // Close the backdrop regardless of success or error
+            setOpenBackDrop(false);
           });
         });
       }
@@ -2579,6 +2591,15 @@ function getStepContent(step: number) {
             <Alert variant="filled" severity="error" sx={{ width: '100%' }}>
               <AlertTitle>Empty acronym!</AlertTitle>
               Please enter the acronym for this factsheet!
+            </Alert>
+          </Snackbar>
+          <Snackbar
+            open={notTheOwner}
+            autoHideDuration={600}
+          >
+            <Alert variant="filled" severity="error" sx={{ width: '100%' }}>
+              <AlertTitle>Access denied!</AlertTitle>
+              You cannot edit scenario bundles that you do not own!
             </Alert>
           </Snackbar>
           <Snackbar
