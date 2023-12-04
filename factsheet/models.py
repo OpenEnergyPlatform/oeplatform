@@ -27,7 +27,5 @@ class ScenarioBundleAccessControl(models.Model):
     bundle_id = CharField(max_length=400, default="none")
 
     @classmethod
-    def load_by_user_and_uid(cls, user, uid):
-        return ScenarioBundleAccessControl.objects.filter(
-            owner_user=user, bundle_id=uid
-        ).first()
+    def load_by_uid(cls, uid):
+        return ScenarioBundleAccessControl.objects.filter(bundle_id=uid).first()
