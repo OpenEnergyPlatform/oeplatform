@@ -10,7 +10,8 @@ from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 
 import login.models as models
-from dataedit.models import PeerReviewManager, Table
+from dataedit.models import PeerReviewManager, Table, PeerReview
+from dataedit.views import schema_whitelist
 
 from .forms import (
     ChangeEmailForm,
@@ -26,33 +27,43 @@ from .models import myuser as OepUser
 
 class TablesView(View):
     def get(self, request, user_id):
-        """
-        Load the user identified by user_id and is OAuth-token.
-            If latter does not exist yet, create one.
-        :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An user id
-        :return: Profile renderer
-        """
         user = get_object_or_404(OepUser, pk=user_id)
-
-        # get all tables and optimize query
         tables = Table.objects.all().select_related()
-        # get all tables the user got write perm on
-        user_tables = [
-            table
-            for table in tables
-            if user.get_table_permission_level(table) >= models.WRITE_PERM
-        ]  # WRITE_PERM = 4
-        # prepare data for template
-        tables = [{"name": table.name, "schema": table.schema} for table in user_tables]
+        draft_tables = []
+        published_tables = []
 
-        # get name of schema form FK object
         for table in tables:
-            table["schema"] = table["schema"].name
+            if user.get_table_permission_level(table) >= models.WRITE_PERM:
+                table_data = {
+                    "name": table.name,
+                    "schema": table.schema.name,
+                    "is_publish": table.is_publish,
+                    "is_reviewed": table.is_reviewed
+                }
 
-        return render(
-            request, "login/user_tables.html", {"tables": tables, "profile_user": user}
-        )
+                # Определение категории таблицы
+                if table.is_reviewed:
+                    if table.is_publish:
+                        published_tables.append(table_data)
+                    else:
+                        draft_tables.append(table_data)
+                else:
+                    draft_tables.append(table_data)
+
+        context = {
+            "profile_user": user,
+            "draft_tables": draft_tables,
+            "published_tables": published_tables,
+            "schema_whitelist": schema_whitelist
+        }
+
+        if request.is_ajax():
+            return render(request, "login/user_tables.html", context)
+        return render(request, "login/user_tables.html", context)
+
+
+
+
 
 
 class ReviewsView(View):
