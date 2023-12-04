@@ -3,12 +3,12 @@ from factsheet import views
 
 
 urlpatterns = [
-    path(r'', views.factsheets_index),
-    path(r'main', views.factsheets_index),
-    re_path(r'^id/*', views.factsheets_index),
-    re_path(r'^compare/*', views.factsheets_index),
-    re_path(r'^oekg_history/*', views.factsheets_index),
-    re_path(r'^oekg_modifications/*', views.factsheets_index),
+    path(r"", views.factsheets_index),
+    path(r"main", views.factsheets_index),
+    re_path(r"^id/*", views.factsheets_index),
+    re_path(r"^compare/*", views.factsheets_index),
+    re_path(r"^oekg_history/*", views.factsheets_index),
+    re_path(r"^oekg_modifications/*", views.factsheets_index),
     path(r"add/", views.create_factsheet),
     path(r"get_oekg_history/", views.get_history),
     path(r"update/", views.update_factsheet),
@@ -28,4 +28,5 @@ urlpatterns = [
     path(r"get_scenarios/", views.get_scenarios),
     path(r"test_query/", views.test_query),
     path(r"get_oekg_modifications/", views.get_oekg_modifications),
+    path(r"check-owner/<str:bundle_id>/", views.check_ownership, name="check_ownership"),
 ]
