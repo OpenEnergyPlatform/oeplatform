@@ -16,7 +16,7 @@ urlpatterns = [
     path(r"get/", views.factsheet_by_id),
     path(r"get_entities_by_type/", views.get_entities_by_type),
     path(r"add_entities/", views.add_entities),
-    path(r"delete_entities/", views.delete_entities),
+    # path(r"delete_entities/", views.delete_entities),
     path(r"delete/", views.delete_factsheet_by_id),
     path(r"all/", views.get_all_factsheets),
     path(r"all_in_turtle/", views.get_all_factsheets_as_turtle),
@@ -28,5 +28,7 @@ urlpatterns = [
     path(r"get_scenarios/", views.get_scenarios),
     path(r"test_query/", views.test_query),
     path(r"get_oekg_modifications/", views.get_oekg_modifications),
-    path(r"check-owner/<str:bundle_id>/", views.check_ownership, name="check_ownership"),
+    path(
+        r"check-owner/<str:bundle_id>/", views.check_ownership, name="check_ownership"
+    ),
 ]
