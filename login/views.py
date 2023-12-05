@@ -57,6 +57,7 @@ class TablesView(View):
             "schema_whitelist": schema_whitelist
         }
 
+        # TODO: Fix this is_ajax as it is outdated according to django documentation ... provide better api endpoint for http requests via HTMX
         if request.is_ajax():
             return render(request, "login/user_tables.html", context)
         return render(request, "login/user_tables.html", context)
