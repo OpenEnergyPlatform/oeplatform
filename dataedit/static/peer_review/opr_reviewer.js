@@ -140,7 +140,7 @@ function peerReview(config) {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
-  updatePercentageDisplay();
+  // updatePercentageDisplay();
   if (state_dict) {
     check_if_review_finished();
   }
@@ -528,7 +528,7 @@ function renderSummaryPageFields() {
 
   updateSummaryTable();
   updateTabProgressIndicatorClasses();
-  updatePercentageDisplay();
+  // updatePercentageDisplay();
 
 }
 
@@ -697,7 +697,7 @@ function saveEntrances() {
 
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
-  updatePercentageDisplay();
+  // updatePercentageDisplay();
 
 }
 function getFieldState(fieldKey) {
@@ -875,7 +875,7 @@ function updateTabClasses() {
 }
 window.addEventListener('DOMContentLoaded', function() {
     updateTabClasses();
-    updatePercentageDisplay() ;
+    // updatePercentageDisplay() ;
 });
 
 function getTotalFieldCount() {
