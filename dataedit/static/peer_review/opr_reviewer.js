@@ -140,6 +140,7 @@ function peerReview(config) {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  // updatePercentageDisplay();
   if (state_dict) {
     check_if_review_finished();
   }
@@ -527,6 +528,7 @@ function renderSummaryPageFields() {
 
   updateSummaryTable();
   updateTabProgressIndicatorClasses();
+  // updatePercentageDisplay();
 
 }
 
@@ -695,6 +697,7 @@ function saveEntrances() {
 
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  // updatePercentageDisplay();
 
 }
 function getFieldState(fieldKey) {
@@ -870,7 +873,35 @@ function updateTabClasses() {
     }
   }
 }
-window.addEventListener('DOMContentLoaded', updateTabClasses);
+window.addEventListener('DOMContentLoaded', function() {
+    updateTabClasses();
+    // updatePercentageDisplay() ;
+});
+
+function getTotalFieldCount() {
+  var allFields = makeFieldList();
+  return allFields.length;
+}
+
+
+function calculateOkPercentage(stateDict) {
+  let totalCount = getTotalFieldCount();
+  let okCount = 0;
+
+  for (let key in stateDict) {
+    if (stateDict[key] === "ok") {
+      okCount++;
+    }
+  }
+
+  let percentage = (okCount / totalCount) * 100;
+  return percentage.toFixed(2);
+}
+
+function updatePercentageDisplay() {
+  document.getElementById("percentageDisplay").textContent = calculateOkPercentage(state_dict);
+}
+
 
 function updateTabProgressIndicatorClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];

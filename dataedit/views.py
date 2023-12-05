@@ -73,7 +73,6 @@ schema_whitelist = [
 
 schema_sandbox = "sandbox"
 
-
 def admin_constraints(request):
     """
     Way to apply changes
@@ -285,7 +284,6 @@ def listschemas(request):
 
     # sort by name
     schemas = sorted(schemas, key=lambda x: x[0])
-
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
@@ -2149,7 +2147,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             "table": table,
             "review_finished": review_finished,
         }
-
         context_meta = {
             # need this here as json.dumps breaks the template syntax access
             # like {{ config.table }} now you can use {{ table }}
