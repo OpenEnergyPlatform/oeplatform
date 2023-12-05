@@ -1,14 +1,37 @@
 import { createTheme } from '@mui/material/styles';
 import palette from './oep-theme/palette';
-import buttonStyles from './oep-theme/components/buttonStyles';
+import { buttonStyles, buttonGroupStyles } from './oep-theme/components/buttonStyles';
 import { tableContainerStyles, tableHeaderStyles, tableRowStyles, tableCellStyles } from './oep-theme/components/tableStyles';
 import toolbarStyles from './oep-theme/components/toolbarStyles';
-import shape from '@material-ui/core/styles/shape';
+import { typographyStyles, inputLabelStyles, inputBaseStyles, textareaAutosizeStyles, formGroupStyles } from './oep-theme/components/typographyStyles';
+import variables from './oep-theme/variables';
 
 const theme = createTheme({
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1200,
+      lg2: 1360,
+      xl: 1536
+    }
+  },
   palette: palette,
+  typography: {
+    body2: {
+      fontSize: variables.fontSize.sm,
+      color: palette.text.primary,
+    },
+  },
   components: {
+    MuiTypography: typographyStyles,
+    MuiInputLabel: inputLabelStyles,
+    MuiInputBase: inputBaseStyles,
+    MuiTextareaAutosize: textareaAutosizeStyles,
+    MuiFormGroup: formGroupStyles,
     MuiButton: buttonStyles,
+    MuiButtonGroup: buttonGroupStyles,
     MuiTableContainer: tableContainerStyles,
     MuiTableHead: tableHeaderStyles,
     MuiTableRow: tableRowStyles,

@@ -24,6 +24,9 @@ from sqlalchemy.orm import sessionmaker
 from api.actions import _get_engine
 from dataedit.structures import Tag
 
+from django.views.decorators.http import require_http_methods
+from django.urls import reverse
+
 from .forms import (
     EnergyframeworkForm,
     EnergymodelForm,
@@ -44,10 +47,6 @@ def getClasses(sheettype):
         c = Energyframework
         f = EnergyframeworkForm
     return c, f
-
-
-def overview(request):
-    return render(request, "modelview/overview.html")
 
 
 def load_tags():
@@ -213,11 +212,12 @@ def processPost(post, c, f, files=None, pk=None, key=None):
     if "new" in fields and fields["new"] == "True":
         fields["study"] = key
     for field in c._meta.get_fields():
-        if type(field) == ArrayField: # noqa
+        if type(field) == ArrayField:  # noqa
             parts = []
             for fi in fields.keys():
                 if (
-                    re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi] # noqa
+                    re.match(r"^{}_\d$".format(field.name), str(fi))
+                    and fields[fi]  # noqa
                 ):
                     parts.append(fi)
             parts.sort()
@@ -320,6 +320,21 @@ class FSAdd(LoginRequiredMixin, View):
                     "errors": errors,
                 },
             )
+
+
+@require_http_methods(["DELETE"])
+@login_required
+def fs_delete(request, sheettype, pk):
+    c, _ = getClasses(sheettype)
+    model = get_object_or_404(c, pk=pk)
+    model.delete()
+
+    response_data = {"success": True, "message": "Entry deleted successfully."}
+
+    response = HttpResponse(response_data)
+    url = reverse("modellist", kwargs={"sheettype": sheettype})
+    response["HX-Redirect"] = url
+    return response
 
 
 def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):

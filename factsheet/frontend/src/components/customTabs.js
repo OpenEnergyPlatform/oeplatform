@@ -4,8 +4,10 @@ import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { makeStyles, Theme } from '@material-ui/core/styles';
+import palette from '../styles/oep-theme/palette';
 
 import '../styles/App.css';
+import variables from '../styles/oep-theme/variables';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -24,7 +26,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ pt: 2, pb: 2 }}>
           <Typography>{children}</Typography>
         </Box>
       )}
@@ -51,10 +53,28 @@ export default function CustomTabs(props) {
       backgroundColor: theme.palette.background.paper,
     },
     tab: {
-      background: '#e3eaef',
+      background: theme.palette.grey[100],
+      color: palette.text.link,
+      fontWeight: theme.typography.fontWeightBold,
+      border: `1px solid ${palette.border}`,
+      minHeight: 'fit-content',
+      padding: theme.spacing(1),
+
+      '&:first-of-type': {
+        borderTopLeftRadius: variables.borderRadius,
+        borderBottomLeftRadius: variables.borderRadius
+      },
+      '&:last-of-type': {
+        borderTopRightRadius: variables.borderRadius,
+        borderBottomRightRadius: variables.borderRadius
+      },
+      '&:not(:last-of-type)': {
+        borderRight: 'none'
+      },
       '&.Mui-selected': {
-        background: '#001c30e6',
-        color: 'white'
+        background: palette.primary.dark,
+        border: `1px solid ${palette.primary.dark}`,
+        color: palette.primary.contrastText
       }
     },
   }));
