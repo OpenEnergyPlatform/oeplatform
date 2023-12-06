@@ -5,6 +5,8 @@
 
 ### Features
 
+- Add management command to reset published tables to not published [(#14)](https://github.com/OpenEnergyPlatform/oeplatform/pull/14)
+
 ### Bugs
 
 ### Removed
