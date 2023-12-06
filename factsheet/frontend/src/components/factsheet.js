@@ -1078,7 +1078,7 @@ function Factsheet(props) {
 
   const handleOpenURL = (e) => {
     if (e !== '') {
-      window.open(e, "_blank")
+      window.open(conf.toep + e, "_blank")
     }
   };
 
@@ -1400,20 +1400,35 @@ function Factsheet(props) {
                       />
                     </HtmlTooltip>
                       :
-                      <FormControlLabel control={
-                        <Checkbox size="small" color="default" style={{ marginLeft: "20px" }} />
-                      } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]}
-                      />
+                      <HtmlTooltip
+                        style={{ marginLeft: '10px' }}
+                        placement="top"
+                        title={
+                          <React.Fragment>
+                            <Typography color="inherit" variant="caption">
+                              {"There is not yet an OEO class for this descriptor."}
+                              <br />
+                              {"We are aware of that and we will add it in future."}
+                            </Typography>
+                          </React.Fragment>
+                        }
+                      >
+                        <FormControlLabel control={
+                          <Checkbox size="small" color="default" />
+                        } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]}
+                        />
+                      </HtmlTooltip>
                     }
                   </span>
                 )
               }
             </div>
           </FormGroup>
-        )}
+        )
+        }
         TooltipComponent={HtmlTooltip}
       />
-    </Grid>
+    </Grid >
   );
 
   const renderStudyPublications = () => (
@@ -2811,7 +2826,7 @@ function Factsheet(props) {
                       </Grid>
                       <Grid item xs={9} style={{ paddingTop: '10px' }}>
                         {selectedStudyKewords.map((v, i) => (
-                          <span> <span> <Chip label={v} size="small" variant="outlined" onClick={() => handleOpenURL(StudyKeywords.filter((i) => i[0] == v)[0][1])} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
+                          <span> <span> <Chip label={v} size="small" variant={StudyKeywords.filter((i) => i[0] == v)[0][1] === "" ? "" : "outlined"} onClick={() => handleOpenURL(StudyKeywords.filter((i) => i[0] == v)[0][1])} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
                         ))}
                       </Grid>
                     </InfoListItem>
