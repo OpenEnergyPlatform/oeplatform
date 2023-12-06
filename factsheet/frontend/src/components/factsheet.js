@@ -247,7 +247,8 @@ function Factsheet(props) {
     'regionalisation',
     'total gross electricity generation',
     'total net electricity generation',
-    'peak electricity generation'
+    'peak electricity generation',
+    'study report due to leggal obligation'
   ];
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
