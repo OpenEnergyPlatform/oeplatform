@@ -893,10 +893,6 @@ def factsheet_by_id(request, *args, **kwargs):
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
     factsheet = {}
 
-    print("############################start")
-    print(study_URI)
-    print(oekg.value(study_URI, OEKG["date_of_publication"]))
-
     acronym = ""
     study_name = ""
     abstract = ""
@@ -1101,7 +1097,6 @@ def factsheet_by_id(request, *args, **kwargs):
     response = JsonResponse(factsheet, safe=False, content_type="application/json")
     patch_response_headers(response, cache_timeout=1)
 
-    print("#####update#####")
     scenario_region = URIRef(
         "http://openenergy-platform.org/ontology/oekg/region/Germany"
     )
