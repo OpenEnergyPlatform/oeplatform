@@ -15,6 +15,8 @@
 - add study names as default in scenario comparison page #1486 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
 - sort sub-classes in text-based oeo-viewer #1469 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
 - sort regions and interacting regions alphabetically #1423 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
+- Add management command to reset published tables to not published [(#1493)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1493)
+
 
 ### Bugs
 
