@@ -110,64 +110,66 @@ export default function LayoutActions(props) {
         <Grid container
           direction="row"
         >
-              <Grid item xs={6}>
-                {search && <CustomSearchInput searchHandler={searchHandler} />}
+            <Grid item xs={10}>
+              <ButtonGroup color="primary" aria-label="outlined primary button group">
+                  {annotate &&
+                    <BlueButton
+                      variant="contained"
+                      component="span"
+                      onClick={annotateDatabaseHandler}
+                      startIcon={<StorageIcon />}>
+                    Annotate My Data
+                    </BlueButton>
+                  }
+                  <BlueButton
+                    variant="contained"
+                    component="span"
+                    startIcon={<ExpandLessIcon />}
+                    onClick={shrinkHandler}>
+                      Shrink
+                  </BlueButton>
+                  <BlueButton
+                    variant="contained"
+                    component="span"
+                    startIcon={<ExpandMoreIcon />}
+                    onClick={expandHandler}>
+                      Expand
+                  </BlueButton>
+                  <BlueButton
+                    variant="contained"
+                    component="span"
+                    onClick={showParentHandler}
+                    startIcon={<ArrowDropUpIcon />}>
+                      Parent
+                  </BlueButton>
+                  <BlueButton
+                    variant="contained"
+                    component="span"
+                    startIcon={<CenterFocusWeakIcon />}
+                    onClick={focusHandler}>
+                      Focus
+                  </BlueButton>
+                  <BlueButton
+                    variant="contained"
+                    component="span"
+                    startIcon={<FullscreenIcon />}
+                    onClick={fitAllHandler}>
+                      Fit
+                  </BlueButton>
+                  {viewAll && <BlueButton
+                    variant="contained"
+                    component="span"
+                    startIcon={<SelectAllIcon />}
+                    onClick={viewAllHandler}>
+                      View All
+                  </BlueButton>}
+                </ButtonGroup>
               </Grid>
-              <Grid item xs={6}>
-                  <ButtonGroup color="primary" aria-label="outlined primary button group">
-                      {annotate &&
-                        <BlueButton
-                          variant="contained"
-                          component="span"
-                          onClick={annotateDatabaseHandler}
-                          startIcon={<StorageIcon />}>
-                        Annotate My Data
-                        </BlueButton>
-                      }
-                      <BlueButton
-                        variant="contained"
-                        component="span"
-                        startIcon={<ExpandLessIcon />}
-                        onClick={shrinkHandler}>
-                          Shrink
-                      </BlueButton>
-                      <BlueButton
-                        variant="contained"
-                        component="span"
-                        startIcon={<ExpandMoreIcon />}
-                        onClick={expandHandler}>
-                          Expand
-                      </BlueButton>
-                      <BlueButton
-                        variant="contained"
-                        component="span"
-                        onClick={showParentHandler}
-                        startIcon={<ArrowDropUpIcon />}>
-                          Parent
-                      </BlueButton>
-                      <BlueButton
-                        variant="contained"
-                        component="span"
-                        startIcon={<CenterFocusWeakIcon />}
-                        onClick={focusHandler}>
-                          Focus
-                      </BlueButton>
-                      <BlueButton
-                        variant="contained"
-                        component="span"
-                        startIcon={<FullscreenIcon />}
-                        onClick={fitAllHandler}>
-                          Fit
-                      </BlueButton>
-                      {viewAll && <BlueButton
-                        variant="contained"
-                        component="span"
-                        startIcon={<SelectAllIcon />}
-                        onClick={viewAllHandler}>
-                          View All
-                      </BlueButton>}
-                      {hierarchicalView && <CustomSwitch toggleRenderMode={HierarchicalViewHandler}/>}
-                    </ButtonGroup>
+              <Grid item xs={1} style={{ paddingLeft: "20px", paddingTop: "15px" }}>
+                Hierarchical view:
+              </Grid>
+              <Grid item xs={1}>
+                {hierarchicalView && <CustomSwitch toggleRenderMode={HierarchicalViewHandler}/>}
               </Grid>
         </Grid>
   );
