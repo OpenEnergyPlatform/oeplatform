@@ -67,6 +67,7 @@ class Table(Tagable):
     # due to oem string (json) parsing like when reading the oem form comment on table
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
+    is_publish = BooleanField(null=False, default=False)
 
     @classmethod
     def load(cls, schema, table):
@@ -95,6 +96,22 @@ class Table(Tagable):
         Mark the table as reviewed and save the change to the database.
         """
         self.is_reviewed = True
+        self.save()
+
+    # TODO: Use function when implementing the publish button
+    def set_is_published(self):
+        """
+        Mark the table as published (ready for destination schema & public) and save the change to the database.
+        """
+        self.is_publish = True
+        self.save()
+
+    # TODO: Use function when implementing the publish button. It should be possible to unpublish a table. This button should be next to the tables listed in Published on the profile page.
+    def set_not_published(self):
+        """
+        Mark the table as not published (making it a draft table again) and save the change to the database.
+        """
+        self.is_publish = False
         self.save()
 
     class Meta:
