@@ -8,6 +8,7 @@
 - Fixed a bug in open URLs for study descriptors. [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
 - Fixed a typo in study descriptors. [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
 - Build bundles and oeo_viewer.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
+- Remove the prefix of the urls.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
 
 ### Features
 

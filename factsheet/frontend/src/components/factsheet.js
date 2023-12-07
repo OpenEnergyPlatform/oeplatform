@@ -1082,12 +1082,6 @@ function Factsheet(props) {
     }
   };
 
-  const handleOpenDatasetsURL = (e) => {
-    if (e !== '') {
-      window.open(conf.toep + e, "_blank")
-    }
-  };
-
   const scenarioDescriptorHandler = (descriptorList, nodes, id) => {
     const zipped = []
     descriptorList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri }));
@@ -1855,7 +1849,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenDatasetsURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
@@ -1878,7 +1872,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenDatasetsURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
               </TableBody>
