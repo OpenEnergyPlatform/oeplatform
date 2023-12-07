@@ -17,8 +17,9 @@
 - sort regions and interacting regions alphabetically #1423 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
 - Add management command to reset published tables to not published [(#1493)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1493)
 
-
 ### Bugs
+
+- Check if the oeo module is available in the ontology folder. [(#14)](https://github.com/OpenEnergyPlatform/oeplatform/pull/14)
 
 ### Removed
 
