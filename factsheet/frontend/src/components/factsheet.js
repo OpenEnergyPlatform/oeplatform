@@ -245,7 +245,7 @@ function Factsheet(props) {
     ['total gross electricity generation', '', ''],
     ['total net electricity generation', '', ''],
     ['peak electricity generation', '', ''],
-    ['study report due to leggal obligation', 'http://openenergy-platform.org/ontology/oeo/OEO_00020373', 'A study report due to legal obligation is a study report that is created beacause of a legal obligation.']
+    ['study report due to legal obligation', 'http://openenergy-platform.org/ontology/oeo/OEO_00020373', 'A study report due to legal obligation is a study report that is created beacause of a legal obligation.']
   ];
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -1078,6 +1078,12 @@ function Factsheet(props) {
 
   const handleOpenURL = (e) => {
     if (e !== '') {
+      window.open(e, "_blank")
+    }
+  };
+
+  const handleOpenDatasetsURL = (e) => {
+    if (e !== '') {
       window.open(conf.toep + e, "_blank")
     }
   };
@@ -1849,7 +1855,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenDatasetsURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
@@ -1872,7 +1878,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenDatasetsURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
               </TableBody>
