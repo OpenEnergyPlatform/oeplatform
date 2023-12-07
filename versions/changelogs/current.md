@@ -19,7 +19,7 @@
 
 ### Bugs
 
-- Check if the oeo module is available in the ontology folder. [(#14)](https://github.com/OpenEnergyPlatform/oeplatform/pull/14)
+- Check if the oeo module is available in the ontology folder. [(#1485)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1495)
 
 ### Removed
 
