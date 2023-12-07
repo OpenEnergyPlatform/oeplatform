@@ -5,6 +5,9 @@
 - update and build oeo-viewer
 - build factsheet(bundles) app
 - fix a bug in the link to study report #1487 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
+- Fixed a bug in open URLs for study descriptors. [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
+- Fixed a typo in study descriptors. [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
+- Build bundles and oeo_viewer.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
 
 ### Features
 
@@ -15,8 +18,6 @@
 - add study names as default in scenario comparison page #1486 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
 - sort sub-classes in text-based oeo-viewer #1469 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
 - sort regions and interacting regions alphabetically #1423 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
-- Add management command to reset published tables to not published [(#1493)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1493)
-
 
 ### Bugs
 
