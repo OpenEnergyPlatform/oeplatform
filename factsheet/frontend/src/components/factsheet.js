@@ -245,7 +245,7 @@ function Factsheet(props) {
     ['total gross electricity generation', '', ''],
     ['total net electricity generation', '', ''],
     ['peak electricity generation', '', ''],
-    ['study report due to leggal obligation', 'http://openenergy-platform.org/ontology/oeo/OEO_00020373', 'A study report due to legal obligation is a study report that is created beacause of a legal obligation.']
+    ['study report due to legal obligation', 'http://openenergy-platform.org/ontology/oeo/OEO_00020373', 'A study report due to legal obligation is a study report that is created beacause of a legal obligation.']
   ];
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
