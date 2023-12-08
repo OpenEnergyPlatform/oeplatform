@@ -1,10 +1,24 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load ontology.rdf %}
-{% block main-content-body %}
 {% load static %}
 
-<br><br>
+{% block site-header %}
+    <div class="main-header">
+        <h1 class="main-header__title">
+            <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg" width="16" height="16" alt="OEO">         
+            Ontology
+        </h1>
+        <div class="main-header__wizard">
+            <a href="/ontology/">Overview</a> / <a href="/ontology/oeo">Open Energy Ontology</a> / Class {{ class_name }}
+        </div>
+    </div>
+
+{% endblock site-header %}
+
+
+{% block main-content-body %}
+
 <h5>Label: {{ class_name }}</h5>
 
 <hr>
