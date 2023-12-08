@@ -20,6 +20,8 @@
 - sort sub-classes in text-based oeo-viewer #1469 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
 - sort regions and interacting regions alphabetically #1423 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
 - Add management command to reset published tables to not published [(#1493)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1493)
+- Add a new function for reading the oeo module/import descriptions [(#1499)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1499)
+- Improvement of the ontology pages by adding the oep page navigation heading and restructuring the content of the oeo-release page [(#1499)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1499)
 
 
 ### Bugs
