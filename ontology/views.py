@@ -8,7 +8,11 @@ from django.shortcuts import Http404, HttpResponse, redirect, render
 from django.views import View
 from rdflib import Graph
 
-from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT
+from oeplatform.settings import (
+    ONTOLOGY_FOLDER,
+    ONTOLOGY_ROOT,
+    OPEN_ENERGY_ONTOLOGY_NAME,
+)
 
 
 def collect_modules(path):
@@ -252,17 +256,21 @@ class OntologyOverview(View):
                     ),
                 )
             else:
-                main_module = collect_modules(path) #TODO fix varname - not clear what path this is
-                main_module_name = list(main_module.keys())[0]
+                main_module = collect_modules(
+                    path
+                )  # TODO fix varname - not clear what path this is
+                if OPEN_ENERGY_ONTOLOGY_NAME in main_module.keys():
+                    main_module_name = OPEN_ENERGY_ONTOLOGY_NAME
+                else:
+                    raise Exception(
+                        f"The main module '{OPEN_ENERGY_ONTOLOGY_NAME}' is not available in {path}."
+                    )
+
                 main_module = main_module[main_module_name]
                 main_module["name"] = main_module_name
-                submodules = collect_modules(
-                    (path / "modules")
-                )
+                submodules = collect_modules((path / "modules"))
                 # Collect all file names
-                imports = collect_modules(
-                    path / "imports"
-                )
+                imports = collect_modules(path / "imports")
 
                 return render(
                     request,
@@ -329,9 +337,9 @@ class OntologyStatics(View):
                 key=lambda d: [int(x) for x in d.split(".")],
             )
         if imports:
-            file_path = onto_base_path / version / "imports" / f"{file}.{extension}" 
+            file_path = onto_base_path / version / "imports" / f"{file}.{extension}"
         else:
-            file_path = onto_base_path / version /  f"{file}.{extension}" 
+            file_path = onto_base_path / version / f"{file}.{extension}"
 
         if os.path.exists(file_path):
             with open(file_path, "br") as f:
@@ -354,4 +362,3 @@ class OntologyStatics(View):
                     "Content-Disposition"
                 ] = f'attachment; filename="{file}.{extension}"'
                 return response
-            
