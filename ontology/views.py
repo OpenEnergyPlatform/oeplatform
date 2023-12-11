@@ -3,16 +3,12 @@ import re
 from collections import defaultdict
 
 from pathlib import Path
-from urllib import response
 
 from django.shortcuts import Http404, HttpResponse, redirect, render
 from django.views import View
 from rdflib import Graph
-from urllib3 import HTTPResponse
-from factsheet.views import ONTHOLOGY_NAME
 
 from oeplatform.settings import (
-    ONTOLOGY_FOLDER,
     ONTOLOGY_ROOT,
     OPEN_ENERGY_ONTOLOGY_NAME,
 )
@@ -202,27 +198,16 @@ class OntologyVersion(View):
         )
 
 
-class PartialOntologyOverviewModules(View):
+class PartialOntologyOverviewContent(View):
     def get(self, request):
         if request.headers.get("HX-Request") == "true":
             if request.method == "GET":
-                onto_base_path = Path(ONTOLOGY_ROOT, ONTHOLOGY_NAME)
+                onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 
                 version = get_ontology_version(onto_base_path)
                 path = onto_base_path / version
-                ontology_data = get_common_data(ONTHOLOGY_NAME)
-                main_module = collect_modules(
-                    path
-                )  # TODO fix varname - not clear what path this is
-                if OPEN_ENERGY_ONTOLOGY_NAME in main_module.keys():
-                    main_module_name = OPEN_ENERGY_ONTOLOGY_NAME
-                else:
-                    raise Exception(
-                        f"The main module '{OPEN_ENERGY_ONTOLOGY_NAME}' is not available in {path}."
-                    )
+                ontology_data = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
 
-                main_module = main_module[main_module_name]
-                main_module["name"] = main_module_name
                 submodules = collect_modules(path / "modules")
                 # Collect all file names
                 imports = collect_modules(path / "imports")
@@ -231,9 +216,8 @@ class PartialOntologyOverviewModules(View):
                     request,
                     "ontology/partial_ontology_content.html",
                     dict(
-                        ontology=ONTHOLOGY_NAME,
+                        ontology=OPEN_ENERGY_ONTOLOGY_NAME,
                         version=ontology_data["version"],
-                        main_module=main_module,
                         submodules=submodules.items(),
                         imports=imports.items(),
                         ontology_description=ontology_data["oeo_context_data"][
@@ -241,10 +225,38 @@ class PartialOntologyOverviewModules(View):
                         ],
                     ),
                 ).content.decode("utf-8")
-                # partial = render(
-                #     request, template_name="ontology/partial_modules.html"
-                # ).content.decode("utf-8")
+
                 return HttpResponse(partial)
+
+
+class PartialOntologyOverviewSidebarContent(View):
+    def get(self, request):
+        onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+
+        version = get_ontology_version(onto_base_path)
+        path = onto_base_path / version
+        main_module = collect_modules(
+            path
+        )  # TODO fix varname - not clear what path this is
+        if OPEN_ENERGY_ONTOLOGY_NAME in main_module.keys():
+            main_module_name = OPEN_ENERGY_ONTOLOGY_NAME
+        else:
+            raise Exception(
+                f"The main module '{OPEN_ENERGY_ONTOLOGY_NAME}' is not available in {path}."
+            )
+
+        main_module = main_module[main_module_name]
+        main_module["name"] = main_module_name
+        partial = render(
+            request,
+            "ontology/partial_ontology_sidebar_content.html",
+            dict(
+                ontology=OPEN_ENERGY_ONTOLOGY_NAME,
+                main_module=main_module,
+            ),
+        ).content.decode("utf-8")
+
+        return HttpResponse(partial)
 
 
 def initial_for_pageload(request):
@@ -256,8 +268,8 @@ def initial_for_pageload(request):
 class OntologyOverview(View):
     def get(self, request, ontology, module_or_id=None, version=None, imports=False):
         # ignore whatever is in ontology
-        ontology = ONTHOLOGY_NAME
-        onto_base_path = Path(ONTOLOGY_ROOT, ONTHOLOGY_NAME)
+        ontology = OPEN_ENERGY_ONTOLOGY_NAME
+        onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 
         if not onto_base_path.exists():
             raise Http404
@@ -382,10 +394,18 @@ class OntologyOverview(View):
             if module_or_id and "oeo" in module_or_id:
                 pass
             else:
-                return render(request, "ontology/oeo.html")
+                return render(
+                    request,
+                    "ontology/oeo.html",
+                    {"ontology": OPEN_ENERGY_ONTOLOGY_NAME},
+                )
         else:
             module_name = None
-            if module_or_id and "oeo" in module_or_id:
+            if (
+                module_or_id
+                and "oeo" in module_or_id.lower()
+                or "bfo" in module_or_id.lower()
+            ):
                 if imports:
                     submodules = collect_modules(path / "imports")
                 else:
@@ -413,7 +433,11 @@ class OntologyViewClasses(View):
 
         sub_classes = []
         super_classes = []
-        if module_or_id and "oeo" in module_or_id:
+        if (
+            module_or_id
+            and "oeo" in module_or_id.lower()
+            or "bfo" in module_or_id.lower()
+        ):
             for row in ontology_data["oeo_context_data"]["q_global"]:
                 if module_or_id in row.o:
                     sub_class_ID = row.s.split("/")[-1]
@@ -424,9 +448,9 @@ class OntologyViewClasses(View):
                         sub_class_ID
                         in ontology_data["oeo_context_data"]["classes_name"].keys()
                     ):
-                        sub_class_name = ontology_data["oeo_context_data"]["classes_name"][
-                            sub_class_ID
-                        ]
+                        sub_class_name = ontology_data["oeo_context_data"][
+                            "classes_name"
+                        ][sub_class_ID]
                         if (
                             sub_class_ID
                             in ontology_data["oeo_context_data"][
