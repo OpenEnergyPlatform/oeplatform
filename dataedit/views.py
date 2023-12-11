@@ -73,7 +73,6 @@ schema_whitelist = [
 
 schema_sandbox = "sandbox"
 
-
 def admin_constraints(request):
     """
     Way to apply changes
@@ -285,7 +284,6 @@ def listschemas(request):
 
     # sort by name
     schemas = sorted(schemas, key=lambda x: x[0])
-
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
@@ -2149,7 +2147,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             "table": table,
             "review_finished": review_finished,
         }
-
         context_meta = {
             # need this here as json.dumps breaks the template syntax access
             # like {{ config.table }} now you can use {{ table }}
@@ -2208,13 +2205,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             # get the review data and additional application metadata
             # from user peer review submit/save
             review_data = json.loads(request.body)
-            if review_id:
-                contributor_review = PeerReview.objects.filter(id=review_id).first()
-                if contributor_review:
-                    contributor_review_data = contributor_review.review.get(
-                        "reviews", []
-                    )
-                    review_data["reviewData"]["reviews"].extend(contributor_review_data)
 
             # The type can be "save" or "submit" as this triggers different behavior
             review_post_type = review_data.get("reviewType")

@@ -77,16 +77,13 @@ export default function CustomSwitch(props) {
   };
 
   return (
-    <FormGroup style={{ alignItems: "end" }}>
-      <FormControlLabel
-        control={
-          <IOSSwitch
+    <div>
+        <IOSSwitch
           checked={state.checkedB}
           onChange={handleChange}
           name="checkedB"
-          />}
-        label=""
-      />
-    </FormGroup>
+        />  
+      
+    </div>
   );
 }

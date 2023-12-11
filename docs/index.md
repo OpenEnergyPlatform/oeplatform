@@ -4,7 +4,23 @@ title: Home
 
 # Developer documentation of the Open Energy Platform (OEP)
 
-Welcome to the Open Energy Platform Documentation. This site provides developer documentation for the Open Energy Platform (OEP).
+Welcome to the Open Energy Platform Documentation. This site provides the developer documentation for the Open Energy Platform (OEP).
+
+!!! Info "State of the documentation"
+    The documentation already provides helpful information but is not yet complete. As only parts of it were maintained during the long-term development, we have to catch up. This is a task that we cannot complete in one go. We have therefore decided to complete it step by step. This means that we will update the documentation of the missing code as soon as we have to work on the corresponding code again. Documentation for the Community area will be added continuously and in a timely manner.
+
+!!! Info "Compendium"
+    If you want to get an overview about the complete Open Energy Family Framework please have a look at our [Compendium](https://openenergyplatform.github.io/organisation/).
+
+## Structure of the documentation
+
+It consists of two parts:
+
+- The "Development" pages provide an overview of our methods and procedures used during development and also provides context about the Open Energy Platform Software to be able to understand the Use Cases and the general scope better.
+
+- The "Installation & Code Documentation" pages will help you to install and set up the Open Energy Platform software system if you wish to use the software for your own purposes or contribute to its development. The "Code Documentation" section provides technical information relevant to understanding the infrastructure elements and architecture of the software. You will also find information about the structure of the oeplatform code project on GitHub. Of course, you will also find documentation about the code itself. This part is divided into two sections describing the web APIs provided by the platform and the documentation about the implemented functions. To structure this part, we group the code documentation according to the features that the code implements and we hope to create an easier understanding of the codebase with this structured approach.
+
+## What do we want to archive with the OEP-Website
 
 The Open Energy Platform is a website that has three main targets:
 
