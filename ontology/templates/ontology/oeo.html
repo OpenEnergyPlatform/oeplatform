@@ -2,6 +2,7 @@
 {% load django_bootstrap5 %}
 {% load ontology.rdf %}
 {% load static %}
+{% load compress %}
 
 {% block site-header %}
     <div class="main-header">
@@ -17,61 +18,12 @@
 {% endblock site-header %}
 
 {% block main-right-sidebar-content %}
-<div class="container">
-    <div class="row">
-        <h3>View the oeo</h3>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="btn-group float-end" role="group" aria-label="Basic example">
-                <a class="btn btn-secondary" href="/ontology/{{ontology}}/BFO_0000001">
-                    Browse oeo classes
-                </a>
-                <a class="btn btn-secondary" href="/viewer/oeo/">
-                    Graphical oeo viewer
-                </a>
-            </div>
-        </div>
-    </div>
-    <hr>
-    <div class="row">
-        <h3>Download the oeo</h3>
-    </div>
-    <div class="row">
-        <div class="col">
-            <a class="btn btn-secondary" href="https://github.com/OpenEnergyPlatform/ontology/releases" target="_blank">
-                <i class="fas fa-external-link-alt"></i>
-                Download release from GitHub.
-            </a>
-        </div>
-    </div>
-    <br>
-    <div class="row">
-        <div class="col">
-            <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/oeo-full.owl">
-                full-oeo-owl
-            </a>
-            <div class="btn-group float-end" role="group" aria-label="Basic example">
-                {% for ex in main_module.extensions %}
-                <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{main_module.name}}.{{ex}}">
-                    {{ex}}
-                </a>
-                {% endfor %}
-                <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/oeo-closure.owl">
-                    closure
-                </a>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <h1>Welcome to Your SPA</h1>
-        <div id="updateable-content">
-            <!-- Content that will be updated -->
-        </div>
-        <button hx-get="{% url 'partial-page-content' %}" hx-swap="outerHTML" hx-target="#content" id="content">Update Content</button>
-        <!-- Add other htmx-enabled elements as needed -->
-    </div>
-    <hr>
+<div hx-get="{% url 'partial-page-sidebar-content' %}" hx-swap="outerHTML" hx-target="#content-sidebar" hx-trigger="load" id="content-sidebar">
+
+
+</div>
+<div id="loading-spinner-sidebar" class="spinner-border text-primary" role="status" style="display: none;">
+    <span class="visually-hidden">Loading...</span>
 </div>
 
 {% endblock main-right-sidebar-content %}
@@ -84,21 +36,29 @@
 </div>
 
 
-
-<script src="https://unpkg.com/htmx.org@1.7.0/dist/htmx.js"></script>
-
-<!-- Define a loading spinner (you can replace this with your preferred spinner) -->
-<div id="loading-spinner" style="display: none;">
-    Loading...
+<div id="loading-spinner" class="spinner-border text-primary" role="status" style="display: none;">
+    <span class="visually-hidden">Loading...</span>
 </div>
+
+
+{% endblock %}
+
+
+{% block after-body-bottom-js %}
+
+{% compress js %}
+<script src="{% static 'ontology/htmx.js' %}"></script>
+{% endcompress %}
 
 <script>
     document.addEventListener('htmx:beforeRequest', function (event) {
         document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('loading-spinner-sidebar').style.display = 'block';
     });
 
     document.addEventListener('htmx:afterSwap', function (event) {
         document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('loading-spinner-sidebar').style.display = 'none';
     });
 
     // Optionally, you can use this event to handle errors
@@ -109,4 +69,4 @@
     });
 </script>
 
-{% endblock %}
+{% endblock after-body-bottom-js %}
