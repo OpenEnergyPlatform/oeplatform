@@ -14,6 +14,8 @@ from oeplatform.settings import (
     OPEN_ENERGY_ONTOLOGY_NAME,
 )
 
+from rdflib import Graph
+
 
 def collect_modules(path):
     modules = dict()
@@ -25,14 +27,49 @@ def collect_modules(path):
             if filename not in modules:
                 modules[filename] = dict(extensions=[], comment="No description found")
             if extension == "owl":
-                # g = Graph()
-                # g.parse(os.path.join(path, file))
-                # root = dict(g.namespaces())['']
-                # comments = g.objects(root, RDFS.comment)
-                # try:
-                #    modules[filename]["comment"] = next(comments)
-                # except StopIteration:
-                modules[filename]["comment"] = "No description found"
+                g = Graph()
+                g.parse(os.path.join(path, file))
+
+                # Get the root namespace
+                root_namespace = next(iter(g.namespaces()))
+
+                # Set the namespaces in the graph
+                for prefix, uri in g.namespaces():
+                    g.bind(prefix, uri)
+
+                # Extract the description from the RDF graph (rdfs:comment)
+                comment_query = f"""
+                    SELECT ?description
+                    WHERE {{
+                        ?ontology rdf:type owl:Ontology .
+                        ?ontology rdfs:comment ?description .
+                    }}
+                """
+                # Execute the SPARQL query for comment
+                comment_results = g.query(comment_query, initNs={"": root_namespace})
+
+                # Update the comment in the modules dictionary if found
+                for row in comment_results:
+                    modules[filename]["comment"] = row[0]
+
+                # If the comment is still "No description found," try extracting from dc:description
+                if modules[filename]["comment"] == "No description found":
+                    description_query = f"""
+                        SELECT ?description
+                        WHERE {{
+                            ?ontology rdf:type owl:Ontology .
+                            ?ontology dc:description ?description .
+                        }}
+                    """
+                    # Execute the SPARQL query for description
+                    description_results = g.query(
+                        description_query, initNs={"": root_namespace}
+                    )
+
+                    # Update the comment in the modules dictionary if found
+                    for row in description_results:
+                        modules[filename]["comment"] = row[0]
+
             modules[filename]["extensions"].append(extension)
     return modules
 
