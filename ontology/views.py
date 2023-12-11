@@ -405,6 +405,7 @@ class OntologyOverview(View):
                 module_or_id
                 and "oeo" in module_or_id.lower()
                 or "bfo" in module_or_id.lower()
+                or "uo" in module_or_id.lower()
             ):
                 if imports:
                     submodules = collect_modules(path / "imports")
@@ -437,6 +438,7 @@ class OntologyViewClasses(View):
             module_or_id
             and "oeo" in module_or_id.lower()
             or "bfo" in module_or_id.lower()
+            or "uo" in module_or_id.lower()
         ):
             for row in ontology_data["oeo_context_data"]["q_global"]:
                 if module_or_id in row.o:
