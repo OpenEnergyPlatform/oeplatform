@@ -8,8 +8,13 @@ urlpatterns = [
     url(r"^$", views.OntologyVersion.as_view()),
     url(
         "partial/page-content/",
-        views.PartialOntologyOverviewModules.as_view(),
+        views.PartialOntologyOverviewContent.as_view(),
         name="partial-page-content",
+    ),
+    url(
+        "partial/page-sidebar-content/",
+        views.PartialOntologyOverviewSidebarContent.as_view(),
+        name="partial-page-sidebar-content",
     ),
     url(r"^ontology/$", views.OntologyVersion.as_view()),
     url(
