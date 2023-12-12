@@ -2743,7 +2743,7 @@ function Factsheet(props) {
               </DialogContent>
               <DialogActions>
                 <Link to={`scenario-bundles/main`} onClick={() => {
-                  axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }, { headers: { 'X-CSRFToken': CSRFToken() } }).then(response => setOpenRemovedDialog(true));
+                  axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id }, headers: { 'X-CSRFToken': CSRFToken() } }).then(response => setOpenRemovedDialog(true));
                   this.reloadRoute();
                 }} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
                   <Button variant="contained" color="error" >
