@@ -15,7 +15,7 @@ class Command(BaseCommand):
         bundle_id = kwargs['bundle_id']
 
         try:
-            user = myuser.objects.get(username=username)
+            user = myuser.objects.get(name=username)
         except myuser.DoesNotExist:
             self.stdout.write(self.style.ERROR(f"User with username '{username}' does not exist"))
             return
