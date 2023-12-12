@@ -5,6 +5,9 @@ const variables = {
   border: {
     'light': `1px solid ${palette.border}`
   },
+  buttonHeight: {
+    'small': '32px'
+  },
   fontSize: {
     'xs': '0.75rem',
     'sm': '0.875rem',
@@ -12,6 +15,11 @@ const variables = {
     'lg': '1.25rem',
     'xl': '1.5rem',
     'xl1': '2rem'
+  },
+  fontWeight: {
+    'light': 300,
+    'normal': 400,
+    'bold': 700
   },
   lineHeight: {
     'sm': '1.25rem',

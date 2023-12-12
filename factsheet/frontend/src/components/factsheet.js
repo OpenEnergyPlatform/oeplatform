@@ -61,12 +61,11 @@ import Toolbar from '@mui/material/Toolbar';
 import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/components/tableStyles.js';
 import InfoListItem from '../styles/oep-theme/components/infoListItem.js'
 import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
-
+import AttachmentIcon from '@mui/icons-material/Attachment';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
 import LinkIcon from '@mui/icons-material/Link';
-
 import Chip from '@mui/material/Chip';
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import Container from '@mui/material/Container';
@@ -104,9 +103,6 @@ function Factsheet(props) {
   const steps = getSteps();
 
   const { id, fsData } = props;
-
-  console.log(id);
-
 
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
@@ -238,20 +234,21 @@ function Factsheet(props) {
 
 
   const StudyKeywords = [
-    'resilience',
-    'life cycle analysis',
-    'CO2 emissions',
-    'Greenhouse gas emissions',
-    'Reallabor',
-    '100% renewables',
-    'acceptance',
-    'sufficiency',
-    '(changes in) demand',
-    'degree of electrifiaction',
-    'regionalisation',
-    'total gross electricity generation',
-    'total net electricity generation',
-    'peak electricity generation'
+    ['resilience', 'http://openenergy-platform.org/ontology/oeo/OEO_00360015', 'Resilience is a disposition of a system that represents the capacity of a system to absorb disturbance and reorganize so as to retain essentially the same function, structure, and feedbacks.'],
+    ['life cycle analysis', 'http://www.openenergy-platform.org/ontology/oeo/OEO_00330023', 'A life cycle assessment is a methodology to calculate and analyse environmental impacts of the life cycle of a material entity or process.'],
+    ['CO2 emissions', '', ''],
+    ['Greenhouse gas emissions', '', ''],
+    ['Reallabor', '', ''],
+    ['100% renewables', '', ''],
+    ['acceptance', 'http://openenergy-platform.org/ontology/oeo/OEO_00360000', 'Acceptance is a realizable entity that represents the attitude of a person or organisation with respect to a certain constructional, (infra)structural or political measure that may be realized in, affected by or results of complex processes like discussions, communications, transformative measures or former personal experiences.'],
+    ['sufficiency', 'http://openenergy-platform.org/ontology/oeo/OEO_00010444', 'Sufficiency is a plan specification for reducing, in absolute terms, the consumption and production of end-use products and services through changes in social practices in order to comply with environmental sustainability while ensuring an adequate social foundation for all people.'],
+    ['(changes in) demand', '', ''],
+    ['degree of electrifiaction', '', ''],
+    ['regionalisation', 'http://openenergy-platform.org/ontology/oeo/OEO_00340006', 'Regionalisation is a methodology to calculate spatially distributed energy producers and consumers with the aim to highlight regional differences in energy supply and potentials, particularly related to renewable energies.'],
+    ['total gross electricity generation', '', ''],
+    ['total net electricity generation', '', ''],
+    ['peak electricity generation', '', ''],
+    ['study report due to legal obligation', 'http://openenergy-platform.org/ontology/oeo/OEO_00020373', 'A study report due to legal obligation is a study report that is created beacause of a legal obligation.']
   ];
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -392,7 +389,7 @@ function Factsheet(props) {
             .finally(() => {
               // Close the backdrop regardless of success or error
               setOpenBackDrop(false);
-            });
+          });
         });
       }
 
@@ -515,7 +512,6 @@ function Factsheet(props) {
     const obj = newScenarios.find(el => el.id === idx);
     if (obj)
       obj[name] = selectedList
-    console.log(newScenarios);
     setScenarios(newScenarios);
 
   };
@@ -1174,6 +1170,13 @@ function Factsheet(props) {
     return foundObj;
   };
 
+
+  const handleOpenURL = (e) => {
+    if (e !== '') {
+      window.open(e, "_blank")
+    }
+  };
+
   const scenarioDescriptorHandler = (descriptorList, nodes, id) => {
     const zipped = []
     descriptorList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri }));
@@ -1471,14 +1474,56 @@ function Factsheet(props) {
           <FormGroup>
             <div >
               {
-                StudyKeywords.map((item) => <FormControlLabel control={<Checkbox size="small" color="default" />} checked={selectedStudyKewords.includes(item)} onChange={handleStudyKeywords} label={item} name={item} />)
+                StudyKeywords.map((item) =>
+                  <span >
+                    {item[1] !== '' ? <HtmlTooltip
+                      style={{ marginLeft: '10px' }}
+                      placement="top"
+                      title={
+                        <React.Fragment>
+                          <Typography color="inherit" variant="caption">
+                            {item[2]}
+                            <br />
+                            <a href={item[1]}>More info from Open Enrgy Ontology (OEO)...</a>
+                          </Typography>
+                        </React.Fragment>
+                      }
+                    >
+                      <FormControlLabel control={
+                        <Checkbox size="small" color="default" />
+                      } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]}
+                      />
+                    </HtmlTooltip>
+                      :
+                      <HtmlTooltip
+                        style={{ marginLeft: '10px' }}
+                        placement="top"
+                        title={
+                          <React.Fragment>
+                            <Typography color="inherit" variant="caption">
+                              {"There is not yet an OEO class for this descriptor."}
+                              <br />
+                              {"We are aware of that and we will add it in future."}
+                            </Typography>
+                          </React.Fragment>
+                        }
+                      >
+                        <FormControlLabel control={
+                          <Checkbox size="small" color="default" />
+                        } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]}
+                        />
+                      </HtmlTooltip>
+                    }
+                  </span>
+                )
               }
             </div>
           </FormGroup>
-        )}
+        )
+        }
         TooltipComponent={HtmlTooltip}
       />
-    </Grid>
+    </Grid >
   );
 
   const renderStudyPublications = () => (
@@ -1899,7 +1944,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.input_datasets.map((e) => <span> <span> {e.value.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
+                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
@@ -1922,7 +1967,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.output_datasets.map((e) => <span> <span> {e.value.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
+                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
               </TableBody>
@@ -2054,7 +2099,11 @@ function Factsheet(props) {
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+              <span> <span>
+                <a href={link_to_study} >
+                  <AttachmentIcon fontSize="large" />
+                </a>
+              </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
             </ContentTableCell>
           </TableRow>
           {/* <TableRow>
@@ -2065,14 +2114,14 @@ function Factsheet(props) {
                 title={
                 <React.Fragment>
                   <Typography color="inherit" variant="subtitle1">
-                    {'A citation reference is a reference stating where a citation was taken from.'}
-                    <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
-                  </Typography>
-                </React.Fragment>
+                  {'A citation reference is a reference stating where a citation was taken from.'}
+                  <br />
+                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
+                </Typography>
+              </React.Fragment>
               }
               >
-              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                <InfoOutlinedIcon sx={{ color: '#708696' }} />
               </HtmlTooltip>
             </div>
           </FirstRowTableCell>
@@ -2082,7 +2131,7 @@ function Factsheet(props) {
         </TableRow> */}
         </TableBody>
       </Table>
-    </TableContainer>
+    </TableContainer >
   )
 
   const renderSectorsAndTechnology = () => (
@@ -2393,7 +2442,25 @@ function Factsheet(props) {
               <FormGroup>
                 <div >
                   {
-                    StudyKeywords.map((item) => <FormControlLabel control={<Checkbox size="small" color="default" />} checked={selectedStudyKewords.includes(item)} onChange={handleStudyKeywords} label={item} name={item} />)
+                    StudyKeywords.map((item) => <FormControlLabel control={
+                      <div >
+                        <HtmlTooltip
+                          style={{ marginLeft: '10px' }}
+                          placement="top"
+                          title={
+                            <React.Fragment>
+                              <Typography color="inherit" variant="caption">
+                                {'A sector division is a specific way to subdivide a system.'}
+                                <br />
+                                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info from Open Enrgy Ontology (OEO)...</a>
+                              </Typography>
+                            </React.Fragment>
+                          }
+                        >
+                          <Checkbox size="small" color="default" />
+                        </HtmlTooltip>
+                      </div>
+                    } checked={selectedStudyKewords.includes(item)} onChange={handleStudyKeywords} label={item} name={item} />)
                   }
                 </div>
               </FormGroup>
@@ -2863,7 +2930,7 @@ function Factsheet(props) {
                       </Grid>
                       <Grid item xs={9} style={{ paddingTop: '10px' }}>
                         {selectedStudyKewords.map((v, i) => (
-                          <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                          <span> <span> <Chip label={v} size="small" variant={StudyKeywords.filter((i) => i[0] == v)[0][1] === "" ? "" : "outlined"} onClick={() => handleOpenURL(StudyKeywords.filter((i) => i[0] == v)[0][1])} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
                         ))}
                       </Grid>
                     </InfoListItem>

@@ -921,10 +921,6 @@ def factsheet_by_id(request, *args, **kwargs):
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
     factsheet = {}
 
-    print("############################start")
-    print(study_URI)
-    print(oekg.value(study_URI, OEKG["date_of_publication"]))
-
     acronym = ""
     study_name = ""
     abstract = ""
@@ -1129,7 +1125,6 @@ def factsheet_by_id(request, *args, **kwargs):
     response = JsonResponse(factsheet, safe=False, content_type="application/json")
     patch_response_headers(response, cache_timeout=1)
 
-    print("#####update#####")
     scenario_region = URIRef(
         "http://openenergy-platform.org/ontology/oekg/region/Germany"
     )
@@ -1350,32 +1345,31 @@ def add_a_fact(request, *args, **kwargs):
     return response
 
 
-# @login_required
-# def delete_entities(request, *args, **kwargs):
-#     """
-#     Removes an entity from OEKG. The minimum requirements for removing an entity are the type and label.
+@login_required
+def delete_entities(request, *args, **kwargs):
+    """
+    Removes an entity from OEKG. The minimum requirements for removing an entity are the type and label.
 
-#     Args:
-#         request (HttpRequest): The incoming HTTP GET request.
-#         entity_type (str): The type(OEO class) of the entity.
-#         entity_label (str): The label of the entity.
-#     """
-#     entity_type = request.GET.get("entity_type")
-#     entity_label = request.GET.get("entity_label")
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        entity_type (str): The type(OEO class) of the entity.
+        entity_label (str): The label of the entity.
+    """
+    entity_type = request.GET.get("entity_type")
+    entity_label = request.GET.get("entity_label")
 
-#     entity_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_type)
-#     entity_Label = URIRef(
-#         "http://openenergy-platform.org/ontology/oekg/" + (entity_label)
-#     )
+    entity_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_type)
+    entity_Label = URIRef(
+        "http://openenergy-platform.org/ontology/oekg/" + (entity_label)
+    )
 
-#     oekg.remove((entity_Label, None, None))
-#     oekg.remove((None, None, entity_Label))
-#     response = JsonResponse(
-#         "entity removed!", safe=False, content_type="application/json"
-#     )
-#     patch_response_headers(response, cache_timeout=1)
-#     return response
-
+    oekg.remove((entity_Label, None, None))
+    oekg.remove((None, None, entity_Label))
+    response = JsonResponse(
+        "entity removed!", safe=False, content_type="application/json"
+    )
+    patch_response_headers(response, cache_timeout=1)
+    return response
 
 @login_required
 def update_an_entity(request, *args, **kwargs):

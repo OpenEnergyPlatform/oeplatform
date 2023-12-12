@@ -128,6 +128,8 @@ try:
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
+OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

@@ -56,9 +56,15 @@ import Divider from '@mui/material/Divider';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import ArrowCircleRightOutlinedIcon from '@mui/icons-material/ArrowCircleRightOutlined';
+import FormatListBulletedOutlinedIcon from '@mui/icons-material/FormatListBulletedOutlined';
+import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
+import { CardItem, CardHeader, CardBody, CardRow} from '../styles/oep-theme/components/cardView.js';
 import '../styles/App.css';
+import variables from '../styles/oep-theme/variables.js';
+import palette from '../styles/oep-theme/palette.js';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -225,16 +231,29 @@ function EnhancedTableToolbar(props) {
 
   return (
     <div>
-    <Grid container>
-        <Typography variant="body1">
-        
-        <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020227">Scenario bundles</a> weave together important information about one or more <a href="http://openenergyplatform.org/ontology/oeo/OEO_00000364">scenarios</a>. They inform about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020011">studies</a> made based on a scenario, including publications (= <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020012">study report</a>). 
-        
-        If there is quantitative <a href="http://openenergyplatform.org/ontology/oeo/OEO_00030029">input data</a> and / or <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020013">output data</a> available on the OEP, the scenario bundles can link to that data, too. 
-        They can also inform about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020353">models</a> (if available as a <a href="https://openenergyplatform.org/factsheets/models/">model factsheet</a>) and frameworks (if available as a <a href="https://openenergyplatform.org/factsheets/frameworks/">framework factsheet</a>) that were used to project a scenario into the future (= <a href="http://openenergyplatform.org/ontology/oeo/OEO_00010262">scenario projection</a>).
-
-        In a nutshell: A scenario bundle provides you with all relevant information to understand a scenario's context and to ease a potential re-use of quantitative data for your own purposes.
+    <Grid
+      container
+      display="flex"
+      flexDirection="row"
+      justifyContent="center"
+      sx={{ py: 2 }}
+    >
+      <Grid
+        item
+        lg={6}
+        sx={{ borderLeft: variables.border.light, px: 2 }}
+      >
+        <Typography variant="body2">
+          <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020227">Scenario bundles</a> weave together important information about one or more <a href="http://openenergyplatform.org/ontology/oeo/OEO_00000364">scenarios</a>. They inform about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020011">studies</a> made based on a scenario, including publications (= <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020012">study report</a>). 
         </Typography>
+        <Typography variant="body2">
+          If there is quantitative <a href="http://openenergyplatform.org/ontology/oeo/OEO_00030029">input data</a> and / or <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020013">output data</a> available on the OEP, the scenario bundles can link to that data, too. 
+          They can also inform about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020353">models</a> (if available as a <a href="https://openenergyplatform.org/factsheets/models/">model factsheet</a>) and frameworks (if available as a <a href="https://openenergyplatform.org/factsheets/frameworks/">framework factsheet</a>) that were used to project a scenario into the future (= <a href="http://openenergyplatform.org/ontology/oeo/OEO_00010262">scenario projection</a>).
+        </Typography>
+        <Typography variant="body2">
+          In a nutshell: A scenario bundle provides you with all relevant information to understand a scenario's context and to ease a potential re-use of quantitative data for your own purposes.
+        </Typography>
+      </Grid>
     </Grid>
     <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
       <Grid container justifyContent="space-between"
@@ -280,10 +299,9 @@ function EnhancedTableToolbar(props) {
             onChange={handleChangeView}
             aria-label="Platform"
             size="small"
-            sx ={{ height:"32px" }}
           >
-            <ToggleButton value="cards">Cards</ToggleButton>
-            <ToggleButton value="list">List</ToggleButton>
+            <ToggleButton value="list"><FormatListBulletedOutlinedIcon />List</ToggleButton>
+            <ToggleButton value="cards"><ViewAgendaOutlinedIcon />Cards</ToggleButton>
           </ToggleButtonGroup>
         </Grid>
         <Grid item xs={6} md={4}>
@@ -685,44 +703,105 @@ export default function CustomTable(props) {
 
   const renderCards= (rs) => {
     const rowsToRender =  filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
-    return  <Grid container 
+    return  <Grid 
+              container 
               justifyContent="space-between"
               alignItems="start"
               direction="row"
+              sx={{ paddingBottom: variables.spacing[6] }}
             >
             {rowsToRender.map((row, index) => {
               const isItemSelected = isSelected(row.study_name);
               const labelId = `enhanced-table-checkbox-${index}`;
               return (
-              <Grid item xs={12} sx={{ border: '1px solid #cadff5', marginBottom: "10px"}} >
-                <div style={{ backgroundColor: "#f6f9fb", padding: "15px" }}>
-                  <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
-                    <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
-                      <Typography variant="body1"><b style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}> {row.study_name} </b></Typography>
-                    </Link> 
-                  </Stack>
-                </div>
-                <div style={{ padding: "15px" }}>
-                  <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-                    <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
-                      <p style={{ fontSize: '16px', cursor: 'pointer', color: "black" }}><b>Acronym: </b>{row.acronym}</p>
-                    </Link> 
-                    {row.date_of_publication !== null && <p><b>Date of publication: </b>{row.date_of_publication}</p>}
-                  </Stack>
-                  <p><b>Abstract: </b> {row.abstract}</p>
-                  <p><b>Institutions: </b>{row.institutions.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
-                                  ))} </p>
-                  <p><b>Funding sources: </b>{row.funding_sources.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
-                                  ))} </p>
-                  <p><b>Models and frameworks: </b>{row.models.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
-                                  ))} 
-                                  {row.frameworks.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
-                                  ))} </p>
-                  <p><b>Scenarios: </b>{row.scenarios.map((v) => (
+              <CardItem>
+                <CardHeader>
+                  <Link
+                    to={`scenario-bundles/id/${row.uid}`}
+                    onClick={() => this.forceUpdate}
+                  >
+                    <Typography variant="link">
+                      {row.study_name}
+                    </Typography>
+                  </Link> 
+                </CardHeader>
+                <CardBody>
+                  <CardRow
+                    rowKey="Acronym"
+                    rowValue={
+                      <Link
+                        to={`scenario-bundles/id/${row.uid}`}
+                        onClick={() => this.forceUpdate}
+                      >
+                        <Typography variant="link">
+                          {row.acronym}
+                        </Typography>
+                      </Link>
+                    }
+                  />
+                    {row.date_of_publication !== null &&
+                      <CardRow
+                        rowKey='Date of publication'
+                        rowValue={row.date_of_publication}
+                      />
+                    }
+                    <CardRow
+                      rowKey='Abstract'
+                      rowValue={row.abstract}
+                    >
+                    </CardRow>
+                    <CardRow
+                      rowKey='Institutions'
+                      rowValue={
+                        row.institutions.map((v) => (
+                          <span>
+                            <span> {v} </span>
+                            <span>
+                              <b className="separator-dot"> . </b>
+                            </span>
+                          </span>
+                        ))
+                      }
+                    />
+                    <CardRow
+                      rowKey='Funding sources'
+                      rowValue={
+                        row.funding_sources.map((v) => (
+                          <span>
+                            <span> {v} </span>
+                            <span>
+                              <b className="separator-dot"> . </b>
+                            </span>
+                          </span>
+                        ))
+                      }
+                    />
+                    <CardRow
+                      rowKey='Models and frameworks'
+                      rowValue={
+                        <>
+                          {row.models.map((v) => (
+                            <span>
+                              <span> {v} </span>
+                              <span>
+                                <b className="separator-dot"> . </b>
+                              </span>
+                            </span>
+                          ))} 
+                          {row.frameworks.map((v) => (
+                            <span>
+                              <span> {v} </span>
+                              <span>
+                                <b className="separator-dot"> . </b>
+                              </span>
+                            </span>
+                          ))} 
+                        </>
+                      }
+                    />
+                    <CardRow
+                      rowKey="Scenarios"
+                      rowValue={row.scenarios.map((v) => (
                         <HtmlTooltip
                           style={{ marginLeft: '10px' }}
                           placement="top"
@@ -736,13 +815,19 @@ export default function CustomTable(props) {
                             </React.Fragment>
                           }
                         >
-                          <Chip size="small" color="primary" label={v.label} variant={selected.has(v.uid) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '4px' }} onClick={(event) => handleClick(event, v.uid)}/>
+                          <Chip
+                            size="small"
+                            color="primary"
+                            label={v.label}
+                            variant={selected.has(v.uid) ? "filled" : "outlined"}
+                            sx={{ 'marginLeft': '5px', 'marginTop': '4px' }}
+                            onClick={(event) => handleClick(event, v.uid)}
+                          />
                         </HtmlTooltip>
                       ))}
-                  </p>
-                </div>
-
-              </Grid>
+                    />
+                </CardBody>
+              </CardItem>
             );
       })}
   </Grid>
@@ -750,6 +835,7 @@ export default function CustomTable(props) {
 
   return (
     <Box sx={{ width: '100%' }}>
+      <BreadcrumbsNavGrid subheaderContent="Overview" />
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={openBackDrop}
