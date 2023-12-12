@@ -401,12 +401,7 @@ class OntologyOverview(View):
                 )
         else:
             module_name = None
-            if (
-                module_or_id
-                and "oeo" in module_or_id.lower()
-                or "bfo" in module_or_id.lower()
-                or "uo" in module_or_id.lower()
-            ):
+            if module_or_id:
                 if imports:
                     submodules = collect_modules(path / "imports")
                 else:
@@ -434,12 +429,7 @@ class OntologyViewClasses(View):
 
         sub_classes = []
         super_classes = []
-        if (
-            module_or_id
-            and "oeo" in module_or_id.lower()
-            or "bfo" in module_or_id.lower()
-            or "uo" in module_or_id.lower()
-        ):
+        if module_or_id:
             for row in ontology_data["oeo_context_data"]["q_global"]:
                 if module_or_id in row.o:
                     sub_class_ID = row.s.split("/")[-1]
