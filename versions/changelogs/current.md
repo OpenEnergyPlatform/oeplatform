@@ -1,6 +1,7 @@
 ### Changes
 
 - Update styling of comparison page [(#1477)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1477)
+- Update styling of cards view in overview page [(#1479)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1479)
 - Improve the profile page for tables by improving the layout, adding descriptive text and introducing sections to categorize the tables into "draft" and "published" according to specific criteria. [(#1440)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1440)
 - update and build oeo-viewer
 - build factsheet(bundles) app
@@ -9,6 +10,7 @@
 - Fixed a typo in study descriptors. [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
 - Build bundles and oeo_viewer.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
 - Remove the prefix of the urls.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
+
 
 ### Features
 

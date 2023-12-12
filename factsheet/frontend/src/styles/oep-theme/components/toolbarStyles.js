@@ -29,7 +29,7 @@ const toolbarStyles = {
           }
         },
         "& .MuiButton-root": {
-          height: '32px'
+          height: variables.buttonHeight.small
         }
       }
     }
