@@ -9,6 +9,7 @@
 - Fixed a typo in study descriptors. [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
 - Build bundles and oeo_viewer.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
 - Remove the prefix of the urls.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
+- Refactor ontology overview django view into smaller and maintainable views and functions [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
 
 ### Features
 
@@ -23,7 +24,6 @@
 - Add a new function for reading the oeo module/import descriptions [(#1499)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1499)
 - Improvement of the ontology pages by adding the oep page navigation heading and restructuring the content of the oeo-release page [(#1499)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1499)
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
-- Refactor ontology overview django view into smaller and maintainable views and functions [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
 
 ### Bugs
 
