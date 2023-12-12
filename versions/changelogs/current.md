@@ -22,7 +22,7 @@
 - Add management command to reset published tables to not published [(#1493)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1493)
 - Add a new function for reading the oeo module/import descriptions [(#1499)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1499)
 - Improvement of the ontology pages by adding the oep page navigation heading and restructuring the content of the oeo-release page [(#1499)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1499)
-- Add a htmx based page loading after intial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
+- Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
 - Refactor ontology overview django view into smaller and maintainable views and functions [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
 
 ### Bugs
