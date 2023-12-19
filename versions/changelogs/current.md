@@ -1,36 +1,7 @@
 ### Changes
 
-- Update styling of comparison page [(#1477)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1477)
-- Update styling of cards view in overview page [(#1479)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1479)
-- Improve the profile page for tables by improving the layout, adding descriptive text and introducing sections to categorize the tables into "draft" and "published" according to specific criteria. [(#1440)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1440)
-- update and build oeo-viewer
-- build factsheet(bundles) app
-- fix a bug in the link to study report #1487 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
-- Fixed a bug in open URLs for study descriptors. [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
-- Fixed a typo in study descriptors. [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
-- Build bundles and oeo_viewer.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
-- Remove the prefix of the urls.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
-- Add links to study descriptors. [PR#1514](https://github.com/OpenEnergyPlatform/oeplatform/pull/1514)
-- Update list of models in bundles app. [PR#1513](https://github.com/OpenEnergyPlatform/oeplatform/pull/1513)
-
 ### Features
-
-- Implement access control (owner & permission group) for editing scenario bundles [(#1484)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1484)
-- add clickable study descriptors #1478 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
-- clickable input and output datasets #1478 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
-- add another scenario descriptor as: study report due to legal obligation #1489 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
-- add a button to download oeo-closure #1488 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
-- add study names as default in scenario comparison page #1486 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
-- sort sub-classes in text-based oeo-viewer #1469 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
-- sort regions and interacting regions alphabetically #1423 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
-- Add management command to reset published tables to not published [(#1493)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1493)
-- Add a new function for reading the oeo module/import descriptions [(#1499)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1499)
-- Improvement of the ontology pages by adding the oep page navigation heading and restructuring the content of the oeo-release page [(#1499)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1499)
 
 ### Bugs
 
-- Check if the oeo module is available in the ontology folder. [(#1485)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1495)
-
 ### Removed
-
-- remove prints inside view.py of factsheet(bundles) app
