@@ -8,7 +8,14 @@ def only_if_user_is_owner_of_scenario_bundle(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         # Get the uid from the URL parameters or any other source.
-        uid = kwargs.get("uid") or json.loads(request.body).get("uid")
+        try:
+            uid = (
+                kwargs.get("uid")
+                or json.loads(request.body).get("uid")
+                or json.loads(request.body).get("id")
+            )
+        except Exception:
+            uid = request.GET.get("id")
 
         try:
             # Retrieve the ScenarioBundleEditAccess object based on the uid.
