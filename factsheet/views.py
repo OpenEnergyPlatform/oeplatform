@@ -1216,6 +1216,7 @@ def query_oekg(request, *args, **kwargs):
     return response
 
 
+@only_if_user_is_owner_of_scenario_bundle
 @login_required
 def delete_factsheet_by_id(request, *args, **kwargs):
     """
@@ -1370,6 +1371,7 @@ def delete_entities(request, *args, **kwargs):
     )
     patch_response_headers(response, cache_timeout=1)
     return response
+
 
 @login_required
 def update_an_entity(request, *args, **kwargs):
