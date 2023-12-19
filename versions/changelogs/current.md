@@ -10,6 +10,7 @@
 - Fixed a typo in study descriptors. [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
 - Build bundles and oeo_viewer.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
 - Remove the prefix of the urls.  [PR#1497](https://github.com/OpenEnergyPlatform/oeplatform/pull/1497)
+- Add links to study descriptors. [PR#1514](https://github.com/OpenEnergyPlatform/oeplatform/pull/1514)
 - Update list of models in bundles app. [PR#1513](https://github.com/OpenEnergyPlatform/oeplatform/pull/1513)
 
 ### Features
