@@ -8,7 +8,13 @@ from django.shortcuts import Http404, HttpResponse, redirect, render
 from django.views import View
 from rdflib import Graph
 
-from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT
+from oeplatform.settings import (
+    ONTOLOGY_FOLDER,
+    ONTOLOGY_ROOT,
+    OPEN_ENERGY_ONTOLOGY_NAME,
+)
+
+from rdflib import Graph
 
 
 def collect_modules(path):
@@ -21,14 +27,49 @@ def collect_modules(path):
             if filename not in modules:
                 modules[filename] = dict(extensions=[], comment="No description found")
             if extension == "owl":
-                # g = Graph()
-                # g.parse(os.path.join(path, file))
-                # root = dict(g.namespaces())['']
-                # comments = g.objects(root, RDFS.comment)
-                # try:
-                #    modules[filename]["comment"] = next(comments)
-                # except StopIteration:
-                modules[filename]["comment"] = "No description found"
+                g = Graph()
+                g.parse(os.path.join(path, file))
+
+                # Get the root namespace
+                root_namespace = next(iter(g.namespaces()))
+
+                # Set the namespaces in the graph
+                for prefix, uri in g.namespaces():
+                    g.bind(prefix, uri)
+
+                # Extract the description from the RDF graph (rdfs:comment)
+                comment_query = f"""
+                    SELECT ?description
+                    WHERE {{
+                        ?ontology rdf:type owl:Ontology .
+                        ?ontology rdfs:comment ?description .
+                    }}
+                """
+                # Execute the SPARQL query for comment
+                comment_results = g.query(comment_query)
+
+                # Update the comment in the modules dictionary if found
+                for row in comment_results:
+                    modules[filename]["comment"] = row[0]
+
+                # If the comment is still "No description found," try extracting from dc:description
+                if modules[filename]["comment"] == "No description found":
+                    description_query = f"""
+                        SELECT ?description
+                        WHERE {{
+                            ?ontology rdf:type owl:Ontology .
+                            ?ontology dc:description ?description .
+                        }}
+                    """
+                    # Execute the SPARQL query for description
+                    description_results = g.query(
+                        description_query
+                    )
+
+                    # Update the comment in the modules dictionary if found
+                    for row in description_results:
+                        modules[filename]["comment"] = row[0]
+
             modules[filename]["extensions"].append(extension)
     return modules
 
@@ -252,17 +293,21 @@ class OntologyOverview(View):
                     ),
                 )
             else:
-                main_module = collect_modules(path) #TODO fix varname - not clear what path this is
-                main_module_name = list(main_module.keys())[0]
+                main_module = collect_modules(
+                    path
+                )  # TODO fix varname - not clear what path this is
+                if OPEN_ENERGY_ONTOLOGY_NAME in main_module.keys():
+                    main_module_name = OPEN_ENERGY_ONTOLOGY_NAME
+                else:
+                    raise Exception(
+                        f"The main module '{OPEN_ENERGY_ONTOLOGY_NAME}' is not available in {path}."
+                    )
+
                 main_module = main_module[main_module_name]
                 main_module["name"] = main_module_name
-                submodules = collect_modules(
-                    (path / "modules")
-                )
+                submodules = collect_modules((path / "modules"))
                 # Collect all file names
-                imports = collect_modules(
-                    path / "imports"
-                )
+                imports = collect_modules(path / "imports")
 
                 return render(
                     request,
@@ -329,9 +374,9 @@ class OntologyStatics(View):
                 key=lambda d: [int(x) for x in d.split(".")],
             )
         if imports:
-            file_path = onto_base_path / version / "imports" / f"{file}.{extension}" 
+            file_path = onto_base_path / version / "imports" / f"{file}.{extension}"
         else:
-            file_path = onto_base_path / version /  f"{file}.{extension}" 
+            file_path = onto_base_path / version / f"{file}.{extension}"
 
         if os.path.exists(file_path):
             with open(file_path, "br") as f:
@@ -354,4 +399,3 @@ class OntologyStatics(View):
                     "Content-Disposition"
                 ] = f'attachment; filename="{file}.{extension}"'
                 return response
-            

@@ -24,10 +24,11 @@ const BreadcrumbsNav = styled(Grid)(({ theme }) => ({
     color: palette.text.primary
   },
 
-  '& .header-style p': {
+  '& .header-style h1': {
     paddingLeft: variables.spacing[2],
     color: palette.text.primary,
-    fontSize: variables.fontSize.lg
+    fontSize: variables.fontSize.lg,
+    fontWeight: theme.typography.fontWeightRegular
   },
 
   '& .header-substyle': {
@@ -43,7 +44,7 @@ const BreadcrumbsNav = styled(Grid)(({ theme }) => ({
   },
 }));
 
-export default function BreadcrumbsNavGrid({ acronym, id, mode }) {
+export default function BreadcrumbsNavGrid({ acronym, id, mode, subheaderContent }) {
   return (
     <BreadcrumbsNav container>
       <Container maxWidth="false">
@@ -51,12 +52,16 @@ export default function BreadcrumbsNavGrid({ acronym, id, mode }) {
           <span>
             <ListAltOutlinedIcon />
           </span>
-          <p>Scenario Bundle</p>
+          <h1>Scenario Bundles</h1>
         </Grid>
         <Grid item xs={12} className='header-substyle'>
-          <span> 
-            {id === "new" ? "new/" : mode + " /"} 
-          </span> 
+          {subheaderContent ? (
+            <span>{subheaderContent}</span>
+          ) : (
+            <span> 
+              {id === "new" ? "new/" : mode + " /"} 
+            </span> 
+          )}
           {acronym}
         </Grid>
       </Container>

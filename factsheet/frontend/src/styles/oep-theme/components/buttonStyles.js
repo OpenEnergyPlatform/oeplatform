@@ -1,3 +1,5 @@
+import variables from '../variables';
+
 export const buttonStyles = {
   defaultProps: {
     disableElevation : true
@@ -5,7 +7,8 @@ export const buttonStyles = {
   styleOverrides: {
     root: {
       textTransform: 'capitalize',
-      minWidth: 'fit-content'
+      minWidth: 'fit-content',
+      fontSize: variables.fontSize.sm
     }
   }
 }
