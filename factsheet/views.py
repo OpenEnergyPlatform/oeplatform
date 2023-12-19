@@ -1215,7 +1215,7 @@ def query_oekg(request, *args, **kwargs):
     )
     return response
 
-
+@only_if_user_is_owner_of_scenario_bundle
 @login_required
 def delete_factsheet_by_id(request, *args, **kwargs):
     """
