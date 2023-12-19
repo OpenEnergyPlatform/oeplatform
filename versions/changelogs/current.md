@@ -14,6 +14,7 @@
 
 ### Features
 
+- Implement access control (owner & permission group) for editing scenario bundles [(#1484)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1484)
 - add clickable study descriptors #1478 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
 - clickable input and output datasets #1478 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
 - add another scenario descriptor as: study report due to legal obligation #1489 [PR#1491](https://github.com/OpenEnergyPlatform/oeplatform/pull/1491)
