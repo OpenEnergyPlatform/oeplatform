@@ -71,6 +71,8 @@ import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import Container from '@mui/material/Container';
 import Backdrop from '@mui/material/Backdrop';
 
+import CSRFToken from './csrfToken';
+
 import '../styles/App.css';
 import { TableRow } from '@mui/material';
 import variables from '../styles/oep-theme/variables.js';
@@ -106,6 +108,7 @@ function Factsheet(props) {
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
   const [emptyAcronym, setEmptyAcronym] = useState(false);
+  const [notTheOwner, setNotTheOwner] = useState(false);
   const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
   const [mode, setMode] = useState(id === "new" ? "edit" : "overview");
   const [factsheetObject, setFactsheetObject] = useState({});
@@ -318,18 +321,22 @@ function Factsheet(props) {
             scenarios: JSON.stringify(scenarios),
             models: JSON.stringify(selectedModels),
             frameworks: JSON.stringify(selectedFrameworks),
-          }).then(response => {
-            if (response.data === 'Factsheet saved') {
-              navigate('/factsheet/fs/' + new_uid);
-              setIsCreated(true);
-              setOpenSavedDialog(true);
-              setUID(new_uid);
-              setOpenBackDrop(false);
-            }
-            else if (response.data === 'Factsheet exists') {
-              setOpenExistDialog(true);
-            }
-          });
+          },
+          {
+            headers: { 'X-CSRFToken': CSRFToken() }
+          }
+        ).then(response => {
+          if (response.data === 'Factsheet saved') {
+            navigate('/factsheet/fs/' + new_uid);
+            setIsCreated(true);
+            setOpenSavedDialog(true);
+            setUID(new_uid);
+            setOpenBackDrop(false);
+          }
+          else if (response.data === 'Factsheet exists') {
+            setOpenExistDialog(true);
+          }
+        });
       } else {
         axios.get(conf.toep + `scenario-bundles/get/`, { params: { id: uid } }).then(res => {
           axios.post(conf.toep + 'scenario-bundles/update/',
@@ -358,16 +365,31 @@ function Factsheet(props) {
               scenarios: JSON.stringify(scenarios),
               models: JSON.stringify(selectedModels),
               frameworks: JSON.stringify(selectedFrameworks),
-            }).then(response => {
-              if (response.data === "factsheet updated!") {
-                setUID(uid);
-                setOpenUpdatedDialog(true);
-                setOpenBackDrop(false);
+            },
+            {
+              headers: { 'X-CSRFToken': CSRFToken() }
+            }
+          ).then(response => {
+            if (response.data === "factsheet updated!") {
+              setUID(uid);
+              setOpenUpdatedDialog(true);
+              setOpenBackDrop(false);
+            }
+            else if (response.data === 'Factsheet exists') {
+              setOpenExistDialog(true);
+            }
+          })
+            .catch(error => {
+              console.error('API Error:', error.message);
+              if (error.response && error.response.status === 403) {
+                // Handle "Access Denied" error
+                setNotTheOwner(true);
               }
-              else if (response.data === 'Factsheet exists') {
-                setOpenExistDialog(true);
-              }
-            });
+            })
+            .finally(() => {
+              // Close the backdrop regardless of success or error
+              setOpenBackDrop(false);
+          });
         });
       }
 
@@ -377,7 +399,8 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+    axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }, { headers: { 'X-CSRFToken': CSRFToken() } }
+    ).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseSavedDialog = () => {
@@ -680,17 +703,21 @@ function Factsheet(props) {
         entity_type: 'OEO.OEO_00000238',
         entity_label: newElement.name,
         entity_iri: newElement.iri
-      }).then(response => {
-        if (response.data === 'A new entity added!') {
-          setOpenAddedDialog(true);
-          setAddedEntity(['Institution', newElement.name]);
-          getInstitution().then((data) => {
-            const tmp = [];
-            data.map((item) => tmp.push(item))
-            setInstitutions(tmp);
-          });
-        }
-      });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'A new entity added!') {
+        setOpenAddedDialog(true);
+        setAddedEntity(['Institution', newElement.name]);
+        getInstitution().then((data) => {
+          const tmp = [];
+          data.map((item) => tmp.push(item))
+          setInstitutions(tmp);
+        });
+      }
+    });
   }
 
 
@@ -701,17 +728,21 @@ function Factsheet(props) {
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
-      }).then(response => {
-        if (response.data === 'entity updated!') {
-          setOpenEditDialog(true);
-          setEditedEntity(['Institution', oldElement, newElement]);
-          getInstitution().then((data) => {
-            const tmp = [];
-            data.map((item) => tmp.push(item))
-            setInstitutions(tmp);
-          });
-        }
-      });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'entity updated!') {
+        setOpenEditDialog(true);
+        setEditedEntity(['Institution', oldElement, newElement]);
+        getInstitution().then((data) => {
+          const tmp = [];
+          data.map((item) => tmp.push(item))
+          setInstitutions(tmp);
+        });
+      }
+    });
   }
 
   const HandleAddNewFundingSource = (newElement) => {
@@ -720,16 +751,20 @@ function Factsheet(props) {
         entity_type: 'OEO.OEO_00090001',
         entity_label: newElement.name,
         entity_iri: newElement.iri
-      }).then(response => {
-        if (response.data === 'A new entity added!')
-          setOpenAddedDialog(true);
-        setAddedEntity(['Funding source', newElement.name]);
-        getFundingSources().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setFundingSources(tmp);
-        });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'A new entity added!')
+        setOpenAddedDialog(true);
+      setAddedEntity(['Funding source', newElement.name]);
+      getFundingSources().then((data) => {
+        const tmp = [];
+        data.map((item) => tmp.push(item))
+        setFundingSources(tmp);
       });
+    });
   }
 
   const HandleEditFundingSource = (oldElement, newElement, editIRI) => {
@@ -740,17 +775,21 @@ function Factsheet(props) {
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
-      }).then(response => {
-        if (response.data === 'entity updated!') {
-          setOpenEditDialog(true);
-          setEditedEntity(['Funding source', oldElement, newElement]);
-          getFundingSources().then((data) => {
-            const tmp = [];
-            data.map((item) => tmp.push(item))
-            setFundingSources(tmp);
-          });
-        }
-      });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'entity updated!') {
+        setOpenEditDialog(true);
+        setEditedEntity(['Funding source', oldElement, newElement]);
+        getFundingSources().then((data) => {
+          const tmp = [];
+          data.map((item) => tmp.push(item))
+          setFundingSources(tmp);
+        });
+      }
+    });
   }
 
   const HandleAddNewContactPerson = (newElement) => {
@@ -759,17 +798,21 @@ function Factsheet(props) {
         entity_type: 'OEO.OEO_00000107',
         entity_label: newElement.name,
         entity_iri: newElement.iri
-      }).then(response => {
-        if (response.data === 'A new entity added!')
-          setOpenAddedDialog(true);
-        setAddedEntity(['Contact person', newElement.name]);
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'A new entity added!')
+        setOpenAddedDialog(true);
+      setAddedEntity(['Contact person', newElement.name]);
 
-        getContactPersons().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setContactPersons(tmp);
-        });
+      getContactPersons().then((data) => {
+        const tmp = [];
+        data.map((item) => tmp.push(item))
+        setContactPersons(tmp);
       });
+    });
   }
 
   const HandleEditContactPerson = (oldElement, newElement, editIRI) => {
@@ -779,17 +822,21 @@ function Factsheet(props) {
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
-      }).then(response => {
-        if (response.data === 'entity updated!') {
-          setOpenEditDialog(true);
-          setEditedEntity(['Contact person', oldElement, newElement]);
-          getAuthors().then((data) => {
-            const tmp = [];
-            data.map((item) => tmp.push(item))
-            setAuthors(tmp);
-          });
-        }
-      });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'entity updated!') {
+        setOpenEditDialog(true);
+        setEditedEntity(['Contact person', oldElement, newElement]);
+        getAuthors().then((data) => {
+          const tmp = [];
+          data.map((item) => tmp.push(item))
+          setAuthors(tmp);
+        });
+      }
+    });
   }
 
   const HandleAddNewAuthor = (newElement) => {
@@ -798,17 +845,21 @@ function Factsheet(props) {
         entity_type: 'OEO.OEO_00000064',
         entity_label: newElement.name,
         entity_iri: newElement.iri
-      }).then(response => {
-        if (response.data === 'A new entity added!')
-          setOpenAddedDialog(true);
-        setAddedEntity(['Author', newElement.name]);
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'A new entity added!')
+        setOpenAddedDialog(true);
+      setAddedEntity(['Author', newElement.name]);
 
-        getAuthors().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setAuthors(tmp);
-        });
+      getAuthors().then((data) => {
+        const tmp = [];
+        data.map((item) => tmp.push(item))
+        setAuthors(tmp);
       });
+    });
   }
 
   const HandleEditAuthors = (oldElement, newElement, editIRI) => {
@@ -818,17 +869,21 @@ function Factsheet(props) {
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
-      }).then(response => {
-        if (response.data === 'entity updated!') {
-          setOpenEditDialog(true);
-          setEditedEntity(['Author', oldElement, newElement]);
-          getAuthors().then((data) => {
-            const tmp = [];
-            data.map((item) => tmp.push(item))
-            setAuthors(tmp);
-          });
-        }
-      });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'entity updated!') {
+        setOpenEditDialog(true);
+        setEditedEntity(['Author', oldElement, newElement]);
+        getAuthors().then((data) => {
+          const tmp = [];
+          data.map((item) => tmp.push(item))
+          setAuthors(tmp);
+        });
+      }
+    });
   }
 
   const HandleAddNewRegion = (newElement) => {
@@ -837,17 +892,21 @@ function Factsheet(props) {
         'entity_type': 'OEO.OEO_00020032',
         'entity_label': newElement.name,
         'entity_iri': newElement.iri,
-      }).then(response => {
-        if (response.data === 'A new entity added!')
-          setOpenAddedDialog(true);
-        setAddedEntity(['Spatial region', newElement.name]);
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'A new entity added!')
+        setOpenAddedDialog(true);
+      setAddedEntity(['Spatial region', newElement.name]);
 
-        getScenarioRegions().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setScenarioRegions(tmp);
-        });
+      getScenarioRegions().then((data) => {
+        const tmp = [];
+        data.map((item) => tmp.push(item))
+        setScenarioRegions(tmp);
       });
+    });
   }
 
   const HandleEditRegion = (oldElement, newElement, editIRI) => {
@@ -857,17 +916,21 @@ function Factsheet(props) {
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
-      }).then(response => {
-        if (response.data === 'entity updated!') {
-          setOpenEditDialog(true);
-          setEditedEntity(['Spatial region', oldElement, newElement]);
-          getScenarioRegions().then((data) => {
-            const tmp = [];
-            data.map((item) => tmp.push(item))
-            setScenarioRegions(tmp);
-          });
-        }
-      });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'entity updated!') {
+        setOpenEditDialog(true);
+        setEditedEntity(['Spatial region', oldElement, newElement]);
+        getScenarioRegions().then((data) => {
+          const tmp = [];
+          data.map((item) => tmp.push(item))
+          setScenarioRegions(tmp);
+        });
+      }
+    });
   }
 
   const HandleAddNewInteractingRegion = (newElement) => {
@@ -876,17 +939,21 @@ function Factsheet(props) {
         entity_type: 'OEO.OEO_00020036',
         entity_label: newElement.name,
         entity_iri: newElement.iri
-      }).then(response => {
-        if (response.data === 'A new entity added!')
-          setOpenAddedDialog(true);
-        setAddedEntity(['Interacting region', newElement.name]);
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'A new entity added!')
+        setOpenAddedDialog(true);
+      setAddedEntity(['Interacting region', newElement.name]);
 
-        getScenarioInteractingRegions().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setScenarioInteractingRegions(tmp);
-        });
+      getScenarioInteractingRegions().then((data) => {
+        const tmp = [];
+        data.map((item) => tmp.push(item))
+        setScenarioInteractingRegions(tmp);
       });
+    });
   }
 
   const HandleEditInteractingRegion = (oldElement, newElement, editIRI) => {
@@ -896,17 +963,21 @@ function Factsheet(props) {
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
-      }).then(response => {
-        if (response.data === 'entity updated!') {
-          setOpenEditDialog(true);
-          setEditedEntity(['Interacting region', oldElement, newElement]);
-          getScenarioInteractingRegions().then((data) => {
-            const tmp = [];
-            data.map((item) => tmp.push(item))
-            setScenarioInteractingRegions(tmp);
-          });
-        }
-      });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'entity updated!') {
+        setOpenEditDialog(true);
+        setEditedEntity(['Interacting region', oldElement, newElement]);
+        getScenarioInteractingRegions().then((data) => {
+          const tmp = [];
+          data.map((item) => tmp.push(item))
+          setScenarioInteractingRegions(tmp);
+        });
+      }
+    });
   }
 
   const HandleAddNNewScenarioYears = (newElement) => {
@@ -915,17 +986,21 @@ function Factsheet(props) {
         entity_type: 'OBO.OEO_00020097',
         entity_label: newElement.name,
         entity_iri: newElement.iri
-      }).then(response => {
-        if (response.data === 'A new entity added!')
-          setOpenAddedDialog(true);
-        setAddedEntity(['Scenario year', newElement.name]);
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'A new entity added!')
+        setOpenAddedDialog(true);
+      setAddedEntity(['Scenario year', newElement.name]);
 
-        getScenarioYears().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setScenarioYears(tmp);
-        });
+      getScenarioYears().then((data) => {
+        const tmp = [];
+        data.map((item) => tmp.push(item))
+        setScenarioYears(tmp);
       });
+    });
   }
 
   const HandleEditScenarioYears = (oldElement, newElement, editIRI) => {
@@ -935,17 +1010,21 @@ function Factsheet(props) {
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
-      }).then(response => {
-        if (response.data === 'entity updated!') {
-          setOpenEditDialog(true);
-          setEditedEntity(['Scenario year', oldElement, newElement]);
-          getScenarioYears().then((data) => {
-            const tmp = [];
-            data.map((item) => tmp.push(item))
-            setScenarioYears(tmp);
-          });
-        }
-      });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'entity updated!') {
+        setOpenEditDialog(true);
+        setEditedEntity(['Scenario year', oldElement, newElement]);
+        getScenarioYears().then((data) => {
+          const tmp = [];
+          data.map((item) => tmp.push(item))
+          setScenarioYears(tmp);
+        });
+      }
+    });
   }
 
   const HandleAddNewModel = (newElement) => {
@@ -954,17 +1033,21 @@ function Factsheet(props) {
         entity_type: 'OEO.OEO_00000274',
         entity_label: newElement.name,
         entity_iri: newElement.iri
-      }).then(response => {
-        if (response.data === 'A new entity added!')
-          setOpenAddedDialog(true);
-        setAddedEntity(['Model', newElement.name]);
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'A new entity added!')
+        setOpenAddedDialog(true);
+      setAddedEntity(['Model', newElement.name]);
 
-        getModels().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setModels(tmp);
-        });
+      getModels().then((data) => {
+        const tmp = [];
+        data.map((item) => tmp.push(item))
+        setModels(tmp);
       });
+    });
   }
 
   const HandleEditModels = (oldElement, newElement, editIRI) => {
@@ -974,17 +1057,21 @@ function Factsheet(props) {
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
-      }).then(response => {
-        if (response.data === 'entity updated!') {
-          setOpenEditDialog(true);
-          setEditedEntity(['Model', oldElement, newElement]);
-          getModels().then((data) => {
-            const tmp = [];
-            data.map((item) => tmp.push(item))
-            setModels(tmp);
-          });
-        }
-      });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'entity updated!') {
+        setOpenEditDialog(true);
+        setEditedEntity(['Model', oldElement, newElement]);
+        getModels().then((data) => {
+          const tmp = [];
+          data.map((item) => tmp.push(item))
+          setModels(tmp);
+        });
+      }
+    });
   }
 
   const HandleAddNewFramework = (newElement) => {
@@ -993,17 +1080,21 @@ function Factsheet(props) {
         entity_type: 'OEO.OEO_00000172',
         entity_label: newElement.name,
         entity_iri: newElement.iri
-      }).then(response => {
-        if (response.data === 'A new entity added!')
-          setOpenAddedDialog(true);
-        setAddedEntity(['Framework', newElement.name]);
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'A new entity added!')
+        setOpenAddedDialog(true);
+      setAddedEntity(['Framework', newElement.name]);
 
-        getFrameworks().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setFrameworks(tmp);
-        });
+      getFrameworks().then((data) => {
+        const tmp = [];
+        data.map((item) => tmp.push(item))
+        setFrameworks(tmp);
       });
+    });
   }
 
   const HandleEditFramework = (oldElement, newElement, editIRI) => {
@@ -1013,17 +1104,21 @@ function Factsheet(props) {
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
-      }).then(response => {
-        if (response.data === 'entity updated!') {
-          setOpenEditDialog(true);
-          setEditedEntity(['Framework', oldElement, newElement]);
-          getFrameworks().then((data) => {
-            const tmp = [];
-            data.map((item) => tmp.push(item))
-            setFrameworks(tmp);
-          });
-        }
-      });
+      },
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
+      }
+    ).then(response => {
+      if (response.data === 'entity updated!') {
+        setOpenEditDialog(true);
+        setEditedEntity(['Framework', oldElement, newElement]);
+        getFrameworks().then((data) => {
+          const tmp = [];
+          data.map((item) => tmp.push(item))
+          setFrameworks(tmp);
+        });
+      }
+    });
   }
 
   const sectorDivisionsHandler = (sectorDivisionsList) => {
@@ -2566,6 +2661,15 @@ function Factsheet(props) {
               </Alert>
             </Snackbar>
             <Snackbar
+              open={notTheOwner}
+              autoHideDuration={600}
+            >
+              <Alert variant="filled" severity="error" sx={{ width: '100%' }}>
+                <AlertTitle>Access denied!</AlertTitle>
+                You cannot edit scenario bundles that you do not own!
+              </Alert>
+            </Snackbar>
+            <Snackbar
               open={openAddedDialog}
               autoHideDuration={6000}
               onClose={handleAddedMessageClose}
@@ -2639,7 +2743,7 @@ function Factsheet(props) {
               </DialogContent>
               <DialogActions>
                 <Link to={`scenario-bundles/main`} onClick={() => {
-                  axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+                  axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id }, headers: { 'X-CSRFToken': CSRFToken() } }).then(response => setOpenRemovedDialog(true));
                   this.reloadRoute();
                 }} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
                   <Button variant="contained" color="error" >

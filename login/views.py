@@ -100,7 +100,9 @@ class ReviewsView(View):
             )
 
             if active_peer_review_revewier is not None:
-                review_history = peer_review_reviews.exclude(pk=active_peer_review_revewier.pk)  # noqa
+                review_history = peer_review_reviews.exclude(
+                    pk=active_peer_review_revewier.pk
+                )  # noqa
             else:
                 # Handle the case when active_peer_review_revewier is None.
                 # Maybe set review_history to some default value or just leave it as None.
@@ -257,10 +259,14 @@ class SettingsView(View):
             Token.objects.get_or_create(user=user)
         user = get_object_or_404(OepUser, pk=user_id)
         token = None
+        user_groups = None
         if request.user.is_authenticated:
             token = Token.objects.get(user=request.user)
+            user_groups = request.user.memberships
         return render(
-            request, "login/user_settings.html", {"profile_user": user, "token": token}
+            request,
+            "login/user_settings.html",
+            {"profile_user": user, "token": token, "groups": user_groups},
         )
 
 
