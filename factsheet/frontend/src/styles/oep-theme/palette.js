@@ -84,6 +84,7 @@ const palette = {
     secondary: '#5F7484',
     link: primaryPalette[700]
   },
+  link: primaryPalette[500],
   divider: '#E3EAEF',
   border: greyPalette[300],
   background: {

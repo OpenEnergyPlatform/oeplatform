@@ -52,8 +52,8 @@
         "name": "Regenerative Energien Modell"
     },
     {
-        "id": "DataProcessing \u2013 Data Model of the German Electricity System (part of the open_eGo project)",
-        "name": "DataProcessing \u2013 Data Model of the German Electricity System (part of the open_eGo project)"
+        "id": "DataProcessing – Data Model of the German Electricity System (part of the open_eGo project)",
+        "name": "DataProcessing – Data Model of the German Electricity System (part of the open_eGo project)"
     },
     {
         "id": "DIstribution Network GeneratOr",
@@ -88,8 +88,8 @@
         "name": "renpassG!S - A Free and Open Python Tool for Simulating Energy Supply Systems"
     },
     {
-        "id": "SCOPE (Sektor\u00fcbergreifende Einsatz- und Ausbauoptimierung f\u00fcr Analysen des zuk\u00fcnftigen Energieversorgungssystems)",
-        "name": "SCOPE (Sektor\u00fcbergreifende Einsatz- und Ausbauoptimierung f\u00fcr Analysen des zuk\u00fcnftigen Energieversorgungssystems)"
+        "id": "SCOPE (Sektorübergreifende Einsatz- und Ausbauoptimierung für Analysen des zukünftigen Energieversorgungssystems)",
+        "name": "SCOPE (Sektorübergreifende Einsatz- und Ausbauoptimierung für Analysen des zukünftigen Energieversorgungssystems)"
     },
     {
         "id": "European Gas Market Model",
@@ -172,8 +172,8 @@
         "name": "Modelling the Energy Development under Environmental And Socioeconomic constraints"
     },
     {
-        "id": "\u00d6koFlex",
-        "name": "\u00d6koFlex"
+        "id": "ÖkoFlex",
+        "name": "ÖkoFlex"
     },
     {
         "id": "Swiss electricity market model",
@@ -232,16 +232,16 @@
         "name": "EE-Stromversorgung"
     },
     {
-        "id": "ENTIGRIS \u2013 Europe/Germany: \u00ad Power System Development",
-        "name": "ENTIGRIS \u2013 Europe/Germany: \u00ad Power System Development"
+        "id": "ENTIGRIS – Europe/Germany: Power System Development",
+        "name": "ENTIGRIS – Europe/Germany:  Power System Development"
     },
     {
         "id": "DISTRICT",
         "name": "DISTRICT"
     },
     {
-        "id": "ESA\u00b2 Data Warehouse",
-        "name": "ESA\u00b2 Data Warehouse"
+        "id": "ESA² Data Warehouse",
+        "name": "ESA² Data Warehouse"
     },
     {
         "id": "eSYS.pro",
@@ -320,8 +320,8 @@
         "name": "Stochastic European Market Simulation"
     },
     {
-        "id": "Zuk\u00fcnftiges Erzeugungssystem unter UnSicherheiten",
-        "name": "Zuk\u00fcnftiges Erzeugungssystem unter UnSicherheiten"
+        "id": "Zukünftiges Erzeugungssystem unter UnSicherheiten",
+        "name": "Zukünftiges Erzeugungssystem unter UnSicherheiten"
     },
     {
         "id": "Model for the Estimation of Local Energy Balancing Demand",
@@ -408,8 +408,8 @@
         "name": "SKIN Energy"
     },
     {
-        "id": "Fundamentalmodell der Stadtwerke M\u00fcnchen",
-        "name": "Fundamentalmodell der Stadtwerke M\u00fcnchen"
+        "id": "Fundamentalmodell der Stadtwerke München",
+        "name": "Fundamentalmodell der Stadtwerke München"
     },
     {
         "id": "Transport energy, economics and environment model",
@@ -452,8 +452,8 @@
         "name": "The Integrated MARKAL-EFOM System: Portugal"
     },
     {
-        "id": "The Integrated MARKAL-EFOM System: \u00c9vora",
-        "name": "The Integrated MARKAL-EFOM System: \u00c9vora"
+        "id": "The Integrated MARKAL-EFOM System: Évora",
+        "name": "The Integrated MARKAL-EFOM System: Évora"
     },
     {
         "id": "Framework for Integrated Energy Systems Assessment",
@@ -496,8 +496,8 @@
         "name": "Model for energy security assessment"
     },
     {
-        "id": "PLEXOS\u00ae Integrated Energy Model",
-        "name": "PLEXOS\u00ae Integrated Energy Model"
+        "id": "PLEXOS® Integrated Energy Model",
+        "name": "PLEXOS® Integrated Energy Model"
     },
     {
         "id": "Economic Valuation of Air pollution",
@@ -744,8 +744,8 @@
         "name": "AnyMOD North America"
     },
     {
-        "id": "Open Baltic Backbone model - FasTen (Fast, flexible, and secure decarbonization of the Baltic states \u2013 possible progress in the next Ten years)",
-        "name": "Open Baltic Backbone model - FasTen (Fast, flexible, and secure decarbonization of the Baltic states \u2013 possible progress in the next Ten years)"
+        "id": "Open Baltic Backbone model - FasTen (Fast, flexible, and secure decarbonization of the Baltic states – possible progress in the next Ten years)",
+        "name": "Open Baltic Backbone model - FasTen (Fast, flexible, and secure decarbonization of the Baltic states – possible progress in the next Ten years)"
     },
     {
         "id": "Domestic Energy Demand Modelling Library",
@@ -1002,5 +1002,9 @@
     {
         "id": "Automated photovoltaic forecasts",
         "name": "Automated photovoltaic forecasts"
+    },
+    {
+        "id": "QuaSi - GenSim",
+        "name": "QuaSi - GenSim"
     }
 ]

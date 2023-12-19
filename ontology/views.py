@@ -45,7 +45,7 @@ def collect_modules(path):
                     }}
                 """
                 # Execute the SPARQL query for comment
-                comment_results = g.query(comment_query, initNs={"": root_namespace})
+                comment_results = g.query(comment_query)
 
                 # Update the comment in the modules dictionary if found
                 for row in comment_results:
@@ -62,7 +62,7 @@ def collect_modules(path):
                     """
                     # Execute the SPARQL query for description
                     description_results = g.query(
-                        description_query, initNs={"": root_namespace}
+                        description_query
                     )
 
                     # Update the comment in the modules dictionary if found
