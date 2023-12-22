@@ -13,8 +13,6 @@ from oeplatform.settings import (
     OPEN_ENERGY_ONTOLOGY_NAME,
 )
 
-from rdflib import Graph
-
 
 def collect_modules(path):
     modules = dict()
@@ -28,9 +26,6 @@ def collect_modules(path):
             if extension == "owl":
                 g = Graph()
                 g.parse(os.path.join(path, file))
-
-                # Get the root namespace
-                root_namespace = next(iter(g.namespaces()))
 
                 # Set the namespaces in the graph
                 for prefix, uri in g.namespaces():
