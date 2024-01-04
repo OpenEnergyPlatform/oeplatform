@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.urls import path
 
 from api import actions, views
 
@@ -20,11 +21,7 @@ urlpatterns = [
         views.Metadata.as_view(),
         name="api_table_meta",
     ),
-    url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<to_schema>[\w\d_\s]+)/$",  # noqa
-        views.Move.as_view(),
-        name="move",
-    ),
+    path('v0/schema/<str:schema>/tables/<str:table>/move/<str:to_schema>/', views.Move.as_view(), name ='move'),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa
         views.Column.as_view(),
