@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
 from rest_framework import status
@@ -31,9 +32,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 
-from .models import OEKG_Modifications
+from .models import OEKG_Modifications, ScenarioBundleAccessControl
 from login import models as login_models
 
+from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, "oeo")
@@ -56,14 +58,14 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-#query_endpoint = 'http://localhost:3030/ds/query'
-#update_endpoint = 'http://localhost:3030/ds/update'
+# query_endpoint = "http://localhost:3030/ds/query"
+# update_endpoint = "http://localhost:3030/ds/update"
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+# query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+# update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-#query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-#update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
+query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
+update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -126,6 +128,35 @@ def factsheets_index(request, *args, **kwargs):
     return render(request, "factsheet/index.html")
 
 
+def set_ownership(bundle_uid, user):
+    model = ScenarioBundleAccessControl()
+    model.owner_user = user
+    model.bundle_id = bundle_uid
+    model.save()
+    return f"The ownership of bundle {bundle_uid} is now set to User {user.name}"
+
+
+def is_owner(user, bundle_id):
+    bundle = ScenarioBundleAccessControl.load_by_uid(uid=bundle_id)
+    if bundle is not None:
+        eval = user == bundle.owner_user.id
+    else:
+        eval = False
+
+    return eval
+
+
+def check_ownership(request, bundle_id):
+    if is_owner(request.user.id, bundle_id):
+        return JsonResponse(
+            {"isOwner": True}, safe=False, content_type="application/json"
+        )
+    else:
+        return JsonResponse(
+            {"isOwner": False}, safe=False, content_type="application/json"
+        )
+
+
 def add_history(triple_subject, triple_predicate, triple_object, type_of_action, user):
     histroy_instance = HistoryOfOEKG(
         triple_subject=triple_subject,
@@ -155,23 +186,22 @@ def get_oekg_modifications(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def create_factsheet(request, *args, **kwargs):
     """
     Creates a scenario bundle based on user's data. Currently, the minimum requirement to create a bundle is the "acronym".
-    The "acronym" must be unique. If the provided acronym already exists in the OEKG, then the function returns a "Duplicate error". 
+    The "acronym" must be unique. If the provided acronym already exists in the OEKG, then the function returns a "Duplicate error".
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
-        uid (str): The unique ID for the bundle. 
-        acronym (str): The acronym for the bundle. 
-        study_name (str): The study name for the bundle. 
-        abstract (str): The abstract for the bundle. 
+        uid (str): The unique ID for the bundle.
+        acronym (str): The acronym for the bundle.
+        study_name (str): The study name for the bundle.
+        abstract (str): The abstract for the bundle.
         institution (list of objects): The institutions for the bundle.
-        funding_source (list of objects): The funding sources for the bundle. 
-        authors (list of objects): The authors for the bundle. 
-        contact_person (list of objects): The contact persons for the bundle. 
-        sector_divisions (list of objects): The sector divisions for the bundle. 
+        funding_source (list of objects): The funding sources for the bundle.
+        authors (list of objects): The authors for the bundle.
+        contact_person (list of objects): The contact persons for the bundle.
+        sector_divisions (list of objects): The sector divisions for the bundle.
         sectors (list of objects): The sectors for the bundle.
         technologies (list of objects): The technologies for the bundle.
         study_keywords (list of strings): The study keywords for the bundle.
@@ -487,28 +517,30 @@ def create_factsheet(request, *args, **kwargs):
         response = JsonResponse(
             "Factsheet saved", safe=False, content_type="application/json"
         )
+        result = set_ownership(bundle_uid=uid, user=request.user)
+        logging.info(result)
         patch_response_headers(response, cache_timeout=1)
 
         return response
 
 
 @login_required
-@csrf_exempt
+@only_if_user_is_owner_of_scenario_bundle
 def update_factsheet(request, *args, **kwargs):
     """
-    Updates a scenario bundle based on user's data. 
+    Updates a scenario bundle based on user's data.
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
-        uid (str): The unique ID for the bundle. 
-        acronym (str): The acronym for the bundle. 
-        study_name (str): The study name for the bundle. 
-        abstract (str): The abstract for the bundle. 
+        uid (str): The unique ID for the bundle.
+        acronym (str): The acronym for the bundle.
+        study_name (str): The study name for the bundle.
+        abstract (str): The abstract for the bundle.
         institution (list of objects): The institutions for the bundle.
-        funding_source (list of objects): The funding sources for the bundle. 
-        authors (list of objects): The authors for the bundle. 
-        contact_person (list of objects): The contact persons for the bundle. 
-        sector_divisions (list of objects): The sector divisions for the bundle. 
+        funding_source (list of objects): The funding sources for the bundle.
+        authors (list of objects): The authors for the bundle.
+        contact_person (list of objects): The contact persons for the bundle.
+        sector_divisions (list of objects): The sector divisions for the bundle.
         sectors (list of objects): The sectors for the bundle.
         technologies (list of objects): The technologies for the bundle.
         study_keywords (list of strings): The study keywords for the bundle.
@@ -520,7 +552,7 @@ def update_factsheet(request, *args, **kwargs):
         frameworks (list of strings): The frameworks for the bundle.
         date_of_publication (str): The date of publication for the bundle.
         report_title (str): The report title for the bundle.
-        
+
     """
     request_body = json.loads(request.body)
     fsData = request_body["fsData"]
@@ -867,8 +899,6 @@ def update_factsheet(request, *args, **kwargs):
         return response
 
 
-# @login_required
-@csrf_exempt
 def factsheet_by_name(request, *args, **kwargs):
     name = request.GET.get("name")
     factsheet = Factsheet.objects.get(name=name)
@@ -878,15 +908,13 @@ def factsheet_by_name(request, *args, **kwargs):
     return response
 
 
-# @login_required
-@csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
     """
-    Returns a scenario bundle based based on the provided ID. 
+    Returns a scenario bundle based based on the provided ID.
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
-        id (str): The unique ID for the bundle. 
+        id (str): The unique ID for the bundle.
     """
 
     uid = request.GET.get("id")
@@ -1108,8 +1136,7 @@ def factsheet_by_id(request, *args, **kwargs):
     return response
 
 
-# @login_required
-@csrf_exempt
+@login_required
 def query_oekg(request, *args, **kwargs):
     """
     This function takes filter objects provided by the user and utilises them to construct a SPARQL query.
@@ -1189,15 +1216,15 @@ def query_oekg(request, *args, **kwargs):
     return response
 
 
+@only_if_user_is_owner_of_scenario_bundle
 @login_required
-@csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
     """
     Removes a scenario bundle based on the provided ID.
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
-        id (str): The unique ID for the bundle. 
+        id (str): The unique ID for the bundle.
 
     """
     id = request.GET.get("id")
@@ -1214,7 +1241,6 @@ def delete_factsheet_by_id(request, *args, **kwargs):
     return response
 
 
-@csrf_exempt
 def test_query(request, *args, **kwargs):
     scenario_region = URIRef(
         "http://openenergy-platform.org/ontology/oekg/region/UnitedKingdomOfGreatBritainAndNorthernIreland"
@@ -1227,8 +1253,6 @@ def test_query(request, *args, **kwargs):
     return response
 
 
-# @login_required
-@csrf_exempt
 def get_entities_by_type(request, *args, **kwargs):
     """
     Returns all entities (from OEKG) with a certain type. The type should be supplied by the user.
@@ -1259,7 +1283,6 @@ def get_entities_by_type(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def add_entities(request, *args, **kwargs):
     """
     Add entities to OEKG. The minimum requirements for adding an entity are the type and label.
@@ -1298,7 +1321,6 @@ def add_entities(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def add_a_fact(request, *args, **kwargs):
     request_body = json.loads(request.body)
     _subject = request_body["subject"]
@@ -1325,7 +1347,6 @@ def add_a_fact(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def delete_entities(request, *args, **kwargs):
     """
     Removes an entity from OEKG. The minimum requirements for removing an entity are the type and label.
@@ -1353,18 +1374,17 @@ def delete_entities(request, *args, **kwargs):
 
 
 @login_required
-@csrf_exempt
 def update_an_entity(request, *args, **kwargs):
     """
     Updates an entity in OEKG. The minimum requirements for updating an entity are the type, the old label, and the new label.
-   
+
     Args:
         request (HttpRequest): The incoming HTTP GET request.
         entity_type (str): The type(OEO class) of the entity.
-        entity_label (str): The label of the entity.   
-        new_entity_label (str): The new label of the entity.   
+        entity_label (str): The label of the entity.
+        new_entity_label (str): The new label of the entity.
         entity_id (str): The IRI of the entity.
-   """
+    """
     request_body = json.loads(request.body)
     entity_type = request_body["entity_type"]
     entity_label = request_body["entity_label"]
@@ -1392,8 +1412,6 @@ def update_an_entity(request, *args, **kwargs):
     return response
 
 
-# @login_required
-@csrf_exempt
 def get_all_factsheets(request, *args, **kwargs):
     all_factsheets = []
     for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
@@ -1457,8 +1475,6 @@ def get_all_factsheets(request, *args, **kwargs):
     return response
 
 
-@csrf_exempt
-# @login_required
 def get_scenarios(request, *args, **kwargs):
     scenarios_uid = [
         i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_uid"))
@@ -1523,8 +1539,7 @@ def get_scenarios(request, *args, **kwargs):
     return response
 
 
-@csrf_exempt
-# @login_required
+@login_required
 def get_all_factsheets_as_turtle(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="ttl")
     response = JsonResponse(
@@ -1535,8 +1550,6 @@ def get_all_factsheets_as_turtle(request, *args, **kwargs):
     return response
 
 
-@csrf_exempt
-# @login_required
 def get_all_factsheets_as_json_ld(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="json-ld")
     response = JsonResponse(
@@ -1574,8 +1587,7 @@ def get_all_sub_classes(cls, visited=None):
     return dict
 
 
-@csrf_exempt
-# @login_required
+@login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     scenario_class = oeo_owl.search_one(
         iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"

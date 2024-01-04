@@ -46,12 +46,13 @@ setup-db: include_security_settings
 	sudo -u postgres psql -d $(LOCAL_DB_NAME) -c "CREATE EXTENSION postgis;"
 
 create-db:
+	
+
+migrate-databases:
 	# Create Django databases and apply migrations
 	python manage.py migrate
-
-migrate:
 	# Apply Django migrations
-	python manage.py migrate
+	python manage.py alembic upgrade head
 
 .PHONY: run-fuseki
 
