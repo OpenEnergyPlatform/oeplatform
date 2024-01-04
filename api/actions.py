@@ -1523,13 +1523,25 @@ def move(from_schema, table, to_schema):
         session.query(OEDBTableTags).filter(
             OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
         ).update({OEDBTableTags.schema_name: to_schema})
+        t.set_is_published()
         session.commit()
-        t.save()
+        # t.save()
     except Exception:
         session.rollback()
         raise
     finally:
         session.close()
+
+
+def update_publish_status(table_name, new_status):
+    try:
+        table = DBTable.objects.get(name=table_name)
+        table.is_publish = new_status
+        table.save()
+        print("table" + " " + str(table.is_publish))
+    except DBTable.DoesNotExist:
+        raise APIError("Table not found for updating publish status")
+
 
 
 def create_meta(schema, table):
