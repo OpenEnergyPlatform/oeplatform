@@ -1523,13 +1523,18 @@ def move(from_schema, table, to_schema):
         session.query(OEDBTableTags).filter(
             OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
         ).update({OEDBTableTags.schema_name: to_schema})
+        t.set_is_published()
         session.commit()
-        t.save()
+        # t.save()
     except Exception:
         session.rollback()
         raise
     finally:
         session.close()
+
+
+
+
 
 
 def create_meta(schema, table):
