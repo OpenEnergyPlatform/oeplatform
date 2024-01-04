@@ -1533,14 +1533,7 @@ def move(from_schema, table, to_schema):
         session.close()
 
 
-def update_publish_status(table_name, new_status):
-    try:
-        table = DBTable.objects.get(name=table_name)
-        table.is_publish = new_status
-        table.save()
-        print("table" + " " + str(table.is_publish))
-    except DBTable.DoesNotExist:
-        raise APIError("Table not found for updating publish status")
+
 
 
 
