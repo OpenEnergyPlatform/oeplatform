@@ -27,7 +27,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api.actions import describe_columns
+from api.actions import assert_has_metadata, describe_columns
 
 try:
     import oeplatform.securitysettings as sec
@@ -72,6 +72,7 @@ schema_whitelist = [
 ]
 
 schema_sandbox = "sandbox"
+
 
 def admin_constraints(request):
     """
@@ -1572,17 +1573,20 @@ def update_table_tags(request):
         table=table, schema=schema, tag_ids_new=ids
     )
 
-    with _get_engine().connect() as con:
-        with con.begin():
-            # TODO Add metadata to table (JSONB field) somewhere here
-            actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=con
-            )
+    if actions.assert_has_metadata(table=table, schema=schema):
+        with _get_engine().connect() as con:
+            with con.begin():
+                # TODO Add metadata to table (JSONB field) somewhere here
+                actions.set_table_metadata(
+                    table=table, schema=schema, metadata=metadata, cursor=con
+                )
 
-    messasge = messages.success(
-        request,
-        'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
-    )
+        messasge = messages.success(
+            request,
+            'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
+        )
+    else:
+        messasge = None
     return render(
         request,
         "dataedit/dataview.html",

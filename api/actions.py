@@ -133,6 +133,16 @@ def assert_add_tag_permission(user, table, permission, schema):
         raise PermissionDenied
 
 
+def assert_has_metadata(table, schema):
+    table = DBTable.load(schema, table)
+    if table.oemetadata is None:
+        result = False
+    else:
+        result = True
+
+    return result
+
+
 def _translate_fetched_cell(cell):
     if isinstance(cell, geoalchemy2.WKBElement):
         return _get_engine().execute(cell.ST_AsText()).scalar()
@@ -1531,10 +1541,6 @@ def move(from_schema, table, to_schema):
         raise
     finally:
         session.close()
-
-
-
-
 
 
 def create_meta(schema, table):
