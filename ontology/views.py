@@ -2,15 +2,24 @@ import os
 import re
 from collections import defaultdict
 
+from pathlib import Path
+
 from django.shortcuts import Http404, HttpResponse, redirect, render
 from django.views import View
 from rdflib import Graph
 
-from oeplatform.settings import ONTOLOGY_FOLDER
+from oeplatform.settings import (
+    ONTOLOGY_FOLDER,
+    ONTOLOGY_ROOT,
+    OPEN_ENERGY_ONTOLOGY_NAME,
+)
+
+from rdflib import Graph
 
 
 def collect_modules(path):
     modules = dict()
+
     for file in os.listdir(path):
         if not os.path.isdir(os.path.join(path, file)):
             match = re.match(r"^(?P<filename>.*)\.(?P<extension>\w+)$", file)
@@ -18,23 +27,61 @@ def collect_modules(path):
             if filename not in modules:
                 modules[filename] = dict(extensions=[], comment="No description found")
             if extension == "owl":
-                # g = Graph()
-                # g.parse(os.path.join(path, file))
-                # root = dict(g.namespaces())['']
-                # comments = g.objects(root, RDFS.comment)
-                # try:
-                #    modules[filename]["comment"] = next(comments)
-                # except StopIteration:
-                modules[filename]["comment"] = "No description found"
+                g = Graph()
+                g.parse(os.path.join(path, file))
+
+                # Get the root namespace
+                root_namespace = next(iter(g.namespaces()))
+
+                # Set the namespaces in the graph
+                for prefix, uri in g.namespaces():
+                    g.bind(prefix, uri)
+
+                # Extract the description from the RDF graph (rdfs:comment)
+                comment_query = f"""
+                    SELECT ?description
+                    WHERE {{
+                        ?ontology rdf:type owl:Ontology .
+                        ?ontology rdfs:comment ?description .
+                    }}
+                """
+                # Execute the SPARQL query for comment
+                comment_results = g.query(comment_query)
+
+                # Update the comment in the modules dictionary if found
+                for row in comment_results:
+                    modules[filename]["comment"] = row[0]
+
+                # If the comment is still "No description found," try extracting from dc:description
+                if modules[filename]["comment"] == "No description found":
+                    description_query = f"""
+                        SELECT ?description
+                        WHERE {{
+                            ?ontology rdf:type owl:Ontology .
+                            ?ontology dc:description ?description .
+                        }}
+                    """
+                    # Execute the SPARQL query for description
+                    description_results = g.query(
+                        description_query
+                    )
+
+                    # Update the comment in the modules dictionary if found
+                    for row in description_results:
+                        modules[filename]["comment"] = row[0]
+
             modules[filename]["extensions"].append(extension)
     return modules
 
 
 class OntologyVersion(View):
     def get(self, request, ontology="oeo", version=None):
-        if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
+        if not onto_base_path.exists():
+            print("test")
             raise Http404
-        versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
+        versions = os.listdir(onto_base_path)
         print(versions)
         if not version:
             version = max(
@@ -51,20 +98,22 @@ class OntologyVersion(View):
 
 class OntologyOverview(View):
     def get(self, request, ontology, module_or_id=None, version=None, imports=False):
-        if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
+        if not onto_base_path.exists():
             raise Http404
-        versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
+        versions = os.listdir(onto_base_path)
         if not version:
             version = max(
                 (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
             )
 
-        path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}"
+        path = onto_base_path / version
         # This is temporary (macOS related)
         file = "oeo-full.owl"
-        Ontology_URI = os.path.join(path, file)
+        Ontology_URI = path / file
         g = Graph()
-        g.parse(Ontology_URI)
+        g.parse(Ontology_URI.as_posix())
 
         q_global = g.query(
             """
@@ -244,17 +293,21 @@ class OntologyOverview(View):
                     ),
                 )
             else:
-                main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
-                main_module_name = list(main_module.keys())[0]
+                main_module = collect_modules(
+                    path
+                )  # TODO fix varname - not clear what path this is
+                if OPEN_ENERGY_ONTOLOGY_NAME in main_module.keys():
+                    main_module_name = OPEN_ENERGY_ONTOLOGY_NAME
+                else:
+                    raise Exception(
+                        f"The main module '{OPEN_ENERGY_ONTOLOGY_NAME}' is not available in {path}."
+                    )
+
                 main_module = main_module[main_module_name]
                 main_module["name"] = main_module_name
-                submodules = collect_modules(
-                    f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules"
-                )
+                submodules = collect_modules((path / "modules"))
                 # Collect all file names
-                imports = collect_modules(
-                    f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports"
-                )
+                imports = collect_modules(path / "imports")
 
                 return render(
                     request,
@@ -311,19 +364,20 @@ class OntologyStatics(View):
         :return:
         """
 
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
         if not extension:
             extension = "owl"
         if not version:
             version = max(
-                (d for d in os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")),
+                (d for d in os.listdir(onto_base_path)),
                 key=lambda d: [int(x) for x in d.split(".")],
             )
         if imports:
-            file_path = (
-                f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports/{file}.{extension}"
-            )
+            file_path = onto_base_path / version / "imports" / f"{file}.{extension}"
         else:
-            file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/{file}.{extension}"
+            file_path = onto_base_path / version / f"{file}.{extension}"
+
         if os.path.exists(file_path):
             with open(file_path, "br") as f:
                 response = HttpResponse(
@@ -334,9 +388,7 @@ class OntologyStatics(View):
                 ] = f'attachment; filename="{file}.{extension}"'
                 return response
         else:
-            file_path = (
-                f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules/{file}.{extension}"
-            )
+            file_path = onto_base_path / version / "modules" / f"{file}.{extension}"
             if not os.path.exists(file_path):
                 raise Http404
             with open(file_path, "br") as f:

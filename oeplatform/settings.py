@@ -59,6 +59,9 @@ INSTALLED_APPS = (
     "fontawesome_5",
     "django_better_admin_arrayfield",
     "oeo_viewer",
+    "factsheet",
+    "corsheaders",
+    "owlready2",
     "compressor",
 )
 
@@ -73,6 +76,7 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
 )
 
@@ -80,10 +84,11 @@ ROOT_URLCONF = "oeplatform.urls"
 
 EXTERNAL_URLS = {
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
-    "tutorials_faq": "https://openenergyplatform.github.io/academy/",
+    "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
     "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
     "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
+    "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
 }
 
@@ -160,6 +165,9 @@ try:
     ONTOLOGY_FOLDER  # noqa
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
+
+OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

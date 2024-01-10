@@ -75,7 +75,7 @@ target/
 
 # Other generated files
 venv*/
-src
+#src
 0_env/
 /envs
 /node_env
@@ -89,5 +89,9 @@ docker/oeplatform_data
 oep-website/oeo_viewer/client/node_modules
 
 oep-website/oeo_viewer/client/static
+
+/oeo
 ontologies/
 scripts/
+
+site/

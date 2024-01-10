@@ -1,0 +1,1146 @@
+[
+    {
+        "name": "constraints for simulation (abbb_constraints)",
+        "label": "dataedit/view/scenario/abbb_constraints"
+    },
+    {
+        "name": "oemof app brandenburg berlin - demand per sector (abbb_demand)",
+        "label": "dataedit/view/scenario/abbb_demand"
+    },
+    {
+        "name": "emobility in Berlin and Brandenburg (abbb_emob)",
+        "label": "dataedit/view/scenario/abbb_emob"
+    },
+    {
+        "name": "Regions of Berlin and Brandenburg (abbb_regions)",
+        "label": "dataedit/view/scenario/abbb_regions"
+    },
+    {
+        "name": "Simulation parameter for appBBB (abbb_simulation_parameter)",
+        "label": "dataedit/view/scenario/abbb_simulation_parameter"
+    },
+    {
+        "name": "Transformer power (abbb_transformer)",
+        "label": "dataedit/view/scenario/abbb_transformer"
+    },
+    {
+        "name": "Transmission capacities related to scenarios (abbb_transmission_capacity)",
+        "label": "dataedit/view/scenario/abbb_transmission_capacity"
+    },
+    {
+        "name": "Rahmendaten f\u00fcr den Projektionsbericht 2023 (Datentabelle) (deutscher_projektionsbericht2023_rahmendaten)",
+        "label": "dataedit/view/scenario/deutscher_projektionsbericht2023_rahmendaten"
+    },
+    {
+        "name": "Simulation parameter for appBBB (ego_slp_parameters)",
+        "label": "dataedit/view/scenario/ego_slp_parameters"
+    },
+    {
+        "name": "2014 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (eu_leg_data_2014_eio_ir_article23_t1)",
+        "label": "dataedit/view/scenario/eu_leg_data_2014_eio_ir_article23_t1"
+    },
+    {
+        "name": "2015 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (eu_leg_data_2015_eio_ir_article23_t1)",
+        "label": "dataedit/view/scenario/eu_leg_data_2015_eio_ir_article23_t1"
+    },
+    {
+        "name": "2015 Collection of parameters for greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (MMR) (eu_leg_data_2015_eio_ir_article23_t3)",
+        "label": "dataedit/view/scenario/eu_leg_data_2015_eio_ir_article23_t3"
+    },
+    {
+        "name": "2016 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation, quality checked by EEA (eu_leg_data_2016_eea)",
+        "label": "dataedit/view/scenario/eu_leg_data_2016_eea"
+    },
+    {
+        "name": "2016 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (eu_leg_data_2016_eio_ir_article23_t1)",
+        "label": "dataedit/view/scenario/eu_leg_data_2016_eio_ir_article23_t1"
+    },
+    {
+        "name": "2016 Collection of parameters for greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (MMR) (eu_leg_data_2016_eio_ir_article23_t3)",
+        "label": "dataedit/view/scenario/eu_leg_data_2016_eio_ir_article23_t3"
+    },
+    {
+        "name": "2017 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation, quality checked by EEA (eu_leg_data_2017_eea)",
+        "label": "dataedit/view/scenario/eu_leg_data_2017_eea"
+    },
+    {
+        "name": "2017 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (eu_leg_data_2017_eio_ir_article23_t1)",
+        "label": "dataedit/view/scenario/eu_leg_data_2017_eio_ir_article23_t1"
+    },
+    {
+        "name": "2017 Collection of parameters for greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (MMR) (eu_leg_data_2017_eio_ir_article23_t3)",
+        "label": "dataedit/view/scenario/eu_leg_data_2017_eio_ir_article23_t3"
+    },
+    {
+        "name": "2018 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation, quality checked by EEA (eu_leg_data_2018_eea)",
+        "label": "dataedit/view/scenario/eu_leg_data_2018_eea"
+    },
+    {
+        "name": "2018 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (eu_leg_data_2018_eio_ir_article23_t1)",
+        "label": "dataedit/view/scenario/eu_leg_data_2018_eio_ir_article23_t1"
+    },
+    {
+        "name": "2018 Collection of parameters for greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (MMR) (eu_leg_data_2018_eio_ir_article23_t3)",
+        "label": "dataedit/view/scenario/eu_leg_data_2018_eio_ir_article23_t3"
+    },
+    {
+        "name": "2019 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation, quality checked by EEA (eu_leg_data_2019_eea)",
+        "label": "dataedit/view/scenario/eu_leg_data_2019_eea"
+    },
+    {
+        "name": "2019 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (eu_leg_data_2019_eio_ir_article23_t1)",
+        "label": "dataedit/view/scenario/eu_leg_data_2019_eio_ir_article23_t1"
+    },
+    {
+        "name": "2019 Collection of parameters for greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (MMR) (eu_leg_data_2019_eio_ir_article23_t3)",
+        "label": "dataedit/view/scenario/eu_leg_data_2019_eio_ir_article23_t3"
+    },
+    {
+        "name": "2020 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation, quality checked by EEA and its Topic Center on Climate Change Mitigation and Energy (eu_leg_data_2020_eea)",
+        "label": "dataedit/view/scenario/eu_leg_data_2020_eea"
+    },
+    {
+        "name": "2020 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (eu_leg_data_2020_eio_ir_article23_t1)",
+        "label": "dataedit/view/scenario/eu_leg_data_2020_eio_ir_article23_t1"
+    },
+    {
+        "name": "2020  Collection of parameters for greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (MMR) (eu_leg_data_2020_eio_ir_article23_t3)",
+        "label": "dataedit/view/scenario/eu_leg_data_2020_eio_ir_article23_t3"
+    },
+    {
+        "name": "2021 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation, quality checked by EEA and its Topic Center on Climate Change Mitigation and Energy (eu_leg_data_2021_eea)",
+        "label": "dataedit/view/scenario/eu_leg_data_2021_eea"
+    },
+    {
+        "name": "2021 greenhouse gas emission projections submitted by European Member States under EU Governance Regulation (eu_leg_data_2021_rep_table_1)",
+        "label": "dataedit/view/scenario/eu_leg_data_2021_rep_table_1"
+    },
+    {
+        "name": "2021 Collection of parameters for greenhouse gas emission projections submitted by European Member States under the EU Governance Regulation (eu_leg_data_2021_rep_table_3)",
+        "label": "dataedit/view/scenario/eu_leg_data_2021_rep_table_3"
+    },
+    {
+        "name": "2022 greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation, quality checked by EEA and its Topic Center on Climate Change Mitigation and Energy (eu_leg_data_2022_eea)",
+        "label": "dataedit/view/scenario/eu_leg_data_2022_eea"
+    },
+    {
+        "name": "2022 greenhouse gas emission projections submitted by European Member States under EU Governance Regulation (eu_leg_data_2022_rep_table_1)",
+        "label": "dataedit/view/scenario/eu_leg_data_2022_rep_table_1"
+    },
+    {
+        "name": "2022 Collection of parameters for greenhouse gas emission projections submitted by European Member States under the EU Governance Regulation (eu_leg_data_2022_rep_table_3)",
+        "label": "dataedit/view/scenario/eu_leg_data_2022_rep_table_3"
+    },
+    {
+        "name": "Harmonised nomenclature for sectoral divisions of greenhouse gas emission projections submitted under EU legislation. (eu_leg_dim_category)",
+        "label": "dataedit/view/scenario/eu_leg_dim_category"
+    },
+    {
+        "name": "Country codes matched with country names from greenhouse gas projections submitted under EU legislation (eu_leg_dim_country)",
+        "label": "dataedit/view/scenario/eu_leg_dim_country"
+    },
+    {
+        "name": "List of gases used in greenhouse gas emission projections submitted under EU legislation (eu_leg_dim_gas)",
+        "label": "dataedit/view/scenario/eu_leg_dim_gas"
+    },
+    {
+        "name": "Notation keys used in greenhouse gas emission projections submitted under EU legislation (eu_leg_dim_notation)",
+        "label": "dataedit/view/scenario/eu_leg_dim_notation"
+    },
+    {
+        "name": "Collection of parameters for greenhouse gas emission projections submitted by European Member States under the Monitoring Mechanism Regulation (MMR) - Parameter (eu_leg_dim_parameter)",
+        "label": "dataedit/view/scenario/eu_leg_dim_parameter"
+    },
+    {
+        "name": "Scenario abbreviations of greenhouse gas emission projections submitted under EU legislation (eu_leg_dim_scenario)",
+        "label": "dataedit/view/scenario/eu_leg_dim_scenario"
+    },
+    {
+        "name": "Parameter units that occur in greenhouse gas projections submitted under EU legislation (eu_leg_dim_unit)",
+        "label": "dataedit/view/scenario/eu_leg_dim_unit"
+    },
+    {
+        "name": "Emission factors and marginal cost, Dynamis Project Forschungsstelle f\u00fcr Energiewirtschaft (FfE) (ffe_dynamis_emission_factors_marginal_cost)",
+        "label": "dataedit/view/scenario/ffe_dynamis_emission_factors_marginal_cost"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem (DeVKopSys) - Emmissionen (fh_iee_devkopsys_base_scenario_emissionen)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_emissionen"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - Endenergie (fh_iee_devkopsys_base_scenario_endenergie)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_endenergie"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - District heating balance (fh_iee_devkopsys_base_scenario_fw_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_fw_bilanz"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - district heating generation (fh_iee_devkopsys_base_scenario_fw_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_fw_erzeugung"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - buildings (fh_iee_devkopsys_base_scenario_gebaeude)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_gebaeude"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - generation of hydrogen (fh_iee_devkopsys_base_scenario_h2_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_h2_erzeugung"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - interconnectors (fh_iee_devkopsys_base_scenario_interkonnektoren)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_interkonnektoren"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - storage technologies (fh_iee_devkopsys_base_scenario_speicher)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_speicher"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - electricity balance (fh_iee_devkopsys_base_scenario_strom_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_strom_bilanz"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity electricity generation (fh_iee_devkopsys_base_scenario_strom_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_strom_erzeugung"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - system costs (fh_iee_devkopsys_base_scenario_systemkosten)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_systemkosten"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - number of vehicles (fh_iee_devkopsys_base_scenario_verkehr)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_base_scenario_verkehr"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity emissions (fh_iee_devkopsys_cost_sensitivity_emissionen)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_emissionen"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity final energy demand (fh_iee_devkopsys_cost_sensitivity_endenergie)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_endenergie"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity district heating balance (fh_iee_devkopsys_cost_sensitivity_fw_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_fw_bilanz"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity district heating balance (fh_iee_devkopsys_cost_sensitivity_fw_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_fw_erzeugung"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity buildings (fh_iee_devkopsys_cost_sensitivity_gebaeude)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_gebaeude"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity generation of hydrogen (fh_iee_devkopsys_cost_sensitivity_h2_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_h2_erzeugung"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity interconnectors (fh_iee_devkopsys_cost_sensitivity_interkonnektoren)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_interkonnektoren"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity storage technologies (fh_iee_devkopsys_cost_sensitivity_speicher)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_speicher"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity electricity balance (fh_iee_devkopsys_cost_sensitivity_strom_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_strom_bilanz"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity electricity generation (fh_iee_devkopsys_cost_sensitivity_strom_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_strom_erzeugung"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity system costs (fh_iee_devkopsys_cost_sensitivity_systemkosten)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_systemkosten"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - cost sensitivity number of vehicles (fh_iee_devkopsys_cost_sensitivity_verkehr)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_cost_sensitivity_verkehr"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - biomass potential (fh_iee_devkopsys_input_biomassepotential)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_input_biomassepotential"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - COP time series (fh_iee_devkopsys_input_cop_zeitreihen)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_input_cop_zeitreihen"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - potentials of renewable technologies (fh_iee_devkopsys_input_ee_potentiale)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_input_ee_potentiale"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - Emmissionen (fh_iee_devkopsys_input_emissionen)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_input_emissionen"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - fahrzeugpotenzial (fh_iee_devkopsys_input_fahrzeugpotentiale)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_input_fahrzeugpotentiale"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - kuppelleistungen (fh_iee_devkopsys_input_kuppelleistungen)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_input_kuppelleistungen"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - laender (fh_iee_devkopsys_input_laender)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_input_laender"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem(DeVKopSys) - rahmendaten (fh_iee_devkopsys_input_rahmendaten)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_input_rahmendaten"
+    },
+    {
+        "name": "Fraunhofer-Institut f\u00fcr Energiewirtschaft und Energiesystemtechnik Dekarbonierung Verkehr - R\u00fcckkopplung Energiesystem (DeVKopSys) - technologieparameter (fh_iee_devkopsys_input_technologieparameter)",
+        "label": "dataedit/view/scenario/fh_iee_devkopsys_input_technologieparameter"
+    },
+    {
+        "name": "Overview of the biomass potential in all four scenarios from project \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") (fh_iee_trafo_fw_input_biomassepotential)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_input_biomassepotential"
+    },
+    {
+        "name": "Overview of the COP time series of heat pumps in all four scenarios from project \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") (fh_iee_trafo_fw_input_cop_zeitreihen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_input_cop_zeitreihen"
+    },
+    {
+        "name": "Overview of the potentials of renewable technologies in all four scenarios from project \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") (fh_iee_trafo_fw_input_ee_potentiale)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_input_ee_potentiale"
+    },
+    {
+        "name": "Overview of the emissions in all four scenarios from project \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") (fh_iee_trafo_fw_input_emissionen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_input_emissionen"
+    },
+    {
+        "name": "Overview of the possible numbers of vehicles in all four scenarios from project \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") (fh_iee_trafo_fw_input_fahrzeugpotentiale)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_input_fahrzeugpotentiale"
+    },
+    {
+        "name": "Overview of the net transfer capacities in all four scenarios from project \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") (fh_iee_trafo_fw_input_kuppelleistungen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_input_kuppelleistungen"
+    },
+    {
+        "name": "Overview of the countries in all four scenarios from project \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") (fh_iee_trafo_fw_input_laender)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_input_laender"
+    },
+    {
+        "name": "Overview of the framework data in all four scenarios from project \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") (fh_iee_trafo_fw_input_rahmendaten)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_input_rahmendaten"
+    },
+    {
+        "name": "Overview of the technology parameters in all four scenarios from project \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") (fh_iee_trafo_fw_input_technologieparameter)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_input_technologieparameter"
+    },
+    {
+        "name": "Overview of the heating potential in all four scenarios from project \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") (fh_iee_trafo_fw_input_waermepotentiale)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_input_waermepotentiale"
+    },
+    {
+        "name": "Overview of the emissions in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_emissionen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_emissionen"
+    },
+    {
+        "name": "Overview of the final energy demand in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_endenergie)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_endenergie"
+    },
+    {
+        "name": "Overview of the district heating balance in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_fw_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_fw_bilanz"
+    },
+    {
+        "name": "Overview of the district heating generation in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_fw_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_fw_erzeugung"
+    },
+    {
+        "name": "Overview of the balance of gaseous hydrocarbons in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_gasf_kws_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_gasf_kws_bilanz"
+    },
+    {
+        "name": "Overview of the buildings in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_gebaeude)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_gebaeude"
+    },
+    {
+        "name": "Overview of the hydrogen balance in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_h2_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_h2_bilanz"
+    },
+    {
+        "name": "Overview of the generation of hydrogen in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_h2_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_h2_erzeugung"
+    },
+    {
+        "name": "Overview of the European interconnectors in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_interkonnektoren)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_interkonnektoren"
+    },
+    {
+        "name": "Overview of different storage technologies in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_speicher)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_speicher"
+    },
+    {
+        "name": "Overview of the electricity balance in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_strom_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_strom_bilanz"
+    },
+    {
+        "name": "Overview of the electricity generation in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_strom_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_strom_erzeugung"
+    },
+    {
+        "name": "Overview of the system costs in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_systemkosten)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_systemkosten"
+    },
+    {
+        "name": "Overview of the number of vehicles in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_verkehr)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_verkehr"
+    },
+    {
+        "name": "Selection of time series of different technologies in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_hohe_sani_zeitreihen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_hohe_sani_zeitreihen"
+    },
+    {
+        "name": "Overview of the emissions in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_emissionen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_emissionen"
+    },
+    {
+        "name": "Overview of the final energy demand in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_endenergie)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_endenergie"
+    },
+    {
+        "name": "Overview of the district heating balance in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_fw_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_fw_bilanz"
+    },
+    {
+        "name": "Overview of the district heating generation in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_fw_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_fw_erzeugung"
+    },
+    {
+        "name": "Overview of the balance of gaseous hydrocarbons in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_gasf_kws_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_gasf_kws_bilanz"
+    },
+    {
+        "name": "Overview of the buildings in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_gebaeude)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_gebaeude"
+    },
+    {
+        "name": "Overview of the hydrogen balance in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_h2_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_h2_bilanz"
+    },
+    {
+        "name": "Overview of the generation of hydrogen in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_h2_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_h2_erzeugung"
+    },
+    {
+        "name": "Overview of the European interconnectors in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_interkonnektoren)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_interkonnektoren"
+    },
+    {
+        "name": "Overview of different storage technologies in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_speicher)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_speicher"
+    },
+    {
+        "name": "Overview of the electricity balance in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_strom_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_strom_bilanz"
+    },
+    {
+        "name": "Overview of the electricity generation in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_strom_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_strom_erzeugung"
+    },
+    {
+        "name": "Overview of the system costs in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_systemkosten)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_systemkosten"
+    },
+    {
+        "name": "Overview of the number of vehicles in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_verkehr)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_verkehr"
+    },
+    {
+        "name": "Selection of time series of different technologies in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a high proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_viel_dez_bio_mod_sani_zeitreihen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_viel_dez_bio_mod_sani_zeitreihen"
+    },
+    {
+        "name": "Overview of the emissions in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_emissionen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_emissionen"
+    },
+    {
+        "name": "Overview of the final energy demand in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_endenergie)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_endenergie"
+    },
+    {
+        "name": "Overview of the district heating balance in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_fw_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_fw_bilanz"
+    },
+    {
+        "name": "Overview of the district heating generation in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_fw_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_fw_erzeugung"
+    },
+    {
+        "name": "Overview of the balance of gaseous hydrocarbons in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_gasf_kws_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_gasf_kws_bilanz"
+    },
+    {
+        "name": "Overview of the buildings in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_gebaeude)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_gebaeude"
+    },
+    {
+        "name": "Overview of the hydrogen balance in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_h2_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_h2_bilanz"
+    },
+    {
+        "name": "Overview of the generation of hydrogen in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_h2_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_h2_erzeugung"
+    },
+    {
+        "name": "Overview of the European interconnectors in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_interkonnektoren)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_interkonnektoren"
+    },
+    {
+        "name": "Overview of different storage technologies in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_speicher)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_speicher"
+    },
+    {
+        "name": "Overview of the electricity balance in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_strom_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_strom_bilanz"
+    },
+    {
+        "name": "Overview of the electricity generation in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_strom_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_strom_erzeugung"
+    },
+    {
+        "name": "Overview of the system costs in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_systemkosten)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_systemkosten"
+    },
+    {
+        "name": "Overview of the number of vehicles in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_verkehr)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_verkehr"
+    },
+    {
+        "name": "Selection of time series of different technologies in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a high degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_zeitreihen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_hohe_sani_zeitreihen"
+    },
+    {
+        "name": "Overview of the emissions in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_emissionen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_emissionen"
+    },
+    {
+        "name": "Overview of the final energy demand in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_endenergie)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_endenergie"
+    },
+    {
+        "name": "Overview of the district heating balance in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_fw_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_fw_bilanz"
+    },
+    {
+        "name": "Overview of the district heating generation in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_fw_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_fw_erzeugung"
+    },
+    {
+        "name": "Overview of the balance of gaseous hydrocarbons in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_gasf_kws_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_gasf_kws_bilanz"
+    },
+    {
+        "name": "Overview of the buildings in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_gebaeude)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_gebaeude"
+    },
+    {
+        "name": "Overview of the hydrogen balance in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_h2_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_h2_bilanz"
+    },
+    {
+        "name": "Overview of the generation of hydrogen in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_h2_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_h2_erzeugung"
+    },
+    {
+        "name": "Overview of the European interconnectors in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_interkonnektoren)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_interkonnektoren"
+    },
+    {
+        "name": "Overview of different storage technologies in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_speicher)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_speicher"
+    },
+    {
+        "name": "Overview of the electricity balance in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_strom_bilanz)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_strom_bilanz"
+    },
+    {
+        "name": "Overview of the electricity generation in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_strom_erzeugung)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_strom_erzeugung"
+    },
+    {
+        "name": "Overview of the system costs in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_systemkosten)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_systemkosten"
+    },
+    {
+        "name": "Overview of the number of vehicles in Germany in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_verkehr)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_verkehr"
+    },
+    {
+        "name": "Selection of time series of different technologies in scenario \"Fh IEE Trafo FW\" (\"Pathways of transformation in the heating sector\") with a low proportion of decentralized biomass and a moderate degree of renovation in the building sector (fh_iee_trafo_fw_wenig_dez_bio_mod_sani_zeitreihen)",
+        "label": "dataedit/view/scenario/fh_iee_trafo_fw_wenig_dez_bio_mod_sani_zeitreihen"
+    },
+    {
+        "name": "Projections of CO2 emission from industrial processes in scenario AMS2012 (ksz2050_r2_ams2012_co2_emissions_industrial_processes)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_co2_emissions_industrial_processes"
+    },
+    {
+        "name": "Projections of electricity consumption of scenario AMS2012 (ksz2050_r2_ams2012_electricity_consumption)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_electricity_consumption"
+    },
+    {
+        "name": "Overview of electricity generation and consumption of scenario AMS2012 (ksz2050_r2_ams2012_electricity_overview)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_electricity_overview"
+    },
+    {
+        "name": "Projections of the fulfillment of energy and climate targets of AMS2012 (ksz2050_r2_ams2012_energy_and_climate_targets)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_energy_and_climate_targets"
+    },
+    {
+        "name": "Projections of energy combustion of scenario AMS2012 (ksz2050_r2_ams2012_energy_consumption_other_energy_industries)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_energy_consumption_other_energy_industries"
+    },
+    {
+        "name": "Projections of fugitive GHG emissions of scenario AMS2012 (ksz2050_r2_ams2012_fugitive_emissions)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_fugitive_emissions"
+    },
+    {
+        "name": "Detailed data of GHG emission projections of scenario AMS2012 by gases and sectors (ksz2050_r2_ams2012_ghg_emissions_detailed_data)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_ghg_emissions_detailed_data"
+    },
+    {
+        "name": "GHG emission projections of fuel combustion of scenario AMS2012 (ksz2050_r2_ams2012_ghg_emissions_from_combustion_by_fuel)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_ghg_emissions_from_combustion_by_fuel"
+    },
+    {
+        "name": "Overview of GHG emission projections of scenario AMS2012 by gases and sectors (ksz2050_r2_ams2012_ghg_emissions_overview)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_ghg_emissions_overview"
+    },
+    {
+        "name": "Key parameters and assumptions of scenario AMS2012 (ksz2050_r2_ams2012_parameters_assumptions)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_parameters_assumptions"
+    },
+    {
+        "name": "Projections of primary and final energy consumption of scenario AMS2012 (ksz2050_r2_ams2012_primary_and_final_energy_consumption)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ams2012_primary_and_final_energy_consumption"
+    },
+    {
+        "name": "Projections of CO2 emission from industrial processes in scenario KS80 (ksz2050_r2_ks80_co2_emissions_industrial_processes)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks80_co2_emissions_industrial_processes"
+    },
+    {
+        "name": "Projections of electricity consumption of scenario KS80 (ksz2050_r2_ks80_electricity_consumption)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks80_electricity_consumption"
+    },
+    {
+        "name": "Overview of electricity generation and consumption of scenario KS80 (ksz2050_r2_ks80_electricity_overview)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks80_electricity_overview"
+    },
+    {
+        "name": "Projections of the fulfillment of energy and climate targets of KS80 (ksz2050_r2_ks80_energy_and_climate_targets)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks80_energy_and_climate_targets"
+    },
+    {
+        "name": "Projections of fugitive GHG emissions of scenario KS80 (ksz2050_r2_ks80_fugitive_emissions)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks80_fugitive_emissions"
+    },
+    {
+        "name": "Detailed data of GHG emission projections of scenario KS80 by gases and sectors (ksz2050_r2_ks80_ghg_emissions_detailed_data)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks80_ghg_emissions_detailed_data"
+    },
+    {
+        "name": "GHG emission projections of fuel combustion of scenario KS80 (ksz2050_r2_ks80_ghg_emissions_from_combustion_by_fuel)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks80_ghg_emissions_from_combustion_by_fuel"
+    },
+    {
+        "name": "Overview of GHG emission projections of scenario KS80 by gases and sectors (ksz2050_r2_ks80_ghg_emissions_overview)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks80_ghg_emissions_overview"
+    },
+    {
+        "name": "Key parameters and assumptions of scenario KS80 (ksz2050_r2_ks80_parameters_assumptions)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks80_parameters_assumptions"
+    },
+    {
+        "name": "Projections of primary and final energy consumption of scenario KS80 (ksz2050_r2_ks80_primary_and_final_energy_consumption)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks80_primary_and_final_energy_consumption"
+    },
+    {
+        "name": "Projections of CO2 emission from industrial processes in scenario KS95 (ksz2050_r2_ks95_co2_emissions_industrial_processes)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks95_co2_emissions_industrial_processes"
+    },
+    {
+        "name": "Projections of electricity consumption of scenario KS95 (ksz2050_r2_ks95_electricity_consumption)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks95_electricity_consumption"
+    },
+    {
+        "name": "Overview of electricity generation and consumption of scenario KS95 (ksz2050_r2_ks95_electricity_overview)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks95_electricity_overview"
+    },
+    {
+        "name": "Projections of the fulfillment of energy and climate targets of KS95 (ksz2050_r2_ks95_energy_and_climate_targets)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks95_energy_and_climate_targets"
+    },
+    {
+        "name": "Projections of fugitive GHG emissions of scenario KS95 (ksz2050_r2_ks95_fugitive_emissions)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks95_fugitive_emissions"
+    },
+    {
+        "name": "Detailed data of GHG emission projections of scenario KS95 by gases and sectors (ksz2050_r2_ks95_ghg_emissions_detailed_data)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks95_ghg_emissions_detailed_data"
+    },
+    {
+        "name": "GHG emission projections of fuel combustion of scenario KS95 (ksz2050_r2_ks95_ghg_emissions_from_combustion_by_fuel)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks95_ghg_emissions_from_combustion_by_fuel"
+    },
+    {
+        "name": "Overview of GHG emission projections of scenario KS95 by gases and sectors (ksz2050_r2_ks95_ghg_emissions_overview)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks95_ghg_emissions_overview"
+    },
+    {
+        "name": "Key parameters and assumptions of scenario KS95 (ksz2050_r2_ks95_parameters_assumptions)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks95_parameters_assumptions"
+    },
+    {
+        "name": "Primary and final energy consumption of scenario KS95 (ksz2050_r2_ks95_primary_and_final_energy_consumption)",
+        "label": "dataedit/view/scenario/ksz2050_r2_ks95_primary_and_final_energy_consumption"
+    },
+    {
+        "name": "Parameter electricity_prices for 2016 of model elmod in the MODEX-NET project (modexnet_elmod_2016_electricity_prices)",
+        "label": "dataedit/view/scenario/modexnet_elmod_2016_electricity_prices"
+    },
+    {
+        "name": "Parameter emissions for 2016 of model elmod in the MODEX-NET project (modexnet_elmod_2016_emissions)",
+        "label": "dataedit/view/scenario/modexnet_elmod_2016_emissions"
+    },
+    {
+        "name": "Parameter energy_mix for 2016 of model elmod in the MODEX-NET project (modexnet_elmod_2016_energy_mix)",
+        "label": "dataedit/view/scenario/modexnet_elmod_2016_energy_mix"
+    },
+    {
+        "name": "Parameter import_export for 2016 of model elmod in the MODEX-NET project (modexnet_elmod_2016_import_export)",
+        "label": "dataedit/view/scenario/modexnet_elmod_2016_import_export"
+    },
+    {
+        "name": "Parameter load_curtailments for 2016 of model elmod in the MODEX-NET project (modexnet_elmod_2016_load_curtailments)",
+        "label": "dataedit/view/scenario/modexnet_elmod_2016_load_curtailments"
+    },
+    {
+        "name": "Parameter storage_p for 2016 of model elmod in the MODEX-NET project (modexnet_elmod_2016_storage_p)",
+        "label": "dataedit/view/scenario/modexnet_elmod_2016_storage_p"
+    },
+    {
+        "name": "Parameter storage_soc for 2016 of model elmod in the MODEX-NET project (modexnet_elmod_2016_storage_soc)",
+        "label": "dataedit/view/scenario/modexnet_elmod_2016_storage_soc"
+    },
+    {
+        "name": "Parameter vres_curtailments for 2016 of model elmod in the MODEX-NET project (modexnet_elmod_2016_vres_curtailments)",
+        "label": "dataedit/view/scenario/modexnet_elmod_2016_vres_curtailments"
+    },
+    {
+        "name": "Parameter electricity_prices for 2016 of model europower in the MODEX-NET project (modexnet_europower_2016_electricity_prices)",
+        "label": "dataedit/view/scenario/modexnet_europower_2016_electricity_prices"
+    },
+    {
+        "name": "Parameter emissions for 2016 of model europower in the MODEX-NET project (modexnet_europower_2016_emissions)",
+        "label": "dataedit/view/scenario/modexnet_europower_2016_emissions"
+    },
+    {
+        "name": "Parameter energy_mix for 2016 of model europower in the MODEX-NET project (modexnet_europower_2016_energy_mix)",
+        "label": "dataedit/view/scenario/modexnet_europower_2016_energy_mix"
+    },
+    {
+        "name": "Parameter import_export for 2016 of model europower in the MODEX-NET project (modexnet_europower_2016_import_export)",
+        "label": "dataedit/view/scenario/modexnet_europower_2016_import_export"
+    },
+    {
+        "name": "Parameter load_curtailments for 2016 of model europower in the MODEX-NET project (modexnet_europower_2016_load_curtailments)",
+        "label": "dataedit/view/scenario/modexnet_europower_2016_load_curtailments"
+    },
+    {
+        "name": "Parameter storage_soc for 2016 of model europower in the MODEX-NET project (modexnet_europower_2016_storage_soc)",
+        "label": "dataedit/view/scenario/modexnet_europower_2016_storage_soc"
+    },
+    {
+        "name": "Parameter vres_curtailments for 2016 of model europower in the MODEX-NET project (modexnet_europower_2016_vres_curtailments)",
+        "label": "dataedit/view/scenario/modexnet_europower_2016_vres_curtailments"
+    },
+    {
+        "name": "Parameter electricity_prices for 2030 of model europower in the MODEX-NET project (modexnet_europower_2030_electricity_prices)",
+        "label": "dataedit/view/scenario/modexnet_europower_2030_electricity_prices"
+    },
+    {
+        "name": "Parameter emissions for 2030 of model europower in the MODEX-NET project (modexnet_europower_2030_emissions)",
+        "label": "dataedit/view/scenario/modexnet_europower_2030_emissions"
+    },
+    {
+        "name": "Parameter energy_mix for 2030 of model europower in the MODEX-NET project (modexnet_europower_2030_energy_mix)",
+        "label": "dataedit/view/scenario/modexnet_europower_2030_energy_mix"
+    },
+    {
+        "name": "Parameter import_export for 2030 of model europower in the MODEX-NET project (modexnet_europower_2030_import_export)",
+        "label": "dataedit/view/scenario/modexnet_europower_2030_import_export"
+    },
+    {
+        "name": "Parameter load_curtailments for 2030 of model europower in the MODEX-NET project (modexnet_europower_2030_load_curtailments)",
+        "label": "dataedit/view/scenario/modexnet_europower_2030_load_curtailments"
+    },
+    {
+        "name": "Parameter electricity_prices for 2016 of model isaar in the MODEX-NET project (modexnet_isaar_2016_electricity_prices)",
+        "label": "dataedit/view/scenario/modexnet_isaar_2016_electricity_prices"
+    },
+    {
+        "name": "Parameter emissions for 2016 of model isaar in the MODEX-NET project (modexnet_isaar_2016_emissions)",
+        "label": "dataedit/view/scenario/modexnet_isaar_2016_emissions"
+    },
+    {
+        "name": "Parameter energy_mix for 2016 of model isaar in the MODEX-NET project (modexnet_isaar_2016_energy_mix)",
+        "label": "dataedit/view/scenario/modexnet_isaar_2016_energy_mix"
+    },
+    {
+        "name": "Parameter import_export for 2016 of model isaar in the MODEX-NET project (modexnet_isaar_2016_import_export)",
+        "label": "dataedit/view/scenario/modexnet_isaar_2016_import_export"
+    },
+    {
+        "name": "Parameter vres_curtailments for 2016 of model isaar in the MODEX-NET project (modexnet_isaar_2016_vres_curtailments)",
+        "label": "dataedit/view/scenario/modexnet_isaar_2016_vres_curtailments"
+    },
+    {
+        "name": "Parameter electricity_prices for 2016 of model miles in the MODEX-NET project (modexnet_miles_2016_electricity_prices)",
+        "label": "dataedit/view/scenario/modexnet_miles_2016_electricity_prices"
+    },
+    {
+        "name": "Parameter emissions for 2016 of model miles in the MODEX-NET project (modexnet_miles_2016_emissions)",
+        "label": "dataedit/view/scenario/modexnet_miles_2016_emissions"
+    },
+    {
+        "name": "Parameter energy_mix for 2016 of model miles in the MODEX-NET project (modexnet_miles_2016_energy_mix)",
+        "label": "dataedit/view/scenario/modexnet_miles_2016_energy_mix"
+    },
+    {
+        "name": "Parameter import_export for 2016 of model miles in the MODEX-NET project (modexnet_miles_2016_import_export)",
+        "label": "dataedit/view/scenario/modexnet_miles_2016_import_export"
+    },
+    {
+        "name": "Parameter load_curtailments for 2016 of model miles in the MODEX-NET project (modexnet_miles_2016_load_curtailments)",
+        "label": "dataedit/view/scenario/modexnet_miles_2016_load_curtailments"
+    },
+    {
+        "name": "Parameter storage_p for 2016 of model miles in the MODEX-NET project (modexnet_miles_2016_storage_p)",
+        "label": "dataedit/view/scenario/modexnet_miles_2016_storage_p"
+    },
+    {
+        "name": "Parameter storage_soc for 2016 of model miles in the MODEX-NET project (modexnet_miles_2016_storage_soc)",
+        "label": "dataedit/view/scenario/modexnet_miles_2016_storage_soc"
+    },
+    {
+        "name": "Parameter vres_curtailments for 2016 of model miles in the MODEX-NET project (modexnet_miles_2016_vres_curtailments)",
+        "label": "dataedit/view/scenario/modexnet_miles_2016_vres_curtailments"
+    },
+    {
+        "name": "Parameter electricity_prices for 2016 of model powerflex in the MODEX-NET project (modexnet_powerflex_2016_electricity_prices)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2016_electricity_prices"
+    },
+    {
+        "name": "Parameter emissions for 2016 of model powerflex in the MODEX-NET project (modexnet_powerflex_2016_emissions)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2016_emissions"
+    },
+    {
+        "name": "Parameter energy_mix for 2016 of model powerflex in the MODEX-NET project (modexnet_powerflex_2016_energy_mix)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2016_energy_mix"
+    },
+    {
+        "name": "Parameter import_export for 2016 of model powerflex in the MODEX-NET project (modexnet_powerflex_2016_import_export)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2016_import_export"
+    },
+    {
+        "name": "Parameter storage_p for 2016 of model powerflex in the MODEX-NET project (modexnet_powerflex_2016_storage_p)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2016_storage_p"
+    },
+    {
+        "name": "Parameter storage_soc for 2016 of model powerflex in the MODEX-NET project (modexnet_powerflex_2016_storage_soc)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2016_storage_soc"
+    },
+    {
+        "name": "Parameter electricity_prices for 2030 of model powerflex in the MODEX-NET project (modexnet_powerflex_2030_electricity_prices)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2030_electricity_prices"
+    },
+    {
+        "name": "Parameter emissions for 2030 of model powerflex in the MODEX-NET project (modexnet_powerflex_2030_emissions)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2030_emissions"
+    },
+    {
+        "name": "Parameter energy_mix for 2030 of model powerflex in the MODEX-NET project (modexnet_powerflex_2030_energy_mix)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2030_energy_mix"
+    },
+    {
+        "name": "Parameter import_export for 2030 of model powerflex in the MODEX-NET project (modexnet_powerflex_2030_import_export)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2030_import_export"
+    },
+    {
+        "name": "Parameter storage_p for 2030 of model powerflex in the MODEX-NET project (modexnet_powerflex_2030_storage_p)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2030_storage_p"
+    },
+    {
+        "name": "Parameter storage_soc for 2030 of model powerflex in the MODEX-NET project (modexnet_powerflex_2030_storage_soc)",
+        "label": "dataedit/view/scenario/modexnet_powerflex_2030_storage_soc"
+    },
+    {
+        "name": "Installierte Leistung f\u00fcr erneuerbare und konventionelle Energietr\u00e4ger auf Basis des Szenarios \"Distributed Energy\" des TYNDP 2020 (nep_2035_installierte_leistung_szenario_distributed_energy)",
+        "label": "dataedit/view/scenario/nep_2035_installierte_leistung_szenario_distributed_energy"
+    },
+    {
+        "name": "Installierte Leistungen je Szenario im Szenario A 2035 / B 2035 / C 2035 / B 2040 (nep_2035_installierte_leistungen_je_szenario)",
+        "label": "dataedit/view/scenario/nep_2035_installierte_leistungen_je_szenario"
+    },
+    {
+        "name": "\u00dcbersicht \u00fcber die Verteilung der installierten Leistungen je Energietr\u00e4ger in den Szenarien des NEP 2035 (nep_2035_leistungsverteilung_installierter_energietraeger)",
+        "label": "dataedit/view/scenario/nep_2035_leistungsverteilung_installierter_energietraeger"
+    },
+    {
+        "name": "Mittlerer, minimaler und maximaler Flexibilit\u00e4tseinsatz je Tagesstunde in Szenario B 2035 (nep_2035_maximaler_flexibilitaetseinsatz_je_tagesstunde)",
+        "label": "dataedit/view/scenario/nep_2035_maximaler_flexibilitaetseinsatz_je_tagesstunde"
+    },
+    {
+        "name": "Methodik der verteilnetzorientierten Lastgangerstellung (nep_2035_methodik_verteilnetzorientierter_lastgangerstellung)",
+        "label": "dataedit/view/scenario/nep_2035_methodik_verteilnetzorientierter_lastgangerstellung"
+    },
+    {
+        "name": "Nettostromverbrauch verschiedener Sektoren je Bundesland und Szenario (nep_2035_nettostromverbrauch_je_bundesland_und_szenario)",
+        "label": "dataedit/view/scenario/nep_2035_nettostromverbrauch_je_bundesland_und_szenario"
+    },
+    {
+        "name": "Nettostromverbrauch nach Sektoren/Anwendungsbereichen (nep_2035_nettostromverbrauch_nach_anwendungsbereichen)",
+        "label": "dataedit/view/scenario/nep_2035_nettostromverbrauch_nach_anwendungsbereichen"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_biomass_st)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_biomass_st"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_bus)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_bus"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_ch4_gt)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_ch4_gt"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_electricity_curtailment)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_electricity_curtailment"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_electricity_demand)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_electricity_demand"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_electricity_demand_profile)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_electricity_demand_profile"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_electricity_liion_battery)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_electricity_liion_battery"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_electricity_shortage)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_electricity_shortage"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_electricity_transmission)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_electricity_transmission"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_oil_st)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_oil_st"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_other_st)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_other_st"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_solar_pv)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_solar_pv"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_solar_pv_profile)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_solar_pv_profile"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_wind_onshore)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_wind_onshore"
+    },
+    {
+        "name": "simple_model (oemof_b3_simple_scenario_1_wind_onshore_profile)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_1_wind_onshore_profile"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_biomass_st)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_biomass_st"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_bus)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_bus"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_ch4_gt)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_ch4_gt"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_electricity_curtailment)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_electricity_curtailment"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_electricity_demand)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_electricity_demand"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_electricity_demand_profile)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_electricity_demand_profile"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_electricity_liion_battery)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_electricity_liion_battery"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_electricity_shortage)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_electricity_shortage"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_electricity_transmission)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_electricity_transmission"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_oil_st)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_oil_st"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_other_st)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_other_st"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_solar_pv)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_solar_pv"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_solar_pv_profile)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_solar_pv_profile"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_wind_onshore)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_wind_onshore"
+    },
+    {
+        "name": "simple_model_2 (oemof_b3_simple_scenario_2_wind_onshore_profile)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_2_wind_onshore_profile"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_biomass_st)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_biomass_st"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_bus)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_bus"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_ch4_gt)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_ch4_gt"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_electricity_curtailment)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_electricity_curtailment"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_electricity_demand)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_electricity_demand"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_electricity_demand_profile)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_electricity_demand_profile"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_electricity_liion_battery)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_electricity_liion_battery"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_electricity_shortage)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_electricity_shortage"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_electricity_transmission)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_electricity_transmission"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_oil_st)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_oil_st"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_other_st)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_other_st"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_solar_pv)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_solar_pv"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_solar_pv_profile)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_solar_pv_profile"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_wind_onshore)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_wind_onshore"
+    },
+    {
+        "name": "simple_model_3 (oemof_b3_simple_scenario_3_wind_onshore_profile)",
+        "label": "dataedit/view/scenario/oemof_b3_simple_scenario_3_wind_onshore_profile"
+    },
+    {
+        "name": "REEEM EcoSense Output (reeem_ecosense_output)",
+        "label": "dataedit/view/scenario/reeem_ecosense_output"
+    },
+    {
+        "name": "REEEM EcoSenseEVA Output (reeem_ecosenseeva_output)",
+        "label": "dataedit/view/scenario/reeem_ecosenseeva_output"
+    },
+    {
+        "name": "REEEM EnergyPRO Input (reeem_energypro_input)",
+        "label": "dataedit/view/scenario/reeem_energypro_input"
+    },
+    {
+        "name": "REEEM EnergyPRO Output (reeem_energypro_output)",
+        "label": "dataedit/view/scenario/reeem_energypro_output"
+    },
+    {
+        "name": "REEEM LEcA Output (reeem_leca_output)",
+        "label": "dataedit/view/scenario/reeem_leca_output"
+    },
+    {
+        "name": "REEEM MESSAGE Input (reeem_message_input)",
+        "label": "dataedit/view/scenario/reeem_message_input"
+    },
+    {
+        "name": "REEEM MESSAGE Output (reeem_message_output)",
+        "label": "dataedit/view/scenario/reeem_message_output"
+    },
+    {
+        "name": "NEWAGE Output (reeem_newage_output)",
+        "label": "dataedit/view/scenario/reeem_newage_output"
+    },
+    {
+        "name": "REEEM OSeMOSYS MESCA Input (reeem_osemosys_mesca_input)",
+        "label": "dataedit/view/scenario/reeem_osemosys_mesca_input"
+    },
+    {
+        "name": "REEEM OSeMOSYS MESCA Output (reeem_osemosys_mesca_output)",
+        "label": "dataedit/view/scenario/reeem_osemosys_mesca_output"
+    },
+    {
+        "name": "REEEM Plexos Input (reeem_plexos_input)",
+        "label": "dataedit/view/scenario/reeem_plexos_input"
+    },
+    {
+        "name": "REEEM Plexos Output (reeem_plexos_output)",
+        "label": "dataedit/view/scenario/reeem_plexos_output"
+    },
+    {
+        "name": "REEEM Times PanEU Output (reeem_times_paneu_output)",
+        "label": "dataedit/view/scenario/reeem_times_paneu_output"
+    },
+    {
+        "name": "Emission scenario data submitted in 2019 by Germany under Regulation (EU) 525/2013 (szenariendb_mmr_de)",
+        "label": "dataedit/view/scenario/szenariendb_mmr_de"
+    }
+]

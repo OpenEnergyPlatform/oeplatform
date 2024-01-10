@@ -17,7 +17,9 @@ const useStyles = makeStyles({
     backgroundColor: "#f7f7f7",
     borderColor: "#00688B",
     overflow: "auto",
-    height: "180px",
+    height: "250px",
+    width: "98%"
+
   },
   bullet: {
     display: "inline-block",

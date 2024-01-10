@@ -9,7 +9,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
+
 import dataedit.models as datamodels
+from login.permissions import CanEditScenarioBundle
 
 try:
     import oeplatform.securitysettings as sec  # noqa
@@ -150,6 +152,9 @@ class UserGroup(Group, PermissionHolder):
                 (perm.level for perm in self.table_permissions.filter(table=table)),
             )
         )
+
+
+# class ScenarioBundlePermissionGroup(Group):
 
 
 class TablePermission(models.Model):

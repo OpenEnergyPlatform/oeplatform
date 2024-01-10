@@ -1,16 +1,11 @@
 import React, { Component } from "react";
 import "babel-polyfill";
-import { styled } from "@material-ui/styles";
-import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-
 import styledComponent from "styled-components";
-
 import CustomTextField from "../presentational/customTextField";
 import CustomTypography from "../presentational/customTypography";
 import CustomSubmitButton from "../presentational/customSubmitButton";
-
 import mainLogo from "../../../statics/network.svg";
 
 const SectionContainer = styledComponent.div`

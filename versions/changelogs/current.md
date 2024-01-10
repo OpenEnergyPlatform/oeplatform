@@ -1,12 +1,19 @@
 ### Changes
 
+- Publish Options for Draft Tables: Implemented hidden publish options for draft tables, visible only for reviewed and unpublished tables.  [(PR#1526)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1526)
+
+- Publish Options for Draft Tables: Added a schema selection dropdown and a confirm publish button to enhance user interaction in the draft tables section.  [(PR#1526)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1526)
+
+- API Functionality Expansion for Publishing Status: Enhanced the API with update_publish_status function, allowing the change of a table's publish status.  [(PR#1526)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1526)
+
+- API Functionality Expansion for Publishing Status: Updated the OEDBTable query action to utilize set_is_published, streamlining the table publishing process.[(PR#1526)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1526)
+
+- UI Feature for Publishing Draft Tables: Developed a new UI feature enabling users to publish draft tables directly from the interface.  [(PR#1526)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1526)
+
+- UI Feature for Publishing Draft Tables: Integrated JavaScript to handle publish actions, including schema selection and confirmation steps, ensuring a seamless user experience.  [(PR#1526)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1526)
+
 ### Features
-- Add initial version of new documentation created using mkdocs and hosted on gh-pages [(#1347)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1347)
-- Open Peer Review: Add functionality that switches to the next category tab if the selected field is not part of the current category [(#1328)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1328)
-- Add funder logo in about page [#1344](https://github.com/OpenEnergyPlatform/oeplatform/pull/1344)
 
 ### Bugs
-- Open Peer Review: Fix a bug in the review backend to handle reviews that are finished in one go (without any feedback). [(#1333)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1333)
-- The django-compressor integration now updates the compressed sources and cache as expected [(#1338)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1338)
 
 ### Removed

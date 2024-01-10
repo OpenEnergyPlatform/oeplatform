@@ -1517,6 +1517,7 @@ def move(from_schema, table, to_schema):
         session.query(OEDBTableTags).filter(
             OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
         ).update({OEDBTableTags.schema_name: to_schema})
+        table_obj.is_published = True
         session.commit()
         table_obj.save()
     except Exception:
@@ -1524,6 +1525,10 @@ def move(from_schema, table, to_schema):
         raise
     finally:
         session.close()
+
+
+
+
 
 
 def create_meta(schema, table):
