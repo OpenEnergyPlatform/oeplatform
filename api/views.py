@@ -595,6 +595,15 @@ class Fields(APIView):
         pass
 
 
+class MovePublish(APIView):
+    @require_admin_permission
+    @api_exception
+    def post(self, request, schema, table, to_schema, embargo_period):
+        if schema not in schema_whitelist or to_schema not in schema_whitelist:
+            raise APIError("Invalid origin or target schema")
+        actions.move_publish(schema, table, to_schema, embargo_period)
+        return HttpResponse(status=status.HTTP_200_OK)
+
 class Move(APIView):
     @require_admin_permission
     @api_exception
