@@ -252,6 +252,8 @@ document.addEventListener('DOMContentLoaded', function () {
       const schema = publishButton.getAttribute('data-schema');
       const tableName = publishButton.getAttribute('data-tableName');
       const toSchema = dropdown.value;
+      const embargoDropdown = this.parentElement.querySelector('.embargo-dropdown');
+      const embargoPeriod = embargoDropdown.value;
 
       publishTable(schema, tableName, toSchema, embargoPeriod);
       publishOptions.style.display = 'none';
