@@ -22,6 +22,7 @@ urlpatterns = [
         name="api_table_meta",
     ),
     path('v0/schema/<str:schema>/tables/<str:table>/move/<str:to_schema>/', views.Move.as_view(), name ='move'),
+    path('v0/schema/<str:schema>/tables/<str:table>/move_publish/<str:to_schema>/<str:embargo_period>/', views.MovePublish.as_view(), name ='move_publish'),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa
         views.Column.as_view(),
