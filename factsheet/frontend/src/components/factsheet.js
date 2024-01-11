@@ -1185,7 +1185,14 @@ function Factsheet(props) {
 
   const findNestedObj = (entireObj, keyToFind, valToFind) => {
     let foundObj;
-    JSON.stringify(entireObj, (_, nestedValue) => {
+    const objFiltered = entireObj.map(item =>
+    ({
+      ...item,
+      label: item.value
+    })
+    );
+
+    JSON.stringify(objFiltered, (_, nestedValue) => {
       if (nestedValue && nestedValue[keyToFind] === valToFind) {
         foundObj = nestedValue;
       }
@@ -1226,7 +1233,9 @@ function Factsheet(props) {
 
   const sectorsHandler = (sectorsList, nodes) => {
     const zipped = []
-    sectorsList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri }));
+    console.log(sectorsList);
+
+    sectorsList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).value, "class": findNestedObj(nodes, 'value', v).iri }));
     setSelectedSectors(zipped);
   };
 
@@ -2183,7 +2192,7 @@ function Factsheet(props) {
             </FirstRowTableCell>
             <ContentTableCell>
               {selectedSectorDivisions.map((v, i) => (
-                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                <span> <span> <Chip label={v.name} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
               ))}
             </ContentTableCell>
           </TableRow>
@@ -2208,7 +2217,7 @@ function Factsheet(props) {
             </FirstRowTableCell>
             <ContentTableCell>
               {selectedSectors.map((v, i) => (
-                <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                <span> <span> <Chip label={v.label} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
               ))}
             </ContentTableCell>
           </TableRow>
