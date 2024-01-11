@@ -58,11 +58,11 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-# query_endpoint = "http://localhost:3030/ds/query"
-# update_endpoint = "http://localhost:3030/ds/update"
+#query_endpoint = "http://localhost:3030/ds/query"
+#update_endpoint = "http://localhost:3030/ds/update"
 
-# query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-# update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
 update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
@@ -1569,7 +1569,6 @@ def get_all_sub_classes(cls, visited=None):
 
     childCount = len(list(cls.subclasses()))
     subclasses = cls.subclasses()
-    value = 10 if childCount > 5 else 500
 
     dict = {
         "name": cls.label.first(),
@@ -1587,7 +1586,7 @@ def get_all_sub_classes(cls, visited=None):
     return dict
 
 
-@login_required
+#@login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     scenario_class = oeo_owl.search_one(
         iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
@@ -1624,12 +1623,14 @@ def populate_factsheets_elements(request, *args, **kwargs):
         )
         for s, p, o in oeo.triples((None, OEO.OEO_00000504, OEO[sd])):
             sector_label = oeo.value(s, RDFS.label)
+            sector_difinition = oeo.value(s, OBO.IAO_0000115)
             sectors_list.append(
                 {
                     "iri": s,
                     "label": sector_label,
                     "value": sector_label,
                     "sector_division": sector_division_URI,
+                    "sector_difinition": sector_difinition
                 }
             )
 

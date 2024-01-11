@@ -31,7 +31,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import conf from "../conf.json";
-import { Tooltip } from '@mui/material';
+import { colors, Tooltip } from '@mui/material';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { styled } from '@mui/material/styles';
@@ -273,8 +273,32 @@ function Factsheet(props) {
     populateFactsheetElements().then((data) => {
       setTechnologies(data.technologies['children']);
       setScenarioDescriptors(data.scenario_descriptors);
-      setSectors(data.sectors);
-      setFilteredSectors(data.sectors);
+      const sectors_with_tooltips = data.sectors.map(item =>
+      ({
+        ...item,
+        label: <span>
+          <HtmlTooltip
+            title={
+              <React.Fragment>
+                <Typography color="inherit" variant="subtitle1">
+                  {item.sector_difinition}
+                  <br />
+                  <a href={item.iri}>More info from Open Energy Ontology (OEO)....</a>
+                </Typography>
+              </React.Fragment>
+            }
+          >
+            <InfoOutlinedIcon sx={{ color: '#708696', marginRight: "7px" }} />
+          </HtmlTooltip>
+          {item.label}
+        </span>
+      })
+      );
+
+      setSectors(sectors_with_tooltips);
+
+      setFilteredSectors([]);
+
       const sector_d = data.sector_divisions;
       sector_d.push({ "label": "Others", "name": "Others", "class": "Others", "value": "Others" });
       setSectorDivisions(sector_d);
@@ -389,7 +413,7 @@ function Factsheet(props) {
             .finally(() => {
               // Close the backdrop regardless of success or error
               setOpenBackDrop(false);
-          });
+            });
         });
       }
 
