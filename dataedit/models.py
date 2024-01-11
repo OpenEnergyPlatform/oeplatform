@@ -68,6 +68,7 @@ class Table(Tagable):
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
     is_publish = BooleanField(null=False, default=False)
+    embargo_time = BooleanField(null=False, default=False)
 
     @classmethod
     def load(cls, schema, table):
