@@ -206,8 +206,8 @@ function getCookie(name) {
   return cookieValue;
 }
 
-function publishTable(schema, tableName, toSchema) {
-  return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move/${toSchema}/`, {
+function publishTable(schema, tableName, toSchema, embargoPeriod) {
+  return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move_publish/${toSchema}/${embargoPeriod}/`, {
     method: 'POST',
     headers: {
       'X-CSRFToken': getCookie("csrftoken"),
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const tableName = publishButton.getAttribute('data-tableName');
       const toSchema = dropdown.value;
 
-      publishTable(schema, tableName, toSchema);
+      publishTable(schema, tableName, toSchema, embargoPeriod);
       publishOptions.style.display = 'none';
     });
   });
