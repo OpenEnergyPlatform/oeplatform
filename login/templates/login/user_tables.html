@@ -61,6 +61,11 @@
                             <button class="btn btn-primary publish-button" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
                             <div class="publish-options" style="display: none;">
                                 <select class="schema-dropdown"></select>
+                                <select class="embargo-dropdown">
+                                    <option value="none">None</option>
+                                    <option value="6_months">6 Months</option>
+                                    <option value="1_year">1 Year</option>
+                                </select>
                                 <button class="btn btn-secondary confirm-publish">Confirm</button>
                             </div>
                         {% endif %}
