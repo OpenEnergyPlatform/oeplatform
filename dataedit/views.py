@@ -237,7 +237,9 @@ def listschemas(request):
 
     # TODO CHW: migrate from schema to topic
     schema_description = dict((t.name, t.description) for t in Topic.objects.all())
-    schema_description[DRAFT_SCHEMA] = "Data in draft"
+    schema_description[
+        DRAFT_SCHEMA
+    ] = "Unfinished data of any kind. Note: there is no version control and data is still volatile."
     schema_description[DATASET_SCHEMA] = "Finalized Data"
 
     # triples of name, description, table_count
