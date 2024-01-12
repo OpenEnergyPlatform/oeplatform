@@ -73,6 +73,7 @@ def get_django_table_obj(table: str, only_editable=False):
     """
     Raises Http404 if table not found, or PermissionDenied if restrict_schemas
     """
+    # TODO: Error when running alembic migrations (no table exists?)
     try:
         table_obj = DBTable.objects.get(name=table)
     except ObjectDoesNotExist:
@@ -1517,7 +1518,6 @@ def move(from_schema, table, to_schema):
         session.query(OEDBTableTags).filter(
             OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
         ).update({OEDBTableTags.schema_name: to_schema})
-        table_obj.is_published = True
         session.commit()
         table_obj.save()
     except Exception:
@@ -1525,10 +1525,6 @@ def move(from_schema, table, to_schema):
         raise
     finally:
         session.close()
-
-
-
-
 
 
 def create_meta(schema, table):

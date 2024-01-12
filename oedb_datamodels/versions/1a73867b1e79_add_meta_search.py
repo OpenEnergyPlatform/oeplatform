@@ -33,7 +33,19 @@ def upgrade():
     meta.reflect()
 
     for table in meta.tables.values():
-        update_meta_search(table.name, table.schema)
+        print(table.name)
+        # TODO @jh-RLI fix lazy workaround
+        if table.name not in [
+            "spatial_ref_sys",
+            "_edit_base",
+            "alembic_version",
+            "api_columns",
+            "table_tags",
+            "tags",
+            "_insert_base",
+            "meta_search",
+        ]:
+            update_meta_search(table.name, table.schema)
 
 
 def downgrade():
