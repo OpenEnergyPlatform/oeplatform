@@ -1,3 +1,4 @@
+from dataedit.models import Table as DBTable
 from dataedit.metadata import v1_4 as __LATEST
 from dataedit.metadata.v1_3 import TEMPLATE_v1_3
 from dataedit.metadata.v1_4 import TEMPLATE_V1_4
@@ -10,7 +11,6 @@ METADATA_TEMPLATE = {
     4: TEMPLATE_V1_4,
     3: TEMPLATE_v1_3,
 }
-
 
 # name of the metadata fields which should not be filled by the user
 METADATA_HIDDEN_FIELDS = [
@@ -131,10 +131,10 @@ def save_metadata_to_db(schema, table, updated_metadata):
         and then saves the updated table object back to the database.
     """
 
-    from dataedit.models import Table
-
     # Load the table object
-    table_obj = Table.load(schema=schema, table=table)
+    # TODO: @jh-RLI Better use singe point of access function to get table object????
+    # cant use actions function because of circular import
+    table_obj = DBTable.objects.get(name=table)
 
     # Update the oemetadata field
     table_obj.oemetadata = updated_metadata
@@ -153,19 +153,11 @@ def load_metadata_from_db(schema, table):
 
     Returns:
         dict: The loaded metadata dictionary.
-
-    Note:
-        The function currently loads metadata from the Table.oemetadata field.
-        There is a consideration to change this function to use a different approach
-        or keep the old functionality (TODO).
     """
 
-    from dataedit.models import Table
-
-    # TODO maybe change this function to load metadata from Table.oemetadata
-    # (JSONB)field? or keep old functionality?
-    # metadata = actions.get_comment_table(schema, table)
-    metadata = Table.load(schema=schema, table=table).oemetadata
+    # TODO: @jh-RLI Better use single point of access function to get table object????
+    # cant use actions function because of circular import
+    metadata = DBTable.objects.get(name=table).oemetadata
 
     metadata = parse_meta_data(metadata, schema, table)
     return metadata
