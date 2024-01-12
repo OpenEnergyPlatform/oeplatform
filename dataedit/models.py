@@ -76,8 +76,6 @@ class Table(Tagable):
     # due to oem string (json) parsing like when reading the oem form comment on table
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
-    is_publish = BooleanField(null=False, default=False)
-    
     topics = models.ManyToManyField(to="dataedit.Topic", related_name="tables")
 
     class Meta:
