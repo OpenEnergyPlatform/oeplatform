@@ -11,7 +11,7 @@ from django.views.generic.edit import DeleteView, UpdateView
 
 import login.models as models
 from dataedit.models import PeerReviewManager, Table, PeerReview
-from dataedit.views import schema_whitelist
+from oeplatform.settings import SCHEMA_WHITELIST
 
 from .forms import (
     ChangeEmailForm,
@@ -37,13 +37,13 @@ class TablesView(View):
                 table_data = {
                     "name": table.name,
                     "schema": table.schema.name,
-                    "is_publish": table.is_publish,
+                    "is_publish": table.is_published,
                     "is_reviewed": table.is_reviewed
                 }
 
                 # Определение категории таблицы
                 if table.is_reviewed:
-                    if table.is_publish:
+                    if table.is_published:
                         published_tables.append(table_data)
                     else:
                         draft_tables.append(table_data)
@@ -54,7 +54,7 @@ class TablesView(View):
             "profile_user": user,
             "draft_tables": draft_tables,
             "published_tables": published_tables,
-            "schema_whitelist": schema_whitelist
+            "schema_whitelist": SCHEMA_WHITELIST
         }
 
         # TODO: Fix this is_ajax as it is outdated according to django documentation ... provide better api endpoint for http requests via HTMX
