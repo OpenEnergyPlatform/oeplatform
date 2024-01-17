@@ -598,12 +598,13 @@ class Fields(APIView):
 class MovePublish(APIView):
     @require_admin_permission
     @api_exception
-    def post(self, request, schema, table, to_schema, embargo_period):
+    def post(self, request, schema, table, to_schema):
         if schema not in schema_whitelist or to_schema not in schema_whitelist:
             raise APIError("Invalid origin or target schema")
+        embargo_period = request.data.get('embargo', {}).get('duration', None)
         actions.move_publish(schema, table, to_schema, embargo_period)
-        return HttpResponse(status=status.HTTP_200_OK)
 
+        return HttpResponse({'message': 'Table successful moved.'}, status=status.HTTP_200_OK)
 class Move(APIView):
     @require_admin_permission
     @api_exception
