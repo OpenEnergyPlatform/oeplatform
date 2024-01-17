@@ -206,9 +206,10 @@ function getCookie(name) {
   return cookieValue;
 }
 
-function publishTable(schema, tableName, toSchema, embargoPeriod) {
-  return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move_publish/${toSchema}/${embargoPeriod}/`, {
+function publishTable(schema, tableName, toSchema, embargoData) {
+  return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move_publish/${toSchema}/`, {
     method: 'POST',
+    body: JSON.stringify({embargo: embargoData}),
     headers: {
       'X-CSRFToken': getCookie("csrftoken"),
       'Content-Type': 'application/json',
@@ -255,14 +256,14 @@ document.addEventListener('DOMContentLoaded', function () {
       const embargoDropdown = this.parentElement.querySelector('.embargo-dropdown');
       const embargoPeriod = embargoDropdown.value;
 
-      publishTable(schema, tableName, toSchema, embargoPeriod);
+      const embargoData = { duration: embargoPeriod };
+
+      publishTable(schema, tableName, toSchema, embargoData);
       publishOptions.style.display = 'none';
     });
   });
 });
 </script>
-
-
 
 {% endblock after-body-bottom-js %}
 
