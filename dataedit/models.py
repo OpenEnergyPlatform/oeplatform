@@ -126,11 +126,8 @@ class Embargo(models.Model):
     duration = models.CharField(max_length=10)
 
     def save(self, *args, **kwargs):
-        # Если date_started еще не установлено, то устанавливаем его в текущее время
         if not self.date_started:
             self.date_started = timezone.now()
-
-        # Теперь можно безопасно добавить timedelta к date_started
         if self.duration == '6_months':
             self.date_ended = self.date_started + timedelta(weeks=26)
         elif self.duration == '1_year':
