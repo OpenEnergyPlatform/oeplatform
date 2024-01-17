@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
@@ -32,7 +32,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from dataedit.models import Schema as DBSchema
+from dataedit.models import Schema as DBSchema, Embargo
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
@@ -1530,40 +1530,29 @@ def move(from_schema, table, to_schema):
     finally:
         session.close()
 
-def move_publish(from_schema, table, to_schema, embargo_period):
-    table = read_pgid(table)
+
+def move_publish(from_schema, table_name, to_schema, embargo_period):
     engine = _get_engine()
     Session = sessionmaker(engine)
     session = Session()
+
     try:
-        try:
-            t = DBTable.objects.get(name=table, schema__name=from_schema)
-        except DBTable.DoesNotExist:
-            raise APIError("Table for schema movement not found")
-        try:
-            to_schema_reg = DBSchema.objects.get(name=to_schema)
-        except DBSchema.DoesNotExist:
-            raise APIError("Target schema not found")
+        t = DBTable.objects.get(name=table_name, schema__name=from_schema)
+        to_schema_reg = DBSchema.objects.get(name=to_schema)
+
         if from_schema == to_schema:
             raise APIError("Target schema same as current schema")
+
         t.schema = to_schema_reg
 
         meta_to_schema = get_meta_schema_name(to_schema)
         meta_from_schema = get_meta_schema_name(from_schema)
 
         movements = [
-            (from_schema, table, to_schema),
-            (meta_from_schema, get_edit_table_name(from_schema, table), meta_to_schema),
-            (
-                meta_from_schema,
-                get_insert_table_name(from_schema, table),
-                meta_to_schema,
-            ),
-            (
-                meta_from_schema,
-                get_delete_table_name(from_schema, table),
-                meta_to_schema,
-            ),
+            (from_schema, table_name, to_schema),
+            (meta_from_schema, get_edit_table_name(from_schema, table_name), meta_to_schema),
+            (meta_from_schema, get_insert_table_name(from_schema, table_name), meta_to_schema),
+            (meta_from_schema, get_delete_table_name(from_schema, table_name), meta_to_schema),
         ]
 
         for fr, tab, to in movements:
@@ -1572,20 +1561,41 @@ def move_publish(from_schema, table, to_schema, embargo_period):
                     from_schema=fr, table=tab, to_schema=to
                 )
             )
+
         session.query(OEDBTableTags).filter(
-            OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
+            OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table_name
         ).update({OEDBTableTags.schema_name: to_schema})
         if embargo_period in ['6_months', '1_year']:
-            t.embargo_time = True
-        else:
-            t.embargo_time = False
+            duration_in_weeks = 26 if embargo_period == '6_months' else 52
+            embargo, created = Embargo.objects.get_or_create(
+                table=t,
+                defaults={
+                    'duration': embargo_period,
+                    'date_ended': datetime.now() + timedelta(weeks=duration_in_weeks)
+                }
+            )
+            if not created and embargo.date_started is not None:
+                embargo.date_ended = embargo.date_started + timedelta(weeks=duration_in_weeks)
+                embargo.save()
+            elif not created:
+                embargo.date_started = datetime.now()
+                embargo.date_ended = embargo.date_started + timedelta(weeks=duration_in_weeks)
+                embargo.save()
         t.set_is_published()
         session.commit()
-    except Exception:
+
+    except DBTable.DoesNotExist:
         session.rollback()
-        raise
+        raise APIError("Table for schema movement not found")
+    except DBSchema.DoesNotExist:
+        session.rollback()
+        raise APIError("Target schema not found")
+    except Exception as e:
+        session.rollback()
+        raise e
     finally:
         session.close()
+
 
 def create_meta(schema, table):
     # meta_schema = get_meta_schema_name(schema)
