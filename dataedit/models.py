@@ -1,3 +1,4 @@
+from datetime import timedelta
 from enum import Enum
 
 from django.contrib.postgres.search import SearchVectorField
@@ -68,7 +69,6 @@ class Table(Tagable):
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
     is_publish = BooleanField(null=False, default=False)
-    embargo_time = BooleanField(null=False, default=False)
 
     @classmethod
     def load(cls, schema, table):
@@ -117,6 +117,28 @@ class Table(Tagable):
 
     class Meta:
         unique_together = (("name",),)
+
+
+class Embargo(models.Model):
+    table = models.ForeignKey(Table, on_delete=models.CASCADE)
+    date_started = models.DateTimeField(auto_now_add=True)
+    date_ended = models.DateTimeField()
+    duration = models.CharField(max_length=10)
+
+    def save(self, *args, **kwargs):
+        # Если date_started еще не установлено, то устанавливаем его в текущее время
+        if not self.date_started:
+            self.date_started = timezone.now()
+
+        # Теперь можно безопасно добавить timedelta к date_started
+        if self.duration == '6_months':
+            self.date_ended = self.date_started + timedelta(weeks=26)
+        elif self.duration == '1_year':
+            self.date_ended = self.date_started + timedelta(weeks=52)
+        else:
+            self.date_ended = None
+
+        super().save(*args, **kwargs)
 
 
 class View(models.Model):
