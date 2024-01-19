@@ -257,7 +257,12 @@ def listschemas(request):
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
-        {"schemas": schemas, "query": searched_query_string, "tags": searched_tag_ids},
+        {
+            "schemas": schemas,
+            "query": searched_query_string,
+            "tags": searched_tag_ids,
+            # "all_topics": schema_description, #TODO: @jh-RLI Would be nice if all topics are visible even if there is no data included 
+        },
     )
 
 
