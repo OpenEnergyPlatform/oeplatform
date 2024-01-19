@@ -12,6 +12,8 @@
 
 - UI Feature for Publishing Draft Tables: Integrated JavaScript to handle publish actions, including schema selection and confirmation steps, ensuring a seamless user experience.  [(PR#1526)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1526)
 
+- The oemetadata on the oep is now stored including null / none values. Users reported that it otherwise is confusing and hinders there metadata workflow. This is related to the update in [omi v0.2.0]() [(PR#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+
 ### Features
 
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
