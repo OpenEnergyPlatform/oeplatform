@@ -38,7 +38,7 @@ class TablesView(View):
                     "name": table.name,
                     "schema": table.schema.name,
                     "is_publish": table.is_published,
-                    "is_reviewed": table.is_reviewed
+                    "is_reviewed": table.is_reviewed,
                 }
 
                 # Определение категории таблицы
@@ -54,17 +54,13 @@ class TablesView(View):
             "profile_user": user,
             "draft_tables": draft_tables,
             "published_tables": published_tables,
-            "schema_whitelist": SCHEMA_WHITELIST
+            "schema_whitelist": SCHEMA_WHITELIST,
         }
 
         # TODO: Fix this is_ajax as it is outdated according to django documentation ... provide better api endpoint for http requests via HTMX
         if request.is_ajax():
             return render(request, "login/user_tables.html", context)
         return render(request, "login/user_tables.html", context)
-
-
-
-
 
 
 class ReviewsView(View):
