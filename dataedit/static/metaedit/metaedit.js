@@ -296,7 +296,7 @@ var MetaEdit = function (config) {
                     array_controls_top: true,
                     no_additional_properties: true,
                     required_by_default: false,
-                    remove_empty_properties: true, // don't remove, otherwise the metadata will not pass the validation on the server
+                    remove_empty_properties: false, // don't remove, otherwise the metadata will not pass the validation on the server
                 }
 
                 config.editor = new JSONEditor(config.form[0], options);
