@@ -42,7 +42,7 @@ from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import merge_field_reviews, process_review_data, recursive_update
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Filter as DBFilter
+from dataedit.models import Filter as DBFilter, Embargo
 from dataedit.models import PeerReview, PeerReviewManager, Table
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
@@ -991,6 +991,7 @@ class DataView(View):
         tags = []  # TODO: Unused - Remove
 
         # db = sec.dbname
+        # host = sec.dbhost
 
         engine = actions._get_engine()
 
@@ -1037,6 +1038,16 @@ class DataView(View):
         default = DBView(name="default", type="table", table=table, schema=schema)
 
         view_id = request.GET.get("view")
+
+        embargo = Embargo.objects.filter(table=table_obj).first()
+        if embargo:
+            now = timezone.now()
+            if embargo.date_ended > now:
+                embargo_time_left = embargo.date_ended - now
+            else:
+                embargo_time_left = "The embargo is over"
+        else:
+            embargo_time_left = "No embargo data available"
 
         if view_id == "default":
             current_view = default
@@ -1130,6 +1141,7 @@ class DataView(View):
             "host": request.get_host(),
             "opr": opr_context,
             "opr_result": opr_result_context,
+            "embargo_time_left": embargo_time_left,
         }
 
         context_dict.update(current_view.options)
