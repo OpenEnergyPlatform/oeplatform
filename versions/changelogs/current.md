@@ -14,7 +14,7 @@
 
 ### Features
 
-- implement ready check for ontology app to check for missing oeo release files and guide the user in case of an error []()
+- implement ready check for ontology app to check for missing oeo release files and guide the user in case of an error [#1457](https://github.com/OpenEnergyPlatform/oeplatform/pull/1547/)
 
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
 
