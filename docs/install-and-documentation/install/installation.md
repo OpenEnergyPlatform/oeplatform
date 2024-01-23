@@ -148,7 +148,7 @@ The goal is to setup a structure like you see below.
             └── oeo-full.owl
     ```
 
-The root of the ontology folder (ontologies) is configured in the settings.py file for the oeplatform. The following variables are relevant to configure the oeo related directories. In most cases you can use the default.
+The root directory of the ontology folder (ontologies) is configured in the settings.py file for the oeplatform. The following variables are relevant for the configuration of the oeo directories. In most cases, you can use the default settings.
 
     ``` python
     ONTOLOGY_ROOT
@@ -157,7 +157,7 @@ The root of the ontology folder (ontologies) is configured in the settings.py fi
     OPEN_ENERGY_ONTOLOGY_FOLDER
     ```
 
-In case you use the default "ontologie" naming you can proceed with downloading the full oeo release files from GitHub and unpacking them into the directory. Check if you finde the "oeo-full.owl" file.
+If you use the default naming "ontology", you can download the full oeo release files from GitHub and unzip them into the directory. Check whether you can find the file "oeo-full.owl".
 
 !!! info
     Download the [full oeo release from GitHub: Assets - build-files.zip](https://github.com/OpenEnergyPlatform/ontology/releases) and extract the oeo directory to match the pattern provided above.
