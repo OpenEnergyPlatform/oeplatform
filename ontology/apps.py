@@ -22,7 +22,7 @@ class OntologyConfig(AppConfig):
         documentation.
         """
         # Specify the file to check
-        file_to_check = OPEN_ENERGY_ONTOLOGY_FOLDER / "e"
+        file_to_check = OPEN_ENERGY_ONTOLOGY_FOLDER
 
         # Configure the logging module
         logging.basicConfig(level=logging.WARNING)
