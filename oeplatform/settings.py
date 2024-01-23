@@ -89,6 +89,11 @@ EXTERNAL_URLS = {
     "compendium": "https://openenergyplatform.github.io/organisation/",
 }
 
+# Kept this separate for now to avoid messing with the other list ... TODO move to EXTERNAL_URLS if possible
+DOCUMENTATION_LINKS = {
+    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#4-setup-the-openenergyontology-integation"
+}
+
 
 def external_urls_context_processor(request):
     """Define hard coded external urls here.
@@ -129,7 +134,7 @@ except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
 OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
-
+OPEN_ENERGY_ONTOLOGY_FOLDER = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
