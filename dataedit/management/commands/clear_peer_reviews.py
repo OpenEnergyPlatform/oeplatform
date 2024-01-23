@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from dataedit.models import PeerReview, PeerReviewManager
-from oeplatform.securitysettings import ONTOLOGY_FOLDER
 
 
 class Command(BaseCommand):
