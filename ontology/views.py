@@ -30,9 +30,6 @@ def collect_modules(path):
                 g = Graph()
                 g.parse(os.path.join(path, file))
 
-                # Get the root namespace
-                root_namespace = next(iter(g.namespaces()))
-
                 # Set the namespaces in the graph
                 for prefix, uri in g.namespaces():
                     g.bind(prefix, uri)
@@ -62,9 +59,7 @@ def collect_modules(path):
                         }}
                     """
                     # Execute the SPARQL query for description
-                    description_results = g.query(
-                        description_query
-                    )
+                    description_results = g.query(description_query)
 
                     # Update the comment in the modules dictionary if found
                     for row in description_results:
