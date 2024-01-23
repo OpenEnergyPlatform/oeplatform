@@ -1,22 +1,21 @@
 import logging
 from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
-from rest_framework import status
+from django.http import Http404, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.utils.cache import patch_response_headers
-import uuid
-import requests
-import rdflib
-from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode, XSD
+# import uuid
+# import requests
+# import rdflib
+from rdflib import Graph, Literal, RDF, URIRef
 from rdflib.compare import to_isomorphic, graph_diff
 from rdflib.plugins.stores import sparqlstore
-from rdflib.namespace import XSD, Namespace
+from rdflib.namespace import Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 import os
-from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT, RDF_DATABASES
-from datetime import date
+from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES, OPEN_ENERGY_ONTOLOGY_NAME
+# from datetime import date
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
 from owlready2 import get_ontology
@@ -27,9 +26,9 @@ from rest_framework.decorators import (
     authentication_classes,
     permission_classes,
 )
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authtoken.models import Token
+# from rest_framework.authentication import TokenAuthentication
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 
 from .models import OEKG_Modifications, ScenarioBundleAccessControl
@@ -38,12 +37,11 @@ from login import models as login_models
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 
 versions = os.listdir(
-    Path(ONTOLOGY_ROOT, "oeo")
+    Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 )  # TODO bad - windows dev will get path error
 # Bryans custom hack!! print(versions.remove(".DS_Store"))
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
-ONTHOLOGY_NAME = "oeo"
-onto_base_path = Path(ONTOLOGY_ROOT, ONTHOLOGY_NAME)
+onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 path = onto_base_path / version  # TODO bad - windows dev will get path error
 # file = "reasoned-oeo-full.owl" # TODO- set in settings
 file = "oeo-full.owl"  # TODO- set in settings
