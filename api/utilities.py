@@ -1,5 +1,6 @@
 from api import actions
 
+
 def transform_results(cursor, triggers, trigger_args):
     row = cursor.fetchone() if not cursor.closed else None
     while row is not None:
@@ -7,3 +8,7 @@ def transform_results(cursor, triggers, trigger_args):
         row = cursor.fetchone()
     for t, targs in zip(triggers, trigger_args):
         t(*targs)
+
+
+def conjunction(clauses):
+    return {"type": "operator", "operator": "AND", "operands": clauses}
