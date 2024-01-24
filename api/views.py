@@ -20,12 +20,21 @@ from omi.structure import OEPMetadata
 from rest_framework import status
 from rest_framework.views import APIView
 
-import api.parser
 import login.models as login_models
+import api.parser
 from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
+from api.utilities import conjunction
+from api.decorators import (
+    load_cursor,
+    cors,
+    require_write_permission,
+    require_delete_permission,
+    require_admin_permission,
+    api_exception,
+)
 from dataedit.models import Table as DBTable
 from dataedit.models import Topic
 from dataedit.views import get_tag_keywords_synchronized_metadata
@@ -35,8 +44,6 @@ from oeplatform.settings import (
     DRAFT_SCHEMA,
     EDITABLE_SCHEMAS,
 )
-
-from api.decorators import load_cursor, cors
 
 logger = logging.getLogger("oeplatform")
 
@@ -57,43 +64,6 @@ class OEPStream(StreamingHttpResponse):
     def __del__(self):
         if self.session:
             self.session.close()
-
-
-def api_exception(f):
-    def wrapper(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except actions.APIError as e:
-            return JsonResponse({"reason": e.message}, status=e.status)
-        except KeyError as e:
-            return JsonResponse({"reason": e}, status=400)
-
-    return wrapper
-
-
-def permission_wrapper(permission, f):
-    def wrapper(caller, request, *args, **kwargs):
-        table = kwargs.get("table") or kwargs.get("sequence")
-        actions.assert_permission(request.user, table, permission)
-        return f(caller, request, *args, **kwargs)
-
-    return wrapper
-
-
-def require_write_permission(f):
-    return permission_wrapper(login_models.WRITE_PERM, f)
-
-
-def require_delete_permission(f):
-    return permission_wrapper(login_models.DELETE_PERM, f)
-
-
-def require_admin_permission(f):
-    return permission_wrapper(login_models.ADMIN_PERM, f)
-
-
-def conjunction(clauses):
-    return {"type": "operator", "operator": "AND", "operands": clauses}
 
 
 class Sequence(APIView):
