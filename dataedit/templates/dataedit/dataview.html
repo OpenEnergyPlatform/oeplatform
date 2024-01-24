@@ -65,6 +65,11 @@
 
 <div class="tab-content" id="tableTabsContent">
   <div class="tab-pane fade show active" id="table-tab-pane" role="tabpanel" aria-labelledby="table-tab" tabindex="0">
+  {% if embargo_time_left != "No embargo data available" and embargo_time_left != "The embargo is over" %}
+      <div class="embargo-message">
+        <p>Data is in embargo</p>
+      </div>
+    {% else %}
     <div class="data-view">
       <span class="data-view__label">View</span>
       <ul class="nav nav-tabs data-view__tabs">
@@ -118,7 +123,6 @@
         </li>
       </ul>
     </div>
-    
     <div>
       <div class="datatable">
         <table class="display" id="datatable" style="width:100%">
@@ -170,6 +174,7 @@
         </div>
       </div>
     </div>
+   {% endif %}
   </div>
   <div class="tab-pane metadata fade" id="metadata-tab-pane" role="tabpanel" aria-labelledby="metadata-tab" tabindex="0">
     <div class="metadata__options">
