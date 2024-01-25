@@ -11,10 +11,11 @@ import requests
 import sqlalchemy as sqla
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.utils import timezone
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import status
@@ -26,8 +27,7 @@ from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
-from dataedit.models import Schema as DBSchema
-from dataedit.models import Table as DBTable
+from dataedit.models import Schema as DBSchema, Embargo, Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
@@ -615,9 +615,23 @@ class Move(APIView):
         return HttpResponse(status=status.HTTP_200_OK)
 
 
+def check_embargo(schema, table):
+    try:
+        table_obj = DBTable.objects.get(name=table, schema__name=schema)
+        embargo = Embargo.objects.filter(table=table_obj).first()
+        if embargo and embargo.date_ended > timezone.now():
+            return True
+        return False
+    except ObjectDoesNotExist:
+        return False
+
+
 class Rows(APIView):
     @api_exception
     def get(self, request, schema, table, row_id=None):
+        if check_embargo(schema, table):
+            return JsonResponse({'error': 'Access to this table is restricted due to embargo.'}, status=403)
+
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         columns = request.GET.getlist("column")
 
@@ -771,6 +785,9 @@ class Rows(APIView):
     @api_exception
     @require_write_permission
     def post(self, request, schema, table, row_id=None, action=None):
+        if check_embargo(schema, table):
+            return JsonResponse({'error': 'Access to this table is restricted due to embargo.'}, status=403)
+
         schema, table = actions.get_table_name(schema, table)
         column_data = request.data["query"]
         status_code = status.HTTP_200_OK
@@ -790,6 +807,9 @@ class Rows(APIView):
     @api_exception
     @require_write_permission
     def put(self, request, schema, table, row_id=None, action=None):
+        if check_embargo(schema, table):
+            return JsonResponse({'error': 'Access to this table is restricted due to embargo.'}, status=403)
+
         if action:
             raise APIError(
                 "This request type (PUT) is not supported. The "
@@ -833,6 +853,9 @@ class Rows(APIView):
 
     @require_delete_permission
     def delete(self, request, table, schema, row_id=None):
+        if check_embargo(schema, table):
+            return JsonResponse({'error': 'Access to this table is restricted due to embargo.'}, status=403)
+
         schema, table = actions.get_table_name(schema, table)
         result = self.__delete_rows(request, schema, table, row_id)
         actions.apply_changes(schema, table)
@@ -840,6 +863,9 @@ class Rows(APIView):
 
     @load_cursor()
     def __delete_rows(self, request, schema, table, row_id=None):
+        if check_embargo(schema, table):
+            return JsonResponse({'error': 'Access to this table is restricted due to embargo.'}, status=403)
+
         where = request.GET.getlist("where")
         query = {"schema": schema, "table": table}
         if where:
@@ -918,6 +944,9 @@ class Rows(APIView):
 
     @load_cursor()
     def __update_rows(self, request, schema, table, row, row_id=None):
+        if check_embargo(schema, table):
+            return JsonResponse({'error': 'Access to this table is restricted due to embargo.'}, status=403)
+
         context = {
             "connection_id": request.data["connection_id"],
             "cursor_id": request.data["cursor_id"],
