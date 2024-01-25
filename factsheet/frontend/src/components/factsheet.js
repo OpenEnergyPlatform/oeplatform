@@ -296,8 +296,8 @@ function Factsheet(props) {
       );
 
       setSectors(sectors_with_tooltips);
-
-      setFilteredSectors([]);
+      setFilteredSectors(sectors_with_tooltips);
+      //setFilteredSectors([]);
 
       const sector_d = data.sector_divisions;
       sector_d.push({ "label": "Others", "name": "Others", "class": "Others", "value": "Others" });
@@ -1233,7 +1233,6 @@ function Factsheet(props) {
 
   const sectorsHandler = (sectorsList, nodes) => {
     const zipped = []
-    console.log(sectorsList);
 
     sectorsList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).value, "class": findNestedObj(nodes, 'value', v).iri }));
     setSelectedSectors(zipped);
@@ -2083,9 +2082,7 @@ function Factsheet(props) {
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedAuthors.map((v, i) => (
-                <span> <span> {doi !== undefined ? doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-              ))}
+              <span> <span> {doi !== undefined ? doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
             </ContentTableCell>
           </TableRow>
           <TableRow>
