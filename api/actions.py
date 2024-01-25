@@ -1480,6 +1480,11 @@ def clear_dict(d):
 
 
 def move(from_schema, table, to_schema):
+    """
+    Implementation note:
+        Currently we implemented two versions of the move functionality
+        this will later be harmonized. See 'move_publish'.
+    """
     table = read_pgid(table)
     engine = _get_engine()
     Session = sessionmaker(engine)
@@ -1534,6 +1539,11 @@ def move(from_schema, table, to_schema):
 
 
 def move_publish(from_schema, table_name, to_schema, embargo_period):
+    """
+    Implementation note:
+        Currently we implemented two versions of the move functionality
+        this will later be harmonized. See 'move'.
+    """
     engine = _get_engine()
     Session = sessionmaker(engine)
     session = Session()
