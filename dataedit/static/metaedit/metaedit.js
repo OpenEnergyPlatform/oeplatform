@@ -217,11 +217,26 @@ var MetaEdit = function (config) {
 
     }
 
+    // Function to recursively convert empty strings to null
+    function convertEmptyStringsToNull(obj) {
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                if (typeof obj[key] === 'string' && obj[key] === '') {
+                    obj[key] = null;
+                } else if (typeof obj[key] === 'object') {
+                    convertEmptyStringsToNull(obj[key]);
+                }
+            }
+        }
+    }
+
     function bindButtons() {
         // download
         $('#metaedit-download').bind('click', function downloadMetadata() {
             var json = config.editor.getValue();
             // create data url
+            convertEmptyStringsToNull(json);
+            console.log(json);
             json = JSON.stringify(json, null, 1);
             blob = new Blob([json], { type: "application/json" }),
                 dataUrl = URL.createObjectURL(blob);
@@ -296,7 +311,7 @@ var MetaEdit = function (config) {
                     array_controls_top: true,
                     no_additional_properties: true,
                     required_by_default: false,
-                    remove_empty_properties: true, // don't remove, otherwise the metadata will not pass the validation on the server
+                    remove_empty_properties: false, // don't remove, otherwise the metadata will not pass the validation on the server
                 }
 
                 config.editor = new JSONEditor(config.form[0], options);
