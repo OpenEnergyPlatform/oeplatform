@@ -78,7 +78,9 @@
 
 </div>
 {% endif %}
+{% comment "@Daryna what is this used for?" %}
 <div id="reviewedTablesData" style="display: none;">{{ reviewed_tables|json_script:"reviewedTablesData" }}</div>
+{% endcomment %}
 <div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
 {% endblock %}
 </div>
@@ -225,6 +227,7 @@ function publishTable(schema, tableName, toSchema, embargoData) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+  // @Daryna pls write comments in english 
   // Извлекаем данные о схемах
   let schemaWhitelist = [];
   const schemaDataElement = document.querySelector('#schemaWhitelistData');
