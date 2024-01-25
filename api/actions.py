@@ -32,8 +32,9 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from dataedit.models import Schema as DBSchema, Embargo
+from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
+from dataedit.models import Embargo
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
@@ -1477,6 +1478,7 @@ def clear_dict(d):
         for k in d
     }
 
+
 def move(from_schema, table, to_schema):
     table = read_pgid(table)
     engine = _get_engine()
@@ -1550,9 +1552,21 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
 
         movements = [
             (from_schema, table_name, to_schema),
-            (meta_from_schema, get_edit_table_name(from_schema, table_name), meta_to_schema),
-            (meta_from_schema, get_insert_table_name(from_schema, table_name), meta_to_schema),
-            (meta_from_schema, get_delete_table_name(from_schema, table_name), meta_to_schema),
+            (
+                meta_from_schema,
+                get_edit_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+            (
+                meta_from_schema,
+                get_insert_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+            (
+                meta_from_schema,
+                get_delete_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
         ]
 
         for fr, tab, to in movements:
@@ -1563,23 +1577,28 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
             )
 
         session.query(OEDBTableTags).filter(
-            OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table_name
+            OEDBTableTags.schema_name == from_schema,
+            OEDBTableTags.table_name == table_name,
         ).update({OEDBTableTags.schema_name: to_schema})
-        if embargo_period in ['6_months', '1_year']:
-            duration_in_weeks = 26 if embargo_period == '6_months' else 52
+        if embargo_period in ["6_months", "1_year"]:
+            duration_in_weeks = 26 if embargo_period == "6_months" else 52
             embargo, created = Embargo.objects.get_or_create(
                 table=t,
                 defaults={
-                    'duration': embargo_period,
-                    'date_ended': datetime.now() + timedelta(weeks=duration_in_weeks)
-                }
+                    "duration": embargo_period,
+                    "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
+                },
             )
             if not created and embargo.date_started is not None:
-                embargo.date_ended = embargo.date_started + timedelta(weeks=duration_in_weeks)
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
                 embargo.save()
             elif not created:
                 embargo.date_started = datetime.now()
-                embargo.date_ended = embargo.date_started + timedelta(weeks=duration_in_weeks)
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
                 embargo.save()
         t.set_is_published()
         session.commit()
