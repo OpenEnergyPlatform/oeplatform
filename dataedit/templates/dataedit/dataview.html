@@ -195,7 +195,7 @@
       {{ meta_widget }}
     </div>
   </div>
-  
+
   <div class="tab-pane open-peer-review fade" id="opr-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
     {% if opr_result.review_exists %}
     <div class="metadata__options">
@@ -326,14 +326,19 @@
 {% endif %}
 
 <h4>API Usage</h4>
-<textarea class="form-control" rows="6" cols="50"
-  style="white-space: nowrap;font-size: 12px;resize: none;overflow-y: hidden;font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
-from requests import get
+{% if embargo_time_left != 'No embargo data available' and embargo_time_left != 'The embargo is over' %}
+    <div class="alert alert-warning" role="alert">
+        API currently unavailable due to data embargo. Time remaining: {{ embargo_time_left }}.
+    </div>
+{% else %}
+    <textarea class="form-control" rows="6" cols="50"
+      style="white-space: nowrap;font-size: 12px;resize: none;overflow-y: hidden;font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
+    from requests import get
+    result = get('https://{{ host }}/api/v0/schema/{{ schema }}/tables/{{ table }}/rows')
+      # Process the row
+    </textarea>
+{% endif %}
 
-result = get('https://{{ host }}/api/v0/schema/{{ schema }}/tables/{{ table }}/rows')
-for row in result.json():
-  # Process the row
-  </textarea>
 <hr>
 
 <h4>Permissions</h4>
