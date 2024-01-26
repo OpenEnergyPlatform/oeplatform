@@ -256,7 +256,9 @@ var MetaEdit = function (config) {
         // submit
         $('#metaedit-submit').bind('click', function sumbmitMetadata() {
             $('#metaedit-submitting').removeClass('d-none');
+            // config.editor.remove_empty_properties = true;
             var json = config.editor.getValue();
+            convertEmptyStringsToNull(json);
             json = fixData(json);
             json = JSON.stringify(json);
             sendJson("POST", config.url_api_meta, json).then(function () {
@@ -312,6 +314,7 @@ var MetaEdit = function (config) {
                     no_additional_properties: true,
                     required_by_default: false,
                     remove_empty_properties: false, // don't remove, otherwise the metadata will not pass the validation on the server
+                    show_errors: "interaction",
                 }
 
                 config.editor = new JSONEditor(config.form[0], options);
@@ -404,7 +407,7 @@ var MetaEdit = function (config) {
                     array_controls_top: true,
                     no_additional_properties: true,
                     required_by_default: false,
-                    remove_empty_properties: true, // don't remove, otherwise the metadata will not pass the validation on the server
+                    remove_empty_properties: false, // don't remove, otherwise the metadata will not pass the validation on the server
                 }
                 config.editor = new JSONEditor(config.form[0], standalone_options);
 

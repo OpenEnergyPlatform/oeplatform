@@ -14,6 +14,8 @@
 
 - The oemetadata on the oep is now stored including null / none values. Users reported that it otherwise is confusing and hinders there metadata workflow. This is related to the update in [omi v0.2.0](https://pypi.org/project/omi/0.2.0/) [(PR#1541)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1541)
 
+- Update schema.json for metaEdit module and update omi version in requirements.txt. This change makes the metadata edit / download results more robust. [(PR#1550)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1550)
+
 ### Features
 
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
