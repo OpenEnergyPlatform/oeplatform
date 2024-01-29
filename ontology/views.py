@@ -247,6 +247,7 @@ class PartialOntologyOverviewSidebarContent(View):
             "ontology/partial_ontology_sidebar_content.html",
             dict(
                 ontology=OPEN_ENERGY_ONTOLOGY_NAME,
+                version=version,
                 main_module=main_module,
             ),
         ).content.decode("utf-8")
@@ -419,9 +420,8 @@ class OntologyOverview(View):
 
 
 class OntologyViewClasses(View):
-    def get(self, request, ontology, module_or_id=None, version=None, imports=False):
-        ontology_data = get_common_data(ontology=OPEN_ENERGY_ONTOLOGY_NAME)
-
+    def get(self, request, ontology=OPEN_ENERGY_ONTOLOGY_NAME, module_or_id=None, version=None, imports=False):
+        ontology_data = get_common_data(ontology=ontology)
         sub_classes = []
         super_classes = []
         if module_or_id:
@@ -519,11 +519,11 @@ class OntologyViewClasses(View):
             class_notes = ontology_data["oeo_context_data"]["classes_notes"][
                 module_or_id
             ]
-
         return render(
             request,
             "ontology/class.html",
             dict(
+                ontology=ontology,
                 class_id=module_or_id,
                 class_name=class_name,
                 sub_classes=sub_classes,
