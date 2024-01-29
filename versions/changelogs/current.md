@@ -16,6 +16,8 @@
 
 - Update schema.json for metaEdit module and update omi version in requirements.txt. This change makes the metadata edit / download results more robust. [(PR#1550)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1550)
 
+- Enhance the ontology/oeo pages based on user feedback [(#1552)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1552)
+
 ### Features
 
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
