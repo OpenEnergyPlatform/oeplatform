@@ -28,7 +28,7 @@
         {{super_class.name}}
       </a>
       <div class="btn-group float-end" role="group" aria-label="Basic example">
-        <a class="btn btn-secondary" href="{{ super_class.ID }}">
+        <a class="btn btn-secondary" href="{% url 'oeo-classes' ontology=ontology module_or_id=super_class.ID %}">
           view
         </a>
       </div>
