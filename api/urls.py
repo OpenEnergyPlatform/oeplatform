@@ -177,4 +177,9 @@ urlpatterns = [
         views.EnergymodelFactsheetListAPIView.as_view(),
         name="list-model-factsheets",
     ),
+    url(
+        r"^v0/datasets/list_all/scenario/?$",
+        views.ScenarioDataTablesListAPIView.as_view(),
+        name="list-scenario-datasets",
+    ),
 ]
