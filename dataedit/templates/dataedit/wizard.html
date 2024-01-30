@@ -267,7 +267,7 @@
             <div class="card-header">
                 <h2 class="mb-0">
                     <!-- go to existing form -->
-                    <a id="editMetadata" target="_blank" href="{% if schema and table %}{% url 'meta_edit' schema=schema table=table %}{% else %}#{% endif %}">Edit metadata</a>
+                    <a id="editMetadata" target="_blank" href="{% if schema and table %}{% url 'dataedit:meta_edit' schema=schema table=table %}{% else %}#{% endif %}">Edit metadata</a>
                 </h2>
             </div>
         </div>
@@ -276,7 +276,7 @@
             <div class="card-header">
                 <h2 class="mb-0">
                     <!-- go to existing form -->
-                    <a id="viewData" target="_blank" href="{% if schema and table %}{% url 'view' schema=schema table=table %}{% else %}#{% endif %}">View data</a>
+                    <a id="viewData" target="_blank" href="{% if schema and table %}{% url 'dataedit:view' schema=schema table=table %}{% else %}#{% endif %}">View data</a>
                 </h2>
             </div>
         </div>
