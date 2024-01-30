@@ -389,7 +389,7 @@ function Factsheet(props) {
             .finally(() => {
               // Close the backdrop regardless of success or error
               setOpenBackDrop(false);
-          });
+            });
         });
       }
 
@@ -2050,9 +2050,7 @@ function Factsheet(props) {
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedAuthors.map((v, i) => (
-                <span> <span> {doi !== undefined ? doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-              ))}
+              <span> <span> {doi !== undefined ? doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
             </ContentTableCell>
           </TableRow>
           <TableRow>
