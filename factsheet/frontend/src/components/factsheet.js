@@ -389,7 +389,7 @@ function Factsheet(props) {
             .finally(() => {
               // Close the backdrop regardless of success or error
               setOpenBackDrop(false);
-          });
+            });
         });
       }
 
@@ -1875,7 +1875,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.scenario_years.map((e) => <span> <span> {e.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
+                    {v.scenario_years.sort((a, b) => a.id - b.id).map((e) => <span> <span> {e.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
