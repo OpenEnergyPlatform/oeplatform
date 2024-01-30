@@ -41,9 +41,9 @@ class ScenarioDataTablesSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
     def get_url(self, obj):
-        kwargs = {"sheettype": "model", "model_name": obj.id}
+        kwargs = {"schema": "scenario", "table": obj.name}
         detail_url = reverse(
-            "modelview:show-factsheet",
+            "dataedit:view",
             kwargs=kwargs,
         )
         return detail_url
@@ -51,4 +51,4 @@ class ScenarioDataTablesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         # fields = ["id", "model_name", "acronym", "url"]
-        fields = ["id", "model_name", "acronym", "url"]
+        fields = ["id", "name", "url"]
