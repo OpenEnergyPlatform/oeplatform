@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.db.utils import IntegrityError
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import status
@@ -23,10 +23,10 @@ from rest_framework.views import APIView
 import login.models as login_models
 import api.parser
 from api import actions, parser, sessions
-from api.encode import Echo, GeneratorJSONEncoder
+from api.encode import Echo
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
-from api.utilities import conjunction
+from api.utilities import conjunction, stream, OEPStream
 from api.decorators import (
     load_cursor,
     cors,
@@ -54,16 +54,6 @@ WHERE_EXPRESSION = re.compile(
     + r"|".join(parser.sql_operators)
     + r")\s*(?P<second>(?![>=]).+)$"
 )
-
-
-class OEPStream(StreamingHttpResponse):
-    def __init__(self, *args, session=None, **kwargs):
-        self.session = session
-        super(OEPStream, self).__init__(*args, **kwargs)
-
-    def __del__(self):
-        if self.session:
-            self.session.close()
 
 
 class Sequence(APIView):
@@ -996,19 +986,6 @@ class FetchView(APIView):
             [actions._translate_fetched_cell(cell) for cell in row],
             default=date_handler,
         )
-
-
-def stream(data, allow_cors=False, status_code=status.HTTP_200_OK, session=None):
-    encoder = GeneratorJSONEncoder()
-    response = OEPStream(
-        encoder.iterencode(data),
-        content_type="application/json",
-        status=status_code,
-        session=session,
-    )
-    if allow_cors:
-        response["Access-Control-Allow-Origin"] = "*"
-    return response
 
 
 class CloseAll(LoginRequiredMixin, APIView):
