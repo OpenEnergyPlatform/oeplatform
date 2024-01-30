@@ -20,7 +20,11 @@ from omi.structure import OEPMetadata
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
-from api.serializers import EnergyframeworkSerializer, EnergymodelSerializer
+from api.serializers import (
+    EnergyframeworkSerializer,
+    EnergymodelSerializer,
+    ScenarioDataTablesSerializer,
+)
 
 import api.parser
 import login.models as login_models
@@ -1176,3 +1180,14 @@ class EnergymodelFactsheetListAPIView(generics.ListAPIView):
 
     queryset = Energymodel.objects.all()
     serializer_class = EnergymodelSerializer
+
+
+class ScenarioDataTablesListAPIView(generics.ListAPIView):
+    """
+    Used for the scenario bundles react app to be able to select a existing
+    framework or model factsheet.
+    """
+
+    topic = "scenario"
+    queryset = DBTable.objects.filter(schema__name=topic)
+    serializer_class = ScenarioDataTablesSerializer
