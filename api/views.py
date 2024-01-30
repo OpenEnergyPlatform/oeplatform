@@ -1184,8 +1184,8 @@ class EnergymodelFactsheetListAPIView(generics.ListAPIView):
 
 class ScenarioDataTablesListAPIView(generics.ListAPIView):
     """
-    Used for the scenario bundles react app to be able to select a existing
-    framework or model factsheet.
+    Used for the scenario bundles react app to be able to populate
+    form select options with existing datasets from scenario topic.
     """
 
     topic = "scenario"
