@@ -16,6 +16,8 @@
 
 - Update schema.json for metaEdit module and update omi version in requirements.txt. This change makes the metadata edit / download results more robust. [(PR#1550)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1550)
 
+- Scenario Bundle: Add more tooltips in scenario tab  [(#1555)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1555)
+
 ### Features
 
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
