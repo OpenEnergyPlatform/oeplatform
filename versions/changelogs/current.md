@@ -22,4 +22,6 @@
 
 ### Bugs
 
+- Scenario Bundles: Fix repeated DOIs [(#1556)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1556)
+
 ### Removed
