@@ -2,8 +2,8 @@ import sqlalchemy as sqla
 from django.core.management.base import BaseCommand
 
 from api.connection import _get_engine
-from dataedit.models import Schema, Table
-from dataedit.views import schema_whitelist
+from dataedit.models import Table
+from oeplatform.settings import SCHEMA_WHITELIST
 
 
 class Command(BaseCommand):
@@ -12,9 +12,8 @@ class Command(BaseCommand):
         inspector = sqla.inspect(engine)
         real_tables = {
             (schema, table_name)
-            for schema in schema_whitelist
+            for schema in SCHEMA_WHITELIST
             for table_name in inspector.get_table_names(schema=schema)
-            if schema in schema_whitelist
         }
         table_objects = {(t.schema.name, t.name) for t in Table.objects.all()}
 
@@ -29,12 +28,14 @@ class Command(BaseCommand):
             if inp == "Y":
                 for schema, table in delete_schema_tables:
                     print(schema, table)
-                    Table.objects.get(name=table, schema__name=schema).delete()
+                    Table.objects.get(name=table).delete()
 
         print("---")
         # create django table objects if table in oedb and not in django
         for schema, table in real_tables.difference(table_objects):
             print(schema, table)
-            s, _ = Schema.objects.get_or_create(name=schema)
-            t = Table(name=table, schema=s)
+            if schema not in SCHEMA_WHITELIST:
+                print(f"Warning: schema {schema} not allowed")
+                continue
+            t = Table.create_with_schema(name=table, schema=schema)
             t.save()

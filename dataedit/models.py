@@ -12,8 +12,18 @@ from django.db.models import (
     ForeignKey,
     IntegerField,
     JSONField,
+    Q,
+    TextField,
 )
 from django.utils import timezone
+
+from oeplatform.settings import (
+    DATASET_SCHEMA,
+    DRAFT_SCHEMA,
+    EDITABLE_SCHEMAS,
+    LEGACY_SCHEMAS,
+    SANDBOX_SCHEMA,
+)
 
 # Create your models here.
 
@@ -36,18 +46,17 @@ class Tagable(models.Model):
 
 
 class Schema(Tagable):
-    """
-    Represents a schema in the database.
-
-    Attributes:
-        name (str): The name of the schema. Must be unique.
+    """Eventually, we want to remove this.
+    For now: do NOT import this class in another module and create
+    bew dependencies
     """
 
     class Meta:
-        unique_together = (("name"),)
+        unique_together = (("name",),)
 
 
 class Table(Tagable):
+    # physical schema in OEDB
     """
     Represents a table within a schema in the database.
 
@@ -67,29 +76,10 @@ class Table(Tagable):
     # due to oem string (json) parsing like when reading the oem form comment on table
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
-    is_publish = BooleanField(null=False, default=False)
+    topics = models.ManyToManyField(to="dataedit.Topic", related_name="tables")
 
-    @classmethod
-    def load(cls, schema, table):
-        """
-        Load a table object from the database given its schema and table name.
-
-        Args:
-            schema (str): The name of the schema.
-            table (str): The name of the table.
-
-        Returns:
-            Table: The loaded table object.
-
-        Raises:
-            DoesNotExist: If no table with the given schema and name exists in the database.
-        """
-
-        table_obj = Table.objects.get(
-            name=table, schema=Schema.objects.get_or_create(name=schema)[0]
-        )
-
-        return table_obj
+    class Meta:
+        unique_together = (("name",),)
 
     def set_is_reviewed(self):
         """
@@ -98,24 +88,63 @@ class Table(Tagable):
         self.is_reviewed = True
         self.save()
 
-    # TODO: Use function when implementing the publish button
-    def set_is_published(self):
-        """
-        Mark the table as published (ready for destination schema & public) and save the change to the database.
-        """
-        self.is_publish = True
-        self.save()
+    def __str__(self):
+        return self.name
 
-    # TODO: Use function when implementing the publish button. It should be possible to unpublish a table. This button should be next to the tables listed in Published on the profile page.
-    def set_not_published(self):
+    @staticmethod
+    def create_with_schema(name: str, schema_name: str = None):
+        """this should be the only way a table object is created, so we can
+        remove the schema later entirely
         """
-        Mark the table as not published (making it a draft table again) and save the change to the database.
-        """
-        self.is_publish = False
-        self.save()
+        if schema_name not in EDITABLE_SCHEMAS:
+            raise Exception(f"Invalid schema: {schema_name}")
+        schema_obj = Schema.objects.get(name=schema_name)
+        return Table.objects.create(name=name, schema=schema_obj)
 
-    class Meta:
-        unique_together = (("name",),)
+    def change_schema(self, schema_name: str = None) -> None:
+        """this should be the only way a the schema is changed, so we can
+        remove the schema later entirely
+        """
+        if schema_name not in [DRAFT_SCHEMA, DATASET_SCHEMA]:
+            raise Exception(f"Invalid schema: {schema_name}")
+        self.schema = Schema.objects.get(name=schema_name)
+
+    @property
+    def is_draft(self):
+        return self.schema.name == DRAFT_SCHEMA
+
+    @property
+    def is_published(self):
+        return self.schema.name == DATASET_SCHEMA or self.schema.name in LEGACY_SCHEMAS
+
+    @property
+    def is_sandbox(self):
+        return self.schema.name == SANDBOX_SCHEMA
+
+    @property
+    def is_editable(self):
+        return self.schema.name in EDITABLE_SCHEMAS
+
+    @property
+    def is_visible(self):
+        return self.is_draft or self.is_sandbox or self.is_published
+
+    @staticmethod
+    def find_draft():
+        """find all unpublished tables"""
+        return Table.objects.filter(schema__name=DRAFT_SCHEMA)
+
+    @staticmethod
+    def find_published():
+        """find all unpublished tables"""
+        return Table.objects.filter(
+            Q(schema__name=DATASET_SCHEMA) | Q(schema__name__in=LEGACY_SCHEMAS)
+        )
+
+    @staticmethod
+    def find_in_topic(topic_name: str):
+        """find all unpublished tables"""
+        return Table.objects.filter(topics__name=topic_name)
 
 
 class View(models.Model):
@@ -464,7 +493,7 @@ class PeerReviewManager(models.Model):
         Returns:
             User: The contributor user.
         """
-        current_table = Table.load(schema=schema, table=table)
+        current_table = Table.objects.get(name=table)
         try:
             table_holder = (
                 current_table.userpermission_set.filter(table=current_table.id)
@@ -592,3 +621,12 @@ class PeerReviewManager(models.Model):
 
     def filter_opr_by_id(opr_id):
         return PeerReview.objects.filter(id=opr_id).first()
+
+
+class Topic(models.Model):
+    name = CharField(max_length=64, null=False, unique=True)
+    description = TextField(max_length=2048)
+
+    @staticmethod
+    def get_topic_names():
+        return list(Topic.objects.values_list("name", flat=True))

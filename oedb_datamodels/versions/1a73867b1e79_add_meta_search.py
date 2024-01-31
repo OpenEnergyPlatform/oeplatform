@@ -10,7 +10,6 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 from api.actions import update_meta_search
-from dataedit.views import schema_whitelist
 
 # revision identifiers, used by Alembic.
 revision = "1a73867b1e79"
@@ -34,7 +33,18 @@ def upgrade():
     meta.reflect()
 
     for table in meta.tables.values():
-        if table.schema in schema_whitelist:
+        print(table.name)
+        # TODO @jh-RLI fix lazy workaround
+        if table.name not in [
+            "spatial_ref_sys",
+            "_edit_base",
+            "alembic_version",
+            "api_columns",
+            "table_tags",
+            "tags",
+            "_insert_base",
+            "meta_search",
+        ]:
             update_meta_search(table.name, table.schema)
 
 

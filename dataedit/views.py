@@ -27,7 +27,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api.actions import describe_columns
+from api.actions import describe_columns, get_django_table_obj
 
 try:
     import oeplatform.securitysettings as sec
@@ -43,35 +43,15 @@ from dataedit.helper import merge_field_reviews, process_review_data, recursive_
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Table
+from dataedit.models import PeerReview, PeerReviewManager, Table, TableRevision, Topic
 from dataedit.models import View as DBView
+from dataedit.models import View as DataViewModel
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
-
-from .models import TableRevision
-from .models import View as DataViewModel
+from oeplatform.settings import DATASET_SCHEMA, DRAFT_SCHEMA, SCHEMA_WHITELIST
 
 session = None
 
-""" This is the initial view that initialises the database connection """
-schema_whitelist = [
-    "boundaries",
-    "climate",
-    "demand",
-    "economy",
-    "emission",
-    "environment",
-    "grid",
-    "model_draft",
-    "openstreetmap",
-    "policy",
-    "reference",
-    "scenario",
-    "society",
-    "supply",
-]
-
-schema_sandbox = "sandbox"
 
 def admin_constraints(request):
     """
@@ -226,9 +206,8 @@ def change_requests(schema, table):
 
 def listschemas(request):
     """
-    Loads all schemas that are present in the external database specified in
-    oeplatform/securitysettings.py. Only schemas that are present in the
-    whitelist are processed that do not start with an underscore.
+    schemas are now topics
+    only schemas/topics that are in dataedit.Topic are allowed
 
     :param request: A HTTP-request object sent by the Django framework
 
@@ -256,27 +235,18 @@ def listschemas(request):
     # get table count per schema
     response = tables.values("schema__name").annotate(tables_count=Count("name"))
 
-    description = {
-        "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",  # noqa
-        "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",  # noqa
-        "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",  # noqa
-        "demand": "Data on demand. Demand can relate to commodities but also to services.",  # noqa
-        "grid": "Energy transmission infrastructure. examples: power lines, substation, pipelines",  # noqa
-        "supply": "Data on supply. Supply can relate to commodities but also to services.",  # noqa
-        "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",  # noqa
-        "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",  # noqa
-        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",  # noqa
-        "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",  # noqa
-        "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",  # noqa
-        "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",  # noqa
-        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",  # noqa
-        "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.",  # noqa
-    }
+    # TODO CHW: migrate from schema to topic
+    schema_description = dict((t.name, t.description) for t in Topic.objects.all())
+    schema_description[
+        DRAFT_SCHEMA
+    ] = "Unfinished data of any kind. Note: there is no version control and data is still volatile."
+    schema_description[DATASET_SCHEMA] = "Finalized Data"
 
+    # triples of name, description, table_count
     schemas = [
         (
             row["schema__name"],
-            description.get(row["schema__name"], "No description"),
+            schema_description.get(row["schema__name"], "No description"),
             row["tables_count"],  # number of tables in schema
         )
         for row in response
@@ -287,7 +257,12 @@ def listschemas(request):
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
-        {"schemas": schemas, "query": searched_query_string, "tags": searched_tag_ids},
+        {
+            "schemas": schemas,
+            "query": searched_query_string,
+            "tags": searched_tag_ids,
+            # "all_topics": schema_description, #TODO: @jh-RLI Would be nice if all topics are visible even if there is no data included 
+        },
     )
 
 
@@ -387,7 +362,7 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     filters = []
 
     # only whitelisted schemata:
-    filters.append(Q(schema__name__in=schema_whitelist))
+    filters.append(Q(schema__name__in=SCHEMA_WHITELIST))
 
     if schema_name:  # only tables in schema
         filters.append(Q(schema__name=schema_name))
@@ -442,15 +417,18 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     return tables
 
 
-def listtables(request, schema_name):
+def listtables(request, topic_name):
     """
     :param request: A HTTP-request object sent by the Django framework
-    :param schema_name: Name of a schema
+    :param topic_name: Name of a topic
     :return: Renders the list of all tables in the specified schema
     """
 
-    if schema_name not in schema_whitelist or schema_name.startswith("_"):
-        raise Http404("Schema not accessible")
+    if not (
+        Topic.objects.filter(name=topic_name).exists()
+        or topic_name in [DRAFT_SCHEMA, DATASET_SCHEMA]
+    ):
+        raise Http404("Topic not accessible")
 
     searched_query_string = request.GET.get("query")
     searched_tag_ids = list(
@@ -465,7 +443,7 @@ def listtables(request, schema_name):
 
     # find all tables (layzy query set) in this schema
     tables = find_tables(
-        schema_name=schema_name,
+        schema_name=topic_name,
         query_string=searched_query_string,
         tag_ids=searched_tag_ids,
     )
@@ -479,7 +457,7 @@ def listtables(request, schema_name):
             array_agg(Tag.color),
             array_agg(Tag.usage_count),
         )
-        .filter(TableTags.schema_name == schema_name, TableTags.tag == Tag.id)  # join
+        .filter(TableTags.schema_name == topic_name, TableTags.tag == Tag.id)  # join
         .group_by(TableTags.table_name)
     )
 
@@ -499,7 +477,7 @@ def listtables(request, schema_name):
         (
             table.name,
             # TODO: slow, because must read metadata for each table!
-            get_readable_table_name(schema_name=schema_name, table_name=table.name),
+            get_readable_table_name(schema_name=topic_name, table_name=table.name),
             tags.get(table.name, []),
         )
         for table in tables
@@ -512,7 +490,7 @@ def listtables(request, schema_name):
         request,
         "dataedit/dataedit_tablelist.html",
         {
-            "schema": schema_name,
+            "schema": topic_name,
             "tables": tables,
             "query": searched_query_string,
             "tags": searched_tag_ids,
@@ -802,7 +780,8 @@ def view_save(request, schema, table):
         for item in request.POST.items():
             item_name, item_value = item
             if item_name.startswith("y-axis-") and item_value == "on":
-                y_axis_list.append(item_name["y-axis-".__len__() :])
+                n_y = len("y-axis-")
+                y_axis_list.append(item_name[n_y:])
         post_options = {"x_axis": post_x_axis, "y_axis": y_axis_list}
     elif post_type == "map":
         # add location column info to options
@@ -970,7 +949,7 @@ class DataView(View):
     Initialises the session data (if necessary)
     """
 
-    def get(self, request, schema, table):
+    def get(self, request, table, schema=None):
         """
         Collects the following information on the specified table:
             * Postgresql comment on this table
@@ -983,10 +962,8 @@ class DataView(View):
         :return:
         """
 
-        if (
-            schema not in schema_whitelist and schema != schema_sandbox
-        ) or schema.startswith("_"):
-            raise Http404("Schema not accessible")
+        table_obj = get_django_table_obj(table)
+        schema = table_obj.schema.name
 
         tags = []  # TODO: Unused - Remove
 
@@ -1000,7 +977,6 @@ class DataView(View):
         # create a table for the metadata linked to the given table
         actions.create_meta(schema, table)
 
-        # the metadata are stored in the table's comment
         metadata = load_metadata_from_db(schema, table)
 
         # setup oemetadata string order according to oem v1.5.1
@@ -1026,9 +1002,9 @@ class DataView(View):
 
         is_admin = False
         can_add = False  # can upload data
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
         if request.user and not request.user.is_anonymous:
-            is_admin = request.user.has_admin_permissions(schema, table)
+            is_admin = request.user.has_admin_permissions(table)
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
@@ -1173,10 +1149,10 @@ class PermissionView(View):
     """
 
     def get(self, request, schema, table):
-        if schema not in schema_whitelist:
+        if schema not in SCHEMA_WHITELIST:
             raise Http404("Schema not accessible")
 
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
 
         user_perms = login_models.UserPermission.objects.filter(table=table_obj)
         group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
@@ -1206,7 +1182,7 @@ class PermissionView(View):
         )
 
     def post(self, request, schema, table):
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
         if (
             request.user.is_anonymous
             or request.user.get_table_permission_level(table_obj)
@@ -1228,7 +1204,7 @@ class PermissionView(View):
 
     def __add_user(self, request, schema, table):
         user = login_models.myuser.objects.filter(name=request.POST["name"]).first()
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
         p, _ = login_models.UserPermission.objects.get_or_create(
             holder=user, table=table_obj
         )
@@ -1237,7 +1213,7 @@ class PermissionView(View):
 
     def __change_user(self, request, schema, table):
         user = login_models.myuser.objects.filter(id=request.POST["user_id"]).first()
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.level = request.POST["level"]
         p.save()
@@ -1245,14 +1221,14 @@ class PermissionView(View):
 
     def __remove_user(self, request, schema, table):
         user = get_object_or_404(login_models.myuser, id=request.POST["user_id"])
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.delete()
         return self.get(request, schema, table)
 
     def __add_group(self, request, schema, table):
         group = get_object_or_404(login_models.UserGroup, name=request.POST["name"])
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
         p, _ = login_models.GroupPermission.objects.get_or_create(
             holder=group, table=table_obj
         )
@@ -1261,7 +1237,7 @@ class PermissionView(View):
 
     def __change_group(self, request, schema, table):
         group = get_object_or_404(login_models.UserGroup, id=request.POST["group_id"])
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
         )
@@ -1271,7 +1247,7 @@ class PermissionView(View):
 
     def __remove_group(self, request, schema, table):
         group = get_object_or_404(login_models.UserGroup, id=request.POST["group_id"])
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
         )
@@ -1553,8 +1529,7 @@ def update_table_tags(request):
     :return: Redirects to the previous page
     """
     # check if valid table / schema
-    schema, table = actions.get_table_name(
-        schema=request.POST["schema"],
+    schema, table = actions.get_schema_and_table_name(
         table=request.POST["table"],
         restrict_schemas=False,
     )
@@ -1563,9 +1538,8 @@ def update_table_tags(request):
         request.user, table, login_models.WRITE_PERM, schema=schema
     )
 
-    ids = {
-        int(field[len("tag_") :]) for field in request.POST if field.startswith("tag_")
-    }
+    n_tags = len("tag_")
+    ids = {int(field[n_tags:]) for field in request.POST if field.startswith("tag_")}
 
     # update tags in db and harmonize metadata
     metadata = get_tag_keywords_synchronized_metadata(
@@ -1782,7 +1756,7 @@ def get_column_description(schema, table):
 class WizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv)."""
 
-    def get(self, request, schema="model_draft", table=None):
+    def get(self, request, schema=DRAFT_SCHEMA, table=None):
         """Handle GET request (render the page)."""
         engine = actions._get_engine()
 
@@ -1792,12 +1766,12 @@ class WizardView(LoginRequiredMixin, View):
         n_rows = None
         if table:
             # get information about the table
-            # if upload: table must exist in schema model_draft
-            if schema != "model_draft":
-                raise Http404("Can only upload to schema model_draft")
+            # if upload: table must exist in DRAFT_SCHEMA
+            if schema != DRAFT_SCHEMA:
+                raise Http404(f"Can only upload to schema {DRAFT_SCHEMA}")
             if not engine.dialect.has_table(engine, table, schema=schema):
                 raise Http404("Table does not exist")
-            table_obj = Table.load(schema, table)
+            table_obj = get_django_table_obj(table)
             if not request.user.is_anonymous:
                 # user_perms = login_models.UserPermission.objects.filter(table=table_obj)  # noqa
                 level = request.user.get_table_permission_level(table_obj)
@@ -1839,7 +1813,7 @@ class MetaEditView(LoginRequiredMixin, View):
         columns = get_column_description(schema, table)
 
         can_add = False
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
@@ -2101,7 +2075,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
-        table_obj = Table.load(schema, table)
+        table_obj = get_django_table_obj(table)
         field_descriptions = self.get_all_field_descriptions(json_schema)
 
         # Check user permissions
@@ -2252,7 +2226,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             # TODO: Check for schema/topic as reviewed finished also indicates the table
             # needs to be or has to be moved.
             if review_finished is True:
-                review_table = Table.load(schema=schema, table=table)
+                review_table = get_django_table_obj(table)
                 review_table.set_is_reviewed()
                 metadata = self.load_json(schema, table)
 
@@ -2290,7 +2264,7 @@ class PeerRreviewContributorView(PeerReviewView):
         """
         can_add = False
         peer_review = PeerReview.objects.get(id=review_id)
-        table_obj = Table.load(peer_review.schema, peer_review.table)
+        table_obj = get_django_table_obj(peer_review.table)
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM

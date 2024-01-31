@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.db.utils import IntegrityError
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import status
@@ -26,16 +26,30 @@ from api.serializers import (
     ScenarioDataTablesSerializer,
 )
 
-import api.parser
 import login.models as login_models
+import api.parser
 from api import actions, parser, sessions
-from api.encode import Echo, GeneratorJSONEncoder
+from api.encode import Echo
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
-from dataedit.models import Schema as DBSchema
+from api.utilities import conjunction, stream, OEPStream
+from api.decorators import (
+    load_cursor,
+    cors,
+    require_write_permission,
+    require_delete_permission,
+    require_admin_permission,
+    api_exception,
+)
 from dataedit.models import Table as DBTable
-from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from dataedit.models import Topic
+from dataedit.views import get_tag_keywords_synchronized_metadata
+from oeplatform.settings import (
+    DATASET_SCHEMA,
+    DEFAULT_SCHEMA,
+    DRAFT_SCHEMA,
+    EDITABLE_SCHEMAS,
+)
 
 from modelview.models import Energyframework, Energymodel
 
@@ -50,178 +64,10 @@ WHERE_EXPRESSION = re.compile(
 )
 
 
-def transform_results(cursor, triggers, trigger_args):
-    row = cursor.fetchone() if not cursor.closed else None
-    while row is not None:
-        yield list(map(actions._translate_fetched_cell, row))
-        row = cursor.fetchone()
-    for t, targs in zip(triggers, trigger_args):
-        t(*targs)
-
-
-class OEPStream(StreamingHttpResponse):
-    def __init__(self, *args, session=None, **kwargs):
-        self.session = session
-        super(OEPStream, self).__init__(*args, **kwargs)
-
-    def __del__(self):
-        if self.session:
-            self.session.close()
-
-
-def load_cursor(named=False):
-    def inner(f):
-        def wrapper(*args, **kwargs):
-            artificial_connection = "connection_id" not in args[1].data
-            fetch_all = "cursor_id" not in args[1].data
-            triggered_close = False
-            if fetch_all:
-                # django_restframework passes different data dictionaries depending
-                # on the request type: PUT -> Mutable, POST -> Immutable
-                # Thus, we have to replace the data dictionary by one we can mutate.
-                if hasattr(args[1].data, "_mutable"):
-                    args[1].data._mutable = True
-                context = {}
-                context["user"] = args[1].user
-                if not artificial_connection:
-                    context["connection_id"] = args[1].data["connection_id"]
-                else:
-                    context.update(actions.open_raw_connection({}, context))
-                    args[1].data["connection_id"] = context["connection_id"]
-                if "cursor_id" in args[1].data:
-                    context["cursor_id"] = args[1].data["cursor_id"]
-                else:
-                    context.update(actions.open_cursor({}, context, named=named))
-                    args[1].data["cursor_id"] = context["cursor_id"]
-            try:
-                result = f(*args, **kwargs)
-                if fetch_all:
-                    cursor = actions.load_cursor_from_context(context)
-                    session = actions.load_session_from_context(context)
-                    if not result:
-                        result = {}
-                    # Initial server-side cursors do not contain any description before
-                    # the first row is fetched. Therefore, we have to try to fetch the
-                    # first one - if successful, we a description if not,
-                    # nothing is returned.
-                    # But: After the last row the cursor will 'forget' its description.
-                    # Therefore we have to fetch the remaining data later.
-
-                    # Set of triggers after all the data was fetched.
-                    # The cursor must not be closed earlier!
-                    triggers = [
-                        actions.close_cursor,
-                        actions.close_raw_connection,
-                        session.connection.commit,
-                    ]
-                    trigger_args = [({}, context), ({}, context), tuple()]
-                    first = None
-                    if not named or cursor.statusmessage:
-                        try:
-                            first = cursor.fetchone()
-                        except psycopg2.ProgrammingError as e:
-                            if not e.args or e.args[0] != "no results to fetch":
-                                raise e
-                        except psycopg2.errors.InvalidCursorName as e:
-                            print(e)
-                    if first:
-                        first = map(actions._translate_fetched_cell, first)
-                        if cursor.description:
-                            description = [
-                                [
-                                    col.name,
-                                    col.type_code,
-                                    col.display_size,
-                                    col.internal_size,
-                                    col.precision,
-                                    col.scale,
-                                    col.null_ok,
-                                ]
-                                for col in cursor.description
-                            ]
-                            result["data"] = (
-                                x
-                                for x in itertools.chain(
-                                    [first],
-                                    transform_results(cursor, triggers, trigger_args),
-                                )
-                            )
-                            result["description"] = description
-                            result["context"] = context
-                            result["rowcount"] = cursor.rowcount
-                            triggered_close = True
-                    if not triggered_close and artificial_connection:
-                        session.connection.commit()
-            finally:
-                if not triggered_close:
-                    if fetch_all and not artificial_connection:
-                        actions.close_cursor({}, context)
-                    if artificial_connection:
-                        actions.close_raw_connection({}, context)
-            return result
-
-        return wrapper
-
-    return inner
-
-
-def cors(allow):
-    def doublewrapper(f):
-        def wrapper(*args, **kwargs):
-            response = f(*args, **kwargs)
-            if allow:
-                response["Access-Control-Allow-Origin"] = "*"
-                response["Access-Control-Allow-Methods"] = "POST"
-                response["Access-Control-Allow-Headers"] = "Content-Type"
-            return response
-
-        return wrapper
-
-    return doublewrapper
-
-
-def api_exception(f):
-    def wrapper(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except actions.APIError as e:
-            return JsonResponse({"reason": e.message}, status=e.status)
-        except KeyError as e:
-            return JsonResponse({"reason": e}, status=400)
-
-    return wrapper
-
-
-def permission_wrapper(permission, f):
-    def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", actions.DEFAULT_SCHEMA)
-        table = kwargs.get("table") or kwargs.get("sequence")
-        actions.assert_permission(request.user, table, permission, schema=schema)
-        return f(caller, request, *args, **kwargs)
-
-    return wrapper
-
-
-def require_write_permission(f):
-    return permission_wrapper(login_models.WRITE_PERM, f)
-
-
-def require_delete_permission(f):
-    return permission_wrapper(login_models.DELETE_PERM, f)
-
-
-def require_admin_permission(f):
-    return permission_wrapper(login_models.ADMIN_PERM, f)
-
-
-def conjunction(clauses):
-    return {"type": "operator", "operator": "AND", "operands": clauses}
-
-
 class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
+        if schema not in EDITABLE_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -234,7 +80,7 @@ class Sequence(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
+        if schema not in EDITABLE_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -257,14 +103,20 @@ class Sequence(APIView):
 
 class Metadata(APIView):
     @api_exception
-    def get(self, request, schema, table):
-        metadata = actions.get_table_metadata(schema, table)
+    def get(self, request, table, schema=None):
+        """schema will be ignored"""
+        table_obj = actions.get_django_table_obj(table)
+        metadata = table_obj.oemetadata
         return JsonResponse(metadata)
 
     @api_exception
     @require_write_permission
     @load_cursor()
-    def post(self, request, schema, table):
+    def post(self, request, table, schema=None):
+        """schema will be ignored"""
+        table_obj = actions.get_django_table_obj(table)
+        schema = table_obj.schema.name
+
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
 
@@ -306,7 +158,7 @@ class Table(APIView):
     """
 
     @api_exception
-    def get(self, request, schema, table):
+    def get(self, request, table, schema=None):
         """
         Returns a dictionary that describes the DDL-make-up of this table.
         Fields are:
@@ -321,8 +173,9 @@ class Table(APIView):
         :param request:
         :return:
         """
-
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        # schema will be ignored
+        table_obj = actions.get_django_table_obj(table)
+        schema = table_obj.schema.name
 
         return JsonResponse(
             {
@@ -335,7 +188,7 @@ class Table(APIView):
         )
 
     @api_exception
-    def post(self, request, schema, table):
+    def post(self, request, table, schema=None):
         """
         Changes properties of tables and table columns
         :param request:
@@ -343,10 +196,10 @@ class Table(APIView):
         :param table:
         :return:
         """
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
-        if schema.startswith("_"):
-            raise PermissionDenied
+        # schema will be ignored
+        table_obj = actions.get_django_table_obj(table, only_editable=True)
+        schema = table_obj.schema.name
+
         json_data = request.data
 
         if "column" in json_data["type"]:
@@ -385,7 +238,7 @@ class Table(APIView):
             )
 
     @api_exception
-    def put(self, request, schema, table):
+    def put(self, request, table, schema=None):
         """
         Every request to unsave http methods have to contain a "csrftoken".
         This token is used to deny cross site reference forwarding.
@@ -396,9 +249,8 @@ class Table(APIView):
         :param request:
         :return:
         """
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
-        if schema.startswith("_"):
+        schema = schema or DEFAULT_SCHEMA
+        if schema not in EDITABLE_SCHEMAS:
             raise PermissionDenied
         if request.user.is_anonymous:
             raise PermissionDenied
@@ -431,7 +283,7 @@ class Table(APIView):
         )
 
         perm, _ = login_models.UserPermission.objects.get_or_create(
-            table=DBTable.load(schema, table), holder=request.user
+            table=actions.get_django_table_obj(table), holder=request.user
         )
         perm.level = login_models.ADMIN_PERM
         perm.save()
@@ -473,10 +325,8 @@ class Table(APIView):
         metadata=None,
     ):
         self.validate_column_names(column_definitions)
-
-        schema_object, _ = DBSchema.objects.get_or_create(name=schema)
         try:
-            table_object = DBTable.objects.create(name=table, schema=schema_object)
+            table_object = DBTable.create_with_schema(table, schema_name=schema)
         except IntegrityError:
             raise APIError("Table aready exists")
 
@@ -500,8 +350,10 @@ class Table(APIView):
 
     @api_exception
     @require_delete_permission
-    def delete(self, request, schema, table):
-        schema, table = actions.get_table_name(schema, table)
+    def delete(self, request, table, schema=None):
+        # schema will be ignored
+        table_obj = actions.get_django_table_obj(table, only_editable=True)
+        schema = table_obj.schema.name
 
         meta_schema = actions.get_meta_schema_name(schema)
 
@@ -531,7 +383,7 @@ class Table(APIView):
                 schema=schema, table=table
             )
         )
-        table_object = DBTable.objects.get(name=table, schema__name=schema)
+        table_object = DBTable.objects.get(name=table)
         table_object.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)
 
@@ -550,7 +402,7 @@ class Index(APIView):
 class Column(APIView):
     @api_exception
     def get(self, request, schema, table, column=None):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = actions.get_schema_and_table_name(table, restrict_schemas=False)
         response = actions.describe_columns(schema, table)
         if column:
             try:
@@ -564,7 +416,7 @@ class Column(APIView):
     @api_exception
     @require_write_permission
     def post(self, request, schema, table, column):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_schema_and_table_name(table)
         response = actions.column_alter(
             request.data["query"], {}, schema, table, column
         )
@@ -573,14 +425,14 @@ class Column(APIView):
     @api_exception
     @require_write_permission
     def put(self, request, schema, table, column):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_schema_and_table_name(table)
         actions.column_add(schema, table, column, request.data["query"])
         return JsonResponse({}, status=201)
 
 
 class Fields(APIView):
     def get(self, request, schema, table, id, column=None):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = actions.get_schema_and_table_name(table, restrict_schemas=False)
         if (
             not parser.is_pg_qual(table)
             or not parser.is_pg_qual(schema)
@@ -606,17 +458,47 @@ class Fields(APIView):
 class Move(APIView):
     @require_admin_permission
     @api_exception
-    def post(self, request, schema, table, to_schema):
-        if schema not in schema_whitelist or to_schema not in schema_whitelist:
-            raise APIError("Invalid origin or target schema")
-        actions.move(schema, table, to_schema)
+    def post(self, request, table: str, topic: str, schema: str = None):
+        """With the removal of schemas,  we physicall will only move tables between
+        DRAFT_SCHEMA and DATASET_SCHEMA (draft and published).
+        However, if the target schema isa topic, we will attach that information
+
+        In consequence, this is equivalent to publish/unpublish
+        """
+
+        # schema will be ignored
+        table_obj = actions.get_django_table_obj(table)
+        schema = table_obj.schema.name
+
+        if topic == DRAFT_SCHEMA and table_obj.is_published:
+            # unpublish: move back into draft
+            target_schema = DRAFT_SCHEMA
+        elif table_obj.is_draft:
+            # publish
+            target_schema = DATASET_SCHEMA
+        else:
+            raise APIError(
+                f"exactly one of origin and target schema must be {DRAFT_SCHEMA}, "
+                f"got {schema}, {topic}"
+            )
+
+        actions.move(schema, table, target_schema)
+
+        # add topic, if it exists
+        topic_objs = Topic.objects.filter(name=topic)
+        if topic_objs.exists():
+            # according to doc, usind `add` does not create duplicates
+            table_obj.topics.add(topic_objs.first())
+
         return HttpResponse(status=status.HTTP_200_OK)
 
 
 class Rows(APIView):
     @api_exception
-    def get(self, request, schema, table, row_id=None):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+    def get(self, request, table, row_id=None, schema=None):
+        table_obj = actions.get_django_table_obj(table)
+        schema = table_obj.schema.name
+
         columns = request.GET.getlist("column")
 
         where = request.GET.getlist("where")
@@ -769,7 +651,7 @@ class Rows(APIView):
     @api_exception
     @require_write_permission
     def post(self, request, schema, table, row_id=None, action=None):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_schema_and_table_name(table)
         column_data = request.data["query"]
         status_code = status.HTTP_200_OK
         if row_id:
@@ -793,7 +675,7 @@ class Rows(APIView):
                 "This request type (PUT) is not supported. The "
                 "'new' statement is only possible in POST requests."
             )
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_schema_and_table_name(table)
         if not row_id:
             return JsonResponse(
                 actions._response_error("This methods requires an id"),
@@ -831,7 +713,7 @@ class Rows(APIView):
 
     @require_delete_permission
     def delete(self, request, table, schema, row_id=None):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_schema_and_table_name(table)
         result = self.__delete_rows(request, schema, table, row_id)
         actions.apply_changes(schema, table)
         return JsonResponse(result)
@@ -1112,19 +994,6 @@ class FetchView(APIView):
             [actions._translate_fetched_cell(cell) for cell in row],
             default=date_handler,
         )
-
-
-def stream(data, allow_cors=False, status_code=status.HTTP_200_OK, session=None):
-    encoder = GeneratorJSONEncoder()
-    response = OEPStream(
-        encoder.iterencode(data),
-        content_type="application/json",
-        status=status_code,
-        session=session,
-    )
-    if allow_cors:
-        response["Access-Control-Allow-Origin"] = "*"
-    return response
 
 
 class CloseAll(LoginRequiredMixin, APIView):

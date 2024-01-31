@@ -3,8 +3,7 @@
 import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
-from api import DEFAULT_SCHEMA
-from dataedit.models import Schema, Table
+from dataedit.models import Table
 
 try:
     import oeplatform.securitysettings as sec
@@ -29,7 +28,7 @@ def _get_engine():
     return __ENGINE
 
 
-def table_exists_in_oedb(table, schema=None):
+def table_exists_in_oedb(table, schema):
     """check if table exists in oedb
 
     Args:
@@ -39,7 +38,6 @@ def table_exists_in_oedb(table, schema=None):
     Returns:
         bool
     """
-    schema = schema or DEFAULT_SCHEMA
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -59,10 +57,8 @@ def table_exists_in_django(table, schema=None):
     Returns:
         bool
     """
-    schema = schema or DEFAULT_SCHEMA
-    schema_obj = Schema.objects.get_or_create(name=schema)[0]
     try:
-        Table.objects.get(name=table, schema=schema_obj)
+        Table.objects.get(name=table)
         return True
     except Table.DoesNotExist:
         return False

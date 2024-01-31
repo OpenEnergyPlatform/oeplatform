@@ -5,20 +5,31 @@ from rest_framework.authtoken.models import Token
 
 from api import actions
 from login.models import myuser
+from oeplatform.settings import (
+    DATASET_SCHEMA,
+    DRAFT_SCHEMA,
+    TEST_DATASET_SCHEMA,
+    TEST_DRAFT_SCHEMA,
+)
 
 from .util import load_content_as_json
 
+# because we are in test mode(if detected properly)
+assert TEST_DRAFT_SCHEMA == DRAFT_SCHEMA
+assert TEST_DATASET_SCHEMA == DATASET_SCHEMA
+
 
 class APITestCase(TestCase):
-    test_schema = "test"
+    test_schema = TEST_DRAFT_SCHEMA
     test_table = "test_table"
 
     @classmethod
     def setUpClass(cls):
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS {cls.test_schema} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA {cls.test_schema}")
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS _{cls.test_schema} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA _{cls.test_schema}")
+        for schema in [TEST_DRAFT_SCHEMA, TEST_DATASET_SCHEMA]:
+            actions.perform_sql(f"DROP SCHEMA IF EXISTS {schema} CASCADE")
+            actions.perform_sql(f"CREATE SCHEMA {schema}")
+            actions.perform_sql(f"DROP SCHEMA IF EXISTS _{schema} CASCADE")
+            actions.perform_sql(f"CREATE SCHEMA _{schema}")
 
         super(APITestCase, cls).setUpClass()
         cls.user, _ = myuser.objects.get_or_create(
@@ -85,7 +96,6 @@ class APITestCase(TestCase):
             table = table or self.test_table
             schema = schema or self.test_schema
             url = f"/api/v0/schema/{schema}/tables/{table}/{path}"
-
         data = json.dumps(data) if data else ""  # IMPORTANT: keep empty string
 
         method = method.lower()

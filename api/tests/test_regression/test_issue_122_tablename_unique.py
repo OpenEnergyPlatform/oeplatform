@@ -1,10 +1,11 @@
 from api import actions
 from api.actions import has_table
 from api.tests import APITestCase
+from oeplatform.settings import SANDBOX_SCHEMA
 
 
 class TestTableNameUnique(APITestCase):
-    schema_sandbox = "sandbox"
+    schema_sandbox = SANDBOX_SCHEMA
 
     @classmethod
     def setUpClass(cls):

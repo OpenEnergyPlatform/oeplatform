@@ -110,16 +110,16 @@
         </li>
       </ul>
     </div>
-    
+
     <div>
       <div class="datatable">
         <table class="display" id="datatable" style="width:100%">
           <thead>
-            <tr>              
+            <tr>
             </tr>
           </thead>
         </table>
-    
+
         <div class="panel-group">
           <div class="panel panel-default">
             <div class="panel-heading">
@@ -136,9 +136,9 @@
             </div>
           </div>
         </div>
-    
+
         <div>
-    
+
         </div>
         {% if current_view.type == "map" %}
         <div style='height: 800px; width: 100%;' id="map"></div>
@@ -182,12 +182,12 @@
       {{ meta_widget }}
     </div>
   </div>
-  
+
   <div class="tab-pane open-peer-review fade" id="opr-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
     {% if opr_result.review_exists %}
     <div class="metadata__options">
       <span>
-        
+
       </span>
     </div>
     <div class="metadata__container">
@@ -209,7 +209,7 @@
     {% else %}
     <div class="metadata__container">
       <span>
-        This table is not reviewed yet. 
+        This table is not reviewed yet.
       </span>
     </div>
     {% endif %}
@@ -221,13 +221,13 @@
 
 
 <h4> Open-Peer-Review </h4>
-{% if opr.is_finished %} 
+{% if opr.is_finished %}
   <!-- Review is finished -->
   <div class="review-status review-status--done">
     Table reviewed
   </div>
 {% else %}
-  {% if not opr.reviewer %} 
+  {% if not opr.reviewer %}
       {% if user.is_authenticated and opr.contributor.id != user.id %}
         <!-- Start -->
         <div class="review-status review-status--start">
@@ -238,7 +238,7 @@
           Start Open-Peer-Review-Process
         </a>
 
-        
+
       {% else %}
         <!-- Start but user is table holder - diable start button -->
         <div class="review-status review-status--start">
@@ -269,7 +269,7 @@
       href="">
       Continue Review
       </a>
-    
+
       <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
   {% endif %}
 {% endif %}
@@ -292,7 +292,7 @@
 </div>
 <hr>
 
-{% if schema == "model_draft" %}
+{% if schema == "{{DRAFT_SCHEMA}}" %}
 <h4>Uploads</h4>
 <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
   title="You need write permissions on this table to upload data" {% endif %}>
@@ -321,7 +321,7 @@ for row in result.json():
 </div>
 <hr>
 
-{% if can_add %} 
+{% if can_add %}
 <h4>Management</h4>
 <div>
   <button class="btn btn-danger mt-2 {% if not can_add %} disabled {% endif %}" id="dataview-table-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>

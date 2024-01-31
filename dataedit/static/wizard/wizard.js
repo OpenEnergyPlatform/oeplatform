@@ -1,6 +1,6 @@
 var Wizard = function(config) {
   var state = {
-    schema: "model_draft",
+    schema: "model_draft", /* TODO: replace hard coded value with DRAFT_SCHEMA variable */
     apiVersion: "v0",
     previewSizeRecords: 10,
     exampleRows: 5,
@@ -329,7 +329,7 @@ var Wizard = function(config) {
     // console.log('updatePreview', state)
     var tbody = $("#wizard-csv-preview").find("tbody");
     tbody.empty();
-    var rows = state.previewRows.length ? state.previewRows.map(state.rowMapper): [];
+    var rows = state.previewRows.length ? state.previewRows.map(state.rowMapper) : [];
     rows.map(function(row) {
       var tr = $("<tr>").appendTo(tbody);
       row.map(function(v) {

@@ -34,8 +34,7 @@ from sqlalchemy.sql.sqltypes import Interval
 
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
-
-from . import DEFAULT_SCHEMA
+from oeplatform.settings import DEFAULT_SCHEMA
 
 __KNOWN_TABLES = {}
 
@@ -802,7 +801,9 @@ def parse_sqla_operator(raw_key, *operands):
                 return x.distance_centroid(y)
             if key in ["getitem"]:
                 if isinstance(y, Slice):
-                    return x[parse_single(y.start, int) : parse_single(y.stop, int)]
+                    i = parse_single(y.start, int)
+                    j = parse_single(y.stop, int)
+                    return x[i:j]
                 else:
                     return x[read_pgid(y)]
             if key in ["in"]:

@@ -6,7 +6,7 @@ from datetime import datetime
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 import sqlalchemy as sa
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404
 from omi.dialects.oep import OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
@@ -22,7 +22,6 @@ from sqlalchemy.orm.session import sessionmaker
 import api
 import dataedit.metadata
 import login.models as login_models
-from api import DEFAULT_SCHEMA
 from api.connection import _get_engine
 from api.error import APIError
 from api.parser import get_or_403, parse_type, read_bool, read_pgid
@@ -32,11 +31,10 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from oeplatform.settings import DEFAULT_SCHEMA, EDITABLE_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -71,21 +69,32 @@ def get_column_obj(table, column):
         raise APIError("Column '%s' does not exist." % column)
 
 
-def get_table_name(schema, table, restrict_schemas=True):
-    if not has_schema(dict(schema=schema)):
+def get_django_table_obj(table: str, only_editable=False):
+    """
+    Raises Http404 if table not found, or PermissionDenied if restrict_schemas
+    """
+    # TODO: Error when running alembic migrations (no table exists?)
+    try:
+        table_obj = DBTable.objects.get(name=table)
+    except ObjectDoesNotExist:
         raise Http404
-    if not has_table(dict(schema=schema, table=table)):
-        raise Http404
-    if schema.startswith("_") or schema == "public" or schema is None:
-        raise PermissionDenied
-    if restrict_schemas:
-        if schema not in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
+
+    if only_editable:
+        if not table_obj.is_editable:
             raise PermissionDenied
-    # TODO check if table in schema_whitelist but circular import
-    # from dataedit.views import schema_whitelist
-    # if schema not in schema_whitelist
-    #     raise PermissionDenied
-    return schema, table
+    elif not table_obj.is_visible:
+        raise PermissionDenied
+
+    return table_obj
+
+
+def get_schema_and_table_name(table: str, restrict_schemas=True):
+    """
+    Returns:
+        tuple: schema_name, table_name
+    """
+    table_obj = get_django_table_obj(table, only_editable=restrict_schemas)
+    return table_obj.schema.name, table_obj.name
 
 
 Base = declarative_base()
@@ -95,17 +104,13 @@ class ResponsiveException(Exception):
     pass
 
 
-def assert_permission(user, table, permission, schema=None):
-    if schema is None:
-        schema = DEFAULT_SCHEMA
-    if (
-        user.is_anonymous
-        or user.get_table_permission_level(DBTable.load(schema, table)) < permission
-    ):
+def assert_permission(user, table: str, permission):
+    table_obj = get_django_table_obj(table)
+    if user.is_anonymous or user.get_table_permission_level(table_obj) < permission:
         raise PermissionDenied
 
 
-def assert_add_tag_permission(user, table, permission, schema):
+def assert_add_tag_permission(user, table, permission, schema=None):
     """
     Tags can be added to tables that are in any schema. However,
     it is necessary to check whether the user has write permission
@@ -122,14 +127,8 @@ def assert_add_tag_permission(user, table, permission, schema):
         PermissionDenied: _description_
 
     """
-    # if not request.user.is_anonymous:
-    #         level = request.user.get_table_permission_level(table)
-    #         can_add = level >= login_models.WRITE_PERM
-
-    if (
-        user.is_anonymous
-        or user.get_table_permission_level(DBTable.load(schema, table)) < permission
-    ):
+    table_obj = get_django_table_obj(table)
+    if user.is_anonymous or user.get_table_permission_level(table_obj) < permission:
         raise PermissionDenied
 
 
@@ -1187,18 +1186,18 @@ def data_delete(request, context=None):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     orig_schema = request.get("schema", DEFAULT_SCHEMA)
 
-    schema, table = get_table_name(orig_schema, orig_table)
+    schema, table = get_schema_and_table_name(orig_table)
 
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context["user"], table, login_models.DELETE_PERM, schema=schema)
+    assert_permission(context["user"], table, login_models.DELETE_PERM)
 
     target_table = get_delete_table_name(orig_schema, orig_table)
     setter = []
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter, ["id"])
-    if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
+    if orig_schema in EDITABLE_SCHEMAS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1208,12 +1207,12 @@ def data_update(request, context=None):
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     orig_schema = read_pgid(request.get("schema", DEFAULT_SCHEMA))
-    schema, table = get_table_name(orig_schema, orig_table)
+    schema, table = get_schema_and_table_name(orig_table)
 
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
+    assert_permission(context["user"], table, login_models.WRITE_PERM)
 
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(request, "values")
@@ -1224,7 +1223,7 @@ def data_update(request, context=None):
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter)
-    if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
+    if orig_schema in EDITABLE_SCHEMAS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1327,12 +1326,12 @@ def data_insert(request, context=None):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     orig_schema = request.get("schema", DEFAULT_SCHEMA)
 
-    schema, table = get_table_name(orig_schema, orig_table)
+    schema, table = get_schema_and_table_name(orig_table)
 
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
+    assert_permission(context["user"], table, login_models.WRITE_PERM)
 
     # mapper = {orig_schema: schema, orig_table: table}
 
@@ -1359,7 +1358,7 @@ def data_insert(request, context=None):
             for col in description
         ]
     response["rowcount"] = cursor.rowcount
-    if schema in PLAYGROUNDS or orig_schema in UNVERSIONED_SCHEMAS:
+    if schema in EDITABLE_SCHEMAS or orig_schema in EDITABLE_SCHEMAS:
         apply_changes(schema, table, cursor)
 
     return response
@@ -1485,16 +1484,12 @@ def move(from_schema, table, to_schema):
     session = Session()
     try:
         try:
-            t = DBTable.objects.get(name=table, schema__name=from_schema)
+            table_obj = DBTable.objects.get(name=table)
         except DBTable.DoesNotExist:
             raise APIError("Table for schema movement not found")
-        try:
-            to_schema_reg = DBSchema.objects.get(name=to_schema)
-        except DBSchema.DoesNotExist:
-            raise APIError("Target schema not found")
         if from_schema == to_schema:
             raise APIError("Target schema same as current schema")
-        t.schema = to_schema_reg
+        table_obj.change_schema(schema_name=to_schema)
 
         meta_to_schema = get_meta_schema_name(to_schema)
         meta_from_schema = get_meta_schema_name(from_schema)
@@ -1523,18 +1518,13 @@ def move(from_schema, table, to_schema):
         session.query(OEDBTableTags).filter(
             OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
         ).update({OEDBTableTags.schema_name: to_schema})
-        t.set_is_published()
         session.commit()
-        # t.save()
+        table_obj.save()
     except Exception:
         session.rollback()
         raise
     finally:
         session.close()
-
-
-
-
 
 
 def create_meta(schema, table):
@@ -2238,14 +2228,11 @@ def apply_deletion(session, table, rows, rids):
         set_applied(session, table, [rid], __DELETE)
 
 
-def update_meta_search(table, schema):
+def update_meta_search(table: str, schema):
     """
     TODO: also update JSONB index fields
     """
-    schema_obj, _ = DBSchema.objects.get_or_create(
-        name=schema if schema is not None else DEFAULT_SCHEMA
-    )
-    t = DBTable.objects.get(name=table, schema=schema_obj)
+    t = get_django_table_obj(table)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
     tags = session.query(OEDBTag.name).filter(
@@ -2299,7 +2286,7 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.load(table=table, schema=schema)
+    django_table_obj = get_django_table_obj(table)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
 

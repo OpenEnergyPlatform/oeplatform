@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
+from .utils import is_test
+
+# TODO CHW: should not start without security settings
 try:
     from .securitysettings import *  # noqa
 except ImportError:
@@ -89,13 +92,48 @@ EXTERNAL_URLS = {
     "compendium": "https://openenergyplatform.github.io/organisation/",
 }
 
+#  OEDB SCHEMAS
 
-def external_urls_context_processor(request):
+# in test environment: use different schemas, so we don't mess
+# with the dev oedb. the test schemas are automatically created and deleted
+# by the unit tests
+TEST_DRAFT_SCHEMA = "test_" + DRAFT_SCHEMA  # noqa F405 from securitysettings
+TEST_DATASET_SCHEMA = "test_" + DATASET_SCHEMA  # noqa F405 from securitysettings
+if is_test():
+    DRAFT_SCHEMA = TEST_DRAFT_SCHEMA
+    DATASET_SCHEMA = TEST_DATASET_SCHEMA
+# schemas where tables can be created or changed
+EDITABLE_SCHEMAS = [DRAFT_SCHEMA, SANDBOX_SCHEMA]  # noqa F405 from securitysettings
+DEFAULT_SCHEMA = SANDBOX_SCHEMA  # noqa F405 from securitysettings
+# old schemas, that still may contain data
+LEGACY_SCHEMAS = [
+    "boundaries",
+    "climate",
+    "economy",
+    "demand",
+    "grid",
+    "supply",
+    "environment",
+    "society",
+    "scenario",
+    "reference",
+    "emission",
+    "openstreetmap",
+    "policy",
+]
+# complete lists of oedb schemas in which tables are allowed
+SCHEMA_WHITELIST = LEGACY_SCHEMAS + [DRAFT_SCHEMA, DATASET_SCHEMA]
+
+
+def add_settings_to_request_context(request):
     """Define hard coded external urls here.
     Use in templates like this: {{ EXTERNAL_URLS.<name_of_url> }}
     Also, you may want to add an icon indicating external links, e.g.
     """
-    return {"EXTERNAL_URLS": EXTERNAL_URLS}
+    return {
+        "EXTERNAL_URLS": EXTERNAL_URLS,
+        "DRAFT_SCHEMA": DRAFT_SCHEMA,  # noqa F405: from security settings
+    }
 
 
 SITE_ID = 1
@@ -111,7 +149,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "oeplatform.settings.external_urls_context_processor",
+                "oeplatform.settings.add_settings_to_request_context",
             ]
         },
     }

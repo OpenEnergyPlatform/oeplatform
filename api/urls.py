@@ -6,11 +6,19 @@ from api import actions, views
 pgsql_qualifier = r"[\w\d_]+"
 equal_qualifier = r"[\w\d\s\'\=]"
 structures = r"table|sequence"
+p_table = f"(?P<table>{pgsql_qualifier})"
+
+
 urlpatterns = [
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/$",
         views.Table.as_view(),
         name="api_table",
+    ),
+    url(
+        f"^v0/datasets/{p_table}/$",
+        views.Table.as_view(),
+        name="api_table_wo_schema",
     ),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/sequences/(?P<sequence>[\w\d_\s]+)/$",
@@ -21,8 +29,19 @@ urlpatterns = [
         views.Metadata.as_view(),
         name="api_table_meta",
     ),
-    path(
-        "v0/schema/<str:schema>/tables/<str:table>/move/<str:to_schema>/",
+    url(
+        f"^v0/datasets/{p_table}/meta/$",
+        views.Metadata.as_view(),
+        name="api_table_meta_wo_schema",
+    ),
+    # TODO CHW:
+    # url(
+    #    r"^v0/dataset/(?P<table>[\w\d_\s]+)/meta/$",
+    #    views.Metadata.as_view(),
+    #    name="api_table_meta_wo_schema",
+    # ),
+    url(
+        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<topic>[\w\d_\s]+)/$",  # noqa
         views.Move.as_view(),
         name="move",
     ),
@@ -44,7 +63,18 @@ urlpatterns = [
         name="api_rows",
     ),
     url(
+        f"^v0/datasets/{p_table}/rows/(?P<row_id>[\d]+)?$",  # noqa
+        views.Rows.as_view(),
+        name="api_rows_wo_schema",
+    ),
+    url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$",
+        views.Rows.as_view(),
+        {"action": "new"},
+        name="api_rows_new",
+    ),
+    url(
+        f"^v0/datasets/{p_table}/rows/rows/new?$",  # noqa
         views.Rows.as_view(),
         {"action": "new"},
         name="api_rows_new",
