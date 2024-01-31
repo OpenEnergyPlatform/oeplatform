@@ -32,4 +32,6 @@
 
 - Scenario Bundles: Fix repeated DOIs [(#1556)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1556)
 
+- Clicking on tags opens a list of tagged tables again [(#1561)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1561)
+
 ### Removed
