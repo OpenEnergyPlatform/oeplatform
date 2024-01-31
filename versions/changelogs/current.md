@@ -19,6 +19,7 @@
 ### Features
 
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
+- Scenario Bundle: Sort scenario years in ascending order [(#1557)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1557)
 
 ### Bugs
 
