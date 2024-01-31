@@ -199,7 +199,7 @@
             <th>Date finished</th>
           </tr>
           <tr>
-            <td> <a class="btn btn-primary" href="{% url 'peer_review_reviewer' table=table schema=schema review_id=opr_result.review_id %}">Review details</a></td>
+            <td> <a class="btn btn-primary" href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr_result.review_id %}">Review details</a></td>
             <td>{{ opr_result.badge }}</td>
             <td>{{ opr_result.date_finished }}</td>
           </tr>
@@ -234,7 +234,7 @@
           Table not reviewed
         </div>
         <a class="btn btn-success btn-sm" type="button"
-        href="{% url 'peer_review_create' table=table schema=schema %}">
+        href="{% url 'dataedit:peer_review_create' table=table schema=schema %}">
           Start Open-Peer-Review-Process
         </a>
 
@@ -245,7 +245,7 @@
           Table not reviewed
         </div>
         <a class="btn btn-success btn-sm disabled" type="button"
-        href="{% url 'peer_review_create' table=table schema=schema %}">
+        href="{% url 'dataedit:peer_review_create' table=table schema=schema %}">
           Start Open-Peer-Review-Process
         </a>
         <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
@@ -256,7 +256,7 @@
         The table is currently under review.
       </div>
       <a class="btn btn-success btn-sm" type="button"
-      href="{% url 'peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
+      href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
         Continue Review
       </a>
     {% else %}
@@ -297,7 +297,7 @@
 <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
   title="You need write permissions on this table to upload data" {% endif %}>
   <a class="btn btn-sm btn-success {% if not can_add %} disabled {% endif %}"
-    href="{% url 'wizard_upload' schema=schema table=table %}">
+    href="{% url 'dataedit:wizard_upload' schema=schema table=table %}">
     Upload CSV (Wizard)
   </a>
 </span>

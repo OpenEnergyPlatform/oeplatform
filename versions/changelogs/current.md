@@ -18,10 +18,18 @@
 
 - Scenario Bundle: Add more tooltips in scenario tab  [(#1555)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1555)
 
+- Enhance the ontology/oeo pages based on user feedback [(#1552)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1552)
+
+
 ### Features
 
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
+- Scenario Bundle: Sort scenario years in ascending order [(#1557)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1557)
+
+- Add http api list endpoint for factsheets (both framework & model) and datasets in the scenario topic [(#1553)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1553)
 
 ### Bugs
+
+- Scenario Bundles: Fix repeated DOIs [(#1556)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1556)
 
 ### Removed
