@@ -1,8 +1,10 @@
 from django.conf.urls import url
-from django.urls import path
+from django.urls import path, include
 
 from modelview import views
 
+
+app_name = "modelview"
 # urlpatterns = [
 #     path(r"^(?P<sheettype>[\w\d_]+)s/$", views.listsheets, {}, name="modellist"),
 #     url(
@@ -48,10 +50,10 @@ urlpatterns = [
     path(
         "<str:sheettype>s/delete/<int:pk>/",
         views.fs_delete,
-        name="delete_factsheet",
+        name="delete-factsheet",
     ),
     path("<str:sheettype>s/download/", views.model_to_csv, name="index"),
-    path("<str:sheettype>s/<int:model_name>/", views.show, name="index"),
+    path("<str:sheettype>s/<int:model_name>/", views.show, name="show-factsheet"),
     path("<str:sheettype>s/<int:model_name>/edit/", views.editModel, name="index"),
     path(
         "<str:sheettype>s/<int:pk>/update/",

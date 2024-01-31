@@ -15,7 +15,7 @@ from dataedit import views
 
 
 pgsql_qualifier = r"[\w\d_]+"
-
+app_name = "dataedit"
 urlpatterns = [
     url(r"^view/$", views.listschemas, name="index"),
     url(r"^schemas$", RedirectView.as_view(pattern_name="index")),

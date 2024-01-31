@@ -332,7 +332,7 @@ def fs_delete(request, sheettype, pk):
     response_data = {"success": True, "message": "Entry deleted successfully."}
 
     response = HttpResponse(response_data)
-    url = reverse("modellist", kwargs={"sheettype": sheettype})
+    url = reverse("modelview:modellist", kwargs={"sheettype": sheettype})
     response["HX-Redirect"] = url
     return response
 
