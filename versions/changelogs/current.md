@@ -20,6 +20,8 @@
 
 - Enhance the ontology/oeo pages based on user feedback [(#1552)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1552)
 
+- Improve the profile tables page and adjust the data publishing feature so that it is less strict and only checks for an open license and does not require a full open peer review. Tables that are already published (not in model_draft) are also checked, but only a warning is displayed if the open license is missing. [(#1565)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1565)
+
 ### Features
 
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
@@ -28,6 +30,8 @@
 - Add http api list endpoint for factsheets (both framework & model) and datasets in the scenario topic [(#1553)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1553)
 
 - Add a new external url that is displayed in the ontology nav menu: Link to the TIB as prototype terminology service integration (part of NFDI4Energy) [(#1564)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1564)
+
+- Introduction of an automatic license check module that attempts to check whether the license specified in the metadata for a particular table is open. It normalises the license name in the metadata (whitespaces become "-", everything is capitalised) and compares it with the official SPDX license list. [(#1565)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1565)
 
 ### Bugs
 
