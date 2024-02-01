@@ -227,10 +227,10 @@ class PeerReview(models.Model):
 
     def save(self, *args, **kwargs):
         review_type = kwargs.pop("review_type", None)
-        if not self.contributor == self.reviewer:
-            # Call the parent class's save method to save the PeerReview instance
-            super().save(*args, **kwargs)
+        pm_new = None
 
+        if not self.contributor == self.reviewer:
+            super().save(*args, **kwargs)
             # TODO: This causes errors if review list ist empty
             # prev_review, next_review = self.get_prev_and_next_reviews(
             #   self.schema, self.table
@@ -242,35 +242,21 @@ class PeerReview(models.Model):
             # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
 
             if review_type == "save":
-                # Handle save status
-                pm_new = PeerReviewManager(
-                    opr=self, status=ReviewDataStatus.SAVED.value
-                )
+                pm_new = PeerReviewManager(opr=self, status=ReviewDataStatus.SAVED.value)
 
             elif review_type == "submit":
-                # Handle submit status
-                pm_new = PeerReviewManager(
-                    opr=self, status=ReviewDataStatus.SUBMITTED.value
-                )
+                pm_new = PeerReviewManager(opr=self, status=ReviewDataStatus.SUBMITTED.value)
                 pm_new.set_next_reviewer()
 
             elif review_type == "finished":
-                # TODO: fails if the review is completed without submitting
-                # (finish in one run)
-                pm_new = PeerReviewManager(
-                    opr=self, status=ReviewDataStatus.FINISHED.value
-                )
+                pm_new = PeerReviewManager(opr=self, status=ReviewDataStatus.FINISHED.value)
                 self.is_finished = True
                 self.date_finished = timezone.now()
-                # Call the parent class's save method to save the PeerReview instance
                 super().save(*args, **kwargs)
 
-            pm_new.save()
+            if pm_new:
+                pm_new.save()
 
-            # if prev_review is not None:
-            #     pm_prev = PeerReviewManager.objects.get(opr=prev_review)
-            #     pm_prev.next_review = next_review
-            #     pm_prev.save()
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
