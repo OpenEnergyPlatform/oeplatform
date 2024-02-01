@@ -20,13 +20,14 @@
 
 - Enhance the ontology/oeo pages based on user feedback [(#1552)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1552)
 
-
 ### Features
 
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
 - Scenario Bundle: Sort scenario years in ascending order [(#1557)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1557)
 
 - Add http api list endpoint for factsheets (both framework & model) and datasets in the scenario topic [(#1553)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1553)
+
+- Add a new external url that is displayed in the ontology nav menu: Link to the TIB as prototype terminology service integration (part of NFDI4Energy) [(#1564)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1564)
 
 ### Bugs
 
