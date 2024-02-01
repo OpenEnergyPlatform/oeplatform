@@ -87,6 +87,7 @@ EXTERNAL_URLS = {
     "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
     "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
+    "spdx_licenses": "https://spdx.github.io/license-list-data/",
 }
 
 
