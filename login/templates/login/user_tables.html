@@ -50,12 +50,16 @@
                                     The automated open data license check result is: {{ table.license_status.status }}
                                 </p>
                                 {% if table.license_status.error %}
-                                    <div class="alert alert-danger" role="alert">
-                                        <strong>Potential publishing without open license.</strong> Please revisit your metadata and check the license information. 
-                                        Please do not publish data that does not hold an open license.
-                                        <br>
-                                        Reason: {{ table.license_status.error }}
-                                    </div>
+                                <div class="alert alert-danger" role="alert">
+                                    <strong>Reason:</strong> {{ table.license_status.error }}
+                                </div>
+                                
+                                <div class="alert alert-danger" role="alert">
+                                    <strong>Potential publishing without open license.</strong> Please revisit your metadata and check the license information. 
+                                    Please do not publish data that does not hold an open license. 
+                                    <br>
+                                    
+                                </div>
                                 {% endif %}                                
                                 <a href={{EXTERNAL_URLS.spdx_licenses}} class="card-link">More information on SPDX licenses</a>
                             </div>
@@ -76,12 +80,14 @@
                     <div class="card-body">
                         
                         <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
-                        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
+                        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="btn btn-primary">View Table</a>
                         <p class="card-text">
                             <h5>License check</h5>
                             The automated open data license check result is: {{table.license_status.status}}
                             {% if table.license_status.error %}
-                                <p>Reason: {{table.license_status.error}}</p>
+                            <div class="alert alert-danger" role="alert">
+                                <strong>Reason:</strong> {{ table.license_status.error }}
+                            </div>
                             {% endif %}
                         </p>
                         <a href={{EXTERNAL_URLS.spdx_licenses}} class="card-link">More information on SPDX licenses</a>
