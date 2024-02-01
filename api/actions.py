@@ -32,7 +32,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from dataedit.models import Schema as DBSchema
+from dataedit.models import Schema as DBSchema, PeerReview
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
@@ -1523,6 +1523,19 @@ def move(from_schema, table, to_schema):
         session.query(OEDBTableTags).filter(
             OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
         ).update({OEDBTableTags.schema_name: to_schema})
+        peer_reviews = PeerReview.objects.filter(table=table, schema=from_schema)
+        for peer_review in peer_reviews:
+            if isinstance(peer_review.review, str):
+                review_data = json.loads(peer_review.review)
+            else:
+                review_data = peer_review.review
+
+            review_data['topic'] = to_schema
+
+            peer_review.review = review_data
+            peer_review.schema = to_schema
+
+            peer_review.save()
         t.set_is_published()
         session.commit()
         # t.save()
@@ -1531,10 +1544,6 @@ def move(from_schema, table, to_schema):
         raise
     finally:
         session.close()
-
-
-
-
 
 
 def create_meta(schema, table):
