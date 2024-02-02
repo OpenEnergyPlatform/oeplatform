@@ -1,4 +1,5 @@
 from enum import Enum
+import json
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
@@ -195,8 +196,8 @@ class PeerReview(models.Model):
         )
         return opr
 
-    # TODO: CAUTION unifinished work ... fix: includes all id´s and not just the
-    # related ones (reviews on same table) .. procudes false results
+    # TODO: CAUTION unfinished work ... fix: includes all id´s and not just the
+    # related ones (reviews on same table) .. procedures false results
     def get_prev_and_next_reviews(self, schema, table):
         """
         Sets the prev_review and next_review fields based on the date_started field of
@@ -291,6 +292,23 @@ class PeerReview(models.Model):
             super().save(*args, **kwargs)
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
+
+    def update_all_table_peer_reviews_after_table_moved(
+        self, *args, to_schema, **kwargs
+    ):
+        # all_peer_reviews = self.objects.filter(table=table, schema=from_schema)
+        # for peer_review in all_peer_reviews:
+        if isinstance(self.review, str):
+            review_data = json.loads(self.review)
+        else:
+            review_data = self.review
+
+        review_data["topic"] = to_schema
+
+        self.review = review_data
+        self.schema = to_schema
+
+        super().save(*args, **kwargs)
 
     @property
     def days_open(self):
