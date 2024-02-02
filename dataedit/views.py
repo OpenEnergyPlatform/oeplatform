@@ -2151,6 +2151,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             # need this here as json.dumps breaks the template syntax access
             # like {{ config.table }} now you can use {{ table }}
             "table": table,
+            "topic": schema,
             "config": json.dumps(config_data),
             "meta": metadata,
             "json_schema": json_schema,
@@ -2328,9 +2329,11 @@ class PeerRreviewContributorView(PeerReviewView):
                     ),
                     "topic": schema,
                     "table": table,
+
                 }
             ),
             "table": table,
+            "topic": schema,
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
