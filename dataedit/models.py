@@ -242,14 +242,20 @@ class PeerReview(models.Model):
             # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
 
             if review_type == "save":
-                pm_new = PeerReviewManager(opr=self, status=ReviewDataStatus.SAVED.value)
+                pm_new = PeerReviewManager(
+                    opr=self, status=ReviewDataStatus.SAVED.value
+                )
 
             elif review_type == "submit":
-                pm_new = PeerReviewManager(opr=self, status=ReviewDataStatus.SUBMITTED.value)
+                pm_new = PeerReviewManager(
+                    opr=self, status=ReviewDataStatus.SUBMITTED.value
+                )
                 pm_new.set_next_reviewer()
 
             elif review_type == "finished":
-                pm_new = PeerReviewManager(opr=self, status=ReviewDataStatus.FINISHED.value)
+                pm_new = PeerReviewManager(
+                    opr=self, status=ReviewDataStatus.FINISHED.value
+                )
                 self.is_finished = True
                 self.date_finished = timezone.now()
                 super().save(*args, **kwargs)
