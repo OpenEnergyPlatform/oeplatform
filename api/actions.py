@@ -490,9 +490,11 @@ def get_response_dict(
     """
     dict = {
         "success": success,
-        "error": str(reason).replace("\n", " ").replace("\r", " ")
-        if reason is not None
-        else None,
+        "error": (
+            str(reason).replace("\n", " ").replace("\r", " ")
+            if reason is not None
+            else None
+        ),
         "http_status": http_status_code,
         "exception": exception,
         "result": result,
@@ -1270,9 +1272,11 @@ def data_insert_check(schema, table, values, context):
                             {
                                 "operands": [
                                     {"type": "column", "column": c},
-                                    {"type": "value", "value": row[c]}
-                                    if c in row
-                                    else {"type": "value"},
+                                    (
+                                        {"type": "value", "value": row[c]}
+                                        if c in row
+                                        else {"type": "value"}
+                                    ),
                                 ],
                                 "operator": "=",
                                 "type": "operator",
@@ -1523,19 +1527,14 @@ def move(from_schema, table, to_schema):
         session.query(OEDBTableTags).filter(
             OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
         ).update({OEDBTableTags.schema_name: to_schema})
-        peer_reviews = PeerReview.objects.filter(table=table, schema=from_schema)
-        for peer_review in peer_reviews:
-            if isinstance(peer_review.review, str):
-                review_data = json.loads(peer_review.review)
-            else:
-                review_data = peer_review.review
 
-            review_data['topic'] = to_schema
+        all_peer_reviews = PeerReview.objects.filter(table=table, schema=from_schema)
 
-            peer_review.review = review_data
-            peer_review.schema = to_schema
+        for peer_review in all_peer_reviews:
+            peer_review.update_all_table_peer_reviews_after_table_moved(
+                to_schema=to_schema
+            )
 
-            peer_review.save()
         t.set_is_published()
         session.commit()
         # t.save()
@@ -1754,9 +1753,11 @@ def get_columns(request, context=None):
 
     enums = dict(
         (
-            "%s.%s" % (rec["schema"], rec["name"])
-            if not rec["visible"]
-            else rec["name"],
+            (
+                "%s.%s" % (rec["schema"], rec["name"])
+                if not rec["visible"]
+                else rec["name"]
+            ),
             rec,
         )
         for rec in engine.dialect._load_enums(connection, schema="*")
