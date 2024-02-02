@@ -39,4 +39,6 @@
 
 - Clicking on tags opens a list of tagged tables again [(#1561)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1561)
 
+- Update the peer review data in case a table is published / moved to another topic. [(#1566)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1566)
+
 ### Removed
