@@ -1,7 +1,5 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
-from django.urls import path
-
 from ontology import views
 
 urlpatterns = [
@@ -45,11 +43,12 @@ urlpatterns = [
         {"imports": True},
     ),
     url(
-        r"^(?P<ontology>[\w_-]+)?/(?P<module_or_id>[\w\d_-]+)?",
+        r"^(?P<ontology>[\w_-]+)?/(?P<module_or_id>[\w\d_-]+)?/$",
         views.OntologyViewClasses.as_view(),
+        name="oeo-classes",
     ),
     url(
-        r"^(?P<ontology>[\w_-]+)(/(?P<module_or_id>[\w\d_-]+))?",
+        r"^(?P<ontology>[\w_-]+)?/$",
         views.OntologyOverview.as_view(),
     ),
 ]

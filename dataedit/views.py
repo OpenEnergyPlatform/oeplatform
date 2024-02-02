@@ -1845,7 +1845,7 @@ class MetaEditView(LoginRequiredMixin, View):
             can_add = level >= login_models.WRITE_PERM
 
         url_table_id = request.build_absolute_uri(
-            reverse("view", kwargs={"schema": schema, "table": table})
+            reverse("dataedit:view", kwargs={"schema": schema, "table": table})
         )
 
         context_dict = {
@@ -1859,7 +1859,7 @@ class MetaEditView(LoginRequiredMixin, View):
                         "api_table_meta", kwargs={"schema": schema, "table": table}
                     ),
                     "url_view_table": reverse(
-                        "view", kwargs={"schema": schema, "table": table}
+                        "dataedit:view", kwargs={"schema": schema, "table": table}
                     ),
                     "cancle_url": get_cancle_state(self.request),
                     "standalone": False,
@@ -2113,7 +2113,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
-                "peer_review_reviewer",
+                "dataedit:peer_review_reviewer",
                 kwargs={"schema": schema, "table": table, "review_id": review_id},
             )
             opr_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
@@ -2133,7 +2133,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             )
         else:
             url_peer_review = reverse(
-                "peer_review_create", kwargs={"schema": schema, "table": table}
+                "dataedit:peer_review_create", kwargs={"schema": schema, "table": table}
             )
             # existing_review={}
             state_dict = None
@@ -2142,7 +2142,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         config_data = {
             "can_add": can_add,
             "url_peer_review": url_peer_review,
-            "url_table": reverse("view", kwargs={"schema": schema, "table": table}),
+            "url_table": reverse("dataedit:view", kwargs={"schema": schema, "table": table}),
             "topic": schema,
             "table": table,
             "review_finished": review_finished,
@@ -2316,7 +2316,7 @@ class PeerRreviewContributorView(PeerReviewView):
                 {
                     "can_add": can_add,
                     "url_peer_review": reverse(
-                        "peer_review_contributor",
+                        "dataedit:peer_review_contributor",
                         kwargs={
                             "schema": schema,
                             "table": table,
@@ -2324,7 +2324,7 @@ class PeerRreviewContributorView(PeerReviewView):
                         },
                     ),
                     "url_table": reverse(
-                        "view", kwargs={"schema": schema, "table": table}
+                        "dataedit:view", kwargs={"schema": schema, "table": table}
                     ),
                     "topic": schema,
                     "table": table,
