@@ -73,6 +73,7 @@ schema_whitelist = [
 
 schema_sandbox = "sandbox"
 
+
 def admin_constraints(request):
     """
     Way to apply changes
@@ -665,9 +666,9 @@ def show_revision(request, schema, table, date):
 def tag_overview(request):
     # if rename or adding of tag fails: display error message
     context = {
-        "errorMsg": "Tag name is not valid"
-        if request.GET.get("status") == "invalid"
-        else ""
+        "errorMsg": (
+            "Tag name is not valid" if request.GET.get("status") == "invalid" else ""
+        )
     }
 
     return render(
@@ -1895,18 +1896,27 @@ class PeerReviewView(LoginRequiredMixin, View):
     parsing, sorting metadata, and handling GET and POST requests for peer review.
     """
 
-    def load_json(self, schema, table):
+    def load_json(self, schema, table, review_id=None):
         """
-        Load JSON metadata from the database.
+        Load JSON metadata from the database. If the review_id is available
+        then load the metadata form the peer review instance and not from the
+        table. This avoids changes to the metadata that is or was reviewed.
 
         Args:
             schema (str): The schema of the table.
             table (str): The name of the table.
+            review_id (int): Id of a peer review in the django database
 
         Returns:
-            dict: Loaded metadata.
+            dict: Loaded oemetadata.
         """
-        metadata = load_metadata_from_db(schema, table)
+        metadata = {}
+        if review_id is None:
+            metadata = load_metadata_from_db(schema, table)
+        elif review_id:
+            opr = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
+            metadata = opr.oemetadata
+
         return metadata
 
     def load_json_schema(self):
@@ -1951,7 +1961,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             lines += [{"field": old[1:], "value": str(val)}]
         return lines
 
-    def sort_in_category(self, schema, table):
+    def sort_in_category(self, schema, table, oemetadata):
         """
         Sorts the metadata of a table into categories and adds the value
         suggestion and comment that were added during the review, to facilitate
@@ -1991,8 +2001,7 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         """
 
-        metadata = self.load_json(schema, table)
-        val = self.parse_keys(metadata)
+        val = self.parse_keys(oemetadata)
         gen_key_list = []
         spatial_key_list = []
         temporal_key_list = []
@@ -2109,7 +2118,8 @@ class PeerReviewView(LoginRequiredMixin, View):
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
-        metadata = self.sort_in_category(schema, table)
+        oemetadata = self.load_json(schema, table, review_id)
+        metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)
         # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
@@ -2142,7 +2152,9 @@ class PeerReviewView(LoginRequiredMixin, View):
         config_data = {
             "can_add": can_add,
             "url_peer_review": url_peer_review,
-            "url_table": reverse("dataedit:view", kwargs={"schema": schema, "table": table}),
+            "url_table": reverse(
+                "dataedit:view", kwargs={"schema": schema, "table": table}
+            ),
             "topic": schema,
             "table": table,
             "review_finished": review_finished,
@@ -2200,7 +2212,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             - After a review is finished, the table's metadata is updated, and the table
             can be moved to a different schema or topic (TODO).
         """
-
+        print(review_id)
         context = {}
         if request.method == "POST":
             # get the review data and additional application metadata
@@ -2255,7 +2267,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             if review_finished is True:
                 review_table = Table.load(schema=schema, table=table)
                 review_table.set_is_reviewed()
-                metadata = self.load_json(schema, table)
+                metadata = self.load_json(schema, table, review_id=review_id)
 
                 recursive_update(metadata, review_data)
 
@@ -2295,7 +2307,8 @@ class PeerRreviewContributorView(PeerReviewView):
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
-        metadata = self.sort_in_category(schema, table)
+        oemetadata = self.load_json(schema, table, review_id)
+        metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)
         json_schema = self.load_json_schema()
         field_descriptions = self.get_all_field_descriptions(json_schema)
         review_data = peer_review.review.get("reviews", [])
@@ -2329,7 +2342,6 @@ class PeerRreviewContributorView(PeerReviewView):
                     ),
                     "topic": schema,
                     "table": table,
-
                 }
             ),
             "table": table,
