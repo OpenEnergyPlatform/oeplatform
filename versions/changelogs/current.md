@@ -22,6 +22,8 @@
 
 - Improve the profile tables page and adjust the data publishing feature so that it is less strict and only checks for an open license and does not require a full open peer review. Tables that are already published (not in model_draft) are also checked, but only a warning is displayed if the open license is missing. [(#1565)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1565)
 
+- Each open peer review now stored the oemetadata. This avoids changes to the metadata that is or was reviewed and helps to maintain a review history [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+
 ### Features
 
 - Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
