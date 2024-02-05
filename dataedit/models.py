@@ -1,5 +1,6 @@
 from enum import Enum
 import json
+import logging
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
@@ -66,6 +67,7 @@ class Table(Tagable):
     search = SearchVectorField(default="")
     # Add field to store oemetadata related to the table and avoide performance issues
     # due to oem string (json) parsing like when reading the oem form comment on table
+    # TODO: Maybe oemetadata should be stored in a separate table and imported via FK here
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
     is_publish = BooleanField(null=False, default=False)
@@ -174,6 +176,9 @@ class PeerReview(models.Model):
     date_submitted = DateTimeField(max_length=1000, null=True, default=None)
     date_finished = DateTimeField(max_length=1000, null=True, default=None)
     review = JSONField(null=True)
+    # TODO: Maybe oemetadata should be stored in a separate table and imported
+    # via FK here / change also for Tables model
+    oemetadata = JSONField(null=False)
 
     # laden
     @classmethod
@@ -248,12 +253,28 @@ class PeerReview(models.Model):
                 )
 
             elif review_type == "submit":
+                result = self.set_version_of_metadata_for_review(
+                    schema=self.schema, table=self.table
+                )
+                if result[0]:
+                    logging.info(result[1])
+                elif result[0] is False:
+                    logging.info(result[1])
+
                 pm_new = PeerReviewManager(
                     opr=self, status=ReviewDataStatus.SUBMITTED.value
                 )
                 pm_new.set_next_reviewer()
 
             elif review_type == "finished":
+                result = self.set_version_of_metadata_for_review(
+                    schema=self.schema, table=self.table
+                )
+                if result[0]:
+                    logging.info(result[1])
+                elif result[0] is False:
+                    logging.info(result[1])
+
                 pm_new = PeerReviewManager(
                     opr=self, status=ReviewDataStatus.FINISHED.value
                 )
@@ -292,6 +313,40 @@ class PeerReview(models.Model):
             super().save(*args, **kwargs)
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
+
+    def set_version_of_metadata_for_review(self, table, schema, *args, **kwargs):
+        """
+        Once the peer review is started, we save the current version of the
+        oemetadata that is present on the table to the peer review instance
+        to be able to do the review to a fixed state of the metadata.
+
+        A started review means a reviewer saves / submits or finishes (in case
+        the review is completed in one go) a review.
+
+        Args:
+            table (str): Table name
+            schema (str): Table database schema aka data topic
+
+        Returns:
+            State (tuple): Bool value that indicates weather there is already
+            a version of oemetadata available for this review & readable
+            status message.
+        """
+        table_oemetdata = Table.load(schema=schema, table=table).oemetadata
+
+        if self.oemetadata is None:
+            self.oemetadata = table_oemetdata
+            super().save(*args, **kwargs)
+
+            return (
+                True,
+                f"Set current version of table's: '{table}' oemetadata for review.",
+            )
+
+        return (
+            False,
+            f"This tables (name: {table}) review already got a version of oemetadata.",
+        )
 
     def update_all_table_peer_reviews_after_table_moved(
         self, *args, to_schema, **kwargs
