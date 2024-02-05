@@ -37,7 +37,7 @@ function Home(props) {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(conf.toep + `sirop/all/`).then(response => {
+    axios.get(conf.toep + `scenario-bundles/all/`).then(response => {
       const token = response.data.token;
       setFactsheets(response.data);
       setLoading(false);
@@ -46,14 +46,14 @@ function Home(props) {
 
   if (loading === false) {
     return (
-      <Box sx={{ paddingTop: theme => theme.spacing(2) }}>
+      <Box>
         <CustomTable factsheets={eval(factsheets)} />
       </Box>
     );
   }
   else {
     return <Box sx={{ paddingTop: theme => theme.spacing(2) }}>
-            <LinearProgress />
+              <LinearProgress />
            </Box>
   }
 }

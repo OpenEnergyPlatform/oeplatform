@@ -2,22 +2,129 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% block main-content-body %}
-    {% if profile_user == request.user %}
-    {% include "login/user_nav.html" %}
-    <div>
-    <ul>
-    {% for table in tables %}
-        <!-- fix the url -->
-        <li>
-        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }} - {{ table.schema }}{% if table.created %}{{ table.created }}{% endif %}</a>
-        </li>
-	{% empty %}
-		No tables found for this user.</li>
-	{% endfor %}
-    </ul>
+{% if profile_user == request.user %}
+{% include "login/user_nav.html" %}
+
+<div class="container">
+<div class="row">
+    
+    <div class="accordion" id="accordionTables">
+        <div class="accordion-item">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTables" aria-expanded="true" aria-controls="collapseTables">
+                How to manage your data resources?
+            </button>
+            </h2>
+            <div id="collapseTables" class="accordion-collapse collapse" aria-labelledby="headingTables" data-bs-parent="#accordionTables">
+            <div class="accordion-body">
+                <strong>Access your data tables:</strong> Listed below are tables associated with you, either created by you or by a group you're part of, 
+                which has permission to access the table. This simplifies resource identification and access. 
+                Expect future enhancements for better data management through additional grouping and sorting options. 
+                <br>
+                <br>
+                <strong>Publish your complete, openly licensed and preferable open peer reviewed data:</strong> 
+                The displayed categories indicate whether a table has been published and assigned 
+                to a specific topic. The "model_draft" section is where you initially create and review your table. 
+                Once data is uploaded to "model_draft," an optional open peer review assesses metadata and data quality, performed by a user other than the creator. 
+                A automated license check verifies the license name you provided in the table metadata. It checks the license name against the SPDX list for open licenses.
+                If your data is openly licensed you can publish your table by moving it to one of the suggested topics on the Open Energy Platform. 
+                The "Publish" button becomes visible once all criteria for publishing are met.
+            </div>
+            </div>
+        </div>
     </div>
-    {% endif %}
+</div>
+<div class="row" id="tableContainer" hx-get="/profile/{{ profile_user.id }}/tables" hx-trigger="load">
+    <h2>Published</h2>
+    <div class="container">
+        <div class="row">
+            {% for table in published_tables %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card">
+                            <h5 class="card-header">Datatable</h5>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
+                                <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="btn btn-primary">View Table</a>
+                                <p class="card-text">
+                                    <h5>License check</h5>
+                                    The automated open data license check result is: {{ table.license_status.status }}
+                                </p>
+                                {% if table.license_status.error %}
+                                <div class="alert alert-danger" role="alert">
+                                    <strong>Reason:</strong> {{ table.license_status.error }}
+                                </div>
+                                
+                                <div class="alert alert-danger" role="alert">
+                                    <strong>Potential publishing without open license.</strong> Please revisit your metadata and check the license information. 
+                                    Please do not publish data that does not hold an open license. 
+                                    <br>
+                                    
+                                </div>
+                                {% endif %}                                
+                                <a href={{EXTERNAL_URLS.spdx_licenses}} class="card-link">More information on SPDX licenses</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <h2>Draft</h2>
+<div class="container">
+    <div class="row">
+        {% for table in draft_tables %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <h5 class="card-header">Datatable</h5>
+                    <div class="card-body">
+                        
+                        <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
+                        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="btn btn-primary">View Table</a>
+                        <p class="card-text">
+                            <h5>License check</h5>
+                            The automated open data license check result is: {{table.license_status.status}}
+                            {% if table.license_status.error %}
+                            <div class="alert alert-danger" role="alert">
+                                <strong>Reason:</strong> {{ table.license_status.error }}
+                            </div>
+                            {% endif %}
+                        </p>
+                        <a href={{EXTERNAL_URLS.spdx_licenses}} class="card-link">More information on SPDX licenses</a>
+                        <p class="card-text">
+                            
+                            {% if table.license_status.status and not table.is_publish %}
+                            <h5>Publish data</h5>
+                            {% if not table.is_reviewed %}
+                            
+                            <div class="alert alert-warning" role="alert">
+                            <strong>Consider before publish your data.</strong> 
+                            Before publishing your data, please note:
+                            While you can publish with an open license, we encourage your participation in the ongoing peer review for this table. 
+                            Your involvement enhances data quality and credibility. Connect on GitHub or initiate a review on the OpenEnergyPlatform. 
+                            Thanks for advancing open data practices!
+                            </div>
+                        </p>
+                        {% endif %}
+                            <button class="btn btn-primary publish-button" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
+                            <div class="publish-options" style="display: none;">
+                                <select class="schema-dropdown"></select>
+                                <button class="btn btn-secondary confirm-publish">Confirm</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+</div>
+{% endif %}
+<div id="reviewedTablesData" style="display: none;">{{ reviewed_tables|json_script:"reviewedTablesData" }}</div>
+<div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
 {% endblock %}
+</div>
 
 
 {% block main-right-sidebar-content %}
@@ -38,7 +145,7 @@
         <div>
             <p class="profile-sidebar__name"> {{ profile_user.name }} </p>
         </div>
-        <p> 
+        <p>
             {% if profile_user.fullname %}
                 {{ profile_user.fullname }}
             {% endif %}
@@ -58,7 +165,7 @@
                 </svg>
                 {{ profile_user.work }}
             </p>
-        {% endif %} 
+        {% endif %}
         </div>
         <div class="profile-sidebar__detail">{% if profile_user.location %}
             <p>
@@ -67,7 +174,7 @@
                 </svg>
                 {{ profile_user.location }}
             </p>
-        {% endif %} 
+        {% endif %}
         </div>
         <div class="profile-sidebar__detail">{% if profile_user.email %}
             <p>
@@ -85,7 +192,7 @@
                 <a href="{{ profile_user.linkedin }}">
                     {{ profile_user.linkedin }}
                 </a>
-                {% endif %} 
+                {% endif %}
             </p>
             <p> {% if profile_user.facebook %}
                 <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -95,7 +202,7 @@
                 <a target="_blank" href="{{ profile_user.facebook }}">
                     {{ profile_user.facebook }}
                 </a>
-                {% endif %} 
+                {% endif %}
             </p>
             <p> {% if profile_user.twitter %}
                 <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -105,7 +212,7 @@
                 <a href="{{ profile_user.twitter }}">
                     {{ profile_user.twitter }}
                 </a>
-                {% endif %} 
+                {% endif %}
             </p>
         </div>
     </div>
@@ -118,8 +225,91 @@
                 </div>
             </div>
         </div>
-    {% endif %} 
+    {% endif %}
 </div>
-    
+
     {% endif %}
 {% endblock %}
+
+
+{% block after-body-bottom-js %}
+<script type="text/javascript">
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function publishTable(schema, tableName, toSchema) {
+  return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move/${toSchema}/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie("csrftoken"),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    }
+  }).then(response => {
+    if (response.ok) {
+      alert('Table moved successfully.');
+    } else {
+      response.text().then(text => { alert(`Error moving table: ${text}`); });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Извлекаем данные о схемах
+  let schemaWhitelist = [];
+  const schemaDataElement = document.querySelector('#schemaWhitelistData');
+  if (schemaDataElement) {
+    schemaWhitelist = JSON.parse(schemaDataElement.textContent);
+  }
+
+  document.querySelectorAll('.publish-button').forEach(button => {
+    button.addEventListener('click', function () {
+      const publishOptions = this.nextElementSibling;
+      const dropdown = publishOptions.querySelector('.schema-dropdown');
+      dropdown.innerHTML = '';
+      schemaWhitelist.forEach(schema => {
+        dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
+      });
+      publishOptions.style.display = 'block';
+    });
+  });
+
+  document.querySelectorAll('.confirm-publish').forEach(button => {
+    button.addEventListener('click', function () {
+      const publishOptions = this.parentElement;
+      const dropdown = publishOptions.querySelector('.schema-dropdown');
+      const cardElement = this.closest('.card');
+      const publishButton = cardElement.querySelector('.publish-button');
+      const schema = publishButton.getAttribute('data-schema');
+      const tableName = publishButton.getAttribute('data-tableName');
+      const toSchema = dropdown.value;
+
+      publishTable(schema, tableName, toSchema);
+      publishOptions.style.display = 'none';
+    });
+  });
+});
+</script>
+
+
+
+{% endblock after-body-bottom-js %}
+
+
+
+
+
+
+

@@ -10,7 +10,10 @@ from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 
 import login.models as models
-from dataedit.models import PeerReviewManager, Table
+from dataedit.models import PeerReviewManager, Table, PeerReview
+from dataedit.views import schema_whitelist
+
+from oeplatform.settings import UNVERSIONED_SCHEMAS
 
 from .forms import (
     ChangeEmailForm,
@@ -23,36 +26,48 @@ from .forms import (
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
+from login.utilities import validate_open_data_license
+
 
 class TablesView(View):
     def get(self, request, user_id):
-        """
-        Load the user identified by user_id and is OAuth-token.
-            If latter does not exist yet, create one.
-        :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An user id
-        :return: Profile renderer
-        """
         user = get_object_or_404(OepUser, pk=user_id)
-
-        # get all tables and optimize query
         tables = Table.objects.all().select_related()
-        # get all tables the user got write perm on
-        user_tables = [
-            table
-            for table in tables
-            if user.get_table_permission_level(table) >= models.WRITE_PERM
-        ]  # WRITE_PERM = 4
-        # prepare data for template
-        tables = [{"name": table.name, "schema": table.schema} for table in user_tables]
+        draft_tables = []
+        published_tables = []
+        published_but_license_issue = []
 
-        # get name of schema form FK object
         for table in tables:
-            table["schema"] = table["schema"].name
+            permission_level = user.get_table_permission_level(table)
+            license_status = validate_open_data_license(django_table_obj=table)
 
-        return render(
-            request, "login/user_tables.html", {"tables": tables, "profile_user": user}
-        )
+            table_data = {
+                "name": table.name,
+                "schema": table.schema.name,
+                "is_publish": table.is_publish,
+                "is_reviewed": table.is_reviewed,
+                "license_status": {
+                    "status": license_status[0],
+                    "error": license_status[1],
+                },
+            }
+
+            if permission_level >= models.WRITE_PERM:
+                if table.is_publish or table.schema.name not in UNVERSIONED_SCHEMAS:
+                    published_tables.append(table_data)
+                else:
+                    draft_tables.append(table_data)
+
+        context = {
+            "profile_user": user,
+            "draft_tables": draft_tables,
+            "published_tables": published_tables,
+            "schema_whitelist": schema_whitelist,
+        }
+
+        if request.is_ajax():
+            return render(request, "login/user_tables.html", context)
+        return render(request, "login/user_tables.html", context)
 
 
 class ReviewsView(View):
@@ -88,7 +103,9 @@ class ReviewsView(View):
             )
 
             if active_peer_review_revewier is not None:
-                review_history = peer_review_reviews.exclude(pk=active_peer_review_revewier.pk)  # noqa
+                review_history = peer_review_reviews.exclude(
+                    pk=active_peer_review_revewier.pk
+                )  # noqa
             else:
                 # Handle the case when active_peer_review_revewier is None.
                 # Maybe set review_history to some default value or just leave it as None.
@@ -245,10 +262,14 @@ class SettingsView(View):
             Token.objects.get_or_create(user=user)
         user = get_object_or_404(OepUser, pk=user_id)
         token = None
+        user_groups = None
         if request.user.is_authenticated:
             token = Token.objects.get(user=request.user)
+            user_groups = request.user.memberships
         return render(
-            request, "login/user_settings.html", {"profile_user": user, "token": token}
+            request,
+            "login/user_settings.html",
+            {"profile_user": user, "token": token, "groups": user_groups},
         )
 
 

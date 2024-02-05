@@ -74,18 +74,22 @@ MIDDLEWARE = (
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware"
+    "django.middleware.common.CommonMiddleware",
 )
 
 ROOT_URLCONF = "oeplatform.urls"
 
 EXTERNAL_URLS = {
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
-    "tutorials_faq": "https://openenergyplatform.github.io/academy/",
+    "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
     "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
     "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
+    "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
+    "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
+    "spdx_licenses": "https://spdx.github.io/license-list-data/",
+
 }
 
 
@@ -116,10 +120,7 @@ TEMPLATES = [
     }
 ]
 
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000", 
-    "http://127.0.0.1:3000"
-    ]
+CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 
@@ -129,6 +130,8 @@ try:
     ONTOLOGY_FOLDER  # noqa
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
+
+OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
 
 
 # Internationalization

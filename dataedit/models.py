@@ -1,4 +1,5 @@
 from enum import Enum
+import json
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
@@ -36,20 +37,55 @@ class Tagable(models.Model):
 
 
 class Schema(Tagable):
+    """
+    Represents a schema in the database.
+
+    Attributes:
+        name (str): The name of the schema. Must be unique.
+    """
+
     class Meta:
         unique_together = (("name"),)
 
 
 class Table(Tagable):
+    """
+    Represents a table within a schema in the database.
+
+    Attributes:
+        schema (Schema): The schema to which the table belongs.
+        search (SearchVectorField): A field for full-text search.
+        oemetadata (JSONField): A field to store oemetadata related to the table.
+        is_reviewed (BooleanField): A flag indicating whether the table is reviewed.
+
+    Note:
+        The oemetadata field helps avoid performance issues due to JSON string parsing.
+    """
+
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
     search = SearchVectorField(default="")
     # Add field to store oemetadata related to the table and avoide performance issues
     # due to oem string (json) parsing like when reading the oem form comment on table
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
+    is_publish = BooleanField(null=False, default=False)
 
     @classmethod
     def load(cls, schema, table):
+        """
+        Load a table object from the database given its schema and table name.
+
+        Args:
+            schema (str): The name of the schema.
+            table (str): The name of the table.
+
+        Returns:
+            Table: The loaded table object.
+
+        Raises:
+            DoesNotExist: If no table with the given schema and name exists in the database.
+        """
+
         table_obj = Table.objects.get(
             name=table, schema=Schema.objects.get_or_create(name=schema)[0]
         )
@@ -57,7 +93,26 @@ class Table(Tagable):
         return table_obj
 
     def set_is_reviewed(self):
+        """
+        Mark the table as reviewed and save the change to the database.
+        """
         self.is_reviewed = True
+        self.save()
+
+    # TODO: Use function when implementing the publish button
+    def set_is_published(self):
+        """
+        Mark the table as published (ready for destination schema & public) and save the change to the database.
+        """
+        self.is_publish = True
+        self.save()
+
+    # TODO: Use function when implementing the publish button. It should be possible to unpublish a table. This button should be next to the tables listed in Published on the profile page.
+    def set_not_published(self):
+        """
+        Mark the table as not published (making it a draft table again) and save the change to the database.
+        """
+        self.is_publish = False
         self.save()
 
     class Meta:
@@ -88,6 +143,21 @@ class Filter(models.Model):
 
 
 class PeerReview(models.Model):
+    """
+    Represents a peer review in the database.
+
+    Attributes:
+        table (CharField): Name of the table being reviewed.
+        schema (CharField): Name of the schema where the table is located.
+        reviewer (ForeignKey): The user who reviews.
+        contributor (ForeignKey): The user who contributes.
+        is_finished (BooleanField): Whether the review is finished.
+        date_started (DateTimeField): When the review started.
+        date_submitted (DateTimeField): When the review was submitted.
+        date_finished (DateTimeField): When the review finished.
+        review (JSONField): The review data in JSON format.
+    """
+
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
     reviewer = ForeignKey(
@@ -126,8 +196,8 @@ class PeerReview(models.Model):
         )
         return opr
 
-    # TODO: CAUTION unifinished work ... fix: includes all id´s and not just the
-    # related ones (reviews on same table) .. procudes false results
+    # TODO: CAUTION unfinished work ... fix: includes all id´s and not just the
+    # related ones (reviews on same table) .. procedures false results
     def get_prev_and_next_reviews(self, schema, table):
         """
         Sets the prev_review and next_review fields based on the date_started field of
@@ -158,10 +228,10 @@ class PeerReview(models.Model):
 
     def save(self, *args, **kwargs):
         review_type = kwargs.pop("review_type", None)
-        if not self.contributor == self.reviewer:
-            # Call the parent class's save method to save the PeerReview instance
-            super().save(*args, **kwargs)
+        pm_new = None
 
+        if not self.contributor == self.reviewer:
+            super().save(*args, **kwargs)
             # TODO: This causes errors if review list ist empty
             # prev_review, next_review = self.get_prev_and_next_reviews(
             #   self.schema, self.table
@@ -173,35 +243,27 @@ class PeerReview(models.Model):
             # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
 
             if review_type == "save":
-                # Handle save status
                 pm_new = PeerReviewManager(
                     opr=self, status=ReviewDataStatus.SAVED.value
                 )
 
             elif review_type == "submit":
-                # Handle submit status
                 pm_new = PeerReviewManager(
                     opr=self, status=ReviewDataStatus.SUBMITTED.value
                 )
                 pm_new.set_next_reviewer()
 
             elif review_type == "finished":
-                # TODO: fails if the review is completed without submitting
-                # (finish in one run)
                 pm_new = PeerReviewManager(
                     opr=self, status=ReviewDataStatus.FINISHED.value
                 )
                 self.is_finished = True
                 self.date_finished = timezone.now()
-                # Call the parent class's save method to save the PeerReview instance
                 super().save(*args, **kwargs)
 
-            pm_new.save()
+            if pm_new:
+                pm_new.save()
 
-            # if prev_review is not None:
-            #     pm_prev = PeerReviewManager.objects.get(opr=prev_review)
-            #     pm_prev.next_review = next_review
-            #     pm_prev.save()
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
@@ -231,6 +293,23 @@ class PeerReview(models.Model):
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
+    def update_all_table_peer_reviews_after_table_moved(
+        self, *args, to_schema, **kwargs
+    ):
+        # all_peer_reviews = self.objects.filter(table=table, schema=from_schema)
+        # for peer_review in all_peer_reviews:
+        if isinstance(self.review, str):
+            review_data = json.loads(self.review)
+        else:
+            review_data = self.review
+
+        review_data["topic"] = to_schema
+
+        self.review = review_data
+        self.schema = to_schema
+
+        super().save(*args, **kwargs)
+
     @property
     def days_open(self):
         if self.date_started is None:
@@ -254,16 +333,21 @@ class Reviewer(Enum):
 
 class PeerReviewManager(models.Model):
     """
-    Model representing the manager of a peer review.
+    Manages peer review processes.
 
-        - It handles the 1:n relation between table and open peer reviews.
-        - It tracks the days open for the peer review.
-        - It tracks the state of the peer review as it can be SAVED, SUBMITTED (stated)
-          or FINISHED.
-        - It determines who is next in the process between reviewer and contributor.
-        - it provides information about the previous and next review.
-        - It provides several methods that provide generic filters for the peerReviews
-            (like filter by table, contributor ...)
+    This model handles the 1:n relation between table and open peer reviews.
+    It tracks the days open for the peer review and its state.
+    It determines who is next in the process between reviewer and contributor.
+    It provides information about the previous and next review.
+    It offers several methods that provide generic filters for the peer reviews.
+
+    Attributes:
+        opr (ForeignKey): The associated peer review.
+        current_reviewer (CharField): The current reviewer.
+        status (CharField): The current status of the review.
+        is_open_since (CharField): How long the review has been open.
+        prev_review (ForeignKey): The previous review in the process.
+        next_review (ForeignKey): The next review in the process.
     """
 
     REVIEW_STATUS = [(status.value, status.name) for status in ReviewDataStatus]
@@ -350,7 +434,7 @@ class PeerReviewManager(models.Model):
 
     def set_next_reviewer(self):
         """
-        Set the order on which peer will be requred to perform a action to
+        Set the order on which peer will be required to perform a action to
         continue with the process.
         """
         # TODO:check for user identifies as ...

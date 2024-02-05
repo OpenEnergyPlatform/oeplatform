@@ -10,6 +10,7 @@ import Chip from '@mui/material/Chip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
@@ -25,10 +26,14 @@ import AlertTitle from '@mui/material/AlertTitle';
 import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar';
 import EditIcon from '@mui/icons-material/Edit';
 import uuid from "react-uuid";
+import { makeStyles } from '@material-ui/core/styles';
 
 const filter = createFilterOptions();
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
+const useStyles = makeStyles((theme) => ({
+}));
 
 export default function CustomAutocomplete(parameters) {
   const { manyItems, idx, name, type, showSelectedElements, addNewHandler, editHandler, handler, width, bgColor } = parameters;
@@ -39,6 +44,7 @@ export default function CustomAutocomplete(parameters) {
   const [editIRI, setEditIRI] = React.useState('');
   const [updatedLabel, setUpdatedLabel] = React.useState('');
 
+  const classes = useStyles();
   
   const [dialogValue, setDialogValue] = React.useState({
     id: '',
@@ -87,19 +93,6 @@ export default function CustomAutocomplete(parameters) {
     toggleOpenEdit(false);
   };
 
-  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      color: 'white',
-      maxWidth: 520,
-      fontSize: theme.typography.pxToRem(20),
-      border: '1px solid black',
-      padding: '20px'
-    },
-  }));
-
   const handleName = e => {
     setDialogValue({
       id: e.target.value,
@@ -133,7 +126,7 @@ export default function CustomAutocomplete(parameters) {
 
 
   return (
-    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: '5px', }}>
+    <Box style={{ width: width }}>
       <Autocomplete
         size="small" 
         multiple
@@ -172,7 +165,12 @@ export default function CustomAutocomplete(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField  {...params } label={parameters.kind} placeholder="" variant="outlined" />
+          <TextField  {...params } label={parameters.kind} placeholder="" variant="outlined" InputProps={{
+            ...params.InputProps,
+            classes: {
+              root: classes.inputRoot, // Apply the custom CSS class
+            },
+          }}/>
         )}
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
@@ -291,7 +289,7 @@ export default function CustomAutocomplete(parameters) {
           'height': '100%',
           // 'border': '1px dashed #cecece',
           'overflow': 'scroll',
-          'borderRadius': '5px',
+          'borderRadius': '4px',
           // 'backgroundColor':'#FCFCFC'
         }}
       >

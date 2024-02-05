@@ -18,7 +18,7 @@ alembic~=1.7
 django-simple-captcha~=0.5
 django-bootstrap5~=21.2
 django-fontawesome-5~=1.0
-omi==0.1.2
+omi==0.2.1
 zipstream-new~=1.1
 rdflib~=5.0
 django_better_admin_arrayfield~=1.4
