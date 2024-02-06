@@ -24,7 +24,8 @@
 
 ### Features
 
-- Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
+- Ontology: Add a htmx based page loading after initial page is visible to the user. [(#1503)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1503)
+
 - Scenario Bundle: Sort scenario years in ascending order [(#1557)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1557)
 
 - Add http api list endpoint for factsheets (both framework & model) and datasets in the scenario topic [(#1553)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1553)
@@ -46,5 +47,7 @@
 - Foreign Key fields are rendered as expected again. [(#1569)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1569)
 
 - Each open peer review now stored the oemetadata. This avoids changes to the metadata that is or was reviewed and helps to maintain a review history [(#1567)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1567)
+
+- Scenario Bundle: Fix the missing CSRF cookie in filter  post request. [(#1571)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1571)
 
 ### Removed
