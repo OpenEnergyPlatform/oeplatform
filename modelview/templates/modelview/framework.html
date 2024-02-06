@@ -9,7 +9,7 @@
 {% block main-right-sidebar-content-actions %}
   <a class="btn btn-info" href="edit">Edit</a>
   <a class="btn btn-danger" 
-    hx-delete="{% url 'delete_factsheet' sheettype='framework' pk=model.pk %}" 
+    hx-delete="{% url 'modelview:delete-factsheet' sheettype='framework' pk=model.pk %}" 
     hx-confirm="Are you sure you want to delete this entry?" 
     >
     Delete

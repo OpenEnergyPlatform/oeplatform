@@ -6,76 +6,139 @@
 {% include "login/user_nav.html" %}
 
 <div class="container">
-<div class="row">
-    
-    <div class="accordion" id="accordionTables">
-        <div class="accordion-item">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTables" aria-expanded="true" aria-controls="collapseTables">
-                How to manage your data resources?
-            </button>
-            </h2>
-            <div id="collapseTables" class="accordion-collapse collapse" aria-labelledby="headingTables" data-bs-parent="#accordionTables">
-            <div class="accordion-body">
-                <strong>Access your data tables:</strong> Listed below are tables associated with you, either created by you or by a group you're part of, 
-                which has permission to access the table. This simplifies resource identification and access. 
-                Expect future enhancements for better data management through additional grouping and sorting options. 
-                <br>
-                <br>
-                <strong>Publish your complete & open peer reviewed data:</strong> The displayed categories indicate whether a table has been published and assigned 
-                to a specific topic. The "model_draft" section is where you initially create and review your table. 
-                Once data is uploaded to "model_draft," an open peer review assesses metadata and data quality, performed by a user other than the creator. 
-                Following a successful review, you can publish your table by moving it to one of the suggested topics on the Open Energy Platform. 
-                The "Publish" button becomes visible once all criteria for publishing are met.
-            </div>
+    <div class="row">
+        
+        <div class="accordion" id="accordionTables">
+            <div class="accordion-item">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTables" aria-expanded="true" aria-controls="collapseTables">
+                    How to manage your data resources?
+                </button>
+                </h2>
+                <div id="collapseTables" class="accordion-collapse collapse" aria-labelledby="headingTables" data-bs-parent="#accordionTables">
+                <div class="accordion-body">
+                    <strong>Access your data tables:</strong> Listed below are tables associated with you, either created by you or by a group you're part of, 
+                    which has permission to access the table. This simplifies resource identification and access. 
+                    Expect future enhancements for better data management through additional grouping and sorting options. 
+                    <br>
+                    <br>
+                    <strong>Publish your complete, openly licensed and preferable open peer reviewed data:</strong> 
+                    The displayed categories indicate whether a table has been published and assigned 
+                    to a specific topic. The "model_draft" section is where you initially create and review your table. 
+                    Once data is uploaded to "model_draft," an optional open peer review assesses metadata and data quality, performed by a user other than the creator. 
+                    A automated license check verifies the license name you provided in the table metadata. It checks the license name against the SPDX list for open licenses.
+                    If your data is openly licensed you can publish your table by moving it to one of the suggested topics on the Open Energy Platform. 
+                    The "Publish" button becomes visible once all criteria for publishing are met.
+                </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<div class="row" id="tableContainer" hx-get="/profile/{{ profile_user.id }}/tables" hx-trigger="load">
-    <h2>Published</h2>
-    <div class="container">
-        <div class="row">
-            {% for table in published_tables %}
-                <div class="col-md-4 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
-                            <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
+    <div class="row" id="tableContainer" hx-get="/profile/{{ profile_user.id }}/tables" hx-trigger="load">
+        <h2>Published</h2>
+        <div class="container">
+            <div class="row">
+                {% for table in published_tables %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card">
+                                <h5 class="card-header">Datatable</h5>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
+                                    <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="btn btn-primary">View Table</a>
+                                    <p class="card-text">
+                                        <h5>License check</h5> 
+                                        Automated open data license check
+                                        {% if table.license_status.status %}
+                                        <span class="badge text-bg-success">Success</span>
+
+                                        {% else %}
+                                        <span class="badge text-bg-danger">Failed</span>
+                                        {% endif %}
+                                    </p>
+                                    {% if table.license_status.error %}
+                                    
+                                    <div class="alert alert-danger" role="alert">
+                                        <strong>Reason:</strong> {{ table.license_status.error }}
+                                    </div>
+                                    
+                                    <div class="alert alert-danger" role="alert">
+                                        <strong>Potential publishing without an open license.</strong> Please revisit your metadata and check the license information. 
+                                        Please do not publish data that does not hold an open license. 
+                                        <br>
+                                        
+                                    </div>
+                                    <a href={{EXTERNAL_URLS.spdx_licenses}} class="card-link">Please use a SPDX license identifier.</a>
+                                    {% endif %}                                
+                                    
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <h2>Draft</h2>
+        <div class="container">
+            <div class="row">
+                {% for table in draft_tables %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <h5 class="card-header">Datatable</h5>
+                            <div class="card-body">
+                                
+                                <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
+                                <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="btn btn-primary">View Table</a>
+                                <p class="card-text">
+                                    <h5>License check</h5>
+                                    Automated open data license check
+                                    {% if table.license_status.status %}
+                                    <span class="badge text-bg-success">Success</span>
+
+                                    {% else %}
+                                    <span class="badge text-bg-danger">Failed</span>
+                                    {% endif %}
+                                    {% if table.license_status.error %}
+                                    <div class="alert alert-danger" role="alert">
+                                        <strong>Reason:</strong> {{ table.license_status.error }}
+                                    </div>
+                                    <a href={{EXTERNAL_URLS.spdx_licenses}} class="card-link">Please use a SPDX license identifier.</a>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="card-text">
+                                    
+                                    {% if table.license_status.status and not table.is_publish %}
+                                    <h5>Publish data</h5>
+                                    {% if not table.is_reviewed %}
+                                    
+                                    <span class="badge text-bg-warning">Optional</span>
+                                    <span class="badge text-bg-warning">Open Peer Review is still in development.</span>
+                                    <div class="alert alert-warning" role="alert">
+                                    <strong>Before publishing your data, please note:</strong> 
+                                    While you can publish with an open license, we encourage your participation in the ongoing peer review for this table. 
+                                    Your involvement enhances data quality and credibility. Connect on GitHub or initiate a review on the OpenEnergyPlatform. 
+                                    Thanks for advancing open data practices!
+                                    </div>
+                                </p>
+                                {% endif %}
+                                    <button class="btn btn-primary publish-button" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
+                                    <div class="publish-options" style="display: none;">
+                                        <select class="schema-dropdown"></select>
+                                        <button class="btn btn-secondary confirm-publish">Confirm</button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
-
-    <h2>Draft</h2>
-<div class="container">
-    <div class="row">
-        {% for table in draft_tables %}
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
-                        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
-                        {% if table.is_reviewed and not table.is_publish %}
-                            <button class="btn btn-primary publish-button" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
-                            <div class="publish-options" style="display: none;">
-                                <select class="schema-dropdown"></select>
-                                <button class="btn btn-secondary confirm-publish">Confirm</button>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-</div>
-
-</div>
-{% endif %}
-<div id="reviewedTablesData" style="display: none;">{{ reviewed_tables|json_script:"reviewedTablesData" }}</div>
-<div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
-{% endblock %}
+    {% endif %}
+    <div id="reviewedTablesData" style="display: none;">{{ reviewed_tables|json_script:"reviewedTablesData" }}</div>
+    <div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
+    {% endblock %}
 </div>
 
 
