@@ -38,7 +38,7 @@ def read_version_changes():
     markdowner = markdown2.Markdown()
     import logging
 
-    logging.error("READING")
+    logging.info("READING VERSION file.")
     try:
         with open(os.path.join(SITE_ROOT, "..", "VERSION")) as version_file:
             match = re.match(version_expr, version_file.read())
@@ -54,6 +54,7 @@ def read_version_changes():
                 "\n".join(line for line in change_file.readlines())
             )
     except Exception:
+        logging.error("READING VERSION file.")
         # probably because change_file is missing
         major, minor, patch, changes = "", "", "", ""
     return {"version": (major, minor, patch), "changes": changes}

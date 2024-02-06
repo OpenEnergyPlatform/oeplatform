@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.urls import path
 
 from api import actions, views
 
@@ -20,8 +21,8 @@ urlpatterns = [
         views.Metadata.as_view(),
         name="api_table_meta",
     ),
-    url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<to_schema>[\w\d_\s]+)/$",  # noqa
+    path(
+        "v0/schema/<str:schema>/tables/<str:table>/move/<str:to_schema>/",
         views.Move.as_view(),
         name="move",
     ),
@@ -166,4 +167,19 @@ urlpatterns = [
     url(r"usrprop/", views.get_users),
     url(r"grpprop/", views.get_groups),
     url("oeo-search", views.oeo_search),
+    url(
+        r"^v0/factsheet/frameworks/?$",
+        views.EnergyframeworkFactsheetListAPIView.as_view(),
+        name="list-framework-factsheets",
+    ),
+    url(
+        r"^v0/factsheet/models/?$",
+        views.EnergymodelFactsheetListAPIView.as_view(),
+        name="list-model-factsheets",
+    ),
+    url(
+        r"^v0/datasets/list_all/scenario/?$",
+        views.ScenarioDataTablesListAPIView.as_view(),
+        name="list-scenario-datasets",
+    ),
 ]

@@ -1,4 +1,6 @@
 from enum import Enum
+import json
+import logging
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
@@ -65,6 +67,7 @@ class Table(Tagable):
     search = SearchVectorField(default="")
     # Add field to store oemetadata related to the table and avoide performance issues
     # due to oem string (json) parsing like when reading the oem form comment on table
+    # TODO: Maybe oemetadata should be stored in a separate table and imported via FK here
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
     is_publish = BooleanField(null=False, default=False)
@@ -173,6 +176,9 @@ class PeerReview(models.Model):
     date_submitted = DateTimeField(max_length=1000, null=True, default=None)
     date_finished = DateTimeField(max_length=1000, null=True, default=None)
     review = JSONField(null=True)
+    # TODO: Maybe oemetadata should be stored in a separate table and imported
+    # via FK here / change also for Tables model
+    oemetadata = JSONField(null=False, default=None)
 
     # laden
     @classmethod
@@ -195,8 +201,8 @@ class PeerReview(models.Model):
         )
         return opr
 
-    # TODO: CAUTION unifinished work ... fix: includes all id´s and not just the
-    # related ones (reviews on same table) .. procudes false results
+    # TODO: CAUTION unfinished work ... fix: includes all id´s and not just the
+    # related ones (reviews on same table) .. procedures false results
     def get_prev_and_next_reviews(self, schema, table):
         """
         Sets the prev_review and next_review fields based on the date_started field of
@@ -227,10 +233,10 @@ class PeerReview(models.Model):
 
     def save(self, *args, **kwargs):
         review_type = kwargs.pop("review_type", None)
-        if not self.contributor == self.reviewer:
-            # Call the parent class's save method to save the PeerReview instance
-            super().save(*args, **kwargs)
+        pm_new = None
 
+        if not self.contributor == self.reviewer:
+            super().save(*args, **kwargs)
             # TODO: This causes errors if review list ist empty
             # prev_review, next_review = self.get_prev_and_next_reviews(
             #   self.schema, self.table
@@ -242,35 +248,43 @@ class PeerReview(models.Model):
             # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
 
             if review_type == "save":
-                # Handle save status
                 pm_new = PeerReviewManager(
                     opr=self, status=ReviewDataStatus.SAVED.value
                 )
 
             elif review_type == "submit":
-                # Handle submit status
+                result = self.set_version_of_metadata_for_review(
+                    schema=self.schema, table=self.table
+                )
+                if result[0]:
+                    logging.info(result[1])
+                elif result[0] is False:
+                    logging.info(result[1])
+
                 pm_new = PeerReviewManager(
                     opr=self, status=ReviewDataStatus.SUBMITTED.value
                 )
                 pm_new.set_next_reviewer()
 
             elif review_type == "finished":
-                # TODO: fails if the review is completed without submitting
-                # (finish in one run)
+                result = self.set_version_of_metadata_for_review(
+                    schema=self.schema, table=self.table
+                )
+                if result[0]:
+                    logging.info(result[1])
+                elif result[0] is False:
+                    logging.info(result[1])
+
                 pm_new = PeerReviewManager(
                     opr=self, status=ReviewDataStatus.FINISHED.value
                 )
                 self.is_finished = True
                 self.date_finished = timezone.now()
-                # Call the parent class's save method to save the PeerReview instance
                 super().save(*args, **kwargs)
 
-            pm_new.save()
+            if pm_new:
+                pm_new.save()
 
-            # if prev_review is not None:
-            #     pm_prev = PeerReviewManager.objects.get(opr=prev_review)
-            #     pm_prev.next_review = next_review
-            #     pm_prev.save()
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
@@ -299,6 +313,57 @@ class PeerReview(models.Model):
             super().save(*args, **kwargs)
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
+
+    def set_version_of_metadata_for_review(self, table, schema, *args, **kwargs):
+        """
+        Once the peer review is started, we save the current version of the
+        oemetadata that is present on the table to the peer review instance
+        to be able to do the review to a fixed state of the metadata.
+
+        A started review means a reviewer saves / submits or finishes (in case
+        the review is completed in one go) a review.
+
+        Args:
+            table (str): Table name
+            schema (str): Table database schema aka data topic
+
+        Returns:
+            State (tuple): Bool value that indicates weather there is already
+            a version of oemetadata available for this review & readable
+            status message.
+        """
+        table_oemetdata = Table.load(schema=schema, table=table).oemetadata
+
+        if self.oemetadata is None:
+            self.oemetadata = table_oemetdata
+            super().save(*args, **kwargs)
+
+            return (
+                True,
+                f"Set current version of table's: '{table}' oemetadata for review.",
+            )
+
+        return (
+            False,
+            f"This tables (name: {table}) review already got a version of oemetadata.",
+        )
+
+    def update_all_table_peer_reviews_after_table_moved(
+        self, *args, to_schema, **kwargs
+    ):
+        # all_peer_reviews = self.objects.filter(table=table, schema=from_schema)
+        # for peer_review in all_peer_reviews:
+        if isinstance(self.review, str):
+            review_data = json.loads(self.review)
+        else:
+            review_data = self.review
+
+        review_data["topic"] = to_schema
+
+        self.review = review_data
+        self.schema = to_schema
+
+        super().save(*args, **kwargs)
 
     @property
     def days_open(self):

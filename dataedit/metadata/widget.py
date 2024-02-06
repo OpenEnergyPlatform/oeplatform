@@ -135,12 +135,20 @@ class MetaDataWidget:
                                 item, level + 1, parent=parent
                             )
 
+                        if item.get("reference", None) is not None:
+                            no_valid_item = False
+                            html += mark_safe("<br>")
+                            # html += mark_safe("{} element".format(parent))
+                            html += self.__convert_to_html(
+                                item, level + 1, parent=parent
+                            )
+
                     else:
-                        html += mark_safe("<p>Not implemented yet</p>")
+                        html += mark_safe("<p>Can't render this entry.</p>")
 
             if no_valid_item:
                 html += mark_safe(
-                    '<p class="metaproperty">There is no valid entry for this field</p>'
+                    '<p class="metaproperty">The entry is empty or there is no valid entry for this field.</p>'
                 )
 
         elif isinstance(data, str) and re.match(self.url_regex, data):
@@ -182,163 +190,4 @@ class MetaDataWidget:
 
     def render(self):
         answer = self.__convert_to_html(data=self.json)
-        return answer
-
-    def __convert_to_form(self, data, level=0, parent=""):
-        """Formats variables into html form for editing
-
-        :param data: either a dict, a list or a string
-        :param level: the level of indentation inside the JSON variable
-        :param parent ????
-        :return:
-        """
-        if level == 0:
-            # separate each item with a horizontal line
-            html = mark_safe("")
-            for key, value in data.items():
-                if key not in METADATA_HIDDEN_FIELDS:
-                    html += self.__convert_to_form(value, level + 1, parent=key)
-                    html += mark_safe("<hr>")
-                else:
-                    html += mark_safe('<div class="metahiddenfield">')
-                    html += self.__convert_to_form(value, level + 1, parent=key)
-                    html += mark_safe("</div>")
-                    html += format_html("<label>{}</label>", key)
-                    html += self.__convert_to_html(value, level + 1, parent=key)
-                    html += mark_safe("<hr>")
-
-            html.rstrip("<hr>")
-        elif level > 0:
-            label = parent.split("_")[-1]
-            label = self.format_index_numbers(label)
-            # between the horizontal lines the item can be a string,
-            # a list of objects or a dict
-            if isinstance(data, str) and "No json format" in data:
-                # simply an input field and a label within a div
-                self.is_error = True
-                html = mark_safe('<div class="form_group">')
-                html += format_html(
-                    '<label class="field-str-label" for="{}"> {} </label>',
-                    parent,
-                    label,
-                )
-                html += format_html(
-                    '<input class="form-control" id="{}" name="{}" type="text" value="{}" />',  # noqa
-                    parent,
-                    parent,
-                    data,
-                )
-                html += mark_safe("</div>")
-            elif isinstance(data, str) and self.is_error is True:
-                self.is_error = False
-                # simply an input field and a label within a div
-                html = mark_safe('<div class="form_group">')
-                html += format_html(
-                    '<label class="field-str-label" for="{}"> {} </label>',
-                    parent,
-                    label,
-                )
-                html += format_html(
-                    '<textarea class="form-control" id="{}" name="{}" type="text">"{}" </textarea>',  # noqa
-                    parent,
-                    parent,
-                    data,
-                )
-                html += mark_safe("</div>")
-            elif isinstance(data, str):
-                # simply an input field and a label within a div
-                html = mark_safe('<div class="form_group">')
-                html += format_html(
-                    '<label class="field-str-label" for="{}"> {} </label>',
-                    parent,
-                    label,
-                )
-                html += format_html(
-                    '<input class="form-control" id="{}" name="{}" type="text" value="{}" />',  # noqa
-                    parent,
-                    parent,
-                    data,
-                )
-                html += mark_safe("</div>")
-            elif data is None:
-                # if data has no tpye, add an input field and a label within a div
-                html = mark_safe('<div class="form_group">')
-                html += format_html(
-                    '<label class="field-str-label" for="{}"> {} </label>',
-                    parent,
-                    label,
-                )
-                # None has to be written as null in JSON context
-                html += format_html(
-                    '<input class="form-control" id="{}" name="{}" type="text" value="null" />',  # noqa
-                    parent,
-                    parent,
-                )
-                html += mark_safe("</div>")
-            elif isinstance(data, dict):
-                html = mark_safe('<table style="width:100%">')
-                html += mark_safe('<tr><td style="width:150px">')
-                html += format_html(
-                    '<label class="field-dict-label">{}</label>', label.capitalize()
-                )
-                html += mark_safe("</td></tr>")
-                html += mark_safe('<tr><td style="width:20px"></td><td>')
-                for key, value in data.items():
-                    html += self.__convert_to_form(
-                        value, level + 1, parent="{}_{}".format(parent, key)
-                    )
-
-                html += mark_safe("</td></tr>")
-                html += mark_safe("</table>")
-            elif isinstance(data, list):
-                html = mark_safe('<table style="width:100%">')
-                html += mark_safe('<tr><td style="width:150px">')
-                html += format_html(
-                    '<label class="field-list-label for="{}_container">', parent
-                )
-                html += conditional_escape(label.capitalize())
-                html += mark_safe("</label></td></tr>")
-                html += mark_safe("<tr><td>")
-                html += format_html('<div id="{}_container">', parent)
-
-                for i, item in enumerate(data):
-                    html += self.__container(
-                        self.__convert_to_form(
-                            item, level + 1, parent="{}{}".format(parent, i)
-                        ),
-                        parent,
-                        i,
-                    )
-                html += mark_safe("</div>")
-
-                # bind to js function defined in dataedit/static/dataedit/metadata.js
-                # to add new elements to the list upon user click
-                html += format_html(
-                    "<a onclick=\"add_list_objects('{}')\">Add</a>", parent
-                )
-
-                html += mark_safe("</td></tr>")
-                html += mark_safe("</table>")
-
-        return html
-
-    # TODO remove this function once the solution with list_field.html is implemented
-    def __container(self, item, parent, idx):
-        """wraps a container"""
-        html = format_html('<div class="metacontainer" id="{}{}">', parent, idx)
-
-        html += mark_safe('<div class="metacontainer-header">')
-        html += format_html(
-            '<a style="color:white" onclick="remove_element(\'{}{}\')">', parent, idx
-        )
-        html += mark_safe('<span class="fas fa-minus"/></a></div>')
-        html += format_html('<div class="metaformframe" id="{}{}">', parent, idx)
-        html += conditional_escape(item)
-        html += mark_safe("</div>")
-        html += mark_safe("</div>")
-        return html
-
-    def render_editmode(self):
-
-        answer = self.__convert_to_form(data=self.json)
         return answer
