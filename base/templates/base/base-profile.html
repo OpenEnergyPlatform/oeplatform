@@ -89,7 +89,7 @@
             {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
 
                 <div class="btn profile-bar">
-                    <a class="btn-profile" href="/user/profile/{{ user.pk }}">{% fa5_icon 'user' 'fas' %} {{ user }}</a>
+                    <a class="btn-profile" href="/user/profile/{{ user.pk }}/settings">{% fa5_icon 'user' 'fas' %} {{ user }}</a>
                     <a class="btn-logout" href="/user/logout/?next=/">{% fa5_icon 'arrow-right' 'fas' %} Logout</a>
                 </div>
 
