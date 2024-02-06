@@ -11,6 +11,7 @@ from subprocess import call
 from wsgiref.util import FileWrapper
 
 import sqlalchemy as sqla
+from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
@@ -971,6 +972,8 @@ class DataView(View):
     Initialises the session data (if necessary)
     """
 
+    # TODO Check if this hits bad in performance
+    @never_cache
     def get(self, request, schema, table):
         """
         Collects the following information on the specified table:
