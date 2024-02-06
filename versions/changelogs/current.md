@@ -33,6 +33,8 @@
 
 - Introduction of an automatic license check module that attempts to check whether the license specified in the metadata for a particular table is open. It normalises the license name in the metadata (whitespaces become "-", everything is capitalised) and compares it with the official SPDX license list. [(#1565)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1565)
 
+- Link to profile/tables page via view my tables button on topic and table list pages and enhance the profile/tables page content [(#1570)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1570)
+
 ### Bugs
 
 - Scenario Bundles: Fix repeated DOIs [(#1556)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1556)
@@ -44,6 +46,5 @@
 - Foreign Key fields are rendered as expected again. [(#1569)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1569)
 
 - Each open peer review now stored the oemetadata. This avoids changes to the metadata that is or was reviewed and helps to maintain a review history [(#1567)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1567)
-
 
 ### Removed
