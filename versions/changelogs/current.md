@@ -41,4 +41,6 @@
 
 - Update the peer review data in case a table is published / moved to another topic. [(#1566)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1566)
 
+- Foreign Key fields are rendered as expected again. [(#1569)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1569)
+
 ### Removed
