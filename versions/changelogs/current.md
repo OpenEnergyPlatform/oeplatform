@@ -43,4 +43,7 @@
 
 - Foreign Key fields are rendered as expected again. [(#1569)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1569)
 
+- Each open peer review now stored the oemetadata. This avoids changes to the metadata that is or was reviewed and helps to maintain a review history [(#1567)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1567)
+
+
 ### Removed
