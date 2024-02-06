@@ -11,6 +11,7 @@ from subprocess import call
 from wsgiref.util import FileWrapper
 
 import sqlalchemy as sqla
+from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
@@ -72,6 +73,7 @@ schema_whitelist = [
 ]
 
 schema_sandbox = "sandbox"
+
 
 def admin_constraints(request):
     """
@@ -665,9 +667,9 @@ def show_revision(request, schema, table, date):
 def tag_overview(request):
     # if rename or adding of tag fails: display error message
     context = {
-        "errorMsg": "Tag name is not valid"
-        if request.GET.get("status") == "invalid"
-        else ""
+        "errorMsg": (
+            "Tag name is not valid" if request.GET.get("status") == "invalid" else ""
+        )
     }
 
     return render(
@@ -970,6 +972,8 @@ class DataView(View):
     Initialises the session data (if necessary)
     """
 
+    # TODO Check if this hits bad in performance
+    @never_cache
     def get(self, request, schema, table):
         """
         Collects the following information on the specified table:
@@ -2142,7 +2146,9 @@ class PeerReviewView(LoginRequiredMixin, View):
         config_data = {
             "can_add": can_add,
             "url_peer_review": url_peer_review,
-            "url_table": reverse("dataedit:view", kwargs={"schema": schema, "table": table}),
+            "url_table": reverse(
+                "dataedit:view", kwargs={"schema": schema, "table": table}
+            ),
             "topic": schema,
             "table": table,
             "review_finished": review_finished,
@@ -2329,7 +2335,6 @@ class PeerRreviewContributorView(PeerReviewView):
                     ),
                     "topic": schema,
                     "table": table,
-
                 }
             ),
             "table": table,
