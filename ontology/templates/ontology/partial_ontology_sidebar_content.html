@@ -1,11 +1,11 @@
 <div class="container">
     <div class="row">
-        <h3>View the oeo</h3>
+        <h3>View the oeo version {{version}}</h3>
     </div>
     <div class="row">
         <div class="col">
             <div class="btn-group float-end" role="group" aria-label="Basic example">
-                <a class="btn btn-secondary" href="/ontology/{{ontology}}/BFO_0000001">
+                <a class="btn btn-secondary" href="/ontology/{{ontology}}/BFO_0000001/">
                     Browse oeo classes
                 </a>
                 <a class="btn btn-secondary" href="/viewer/oeo/">
@@ -32,6 +32,7 @@
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
+    <p>Download the full owl file for oeo version {{version}} and more ... </p>
     <div class="row">
         <div class="col">
             <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/oeo-full.owl">

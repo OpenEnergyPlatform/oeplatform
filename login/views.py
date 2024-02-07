@@ -13,6 +13,8 @@ import login.models as models
 from dataedit.models import PeerReviewManager, Table, PeerReview
 from dataedit.views import schema_whitelist
 
+from oeplatform.settings import UNVERSIONED_SCHEMAS
+
 from .forms import (
     ChangeEmailForm,
     CreateUserForm,
@@ -24,6 +26,8 @@ from .forms import (
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
+from login.utilities import validate_open_data_license
+
 
 class TablesView(View):
     def get(self, request, user_id):
@@ -31,22 +35,26 @@ class TablesView(View):
         tables = Table.objects.all().select_related()
         draft_tables = []
         published_tables = []
+        published_but_license_issue = []
 
         for table in tables:
-            if user.get_table_permission_level(table) >= models.WRITE_PERM:
-                table_data = {
-                    "name": table.name,
-                    "schema": table.schema.name,
-                    "is_publish": table.is_publish,
-                    "is_reviewed": table.is_reviewed
-                }
+            permission_level = user.get_table_permission_level(table)
+            license_status = validate_open_data_license(django_table_obj=table)
 
-                # Определение категории таблицы
-                if table.is_reviewed:
-                    if table.is_publish:
-                        published_tables.append(table_data)
-                    else:
-                        draft_tables.append(table_data)
+            table_data = {
+                "name": table.name,
+                "schema": table.schema.name,
+                "is_publish": table.is_publish,
+                "is_reviewed": table.is_reviewed,
+                "license_status": {
+                    "status": license_status[0],
+                    "error": license_status[1],
+                },
+            }
+
+            if permission_level >= models.WRITE_PERM:
+                if table.is_publish or table.schema.name not in UNVERSIONED_SCHEMAS:
+                    published_tables.append(table_data)
                 else:
                     draft_tables.append(table_data)
 
@@ -54,17 +62,12 @@ class TablesView(View):
             "profile_user": user,
             "draft_tables": draft_tables,
             "published_tables": published_tables,
-            "schema_whitelist": schema_whitelist
+            "schema_whitelist": schema_whitelist,
         }
 
-        # TODO: Fix this is_ajax as it is outdated according to django documentation ... provide better api endpoint for http requests via HTMX
         if request.is_ajax():
             return render(request, "login/user_tables.html", context)
         return render(request, "login/user_tables.html", context)
-
-
-
-
 
 
 class ReviewsView(View):

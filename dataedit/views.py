@@ -11,6 +11,7 @@ from subprocess import call
 from wsgiref.util import FileWrapper
 
 import sqlalchemy as sqla
+from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
@@ -72,6 +73,7 @@ schema_whitelist = [
 ]
 
 schema_sandbox = "sandbox"
+
 
 def admin_constraints(request):
     """
@@ -665,9 +667,9 @@ def show_revision(request, schema, table, date):
 def tag_overview(request):
     # if rename or adding of tag fails: display error message
     context = {
-        "errorMsg": "Tag name is not valid"
-        if request.GET.get("status") == "invalid"
-        else ""
+        "errorMsg": (
+            "Tag name is not valid" if request.GET.get("status") == "invalid" else ""
+        )
     }
 
     return render(
@@ -970,6 +972,8 @@ class DataView(View):
     Initialises the session data (if necessary)
     """
 
+    # TODO Check if this hits bad in performance
+    @never_cache
     def get(self, request, schema, table):
         """
         Collects the following information on the specified table:
@@ -1845,7 +1849,7 @@ class MetaEditView(LoginRequiredMixin, View):
             can_add = level >= login_models.WRITE_PERM
 
         url_table_id = request.build_absolute_uri(
-            reverse("view", kwargs={"schema": schema, "table": table})
+            reverse("dataedit:view", kwargs={"schema": schema, "table": table})
         )
 
         context_dict = {
@@ -1859,7 +1863,7 @@ class MetaEditView(LoginRequiredMixin, View):
                         "api_table_meta", kwargs={"schema": schema, "table": table}
                     ),
                     "url_view_table": reverse(
-                        "view", kwargs={"schema": schema, "table": table}
+                        "dataedit:view", kwargs={"schema": schema, "table": table}
                     ),
                     "cancle_url": get_cancle_state(self.request),
                     "standalone": False,
@@ -1895,18 +1899,27 @@ class PeerReviewView(LoginRequiredMixin, View):
     parsing, sorting metadata, and handling GET and POST requests for peer review.
     """
 
-    def load_json(self, schema, table):
+    def load_json(self, schema, table, review_id=None):
         """
-        Load JSON metadata from the database.
+        Load JSON metadata from the database. If the review_id is available
+        then load the metadata form the peer review instance and not from the
+        table. This avoids changes to the metadata that is or was reviewed.
 
         Args:
             schema (str): The schema of the table.
             table (str): The name of the table.
+            review_id (int): Id of a peer review in the django database
 
         Returns:
-            dict: Loaded metadata.
+            dict: Loaded oemetadata.
         """
-        metadata = load_metadata_from_db(schema, table)
+        metadata = {}
+        if review_id is None:
+            metadata = load_metadata_from_db(schema, table)
+        elif review_id:
+            opr = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
+            metadata = opr.oemetadata
+
         return metadata
 
     def load_json_schema(self):
@@ -1951,7 +1964,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             lines += [{"field": old[1:], "value": str(val)}]
         return lines
 
-    def sort_in_category(self, schema, table):
+    def sort_in_category(self, schema, table, oemetadata):
         """
         Sorts the metadata of a table into categories and adds the value
         suggestion and comment that were added during the review, to facilitate
@@ -1991,8 +2004,7 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         """
 
-        metadata = self.load_json(schema, table)
-        val = self.parse_keys(metadata)
+        val = self.parse_keys(oemetadata)
         gen_key_list = []
         spatial_key_list = []
         temporal_key_list = []
@@ -2109,11 +2121,12 @@ class PeerReviewView(LoginRequiredMixin, View):
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
-        metadata = self.sort_in_category(schema, table)
+        oemetadata = self.load_json(schema, table, review_id)
+        metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)
         # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
-                "peer_review_reviewer",
+                "dataedit:peer_review_reviewer",
                 kwargs={"schema": schema, "table": table, "review_id": review_id},
             )
             opr_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
@@ -2133,7 +2146,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             )
         else:
             url_peer_review = reverse(
-                "peer_review_create", kwargs={"schema": schema, "table": table}
+                "dataedit:peer_review_create", kwargs={"schema": schema, "table": table}
             )
             # existing_review={}
             state_dict = None
@@ -2142,7 +2155,9 @@ class PeerReviewView(LoginRequiredMixin, View):
         config_data = {
             "can_add": can_add,
             "url_peer_review": url_peer_review,
-            "url_table": reverse("view", kwargs={"schema": schema, "table": table}),
+            "url_table": reverse(
+                "dataedit:view", kwargs={"schema": schema, "table": table}
+            ),
             "topic": schema,
             "table": table,
             "review_finished": review_finished,
@@ -2151,6 +2166,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             # need this here as json.dumps breaks the template syntax access
             # like {{ config.table }} now you can use {{ table }}
             "table": table,
+            "topic": schema,
             "config": json.dumps(config_data),
             "meta": metadata,
             "json_schema": json_schema,
@@ -2199,7 +2215,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             - After a review is finished, the table's metadata is updated, and the table
             can be moved to a different schema or topic (TODO).
         """
-
+        print(review_id)
         context = {}
         if request.method == "POST":
             # get the review data and additional application metadata
@@ -2254,7 +2270,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             if review_finished is True:
                 review_table = Table.load(schema=schema, table=table)
                 review_table.set_is_reviewed()
-                metadata = self.load_json(schema, table)
+                metadata = self.load_json(schema, table, review_id=review_id)
 
                 recursive_update(metadata, review_data)
 
@@ -2294,7 +2310,8 @@ class PeerRreviewContributorView(PeerReviewView):
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
-        metadata = self.sort_in_category(schema, table)
+        oemetadata = self.load_json(schema, table, review_id)
+        metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)
         json_schema = self.load_json_schema()
         field_descriptions = self.get_all_field_descriptions(json_schema)
         review_data = peer_review.review.get("reviews", [])
@@ -2316,7 +2333,7 @@ class PeerRreviewContributorView(PeerReviewView):
                 {
                     "can_add": can_add,
                     "url_peer_review": reverse(
-                        "peer_review_contributor",
+                        "dataedit:peer_review_contributor",
                         kwargs={
                             "schema": schema,
                             "table": table,
@@ -2324,13 +2341,14 @@ class PeerRreviewContributorView(PeerReviewView):
                         },
                     ),
                     "url_table": reverse(
-                        "view", kwargs={"schema": schema, "table": table}
+                        "dataedit:view", kwargs={"schema": schema, "table": table}
                     ),
                     "topic": schema,
                     "table": table,
                 }
             ),
             "table": table,
+            "topic": schema,
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),

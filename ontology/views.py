@@ -202,6 +202,15 @@ class PartialOntologyOverviewContent(View):
                 ontology_data = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
 
                 submodules = collect_modules(path / "modules")
+
+                desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
+
+                relevant_modules = {
+                    key: value
+                    for key, value in submodules.items()
+                    if key in desired_keys
+                }
+
                 # Collect all file names
                 imports = collect_modules(path / "imports")
 
@@ -209,9 +218,9 @@ class PartialOntologyOverviewContent(View):
                     request,
                     "ontology/partial_ontology_content.html",
                     dict(
-                        ontology=OPEN_ENERGY_ONTOLOGY_NAME,
+                        ontology=ontology_data["ontology"],
                         version=ontology_data["version"],
-                        submodules=submodules.items(),
+                        submodules=relevant_modules.items(),
                         imports=imports.items(),
                         ontology_description=ontology_data["oeo_context_data"][
                             "ontology_description"
@@ -245,6 +254,7 @@ class PartialOntologyOverviewSidebarContent(View):
             "ontology/partial_ontology_sidebar_content.html",
             dict(
                 ontology=OPEN_ENERGY_ONTOLOGY_NAME,
+                version=version,
                 main_module=main_module,
             ),
         ).content.decode("utf-8")
@@ -274,67 +284,6 @@ class OntologyOverview(View):
 
         path = onto_base_path / version
         # This is temporary (macOS related)
-        file = "oeo-full.owl"
-        Ontology_URI = path / file
-        g = Graph()
-        g.parse(Ontology_URI.as_posix())
-
-        q_global = g.query(
-            """
-            SELECT DISTINCT ?s ?o
-            WHERE { ?s rdfs:subClassOf ?o
-            filter(!isBlank(?o))
-            }
-            """
-        )
-
-        q_label = g.query(
-            """
-            SELECT DISTINCT ?s ?o
-            WHERE { ?s rdfs:label ?o }
-            """
-        )
-
-        q_definition = g.query(
-            """
-            SELECT DISTINCT ?s ?o
-            WHERE { ?s obo:IAO_0000115 ?o }
-            """
-        )
-
-        q_note = g.query(
-            """
-            SELECT DISTINCT ?s ?o
-            WHERE { ?s obo:IAO_0000116 ?o }
-            """
-        )
-
-        q_main_description = g.query(
-            """
-            SELECT ?s ?o
-            WHERE { ?s dc:description ?o }
-            """
-        )
-
-        classes_name = {}
-        for row in q_label:
-            class_name = row.s.split("/")[-1]
-            classes_name[class_name] = row.o
-
-        classes_definitions = defaultdict(list)
-        for row in q_definition:
-            class_name = row.s.split("/")[-1]
-            classes_definitions[class_name].append(row.o)
-
-        classes_notes = defaultdict(list)
-        for row in q_note:
-            class_name = row.s.split("/")[-1]
-            classes_notes[class_name].append(row.o)
-
-        ontology_description = ""
-        for row in q_main_description:
-            if row.s.split("/")[-1] == "":
-                ontology_description = row.o
 
         # Begin prepare data for oeo-viewer. Only need to be executed once per release
         # graphLinks = []
@@ -392,34 +341,18 @@ class OntologyOverview(View):
                     "ontology/oeo.html",
                     {"ontology": OPEN_ENERGY_ONTOLOGY_NAME},
                 )
-        else:
-            module_name = None
-            if module_or_id:
-                if imports:
-                    submodules = collect_modules(path / "imports")
-                else:
-                    submodules = collect_modules(f"{path}/modules")
-                # If module_or_id is the name of a valid submodule, use this module
-                if module_or_id in submodules:
-                    module_name = module_or_id
-                if imports:
-                    return redirect(f"{path}/imports/{module_name}.owl")  # noqa
-                else:
-                    return redirect(f"{path}/{module_name}.owl")
-            # If no module was requested or the requested id was not a module,
-            # serve main ontology
-            if module_name is None:
-                main_module = collect_modules(path)
-                module_name = list(main_module.keys())[0]
-            return redirect(
-                f"/ontology/{ontology}/releases/{version}/{module_name}.owl"
-            )
 
 
 class OntologyViewClasses(View):
-    def get(self, request, ontology, module_or_id=None, version=None, imports=False):
-        ontology_data = get_common_data(ontology=OPEN_ENERGY_ONTOLOGY_NAME)
-
+    def get(
+        self,
+        request,
+        ontology=OPEN_ENERGY_ONTOLOGY_NAME,
+        module_or_id=None,
+        version=None,
+        imports=False,
+    ):
+        ontology_data = get_common_data(ontology=ontology)
         sub_classes = []
         super_classes = []
         if module_or_id:
@@ -517,11 +450,11 @@ class OntologyViewClasses(View):
             class_notes = ontology_data["oeo_context_data"]["classes_notes"][
                 module_or_id
             ]
-
         return render(
             request,
             "ontology/class.html",
             dict(
+                ontology=ontology,
                 class_id=module_or_id,
                 class_name=class_name,
                 sub_classes=sub_classes,
