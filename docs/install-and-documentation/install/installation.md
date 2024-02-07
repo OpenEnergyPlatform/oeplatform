@@ -137,17 +137,27 @@ We use `alembic` to keep track of changes in those tables. To create all tables 
 #### 4.1 Include the full oeo
 
 It is necessary to include the source files of the OpenEnergyOntology (OEO) in this project.
-Currently you have to manually create the following folder structure:
+The goal is to setup a structure like you see below.
 
-```
-# Add "ontologies" folder and insert the oeo build files (see info below) in the "oeplatform" directory. Not in the "oeplatform/oeplatform" directory. 
-ontologies/
-└── oeo
-    └── 1 # in production this will be the version of a specific OEO release
-        ├── imports
-        ├── modules
-        └── oeo-full.owl
-```
+    ``` bash
+    ontologies/
+    └── oeo
+        └── 1 # in production this will be the version of a specific OEO release
+            ├── imports
+            ├── modules
+            └── oeo-full.owl
+    ```
+
+The root directory where all ontologies are stored is called "ontologies". This is configured in the settings.py file for the oeplatform. The following variables are relevant for the configuration of the oeo directories. In most cases, you can use the default settings.
+
+    ``` python
+    ONTOLOGY_FOLDER # Name of the folder for all ontologies
+    ONTOLOGY_ROOT   # constructed Path for all ontologies
+    OPEN_ENERGY_ONTOLOGY_NAME   # Name of the oeo
+    OPEN_ENERGY_ONTOLOGY_FOLDER # constructed Path for the oeo directory
+    ```
+
+If you use the default naming "ontologies", you can download the full oeo release files from GitHub and unzip them into the directory. Check whether you can find the file "oeo-full.owl".
 
 !!! info
     Download the [full oeo release from GitHub: Assets - build-files.zip](https://github.com/OpenEnergyPlatform/ontology/releases) and extract the oeo directory to match the pattern provided above.
@@ -219,10 +229,10 @@ In the django app directory `oeplatform/factsheet` we Provide a Web-API to acces
     To serve the React build on a website that is provided by django you have to include the build files from the `factsheet/static` directory in the django template in `factsheet/templates/index.html`. In the html template the you must make sure that the JavaScript bundle file is imported. The name of the file changes after each new build and it should read like `main.5654a0e0.js`.
 
     The tamplate should then include this line:
+
     ```html
     <script src="{% static 'factsheet/js/main.55586e26.js' %}"></script>
     ```
-
 
 ## Next steps
 
