@@ -25,7 +25,7 @@ const ComparisonBoardMain = (props) => {
   const [scenarios, setScenarios] = useState([]);
   const scenarios_uid = params.split('#');
   const scenarios_uid_json = JSON.stringify(scenarios_uid);
-  const [selectedCriteria, setselectedCriteria] = useState(['Descriptors']);
+  const [selectedCriteria, setselectedCriteria] = useState(['Descriptors', 'Study name']);
 
   const getScenarios = async () => {
     const { data } = await axios.get(conf.toep + `scenario-bundles/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
@@ -35,7 +35,7 @@ const ComparisonBoardMain = (props) => {
   useEffect(() => {
     getScenarios().then((data) => {
       setScenarios(data);
-      });
+    });
   }, []);
 
 
@@ -63,7 +63,7 @@ const ComparisonBoardMain = (props) => {
   }
 
   return (
-    scenarios.length !== 0 && 
+    scenarios.length !== 0 &&
     <Grid container
       direction="row"
       justifyContent="space-between"
@@ -80,20 +80,20 @@ const ComparisonBoardMain = (props) => {
                   <Button variant="outlined" size="small" sx={{ mr: 1 }}>
                     <ArrowBackIcon />
                   </Button>
-                </Link>  
+                </Link>
               </Tooltip>
             </Grid>
             <Grid item xs={6} md={4}>
             </Grid>
             <Grid item xs={6} md={4}>
-              <Button color="primary" 
-                variant="text" 
-                size="small" 
+              <Button color="primary"
+                variant="text"
+                size="small"
                 startIcon={<ArrowRightIcon />}>
-                How it works? 
+                How it works?
               </Button>
             </Grid>
-          </Grid>   
+          </Grid>
         </Toolbar>
         {/* <ComparisonControl /> */}
         <OptionBox>
@@ -106,11 +106,11 @@ const ComparisonBoardMain = (props) => {
             </div>
           </FormGroup>
           <MultipleSelectChip
-            sx={{ mt: 2, width : "100%" }}
+            sx={{ mt: 2, width: "100%" }}
             options={['Scenario 1', 'Scenario 2', 'Scenario 3']}
             label="Scenarios to be compared"
             disabled={true}
-            />
+          />
         </OptionBox>
         <ComparisonBoardItems elements={scenarios} c_aspects={selectedCriteria} />
       </Container>

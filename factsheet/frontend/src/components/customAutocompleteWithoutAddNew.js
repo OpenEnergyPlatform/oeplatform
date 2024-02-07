@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function CustomAutocompleteWithoutAddNew(parameters) {
-  const { manyItems, idx, name, type, showSelectedElements, handler, width, noTooltip=false } = parameters;
+  const { manyItems, idx, name, type, showSelectedElements, handler, width, noTooltip = false } = parameters;
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
   const classes = useStyles();
 
@@ -33,7 +33,7 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
   return (
     <Box style={{ width: width }}>
       <Autocomplete
-        size="small" 
+        size="small"
         multiple
         id="checkboxes-tags-demo"
         options={parameters.optionsSet}
@@ -41,26 +41,26 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
         getOptionLabel={(option) => option.name}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
-             {!option.inputValue &&<Checkbox
+            {!option.inputValue && <Checkbox
               icon={icon}
               checkedIcon={checkedIcon}
               style={{ marginRight: 8 }}
-              checked={ selected }
+              checked={selected}
             />}
             {!noTooltip && !option.inputValue && <HtmlTooltip
-            style={{ marginRight: '5px' }}
-            placement="top"
-            title={
-              <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                Description of <b>{option.name}</b> : TDB ...
-              <br />
-              <a href={2}>More info from Open Enrgy Knowledge Graph (OEKG)...</a>
-              </Typography>
-              </React.Fragment>
-            }
+              style={{ marginRight: '5px' }}
+              placement="top"
+              title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="caption">
+                    Description of <b>{option.name}</b> : TDB ...
+                    <br />
+                    <a href={2}>More info from Open Enrgy Knowledge Graph (OEKG)...</a>
+                  </Typography>
+                </React.Fragment>
+              }
             >
-            <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+              <HelpOutlineIcon sx={{ color: '#bdbdbd' }} />
             </HtmlTooltip>}
             {option.name}
           </li>
@@ -75,7 +75,7 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
             classes: {
               root: classes.inputRoot, // Apply the custom CSS class
             },
-          }}/>
+          }} />
         )}
       />
       {showSelectedElements && <Box
@@ -90,11 +90,11 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
           // 'backgroundColor':'#FCFCFC'
         }}
       >
-        {value.map((v) => (
-          <Chip size='small' key={v.id}  label={v.name} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }}/>
+        {value.sort((a, b) => a.name.localeCompare(b.name)).map((v) => (
+          <Chip size='small' key={v.id} label={v.name} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} />
         ))}
       </Box>}
     </Box>
   );
-  
+
 }

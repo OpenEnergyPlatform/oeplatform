@@ -96,12 +96,11 @@ nav:
       - Manual database setup: install-and-documentation/install/manual-db-setup.md
       - Development setup: install-and-documentation/install/development-setup.md
     - Documentation:
-      - Overview: 
-        - install-and-documentation/oeplatform-code/index.md
       - Architecture:
         - install-and-documentation/oeplatform-code/architecture/index.md
         - Infrastructure: install-and-documentation/oeplatform-code/architecture/infrastructure.md
         - Software Project: install-and-documentation/oeplatform-code/architecture/project-structure.md
+        - oeplatform Modules: install-and-documentation/oeplatform-code/architecture/modules.md
       - Web-API's:
         - install-and-documentation/oeplatform-code/web-api/index.md
         - OEDB REST-API: 
@@ -110,6 +109,7 @@ nav:
           - install-and-documentation/oeplatform-code/web-api/oekg-api/index.md 
       - Features:
         - install-and-documentation/oeplatform-code/features/index.md
+        - metaBuilder Metadata creation: install-and-documentation/oeplatform-code/features/metaBuilder/index.md
         - Open Peer Review Process:
           - install-and-documentation/oeplatform-code/features/open-peer-review-process/index.md
           - Technical docs: install-and-documentation/oeplatform-code/features/open-peer-review-process/technical-docs.md

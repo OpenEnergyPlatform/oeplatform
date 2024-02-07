@@ -1,87 +1,109 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load ontology.rdf %}
-{% block main-content-body %}
 {% load static %}
+{% load compress %}
+
+{% block site-header %}
+    <div class="main-header">
+        <h1 class="main-header__title">
+            <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg" width="16" height="16" alt="OEO">         
+            Ontology
+        </h1>
+        <div class="main-header__wizard">
+            <a href="/ontology/">Overview</a> / Open Energy Ontology
+        </div>
+    </div>
+
+{% endblock site-header %}
+
+{% block main-right-sidebar-content %}
+<div hx-get="{% url 'partial-page-sidebar-content' %}" hx-swap="outerHTML" hx-target="#content-sidebar" hx-trigger="load" id="content-sidebar">
 
 
+</div>
+<div id="loading-spinner-sidebar" class=" btn btn-primary disabled placeholder" role="status" style="display: none;">
+    <p class="card-text placeholder-glow">
+        <span class="placeholder col-7"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-6"></span>
+        <span class="placeholder col-8"></span>
+      </p>
+    <span class="visually-hidden">Loading...</span>
+</div>
 
-<h2>{{ main_module.name }}<div class="btn-group float-end" role="group" aria-label="Basic example">
-                    {% for ex in main_module.extensions %}
-                        <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{main_module.name}}.{{ex}}">
-                            {{ex}}
-                        </a>
-                    {% endfor %}
-                    <a class="btn btn-secondary" href="/ontology/{{ontology}}/BFO_0000001">
-                        classes
-                    </a>
-                    <a class="btn btn-secondary" href="/viewer/oeo/">
-                        viewer
-                    </a>
-                </div> </h2> <br>
+{% endblock main-right-sidebar-content %}
 
-<div class="card">
-    <div class="card-header">
-        <a class="card-link" data-bs-toggle="collapse" href="#collapse{{ forloop.counter }}">
-            {{ ontology_description }}
-        </a>
+{% block main-content-body %}
+ 
+<div hx-get="{% url 'partial-page-content' %}" hx-swap="outerHTML" hx-target="#content" hx-trigger="load" id="content">
+
+
+</div>
+
+
+<div id="loading-spinner" class="text-primary" role="status" style="display: none;" aria-hidden="true">
+    <p class="card-text placeholder-glow">
+        <span class="placeholder col-7"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-6"></span>
+        <span class="placeholder col-8"></span>
+    </p>
+
+    <div class="card" aria-hidden="true">
+        <div class="card-body">
+            <h5 class="card-title placeholder-glow">
+            <span class="placeholder col-6"></span>
+            </h5>
+            <p class="card-text placeholder-glow">
+            <span class="placeholder col-7"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-6"></span>
+            <span class="placeholder col-8"></span>
+            <span class="placeholder col-7"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-6"></span>
+            <span class="placeholder col-8"></span>
+            <span class="placeholder col-7"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-6"></span>
+            <span class="placeholder col-8"></span>
+        </p>
     </div>
 </div>
 
 
-<br><br>
-<h3>Modules</h3><br>
-
-<div id="accordion">
-    {% for module, about in submodules %}
-        <div class="card">
-            <div class="card-header">
-                <a class="card-link" data-bs-toggle="collapse" href="#collapse{{ forloop.counter }}">
-                    {{module}}
-                </a>
-                <div class="btn-group float-end" role="group" aria-label="Basic example">
-                    {% for ex in about.extensions %}
-                        <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{module}}.{{ex}}">
-                            {{ex}}
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
-            <div id="collapse{{ forloop.counter }}" class="collapse" data-bs-parent="#accordion">
-                <div class="card-body">
-                    {{ about.comment }}
-                </div>
-            </div>
-        </div>
-    {% endfor %}
-</div>
-
-<hr>
-<h3>Imports</h3><br>
-
-<div id="imports_accordion">
-    {% for module, about in imports %}
-        <div class="card">
-            <div class="card-header">
-                <a class="card-link" data-bs-toggle="collapse" href="#imports_collapse{{ forloop.counter }}">
-                    {{module}}
-                </a>
-                <div class="btn-group float-end" role="group" aria-label="Basic example">
-                    {% for ex in about.extensions %}
-                        <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/imports/{{module}}.{{ex}}">
-                            {{ex}}
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
-            <div id="imports_collapse{{ forloop.counter }}" class="collapse" data-bs-parent="#imports_accordion">
-                <div class="card-body">
-                    {{ about.comment }}
-                </div>
-            </div>
-        </div>
-    {% endfor %}
-</div>
-
-
 {% endblock %}
+
+
+{% block after-body-bottom-js %}
+
+{% compress js %}
+<script src="{% static 'ontology/htmx.js' %}"></script>
+{% endcompress %}
+
+<script>
+    document.addEventListener('htmx:beforeRequest', function (event) {
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('loading-spinner-sidebar').style.display = 'block';
+    });
+
+    document.addEventListener('htmx:afterSwap', function (event) {
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('loading-spinner-sidebar').style.display = 'none';
+    });
+
+    // Optionally, you can use this event to handle errors
+    document.addEventListener('htmx:afterRequest', function (event) {
+        if (event.detail.xhr.status >= 400) {
+            console.error('Request failed:', event.detail.xhr);
+        }
+    });
+</script>
+
+{% endblock after-body-bottom-js %}

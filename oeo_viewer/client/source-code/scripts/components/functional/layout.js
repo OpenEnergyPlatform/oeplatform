@@ -1,11 +1,12 @@
 import React, { Component, useEffect } from "react";
 import ForceGraph2D from "react-force-graph-2d";
-import GraphData from "../../../statics/oeo_info.json";
+import GraphData from "../../../../../data/oeo_viewer_json_data.json";
 import CustomDialog from "../presentational/customDialog";
 import BaseCard from "../presentational/baseCard";
 import CustomCard from "../presentational/customCard";
 import CustomTreeView from "./customTreeView";
 import LayoutActions from "./actions.js";
+import SearchBox from "./searchBox";
 import Grid from "@material-ui/core/Grid";
 
 
@@ -34,7 +35,7 @@ class Layout extends Component {
   state = {
     openSettingDialog: false,
     currentNode: "",
-    hierarchicalView: false,
+    hierarchicalView: true,
     cooldownTicks: 1000
   };
 
@@ -64,10 +65,10 @@ class Layout extends Component {
   }
 
   updateWindowDimensions() {
-  this.setState({
-    width: window.innerWidth / 1.4 ,
-    height: window.innerHeight / 1.8
-  });
+    this.setState({
+      width: window.innerWidth / 1.42,
+      height: window.innerHeight / 1.8
+    });
   }
 
   handleSettingDialogOpen = status => {
@@ -90,23 +91,23 @@ class Layout extends Component {
     let treeData = [];
 
     allLinks.forEach(link => {
-        if ((typeof link.source) === 'object') {
-          treeData.push({'id': link.target.id, 'parent': link.source.id});
-        }
-        else {
-          treeData.push({'id': link.target, 'parent': link.source});
-        }
+      if ((typeof link.source) === 'object') {
+        treeData.push({ 'id': link.target.id, 'parent': link.source.id });
+      }
+      else {
+        treeData.push({ 'id': link.target, 'parent': link.source });
+      }
     });
     const currentNode = treeData.find(link => link.id === node.id);
     let allParents = [];
 
-    if(currentNode !== undefined) {
+    if (currentNode !== undefined) {
       (function traverseTreeBack(node = currentNode) {
-          allParents.unshift(node.id);
-          if (node.id == 'BFO_0000001' || node.parent == 'BFO_0000001') return;
-          const parentNode = treeData.find(link => link.id === node.parent);
-          traverseTreeBack(parentNode);
-        })();
+        allParents.unshift(node.id);
+        if (node.id == 'BFO_0000001' || node.parent == 'BFO_0000001') return;
+        const parentNode = treeData.find(link => link.id === node.parent);
+        traverseTreeBack(parentNode);
+      })();
     };
 
     allParents.unshift('BFO_0000001');
@@ -246,23 +247,23 @@ class Layout extends Component {
 
     let treeData = [];
     allLinks.forEach(link => {
-        if ((typeof link.source) === 'object') {
-          treeData.push({'id': link.target.id, 'parent': link.source.id});
-        }
-        else {
-          treeData.push({'id': link.target, 'parent': link.source});
-        }
+      if ((typeof link.source) === 'object') {
+        treeData.push({ 'id': link.target.id, 'parent': link.source.id });
+      }
+      else {
+        treeData.push({ 'id': link.target, 'parent': link.source });
+      }
     });
 
     let allParents = [];
     const searchedNodeInTreeData = treeData.find(link => link.id === searchedtNode.id);
 
     (function traverseTreeBack(node = searchedNodeInTreeData) {
-        allParents.unshift(node.id);
-        if (node.id === 'BFO_0000001' || node.parent === 'BFO_0000001') return;
-        const parentNode = treeData.find(link => link.id === node.parent);
-        traverseTreeBack(parentNode);
-      })();
+      allParents.unshift(node.id);
+      if (node.id === 'BFO_0000001' || node.parent === 'BFO_0000001') return;
+      const parentNode = treeData.find(link => link.id === node.parent);
+      traverseTreeBack(parentNode);
+    })();
 
     allParents.unshift('BFO_0000001');
 
@@ -300,17 +301,19 @@ class Layout extends Component {
       const targetName = allNodes.find(node => node.id === link.target);
       const sourceName = allNodes.find(node => node.id === link.source);
       if (sourceName !== undefined && targetName !== undefined)
-         treeData.push({'id': link.target,
-                        'parent': link.source,
-                        'name': targetName['name'],
-                        'parent_parent': sourceName['name']}
-                      );
-      }
+        treeData.push({
+          'id': link.target,
+          'parent': link.source,
+          'name': targetName['name'],
+          'parent_parent': sourceName['name']
+        }
+        );
+    }
     );
 
     function findFor(parentId) {
       var z = [];
-      for (var i = 0; i < treeData.length; i++){
+      for (var i = 0; i < treeData.length; i++) {
         if (treeData[i].parent === parentId) {
           var ch = findFor(treeData[i].id);
           var o = Object.keys(ch).length === 0 ? {} : { children: ch };
@@ -329,7 +332,7 @@ class Layout extends Component {
     }
 
     const rootNode = allNodes.find(node => node.id === 'BFO_0000001');
-    const nodeToStart =  requestedNode !== undefined ? requestedNode :rootNode
+    const nodeToStart = requestedNode !== undefined ? requestedNode : rootNode
     const filteredNodes = [nodeToStart];
     const filteredLinks = [];
 
@@ -354,11 +357,11 @@ class Layout extends Component {
     if (requestedNode !== undefined) {
       const searchedNodeInTreeData = treeData.find(link => link.id === requestedNode.id);
       (function traverseTreeBack(node = searchedNodeInTreeData) {
-          allParents.unshift(node.id);
-          if (node.id === 'BFO_0000001' || node.parent === 'BFO_0000001') return;
-          const parentNode = treeData.find(link => link.id === node.parent);
-          traverseTreeBack(parentNode);
-        })();
+        allParents.unshift(node.id);
+        if (node.id === 'BFO_0000001' || node.parent === 'BFO_0000001') return;
+        const parentNode = treeData.find(link => link.id === node.parent);
+        traverseTreeBack(parentNode);
+      })();
 
       allParents.unshift('BFO_0000001');
     }
@@ -373,7 +376,7 @@ class Layout extends Component {
         'nodes': filteredNodes
       }
     });
-    };
+  };
 
 
   shrinkHandler() {
@@ -417,15 +420,15 @@ class Layout extends Component {
     let traversedLinks = [];
 
     (function traverseTree(node = nodesById[topMostNodeId]) {
-        const nodeFound = filteredNodes.find(el => el.id === node.id) !== undefined;
-        if (nodeFound) return;
-        visibleNodes.push(node);
-        traversedLinks.push(...node.childLinks);
+      const nodeFound = filteredNodes.find(el => el.id === node.id) !== undefined;
+      if (nodeFound) return;
+      visibleNodes.push(node);
+      traversedLinks.push(...node.childLinks);
 
-        node.childLinks
-          .map(link => ((typeof link.target) === 'object') ? link.target : nodesById[link.target])
-          .forEach(traverseTree);
-      })();
+      node.childLinks
+        .map(link => ((typeof link.target) === 'object') ? link.target : nodesById[link.target])
+        .forEach(traverseTree);
+    })();
 
     visibleLinks = traversedLinks.filter(el => filteredNodes.find(n => n.id === el.target.id) === undefined);
 
@@ -520,56 +523,49 @@ class Layout extends Component {
         // }}
 
         nodeCanvasObject={(node, ctx, globalScale) => {
-              
-              //ctx.fillStyle = node.id === this.state.currentNode.id ? "#009688" :'#deeaee';
 
-              /* ctx.beginPath();
-              ctx.arc(node.x, node.y, 12, 0, 2 * Math.PI);
-              ctx.stroke();
-              ctx.fill();
+          ctx.fillStyle = node.id === this.state.currentNode.id ? "#009688" : '#deeaee';
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 18, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.fill();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = node.id === this.state.currentNode.id ? "#ffffff" : '#034f84';
+          ctx.strokeStyle = "#00688B";
+          ctx.lineWidth = 2;
 
-              ctx.textAlign = "center";
-              ctx.textBaseline = "middle";
-              ctx.fillStyle =  node.id === this.state.currentNode.id ? "#ffffff" :'#034f84';
-              ctx.strokeStyle = "#00688B";
-              ctx.lineWidth = 2; */
+          const label = node.name;
+          var num_of_words = label.length;
+          var lines = label.split(" ");
 
-              const label = node.name;
-              var num_of_words = label.length;
+          // ctx.fillStyle =  node.id === this.state.currentNode.id ? "#78C1AE" :'#04678F';
+          // ctx.fillRect(node.x - 2, node.y - 8, (num_of_words * 2.4) + 6 , 14); 
 
-              ctx.fillStyle =  node.id === this.state.currentNode.id ? "#78C1AE" :'#04678F';
-              ctx.fillRect(node.x - 1, node.y - 8, (num_of_words * 2.4) + 2 , 12); 
+          const fontSize = 5;
+          ctx.font = `bold ${fontSize}px Tahoma`;
+          ctx.fillStyle = node.id === this.state.currentNode.id ? '#ffffff' : "#04678F";
 
-              const fontSize = 5;
-              ctx.font = `${fontSize}px Tahoma`;
-              ctx.fillStyle = node.id === this.state.currentNode.id ? "#04678F" :'#ffffff';
-              ctx.fillText(label, node.x, node.y )
-              
-              
-
-              /* if (lines.length == 1) {
-                ctx.fillText(lines[0], node.x, node.y )
+          if (lines.length == 1) {
+            ctx.fillText(lines[0], node.x, node.y)
+          } else {
+            for (var i = 0; i < lines.length; i++) {
+              if (i == 0) {
+                ctx.fillText(lines[i], node.x, node.y - 4);
+              } else if (i == 1) {
+                ctx.fillText(lines[i], node.x, node.y + 2);
+              } else if (i == 2) {
+                ctx.fillText(lines[i], node.x, node.y + 8);
               } else {
-                for (var i = 0; i<lines.length; i++) {
-                  if (i == 0) {
-                    ctx.fillText(lines[i], node.x, node.y - 8 );
-                  } else if (i == 1) {
-                    ctx.fillText(lines[i], node.x, node.y - 2 );
-                  } else if (i == 2) {
-                    ctx.fillText(lines[i], node.x, node.y + 4 );
-                  } else {
-                    ctx.fillText(lines[i], node.x, node.y + 10 );
-                  }
-                }
-              } */
-
-
-              const textWidth = ctx.measureText(label).width;
-              const bckgDimensions = [textWidth, fontSize].map(
-                n => n + fontSize * 6
-                ); // some padding
-                node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
-              }}
+                ctx.fillText(lines[i], node.x, node.y + 14);
+              }
+            }
+          }
+          const textWidth = ctx.measureText(label).width;
+          const bckgDimensions = [textWidth, fontSize].map(
+            n => n + fontSize * 6); // some padding
+          node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+        }}
 
         nodePointerAreaPaint={(node, color, ctx) => {
           ctx.fillStyle = color;
@@ -610,72 +606,81 @@ class Layout extends Component {
   }
 
   render() {
-      return (
-        <div>
+    return (
+      <div>
         <Grid
           container
           direction="row"
           justifyContent="center"
           //alignItems="stretch"
           spacing={2}>
-              <Grid item xs={3}>
-                  <div>
-                      <BaseCard
-                        content={<CustomTreeView
-                        treeViewData={this.state.treeViewData}
-                        expanded={this.state.currentNodeAllParents}
-                        treeViewSelectHandler={this.treeViewSelectHandler}
-                        />}
-                      />
-                  </div>
-              </Grid>
-              <Grid item xs={9} >
-                <Grid
-                  container
-                  direction="column"
-                  justifyContent="center"
-                >
-                {<CustomCard
-                  nodeInfo={this.state.currentNode}
+          <Grid item xs={3}>
+            <div>
+              <BaseCard
+                content={<CustomTreeView
+                  treeViewData={this.state.treeViewData}
+                  expanded={this.state.currentNodeAllParents}
+                  treeViewSelectHandler={this.treeViewSelectHandler}
                 />}
+              />
+            </div>
+          </Grid>
+          <Grid item xs={9} >
+            <Grid
+              container
+              direction="column"
+              justifyContent="center"
+            >
+              <div>
+                {<SearchBox
+                  searchHandler={this.searchHandler}
+                />}
+              </div>
 
-                <div style={{ "padding": "15px 0px 0px 0px", "height": "60px" }}>
-                  {<LayoutActions
-                    annotate={false}
-                    viewAll={true}
-                    search={true}
-                    hierarchicalView={true}
-                    focusHandler={this.focusHandler}
-                    fitAllHandler={this.fitAllHandler}
-                    annotateDatabaseHandler={this.annotateDatabaseHandler}
-                    expandHandler={this.expandHandler}
-                    showParentHandler={this.showParentHandler}
-                    shrinkHandler={this.shrinkHandler}
-                    viewAllHandler={this.viewAllHandler}
-                    toggleRenderMode={this.toggleRenderMode}
-                    HierarchicalViewHandler={this.HierarchicalViewHandler}
-                    searchHandler={this.searchHandler}
-                    />}
-                 </div>
-                 <div style={{
-                     "borderStyle": "solid",
-                     "borderWidth": "1px",
-                     "backgroundColor": "#f7f7f7",
-                     "borderColor": "#00688B" }}>
-                  {this.renderSense()}
-                 </div>
-                </Grid>
-              </Grid>
+              {<CustomCard
+                nodeInfo={this.state.currentNode}
+              />}
+
+              <div style={{ "padding": "15px 0px 0px 15px", "height": "60px" }}>
+                {<LayoutActions
+                  annotate={false}
+                  viewAll={false}
+                  search={true}
+                  hierarchicalView={true}
+                  focusHandler={this.focusHandler}
+                  fitAllHandler={this.fitAllHandler}
+                  annotateDatabaseHandler={this.annotateDatabaseHandler}
+                  expandHandler={this.expandHandler}
+                  showParentHandler={this.showParentHandler}
+                  shrinkHandler={this.shrinkHandler}
+                  viewAllHandler={this.viewAllHandler}
+                  toggleRenderMode={this.toggleRenderMode}
+                  HierarchicalViewHandler={this.HierarchicalViewHandler}
+                  searchHandler={this.searchHandler}
+                />}
+              </div>
+
+              <div style={{
+                "width": "98%",
+                "borderStyle": "solid",
+                "borderWidth": "1px",
+                "backgroundColor": "#f7f7f7",
+                "borderColor": "#00688B"
+              }}>
+                {this.renderSense()}
+              </div>
+            </Grid>
+          </Grid>
         </Grid>
-          <div>
-            <CustomDialog
-              handleDialogOpen={this.handleSettingDialogOpen}
-              handleDialogClose={this.handleSettingDialogClose}
-              open={this.state.openSettingDialog}
-              content={this.state.currentNode}
-            />
-          </div>
+        <div>
+          <CustomDialog
+            handleDialogOpen={this.handleSettingDialogOpen}
+            handleDialogClose={this.handleSettingDialogClose}
+            open={this.state.openSettingDialog}
+            content={this.state.currentNode}
+          />
         </div>
+      </div>
     );
   }
 }

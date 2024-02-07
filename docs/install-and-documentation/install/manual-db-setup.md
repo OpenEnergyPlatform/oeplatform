@@ -11,10 +11,10 @@ Below we describe the complete manual installation of the OpenEnergyPlatform dat
 
 ## 1 Install the database infrastructure
 
-To setup the PostgreSQL database on your own machine your have to install the database software and setup additional packages as well as install the database tables that are already available as datamodel which is maintained as python classes called (data-) models.
+To setup the PostgreSQL database on your own machine you have to install the database software and setup additional packages. After the databases are installed you have to create the database tables that are already available as data model in the oeplatform code project. There we maintain the tables as python classes called models. You will use django and alembic to create these table automatically.
 
 !!! tip
-    We also offer the possibility to use [docker](https://www.docker.com/), if you are a developer you could manually install the OEP alongside the dockercontainer to run the database or run everything in docker. This can facilitate the maintenance of the Oeplattform infrastructure and the local deployment of the Oeplattform. However, Docker as additional software usually requires more resources, especially memory.
+    We also offer the possibility to use [docker](https://www.docker.com/), if you are a developer you could manually install the OEP alongside the docker container to run the database or run everything in docker. This can facilitate the maintenance of the oeplattform infrastructure and the local deployment of the Oeplattform. However, Docker as additional software usually requires more resources, especially memory.
 
     For this purpose, 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database) are published with each release, which can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
 
@@ -24,12 +24,12 @@ To setup the PostgreSQL database on your own machine your have to install the da
 
 If postgresql is not installed yet on your computer, you can follow this [guide](https://wam.readthedocs.io/en/latest/getting_started.html#installation-from-scratch).
 
-During the installation, make sure that you note the superuser and password. Other relevant details are host and the port, these can most likely be set to the default value. In the oeplatoform configuration the values are:
+During the installation, make sure that you note the superuser and password. Other relevant details are the host and the port, these will most likely be set to the default value. In the oeplatoform default configuration the values are:
 
 - Host `127.0.0.1` or `localhost`.
 - Port `5432`
 
-For the creation of spatial objects we use [PostGIS](https://postgis.net/install/) for PostgreSQL.
+For the creation of spatial objects we use the [PostGIS](https://postgis.net/install/) plugin for PostgreSQL.
 
 ??? Info "How to get PostGIS"
     PostGIS is a plugin for PostgreSQL and must be installed additionally. If you use an installation wizard, this step is probably included in the general PostgreSQL installation.
@@ -41,7 +41,7 @@ For the creation of spatial objects we use [PostGIS](https://postgis.net/install
 ### 1.2 Install Apache Jena Fuseki
 
 !!! note
-    - Skip the installation if your developement task is not aimed at the OEKG.
+    - Skip the installation if your development task is not aimed at the [OEKG](https://openenergyplatform.github.io/organisation/family_members/knowledge-representation/oekg/).
     - For more information about Apache Jena Fuseki please visit [this page.](https://jena.apache.org/documentation/fuseki2/)
 
 1. Download [apache-jena-fuseki-4.2.0.tar.gz](https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-4.2.0.tar.gz)
@@ -51,9 +51,9 @@ For the creation of spatial objects we use [PostGIS](https://postgis.net/install
 
         ./fuseki-server
 
-5. To access the server UI, enter `http://localhost:3030/` in your web browser.
-4. First click the **manage datasets** tab and then choose the **add new dataset**.
-5. Enter `OEKG_DS` for the **dataset name** and choose the type of dataset (in-memory datasets do not persist if the server stops) and click **create dataset**.
+4. To access the server UI, enter `http://localhost:3030/` in your web browser.
+5. First click the **manage datasets** tab and then choose the **add new dataset**.
+6. Enter `OEKG_DS` for the **dataset name** and choose the type of dataset (in-memory datasets do not persist if the server stops) and click **create dataset**.
 
 ## 2 Create the PostgreSQL databases
 
@@ -80,9 +80,9 @@ it will be instantiated by automated scripts later on.
 Once logged into your psql session (for linux: `sudo -u postgres psql`, for windows: `psql`), run the following lines:
 
     # optional: .. with owner = postgres;
-    create database oep_db;
+    create database oedb;
 
-After successfully installing PostGIS (see [step 1.1](#11-install-postgresql)), enter in `oep_db` (`\c oep_db;`) and type the additional commands:
+After successfully installing PostGIS (see [step 1.1](#11-install-postgresql)), enter in `oedb` (`\c oedb;`) and type the additional commands:
 
     create extension postgis;
     create extension postgis_topology;
@@ -116,7 +116,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.environ.get("OEP_DJANGO_NAME", "oep_django"),
      'USER': os.environ.get("OEP_DJANGO_USER", "postgres"),
-     'PASSWORD': os.environ.get("OEP_DB_PW", "postgres"),
+     'PASSWORD': os.environ.get("OEP_DJANGO_PW", "postgres"),
      'HOST': os.environ.get("OEP_DJANGO_HOST", "localhost")
  }
 }
@@ -140,7 +140,7 @@ DATABASES = {
 
         ``` bash
         set OEP_DJANGO_USER=oep_django_user
-        set OEP_DB_PW=<oep_django_password>
+        set OEP_DJANGO_PW=<oep_django_password>
         ```
 
     In the following steps we'll provide the terminal commands but you always can set the environment variables via menus instead.
@@ -149,7 +149,7 @@ DATABASES = {
 
         ``` bash
         export OEP_DJANGO_USER=oep_django_user
-        export OEP_DB_PW=<oep_django_password>
+        export OEP_DJANGO_PW=<oep_django_password>
         ```
 
 #### 3.1.2 oedb primary database
@@ -183,22 +183,22 @@ dbname = os.environ.get("LOCAL_DB_NAME", "oedb")
     - On windows
 
         ``` bash
-        set LOCAL_DB_USER=oep_db_user
-        set LOCAL_DB_PASSWORD=<oep_db_password>
-        set LOCAL_DB_NAME=oep_db
+        set LOCAL_DB_USER=oedb_user
+        set LOCAL_DB_PASSWORD=<oedb_password>
+        set LOCAL_DB_NAME=oedb
         ```
 
     - On linux
 
         ``` bash
-        export LOCAL_DB_USER=oep_db_user
-        export LOCAL_DB_PASSWORD=<oep_db_password>
-        export LOCAL_DB_NAME=oep_db
+        export LOCAL_DB_USER=oedb_user
+        export LOCAL_DB_PASSWORD=<oedb_password>
+        export LOCAL_DB_NAME=oedb
         ```
 
     !!! Tip
         If you kept the default name from the above example in 2.1, then the environment variables
-        `LOCAL_DB_USER` and `LOCAL_DB_NAME` should have the values `oep_db_user` and `oep_db`, respectively.
+        `LOCAL_DB_USER` and `LOCAL_DB_NAME` should have the values `oedb_user` and `oedb`, respectively.
 
 ### 3.2 Verify the connection
 

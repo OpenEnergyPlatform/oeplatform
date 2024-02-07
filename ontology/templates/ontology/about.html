@@ -1,8 +1,44 @@
 {% extends "base/base.html" %}
+{% load static %}
+
+{% block site-header %}
+    <div class="main-header">
+        <h1 class="main-header__title">
+            <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg" width="16" height="16" alt="OEO">         
+            Ontology
+        </h1>
+        <div class="main-header__wizard">
+            Overview
+        </div>
+    </div>
+
+{% endblock site-header %}
+
+{% block main-right-sidebar-content %}
+<div class="container">
+    <div class="row">
+        <h3>Ontologies</h3>
+    </div>
+    <div class="row">
+        <table class="table">
+            <tr>
+                <th>Name</th>
+                <th>Version</th>
+            </tr>
+            <tr>
+                <td><a href="/ontology/oeo/">Open Energy Ontology (OEO)</a></td>
+                <td>{{ version }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+{% endblock main-right-sidebar-content %}
+
 
 {% block main-content-body %}
 
-<h2 id="open-energy-ontology">Open Energy Ontology</h2>
+<h3>Open Energy Ontology</h3>
 <p>The Open Energy Ontology (OEO) is created as a domain ontology within the
   field of energy system modelling. It is growing constantly and under a regular
   release cycle. The latest OEO version is {{ version }} and its files can be accessed <a href="https://openenergy-platform.org/ontology/oeo">here</a>.</p>
@@ -69,14 +105,4 @@ We can then facilitate someone who can follow up on your question.
 
 <p>A  <a href={% url 'oeo-s-c'%}>OEO steering committee</a> was created in autumn 2019.</p>
 
-<h3>Ontologies</h3>
-<table class="table">
-    <tr>
-        <th>Name</th>
-        <th>Description</th>
-    </tr>
-    <tr>
-        <td><a href="/ontology/oeo">OEO</a></td>
-    </tr>
-</table>
 {% endblock %}

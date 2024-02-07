@@ -18,6 +18,7 @@ const useStyles = makeStyles({
     borderColor: "#00688B",
     overflow: "auto",
     height: "250px",
+    width: "98%"
 
   },
   bullet: {
