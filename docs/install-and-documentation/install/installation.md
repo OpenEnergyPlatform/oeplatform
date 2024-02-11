@@ -48,7 +48,7 @@ The installation steps have been proofed on linux and windows for python 3.6 and
         - `python manage.py collectstatic`
         - `python manage.py compress`
         - `python manage.py migrate`
-        - python manage.py alembic upgrade head`
+        - `python manage.py alembic upgrade head`
 
         ??? Info "Sept 3.1: Management commands:" 
             These commands are most likely not relevant if you are setting up oeplatform for the first time. One exception is the mirror command. If you have created some tables manually in the oedb database, you can use the mirror command to register them in the oeplatform.
@@ -161,12 +161,12 @@ The goal is to have a new directory like you see below inside the oeplatform dir
 
 The directory where all ontologies are stored is called "ontologies". If you want to change the name of the directory you have to update the settings.py file for the oeplatform also. The following variables are relevant for the configuration of the ontology integration. In most cases, you can use the default settings.
 
-    ``` python
-    ONTOLOGY_FOLDER # Name of the folder for all ontologies
-    ONTOLOGY_ROOT   # constructed Path for all ontologies
-    OPEN_ENERGY_ONTOLOGY_NAME   # Name of the oeo
-    OPEN_ENERGY_ONTOLOGY_FOLDER # constructed Path for the oeo directory
-    ```
+``` py
+ONTOLOGY_FOLDER # Name of the folder for all ontologies
+ONTOLOGY_ROOT   # constructed Path for all ontologies
+OPEN_ENERGY_ONTOLOGY_NAME   # Name of the oeo
+OPEN_ENERGY_ONTOLOGY_FOLDER # constructed Path for the oeo directory
+```
 
 If you use the default naming "ontologies" you should create this directory. Then you can download the full oeo release files from GitHub and unzip them into the new directory. To validate you can check whether you can find the file "oeo-full.owl".
 
@@ -212,7 +212,7 @@ In the django app directory `oeplatform/factsheet` we provide a Web-API to acces
 
     The connection to the database API is setup in the factsheet/views.py you have to make sure that you provide the correct URL to you database instance. In development mode it should be something like:
 
-    ``` python
+    ``` py
     query_endpoint = 'http://localhost:3030/ds/query'
     update_endpoint = 'http://localhost:3030/ds/update'
     ```
@@ -227,7 +227,7 @@ In the django app directory `oeplatform/factsheet` we provide a Web-API to acces
 
 4. Build the scenario bundle app:
 
-    ``` bash
+    ```
     cd factsheet/frontend
     npm install
     cd ../..
