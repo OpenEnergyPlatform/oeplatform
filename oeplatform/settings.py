@@ -137,7 +137,7 @@ except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
 OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
-OPEN_ENERGY_ONTOLOGY_FOLDER = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+OPEN_ENERGY_ONTOLOGY_FOLDER = "/Users/memarian/Documents/OEO/" #Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
