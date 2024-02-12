@@ -21,7 +21,6 @@ const ColorToggleButton = (props) => {
 
   const param_2 = String(window.location.href).split('/')[5];
 
-
   useEffect(() => {
     // Replace 'bundle_id' with the actual ID of the ScenarioBundle you want to check
     const bundleId = param_2; // Assuming you pass the uid as a prop
