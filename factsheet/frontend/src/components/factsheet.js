@@ -275,9 +275,6 @@ function Factsheet(props) {
       function parse(arr) {
         return arr.map(obj => {
           Object.keys(obj).forEach(key => {
-            if (Array.isArray(obj[key])) {
-              parse(obj[key]);
-            }
             if (key === 'label') {
               obj[key] = <span>
                 <HtmlTooltip
@@ -302,7 +299,11 @@ function Factsheet(props) {
         })
       }
 
-      setTechnologies(parse(data.technologies['children']));
+
+      const all_technologies = parse(data.technologies['children']);
+      setTechnologies(all_technologies);
+
+
       // setTechnologies(data.technologies['children']);
 
       setScenarioDescriptors(data.scenario_descriptors);
@@ -1218,12 +1219,34 @@ function Factsheet(props) {
 
   const findNestedObj = (entireObj, keyToFind, valToFind) => {
     let foundObj;
+
+    console.log(entireObj);
+
     const objFiltered = entireObj.map(item =>
     ({
       ...item,
       label: item.value
     })
     );
+
+
+    function safeStringify(obj, indent = 2) {
+      const cache = new Set();
+      return JSON.stringify(obj, (key, value) => {
+        if (typeof value === 'object' && value !== null) {
+          if (cache.has(value)) {
+            // Circular reference found, return a placeholder object
+            return '[Circular Reference]';
+          }
+          // Store the value in our set
+          cache.add(value);
+        }
+        return value;
+      }, indent);
+    }
+
+    console.log(safeStringify(objFiltered));
+
 
     JSON.stringify(objFiltered, (_, nestedValue) => {
       if (nestedValue && nestedValue[keyToFind] === valToFind) {
@@ -1254,6 +1277,7 @@ function Factsheet(props) {
 
   const technologyHandler = (technologyList, nodes) => {
     const zipped = []
+    console.log(technologyList);
     technologyList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri }));
     setSelectedTechnologies(zipped);
   };
@@ -1266,7 +1290,6 @@ function Factsheet(props) {
 
   const sectorsHandler = (sectorsList, nodes) => {
     const zipped = []
-
     sectorsList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).value, "class": findNestedObj(nodes, 'value', v).iri }));
     setSelectedSectors(zipped);
   };
@@ -2272,7 +2295,7 @@ function Factsheet(props) {
             </FirstRowTableCell>
             <ContentTableCell>
               {selectedTechnologies.map((v, i) => (
-                <span> <span> {v.value} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                <span> <span> <Chip label={v.value} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
               ))}
             </ContentTableCell>
           </TableRow>
