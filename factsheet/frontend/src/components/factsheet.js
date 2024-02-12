@@ -271,7 +271,40 @@ function Factsheet(props) {
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
-      setTechnologies(data.technologies['children']);
+
+      function parse(arr) {
+        return arr.map(obj => {
+          Object.keys(obj).forEach(key => {
+            if (Array.isArray(obj[key])) {
+              parse(obj[key]);
+            }
+            if (key === 'label') {
+              obj[key] = <span>
+                <HtmlTooltip
+                  title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {obj.definition}
+                        <br />
+                        <a href={obj.iri}>More info from Open Energy Ontology (OEO)....</a>
+                      </Typography>
+                    </React.Fragment>
+                  }
+                >
+                  <InfoOutlinedIcon sx={{ color: '#708696', marginRight: "7px" }} />
+                </HtmlTooltip>
+                {obj.label}
+              </span>;
+            }
+          })
+
+          return obj;
+        })
+      }
+
+      setTechnologies(parse(data.technologies['children']));
+      // setTechnologies(data.technologies['children']);
+
       setScenarioDescriptors(data.scenario_descriptors);
       const sectors_with_tooltips = data.sectors.map(item =>
       ({
@@ -1710,7 +1743,7 @@ function Factsheet(props) {
       />
       <BundleScenariosGridItem
         {...props}
-        spanValue="Technology"
+        spanValue="Technologies"
         tooltipText="A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way."
         hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000407"
         renderField={() => (
@@ -2239,7 +2272,7 @@ function Factsheet(props) {
             </FirstRowTableCell>
             <ContentTableCell>
               {selectedTechnologies.map((v, i) => (
-                <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                <span> <span> {v.value} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
               ))}
             </ContentTableCell>
           </TableRow>

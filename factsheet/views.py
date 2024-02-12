@@ -58,14 +58,14 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-#query_endpoint = "http://localhost:3030/ds/query"
-#update_endpoint = "http://localhost:3030/ds/update"
+query_endpoint = "http://localhost:3030/ds/query"
+update_endpoint = "http://localhost:3030/ds/update"
 
 #query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
 #update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
+#query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
+#update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -1570,11 +1570,13 @@ def get_all_sub_classes(cls, visited=None):
     childCount = len(list(cls.subclasses()))
     subclasses = cls.subclasses()
 
+
     dict = {
         "name": cls.label.first(),
         "label": cls.label.first(),
         "value": cls.label.first(),
         "iri": cls.iri,
+        "definition": oeo.value(OEO[str(cls).split('.')[1]], OBO.IAO_0000115)
     }
 
     if childCount > 0:
