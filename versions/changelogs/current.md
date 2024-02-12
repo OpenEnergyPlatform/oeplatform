@@ -14,6 +14,8 @@
 
 ### Features
 
+- Tooltips for sectors sector divisions and technologies [(PR#1579)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1579)
+
 ### Bugs
 
 ### Removed
