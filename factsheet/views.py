@@ -5,6 +5,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.utils.cache import patch_response_headers
+
 # import uuid
 # import requests
 # import rdflib
@@ -15,6 +16,7 @@ from rdflib.namespace import Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 import os
 from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES, OPEN_ENERGY_ONTOLOGY_NAME
+
 # from datetime import date
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
@@ -26,6 +28,7 @@ from rest_framework.decorators import (
     authentication_classes,
     permission_classes,
 )
+
 # from rest_framework.authentication import TokenAuthentication
 # from rest_framework.permissions import IsAuthenticated
 # from rest_framework.authtoken.models import Token
@@ -35,6 +38,7 @@ from .models import OEKG_Modifications, ScenarioBundleAccessControl
 from login import models as login_models
 
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
+from factsheet.oekg.filters import OekgQuery
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
@@ -56,14 +60,14 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-# query_endpoint = "http://localhost:3030/ds/query"
-# update_endpoint = "http://localhost:3030/ds/update"
+query_endpoint = "http://localhost:3030/ds/query"
+update_endpoint = "http://localhost:3030/ds/update"
 
 # query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
 # update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
+# query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
+# update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -1198,9 +1202,9 @@ def query_oekg(request, *args, **kwargs):
         study_keywords=str(study_keywords_list).replace("[", "").replace("]", ""),
         scenario_year_start=scenario_year_start_value,
         scenario_year_end=scenario_year_end_value,
-        funding_source_exp="OEO:OEO_00000509 ?funding_sources ;"
-        if funding_sources_list != []
-        else "",
+        funding_source_exp=(
+            "OEO:OEO_00000509 ?funding_sources ;" if funding_sources_list != [] else ""
+        ),
         authors_exp="OEO:OEO_00000506 ?authors ;" if authors_list != [] else "",
     )
 
@@ -1753,3 +1757,42 @@ def populate_factsheets_elements(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
 
     return response
+
+
+def filter_scenario_view(request):
+    # Get the table IRI from the request or any other source
+    table_iri = request.GET.get("table_iri", "")
+    # table_iri = "dataedit/view/scenario/abbb_emob"
+
+    # Create an instance of OekgQuery
+    oekg_query = OekgQuery()
+
+    # Get related scenarios where the table is the input dataset
+    input_dataset_scenarios = (
+        oekg_query.get_related_scenarios_where_table_is_input_dataset(table_iri)
+    )
+
+    # Get related scenarios where the table is the output dataset
+    output_dataset_scenarios = (
+        oekg_query.get_related_scenarios_where_table_is_output_dataset(table_iri)
+    )
+
+    # Get the acronyms for the scenarios
+    input_dataset_acronyms = [
+        oekg_query.get_scenario_acronym(scenario_uri)
+        for scenario_uri in input_dataset_scenarios
+    ]
+
+    output_dataset_acronyms = [
+        oekg_query.get_scenario_acronym(scenario_uri)
+        for scenario_uri in output_dataset_scenarios
+    ]
+
+    # Prepare data for rendering in the template
+    context = {
+        "input_dataset_scenarios": input_dataset_acronyms,
+        "output_dataset_scenarios": output_dataset_acronyms,
+    }
+    html_content = render(request, "partials/related_oekg_scenarios.html", context).content.decode("utf-8")
+    # Render the template with the context
+    return HttpResponse(html_content)
