@@ -8,4 +8,6 @@
 
 ## Bugs
 
+Bugfix: Delete a row using the http api leads to server error if table includes not nullable fields [#1581](https://github.com/OpenEnergyPlatform/oeplatform/pull/1581)
+
 ## Removed
