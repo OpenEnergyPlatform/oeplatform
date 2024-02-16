@@ -15,3 +15,5 @@
 ## Bugs
 
 Bugfix: Delete a row using the http api leads to server error if table includes not nullable fields [#1581](https://github.com/OpenEnergyPlatform/oeplatform/pull/1581)
+
+- Bugfix: Adding tags if metadata is empty does not result in a server error anymore. [(#1528)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1528)
