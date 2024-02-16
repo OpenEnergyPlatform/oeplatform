@@ -7,7 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
-import CustomSwap from './customSwapButton.js';
+import ColorToggleButton from './customSwapButton.js';
 import CustomTabs from './customTabs.js';
 import CustomAutocomplete from './customAutocomplete.js';
 import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
@@ -2669,7 +2669,7 @@ function Factsheet(props) {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <CustomSwap handleSwap={handleSwap} />
+                <ColorToggleButton handleSwap={handleSwap} />
                 <div style={{ 'textAlign': 'center' }}>
                   {/* <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                     <CircularProgress variant="determinate" value={60} size={60} />
