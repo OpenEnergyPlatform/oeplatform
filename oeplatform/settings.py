@@ -89,7 +89,6 @@ EXTERNAL_URLS = {
     "compendium": "https://openenergyplatform.github.io/organisation/",
     "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
     "spdx_licenses": "https://spdx.github.io/license-list-data/",
-
 }
 
 # Kept this separate for now to avoid messing with the other list ... TODO move to EXTERNAL_URLS if possible
@@ -137,7 +136,7 @@ except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
 OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
-OPEN_ENERGY_ONTOLOGY_FOLDER = "/Users/memarian/Documents/OEO/" #Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+OPEN_ENERGY_ONTOLOGY_FOLDER = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
