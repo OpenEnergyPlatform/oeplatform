@@ -1854,14 +1854,14 @@ function Factsheet(props) {
                 <TableRow>
                   <FirstRowTableCell>
                     <div>
-                      <span>Name</span>
+                      <span>Scenario name</span>
                       <HtmlTooltip
                         title={
                           <React.Fragment>
                             <Typography color="inherit" variant="subtitle1">
-                              {'A study is a project with the goal to investigate something.'}
+                              {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -1923,14 +1923,14 @@ function Factsheet(props) {
                 <TableRow>
                   <FirstRowTableCell>
                     <div>
-                      <span>Descriptors</span>
+                      <span>Scenario descriptors</span>
                       <HtmlTooltip
                         title={
                           <React.Fragment>
                             <Typography color="inherit" variant="subtitle1">
-                              {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
+                              {'A data descriptor is an information content entity that contains additional information about some data.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)....</a>
+                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000119">More info from Open Energy Ontology (OEO)....</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -1963,7 +1963,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.scenario_years.map((e) => <span> <span> {e.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
+                    {v.scenario_years.sort((a, b) => a.id - b.id).map((e) => <span> <span> {e.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>

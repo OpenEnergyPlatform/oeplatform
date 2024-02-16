@@ -21,7 +21,11 @@ urlpatterns = [
         views.Metadata.as_view(),
         name="api_table_meta",
     ),
-    path('v0/schema/<str:schema>/tables/<str:table>/move/<str:to_schema>/', views.Move.as_view(), name ='move'),
+    path(
+        "v0/schema/<str:schema>/tables/<str:table>/move/<str:to_schema>/",
+        views.Move.as_view(),
+        name="move",
+    ),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa
         views.Column.as_view(),
@@ -163,4 +167,19 @@ urlpatterns = [
     url(r"usrprop/", views.get_users),
     url(r"grpprop/", views.get_groups),
     url("oeo-search", views.oeo_search),
+    url(
+        r"^v0/factsheet/frameworks/?$",
+        views.EnergyframeworkFactsheetListAPIView.as_view(),
+        name="list-framework-factsheets",
+    ),
+    url(
+        r"^v0/factsheet/models/?$",
+        views.EnergymodelFactsheetListAPIView.as_view(),
+        name="list-model-factsheets",
+    ),
+    url(
+        r"^v0/datasets/list_all/scenario/?$",
+        views.ScenarioDataTablesListAPIView.as_view(),
+        name="list-scenario-datasets",
+    ),
 ]
