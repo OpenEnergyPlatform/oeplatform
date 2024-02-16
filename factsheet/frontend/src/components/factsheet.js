@@ -31,7 +31,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import conf from "../conf.json";
-import { Tooltip } from '@mui/material';
+import { colors, Tooltip } from '@mui/material';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { styled } from '@mui/material/styles';
@@ -271,10 +271,68 @@ function Factsheet(props) {
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
-      setTechnologies(data.technologies['children']);
+
+      function parse(arr) {
+        return arr.map(obj => {
+          Object.keys(obj).forEach(key => {
+            if (key === 'label') {
+              obj[key] = <span>
+                <HtmlTooltip
+                  title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="subtitle1">
+                        {obj.definition}
+                        <br />
+                        <a href={obj.iri}>More info from Open Energy Ontology (OEO)....</a>
+                      </Typography>
+                    </React.Fragment>
+                  }
+                >
+                  <InfoOutlinedIcon sx={{ color: '#708696', marginRight: "7px" }} />
+                </HtmlTooltip>
+                {obj.label}
+              </span>;
+            }
+          })
+
+          return obj;
+        })
+      }
+
+
+      const all_technologies = parse(data.technologies['children']);
+      setTechnologies(all_technologies);
+
+
+      // setTechnologies(data.technologies['children']);
+
       setScenarioDescriptors(data.scenario_descriptors);
-      setSectors(data.sectors);
-      setFilteredSectors(data.sectors);
+      const sectors_with_tooltips = data.sectors.map(item =>
+      ({
+        ...item,
+        label: <span>
+          <HtmlTooltip
+            title={
+              <React.Fragment>
+                <Typography color="inherit" variant="subtitle1">
+                  {item.sector_difinition}
+                  <br />
+                  <a href={item.iri}>More info from Open Energy Ontology (OEO)....</a>
+                </Typography>
+              </React.Fragment>
+            }
+          >
+            <InfoOutlinedIcon sx={{ color: '#708696', marginRight: "7px" }} />
+          </HtmlTooltip>
+          {item.label}
+        </span>
+      })
+      );
+
+      setSectors(sectors_with_tooltips);
+      setFilteredSectors(sectors_with_tooltips);
+      //setFilteredSectors([]);
+
       const sector_d = data.sector_divisions;
       sector_d.push({ "label": "Others", "name": "Others", "class": "Others", "value": "Others" });
       setSectorDivisions(sector_d);
@@ -1161,7 +1219,36 @@ function Factsheet(props) {
 
   const findNestedObj = (entireObj, keyToFind, valToFind) => {
     let foundObj;
-    JSON.stringify(entireObj, (_, nestedValue) => {
+
+    console.log(entireObj);
+
+    const objFiltered = entireObj.map(item =>
+    ({
+      ...item,
+      label: item.value
+    })
+    );
+
+
+    function safeStringify(obj, indent = 2) {
+      const cache = new Set();
+      return JSON.stringify(obj, (key, value) => {
+        if (typeof value === 'object' && value !== null) {
+          if (cache.has(value)) {
+            // Circular reference found, return a placeholder object
+            return '[Circular Reference]';
+          }
+          // Store the value in our set
+          cache.add(value);
+        }
+        return value;
+      }, indent);
+    }
+
+    console.log(safeStringify(objFiltered));
+
+
+    JSON.stringify(objFiltered, (_, nestedValue) => {
       if (nestedValue && nestedValue[keyToFind] === valToFind) {
         foundObj = nestedValue;
       }
@@ -1190,6 +1277,7 @@ function Factsheet(props) {
 
   const technologyHandler = (technologyList, nodes) => {
     const zipped = []
+    console.log(technologyList);
     technologyList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri }));
     setSelectedTechnologies(zipped);
   };
@@ -1202,7 +1290,7 @@ function Factsheet(props) {
 
   const sectorsHandler = (sectorsList, nodes) => {
     const zipped = []
-    sectorsList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri }));
+    sectorsList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).value, "class": findNestedObj(nodes, 'value', v).iri }));
     setSelectedSectors(zipped);
   };
 
@@ -1678,7 +1766,7 @@ function Factsheet(props) {
       />
       <BundleScenariosGridItem
         {...props}
-        spanValue="Technology"
+        spanValue="Technologies"
         tooltipText="A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way."
         hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000407"
         renderField={() => (
@@ -2157,7 +2245,7 @@ function Factsheet(props) {
             </FirstRowTableCell>
             <ContentTableCell>
               {selectedSectorDivisions.map((v, i) => (
-                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                <span> <span> <Chip label={v.name} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
               ))}
             </ContentTableCell>
           </TableRow>
@@ -2182,7 +2270,7 @@ function Factsheet(props) {
             </FirstRowTableCell>
             <ContentTableCell>
               {selectedSectors.map((v, i) => (
-                <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                <span> <span> <Chip label={v.label} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
               ))}
             </ContentTableCell>
           </TableRow>
@@ -2207,7 +2295,7 @@ function Factsheet(props) {
             </FirstRowTableCell>
             <ContentTableCell>
               {selectedTechnologies.map((v, i) => (
-                <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                <span> <span> <Chip label={v.value} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
               ))}
             </ContentTableCell>
           </TableRow>

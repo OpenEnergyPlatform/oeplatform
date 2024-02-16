@@ -32,7 +32,8 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from dataedit.models import Schema as DBSchema, PeerReview
+from dataedit.models import PeerReview
+from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
@@ -46,6 +47,8 @@ logger = logging.getLogger("oeplatform")
 __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
+
+ID_COLUMN_NAME = "id"
 
 
 MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
@@ -1183,6 +1186,38 @@ def __change_rows(request, context, target_table, setter, fields=None):
     return {"rowcount": rows["rowcount"]}
 
 
+def drop_not_null_constraints_from_delete_meta_table(
+    meta_table_delete: str, meta_schema: str
+) -> None:
+    # https://github.com/OpenEnergyPlatform/oeplatform/issues/1548
+    # we only want id column (and meta colums, wich start with a "_")
+
+    engine = _get_engine()
+
+    # find not nullable columns in meta tables
+    query = f"""
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_name = '{meta_table_delete}'
+    AND table_schema = '{meta_schema}'
+    AND is_nullable = 'NO'
+    """
+    column_names = [x[0] for x in engine.execute(query).fetchall()]
+    # filter meta columns and id
+    column_names = [
+        c for c in column_names if c != ID_COLUMN_NAME and not c.startswith("_")
+    ]
+
+    if not column_names:
+        # nothing to do
+        return
+
+    # drop not null from these columns
+    col_drop = ", ".join(f'ALTER "{c}" DROP NOT NULL' for c in column_names)
+    query = f'ALTER TABLE "{meta_schema}"."{meta_table_delete}" {col_drop};'
+    engine.execute(query)
+
+
 def data_delete(request, context=None):
     orig_table = get_or_403(request, "table")
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
@@ -1199,6 +1234,10 @@ def data_delete(request, context=None):
     target_table = get_delete_table_name(orig_schema, orig_table)
     setter = []
     cursor = load_cursor_from_context(context)
+
+    meta_schema = get_meta_schema_name(schema)
+    drop_not_null_constraints_from_delete_meta_table(target_table, meta_schema)
+
     result = __change_rows(request, context, target_table, setter, ["id"])
     if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
@@ -2085,6 +2124,15 @@ def getValue(schema, table, column, id):
 
 
 def apply_changes(schema, table, cursor=None):
+    """Apply changes from the meta tables to the actual table.
+
+    Meta tables are :
+    * _<NAME>_insert
+    * _<NAME>_update
+    * _<NAME>_delete
+
+    """
+
     def add_type(d, type):
         d["_type"] = type
         return d

@@ -69,7 +69,7 @@ run-fuseki:
 
 clean:
 	# Remove Apache Jena Fuseki and downloaded files
-	rm -rf apache-jena-fuseki-4.0.0 apache-jena-fuseki-4.0.0.tar.gz
+	rm -rf apache-jena-fuseki-4.0.0.tar.gz
 
 .PHONY: all
 
