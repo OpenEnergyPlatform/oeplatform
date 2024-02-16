@@ -1,22 +1,21 @@
 import logging
 from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
-from rest_framework import status
+from django.http import Http404, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.utils.cache import patch_response_headers
-import uuid
-import requests
-import rdflib
-from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode, XSD
+# import uuid
+# import requests
+# import rdflib
+from rdflib import Graph, Literal, RDF, URIRef
 from rdflib.compare import to_isomorphic, graph_diff
 from rdflib.plugins.stores import sparqlstore
-from rdflib.namespace import XSD, Namespace
+from rdflib.namespace import Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 import os
-from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT, RDF_DATABASES
-from datetime import date
+from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES, OPEN_ENERGY_ONTOLOGY_NAME
+# from datetime import date
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
 from owlready2 import get_ontology
@@ -27,9 +26,9 @@ from rest_framework.decorators import (
     authentication_classes,
     permission_classes,
 )
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authtoken.models import Token
+# from rest_framework.authentication import TokenAuthentication
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 
 from .models import OEKG_Modifications, ScenarioBundleAccessControl
@@ -38,12 +37,11 @@ from login import models as login_models
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 
 versions = os.listdir(
-    Path(ONTOLOGY_ROOT, "oeo")
+    Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 )  # TODO bad - windows dev will get path error
 # Bryans custom hack!! print(versions.remove(".DS_Store"))
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
-ONTHOLOGY_NAME = "oeo"
-onto_base_path = Path(ONTOLOGY_ROOT, ONTHOLOGY_NAME)
+onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 path = onto_base_path / version  # TODO bad - windows dev will get path error
 # file = "reasoned-oeo-full.owl" # TODO- set in settings
 file = "oeo-full.owl"  # TODO- set in settings
@@ -58,11 +56,11 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-# query_endpoint = "http://localhost:3030/ds/query"
-# update_endpoint = "http://localhost:3030/ds/update"
+#query_endpoint = "http://localhost:3030/ds/query"
+#update_endpoint = "http://localhost:3030/ds/update"
 
-# query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-# update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
 update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
@@ -890,7 +888,7 @@ def update_factsheet(request, *args, **kwargs):
             old_state=in_first.serialize(format="json-ld"),
             new_state=in_second.serialize(format="json-ld"),
         )
-        OEKG_Modifications_instance.save()
+        #OEKG_Modifications_instance.save()
 
         response = JsonResponse(
             "factsheet updated!", safe=False, content_type="application/json"
@@ -1569,13 +1567,14 @@ def get_all_sub_classes(cls, visited=None):
 
     childCount = len(list(cls.subclasses()))
     subclasses = cls.subclasses()
-    value = 10 if childCount > 5 else 500
+
 
     dict = {
         "name": cls.label.first(),
         "label": cls.label.first(),
         "value": cls.label.first(),
         "iri": cls.iri,
+        "definition": oeo.value(OEO[str(cls).split('.')[1]], OBO.IAO_0000115)
     }
 
     if childCount > 0:
@@ -1587,7 +1586,7 @@ def get_all_sub_classes(cls, visited=None):
     return dict
 
 
-@login_required
+#@login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     scenario_class = oeo_owl.search_one(
         iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
@@ -1624,12 +1623,14 @@ def populate_factsheets_elements(request, *args, **kwargs):
         )
         for s, p, o in oeo.triples((None, OEO.OEO_00000504, OEO[sd])):
             sector_label = oeo.value(s, RDFS.label)
+            sector_difinition = oeo.value(s, OBO.IAO_0000115)
             sectors_list.append(
                 {
                     "iri": s,
                     "label": sector_label,
                     "value": sector_label,
                     "sector_division": sector_division_URI,
+                    "sector_difinition": sector_difinition
                 }
             )
 

@@ -28,7 +28,7 @@ authors:
 title: "Open Energy Family - Open Energy Platform (OEP)"
 type: software
 license: AGPL-3.0-or-later
-version: 0.17.2
+version: 0.18.0
 doi:
-date-released: 2023-12-19
+date-released: 2024-02-06
 url: "https://github.com/OpenEnergyPlatform/oeplatform/"
