@@ -15,3 +15,5 @@
 ## Bugs
 
 Bugfix: Delete a row using the http api leads to server error if table includes not nullable fields [#1581](https://github.com/OpenEnergyPlatform/oeplatform/pull/1581)
+
+Fix: Prevent functionality that attempts to connect to an external service and raises errors in the oep server logs. [#1581](https://github.com/OpenEnergyPlatform/oeplatform/pull/1581)
