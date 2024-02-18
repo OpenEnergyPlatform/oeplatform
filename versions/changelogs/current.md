@@ -17,3 +17,5 @@
 Bugfix: Delete a row using the http api leads to server error if table includes not nullable fields [#1581](https://github.com/OpenEnergyPlatform/oeplatform/pull/1581)
 
 - Fix: Users are now redirected to the login page if they attempt to create a new scenario bundle. (Note we will prevent not logged in users to open the create bundle page soon) [(#1595)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1595)
+
+- Fix: Prevent functionality that attempts to connect to an external service and raises errors in the oep server logs. [#1594](https://github.com/OpenEnergyPlatform/oeplatform/pull/1594)
