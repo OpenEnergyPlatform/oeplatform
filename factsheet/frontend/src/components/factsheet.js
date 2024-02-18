@@ -384,15 +384,28 @@ function Factsheet(props) {
             headers: { 'X-CSRFToken': CSRFToken() }
           }
         ).then(response => {
-          if (response.data === 'Factsheet saved') {
-            navigate('/factsheet/fs/' + new_uid);
-            setIsCreated(true);
-            setOpenSavedDialog(true);
-            setUID(new_uid);
-            setOpenBackDrop(false);
+          if (response.status === 200) {
+            // Handle successful response
+
+            if (response.data === 'Factsheet saved') {
+              navigate('/factsheet/fs/' + new_uid);
+              setIsCreated(true);
+              setOpenSavedDialog(true);
+              setUID(new_uid);
+              setOpenBackDrop(false);
+            }
+            else if (response.data === 'Factsheet exists') {
+              setOpenExistDialog(true);
+              setOpenBackDrop(false);
+            }
+
           }
-          else if (response.data === 'Factsheet exists') {
-            setOpenExistDialog(true);
+          
+        }).catch(error => {
+          if (error.response && error.response.status === 403) {
+            // Handle "Access Denied" error
+            const redirectUrl = conf.toep + "/user/login/?next=/scenario-bundles/id/new";
+            window.location.href = redirectUrl;
           }
         });
       } else {
@@ -435,6 +448,7 @@ function Factsheet(props) {
             }
             else if (response.data === 'Factsheet exists') {
               setOpenExistDialog(true);
+              setOpenBackDrop(false);
             }
           })
             .catch(error => {
@@ -453,6 +467,7 @@ function Factsheet(props) {
 
     } else {
       setEmptyAcronym(true);
+      setOpenBackDrop(false);
     }
   };
 
