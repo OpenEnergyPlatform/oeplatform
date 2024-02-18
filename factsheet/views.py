@@ -1,10 +1,11 @@
 import logging
 from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse, HttpResponseForbidden
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.utils.cache import patch_response_headers
+
 # import uuid
 # import requests
 # import rdflib
@@ -15,6 +16,7 @@ from rdflib.namespace import Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 import os
 from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES, OPEN_ENERGY_ONTOLOGY_NAME
+
 # from datetime import date
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
@@ -26,6 +28,7 @@ from rest_framework.decorators import (
     authentication_classes,
     permission_classes,
 )
+
 # from rest_framework.authentication import TokenAuthentication
 # from rest_framework.permissions import IsAuthenticated
 # from rest_framework.authtoken.models import Token
@@ -56,14 +59,14 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-#query_endpoint = "http://localhost:3030/ds/query"
-#update_endpoint = "http://localhost:3030/ds/update"
+query_endpoint = "http://localhost:3030/ds/query"
+update_endpoint = "http://localhost:3030/ds/update"
 
-#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+# query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+# update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
+# query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
+# update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -123,6 +126,14 @@ def undo_clean_name(name):
 
 
 def factsheets_index(request, *args, **kwargs):
+    # userLoggedIn = False
+    # if request.user.is_authenticated:
+    #     userLoggedIn = True
+
+    # context_data = {
+    #     "userLoggedIn": userLoggedIn,
+    # }
+
     return render(request, "factsheet/index.html")
 
 
@@ -183,7 +194,7 @@ def get_oekg_modifications(request, *args, **kwargs):
     return response
 
 
-@login_required
+# @login_required
 def create_factsheet(request, *args, **kwargs):
     """
     Creates a scenario bundle based on user's data. Currently, the minimum requirement to create a bundle is the "acronym".
@@ -216,6 +227,10 @@ def create_factsheet(request, *args, **kwargs):
         "Factsheet saved" if successful, "Duplicate error" if the bundle's acronym exists.
 
     """
+
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("User not authenticated")
+
     request_body = json.loads(request.body)
     name = request_body["name"]
     uid = request_body["uid"]
@@ -888,7 +903,7 @@ def update_factsheet(request, *args, **kwargs):
             old_state=in_first.serialize(format="json-ld"),
             new_state=in_second.serialize(format="json-ld"),
         )
-        #OEKG_Modifications_instance.save()
+        # OEKG_Modifications_instance.save()
 
         response = JsonResponse(
             "factsheet updated!", safe=False, content_type="application/json"
@@ -1198,9 +1213,9 @@ def query_oekg(request, *args, **kwargs):
         study_keywords=str(study_keywords_list).replace("[", "").replace("]", ""),
         scenario_year_start=scenario_year_start_value,
         scenario_year_end=scenario_year_end_value,
-        funding_source_exp="OEO:OEO_00000509 ?funding_sources ;"
-        if funding_sources_list != []
-        else "",
+        funding_source_exp=(
+            "OEO:OEO_00000509 ?funding_sources ;" if funding_sources_list != [] else ""
+        ),
         authors_exp="OEO:OEO_00000506 ?authors ;" if authors_list != [] else "",
     )
 
@@ -1568,13 +1583,12 @@ def get_all_sub_classes(cls, visited=None):
     childCount = len(list(cls.subclasses()))
     subclasses = cls.subclasses()
 
-
     dict = {
         "name": cls.label.first(),
         "label": cls.label.first(),
         "value": cls.label.first(),
         "iri": cls.iri,
-        "definition": oeo.value(OEO[str(cls).split('.')[1]], OBO.IAO_0000115)
+        "definition": oeo.value(OEO[str(cls).split(".")[1]], OBO.IAO_0000115),
     }
 
     if childCount > 0:
@@ -1586,7 +1600,7 @@ def get_all_sub_classes(cls, visited=None):
     return dict
 
 
-#@login_required
+# @login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     scenario_class = oeo_owl.search_one(
         iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
@@ -1630,7 +1644,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
                     "label": sector_label,
                     "value": sector_label,
                     "sector_division": sector_division_URI,
-                    "sector_difinition": sector_difinition
+                    "sector_difinition": sector_difinition,
                 }
             )
 
