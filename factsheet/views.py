@@ -40,6 +40,7 @@ from .models import OEKG_Modifications, ScenarioBundleAccessControl
 from login import models as login_models
 
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
+from factsheet.oekg.filters import OekgQuery
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, "oeo")
@@ -1809,3 +1810,42 @@ def populate_factsheets_elements(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
 
     return response
+
+
+def filter_scenario_view(request):
+    # Get the table IRI from the request or any other source
+    table_iri = request.GET.get("table_iri", "")
+    # table_iri = "dataedit/view/scenario/abbb_emob"
+
+    # Create an instance of OekgQuery
+    oekg_query = OekgQuery()
+
+    # Get related scenarios where the table is the input dataset
+    input_dataset_scenarios = (
+        oekg_query.get_related_scenarios_where_table_is_input_dataset(table_iri)
+    )
+
+    # Get related scenarios where the table is the output dataset
+    output_dataset_scenarios = (
+        oekg_query.get_related_scenarios_where_table_is_output_dataset(table_iri)
+    )
+
+    # Get the acronyms for the scenarios
+    input_dataset_acronyms = [
+        oekg_query.get_scenario_acronym(scenario_uri)
+        for scenario_uri in input_dataset_scenarios
+    ]
+
+    output_dataset_acronyms = [
+        oekg_query.get_scenario_acronym(scenario_uri)
+        for scenario_uri in output_dataset_scenarios
+    ]
+
+    # Prepare data for rendering in the template
+    context = {
+        "input_dataset_scenarios": input_dataset_acronyms,
+        "output_dataset_scenarios": output_dataset_acronyms,
+    }
+    html_content = render(request, "partials/related_oekg_scenarios.html", context).content.decode("utf-8")
+    # Render the template with the context
+    return HttpResponse(html_content)
