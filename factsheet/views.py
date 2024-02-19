@@ -61,11 +61,11 @@ oeo_owl = get_ontology(Ontology_URI_STR).load()
 query_endpoint = "http://localhost:3030/ds/query"
 update_endpoint = "http://localhost:3030/ds/update"
 
-#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+# query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+# update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-#query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-#update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
+# query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
+# update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -338,9 +338,15 @@ def create_factsheet(request, *args, **kwargs):
                             + interacting_region["iri"]
                         )
 
-                        bundle.add((scenario_interacting_region, RDF.type, OEO.OEO_00020036))
                         bundle.add(
-                            (scenario_interacting_region, RDFS.label, Literal(interacting_region["name"]))
+                            (scenario_interacting_region, RDF.type, OEO.OEO_00020036)
+                        )
+                        bundle.add(
+                            (
+                                scenario_interacting_region,
+                                RDFS.label,
+                                Literal(interacting_region["name"]),
+                            )
                         )
                         bundle.add(
                             (
@@ -350,7 +356,11 @@ def create_factsheet(request, *args, **kwargs):
                             )
                         )
                         bundle.add(
-                            (scenario_URI, OEO.OEO_00020222, scenario_interacting_region)
+                            (
+                                scenario_URI,
+                                OEO.OEO_00020222,
+                                scenario_interacting_region,
+                            )
                         )
 
                 if "scenario_years" in item:
@@ -651,7 +661,9 @@ def update_factsheet(request, *args, **kwargs):
                                 region_URI,
                             )
                         )
-                        new_bundle.add((scenario_URI, OEO.OEO_00020220, scenario_region))
+                        new_bundle.add(
+                            (scenario_URI, OEO.OEO_00020220, scenario_region)
+                        )
 
                 if "interacting_regions" in item:
                     for interacting_region in item["interacting_regions"]:
@@ -665,7 +677,11 @@ def update_factsheet(request, *args, **kwargs):
                             (scenario_interacting_region, RDF.type, OEO.OEO_00020036)
                         )
                         new_bundle.add(
-                            (scenario_interacting_region, RDFS.label, Literal(interacting_region["name"]))
+                            (
+                                scenario_interacting_region,
+                                RDFS.label,
+                                Literal(interacting_region["name"]),
+                            )
                         )
                         new_bundle.add(
                             (
@@ -676,7 +692,11 @@ def update_factsheet(request, *args, **kwargs):
                         )
 
                         new_bundle.add(
-                            (scenario_URI, OEO.OEO_00020222, scenario_interacting_region)
+                            (
+                                scenario_URI,
+                                OEO.OEO_00020222,
+                                scenario_interacting_region,
+                            )
                         )
 
                 if "scenario_years" in item:
@@ -891,7 +911,7 @@ def update_factsheet(request, *args, **kwargs):
             old_state=in_first.serialize(format="json-ld"),
             new_state=in_second.serialize(format="json-ld"),
         )
-        #OEKG_Modifications_instance.save()
+        # OEKG_Modifications_instance.save()
 
         response = JsonResponse(
             "factsheet updated!", safe=False, content_type="application/json"
@@ -901,10 +921,12 @@ def update_factsheet(request, *args, **kwargs):
 
 
 def is_logged_in(request, *args, **kwargs):
-    user=login_models.myuser.objects.filter(name=request.user).first()
-    
+    user = None
+    if request.user.is_authenticated:
+        user = True
+
     output = ""
-    if user == None:
+    if user is None:
         output = "NOT_LOGGED_IN"
     else:
         output = "LOGGED_IN"
@@ -1214,9 +1236,9 @@ def query_oekg(request, *args, **kwargs):
         study_keywords=str(study_keywords_list).replace("[", "").replace("]", ""),
         scenario_year_start=scenario_year_start_value,
         scenario_year_end=scenario_year_end_value,
-        funding_source_exp="OEO:OEO_00000509 ?funding_sources ;"
-        if funding_sources_list != []
-        else "",
+        funding_source_exp=(
+            "OEO:OEO_00000509 ?funding_sources ;" if funding_sources_list != [] else ""
+        ),
         authors_exp="OEO:OEO_00000506 ?authors ;" if authors_list != [] else "",
     )
 
@@ -1584,13 +1606,12 @@ def get_all_sub_classes(cls, visited=None):
     childCount = len(list(cls.subclasses()))
     subclasses = cls.subclasses()
 
-
     dict = {
         "name": cls.label.first(),
         "label": cls.label.first(),
         "value": cls.label.first(),
         "iri": cls.iri,
-        "definition": oeo.value(OEO[str(cls).split('.')[1]], OBO.IAO_0000115)
+        "definition": oeo.value(OEO[str(cls).split(".")[1]], OBO.IAO_0000115),
     }
 
     if childCount > 0:
@@ -1602,7 +1623,7 @@ def get_all_sub_classes(cls, visited=None):
     return dict
 
 
-#@login_required
+# @login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     scenario_class = oeo_owl.search_one(
         iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
@@ -1646,7 +1667,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
                     "label": sector_label,
                     "value": sector_label,
                     "sector_division": sector_division_URI,
-                    "sector_difinition": sector_difinition
+                    "sector_difinition": sector_difinition,
                 }
             )
 
