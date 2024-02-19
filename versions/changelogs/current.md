@@ -4,6 +4,12 @@
 
 - Disable view and edit button on create new page of the scenario bundles  (issue #1576) [(#1577)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1577)
 
+- Hide scenario dropdown in comaprison page [(#1599)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1599)
+
+- Disable all entity edits (issue #1582) [(#1599)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1599)
+
+- Remove broken link [(#1599)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1599)
+
 ## Features
 
 - implement ready check for ontology app to check for missing oeo release files and guide the user in case of an error [#1457](https://github.com/OpenEnergyPlatform/oeplatform/pull/1547/)
