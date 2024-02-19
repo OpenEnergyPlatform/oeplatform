@@ -3,6 +3,7 @@
 ## Changes
 
 - Disable view and edit button on create new page of the scenario bundles  (issue #1576) [(#1577)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1577)
+- Disable create new button when the user is not logged in  (issue #1576) [(#1598)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1598)
 
 ## Features
 
