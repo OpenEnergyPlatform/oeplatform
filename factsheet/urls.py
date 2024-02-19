@@ -36,4 +36,5 @@ urlpatterns = [
         views.filter_scenario_view,
         name="filter_scenario_view",
     ),
+    path(r"is_logged_in/", views.is_logged_in),
 ]

@@ -53,7 +53,7 @@ class TablesView(View):
             }
 
             if permission_level >= models.WRITE_PERM:
-                if table.is_publish or table.schema.name not in UNVERSIONED_SCHEMAS:
+                if table.is_publish and table.schema.name not in UNVERSIONED_SCHEMAS:
                     published_tables.append(table_data)
                 else:
                     draft_tables.append(table_data)
