@@ -10,6 +10,9 @@
 
 - Remove broken link [(#1599)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1599)
 
+- Disable create new button when the user is not logged in  (issue #1576) [(#1598)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1598)
+
+
 ## Features
 
 - implement ready check for ontology app to check for missing oeo release files and guide the user in case of an error [#1457](https://github.com/OpenEnergyPlatform/oeplatform/pull/1547/)
@@ -20,4 +23,10 @@
 
 ## Bugs
 
-Bugfix: Delete a row using the http api leads to server error if table includes not nullable fields [#1581](https://github.com/OpenEnergyPlatform/oeplatform/pull/1581)
+- Bugfix: Delete a row using the http api leads to server error if table includes not nullable fields [#1581](https://github.com/OpenEnergyPlatform/oeplatform/pull/1581)
+
+- Fix: Users are now redirected to the login page if they attempt to create a new scenario bundle. (Note we will prevent not logged in users to open the create bundle page soon) [(#1595)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1595)
+
+- Fix: Prevent functionality that attempts to connect to an external service and raises errors in the oep server logs. [#1594](https://github.com/OpenEnergyPlatform/oeplatform/pull/1594)
+
+- Fix bug in saving and updating interacting regions  (issue #1576) [(#1597)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1597)

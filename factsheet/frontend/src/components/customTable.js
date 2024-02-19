@@ -228,7 +228,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected } = props;
+  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected, logged_in } = props;
 
   return (
     <div>
@@ -306,10 +306,24 @@ function EnhancedTableToolbar(props) {
             </ToggleButtonGroup>
           </Grid>
           <Grid item xs={6} md={4}>
-            <Button component={Link} variant="contained" size="small" className="linkButton" to={`scenario-bundles/id/new`} onClick={() => this.forceUpdate}>
-              <AddIcon />
-              Create new
-            </Button>
+            <HtmlTooltip
+              style={{ marginLeft: '10px' }}
+              placement="top"
+              title={
+                <React.Fragment>
+                  <div>
+                    <b>{logged_in === "NOT_LOGGED_IN" ? "Please login first!" : "Create a new Scenario Bundle!"}</b>
+                  </div>
+                </React.Fragment>
+              }
+            >
+              <span>
+                <Button disabled={logged_in === "NOT_LOGGED_IN"} component={Link} variant="contained" size="small" className="linkButton" to={`scenario-bundles/id/new`} onClick={() => this.forceUpdate}>
+                  <AddIcon />
+                  Create new
+                </Button>
+              </span>
+            </HtmlTooltip>
           </Grid>
         </Grid>
       </Toolbar>
@@ -345,8 +359,8 @@ export default function CustomTable(props) {
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
   const [selectedAspects, setSelectedAspects] = useState([]);
   const [alignment, setAlignment] = React.useState('list');
-
   const [filteredFactsheets, setFilteredFactsheets] = useState([]);
+  const [logged_in, setLogged_in] = React.useState('');
 
   const handleChangeView = (
     event: React.MouseEvent<HTMLElement>,
@@ -476,6 +490,11 @@ export default function CustomTable(props) {
     return data;
   };
 
+  const getLoggedInStatus = async () => {
+    const { data } = await axios.get(conf.toep + `scenario-bundles/is_logged_in/`);
+    return data;
+  };
+
   useEffect(() => {
     getInstitution().then((data) => {
       const tmp = [];
@@ -497,6 +516,12 @@ export default function CustomTable(props) {
       const tmp = [];
       data.map((item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }))
       setFundingSources(tmp);
+    });
+  }, []);
+
+  useEffect(() => {
+    getLoggedInStatus().then((data) => {
+      setLogged_in(data);
     });
   }, []);
 
@@ -946,7 +971,7 @@ export default function CustomTable(props) {
       </Dialog>
 
       <Container maxWidth="xl">
-        <EnhancedTableToolbar numSelected={selected.size} selected={selected} alignment={alignment} handleChangeView={handleChangeView} handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison} />
+        <EnhancedTableToolbar logged_in={logged_in} numSelected={selected.size} selected={selected} alignment={alignment} handleChangeView={handleChangeView} handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison} />
         {alignment == "list" && <TableContainer>
           <Table
             sx={{ minWidth: 1400 }}
