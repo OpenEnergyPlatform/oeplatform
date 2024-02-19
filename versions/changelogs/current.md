@@ -3,7 +3,7 @@
 ## Changes
 
 - Disable view and edit button on create new page of the scenario bundles  (issue #1576) [(#1577)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1577)
-- Disable view and edit button on create new page of the scenario bundles  (issue #1576) [(#1597)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1597)
+- Fix bug in saving and updating interacting regions  (issue #1576) [(#1597)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1597)
 
 ## Features
 
