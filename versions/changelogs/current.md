@@ -3,7 +3,10 @@
 ## Changes
 
 - Disable view and edit button on create new page of the scenario bundles  (issue #1576) [(#1577)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1577)
-- Fix bug in saving and updating interacting regions  (issue #1576) [(#1597)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1597)
+
+- Disable create new button when the user is not logged in  (issue #1576) [(#1598)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1598)
+
+
 
 ## Features
 
@@ -20,3 +23,5 @@
 - Fix: Users are now redirected to the login page if they attempt to create a new scenario bundle. (Note we will prevent not logged in users to open the create bundle page soon) [(#1595)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1595)
 
 - Fix: Prevent functionality that attempts to connect to an external service and raises errors in the oep server logs. [#1594](https://github.com/OpenEnergyPlatform/oeplatform/pull/1594)
+
+- Fix bug in saving and updating interacting regions  (issue #1576) [(#1597)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1597)
