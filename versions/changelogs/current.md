@@ -3,6 +3,7 @@
 ## Changes
 
 - Disable view and edit button on create new page of the scenario bundles  (issue #1576) [(#1577)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1577)
+- Fix bug in saving and updating interacting regions  (issue #1576) [(#1597)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1597)
 
 ## Features
 
@@ -14,7 +15,7 @@
 
 ## Bugs
 
-Bugfix: Delete a row using the http api leads to server error if table includes not nullable fields [#1581](https://github.com/OpenEnergyPlatform/oeplatform/pull/1581)
+- Bugfix: Delete a row using the http api leads to server error if table includes not nullable fields [#1581](https://github.com/OpenEnergyPlatform/oeplatform/pull/1581)
 
 - Fix: Users are now redirected to the login page if they attempt to create a new scenario bundle. (Note we will prevent not logged in users to open the create bundle page soon) [(#1595)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1595)
 
