@@ -333,24 +333,24 @@ def create_factsheet(request, *args, **kwargs):
                 if "interacting_regions" in item:
                     for interacting_region in item["interacting_regions"]:
                         interacting_region_URI = URIRef(interacting_region["iri"])
-                        interacting_regions = URIRef(
+                        scenario_interacting_region = URIRef(
                             "http://openenergy-platform.org/ontology/oekg/"
                             + interacting_region["iri"]
                         )
 
-                        bundle.add((interacting_regions, RDF.type, OEO.OEO_00020036))
+                        bundle.add((scenario_interacting_region, RDF.type, OEO.OEO_00020036))
                         bundle.add(
-                            (interacting_regions, RDFS.label, Literal(region["name"]))
+                            (scenario_interacting_region, RDFS.label, Literal(interacting_region["name"]))
                         )
                         bundle.add(
                             (
-                                interacting_regions,
+                                scenario_interacting_region,
                                 OEKG["reference"],
                                 interacting_region_URI,
                             )
                         )
                         bundle.add(
-                            (scenario_URI, OEO.OEO_00020222, interacting_regions)
+                            (scenario_URI, OEO.OEO_00020222, scenario_interacting_region)
                         )
 
                 if "scenario_years" in item:
@@ -651,31 +651,32 @@ def update_factsheet(request, *args, **kwargs):
                                 region_URI,
                             )
                         )
+                        new_bundle.add((scenario_URI, OEO.OEO_00020220, scenario_region))
 
                 if "interacting_regions" in item:
                     for interacting_region in item["interacting_regions"]:
                         interacting_region_URI = URIRef(interacting_region["iri"])
-                        interacting_regions = URIRef(
+                        scenario_interacting_region = URIRef(
                             "http://openenergy-platform.org/ontology/oekg/"
                             + interacting_region["iri"]
                         )
 
                         new_bundle.add(
-                            (interacting_regions, RDF.type, OEO.OEO_00020036)
+                            (scenario_interacting_region, RDF.type, OEO.OEO_00020036)
                         )
                         new_bundle.add(
-                            (interacting_regions, RDFS.label, Literal(region["name"]))
+                            (scenario_interacting_region, RDFS.label, Literal(interacting_region["name"]))
                         )
                         new_bundle.add(
                             (
-                                interacting_regions,
+                                scenario_interacting_region,
                                 OEKG["reference"],
                                 interacting_region_URI,
                             )
                         )
 
                         new_bundle.add(
-                            (scenario_URI, OEO.OEO_00020222, interacting_regions)
+                            (scenario_URI, OEO.OEO_00020222, scenario_interacting_region)
                         )
 
                 if "scenario_years" in item:
