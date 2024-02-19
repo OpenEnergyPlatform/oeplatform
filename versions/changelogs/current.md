@@ -21,6 +21,8 @@
 
 - Tooltips for sectors sector divisions and technologies [(PR#1579)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1579)
 
+- Remove "Early Access" from scenarios indication the feature is now in version 1.0.0 [(PR#1600)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1600)
+
 ## Bugs
 
 - Bugfix: Delete a row using the http api leads to server error if table includes not nullable fields [#1581](https://github.com/OpenEnergyPlatform/oeplatform/pull/1581)
