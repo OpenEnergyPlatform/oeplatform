@@ -4,8 +4,13 @@
 
 - Disable view and edit button on create new page of the scenario bundles  (issue #1576) [(#1577)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1577)
 
-- Disable create new button when the user is not logged in  (issue #1576) [(#1598)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1598)
+- Hide scenario dropdown in comaprison page [(#1599)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1599)
 
+- Disable all entity edits (issue #1582) [(#1599)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1599)
+
+- Remove broken link [(#1599)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1599)
+
+- Disable create new button when the user is not logged in  (issue #1576) [(#1598)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1598)
 
 
 ## Features
