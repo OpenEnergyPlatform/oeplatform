@@ -6,17 +6,19 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.utils.cache import patch_response_headers
+
 import uuid
 import requests
 import rdflib
 from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode, XSD
+
 from rdflib.compare import to_isomorphic, graph_diff
 from rdflib.plugins.stores import sparqlstore
 from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 import os
-from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT, RDF_DATABASES
-from datetime import date
+from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES, OPEN_ENERGY_ONTOLOGY_NAME
+
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
 from owlready2 import get_ontology
@@ -27,9 +29,11 @@ from rest_framework.decorators import (
     authentication_classes,
     permission_classes,
 )
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authtoken.models import Token
+
+# from rest_framework.authentication import TokenAuthentication
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.authtoken.models import Token
+
 from django.contrib.auth.decorators import login_required
 
 from .models import OEKG_Modifications, ScenarioBundleAccessControl
@@ -125,6 +129,14 @@ def undo_clean_name(name):
 
 
 def factsheets_index(request, *args, **kwargs):
+    # userLoggedIn = False
+    # if request.user.is_authenticated:
+    #     userLoggedIn = True
+
+    # context_data = {
+    #     "userLoggedIn": userLoggedIn,
+    # }
+
     return render(request, "factsheet/index.html")
 
 
@@ -185,7 +197,7 @@ def get_oekg_modifications(request, *args, **kwargs):
     return response
 
 
-@login_required
+# @login_required
 def create_factsheet(request, *args, **kwargs):
     """
     Creates a scenario bundle based on user's data. Currently, the minimum requirement to create a bundle is the "acronym".
@@ -218,6 +230,10 @@ def create_factsheet(request, *args, **kwargs):
         "Factsheet saved" if successful, "Duplicate error" if the bundle's acronym exists.
 
     """
+
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("User not authenticated")
+
     request_body = json.loads(request.body)
     name = request_body["name"]
     uid = request_body["uid"]
