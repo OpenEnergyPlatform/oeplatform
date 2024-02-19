@@ -31,4 +31,5 @@ urlpatterns = [
     path(
         r"check-owner/<str:bundle_id>/", views.check_ownership, name="check_ownership"
     ),
+    path(r"is_logged_in/", views.is_logged_in),
 ]
