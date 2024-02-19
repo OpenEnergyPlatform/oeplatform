@@ -5,5 +5,3 @@
 ## Features
 
 ## Bugs
-
-## Removed

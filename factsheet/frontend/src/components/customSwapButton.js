@@ -21,17 +21,16 @@ const ColorToggleButton = (props) => {
 
   const param_2 = String(window.location.href).split('/')[5];
 
-
   useEffect(() => {
     // Replace 'bundle_id' with the actual ID of the ScenarioBundle you want to check
     const bundleId = param_2; // Assuming you pass the uid as a prop
     // Make the API call to check if the user is the owner
-    axios.post(conf.toep + `scenario-bundles/check-owner/${bundleId}/`, 
+    axios.post(conf.toep + `scenario-bundles/check-owner/${bundleId}/`,
       {
         uid: bundleId
       },
-      { 
-        headers: {'X-CSRFToken': CSRFToken()}
+      {
+        headers: { 'X-CSRFToken': CSRFToken() }
       })
       .then(response => {
         // Assuming the response.data contains the ownership information
@@ -53,7 +52,7 @@ const ColorToggleButton = (props) => {
     props.handleSwap(mode);
   };
 
-  
+
   const handleNotTheOwnerClose = (event, reason) => {
     if (reason === 'clickaway') {
       return;
@@ -72,7 +71,7 @@ const ColorToggleButton = (props) => {
       </Tooltip>
       <ButtonGroup variant="contained" aria-label="outlined primary button group" sx={{ mr: 1 }}>
         <Tooltip title="Overview">
-          <Button size="small" name="overview" onClick={(e) => handleChange(e, 'overview')}>
+          <Button size="small" name="overview" disabled={String(window.location.href).split('/').pop() === "new"} onClick={(e) => handleChange(e, 'overview')}>
             <RemoveRedEyeOutlinedIcon sx={{ mr: 1 }} /> <span>View</span>
           </Button>
         </Tooltip>
@@ -80,8 +79,9 @@ const ColorToggleButton = (props) => {
           <Button
             size="small"
             value="edit"
+            disabled={String(window.location.href).split('/').pop() === "new"}
             onClick={(e) => handleChange(e, 'edit')}
-            // disabled={!isOwner} // Disable the button if the user is not the owner
+          // disabled={!isOwner} // Disable the button if the user is not the owner
           >
             <EditOutlinedIcon sx={{ mr: 1 }} /> <span>Edit</span>
           </Button>

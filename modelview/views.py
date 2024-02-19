@@ -143,7 +143,7 @@ def show(request, sheettype, model_name):
             )
             org = match.group("org")
             repo = match.group("repo")
-            _handle_github_contributions(org, repo)
+            # _handle_github_contributions(org, repo)
         except Exception:
             org = None
             repo = None
@@ -343,8 +343,8 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     If the image is not present or outdated it will be reconstructed
 
     Note:
-        Keep in mind that a external (GitHub) API is called and you server need to allow
-        such connections.
+        Keep in mind that a external (GitHub) API is called and your server 
+        needs to allow such connections.
     """
     path = "GitHub_{0}_{1}_Contribution.png".format(org, repo)
     full_path = os.path.join(djangoSettings.MEDIA_ROOT, path)
