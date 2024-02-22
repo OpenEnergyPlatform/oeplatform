@@ -105,12 +105,12 @@ const ComparisonBoardMain = (props) => {
               }
             </div>
           </FormGroup>
-          <MultipleSelectChip
+          {/* <MultipleSelectChip
             sx={{ mt: 2, width: "100%" }}
             options={['Scenario 1', 'Scenario 2', 'Scenario 3']}
             label="Scenarios to be compared"
             disabled={true}
-          />
+          /> */}
         </OptionBox>
         <ComparisonBoardItems elements={scenarios} c_aspects={selectedCriteria} />
       </Container>

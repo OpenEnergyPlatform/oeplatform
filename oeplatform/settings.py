@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from pathlib import Path
 
 try:
     from .securitysettings import *  # noqa
@@ -87,6 +88,13 @@ EXTERNAL_URLS = {
     "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
     "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
+    "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
+    "spdx_licenses": "https://spdx.github.io/license-list-data/",
+}
+
+# Kept this separate for now to avoid messing with the other list ... TODO move to EXTERNAL_URLS if possible
+DOCUMENTATION_LINKS = {
+    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#4-setup-the-openenergyontology-integation"
 }
 
 
@@ -129,7 +137,7 @@ except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
 OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
-
+OPEN_ENERGY_ONTOLOGY_FOLDER = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

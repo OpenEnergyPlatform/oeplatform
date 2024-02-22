@@ -20,6 +20,12 @@ from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework import generics
+from api.serializers import (
+    EnergyframeworkSerializer,
+    EnergymodelSerializer,
+    ScenarioDataTablesSerializer,
+)
 
 import api.parser
 import login.models as login_models
@@ -30,6 +36,8 @@ from api.helpers.http import ModHttpResponse
 from dataedit.models import Schema as DBSchema, Embargo, Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+
+from modelview.models import Energyframework, Energymodel
 
 logger = logging.getLogger("oeplatform")
 
@@ -1190,3 +1198,35 @@ def oeo_search(request):
     # res: something like [{"label": "testlabel", "resource": "testresource"}]
     # send back to client
     return JsonResponse(res, safe=False)
+
+
+# Energyframework, Energymodel
+class EnergyframeworkFactsheetListAPIView(generics.ListAPIView):
+    """
+    Used for the scenario bundles react app to be able to select a existing
+    framework or model factsheet.
+    """
+
+    queryset = Energyframework.objects.all()
+    serializer_class = EnergyframeworkSerializer
+
+
+class EnergymodelFactsheetListAPIView(generics.ListAPIView):
+    """
+    Used for the scenario bundles react app to be able to select a existing
+    framework or model factsheet.
+    """
+
+    queryset = Energymodel.objects.all()
+    serializer_class = EnergymodelSerializer
+
+
+class ScenarioDataTablesListAPIView(generics.ListAPIView):
+    """
+    Used for the scenario bundles react app to be able to populate
+    form select options with existing datasets from scenario topic.
+    """
+
+    topic = "scenario"
+    queryset = DBTable.objects.filter(schema__name=topic)
+    serializer_class = ScenarioDataTablesSerializer
