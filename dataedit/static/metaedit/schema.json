@@ -55,6 +55,15 @@
                     "name": {
                         "description": "The class label of the OEO term.",
                         "example": "energy",
+                        "format": "autocomplete",
+                        "options": {
+                            "autocomplete": {
+                                "search": "search_name",
+                                "getResultValue": "getResultValue_name",
+                                "renderResult": "renderResult_name",
+                                "autoSelect": true
+                            }
+                        },
                         "type": [
                             "string",
                             "null"
@@ -707,6 +716,15 @@
                                                     "name": {
                                                         "description": "A class label of the OEO terms.",
                                                         "example": "wind energy converting unit",
+                                                        "format": "autocomplete",
+                                                        "options": {
+                                                            "autocomplete": {
+                                                                "search": "search_name",
+                                                                "getResultValue": "getResultValue_name",
+                                                                "renderResult": "renderResult_name",
+                                                                "autoSelect": true
+                                                            }
+                                                        },
                                                         "type": [
                                                             "string",
                                                             "null"
@@ -752,6 +770,15 @@
                                                     "name": {
                                                         "description": "The class label of the OEO terms.",
                                                         "example": "onshore wind farm",
+                                                        "format": "autocomplete",
+                                                        "options": {
+                                                            "autocomplete": {
+                                                                "search": "search_name",
+                                                                "getResultValue": "getResultValue_name",
+                                                                "renderResult": "renderResult_name",
+                                                                "autoSelect": true
+                                                            }
+                                                        },
                                                         "type": [
                                                             "string",
                                                             "null"
