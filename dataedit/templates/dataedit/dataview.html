@@ -45,6 +45,12 @@
           Review results
         </button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="oekg-scenarios-tab" data-bs-toggle="tab" data-bs-target="#scenarios-tab-pane" type="button" role="tab" aria-controls="metadata-tab-pane" aria-selected="false">
+          <img src="{% static '/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}" width="16" height="16" alt="OEO">
+          Related Scenarios
+        </button>
+      </li>
     </ul>
   </div>
 </div>
@@ -214,6 +220,17 @@
     </div>
     {% endif %}
   </div>
+
+  <div class="tab-pane oekg-scenarios fade" id="scenarios-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
+   
+    <div class="metadata__container">
+      <span>
+        <div id="filteredScenariosContainer" hx-get="{% url 'factsheet:filter_scenario_view' %}?table_iri=dataedit/view/{{schema}}/{{table}}" hx-target="#filteredScenariosContainer" hx-swap="outerHTML" hx-trigger="load">
+          Loading ...
+        </div>
+      </span>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
@@ -371,6 +388,7 @@ for row in result.json():
 <script src="{% static 'dataedit/dataedit.js' %}"></script>
 <script src="{% static 'dataedit/plotly-latest.min.js' %}"></script><!-- src: https://unpkg.com/json5@^2.0.0/dist/index.min.js -->
 <script src="{% static 'dataedit/json5.min.js' %}"></script><!-- src: https://unpkg.com/json5@^2.0.0/dist/index.min.js -->
+<script src="{% static 'modelview/htmx.min.js' %}"></script>
 
 <!-- Make sure you put this AFTER Leaflet's CSS -->
 <script src="{% static 'dataedit/leaflet.min.js' %}"></script><!-- src: https://unpkg.com/leaflet@1.3.1/dist/leaflet.js -->

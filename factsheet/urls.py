@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from factsheet import views
 
-
+app_name = "factsheet"
 urlpatterns = [
     path(r"", views.factsheets_index),
     path(r"main", views.factsheets_index),
@@ -31,4 +31,10 @@ urlpatterns = [
     path(
         r"check-owner/<str:bundle_id>/", views.check_ownership, name="check_ownership"
     ),
+    path(
+        r"filter-oekg-scenarios/",
+        views.filter_scenario_view,
+        name="filter_scenario_view",
+    ),
+    path(r"is_logged_in/", views.is_logged_in),
 ]

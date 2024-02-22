@@ -384,15 +384,28 @@ function Factsheet(props) {
             headers: { 'X-CSRFToken': CSRFToken() }
           }
         ).then(response => {
-          if (response.data === 'Factsheet saved') {
-            navigate('/factsheet/fs/' + new_uid);
-            setIsCreated(true);
-            setOpenSavedDialog(true);
-            setUID(new_uid);
-            setOpenBackDrop(false);
+          if (response.status === 200) {
+            // Handle successful response
+
+            if (response.data === 'Factsheet saved') {
+              navigate('/factsheet/fs/' + new_uid);
+              setIsCreated(true);
+              setOpenSavedDialog(true);
+              setUID(new_uid);
+              setOpenBackDrop(false);
+            }
+            else if (response.data === 'Factsheet exists') {
+              setOpenExistDialog(true);
+              setOpenBackDrop(false);
+            }
+
           }
-          else if (response.data === 'Factsheet exists') {
-            setOpenExistDialog(true);
+          
+        }).catch(error => {
+          if (error.response && error.response.status === 403) {
+            // Handle "Access Denied" error
+            const redirectUrl = conf.toep + "/user/login/?next=/scenario-bundles/id/new";
+            window.location.href = redirectUrl;
           }
         });
       } else {
@@ -435,6 +448,7 @@ function Factsheet(props) {
             }
             else if (response.data === 'Factsheet exists') {
               setOpenExistDialog(true);
+              setOpenBackDrop(false);
             }
           })
             .catch(error => {
@@ -453,6 +467,7 @@ function Factsheet(props) {
 
     } else {
       setEmptyAcronym(true);
+      setOpenBackDrop(false);
     }
   };
 
@@ -1923,14 +1938,14 @@ function Factsheet(props) {
                 <TableRow>
                   <FirstRowTableCell>
                     <div>
-                      <span>Scenario descriptors</span>
+                      <span>Scenario type</span>
                       <HtmlTooltip
                         title={
                           <React.Fragment>
                             <Typography color="inherit" variant="subtitle1">
-                              {'A data descriptor is an information content entity that contains additional information about some data.'}
+                              {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000119">More info from Open Energy Ontology (OEO)....</a>
+                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)....</a>
                             </Typography>
                           </React.Fragment>
                         }
