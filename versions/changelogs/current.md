@@ -5,3 +5,5 @@
 ## Features
 
 ## Bugs
+
+- OEMetaBuilder: Readd missing autocomplete functionality that was not added after the oemetadata schema update for metadata version 0.1.6 []()
