@@ -1,0 +1,51 @@
+<h2>Published</h2>
+<div class="container">
+    <div class="row">
+        {% for table in published_tables %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
+                        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<h2>Draft</h2>
+<div class="container">
+    <div class="row">
+        {% for table in draft_tables %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
+                        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
+                        {% if table.is_reviewed and not table.is_publish %}
+                            <button class="btn btn-primary publish-button" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
+                            <div class="publish-options" style="display: none;">
+                                <label>
+                                    <select class="schema-dropdown">
+                                        {% for schema in schema_whitelist %}
+                                            <option value="{{ schema }}">{{ schema }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                                <label>
+                                    <select class="embargo-dropdown">
+                                        <option value="none">None</option>
+                                        <option value="6_months">6 Months</option>
+                                        <option value="1_year">1 Year</option>
+                                    </select>
+                                </label>
+                                <button class="btn btn-secondary confirm-publish">Confirm</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
