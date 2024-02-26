@@ -4,6 +4,7 @@
 {% block main-content-body %}
 {% if profile_user == request.user %}
 {% include "login/user_nav.html" %}
+
 <div class="container">
 <div class="row">
     
@@ -30,21 +31,19 @@
         </div>
     </div>
 </div>
-<script src="https://unpkg.com/htmx.org"></script>
-
-<div class="row" id="tableContainer" hx-get="/user/profile/{{ profile_user.id }}/tables" hx-trigger="load">
+<div class="row" id="tableContainer" hx-get="/profile/{{ profile_user.id }}/tables" hx-trigger="load">
     <h2>Published</h2>
     <div class="container">
         <div class="row">
             {% for table in published_tables %}
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
-                        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
+                            <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
+                        </div>
                     </div>
                 </div>
-            </div>
             {% endfor %}
         </div>
     </div>
@@ -60,23 +59,14 @@
                         <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
                         {% if table.is_reviewed and not table.is_publish %}
                             <button class="btn btn-primary publish-button" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
-                            <div class="publish-options" id="publish-options-{{ table.name }}" style="display: none;">
-                                <label>
-                                    <select class="schema-dropdown"></select>
-                                </label>
-                                <label>
-                                    <select class="embargo-dropdown">
-                                        <option value="none">None</option>
-                                        <option value="6_months">6 Months</option>
-                                        <option value="1_year">1 Year</option>
-                                    </select>
-                                </label>
-                                <button class="btn btn-secondary confirm-publish"
-                                        hx-post="/api/v0/schema/{{ table.schema }}/tables/{{ table.name }}/move_publish/{toSchema}/"
-                                        hx-target="#tableContainer"
-                                        hx-swap="outerHTML"
-                                        hx-include="#publish-options-{{ table.name }}">Confirm
-                                </button>
+                            <div class="publish-options" style="display: none;">
+                                <select class="schema-dropdown"></select>
+                                <select class="embargo-dropdown">
+                                    <option value="none">None</option>
+                                    <option value="6_months">6 Months</option>
+                                    <option value="1_year">1 Year</option>
+                                </select>
+                                <button class="btn btn-secondary confirm-publish">Confirm</button>
                             </div>
                         {% endif %}
                     </div>
@@ -87,7 +77,6 @@
 </div>
 
 </div>
-
 {% endif %}
 {% comment "@Daryna what is this used for?" %}
 <div id="reviewedTablesData" style="display: none;">{{ reviewed_tables|json_script:"reviewedTablesData" }}</div>
@@ -203,44 +192,87 @@
 
 
 {% block after-body-bottom-js %}
-
 <script type="text/javascript">
-document.addEventListener('DOMContentLoaded', function() {
-    const schemaDataElement = document.querySelector('#schemaWhitelistData');
-    let schemaWhitelist = schemaDataElement ? JSON.parse(schemaDataElement.textContent) : [];
-
-    document.body.addEventListener('click', function(event) {
-        const target = event.target;
-
-        if (target.classList.contains('publish-button')) {
-            console.log(schemaWhitelist);
-            const publishOptions = target.nextElementSibling;
-            const schemaDropdown = publishOptions.querySelector('.schema-dropdown');
-            schemaDropdown.innerHTML = schemaWhitelist.map(schema => `<option value="${schema}">${schema}</option>`).join('');
-            publishOptions.style.display = 'block';
-        }
-    });
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
     }
+  }
+  return cookieValue;
+}
 
-    document.body.addEventListener('htmx:configRequest', function (event) {
-        event.detail.headers['X-CSRFToken'] = getCookie('csrftoken');
+function publishTable(schema, tableName, toSchema, embargoData) {
+  return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move_publish/${toSchema}/`, {
+    method: 'POST',
+    body: JSON.stringify({embargo: embargoData}),
+    headers: {
+      'X-CSRFToken': getCookie("csrftoken"),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    }
+  }).then(response => {
+    if (response.ok) {
+      alert('Table moved successfully.');
+    } else {
+      response.text().then(text => { alert(`Error moving table: ${text}`); });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  // @Daryna pls write comments in english 
+  // Извлекаем данные о схемах
+  let schemaWhitelist = [];
+  const schemaDataElement = document.querySelector('#schemaWhitelistData');
+  if (schemaDataElement) {
+    schemaWhitelist = JSON.parse(schemaDataElement.textContent);
+  }
+
+  document.querySelectorAll('.publish-button').forEach(button => {
+    button.addEventListener('click', function () {
+      const publishOptions = this.nextElementSibling;
+      const dropdown = publishOptions.querySelector('.schema-dropdown');
+      dropdown.innerHTML = '';
+      schemaWhitelist.forEach(schema => {
+        dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
+      });
+      publishOptions.style.display = 'block';
     });
+  });
+
+  document.querySelectorAll('.confirm-publish').forEach(button => {
+    button.addEventListener('click', function () {
+      const publishOptions = this.parentElement;
+      const dropdown = publishOptions.querySelector('.schema-dropdown');
+      const cardElement = this.closest('.card');
+      const publishButton = cardElement.querySelector('.publish-button');
+      const schema = publishButton.getAttribute('data-schema');
+      const tableName = publishButton.getAttribute('data-tableName');
+      const toSchema = dropdown.value;
+      const embargoDropdown = this.parentElement.querySelector('.embargo-dropdown');
+      const embargoPeriod = embargoDropdown.value;
+
+      const embargoData = { duration: embargoPeriod };
+
+      publishTable(schema, tableName, toSchema, embargoData);
+      publishOptions.style.display = 'none';
+    });
+  });
 });
 </script>
 
 {% endblock after-body-bottom-js %}
+
+
+
+
+
+
 

@@ -39,18 +39,24 @@
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="OPR-tab" data-bs-toggle="tab" data-bs-target="#opr-tab-pane" type="button" role="tab" aria-controls="metadata-tab-pane" aria-selected="false">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+          <svg height="16" width="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="m12.58,15.28c-.1,0-.2-.03-.3-.08l-4.32-2.99-4.29,2.94c-.19.12-.42.12-.61,0-.19-.13-.25-.35-.2-.57l1.5-5.05L.21,6.34c-.19-.13-.25-.37-.19-.57.07-.22.27-.35.49-.37l5.27-.13L7.53.35c.07-.2.27-.35.49-.35s.42.13.49.35l1.77,4.96,5.22.13c.22,0,.42.15.49.37.07.22,0,.44-.19.57l-4.17,3.21,1.48,5c.07.22-.02.44-.2.57-.1.07-.2.1-.32.1h0Zm-4.63-4.24c.1,0,.2.03.3.08l3.42,2.34-1.16-3.92c-.07-.2.02-.44.19-.57l3.28-2.52-4.09-.1c-.22,0-.4-.15-.49-.35l-1.38-3.9-1.36,3.87c-.07.2-.27.34-.49.35l-4.14.12,3.23,2.49c.17.13.25.35.19.57l-1.18,3.97,3.36-2.3c.1-.08.2-.12.32-.12h0Z"/>
           </svg>
           Review results
         </button>
       </li>
-        <li class="nav-item" role="presentation">
+      <li class="nav-item" role="presentation">
         <button class="nav-link" id="embargo-tab" data-bs-toggle="tab" data-bs-target="#embargo-tab-pane" type="button" role="tab" aria-controls="embargo-tab-pane" aria-selected="false">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
           </svg>
           Embargo time
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="oekg-scenarios-tab" data-bs-toggle="tab" data-bs-target="#scenarios-tab-pane" type="button" role="tab" aria-controls="metadata-tab-pane" aria-selected="false">
+          <img src="{% static '/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}" width="16" height="16" alt="OEO">
+          Related Scenarios
         </button>
       </li>
     </ul>
@@ -212,7 +218,7 @@
             <th>Date finished</th>
           </tr>
           <tr>
-            <td> <a class="btn btn-primary" href="{% url 'peer_review_reviewer' table=table schema=schema review_id=opr_result.review_id %}">Review details</a></td>
+            <td> <a class="btn btn-primary" href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr_result.review_id %}">Review details</a></td>
             <td>{{ opr_result.badge }}</td>
             <td>{{ opr_result.date_finished }}</td>
           </tr>
@@ -227,11 +233,20 @@
     </div>
     {% endif %}
   </div>
-<div class="tab-pane fade" id="embargo-tab-pane" role="tabpanel" aria-labelledby="embargo-tab" tabindex="0">
-    <div class="embargo-content">
-        Embargo time left: {{ embargo_time_left }}
+  <div class="tab-pane fade" id="embargo-tab-pane" role="tabpanel" aria-labelledby="embargo-tab" tabindex="0">
+      <div class="embargo-content">
+          Embargo time left: {{ embargo_time_left }}
+      </div>
+  </div>
+  <div class="tab-pane oekg-scenarios fade" id="scenarios-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
+    <div class="metadata__container">
+      <span>
+        <div id="filteredScenariosContainer" hx-get="{% url 'factsheet:filter_scenario_view' %}?table_iri=dataedit/view/{{schema}}/{{table}}" hx-target="#filteredScenariosContainer" hx-swap="outerHTML" hx-trigger="load">
+          Loading ...
+        </div>
+      </span>
     </div>
-</div>
+  </div>
 </div>
 {% endblock %}
 
@@ -252,7 +267,7 @@
           Table not reviewed
         </div>
         <a class="btn btn-success btn-sm" type="button"
-        href="{% url 'peer_review_create' table=table schema=schema %}">
+        href="{% url 'dataedit:peer_review_create' table=table schema=schema %}">
           Start Open-Peer-Review-Process
         </a>
 
@@ -263,7 +278,7 @@
           Table not reviewed
         </div>
         <a class="btn btn-success btn-sm disabled" type="button"
-        href="{% url 'peer_review_create' table=table schema=schema %}">
+        href="{% url 'dataedit:peer_review_create' table=table schema=schema %}">
           Start Open-Peer-Review-Process
         </a>
         <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
@@ -274,7 +289,7 @@
         The table is currently under review.
       </div>
       <a class="btn btn-success btn-sm" type="button"
-      href="{% url 'peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
+      href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
         Continue Review
       </a>
     {% else %}
@@ -318,7 +333,7 @@
 <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
   title="You need write permissions on this table to upload data" {% endif %}>
   <a class="btn btn-sm btn-success {% if not can_add %} disabled {% endif %}"
-    href="{% url 'wizard_upload' schema=schema table=table %}">
+    href="{% url 'dataedit:wizard_upload' schema=schema table=table %}">
     Upload CSV (Wizard)
   </a>
 </span>
@@ -397,6 +412,7 @@
 <script src="{% static 'dataedit/dataedit.js' %}"></script>
 <script src="{% static 'dataedit/plotly-latest.min.js' %}"></script><!-- src: https://unpkg.com/json5@^2.0.0/dist/index.min.js -->
 <script src="{% static 'dataedit/json5.min.js' %}"></script><!-- src: https://unpkg.com/json5@^2.0.0/dist/index.min.js -->
+<script src="{% static 'modelview/htmx.min.js' %}"></script>
 
 <!-- Make sure you put this AFTER Leaflet's CSS -->
 <script src="{% static 'dataedit/leaflet.min.js' %}"></script><!-- src: https://unpkg.com/leaflet@1.3.1/dist/leaflet.js -->

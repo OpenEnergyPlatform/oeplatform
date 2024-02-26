@@ -32,6 +32,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
+from dataedit.models import PeerReview
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.models import Embargo
@@ -47,6 +48,8 @@ logger = logging.getLogger("oeplatform")
 __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
+
+ID_COLUMN_NAME = "id"
 
 
 MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
@@ -491,9 +494,11 @@ def get_response_dict(
     """
     dict = {
         "success": success,
-        "error": str(reason).replace("\n", " ").replace("\r", " ")
-        if reason is not None
-        else None,
+        "error": (
+            str(reason).replace("\n", " ").replace("\r", " ")
+            if reason is not None
+            else None
+        ),
         "http_status": http_status_code,
         "exception": exception,
         "result": result,
@@ -1182,6 +1187,38 @@ def __change_rows(request, context, target_table, setter, fields=None):
     return {"rowcount": rows["rowcount"]}
 
 
+def drop_not_null_constraints_from_delete_meta_table(
+    meta_table_delete: str, meta_schema: str
+) -> None:
+    # https://github.com/OpenEnergyPlatform/oeplatform/issues/1548
+    # we only want id column (and meta colums, wich start with a "_")
+
+    engine = _get_engine()
+
+    # find not nullable columns in meta tables
+    query = f"""
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_name = '{meta_table_delete}'
+    AND table_schema = '{meta_schema}'
+    AND is_nullable = 'NO'
+    """
+    column_names = [x[0] for x in engine.execute(query).fetchall()]
+    # filter meta columns and id
+    column_names = [
+        c for c in column_names if c != ID_COLUMN_NAME and not c.startswith("_")
+    ]
+
+    if not column_names:
+        # nothing to do
+        return
+
+    # drop not null from these columns
+    col_drop = ", ".join(f'ALTER "{c}" DROP NOT NULL' for c in column_names)
+    query = f'ALTER TABLE "{meta_schema}"."{meta_table_delete}" {col_drop};'
+    engine.execute(query)
+
+
 def data_delete(request, context=None):
     orig_table = get_or_403(request, "table")
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
@@ -1198,6 +1235,10 @@ def data_delete(request, context=None):
     target_table = get_delete_table_name(orig_schema, orig_table)
     setter = []
     cursor = load_cursor_from_context(context)
+
+    meta_schema = get_meta_schema_name(schema)
+    drop_not_null_constraints_from_delete_meta_table(target_table, meta_schema)
+
     result = __change_rows(request, context, target_table, setter, ["id"])
     if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
@@ -1271,9 +1312,11 @@ def data_insert_check(schema, table, values, context):
                             {
                                 "operands": [
                                     {"type": "column", "column": c},
-                                    {"type": "value", "value": row[c]}
-                                    if c in row
-                                    else {"type": "value"},
+                                    (
+                                        {"type": "value", "value": row[c]}
+                                        if c in row
+                                        else {"type": "value"}
+                                    ),
                                 ],
                                 "operator": "=",
                                 "type": "operator",
@@ -1529,6 +1572,15 @@ def move(from_schema, table, to_schema):
         session.query(OEDBTableTags).filter(
             OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
         ).update({OEDBTableTags.schema_name: to_schema})
+
+        all_peer_reviews = PeerReview.objects.filter(table=table, schema=from_schema)
+
+        for peer_review in all_peer_reviews:
+            peer_review.update_all_table_peer_reviews_after_table_moved(
+                to_schema=to_schema
+            )
+
+        t.set_is_published()
         session.commit()
         t.save()
     except Exception:
@@ -1536,7 +1588,6 @@ def move(from_schema, table, to_schema):
         raise
     finally:
         session.close()
-
 
 def move_publish(from_schema, table_name, to_schema, embargo_period):
     """
@@ -1610,6 +1661,14 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
                     weeks=duration_in_weeks
                 )
                 embargo.save()
+                
+        all_peer_reviews = PeerReview.objects.filter(table=table, schema=from_schema)
+
+        for peer_review in all_peer_reviews:
+            peer_review.update_all_table_peer_reviews_after_table_moved(
+                to_schema=to_schema
+            )
+            
         t.set_is_published()
         session.commit()
 
@@ -1624,7 +1683,6 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
         raise e
     finally:
         session.close()
-
 
 def create_meta(schema, table):
     # meta_schema = get_meta_schema_name(schema)
@@ -1834,9 +1892,11 @@ def get_columns(request, context=None):
 
     enums = dict(
         (
-            "%s.%s" % (rec["schema"], rec["name"])
-            if not rec["visible"]
-            else rec["name"],
+            (
+                "%s.%s" % (rec["schema"], rec["name"])
+                if not rec["visible"]
+                else rec["name"]
+            ),
             rec,
         )
         for rec in engine.dialect._load_enums(connection, schema="*")
@@ -2164,6 +2224,15 @@ def getValue(schema, table, column, id):
 
 
 def apply_changes(schema, table, cursor=None):
+    """Apply changes from the meta tables to the actual table.
+
+    Meta tables are :
+    * _<NAME>_insert
+    * _<NAME>_update
+    * _<NAME>_delete
+
+    """
+
     def add_type(d, type):
         d["_type"] = type
         return d

@@ -1,0 +1,21 @@
+Scenarios are part of the scenario bundles. You can find them in the column "Scenario" on the scenario bundles overview page.
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            Scenarios where this table is listed as input dataset:
+            <ul class="list-group">
+                {% for acronym in input_dataset_scenarios %}
+                    <li class="list-group-item">{{ acronym }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-6">
+            Scenarios where this table is listed as output dataset:
+            <ul class="list-group">
+                {% for acronym in output_dataset_scenarios %}
+                    <li class="list-group-item">{{ acronym }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>

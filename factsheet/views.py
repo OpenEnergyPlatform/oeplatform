@@ -1,22 +1,24 @@
 import logging
 from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse, HttpResponseForbidden
 from rest_framework import status
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.utils.cache import patch_response_headers
+
 import uuid
 import requests
 import rdflib
 from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode, XSD
+
 from rdflib.compare import to_isomorphic, graph_diff
 from rdflib.plugins.stores import sparqlstore
 from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 import os
-from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT, RDF_DATABASES
-from datetime import date
+from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES, OPEN_ENERGY_ONTOLOGY_NAME
+
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
 from owlready2 import get_ontology
@@ -27,15 +29,18 @@ from rest_framework.decorators import (
     authentication_classes,
     permission_classes,
 )
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authtoken.models import Token
+
+# from rest_framework.authentication import TokenAuthentication
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.authtoken.models import Token
+
 from django.contrib.auth.decorators import login_required
 
 from .models import OEKG_Modifications, ScenarioBundleAccessControl
 from login import models as login_models
 
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
+from factsheet.oekg.filters import OekgQuery
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, "oeo")
@@ -125,6 +130,14 @@ def undo_clean_name(name):
 
 
 def factsheets_index(request, *args, **kwargs):
+    # userLoggedIn = False
+    # if request.user.is_authenticated:
+    #     userLoggedIn = True
+
+    # context_data = {
+    #     "userLoggedIn": userLoggedIn,
+    # }
+
     return render(request, "factsheet/index.html")
 
 
@@ -185,7 +198,7 @@ def get_oekg_modifications(request, *args, **kwargs):
     return response
 
 
-@login_required
+# @login_required
 def create_factsheet(request, *args, **kwargs):
     """
     Creates a scenario bundle based on user's data. Currently, the minimum requirement to create a bundle is the "acronym".
@@ -218,6 +231,10 @@ def create_factsheet(request, *args, **kwargs):
         "Factsheet saved" if successful, "Duplicate error" if the bundle's acronym exists.
 
     """
+
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("User not authenticated")
+
     request_body = json.loads(request.body)
     name = request_body["name"]
     uid = request_body["uid"]
@@ -333,24 +350,34 @@ def create_factsheet(request, *args, **kwargs):
                 if "interacting_regions" in item:
                     for interacting_region in item["interacting_regions"]:
                         interacting_region_URI = URIRef(interacting_region["iri"])
-                        interacting_regions = URIRef(
+                        scenario_interacting_region = URIRef(
                             "http://openenergy-platform.org/ontology/oekg/"
                             + interacting_region["iri"]
                         )
 
-                        bundle.add((interacting_regions, RDF.type, OEO.OEO_00020036))
                         bundle.add(
-                            (interacting_regions, RDFS.label, Literal(region["name"]))
+                            (scenario_interacting_region, RDF.type, OEO.OEO_00020036)
                         )
                         bundle.add(
                             (
-                                interacting_regions,
+                                scenario_interacting_region,
+                                RDFS.label,
+                                Literal(interacting_region["name"]),
+                            )
+                        )
+                        bundle.add(
+                            (
+                                scenario_interacting_region,
                                 OEKG["reference"],
                                 interacting_region_URI,
                             )
                         )
                         bundle.add(
-                            (scenario_URI, OEO.OEO_00020222, interacting_regions)
+                            (
+                                scenario_URI,
+                                OEO.OEO_00020222,
+                                scenario_interacting_region,
+                            )
                         )
 
                 if "scenario_years" in item:
@@ -651,31 +678,42 @@ def update_factsheet(request, *args, **kwargs):
                                 region_URI,
                             )
                         )
+                        new_bundle.add(
+                            (scenario_URI, OEO.OEO_00020220, scenario_region)
+                        )
 
                 if "interacting_regions" in item:
                     for interacting_region in item["interacting_regions"]:
                         interacting_region_URI = URIRef(interacting_region["iri"])
-                        interacting_regions = URIRef(
+                        scenario_interacting_region = URIRef(
                             "http://openenergy-platform.org/ontology/oekg/"
                             + interacting_region["iri"]
                         )
 
                         new_bundle.add(
-                            (interacting_regions, RDF.type, OEO.OEO_00020036)
-                        )
-                        new_bundle.add(
-                            (interacting_regions, RDFS.label, Literal(region["name"]))
+                            (scenario_interacting_region, RDF.type, OEO.OEO_00020036)
                         )
                         new_bundle.add(
                             (
-                                interacting_regions,
+                                scenario_interacting_region,
+                                RDFS.label,
+                                Literal(interacting_region["name"]),
+                            )
+                        )
+                        new_bundle.add(
+                            (
+                                scenario_interacting_region,
                                 OEKG["reference"],
                                 interacting_region_URI,
                             )
                         )
 
                         new_bundle.add(
-                            (scenario_URI, OEO.OEO_00020222, interacting_regions)
+                            (
+                                scenario_URI,
+                                OEO.OEO_00020222,
+                                scenario_interacting_region,
+                            )
                         )
 
                 if "scenario_years" in item:
@@ -890,13 +928,28 @@ def update_factsheet(request, *args, **kwargs):
             old_state=in_first.serialize(format="json-ld"),
             new_state=in_second.serialize(format="json-ld"),
         )
-        OEKG_Modifications_instance.save()
+        # OEKG_Modifications_instance.save()
 
         response = JsonResponse(
             "factsheet updated!", safe=False, content_type="application/json"
         )
         patch_response_headers(response, cache_timeout=1)
         return response
+
+
+def is_logged_in(request, *args, **kwargs):
+    user = None
+    if request.user.is_authenticated:
+        user = True
+
+    output = ""
+    if user is None:
+        output = "NOT_LOGGED_IN"
+    else:
+        output = "LOGGED_IN"
+    response = JsonResponse(output, safe=False, content_type="application/json")
+    patch_response_headers(response, cache_timeout=1)
+    return response
 
 
 def factsheet_by_name(request, *args, **kwargs):
@@ -1200,9 +1253,9 @@ def query_oekg(request, *args, **kwargs):
         study_keywords=str(study_keywords_list).replace("[", "").replace("]", ""),
         scenario_year_start=scenario_year_start_value,
         scenario_year_end=scenario_year_end_value,
-        funding_source_exp="OEO:OEO_00000509 ?funding_sources ;"
-        if funding_sources_list != []
-        else "",
+        funding_source_exp=(
+            "OEO:OEO_00000509 ?funding_sources ;" if funding_sources_list != [] else ""
+        ),
         authors_exp="OEO:OEO_00000506 ?authors ;" if authors_list != [] else "",
     )
 
@@ -1569,13 +1622,13 @@ def get_all_sub_classes(cls, visited=None):
 
     childCount = len(list(cls.subclasses()))
     subclasses = cls.subclasses()
-    value = 10 if childCount > 5 else 500
 
     dict = {
         "name": cls.label.first(),
         "label": cls.label.first(),
         "value": cls.label.first(),
         "iri": cls.iri,
+        "definition": oeo.value(OEO[str(cls).split(".")[1]], OBO.IAO_0000115),
     }
 
     if childCount > 0:
@@ -1587,7 +1640,7 @@ def get_all_sub_classes(cls, visited=None):
     return dict
 
 
-@login_required
+# @login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     scenario_class = oeo_owl.search_one(
         iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
@@ -1624,12 +1677,14 @@ def populate_factsheets_elements(request, *args, **kwargs):
         )
         for s, p, o in oeo.triples((None, OEO.OEO_00000504, OEO[sd])):
             sector_label = oeo.value(s, RDFS.label)
+            sector_difinition = oeo.value(s, OBO.IAO_0000115)
             sectors_list.append(
                 {
                     "iri": s,
                     "label": sector_label,
                     "value": sector_label,
                     "sector_division": sector_division_URI,
+                    "sector_difinition": sector_difinition,
                 }
             )
 
@@ -1755,3 +1810,42 @@ def populate_factsheets_elements(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
 
     return response
+
+
+def filter_scenario_view(request):
+    # Get the table IRI from the request or any other source
+    table_iri = request.GET.get("table_iri", "")
+    # table_iri = "dataedit/view/scenario/abbb_emob"
+
+    # Create an instance of OekgQuery
+    oekg_query = OekgQuery()
+
+    # Get related scenarios where the table is the input dataset
+    input_dataset_scenarios = (
+        oekg_query.get_related_scenarios_where_table_is_input_dataset(table_iri)
+    )
+
+    # Get related scenarios where the table is the output dataset
+    output_dataset_scenarios = (
+        oekg_query.get_related_scenarios_where_table_is_output_dataset(table_iri)
+    )
+
+    # Get the acronyms for the scenarios
+    input_dataset_acronyms = [
+        oekg_query.get_scenario_acronym(scenario_uri)
+        for scenario_uri in input_dataset_scenarios
+    ]
+
+    output_dataset_acronyms = [
+        oekg_query.get_scenario_acronym(scenario_uri)
+        for scenario_uri in output_dataset_scenarios
+    ]
+
+    # Prepare data for rendering in the template
+    context = {
+        "input_dataset_scenarios": input_dataset_acronyms,
+        "output_dataset_scenarios": output_dataset_acronyms,
+    }
+    html_content = render(request, "partials/related_oekg_scenarios.html", context).content.decode("utf-8")
+    # Render the template with the context
+    return HttpResponse(html_content)

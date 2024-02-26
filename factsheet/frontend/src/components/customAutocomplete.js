@@ -45,14 +45,14 @@ export default function CustomAutocomplete(parameters) {
   const [updatedLabel, setUpdatedLabel] = React.useState('');
 
   const classes = useStyles();
-  
+
   const [dialogValue, setDialogValue] = React.useState({
     id: '',
     name: '',
   });
   const theme = useTheme();
 
- 
+
   const onDelete = (name) => () => {
     const newValue = value.filter((v) => v.name !== name);
     setValue(newValue);
@@ -103,9 +103,9 @@ export default function CustomAutocomplete(parameters) {
   const handleUpdatedLabel = e => {
     setUpdatedLabel(e.target.value);
   };
-  
+
   const handleAddNew = e => {
-    const updauedValue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
+    const updauedValue = value.filter(item => (!item.hasOwnProperty('inputValue')));
     const updatedDialogeValue = { "iri": uuid(), "id": dialogValue.id, "name": dialogValue.id };
     updauedValue.push(updatedDialogeValue);
     setValue(updauedValue);
@@ -114,7 +114,7 @@ export default function CustomAutocomplete(parameters) {
     handler(updauedValue);
   };
 
-  
+
   const handleEdit = e => {
     editHandler(editLabel, updatedLabel, editIRI);
     setUpdatedLabel('');
@@ -128,7 +128,7 @@ export default function CustomAutocomplete(parameters) {
   return (
     <Box style={{ width: width }}>
       <Autocomplete
-        size="small" 
+        size="small"
         multiple
         id="checkboxes-tags-demo"
         options={parameters.optionsSet}
@@ -136,26 +136,26 @@ export default function CustomAutocomplete(parameters) {
         getOptionLabel={(option) => option.name}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
-             {!option.inputValue &&<Checkbox
+            {!option.inputValue && <Checkbox
               icon={icon}
               checkedIcon={checkedIcon}
               style={{ marginRight: 8 }}
-              checked={ selected }
+              checked={selected}
             />}
             {!option.inputValue && <HtmlTooltip
-            style={{ marginRight: '5px' }}
-            placement="top"
-            title={
-              <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                Description of <b>{option.name}</b> : TDB ...
-              <br />
-              <a href={2}>More info from Open Enrgy Knowledge Graph (OEKG)...</a>
-              </Typography>
-              </React.Fragment>
-            }
+              style={{ marginRight: '5px' }}
+              placement="top"
+              title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="caption">
+                    Description of <b>{option.name}</b> : TDB ...
+                    <br />
+                    <a href={2}>More info from Open Enrgy Knowledge Graph (OEKG)...</a>
+                  </Typography>
+                </React.Fragment>
+              }
             >
-            <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+              <HelpOutlineIcon sx={{ color: '#bdbdbd' }} />
             </HtmlTooltip>}
             {option.name}
           </li>
@@ -165,12 +165,12 @@ export default function CustomAutocomplete(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField  {...params } label={parameters.kind} placeholder="" variant="outlined" InputProps={{
+          <TextField  {...params} label={parameters.kind} placeholder="" variant="outlined" InputProps={{
             ...params.InputProps,
             classes: {
               root: classes.inputRoot, // Apply the custom CSS class
             },
-          }}/>
+          }} />
         )}
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
@@ -184,14 +184,14 @@ export default function CustomAutocomplete(parameters) {
           return filtered;
         }}
       />
-      
+
       <Dialog open={open} onClose={handleClose}  >
         <form onSubmit={handleSubmit}>
           <DialogContent>
             <DialogContentText sx={{
               'marginTop': '20px',
               'marginBottom': '20px',
-              }}>
+            }}>
               You are about to add <b><i>{dialogValue.name}</i></b> as a new <b><i>{type}</i> </b> in Open Energy Knowledge Graph (OEKG)
             </DialogContentText>
             <TextField
@@ -199,21 +199,21 @@ export default function CustomAutocomplete(parameters) {
               variant='standard'
               sx={{
                 'marginTop': '20px',
-                }}
-                id="name"
-                value={dialogValue.name}
-                onChange={handleName}
-                label="Label"
-                fullWidth
+              }}
+              id="name"
+              value={dialogValue.name}
+              onChange={handleName}
+              label="Label"
+              fullWidth
             />
             <TextField
               size="small"
               variant='standard'
               sx={{
                 'marginTop': '20px',
-                }}
-                label={'URL (Optional)'}
-                fullWidth
+              }}
+              label={'URL (Optional)'}
+              fullWidth
             />
             <TextField
               sx={{
@@ -239,12 +239,12 @@ export default function CustomAutocomplete(parameters) {
           <DialogContentText sx={{
             'marginTop': '20px',
             'marginBottom': '20px',
-            }}>
+          }}>
             You are about to edit <b><i>{editLabel}</i></b> as a new <b><i>{type}</i></b>  in Open Energy Knowledge Graph (OEKG)
           </DialogContentText>
           <TextField
             sx={{
-            'marginTop': '20px',
+              'marginTop': '20px',
             }}
             size="small"
             variant='standard'
@@ -256,7 +256,7 @@ export default function CustomAutocomplete(parameters) {
           />
           <TextField
             sx={{
-            'marginTop': '20px',
+              'marginTop': '20px',
             }}
             size="small"
             variant='standard'
@@ -293,11 +293,14 @@ export default function CustomAutocomplete(parameters) {
           // 'backgroundColor':'#FCFCFC'
         }}
       >
-        {value.map((v) => (
+        {/*  {value.map((v) => (
           <Chip size='small' key={v.id}  label={v.name} deleteIcon={<EditIcon />}  onDelete={(e) => handleDelete(e, v.name, v.iri) } variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }}/>
+        ))} */}
+        {value.map((v) => (
+          <Chip size='small' key={v.id} label={v.name} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} />
         ))}
       </Box>}
     </Box>
   );
-  
+
 }
