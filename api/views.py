@@ -621,8 +621,9 @@ class MovePublish(APIView):
             'published_tables': [table for table in tables if table.is_publish],
             "schema_whitelist": schema_whitelist,
         }
-        html = render_to_string('login/user_tables_partial.html', context)
+        html = render_to_string('login/user_tables.html', context)
         return HttpResponse(html)
+
 class Move(APIView):
     @require_admin_permission
     @api_exception

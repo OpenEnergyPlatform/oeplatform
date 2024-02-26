@@ -4,7 +4,9 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
@@ -41,7 +43,6 @@ class TablesView(View):
                     "is_reviewed": table.is_reviewed
                 }
 
-                # Определение категории таблицы
                 if table.is_reviewed:
                     if table.is_publish:
                         published_tables.append(table_data)
@@ -58,14 +59,10 @@ class TablesView(View):
         }
 
         # TODO: Fix this is_ajax as it is outdated according to django documentation ... provide better api endpoint for http requests via HTMX
-        if request.is_ajax():
+        if 'HX-Request' in request.headers:
+            return HttpResponse(render_to_string('login/user_tables.html', context, request=request))
+        else:
             return render(request, "login/user_tables.html", context)
-        return render(request, "login/user_tables.html", context)
-
-
-
-
-
 
 class ReviewsView(View):
     def get(self, request, user_id):
