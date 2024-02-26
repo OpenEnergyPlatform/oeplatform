@@ -59,14 +59,23 @@
                         <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
                         {% if table.is_reviewed and not table.is_publish %}
                             <button class="btn btn-primary publish-button" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
-                            <div class="publish-options" style="display: none;">
-                                <select class="schema-dropdown"></select>
-                                <select class="embargo-dropdown">
-                                    <option value="none">None</option>
-                                    <option value="6_months">6 Months</option>
-                                    <option value="1_year">1 Year</option>
-                                </select>
-                                <button class="btn btn-secondary confirm-publish">Confirm</button>
+                            <div class="publish-options-{{ table.name }}" style="display: none;">
+                                <label>
+                                    <select class="schema-dropdown"></select>
+                                </label>
+                                <label>
+                                    <select class="embargo-dropdown">
+                                        <option value="none">None</option>
+                                        <option value="6_months">6 Months</option>
+                                        <option value="1_year">1 Year</option>
+                                    </select>
+                                </label>
+                                <button class="btn btn-secondary confirm-publish"
+                                    hx-post="/path/to/move_publish/"
+                                    hx-target="#tableContainer"
+                                    hx-swap="outerHTML"
+                                    hx-include="#publish-options-{{ table.name }}"
+                                >Confirm</button>
                             </div>
                         {% endif %}
                     </div>
@@ -192,83 +201,46 @@
 
 
 {% block after-body-bottom-js %}
+
 <script type="text/javascript">
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.startsWith(name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
+document.addEventListener('DOMContentLoaded', function() {
+    const schemaDataElement = document.querySelector('#schemaWhitelistData');
+    let schemaWhitelist = schemaDataElement ? JSON.parse(schemaDataElement.textContent) : [];
 
-function publishTable(schema, tableName, toSchema, embargoData) {
-  return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move_publish/${toSchema}/`, {
-    method: 'POST',
-    body: JSON.stringify({embargo: embargoData}),
-    headers: {
-      'X-CSRFToken': getCookie("csrftoken"),
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    }
-  }).then(response => {
-    if (response.ok) {
-      alert('Table moved successfully.');
-    } else {
-      response.text().then(text => { alert(`Error moving table: ${text}`); });
-    }
-  });
-}
+    document.body.addEventListener('click', function(event) {
+        const target = event.target;
 
-document.addEventListener('DOMContentLoaded', function () {
-  // @Daryna pls write comments in english 
-  // Извлекаем данные о схемах
-  let schemaWhitelist = [];
-  const schemaDataElement = document.querySelector('#schemaWhitelistData');
-  if (schemaDataElement) {
-    schemaWhitelist = JSON.parse(schemaDataElement.textContent);
-  }
-
-  document.querySelectorAll('.publish-button').forEach(button => {
-    button.addEventListener('click', function () {
-      const publishOptions = this.nextElementSibling;
-      const dropdown = publishOptions.querySelector('.schema-dropdown');
-      dropdown.innerHTML = '';
-      schemaWhitelist.forEach(schema => {
-        dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
-      });
-      publishOptions.style.display = 'block';
+        if (target.classList.contains('publish-button')) {
+            const publishOptions = target.nextElementSibling;
+            const schemaDropdown = publishOptions.querySelector('.schema-dropdown');
+            schemaDropdown.innerHTML = schemaWhitelist.map(schema => `<option value="${schema}">${schema}</option>`).join('');
+            publishOptions.style.display = 'block';
+        }
     });
-  });
 
-  document.querySelectorAll('.confirm-publish').forEach(button => {
-    button.addEventListener('click', function () {
-      const publishOptions = this.parentElement;
-      const dropdown = publishOptions.querySelector('.schema-dropdown');
-      const cardElement = this.closest('.card');
-      const publishButton = cardElement.querySelector('.publish-button');
-      const schema = publishButton.getAttribute('data-schema');
-      const tableName = publishButton.getAttribute('data-tableName');
-      const toSchema = dropdown.value;
-      const embargoDropdown = this.parentElement.querySelector('.embargo-dropdown');
-      const embargoPeriod = embargoDropdown.value;
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
-      const embargoData = { duration: embargoPeriod };
-
-      publishTable(schema, tableName, toSchema, embargoData);
-      publishOptions.style.display = 'none';
+    document.body.addEventListener('htmx:configRequest', function (event) {
+        event.detail.headers['X-CSRFToken'] = getCookie('csrftoken');
     });
-  });
 });
 </script>
 
 {% endblock after-body-bottom-js %}
+
 
 
 
