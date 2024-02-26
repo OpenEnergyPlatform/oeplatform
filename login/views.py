@@ -10,8 +10,11 @@ from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 
 import login.models as models
-from dataedit.models import PeerReviewManager, Table, PeerReview
+from dataedit.models import PeerReviewManager, Table
 from dataedit.views import schema_whitelist
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+
 
 from .forms import (
     ChangeEmailForm,
@@ -41,7 +44,6 @@ class TablesView(View):
                     "is_reviewed": table.is_reviewed
                 }
 
-                # Определение категории таблицы
                 if table.is_reviewed:
                     if table.is_publish:
                         published_tables.append(table_data)
@@ -58,8 +60,9 @@ class TablesView(View):
         }
 
         # TODO: Fix this is_ajax as it is outdated according to django documentation ... provide better api endpoint for http requests via HTMX
-        if request.is_ajax():
-            return render(request, "login/user_tables.html", context)
+        if 'HX-Request' in request.headers:
+            return HttpResponse(render_to_string('login/user_tables_partial.html', context, request=request))
+
         return render(request, "login/user_tables.html", context)
 
 

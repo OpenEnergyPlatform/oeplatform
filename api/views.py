@@ -15,6 +15,7 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.template.loader import render_to_string
 from django.utils import timezone
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
@@ -296,6 +297,8 @@ class Table(APIView):
     """
     Handels the creation of tables and serves information on existing tables
     """
+
+    objects = None
 
     @api_exception
     def get(self, request, schema, table):
@@ -604,7 +607,14 @@ class MovePublish(APIView):
         embargo_period = request.data.get('embargo', {}).get('duration', None)
         actions.move_publish(schema, table, to_schema, embargo_period)
 
-        return HttpResponse({'message': 'Table successful moved.'}, status=status.HTTP_200_OK)
+        tables = Table.objects.all()
+        context = {
+            'draft_tables': [table for table in tables if not table.is_publish],
+            'published_tables': [table for table in tables if table.is_publish],
+            "schema_whitelist": schema_whitelist,
+        }
+        html = render_to_string('login/user_tables_partial.html', context)
+        return HttpResponse(html)
 class Move(APIView):
     @require_admin_permission
     @api_exception
