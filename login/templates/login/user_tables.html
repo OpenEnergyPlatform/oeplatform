@@ -71,7 +71,7 @@
                                     </select>
                                 </label>
                                 <button class="btn btn-secondary confirm-publish"
-                                    hx-post="/path/to/move_publish/"
+                                    hx-post="/api/v0/schema/{{ table.schema }}/tables/{{ table.name }}/move_publish/{toSchema}/"
                                     hx-target="#tableContainer"
                                     hx-swap="outerHTML"
                                     hx-include="#publish-options-{{ table.name }}"
