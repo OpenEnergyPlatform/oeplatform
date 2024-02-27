@@ -215,6 +215,10 @@ main.main .content .content__container.content__container--profile {
     @include cards-layout;
 
     .group-card {
-        @include card-container;
+        @include card-container {
+            &__header-top {
+                padding-bottom: 0;
+            }
+        }
     }
 }

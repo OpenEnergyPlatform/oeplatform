@@ -33,20 +33,24 @@
     @extend .h-100;
 
     &__header {
-        @extend .card-header;
-        @extend .bg-light;
+      @extend .card-header;
+      @extend .bg-light;
     }
 
     &__header-top {
       @include flex-row;
       @extend .justify-content-between;
       @extend .align-items-end;
-      @extend .pb-2;
-  }
+      padding-bottom: 0.5rem;
+    }
 
     &__title {
         @extend .fs-7;
         @extend .fw-semibold;
+
+        a {
+            @extend .text-decoration-none;
+        }
 
         &-icon {
             @extend .me-1;
@@ -58,12 +62,12 @@
     }
 
     &__top-end {
-      @extend .fs-8;
-      @extend .fw-semibold;
+        @extend .fs-8;
+        @extend .fw-semibold;
     }
 
     &__header-btm {
-      @extend .pb-1;
+        @extend .pb-1;
     }
 
     &__tag {
@@ -100,4 +104,6 @@
             @extend .fs-6;
         }
     }
+
+    @content;
 }
