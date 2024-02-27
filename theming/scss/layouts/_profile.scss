@@ -219,6 +219,25 @@ main.main .content .content__container.content__container--profile {
             &__header-top {
                 padding-bottom: 0;
             }
+
+            &__tag {
+                @extend .border;
+                @extend .fw-normal;
+                @extend .py-0;
+                margin-bottom: 0;
+
+                &--admin {
+                    background-color: $purple-100;
+                    border-color: $purple-200 !important;
+                    color: $purple-700;
+                }
+
+                &--member {
+                    background-color: $yellow-100;
+                    border-color: $yellow-300 !important;
+                    color: $yellow-800;
+                }
+            }
         }
     }
 }

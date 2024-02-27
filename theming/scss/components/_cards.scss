@@ -48,6 +48,10 @@
         @extend .fs-7;
         @extend .fw-semibold;
 
+        &-text {
+            @extend .me-1;
+        }
+
         a {
             @extend .text-decoration-none;
         }
@@ -73,7 +77,7 @@
     &__tag {
         @extend .rounded-pill;
         @extend .d-inline-block;
-        @extend .mb-1;
+        margin-bottom: 0.25rem;
         background-color: $gray-200;
         padding: 1px 1rem;
 
