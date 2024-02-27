@@ -43,55 +43,52 @@
     </div>
     <hr>
     
-    <div class="container">
-        <div class="row">
-            <h2 class="header">User Groups</h2>
-            <div class="accordion" id="accordionExample">
-                <div class="accordion-item">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                        How to use Groups on the Open Energy Platform?
-                    </button>
-                    </h2>
-                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-                        <strong>User Group management:</strong> On the profile page, you can oversee and control your groups, including those you are part of. 
-                        If you're an admin or owner, you have the authority to invite users, assigning them specific permissions to assist in group management. 
-                        To maintain user privacy, we currently require you to personally know and seek consent from individuals you wish to invite by requesting their usernames.
-                        <br>
-                        <br>
-                        <strong>User object permissions:</strong> Groups on the Open Energy Platform serve a singular purpose: simplifying object-level permissions. 
-                        This functionality currently is particularly relevant for data tables that users create in the database section of the platform. To grant permissions, 
-                        visit the detail view of the table where, as the owner or creator, you'll find the permissions button on the right side. From there, 
-                        you can add individual users with specific permissions or include a group to grant identical permissions to all its members. 
-                    </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <h2 class="header">Manage Groups</h2>
-                <div style="overflow: hidden;">
-                    <a href="/user/groups/" class="btn btn-secondary">Manage Groups</a>
-                </div>
-            </div>
-
-            <div class="col-md-9">
-                <div class="d-grid md-4" id="user-group-list">
-                    <h2 class="header">Group Memberships</h2>
-                    <ul class="list-group">
-                        {% if token %}
-                            {% for membership in request.user.memberships.all %}
-                                <li class="list-group-item">{{ membership.group }}</li>
-                                <li class="list-group-item">{{ membership.group.description }}</li>
-                                <hr> <!-- Add a horizontal line between each iteration -->
-                            {% endfor %}
-                        {% endif %}
-                    </ul>
+    
+    <div class="row">
+        <h2 class="header">User Groups</h2>
+        <div class="collapse-container collapse-container--right">
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroupUse" aria-expanded="false" aria-controls="collapseGroupUse">
+                How to use Groups on the Open Energy Platform?
+            </button>
+            <div class="collapse" id="collapseGroupUse">
+                <div class="card card-body">
+                    <strong>User Group management:</strong> On the profile page, you can oversee and control your groups, including those you are part of. 
+                    If you're an admin or owner, you have the authority to invite users, assigning them specific permissions to assist in group management. 
+                    To maintain user privacy, we currently require you to personally know and seek consent from individuals you wish to invite by requesting their usernames.
+                    <br>
+                    <br>
+                    <strong>User object permissions:</strong> Groups on the Open Energy Platform serve a singular purpose: simplifying object-level permissions. 
+                    This functionality currently is particularly relevant for data tables that users create in the database section of the platform. To grant permissions, 
+                    visit the detail view of the table where, as the owner or creator, you'll find the permissions button on the right side. From there, 
+                    you can add individual users with specific permissions or include a group to grant identical permissions to all its members. 
                 </div>
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-3">
+            <h2 class="header">Manage Groups</h2>
+            <div style="overflow: hidden;">
+                <a href="/user/groups/" class="btn btn-secondary">Manage Groups</a>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="d-grid md-4" id="user-group-list">
+                <h2 class="header">Group Memberships</h2>
+                <ul class="list-group">
+                    {% if token %}
+                        {% for membership in request.user.memberships.all %}
+                            <li class="list-group-item">{{ membership.group }}</li>
+                            <li class="list-group-item">{{ membership.group.description }}</li>
+                            <hr> <!-- Add a horizontal line between each iteration -->
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
     
 
     {% endif %}

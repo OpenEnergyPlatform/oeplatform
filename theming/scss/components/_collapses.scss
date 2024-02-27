@@ -1,0 +1,13 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.collapse-container {
+  &--right button {
+    @extend .w-100;
+    @extend .text-end;
+  }
+  
+  button {
+    width: 50rem;
+  }
+}
