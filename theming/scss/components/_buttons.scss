@@ -12,4 +12,9 @@
     &__icon {
         @extend .me-1;
     }
+
+    &--xs {
+        @extend .py-0;
+        height: 1.75rem;
+    }
 }
