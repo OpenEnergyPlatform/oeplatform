@@ -210,10 +210,23 @@ main.main .content .content__container.content__container--profile {
             }
         }
     }
+
+    &-category-heading {
+        @extend .py-2;
+        @extend .fs-6;
+        @extend .fw-bold;
+        @extend .text-body;
+    }
 }
 
 .group-management {
-    @include cards-layout;
+    @extend .mb-4;
+
+    @include cards-layout {
+        &__col {
+            margin-bottom: 0.75rem !important;
+        }
+    }
 
     .group-card {
         @include card-container {
@@ -260,23 +273,27 @@ main.main .content .content__container.content__container--profile {
                 }
             }
 
-            &__btn-invite {
+            &__btn {
                 @extend .btn;
-                @extend .btn-link;
                 @extend .btn--xs;
-                @extend .text-decoration-none;
                 @extend .ms-4;
+            }
+
+            &__btn--invite {
+                @extend .btn-link;
+                @extend .text-decoration-none;
 
                 svg {
                     @extend .me-1;
                 }
             }
 
-            &__btn-edit {
-                @extend .btn;
+            &__btn--edit {
                 @extend .btn-outline-info;
-                @extend .btn--xs;
-                @extend .ms-4;
+            }
+
+            &__btn--accept {
+                @extend .btn-primary;
             }
         }
     }

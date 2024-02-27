@@ -10,8 +10,8 @@
 
     &__col {
         @extend .col-12;
-        @extend .mb-4;
         @extend .px-0;
+        margin-bottom: 1.5rem;
 
         &--4 {
             @extend .col-lg-4;
@@ -26,6 +26,8 @@
             }
         }
     }
+
+    @content;
 }
 
 @mixin card-container {
