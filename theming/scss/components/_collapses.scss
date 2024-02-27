@@ -2,12 +2,20 @@
 @use '../base/mixins' as *;
 
 .collapse-container {
-  &--right button {
-    @extend .w-100;
-    @extend .text-end;
-  }
-  
-  button {
-    width: 50rem;
+  &__button {
+    @extend .d-flex;
+    @extend .flex-row;
+    @extend .mb-2;
+
+    &--right {
+      @extend .justify-content-end;
+    }
+
+    button {
+      @extend .btn;
+      @extend .btn-link;
+      @extend .fw-bold;
+      @extend .text-decoration-none;
+    }
   }
 }
