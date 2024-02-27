@@ -1,5 +1,6 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
+@use '../components/cards' as *;
 
 main.main .content .content__container.content__container--profile {
     .content {
@@ -207,5 +208,13 @@ main.main .content .content__container.content__container--profile {
                 }
             }
         }
+    }
+}
+
+.group-management {
+    @include cards-layout;
+
+    .group-card {
+        @include card-container;
     }
 }
