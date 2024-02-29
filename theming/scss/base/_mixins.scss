@@ -35,6 +35,10 @@
   user-select: none;
 }
 
+.btn-secondary {
+  @include button-variant($gray-300, $gray-300);
+}
+
 .btn-tertiary {
   @include button-variant($gray-300, $gray-300);
 }

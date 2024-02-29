@@ -296,7 +296,7 @@ main.main .content .content__container.content__container--profile {
 
         button {
             @extend .btn;
-            @extend .btn-light;
+            @extend .btn-secondary;
             @extend .w-100;
         }
     }
