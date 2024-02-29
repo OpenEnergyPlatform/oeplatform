@@ -262,6 +262,44 @@ main.main .content .content__container.content__container--profile {
             @extend .btn-primary;
         }
     }
+
+    &__members {
+        width: 24rem;
+    }
+
+    &__member {
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .pb-3;
+    }
+
+    &__profile-name {
+        @extend .fw-bold;
+        width: 50%;
+
+        a {
+            @extend .text-decoration-none;
+        }
+    }
+
+    &__member-status {
+        flex: 1;
+
+        select {
+            @extend .form-select;
+            @extend .form-select-sm;
+        }
+    }
+
+    &__member-invite {
+        @extend .py-2;
+
+        button {
+            @extend .btn;
+            @extend .btn-light;
+            @extend .w-100;
+        }
+    }
 }
 
 .group-management {
