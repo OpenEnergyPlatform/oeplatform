@@ -210,12 +210,57 @@ main.main .content .content__container.content__container--profile {
             }
         }
     }
+}
 
-    &-category-heading {
+.profile-category {
+    @extend .pb-3;
+
+    &__heading {
         @extend .py-2;
         @extend .fs-6;
         @extend .fw-bold;
         @extend .text-body;
+
+        &--sm {
+            @extend .fs-7;
+            @extend .fw-light;
+        }
+
+        &--border-btm {
+            @extend .border-bottom;
+            @extend .mb-3;
+        }
+    }
+
+    &__input {
+        @extend .pb-3;
+
+        label {
+            @extend .form-label;
+        }
+
+        input,
+        textarea {
+            @extend .form-control;
+        }
+    }
+
+    &__btns {
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .justify-content-end;
+    }
+
+    &__btn {
+        @extend .btn;
+        
+        &--undo {
+            @extend .btn-link;
+        }
+
+        &--save {
+            @extend .btn-primary;
+        }
     }
 }
 

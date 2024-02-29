@@ -18,3 +18,17 @@
         height: 1.75rem;
     }
 }
+
+.backlink {
+    @extend .pb-2;
+    
+    a {
+        @extend .text-decoration-none;
+        @extend .fw-semibold;
+    }
+
+    svg {
+        @extend .me-1;
+        @include translateY(-2px);
+    }
+}
