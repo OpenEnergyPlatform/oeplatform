@@ -253,6 +253,7 @@ main.main .content .content__container.content__container--profile {
 
     &__btn {
         @extend .btn;
+        min-width: 8rem;
         
         &--undo {
             @extend .btn-link;
@@ -260,6 +261,16 @@ main.main .content .content__container.content__container--profile {
 
         &--save {
             @extend .btn-primary;
+        }
+
+        &--leave {
+            @extend .btn-outline-primary;
+            min-width: 10rem;
+        }
+
+        &--delete {
+            @extend .btn-danger;
+            min-width: 10rem;
         }
     }
 
@@ -298,6 +309,12 @@ main.main .content .content__container.content__container--profile {
             @extend .btn;
             @extend .btn-secondary;
             @extend .w-100;
+        }
+    }
+
+    &__danger {
+        div {
+            @extend .pb-4;
         }
     }
 }
