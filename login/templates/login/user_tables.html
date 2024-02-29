@@ -7,15 +7,17 @@
 
 <div class="container">
     <div class="row">
-        
-        <div class="accordion" id="accordionTables">
-            <div class="accordion-item">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTables" aria-expanded="true" aria-controls="collapseTables">
+        <div class="collapse-container collapse-container--right">
+            <div class="collapse-container__button collapse-container__button--right">
+                <button type="button" data-bs-toggle="collapse" data-bs-target="#collapseOEPUse" aria-expanded="false" aria-controls="collapseOEPUse">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+                        <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                    </svg>
                     How to manage your data resources?
                 </button>
-                </h2>
-                <div id="collapseTables" class="accordion-collapse collapse" aria-labelledby="headingTables" data-bs-parent="#accordionTables">
-                <div class="accordion-body">
+            </div>
+            <div class="collapse" id="collapseOEPUse">
+                <div class="card card-body">
                     <strong>Access your data tables:</strong> Listed below are tables associated with you, either created by you or by a group you're part of, 
                     which has permission to access the table. This simplifies resource identification and access. 
                     Expect future enhancements for better data management through additional grouping and sorting options. 
@@ -28,7 +30,6 @@
                     A automated license check verifies the license name you provided in the table metadata. It checks the license name against the SPDX list for open licenses.
                     If your data is openly licensed you can publish your table by moving it to one of the suggested topics on the Open Energy Platform. 
                     The "Publish" button becomes visible once all criteria for publishing are met.
-                </div>
                 </div>
             </div>
         </div>
