@@ -1,12 +1,27 @@
 {# this is the subpage navigation on the user profile page #}
 {% load static %}
 <script>
-    function toggler(divId) {
-        $("#" + divId).toggle();
-    }
+  function toggler(divId) {
+      $("#" + divId).toggle();
+  }
+
+  // add .active class to selected tab
+  document.addEventListener("DOMContentLoaded", function() {
+    const currentPath = window.location.pathname;
+    const tabs = document.querySelectorAll("#profileTabs a");
+
+    tabs.forEach(tab => tab.classList.remove("active"));
+
+    tabs.forEach(tab => {
+      const tabPath = new URL(tab.href, window.location.origin).pathname;
+      if (tabPath === currentPath) {
+        tab.classList.add("active");
+      }
+    });
+  });
 </script>
 
-<div class="pages-nav-tabs">
+<div class="pages-nav-tabs" id="profileTabs">
   {% if profile_user %}
   <a href="{% url 'tables' profile_user.id %}">
     <svg height="16" width="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
