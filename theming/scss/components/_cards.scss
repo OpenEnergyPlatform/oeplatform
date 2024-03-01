@@ -186,6 +186,7 @@
     }
 
     &__content-danger {
+        @extend .position-relative;
         @extend .background-danger;
         @extend .border-start;
         @extend .border-danger;
@@ -193,6 +194,43 @@
         @extend .px-3;
         @extend .py-2;
         @extend .text-danger;
+    }
+
+    &__content-danger-icon {
+        @extend .position-absolute;
+    }
+
+    &__content-danger-message {
+        @extend .ps-4;
+        @extend .fw-semibold;
+    }
+
+    &__content-danger-details {
+        @extend .ps-3;
+
+        p {
+            @extend .mb-1;
+        }
+
+        button {
+            @extend .btn;
+            @extend .btn-link;
+            @extend .btn-sm;
+            @extend .text-danger;
+
+            &:focus {
+                border-color: $danger;
+                box-shadow: 0 0 0 0.25rem rgba(225,83,97,.5);
+            }
+        }
+
+        p button {
+            @extend .fw-normal; // overwrite .fw-bold from .btn
+        }
+
+        svg {
+            @include translateY(-2px);
+        }
     }
 
     @content;

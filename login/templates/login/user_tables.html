@@ -164,7 +164,28 @@
                             <span class="profile-table-card__embargo">Embargo until 06/05/2024</span>
                         </div>
                         <div class="profile-table-card__content-danger">
-                            Potential publishing without an open license
+                            <div class="profile-table-card__content-danger-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                    <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                                </svg>
+                            </div>
+                            <div class="profile-table-card__content-danger-message">
+                                Potential publishing without an open license
+                            </div>
+                            <div class="profile-table-card__content-danger-details">
+                                <p>
+                                    <button type="button" data-bs-toggle="collapse" data-bs-target="#collapseWarningDetails" aria-expanded="false" aria-controls="collapseWarningDetails">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+                                            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                                        </svg>
+                                        Details
+                                    </button>
+                                </p>
+                                <div class="collapse" id="collapseWarningDetails">
+                                    Please revisit your metadata and check the license information. Please do not publish data that does not hold an open license.
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
