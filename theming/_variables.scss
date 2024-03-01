@@ -82,6 +82,41 @@ $secondary: $blue-700;
 $body-color: $gray-700;
 $text-muted: #5F7484;
 
+// New colors
+$primary:       $blue;
+$secondary:     $gray-600;
+$success:       $green;
+$info:          $cyan;
+$warning:       $yellow;
+$danger:        $red;
+$light:         $gray-100;
+$dark:          $gray-900 ;
+
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark
+);
+
+$theme-colors: map-merge($theme-colors, (
+  "background-success": $green-100,
+  "background-warning": $yellow-100,
+  "background-danger": $red-100,
+  "background-info": $blue-100,
+  "background-neutral": $gray-100
+));
+
+@each $color, $value in $theme-colors {
+  .#{$color} {
+    background-color: $value !important;
+  }
+}
+
 //// Typography
 $font-size-base:              1rem;
 $h1-font-size:                $font-size-base * 2;

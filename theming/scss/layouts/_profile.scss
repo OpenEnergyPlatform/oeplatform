@@ -398,3 +398,17 @@ main.main .content .content__container.content__container--profile {
         }
     }
 }
+
+.profile-tables {
+    @extend .mb-4;
+
+    @include cards-layout {
+        &__col {
+            margin-bottom: 0.75rem !important;
+        }
+    }
+
+    .profile-table-card {
+        @include card-simple-container;
+    }
+}
