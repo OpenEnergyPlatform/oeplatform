@@ -409,6 +409,29 @@ main.main .content .content__container.content__container--profile {
     }
 
     .profile-table-card {
-        @include card-simple-container;
+        @include card-simple-container {
+            margin-bottom: 0.75rem !important;
+
+            .profile-table-card__tag.profile-table-card__tag--warning,
+            .profile-table-card__tag.profile-table-card__tag--success {
+                @extend .ms-0;
+                @extend .me-3;
+                @extend .px-1;
+                @extend .text-center;
+            }
+
+            &__btn {
+                @extend .btn;
+                @extend .btn-primary;
+                @extend .fw-semibold;
+                @extend .py-0;
+                @extend .px-4;
+                @extend .ms-3;
+            }
+
+            &__btn--sm {
+                height: 1.5rem;
+            }
+        }
     }
 }

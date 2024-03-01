@@ -1,5 +1,6 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
+@use '../components/tags' as *;
 
 @mixin cards-layout {
     @extend .container-fluid;
@@ -77,16 +78,7 @@
     }
 
     &__tag {
-        @extend .rounded-pill;
-        @extend .d-inline-block;
-        margin-bottom: 0.25rem;
-        background-color: $gray-200;
-        padding: 1px 1rem;
-
-        &--highlight {
-            @extend .text-white;
-            background-color: $gray-600;
-        }
+        @include tag-mark;
     }
 
     &__body {
@@ -157,13 +149,12 @@
     }
 
     &__tag {
-        @extend .rounded-pill;
-        @extend .d-inline-block;
+        @include tag-mark;
         @extend .ms-2;
-        margin-bottom: 0.25rem;
-        background-color: $gray-200;
-        padding: 1px 1rem;
-        height: 1.5rem;
+
+        &--no-margin {
+            @extend .ms-0;
+        }
     }
 
     &__content-secondary {
@@ -224,6 +215,10 @@
 
         svg {
             @include translateY(-2px);
+        }
+
+        a {
+            @extend .ps-2;
         }
     }
 
