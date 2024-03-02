@@ -275,7 +275,11 @@ main.main .content .content__container.content__container--profile {
     }
 
     &__members {
-        width: 24rem;
+        width: 100%;
+
+        @include media-breakpoint-up(sm) {
+            width: 24rem;
+        }
     }
 
     &__member {
@@ -371,12 +375,29 @@ main.main .content .content__container.content__container--profile {
                 svg {
                     @extend .me-2;
                 }
+
+                @include media-breakpoint-down(lg) {
+                    font-size: 0.75rem !important;
+
+                    svg {
+                        display: none !important;
+                    }
+                }
             }
 
             &__btn {
                 @extend .btn;
                 @extend .btn--xs;
-                @extend .ms-4;
+                @extend .ms-3;
+
+                @include media-breakpoint-down(lg) {
+                    margin-left: 0.5rem !important;
+                    font-size: 0.75rem !important;
+
+                    svg {
+                        display: none !important;
+                    }
+                }
             }
 
             &__btn--invite {
