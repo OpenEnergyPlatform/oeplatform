@@ -6,7 +6,7 @@
 {% include "login/user_nav.html" %}
 
 <div class="container">
-    <div class="row">
+    <section class="row">
         <div class="collapse-container collapse-container--right">
             <div class="collapse-container__button collapse-container__button--right">
                 <button type="button" data-bs-toggle="collapse" data-bs-target="#collapseOEPUse" aria-expanded="false" aria-controls="collapseOEPUse">
@@ -33,7 +33,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
     <div class="row" id="tableContainer" hx-get="/profile/{{ profile_user.id }}/tables" hx-trigger="load">
         <h2>Published</h2>
         <div class="container">
@@ -136,7 +136,7 @@
             </div>
         </div>
     </div>
-    <div class="profile-category">
+    <section class="profile-category">
         <h2 class="profile-category__heading">Published</h2>
         <div class="profile-tables">
             <div class="profile-tables__row">
@@ -270,8 +270,8 @@
                 </li>
             </ul>
         </nav>
-    </div>
-    <div class="profile-category">
+    </section>
+    <section class="profile-category">
         <h2 class="profile-category__heading">Draft</h2>
         <div class="profile-tables">
             <div class="profile-tables__row">
@@ -389,7 +389,7 @@
                 </li>
             </ul>
         </nav>
-    </div>
+    </section>
     {% endif %}
     <div id="reviewedTablesData" style="display: none;">{{ reviewed_tables|json_script:"reviewedTablesData" }}</div>
     <div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
