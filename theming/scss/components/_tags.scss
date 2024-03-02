@@ -33,11 +33,13 @@ $tag-mark-width: 7rem;
         @extend .background-success;
         color: $green-700 !important;
         width: $tag-mark-width;
+        min-width: $tag-mark-width;
     }
 
     &--warning {
         @extend .background-warning;
         color: $yellow-800 !important;
         width: $tag-mark-width;
+        min-width: $tag-mark-width;
     }
 }

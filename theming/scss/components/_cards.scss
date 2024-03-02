@@ -126,10 +126,18 @@
             @extend .flex-row;
             @extend .justify-content-end;
         }
+
+        @include media-breakpoint-down(xl) {
+            flex-direction: column !important;
+
+            &--left {
+                padding-bottom: 1rem;
+            }
+        }
     }
 
     &__link {
-        max-width: 25rem;
+        max-width: 20rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;  
@@ -137,6 +145,10 @@
         text-overflow: ellipsis;
         white-space: normal;
         max-height: calc(2 * 21px);
+
+        @include media-breakpoint-up(xxl) {
+            max-width: 25rem;
+        }
 
         a {
             @extend .text-decoration-none;
