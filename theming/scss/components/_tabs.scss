@@ -151,4 +151,16 @@
         @extend .me-1;
         vertical-align: text-bottom;
     }
+
+    @include media-breakpoint-down(lg) {
+        a {
+            font-size: 1rem !important;
+            padding-right: 0.75rem !important;
+            padding-left: 0.75rem !important;
+        }
+
+        svg {
+            display: none !important;
+        }
+    }
 }
