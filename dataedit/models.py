@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from enum import Enum
 import json
 import logging
@@ -123,10 +123,25 @@ class Table(Tagable):
 
 
 class Embargo(models.Model):
-    table = models.ForeignKey(Table, on_delete=models.CASCADE)
+    DURATION_CHOICES = [
+        ('6_months', '6 Months'),
+        ('1_year', '1 Year'),
+    ]
+
+    table = models.ForeignKey(Table, on_delete=models.CASCADE, related_name='embargoes')
     date_started = models.DateTimeField(auto_now_add=True)
     date_ended = models.DateTimeField()
-    duration = models.CharField(max_length=10)
+    duration = models.CharField(max_length=10, choices=DURATION_CHOICES)
+
+    def is_active(self):
+        return datetime.now() < self.date_ended
+
+    def remaining_days(self):
+        return (self.date_ended - datetime.now()).days if self.is_active() else 0
+
+    def __str__(self):
+        return f"Table {self.table} in embargo until {self.date_ended.strftime('%Y-%m-%d')}"
+
 
     def save(self, *args, **kwargs):
         if not self.date_started:
@@ -198,7 +213,8 @@ class PeerReview(models.Model):
     review = JSONField(null=True)
     # TODO: Maybe oemetadata should be stored in a separate table and imported
     # via FK here / change also for Tables model
-    oemetadata = JSONField(null=False, default=None)
+    oemetadata = JSONField(null=True, default=None)
+
 
     # laden
     @classmethod
