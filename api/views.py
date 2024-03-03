@@ -3,6 +3,7 @@ import itertools
 import json
 import logging
 import re
+from datetime import datetime
 from decimal import Decimal
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
@@ -407,15 +408,16 @@ class Table(APIView):
             raise PermissionDenied
         if actions.has_table(dict(schema=schema, table=table), {}):
             raise APIError("Table already exists")
-        json_data = request.data["query"]
+        json_data = request.data.get("query", {})
+        embargo_data = request.data.get("embargo", {})
         constraint_definitions = []
         column_definitions = []
 
-        for constraint_definiton in json_data.get("constraints", []):
-            constraint_definiton.update(
+        for constraint_definition in json_data.get("constraints", []):
+            constraint_definition.update(
                 {"action": "ADD", "c_table": table, "c_schema": schema}
             )
-            constraint_definitions.append(constraint_definiton)
+            constraint_definitions.append(constraint_definition)
 
         if "columns" not in json_data:
             raise actions.APIError("Table contains no columns")
@@ -431,6 +433,7 @@ class Table(APIView):
             column_definitions,
             constraint_definitions,
             metadata=metadata,
+            embargo_data=embargo_data,
         )
 
         perm, _ = login_models.UserPermission.objects.get_or_create(
@@ -474,6 +477,7 @@ class Table(APIView):
         column_definitions,
         constraint_definitions,
         metadata=None,
+        embargo_data=None,
     ):
         self.validate_column_names(column_definitions)
 
@@ -500,6 +504,25 @@ class Table(APIView):
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
+        if embargo_data:
+            date_started = datetime.strptime(embargo_data['start'], '%Y-%m-%d').date()
+            date_ended = datetime.strptime(embargo_data['end'], '%Y-%m-%d').date()
+            duration_days = (date_ended - date_started).days
+            if duration_days <= 182:
+                duration = '6_months'
+            elif duration_days <= 365:
+                duration = '1_year'
+            else:
+                duration = None
+
+            if date_started <= timezone.now().date() <= date_ended:
+                Embargo.objects.create(
+                    table=table_object,
+                    date_started=date_started,
+                    date_ended=date_ended,
+                    duration=duration
+                )
+            print(f"Creating embargo: date_started={date_started}, date_ended={date_ended}, duration={duration}")
 
     @api_exception
     @require_delete_permission
