@@ -409,7 +409,7 @@ class Table(APIView):
         if actions.has_table(dict(schema=schema, table=table), {}):
             raise APIError("Table already exists")
         json_data = request.data.get("query", {})
-        embargo_data = request.data.get("embargo", {})
+        embargo_data = request.data.get("embargo") or json_data.get("embargo", {})
         constraint_definitions = []
         column_definitions = []
 
@@ -505,24 +505,25 @@ class Table(APIView):
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
         if embargo_data:
-            date_started = datetime.strptime(embargo_data['start'], '%Y-%m-%d').date()
-            date_ended = datetime.strptime(embargo_data['end'], '%Y-%m-%d').date()
-            duration_days = (date_ended - date_started).days
-            if duration_days <= 182:
-                duration = '6_months'
-            elif duration_days <= 365:
-                duration = '1_year'
-            else:
-                duration = None
-
-            if date_started <= timezone.now().date() <= date_ended:
-                Embargo.objects.create(
-                    table=table_object,
-                    date_started=date_started,
-                    date_ended=date_ended,
-                    duration=duration
-                )
-            print(f"Creating embargo: date_started={date_started}, date_ended={date_ended}, duration={duration}")
+            start_date = embargo_data.get('start')
+            end_date = embargo_data.get('end')
+            if start_date and end_date:
+                date_started = datetime.strptime(start_date, '%Y-%m-%d').date()
+                date_ended = datetime.strptime(end_date, '%Y-%m-%d').date()
+                duration_days = (date_ended - date_started).days
+                if duration_days <= 182:
+                    duration = '6_months'
+                elif duration_days <= 365:
+                    duration = '1_year'
+                else:
+                    duration = None
+                if date_started <= timezone.now().date() <= date_ended:
+                    Embargo.objects.create(
+                        table=table_object,
+                        date_started=date_started,
+                        date_ended=date_ended,
+                        duration=duration
+                    )
 
     @api_exception
     @require_delete_permission
