@@ -6,6 +6,10 @@ import re
 
 from oeplatform.settings import STATIC_ROOT
 
+#####################################################
+# Utilities mainly used for the Tables profile page #
+#####################################################
+
 
 def normalize_license_name(name):
     # Replace whitespaces with hyphens and convert to uppercase
@@ -37,7 +41,10 @@ def create_license_id_set():
     # Check if the "licenses" key exists in the dictionary
     if "licenses" in licenses:
         # Create a set of unique licenseId values
-        return {license_info.get("licenseId").upper() for license_info in licenses["licenses"]}
+        return {
+            license_info.get("licenseId").upper()
+            for license_info in licenses["licenses"]
+        }
 
     else:
         return set()
@@ -76,3 +83,22 @@ def validate_open_data_license(django_table_obj):
         )
 
     return True, None
+
+
+#####################################################
+# Utilities mainly used for the Review profile page #
+#####################################################
+
+# Add functionality here
+
+###############################################################
+# Utilities mainly used for the Group Management profile page #
+###############################################################
+
+# Add functionality here
+
+#######################################################
+# Utilities mainly used for the Settings profile page #
+#######################################################
+
+# Add functionality here
