@@ -5,7 +5,6 @@
 {% if profile_user == request.user %}
 {% include "login/user_nav.html" %}
 
-
 <!-- ###### Published ###### -->
 
 <section class="profile-category">
@@ -163,7 +162,8 @@
                                 </svg>
                                 License
                             </div>
-                            <button class="profile-table-card__btn profile-table-card__btn--sm">Publish</button>
+                            <button class="profile-table-card__btn profile-table-card__btn--sm publish-button" data-bs-toggle="modal" data-bs-target="#publishModal" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
+                            
                             {% else %}
                             <div class="profile-table-card__tag profile-table-card__tag--danger">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
@@ -181,10 +181,11 @@
                                 {{ table.schema }}
                             </div>
                         </div>
-
+                        
+                            
                         <!-- Add once embargo branch is merged PR https://github.com/OpenEnergyPlatform/oeplatform/pull/1534 -->
                         <!-- <div class="profile-table-card__content-secondary">
-                            <span class="profile-table-card__embargo">
+                        <span class="profile-table-card__embargo">
                                 Embargo until 06/05/2024
                                 <button type="button" class="btn btn-outline-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Test text">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#294456" class="bi bi-info-circle" viewBox="0 0 16 16">
@@ -193,9 +194,7 @@
                                     </svg>
                                 </button>
                             </span>
-                        </div> -->
-
-                            
+                        </div>  -->                               
                     </div>
                     {% if table.license_status.error %}
                     <div class="profile-table-card__content-danger">
@@ -235,8 +234,27 @@
 {% endif %}
 <div id="reviewedTablesData" style="display: none;">{{ reviewed_tables|json_script:"reviewedTablesData" }}</div>
 <div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
-{% endblock %}
 
+
+<!-- Modal for publishing functionality (after pressing publish button) -->
+
+<div class="modal fade" id="publishModal" tabindex="-1" aria-labelledby="publishModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="publishModalLabel">Publish Table</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="publish-options">
+                    <select class="form-select schema-dropdown"></select>
+                    <button class="btn btn-primary confirm-publish" data-bs-dismiss="modal">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
 
 {% block main-right-sidebar-content %}
@@ -379,39 +397,41 @@ function publishTable(schema, tableName, toSchema) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-  // Извлекаем данные о схемах
-  let schemaWhitelist = [];
-  const schemaDataElement = document.querySelector('#schemaWhitelistData');
-  if (schemaDataElement) {
-    schemaWhitelist = JSON.parse(schemaDataElement.textContent);
-  }
+    let schemaWhitelist = [];
+    let relatedButton;
+    let publishModalInstance; // Declare publishModalInstance in a higher scope
 
-  document.querySelectorAll('.publish-button').forEach(button => {
-    button.addEventListener('click', function () {
-      const publishOptions = this.nextElementSibling;
-      const dropdown = publishOptions.querySelector('.schema-dropdown');
-      dropdown.innerHTML = '';
-      schemaWhitelist.forEach(schema => {
-        dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
-      });
-      publishOptions.style.display = 'block';
+    const schemaDataElement = document.querySelector('#schemaWhitelistData');
+    if (schemaDataElement) {
+        schemaWhitelist = JSON.parse(schemaDataElement.textContent);
+    }
+
+    // Event listener for modal show event
+    var publishModal = new bootstrap.Modal(document.getElementById('publishModal'));
+    publishModalInstance = bootstrap.Modal.getInstance(publishModal._element);
+
+    publishModalInstance._element.addEventListener('show.bs.modal', function (event) {
+        relatedButton = event.relatedTarget;
+        const dropdown = this.querySelector('.schema-dropdown');
+        dropdown.innerHTML = '';
+        schemaWhitelist.forEach(schema => {
+            dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
+        });
     });
-  });
 
-  document.querySelectorAll('.confirm-publish').forEach(button => {
-    button.addEventListener('click', function () {
-      const publishOptions = this.parentElement;
-      const dropdown = publishOptions.querySelector('.schema-dropdown');
-      const cardElement = this.closest('.card');
-      const publishButton = cardElement.querySelector('.publish-button');
-      const schema = publishButton.getAttribute('data-schema');
-      const tableName = publishButton.getAttribute('data-tableName');
-      const toSchema = dropdown.value;
+    // Event listener for Confirm button click inside the modal
+    document.querySelector('.confirm-publish').addEventListener('click', function () {
+        const dropdown = document.querySelector('.schema-dropdown');
+        if (relatedButton) {
+            const schema = relatedButton.getAttribute('data-schema');
+            const tableName = relatedButton.getAttribute('data-tableName');
+            const toSchema = dropdown.value;
 
-      publishTable(schema, tableName, toSchema);
-      publishOptions.style.display = 'none';
+            publishTable(schema, tableName, toSchema);
+        } else {
+            console.error('relatedButton is not defined.');
+        }
     });
-  });
 });
 </script>
 
