@@ -59,6 +59,11 @@ urlpatterns = [
         name="reviews",
     ),
     url(
+        r"^profile/(?P<user_id>[\d]+)/groups$",
+        views.GroupsView.as_view(),
+        name="groups",
+    ),
+    url(
         r"^profile/(?P<user_id>[\d]+)/settings$",
         views.SettingsView.as_view(),
         name="settings",
@@ -74,30 +79,38 @@ urlpatterns = [
     #    AccountDeleteView.as_view(),
     #    name="account-delete",
     # ),
-    url(r"^groups/$", views.GroupManagement.as_view(), name="input"),
+    url(
+        r"^profile/(?P<user_id>[\d]+)/partial_groups$",
+        views.PartialGroupsView.as_view(),
+        name="partial-groups",
+    ),
     url(
         r"^groups/new/$",
-        views.GroupCreate.as_view(),
-        name="input",
+        views.GroupManagement.as_view(),
+        name="group-create",
     ),
     url(
         r"^profile/(?P<user_id>[\d]+)/edit$", views.EditUserView.as_view(), name="edit"
     ),
     url(
-        r"^groups/(?P<group_id>[\w\d_\s]+)/edit$",
-        views.GroupCreate.as_view(),
-        name="input",
-    ),
-    url(
-        r"^groups/(?P<group_id>[\w\d_\s]+)/$",
-        views.GroupView.as_view(),
+        r"^profile/groups/(?P<group_id>[\w\d_\s]+)/edit$",
+        views.GroupManagement.as_view(),
+        name="group-edit",
     ),
     url(
         r"^groups/(?P<group_id>[\w\d_\s]+)/members$",
-        views.GroupEdit.as_view(),
-        name="input",
+        views.PartialGroupMemberManagement.as_view(),
+        name="partial-group-membership",
     ),
-    url(r"^groups/new/$", views.GroupCreate.as_view(), name="input"),
+    url(
+        r"^groups/(?P<group_id>[\w\d_\s]+)/partial/edit_form$",
+        views.PartialGroupEditForm.as_view(),
+        name="group-partial-edit-form",
+    ),
+    # url(
+    #     r"^groups/(?P<group_id>[\w\d_\s]+)/$",
+    #     views.GroupView.as_view(),
+    # ),
     url(r"^register$", views.CreateUserView.as_view()),
     url(r"^detach$", views.DetachView.as_view()),
     url(r"^activate/(?P<token>[\w\d\-\s]+)$", views.activate),
