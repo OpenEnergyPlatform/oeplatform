@@ -1,11 +1,13 @@
 import json
-from pathlib import Path
 import logging
-from functools import lru_cache
 import re
 from enum import Enum, auto
 
 from django.templatetags.static import static
+
+from functools import lru_cache
+from pathlib import Path
+
 
 from oeplatform.settings import STATIC_ROOT
 
@@ -30,7 +32,7 @@ def read_spdx_licenses_from_static():
     try:
         # Open the file in read mode
         if json_file_path:
-            with open(json_file_path, "r") as file:
+            with open(json_file_path, "r", encoding="utf-8") as file:
                 # Load the JSON data into a Python dictionary
                 data_dict = json.load(file)
 
@@ -77,14 +79,16 @@ def validate_open_data_license(django_table_obj):
     if not first_license.get("name"):
         return (
             False,
-            "The license name is missing (only checked the first license element in the oemetadata).",
+            "The license name is missing "
+            "(only checked the first license element in the oemetadata).",
         )
 
     identifier = first_license["name"]
     if not search_oem_license_in_spdx_list(input_license_id=identifier):
         return (
             False,
-            "The license name was not found in the SPDX licenses list. (See https://github.com/spdx/license-list-data/blob/main/json/licenses.json)",
+            "The license name was not found in the SPDX licenses list. (See "
+            "https://github.com/spdx/license-list-data/blob/main/json/licenses.json)",
         )
 
     return True, None
