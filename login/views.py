@@ -18,7 +18,7 @@ from login.utilities import (
 from dataedit.models import PeerReviewManager, Table, PeerReview
 from dataedit.views import schema_whitelist
 
-from oeplatform.settings import UNVERSIONED_SCHEMAS, ACTIVATE_OPEN_PEER_REVIEW
+from oeplatform.settings import UNVERSIONED_SCHEMAS
 
 from .forms import (
     ChangeEmailForm,
