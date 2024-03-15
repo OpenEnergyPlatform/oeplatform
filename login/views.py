@@ -296,14 +296,30 @@ class GroupsView(View):
             "login/user_groups.html",
             {"profile_user": user, "groups": user_groups},
         )
+
+
+class PartialGroupsView(View):
+    def get(self, request, user_id):
+        """
+        TBD
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :return: Profile renderer
         """
+        user = get_object_or_404(OepUser, pk=user_id)
+        user_groups = None
+        if request.user.is_authenticated:
+            user_groups = request.user.memberships
 
-        membership = request.user.memberships
+        # if user_groups:
+        #     for user_group in user_groups:
+        #     membership = GroupMembership.objects.filter(
+        #         group=group, user=request.user
+        #     ).first()
         return render(
-            request, "login/list_memberships.html", {"membership": membership}
+            request,
+            "login/partials/groups.html",
+            {"profile_user": user, "groups": user_groups},
         )
 
 
