@@ -519,7 +519,9 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied
             group.delete()
-            return redirect("/user/groups")
+            response = HttpResponse()
+            response['HX-Redirect'] = "/user/profile/1/groups?delete_msg=True"
+            return response
         else:
             raise PermissionDenied
         return render(
