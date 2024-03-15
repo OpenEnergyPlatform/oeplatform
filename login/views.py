@@ -323,7 +323,24 @@ class PartialGroupsView(View):
         )
 
 
-class GroupCreate(View, LoginRequiredMixin):
+# class GroupManagement(View, LoginRequiredMixin):
+# def get(self, request):
+#     """
+#     Load and list the available groups by groupadmin.
+#     :param request: A HTTP-request object sent by the Django framework.
+#     :param user_id: An user id
+#     :return: Profile renderer
+#     """
+
+#     membership = request.user.memberships
+#     return render(
+#         request, "login/list_memberships.html", {"membership": membership}
+#     )
+
+
+class GroupManagement(View, LoginRequiredMixin):
+    form_is_valid = False
+
     def get(self, request, group_id=None):
         """
         Load the chosen action(create or edit) for a group.
@@ -332,18 +349,26 @@ class GroupCreate(View, LoginRequiredMixin):
         :param user_id: An group id
         :return: Profile renderer
         """
-
+        group = None
         if group_id:
             group = UserGroup.objects.get(id=group_id)
             form = GroupForm(instance=group)
             membership = get_object_or_404(
                 GroupMembership, group=group, user=request.user
             )
+            is_admin = False
             if membership.level < ADMIN_PERM:
                 raise PermissionDenied
+            else:
+                is_admin = True
         else:
+            is_admin = False
             form = GroupForm()
-        return render(request, "login/group_create.html", {"form": form})
+        return render(
+            request,
+            "login/partials/group_management.html",
+            {"form": form, "group": group, "is_admin": is_admin},
+        )
 
     def post(self, request, group_id=None):
         """
@@ -355,9 +380,22 @@ class GroupCreate(View, LoginRequiredMixin):
         :param user_id: An group id
         :return: Profile renderer
         """
+        self.form_is_valid = False
         group = UserGroup.objects.get(id=group_id) if group_id else None
         form = GroupForm(request.POST, instance=group)
+        status = None
         if form.is_valid():
+            self.form_is_valid = True
+
+        if not self.form_is_valid:
+            return render(
+                request,
+                "login/partials/group_component_form_edit.html",
+                {"form": form},
+            )
+
+        if self.form_is_valid:
+            status = 201
             if group_id:
                 group = form.save()
                 membership = get_object_or_404(
@@ -365,15 +403,21 @@ class GroupCreate(View, LoginRequiredMixin):
                 )
                 if membership.level < ADMIN_PERM:
                     raise PermissionDenied
+                return render(
+                    request,
+                    "login/partials/group_component_form_edit.html",
+                    {"form": form, "group": group},
+                    status=status,
+                )
             else:
                 group = form.save()
                 membership = GroupMembership.objects.create(
                     user=request.user, group=group, level=ADMIN_PERM
                 )
                 membership.save()
-            return redirect("/user/groups/{id}".format(id=group.id), {"group": group})
-        else:
-            return render(request, "login/group_create.html", {"form": form})
+                response = HttpResponse()
+                response['HX-Redirect'] = "/user/profile/1/groups?create_msg=True"
+                return response
 
 
 class GroupView(View, LoginRequiredMixin):
