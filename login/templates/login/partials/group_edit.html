@@ -1,0 +1,175 @@
+{% load django_bootstrap5 %}
+
+{% block main-content-body %}
+{% load static %}
+
+    <script type="text/javascript">
+        function getConfirmation(exec) {
+            var retVal = confirm("Do you want to delete this group ?");
+            if (retVal == true) {
+                exec();
+            }
+        }
+    </script>
+<div class="htmxReplacementBox">
+    <div class="backlink">
+        <a href="" hx-get="{% url 'partial-groups' request.user.id %}" hx-target=".htmxReplacementBox">
+            <svg width="14" height="14" fill="currentColor" version="1.1" viewBox="0 0 16.933 16.936" xmlns="http://www.w3.org/2000/svg">
+                <path d="m10.794 16.748 1.4961-1.4961-6.7832-6.7832 6.7832-6.7832-1.4961-1.4961-8.2793 8.2793z"/>
+            </svg>
+            Back to overview
+        </a>
+    </div>
+    <section class="profile-category htmxFormComponent">
+        <h2 class="header">{{group.name}}</h2>
+        <h2 class="profile-category__heading profile-category__heading--border-btm">Details</h2>
+        <div class="profile-category__input">
+            <label for="formInputGroupName">Name</label>
+            <input type="text" id="formInputGroupName">
+        </div>
+        <div class="profile-category__input">
+            <label for="formInputGroupDescription" >Description</label>
+            <textarea id="formInputGroupDescription" rows="3"></textarea>
+        </div>
+        <div class="profile-category__btns">
+            <button class="profile-category__btn  profile-category__btn--save" hx-get="{% url 'group-partial-edit-form' group_id=group.id %}"  hx-target=".htmxFormComponent">Save</button>
+        </div>
+    </section>
+    <section class="profile-category">
+        <h2 class="profile-category__heading profile-category__heading--border-btm">Members <span class="profile-category__heading--sm">(5)</span></h2>
+        <div class="profile-category__members">
+            <div class="profile-category__member">
+                <div class="profile-category__profile-name">
+                    Me
+                </div>
+                <div class="profile-category__member-status">
+                    Admin
+                </div>
+            </div>
+            <div class="profile-category__member">
+                <div class="profile-category__profile-name">
+                    <a href="#">jh-rli</a>
+                </div>
+                <div class="profile-category__member-status">
+                    Admin
+                </div>
+            </div>
+            <div class="profile-category__member">
+                <div class="profile-category__profile-name">
+                    <a href="#">bmlancien</a>
+                </div>
+                <div class="profile-category__member-status">
+                    Admin
+                </div>
+            </div>
+            <div class="profile-category__member">
+                <div class="profile-category__profile-name">
+                    <a href="#">alix-agency</a>
+                </div>
+                <div class="profile-category__member-status">
+                    <select aria-label="Group member's status">
+                        <option selected>Member</option>
+                        <option value="1">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="profile-category__member">
+                <div class="profile-category__profile-name">
+                    <a href="#">mona</a>
+                </div>
+                <div class="profile-category__member-status">
+                    <select aria-label="Group member's status">
+                        <option selected>Member</option>
+                        <option value="1">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="profile-category__member-invite">
+                <button>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                    </svg>
+                    Invite member
+                </button>
+            </div>
+        </div>
+    </section>
+    <section class="profile-category">
+        <div class="profile-category__danger">
+            <h2 class="profile-category__heading profile-category__heading--border-btm">Danger zone</h2>
+            <div>
+                <button class="profile-category__btn profile-category__btn--leave">Leave group</button>
+            </div>
+            {% if is_admin %}
+            <div>
+                <button class="profile-category__btn profile-category__btn--delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-exclamation-triangle btn__icon" viewBox="0 0 16 16">
+                        <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/>
+                        <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                    </svg>
+                    Delete group
+                </button>
+                <p>Once you delete the group, you cannot undo it.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+
+
+    <div style ="display:flex;flex-flow: row; align-items: center; margin-bottom: 1em;">
+        <h4 style="margin: 0;">{{group.name}}</h4>
+        <a href="edit">
+            <span style="font-size: 16px; margin-left: 0.5em;" class="fas fa-edit"></span>
+        </a>
+    </div>
+    <form action="members" style ="display:inline-block;float:right"  method="post" onsubmit="return confirm('Are you sure you want to delete this group: {{group.name}}?')">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="delete_group">
+        <input class="btn btn-danger" type="submit" value="Delete group">
+    </form>
+    {% if group.description %}
+        <div class="well"> <b>Description:</b> {{group.description}} </div>
+    {% endif %}
+	<div class="card " style="width:60%">
+		<div class="card-header">
+			Members
+		</div>
+		{% for membership in group.memberships.all %}
+		<div class="card-body">
+			<div>
+                <label class="form-label" for="level">{{ membership.user.name }}</label>
+				{% if is_admin %}
+                    <form class="form-inline" action="members" method="post" style ="display:inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="alter_user">
+                        <input type="hidden" name="user_id" value="{{membership.user.id}}">
+                        <select class="form-control" id="level" name="level" onchange="this.form.submit()">
+                            {% for value, choice in choices %}
+                                <option value="{{value}}" {% if membership.level == value %} selected="selected" {% endif %}>{{choice}}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    <form action="members" method="post" style="display:inline-block;float:right"  onsubmit="return confirm('Are you sure you want to remove {{membership.user.name}} from {{group.name}} and retract all permissions?')">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="remove_user">
+                        <input type="hidden" name="user_id" value="{{membership.user.id}}">
+                        <input type="submit" class="btn btn-danger" value="Remove user">
+                    </form>
+                {% endif %}
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	<form action="members" method="post"  style="width:60%">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="add_user">
+        <input class="form-control" name="name" type="text" placeholder="Add a user" >
+		{% if "name" in errors %}
+    		<div style="color:#ff0000">{{ errors.name }}</div>
+		{% endif %}
+        <b>Note:</b> Users have to log in on the OEP at least once in order to be registered.<br>
+		<input type="submit" value="Add">
+    </form>
+{% endblock %}
