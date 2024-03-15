@@ -11,10 +11,14 @@ from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 
 import login.models as models
+from login.utilities import (
+    get_badge_icon_path,
+    get_review_badge_from_table_metadata,
+)
 from dataedit.models import PeerReviewManager, Table, PeerReview
 from dataedit.views import schema_whitelist
 
-from oeplatform.settings import UNVERSIONED_SCHEMAS
+from oeplatform.settings import UNVERSIONED_SCHEMAS, ACTIVATE_OPEN_PEER_REVIEW
 
 from .forms import (
     ChangeEmailForm,
@@ -36,17 +40,35 @@ class TablesView(View):
         tables = Table.objects.all().select_related()
         draft_tables = []
         published_tables = []
-        published_but_license_issue = []
+        # published_but_license_issue = []
 
         for table in tables:
             permission_level = user.get_table_permission_level(table)
             license_status = validate_open_data_license(django_table_obj=table)
+
+            review_badge = None
+            badge_icon = None
+            badge_msg = None
+            if table.oemetadata:
+                review_badge = get_review_badge_from_table_metadata(table)
+
+            if review_badge and review_badge[0]:
+                badge_icon = get_badge_icon_path(review_badge[1])
+
+            if review_badge and not review_badge[0]:
+                badge_msg = review_badge[1]
 
             table_data = {
                 "name": table.name,
                 "schema": table.schema.name,
                 "is_publish": table.is_publish,
                 "is_reviewed": table.is_reviewed,
+                "review_badge_context": {
+                    "error_msg": badge_msg,
+                    "badge": review_badge,
+                    "icon": badge_icon,
+                },
+                "icon_path": badge_icon,
                 "license_status": {
                     "status": license_status[0],
                     "error": license_status[1],
