@@ -542,6 +542,47 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
         return self.get(request)
 
 
+class PartialGroupEditForm(View, LoginRequiredMixin):
+    def get(self, request, group_id):
+        """
+        Returns a edit form component for a group.
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :param user_id: An group id
+        :return: Profile renderer
+        """
+        group = get_object_or_404(UserGroup, pk=group_id)
+        is_admin = False
+        membership = GroupMembership.objects.filter(
+            group=group, user=request.user
+        ).first()
+        if membership:
+            is_admin = membership.level >= ADMIN_PERM
+        return render(
+            request,
+            "login/partials/group_component_form_edit.html",
+            {"group": group, "choices": GroupMembership.choices, "is_admin": is_admin},
+        )
+
+    def post(self, request, group_id):
+        group = UserGroup.objects.get(id=group_id) if group_id else None
+        form = GroupForm(request.POST, instance=group)
+        if form.is_valid():
+            if group_id:
+                group = form.save()
+                membership = get_object_or_404(
+                    GroupMembership, group=group, user=request.user
+                )
+                if membership.level < ADMIN_PERM:
+                    raise PermissionDenied
+                return render(
+                    request,
+                    "login/partials/group_component_form_edit.html",
+                    {"form": form, "group": group},
+                    status=201,
+                )
+
+
 class ProfileUpdateView(UpdateView, LoginRequiredMixin):
     """
     Autogenerate a update form for users.
