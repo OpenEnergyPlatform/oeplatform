@@ -421,24 +421,30 @@ class GroupManagement(View, LoginRequiredMixin):
                 return response
 
 
-class GroupView(View, LoginRequiredMixin):
-    def get(self, request, group_id):
-        """
-        Load the chosen action(create or edit) for a group.
-        :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An user id
-        :param user_id: An group id
-        :return: Profile renderer
-        """
-        group = get_object_or_404(UserGroup, pk=group_id)
-        return render(
-            request,
-            "login/group.html",
-            {"group": group},
-        )
+# class GroupEdit(View, LoginRequiredMixin):
+#     def get(self, request, group_id):
+#         """
+#         Load the chosen action(create or edit) for a group.
+#         :param request: A HTTP-request object sent by the Django framework.
+#         :param user_id: An user id
+#         :param user_id: An group id
+#         :return: Profile renderer
+#         """
+#         group = get_object_or_404(UserGroup, pk=group_id)
+#         is_admin = False
+#         membership = GroupMembership.objects.filter(
+#             group=group, user=request.user
+#         ).first()
+#         if membership:
+#             is_admin = membership.level >= ADMIN_PERM
+#         return render(
+#             request,
+#             "login/partials/group_edit.html",
+#             {"group": group, "choices": GroupMembership.choices, "is_admin": is_admin},
+#         )
 
 
-class GroupEdit(View, LoginRequiredMixin):
+class PartialGroupMemberManagement(View, LoginRequiredMixin):
     def get(self, request, group_id):
         """
         Load the chosen action(create or edit) for a group.
@@ -456,7 +462,7 @@ class GroupEdit(View, LoginRequiredMixin):
             is_admin = membership.level >= ADMIN_PERM
         return render(
             request,
-            "login/change_form.html",
+            "login/partials/group_component_membership.html",
             {"group": group, "choices": GroupMembership.choices, "is_admin": is_admin},
         )
 
