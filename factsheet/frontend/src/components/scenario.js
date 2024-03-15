@@ -432,7 +432,7 @@ export default function Scenario(props) {
           {...props}
           labelGridSize = {3}
           fieldGridSize = {9}
-          spanValue="Scenario descriptors"
+          spanValue="Scenario type"
           tooltipText="A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
           renderField={() => (
