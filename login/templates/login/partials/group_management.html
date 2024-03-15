@@ -19,7 +19,7 @@
         {% endif %}
         <h2 class="profile-category__heading profile-category__heading--border-btm">Details</h2>
         {% if group %}
-        <form id="group-form" action="{% url 'group-partial-edit-form' group_id=group.id %}" method="post" hx-post hx-target=".htmxFormComponent">
+        <form id="group-form" hx-post="{% url 'group-partial-edit-form' group_id=group.id %}" hx-target=".htmxFormComponent">
             {% csrf_token %}
             {% bootstrap_form form %}
             <!-- <input form="group-form" class="btn btn-success" type="submit" value="Submit"> -->
