@@ -10,7 +10,7 @@ django-colorfield~=0.7
 requests~=2.27
 psycopg2-binary
 webcolors~=1.11
-djangorestframework~=3.14
+djangorestframework==3.14
 django-axes~=5.30
 shapely~=1.8
 markdown2~=2.4
