@@ -14,6 +14,7 @@ COPY ./docker/apache2.conf /etc/apache2/conf-enabled/oeplatform.conf
 COPY . /app
 COPY ./docker/docker-entrypoint.sh /app/docker-entrypoint.sh
 
+RUN mkdir /app/ontologies && cd /app/ontologies && wget https://github.com/OpenEnergyPlatform/ontology/releases/latest/download/build-files.zip && unzip build-files.zip && rm build-files.zip
 
 RUN cp /app/oeplatform/securitysettings.py.default /app/oeplatform/securitysettings.py && python manage.py collectstatic --noinput && rm /app/oeplatform/securitysettings.py
 
