@@ -20,6 +20,9 @@ python manage.py migrate
 echo "Migrating local database..."
 python manage.py alembic upgrade head
 
+echo "Compress stylesheets"
+python manage.py compress
+
 echo "Starting apache2"
 
 /usr/sbin/apache2ctl -DFOREGROUND
