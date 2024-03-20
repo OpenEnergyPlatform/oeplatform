@@ -1,4 +1,5 @@
 {% extends "base/base-profile.html" %}
+{% load compress %}
 {% load django_bootstrap5 %}
 {% load static %}
 {% block main-content-body %}
@@ -31,7 +32,7 @@
         </div>
     </div>
 </div>
-<div class="row" id="tableContainer" hx-get="/profile/{{ profile_user.id }}/tables" hx-trigger="load">
+<div class="row" id="tableContainer" hx-get="/user/profile/{{ profile_user.id }}/tables" hx-trigger="load">
     <h2>Published</h2>
     <div class="container">
         <div class="row">
@@ -202,6 +203,9 @@
 
 {% block after-body-bottom-js %}
 
+   {% compress js%}
+       <script src="{%static 'ontology/htmx.js'%}"></script>
+   {% endcompress %}
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
     const schemaDataElement = document.querySelector('#schemaWhitelistData');
