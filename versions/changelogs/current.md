@@ -22,6 +22,6 @@
 
 New section!
 
-- Update the REST-API page of the documentation [(#1632)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1632):
+- Update the REST-API page of the documentation [(#1636)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1636):
   - It is currently work in progress and will be updated within the next couple months.
   - This update adds more context and links to the academy api tutorials.
