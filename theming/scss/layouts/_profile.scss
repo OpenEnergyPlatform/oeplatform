@@ -220,6 +220,7 @@ main.main .content .content__container.content__container--profile {
         @extend .fs-6;
         @extend .fw-bold;
         @extend .text-body;
+        @extend .d-inline-block;
 
         &--sm {
             @extend .fs-7;
@@ -271,6 +272,11 @@ main.main .content .content__container.content__container--profile {
         &--delete {
             @extend .btn-danger;
             min-width: 10rem;
+        }
+
+        &--add {
+            @include translateY(-3px);
+            @extend .btn-link;
         }
     }
 
