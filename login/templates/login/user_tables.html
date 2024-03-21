@@ -141,7 +141,9 @@
                                 Reviewed
                             </div>
                             <div class="profile-table-card__badge">
-                                <img style="width:112px;height: 23px;" src="/static/img/badges/badge_iron.png">
+                                <div id="badge-container" hx-get="{% url 'badge_partial' badge_name='Gold' %}" hx-trigger="load" hx-refresh="5s">
+                                    <img style="width:112px;height: 23px;" src="{{ icon_path }}">
+                                </div>
                                 <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_bronze.png"> -->
                                 <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_platinum.png"> -->
                             </div>
