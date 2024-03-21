@@ -13,3 +13,5 @@
 - Docker: docker-entrypoint.sh wasn't running compression of stylesheets on startup [(#1627)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1627)
 
 - Update requirements: Fix drf pip version to v3.14 to avoid [django-reset-framework issue](https://github.com/encode/django-rest-framework/issues/9300) [(1630)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1630)
+
+- Include oeo in oeplatform docker image [(#1631)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1631)
