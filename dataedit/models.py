@@ -178,7 +178,7 @@ class PeerReview(models.Model):
     review = JSONField(null=True)
     # TODO: Maybe oemetadata should be stored in a separate table and imported
     # via FK here / change also for Tables model
-    oemetadata = JSONField(null=False, default=None)
+    oemetadata = JSONField(null=False, default=dict)
 
     # laden
     @classmethod
