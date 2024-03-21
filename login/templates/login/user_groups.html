@@ -6,10 +6,8 @@
 {% include "login/user_nav.html" %}
 
 {% if request.user.is_authenticated and request.user == user%}
-    <hr>  
     <div class="htmxReplacementBox">
     <div class="row">
-        <h2 class="header">User Groups</h2>
         <div class="collapse-container collapse-container--right">
             <div class="collapse-container__button collapse-container__button--right">
                 <button type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroupUse" aria-expanded="false" aria-controls="collapseGroupUse">
