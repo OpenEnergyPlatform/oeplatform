@@ -8,6 +8,8 @@
 
 ## Bugs
 
+- Bugfix: Adding tags if metadata is empty does not result in a server error anymore. [(#1528)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1528)
+
 - OEMetaBuilder: Readd missing autocomplete functionality that was not added after the oemetadata schema update for metadata version 0.1.6 [(#1608)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1608)
 
 - Docker: docker-entrypoint.sh wasn't running compression of stylesheets on startup [(#1627)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1627)
