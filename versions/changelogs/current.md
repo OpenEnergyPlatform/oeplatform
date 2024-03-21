@@ -6,6 +6,8 @@
 
 - Add NFDI to our list of Partners [(#1605)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1605).
 
+- Add feature to reset a api token via the profile/settings page [(#1637)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1637)
+
 ## Bugs
 
 - Bugfix: Adding tags if metadata is empty does not result in a server error anymore. [(#1528)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1528)
