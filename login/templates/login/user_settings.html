@@ -1,6 +1,7 @@
 {% extends "base/base-profile.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
+{% load compress %}
 {% block main-content-body %}
 {% include "login/user_nav.html" %}
 
@@ -13,7 +14,13 @@
                 <a id="toggler" href="#" onclick="toggler('token');">Show token</a>
                 <div style="display:none" id="token">
                 {% if token %}
-                     {{ token }}
+                    <div class="userApiToken">
+                        {{ token }}
+                    </div>
+                    <div>
+                        <button hx-post="{% url 'reset-token' %}" hx-target=".userApiToken">Reset token</button>
+                        <i>Resetting the token will affect your REST-API based requests. In most cases it only makes sense to reset it in case it was accidentally published.</i>
+                    </div>
                 {% endif %}
                 </div>
             </td>
@@ -197,3 +204,14 @@
 {% endif %}
 {% endblock %}
 
+
+{% block after-body-bottom-js %}
+{% compress js %}
+<script src="{% static 'ontology/htmx.js' %}"></script>
+{% endcompress %}
+<script>
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    })
+</script>
+{% endblock %}
