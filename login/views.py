@@ -4,14 +4,18 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 
+from rest_framework.authtoken.models import Token
+
 import login.models as models
 from dataedit.models import PeerReviewManager, Table, PeerReview
 from dataedit.views import schema_whitelist
+
 
 from oeplatform.settings import UNVERSIONED_SCHEMAS
 
@@ -567,3 +571,18 @@ def activate(request, token):
         token_obj.user.save()
         token_obj.delete()
     return redirect("/user/profile/{id}".format(id=token_obj.user.id))
+
+
+def token_reset(request):
+    if request.user.is_authenticated:
+
+        user_token = get_object_or_404(
+            Token, user=request.user.id
+        )  # Get the current user's token
+        user_token.delete()  # Delete the existing token
+
+        new_token = Token.objects.create(user=request.user)
+
+        return HttpResponse(new_token)
+    else:
+        return HttpResponseForbidden("You are not authorized to reset the token.")
