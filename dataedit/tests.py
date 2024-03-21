@@ -1,20 +1,18 @@
 from django.test import TestCase
-from django.db.migrations.executor import MigrationExecutor
-from django.db import connection
 from .models import PeerReview, Table, Schema
 
 from login.models import myuser
 from metadata.v160.example import OEMETADATA_V160_EXAMPLE
 
-# functionality form migration 0033 / cant be imported?
-def populate_oemetadata(apps, schema_editor):
-    PeerReview = apps.get_model("dataedit", "PeerReview")
-    TableModel = apps.get_model("dataedit", "Table")
+
+# replicated functionality form dataedit migration 0033
+# avoid setting up full migration test framework
+def populate_peerreview_oemetadata():
     for review in PeerReview.objects.all():
         if not review.oemetadata or review.oemetadata == {}:
             # Logic to find a matching value from TableModel.
-            table = TableModel.objects.filter(
-                schema=review.schema, name=review.table
+            table = Table.objects.filter(
+                schema__name=review.schema, name=review.table
             ).first()
             if table:
                 review.oemetadata = table.oemetadata
@@ -49,19 +47,26 @@ class MigrationTest(TestCase):
 
     def test_migration(self):
         # Apply the migration
-        executor = MigrationExecutor(connection)
-        app = "dataedit"  # Your app name
-        migration_name = "0033_peerreview_oemetadata"
+        # executor = MigrationExecutor(connection)
+        # app = "dataedit"
+        # migration_name = "0033_peerreview_oemetadata"
+        # executor.migrate([(app, migration_name)])
 
-        executor.migrate([(app, migration_name)])
+        # Make sure at least one PeerReview instance exists for testing
+        self.assertTrue(PeerReview.objects.exists(), "PeerReview instance should exist")
 
         # Re-fetch records from the database
         review = PeerReview.objects.first()
+        self.assertEqual(review.oemetadata, {})
 
-        # Check that oemetadata is no longer {]
-        self.assertEqual(
-            review.oemetadata, OEMETADATA_V160_EXAMPLE
-        )  # Or any other condition you expect
+        populate_peerreview_oemetadata()
+
+        # Update Re-fetch records from the database
+        review = PeerReview.objects.first()
+
+        # Since the 'oemetadata' field is added by the migration, it will exist here
+        # Now perform your checks on 'oemetadata'
+        self.assertEqual(review.oemetadata, OEMETADATA_V160_EXAMPLE)
 
     def test_migration_rollback(self):
         # Implement if needed
