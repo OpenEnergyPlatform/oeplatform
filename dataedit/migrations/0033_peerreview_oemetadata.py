@@ -3,18 +3,9 @@
 from django.db import migrations, models
 
 
-# def update_oemetadata_to_empty_dict(apps, schema_editor):
-#     PeerReview = apps.get_model("dataedit", "PeerReview")
-#     # Filter for peer reviews where `oemetadata` is None (aka null)
-#     # and update them to have an empty dictionary instead.
-#     PeerReview.objects.filter(oemetadata__isnull=True).update(oemetadata=dict())
-
-
 def populate_oemetadata(apps, schema_editor):
     PeerReview = apps.get_model("dataedit", "PeerReview")
-    TableModel = apps.get_model(
-        "dataedit", "Table"
-    ) 
+    TableModel = apps.get_model("dataedit", "Table")
     for review in PeerReview.objects.all():
         if not review.oemetadata or review.oemetadata == {}:
             # Logic to find a matching value from TableModel.
