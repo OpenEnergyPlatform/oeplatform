@@ -33,6 +33,10 @@ from .models import myuser as OepUser
 
 from login.utilities import validate_open_data_license
 
+###########################################################################
+#            User Tables related views & partial views for htmx           #
+###########################################################################
+
 
 class TablesView(View):
     def get(self, request, user_id):
@@ -91,6 +95,11 @@ class TablesView(View):
         if request.is_ajax():
             return render(request, "login/user_tables.html", context)
         return render(request, "login/user_tables.html", context)
+
+
+##############################################################################
+#          User Open Peer Review related views & partial views for htmx      #
+##############################################################################
 
 
 class ReviewsView(View):
@@ -626,6 +635,11 @@ class PartialGroupInvite(View, LoginRequiredMixin):
         else:
             raise PermissionDenied
         # return HttpResponse(context, status=201)
+
+
+##############################################################################
+#                    User Profile/Account related views                      #
+##############################################################################
 
 
 class ProfileUpdateView(UpdateView, LoginRequiredMixin):
