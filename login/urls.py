@@ -103,6 +103,11 @@ urlpatterns = [
         name="partial-group-membership",
     ),
     url(
+        r"^groups/(?P<group_id>[\w\d_\s]+)/member/invite$",
+        views.PartialGroupInvite.as_view(),
+        name="partial-group-invite",
+    ),
+    url(
         r"^groups/(?P<group_id>[\w\d_\s]+)/partial/edit_form$",
         views.PartialGroupEditForm.as_view(),
         name="group-partial-edit-form",
