@@ -4,7 +4,7 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, View
@@ -15,7 +15,7 @@ from login.utilities import (
     get_badge_icon_path,
     get_review_badge_from_table_metadata,
 )
-from dataedit.models import PeerReviewManager, Table, PeerReview
+from dataedit.models import PeerReviewManager, Table
 from dataedit.views import schema_whitelist
 
 from oeplatform.settings import UNVERSIONED_SCHEMAS
@@ -296,6 +296,11 @@ class SettingsView(View):
         )
 
 
+###########################################################################
+#            User Group related views & partial views for htmx            #
+###########################################################################
+
+
 class GroupsView(View):
     def get(self, request, user_id):
         """
@@ -418,7 +423,7 @@ class GroupManagement(View, LoginRequiredMixin):
             )
 
         if self.form_is_valid:
-            status = 201
+            # status = 201
             if group_id:
                 group = form.save()
                 membership = get_object_or_404(
@@ -439,7 +444,7 @@ class GroupManagement(View, LoginRequiredMixin):
                 )
                 membership.save()
                 response = HttpResponse()
-                response['HX-Redirect'] = "/user/profile/1/groups?create_msg=True"
+                response["HX-Redirect"] = "/user/profile/1/groups?create_msg=True"
                 return response
 
 
@@ -477,24 +482,14 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
         """
         mode = request.POST["mode"]
         group = get_object_or_404(UserGroup, id=group_id)
+        # group_member_count = group.memberships.all
         membership = get_object_or_404(GroupMembership, group=group, user=request.user)
 
         errors = {}
-        if mode == "add_user":
-            if membership.level < models.WRITE_PERM:
-                raise PermissionDenied
-            try:
-                user = OepUser.objects.get(name=request.POST["name"])
-                membership, _ = GroupMembership.objects.get_or_create(
-                    group=group, user=user
-                )
-                membership.save()
-            except OepUser.DoesNotExist:
-                errors["name"] = "User does not exist"
-        elif mode == "remove_user":
+        if mode == "remove_user":
             if membership.level < models.DELETE_PERM:
                 raise PermissionDenied
-            user = OepUser.objects.get(id=request.POST["user_id"])
+            user = OepUser.objects.get(id=request.user.id)
             membership = GroupMembership.objects.get(group=group, user=user)
             if membership.level >= ADMIN_PERM:
                 admins = GroupMembership.objects.filter(group=group).exclude(user=user)
@@ -507,7 +502,7 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
         elif mode == "alter_user":
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied
-            user = OepUser.objects.get(id=request.POST["user_id"])
+            user = OepUser.objects.get(id=request.user.id)
             if user == request.user:
                 errors["name"] = "You can not change your own permissions"
             else:
@@ -519,20 +514,11 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
                 raise PermissionDenied
             group.delete()
             response = HttpResponse()
-            response['HX-Redirect'] = "/user/profile/1/groups?delete_msg=True"
+            response["HX-Redirect"] = "/user/profile/1/groups?delete_msg=True"
             return response
         else:
             raise PermissionDenied
-        return render(
-            request,
-            "login/change_form.html",
-            {
-                "group": group,
-                "choices": GroupMembership.choices,
-                "errors": errors,
-                "is_admin": True,
-            },
-        )
+        return JsonResponse({"success": True})
 
     def __add_user(self, request, group):
         user = OepUser.objects.filter(id=request.POST["user_id"]).first()
@@ -541,6 +527,7 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
         return self.get(request)
 
 
+# TODO: Post should not return render ... Get might never be used
 class PartialGroupEditForm(View, LoginRequiredMixin):
     def get(self, request, group_id):
         """
@@ -580,6 +567,7 @@ class PartialGroupEditForm(View, LoginRequiredMixin):
                     {"form": form, "group": group},
                     status=201,
                 )
+
 
 class PartialGroupInvite(View, LoginRequiredMixin):
     def get(self, request, group_id):
