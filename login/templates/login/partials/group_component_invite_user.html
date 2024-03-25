@@ -1,0 +1,114 @@
+<section class="profile-category htmxComponentGroupMembership">
+    <h2 class="profile-category__heading profile-category__heading--border-btm">Members <span class="profile-category__heading--sm">(5)</span></h2>
+    <div class="profile-category__members">
+        {% for membership in group.memberships.all %}
+        
+            {% if is_admin %}
+            <div class="profile-category__member">
+                <div class="profile-category__profile-name">
+                    {{ membership.user.name }}
+                </div>
+                <div class="profile-category__member-status">
+                    <form hx-post="{% url 'partial-group-membership' group_id=group.id %}" hx-trigger="change" hx-target="htmxComponentGroupMembership">
+                        <input type="hidden" name="mode" value="alter_user">
+                        <select aria-label="Group member's status" name="selected_value">
+                            {% for value, choice in choices %}
+                                <option value="{{ value }}" {% if membership.level == value %} selected="selected" {% endif %}>{{ choice }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+                asda
+            </div>
+           
+            {% else %}
+            <div class="profile-category__member">
+                <div class="profile-category__profile-name">
+                    {{ membership.user.name }}
+                </div>
+                <div class="profile-category__member-status">
+                    Admin
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+        <!-- <div class="profile-category__member">
+            <div class="profile-category__profile-name">
+                <a href="#">jh-rli</a>
+            </div>
+            <div class="profile-category__member-status">
+                Admin
+            </div>
+        </div>
+        <div class="profile-category__member">
+            <div class="profile-category__profile-name">
+                <a href="#">bmlancien</a>
+            </div>
+            <div class="profile-category__member-status">
+                Admin
+            </div>
+        </div>
+        <div class="profile-category__member">
+            <div class="profile-category__profile-name">
+                <a href="#">alix-agency</a>
+            </div>
+            <div class="profile-category__member-status">
+                <select aria-label="Group member's status">
+                    <option selected>Member</option>
+                    <option value="1">Admin</option>
+                </select>
+            </div>
+        </div>
+        <div class="profile-category__member">
+            <div class="profile-category__profile-name">
+                <a href="#">mona</a>
+            </div>
+            <div class="profile-category__member-status">
+                <select aria-label="Group member's status">
+                    <option selected>Member</option>
+                    <option value="1">Admin</option>
+                </select>
+            </div>
+        </div> -->
+        <div class="profile-category__member-invite">
+            <form id="invite-form" hx-post="{% url 'partial-group-invite' group_id=group.id %}" hx-target="#error-message" hx-encType="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="mode" value="add_user">
+                <input class="form-control" id="username-input" name="name" type="text" placeholder="Add a user" >
+                {% if error %}
+                    <div style="color:#ff0000">{{ error.value }}</div>
+                {% endif %}
+                
+            </form>
+            <div id="error-message"></div>
+            <button form="invite-form" type="submit" value="Submit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                </svg>
+                Invite member
+            </button>
+            <b>Note:</b> Users have to log in on the OEP at least once in order to be registered.<br>
+        </div>
+    </div>
+</section>
+
+
+<script>
+    document.body.addEventListener('htmx:responseError', function(event) {
+        var usernameInput = document.getElementById('username-input');
+        usernameInput.classList.add('error-outline'); // Highlight the input in red
+        
+        var errorMessageDiv = document.getElementById('error-message');
+        var response = JSON.parse(event.detail.xhr.responseText);
+        errorMessageDiv.innerText = response.error;
+        errorMessageDiv.style.color = 'red'; // Optional: make the error message text red
+    });
+    document.body.addEventListener('htmx:beforeRequest', function(event) {
+        // Remove error styling and message before a new request
+        var usernameInput = document.getElementById('username-input');
+        usernameInput.classList.remove('error-outline');
+        
+        var errorMessageDiv = document.getElementById('error-message');
+        errorMessageDiv.innerText = '';
+    });
+</script>
