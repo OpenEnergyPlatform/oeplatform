@@ -119,12 +119,14 @@
             @extend .d-flex;
             @extend .flex-row;
             @extend .justify-content-start;
+            @extend .align-items-center;
         }
 
         &--right {
             @extend .d-flex;
             @extend .flex-row;
             @extend .justify-content-end;
+            @extend .align-items-center;
         }
 
         @include media-breakpoint-down(xl) {

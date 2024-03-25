@@ -220,6 +220,7 @@ main.main .content .content__container.content__container--profile {
         @extend .fs-6;
         @extend .fw-bold;
         @extend .text-body;
+        @extend .d-inline-block;
 
         &--sm {
             @extend .fs-7;
@@ -271,6 +272,11 @@ main.main .content .content__container.content__container--profile {
         &--delete {
             @extend .btn-danger;
             min-width: 10rem;
+        }
+
+        &--add {
+            @include translateY(-3px);
+            @extend .btn-link;
         }
     }
 
@@ -431,6 +437,10 @@ main.main .content .content__container.content__container--profile {
         @include card-simple-container {
             margin-bottom: 0.75rem !important;
 
+            .profile-table-card__tag {
+                @extend .mb-0;
+            }
+
             .profile-table-card__tag.profile-table-card__tag--warning,
             .profile-table-card__tag.profile-table-card__tag--success {
                 @extend .ms-0;
@@ -449,7 +459,7 @@ main.main .content .content__container.content__container--profile {
             }
 
             &__btn--sm {
-                height: 1.5rem;
+                height: 2rem;
             }
         }
     }

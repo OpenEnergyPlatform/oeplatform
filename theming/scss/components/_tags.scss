@@ -7,6 +7,7 @@ $tag-mark-width: 7rem;
     @extend .rounded-pill;
     @extend .d-inline-block;
     @extend .fs-8;
+    @include user-select-none;
     line-height: 1.35rem;
     margin-bottom: 0.25rem;
     background-color: $gray-200;
@@ -25,8 +26,9 @@ $tag-mark-width: 7rem;
     }
 
     &--danger {
-        @extend .background-danger;
+        @extend .bg-white;
         @extend .text-danger;
+        border: 1px solid $danger;
     }
 
     &--success {
@@ -41,5 +43,6 @@ $tag-mark-width: 7rem;
         color: $yellow-800 !important;
         width: $tag-mark-width;
         min-width: $tag-mark-width;
+        border: 1px solid $warning;
     }
 }
