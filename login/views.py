@@ -581,6 +581,64 @@ class PartialGroupEditForm(View, LoginRequiredMixin):
                     status=201,
                 )
 
+class PartialGroupInvite(View, LoginRequiredMixin):
+    def get(self, request, group_id):
+        group = get_object_or_404(UserGroup, pk=group_id)
+        is_admin = False
+        membership = GroupMembership.objects.filter(
+            group=group, user=request.user
+        ).first()
+        if membership:
+            is_admin = membership.level >= ADMIN_PERM
+
+        return render(
+            request,
+            "login/partials/group_component_invite_user.html",
+            {
+                "choices": GroupMembership.choices,
+                "is_admin": is_admin,
+                "group": group,
+                "membership": membership,
+            },
+        )
+
+    def post(self, request, group_id):
+        """
+        Performs selected action(save or delete) for a group.
+        If a groupname already exists, then a error will be output.
+        The selected users become members of this group. The groupadmin is already set.
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :param user_id: An group id
+        :return: Profile renderer
+        """
+        mode = request.POST.get("mode")
+        if mode is None:
+            return HttpResponseNotAllowed("Mode not specified")
+
+        group = get_object_or_404(UserGroup, id=group_id)
+        # group_member_count = group.memberships.all
+        membership = get_object_or_404(GroupMembership, group=group, user=request.user)
+
+        context = {}
+        if mode == "add_user":
+            if membership.level < models.WRITE_PERM:
+                raise PermissionDenied
+            try:
+                user = OepUser.objects.get(name=request.POST["name"])
+                membership, _ = GroupMembership.objects.get_or_create(
+                    group=group, user=user
+                )
+                membership.save()
+                context["added_user"] = user.id
+                return HttpResponse(context, status=201)
+            except OepUser.DoesNotExist:
+                context["error"] = "User does not exist"
+                return HttpResponse(context, status=400)
+        else:
+            raise PermissionDenied
+        # return HttpResponse(context, status=201)
+
 
 class ProfileUpdateView(UpdateView, LoginRequiredMixin):
     """
