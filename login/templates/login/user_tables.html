@@ -2,99 +2,15 @@
 {% load compress %}
 {% load django_bootstrap5 %}
 {% load static %}
+
+
+
 {% block main-content-body %}
-{% if profile_user == request.user %}
-{% include "login/user_nav.html" %}
-
-<div class="container">
-<div class="row">
-    
-    <div class="accordion" id="accordionTables">
-        <div class="accordion-item">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTables" aria-expanded="true" aria-controls="collapseTables">
-                How to manage your data resources?
-            </button>
-            </h2>
-            <div id="collapseTables" class="accordion-collapse collapse" aria-labelledby="headingTables" data-bs-parent="#accordionTables">
-            <div class="accordion-body">
-                <strong>Access your data tables:</strong> Listed below are tables associated with you, either created by you or by a group you're part of, 
-                which has permission to access the table. This simplifies resource identification and access. 
-                Expect future enhancements for better data management through additional grouping and sorting options. 
-                <br>
-                <br>
-                <strong>Publish your complete & open peer reviewed data:</strong> The displayed categories indicate whether a table has been published and assigned 
-                to a specific topic. The "model_draft" section is where you initially create and review your table. 
-                Once data is uploaded to "model_draft," an open peer review assesses metadata and data quality, performed by a user other than the creator. 
-                Following a successful review, you can publish your table by moving it to one of the suggested topics on the Open Energy Platform. 
-                The "Publish" button becomes visible once all criteria for publishing are met.
-            </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row" id="tableContainer" hx-get="/user/profile/{{ profile_user.id }}/tables" hx-trigger="load">
-    <h2>Published</h2>
-    <div class="container">
-        <div class="row">
-            {% for table in published_tables %}
-                <div class="col-md-4 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
-                            <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <h2>Draft</h2>
-<div class="container">
-    <div class="row">
-        {% for table in draft_tables %}
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
-                        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="card-link">View Table</a>
-                        {% if table.is_reviewed and not table.is_publish %}
-                            <button class="btn btn-primary publish-button" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
-                            <div class="publish-options-{{ table.name }}" style="display: none;">
-                                <label>
-                                    <select class="schema-dropdown"></select>
-                                </label>
-                                <label>
-                                    <select class="embargo-dropdown">
-                                        <option value="none">None</option>
-                                        <option value="6_months">6 Months</option>
-                                        <option value="1_year">1 Year</option>
-                                    </select>
-                                </label>
-                                <button class="btn btn-secondary confirm-publish"
-                                    hx-post="/api/v0/schema/{{ table.schema }}/tables/{{ table.name }}/move_publish/{toSchema}/"
-                                    hx-target="#tableContainer"
-                                    hx-swap="outerHTML"
-                                    hx-include="#publish-options-{{ table.name }}"
-                                >Confirm</button>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-</div>
-
-</div>
-{% endif %}
-{% comment "@Daryna what is this used for?" %}
-<div id="reviewedTablesData" style="display: none;">{{ reviewed_tables|json_script:"reviewedTablesData" }}</div>
-{% endcomment %}
-<div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
+    {% if profile_user == request.user %}
+        {% include "login/user_nav.html" %}
+        {% include 'login/user_partial_tables.html' %}
+    {% endif %}
 {% endblock %}
-</div>
-
 
 {% block main-right-sidebar-content %}
 {% if profile_user == request.user %}
@@ -207,9 +123,9 @@
        <script src="{%static 'ontology/htmx.js'%}"></script>
    {% endcompress %}
 <script type="text/javascript">
-document.addEventListener('DOMContentLoaded', function() {
-    const schemaDataElement = document.querySelector('#schemaWhitelistData');
-    let schemaWhitelist = schemaDataElement ? JSON.parse(schemaDataElement.textContent) : [];
+    document.addEventListener('DOMContentLoaded', function() {
+        const schemaDataElement = document.querySelector('#schemaWhitelistData');
+        let schemaWhitelist = schemaDataElement ? JSON.parse(schemaDataElement.textContent) : [];
 
     document.body.addEventListener('click', function(event) {
         const target = event.target;

@@ -1,13 +1,12 @@
 {% load compress %}
 {% load django_bootstrap5 %}
 {% load static %}
-{% block main-content-body %}
+
 {% if profile_user == request.user %}
-{% include "login/user_nav.html" %}
 
 <div class="container">
 <div class="row">
-<div class="row" id="tableContainer" hx-get="/user/profile/{{ profile_user.id }}/tables" hx-trigger="load">
+<div class="row" id="tableContainer">
     <h2>Published</h2>
     <div class="container">
         <div class="row">
@@ -47,7 +46,7 @@
                                     </select>
                                 </label>
                                 <button class="btn btn-secondary confirm-publish"
-                                    hx-post="/api/v0/schema/{{ table.schema }}/tables/{{ table.name }}/move_publish/{toSchema}/"
+                                    hx-post="/api/v0/schema/{{ table.schema }}/tables/{{ table.name }}/move_publish/{{ toSchema }}/"
                                     hx-target="#tableContainer"
                                     hx-swap="outerHTML"
                                     hx-include="#publish-options-{{ table.name }}"
@@ -61,11 +60,10 @@
     </div>
 </div>
 
-</div>
+<!-- </div> -->
 {% endif %}
 {% comment "@Daryna what is this used for?" %}
 <div id="reviewedTablesData" style="display: none;">{{ reviewed_tables|json_script:"reviewedTablesData" }}</div>
 {% endcomment %}
 <div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
-{% endblock %}
 </div>
