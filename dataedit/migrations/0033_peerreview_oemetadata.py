@@ -11,7 +11,7 @@ def populate_oemetadata(apps, schema_editor):
             if not review.oemetadata or review.oemetadata == {}:
                 # Logic to find a matching value from TableModel.
                 table = TableModel.objects.filter(
-                    schema=review.schema, name=review.table
+                    schema__name=review.schema, name=review.table
                 ).first()
                 if table:
                     review.oemetadata = table.oemetadata
