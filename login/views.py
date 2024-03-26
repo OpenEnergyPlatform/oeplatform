@@ -4,7 +4,9 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
@@ -12,8 +14,6 @@ from django.views.generic.edit import DeleteView, UpdateView
 import login.models as models
 from dataedit.models import PeerReviewManager, Table, PeerReview
 from dataedit.views import schema_whitelist
-
-from oeplatform.settings import UNVERSIONED_SCHEMAS
 
 from .forms import (
     ChangeEmailForm,
@@ -26,8 +26,6 @@ from .forms import (
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
-from login.utilities import validate_open_data_license
-
 
 class TablesView(View):
     def get(self, request, user_id):
@@ -35,26 +33,21 @@ class TablesView(View):
         tables = Table.objects.all().select_related()
         draft_tables = []
         published_tables = []
-        published_but_license_issue = []
 
         for table in tables:
-            permission_level = user.get_table_permission_level(table)
-            license_status = validate_open_data_license(django_table_obj=table)
+            if user.get_table_permission_level(table) >= models.WRITE_PERM:
+                table_data = {
+                    "name": table.name,
+                    "schema": table.schema.name,
+                    "is_publish": table.is_publish,
+                    "is_reviewed": table.is_reviewed
+                }
 
-            table_data = {
-                "name": table.name,
-                "schema": table.schema.name,
-                "is_publish": table.is_publish,
-                "is_reviewed": table.is_reviewed,
-                "license_status": {
-                    "status": license_status[0],
-                    "error": license_status[1],
-                },
-            }
-
-            if permission_level >= models.WRITE_PERM:
-                if table.is_publish and table.schema.name not in UNVERSIONED_SCHEMAS:
-                    published_tables.append(table_data)
+                if table.is_reviewed:
+                    if table.is_publish:
+                        published_tables.append(table_data)
+                    else:
+                        draft_tables.append(table_data)
                 else:
                     draft_tables.append(table_data)
 
@@ -62,13 +55,14 @@ class TablesView(View):
             "profile_user": user,
             "draft_tables": draft_tables,
             "published_tables": published_tables,
-            "schema_whitelist": schema_whitelist,
+            "schema_whitelist": schema_whitelist
         }
 
-        if request.is_ajax():
+        # TODO: Fix this is_ajax as it is outdated according to django documentation ... provide better api endpoint for http requests via HTMX
+        if 'HX-Request' in request.headers:
+            return render(request, 'login/user_partial_tables.html', context)
+        else:
             return render(request, "login/user_tables.html", context)
-        return render(request, "login/user_tables.html", context)
-
 
 class ReviewsView(View):
     def get(self, request, user_id):
