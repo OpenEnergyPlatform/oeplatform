@@ -38,9 +38,11 @@ def read_version_changes():
     markdowner = markdown2.Markdown()
     import logging
 
-    logging.error("READING")
+    logging.info("READING VERSION file.")
     try:
-        with open(os.path.join(SITE_ROOT, "..", "VERSION")) as version_file:
+        with open(
+            os.path.join(SITE_ROOT, "..", "VERSION"), encoding="utf-8"
+        ) as version_file:
             match = re.match(version_expr, version_file.read())
             major, minor, patch = match.groups()
         with open(
@@ -48,12 +50,14 @@ def read_version_changes():
                 SITE_ROOT,
                 "..",
                 "versions/changelogs/%s_%s_%s.md" % (major, minor, patch),
-            )
+            ),
+            encoding="utf-8",
         ) as change_file:
             changes = markdowner.convert(
                 "\n".join(line for line in change_file.readlines())
             )
     except Exception:
+        logging.error("READING VERSION file.")
         # probably because change_file is missing
         major, minor, patch, changes = "", "", "", ""
     return {"version": (major, minor, patch), "changes": changes}
@@ -73,7 +77,7 @@ def get_logs(request):
         markdowner = markdown2.Markdown()
         if match:
             major, minor, patch = match.groups()
-            with open("versions/changelogs" + file) as f:
+            with open("versions/changelogs" + file, encoding="utf-8") as f:
                 logs[(major, minor, patch)] = markdowner.convert(
                     "\n".join(line for line in f.readlines())
                 )

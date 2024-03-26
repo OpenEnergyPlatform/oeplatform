@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from pathlib import Path
 
 try:
     from .securitysettings import *  # noqa
@@ -74,18 +75,26 @@ MIDDLEWARE = (
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware"
+    "django.middleware.common.CommonMiddleware",
 )
 
 ROOT_URLCONF = "oeplatform.urls"
 
 EXTERNAL_URLS = {
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
-    "tutorials_faq": "https://openenergyplatform.github.io/academy/",
+    "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
     "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
     "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
+    "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
+    "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
+    "spdx_licenses": "https://spdx.github.io/license-list-data/",
+}
+
+# Kept this separate for now to avoid messing with the other list ... TODO move to EXTERNAL_URLS if possible
+DOCUMENTATION_LINKS = {
+    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#4-setup-the-openenergyontology-integation"
 }
 
 
@@ -116,10 +125,7 @@ TEMPLATES = [
     }
 ]
 
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000", 
-    "http://127.0.0.1:3000"
-    ]
+CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 
@@ -130,6 +136,8 @@ try:
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
+OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
+OPEN_ENERGY_ONTOLOGY_FOLDER = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

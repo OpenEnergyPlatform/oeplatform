@@ -1,4 +1,6 @@
-const buttonStyles = {
+import variables from '../variables';
+
+export const buttonStyles = {
   defaultProps: {
     disableElevation : true
   },
@@ -6,8 +8,17 @@ const buttonStyles = {
     root: {
       textTransform: 'capitalize',
       minWidth: 'fit-content',
+      fontSize: variables.fontSize.sm
     }
   }
 }
 
-export default buttonStyles;
+export const buttonGroupStyles = {
+  styleOverrides: {
+    root: {
+      "&.MuiButtonGroup-root": {
+        boxShadow: 'none'
+      }
+    }
+  }
+}

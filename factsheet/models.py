@@ -1,11 +1,31 @@
 from django.db import models
 from django.utils import timezone
 
+from django.db.models import (
+    CharField,
+    DateTimeField,
+    ForeignKey,
+    JSONField,
+)
 
-class HistoryOfOEKG(models.Model):
-    triple_subject = models.TextField()
-    triple_predicate = models.TextField()
-    triple_object = models.TextField()
-    type_of_action = models.CharField(max_length=100)
-    user = models.CharField(max_length=200)
-    timestamp = models.DateTimeField(default=timezone.now)
+
+class OEKG_Modifications(models.Model):
+    bundle_id = CharField(max_length=400, default="none")
+    old_state = JSONField()
+    new_state = JSONField()
+    user = ForeignKey("login.myuser", on_delete=models.CASCADE, null=True)
+    timestamp = DateTimeField(default=timezone.now)
+
+
+class ScenarioBundleAccessControl(models.Model):
+    owner_user = models.ForeignKey(
+        "login.myuser",
+        on_delete=models.CASCADE,
+        related_name="scenario_bundle_creator",
+        null=False,
+    )
+    bundle_id = CharField(max_length=400, default="none")
+
+    @classmethod
+    def load_by_uid(cls, uid):
+        return ScenarioBundleAccessControl.objects.filter(bundle_id=uid).first()

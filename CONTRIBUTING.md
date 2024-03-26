@@ -24,8 +24,10 @@ by [Vincent Driessen](https://nvie.com/posts/a-successful-git-branching-model/):
    ```
 3. Create a branch from `develop` to work on your issue (see below, the "Branch name convention" section)
    ```bash
-   git checkout -b feature/myfeature
+   git checkout -b feature-myfeature
    ```
+    We have agreed to use only branch names that have a - instead of / between words.
+   
 4. Push your local branch on the remote server `origin`
    ```bash
    git push
