@@ -2251,6 +2251,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                         review=review_datamodel,
                         reviewer=request.user,
                         contributor=contributor,
+                        oemetadata=load_metadata_from_db(schema=schema, table=table),
                     )
                     table_review.save(review_type=review_post_type)
                 else:
