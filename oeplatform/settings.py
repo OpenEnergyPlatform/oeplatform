@@ -188,3 +188,13 @@ COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
+
+
+# query_endpoint = "http://localhost:3030/ds/query"
+# update_endpoint = "http://localhost:3030/ds/update"
+
+# query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+# update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+
+query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
+update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
