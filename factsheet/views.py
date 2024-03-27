@@ -17,7 +17,7 @@ from rdflib.plugins.stores import sparqlstore
 from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 import os
-from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES, OPEN_ENERGY_ONTOLOGY_NAME
+from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES, OPEN_ENERGY_ONTOLOGY_NAME, query_endpoint, update_endpoint
 
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
@@ -62,15 +62,6 @@ oeo = Graph()
 oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
-
-# query_endpoint = "http://localhost:3030/ds/query"
-# update_endpoint = "http://localhost:3030/ds/update"
-
-# query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-# update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
-
-query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
