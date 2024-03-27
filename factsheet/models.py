@@ -29,3 +29,8 @@ class ScenarioBundleAccessControl(models.Model):
     @classmethod
     def load_by_uid(cls, uid):
         return ScenarioBundleAccessControl.objects.filter(bundle_id=uid).first()
+        
+class LockTable(models.Model):
+    resource_name = CharField(max_length=400)
+    timeout_time = DateTimeField(default=timezone.now)
+    transaction_id = CharField(max_length=400)

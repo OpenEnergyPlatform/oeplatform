@@ -23,6 +23,7 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
 from owlready2 import get_ontology
 from pathlib import Path
+import datetime as dt
 
 from rest_framework.decorators import (
     api_view,
@@ -36,7 +37,7 @@ from rest_framework.decorators import (
 
 from django.contrib.auth.decorators import login_required
 
-from .models import OEKG_Modifications, ScenarioBundleAccessControl
+from .models import OEKG_Modifications, ScenarioBundleAccessControl, LockTable
 from login import models as login_models
 
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
@@ -928,7 +929,7 @@ def update_factsheet(request, *args, **kwargs):
             old_state=in_first.serialize(format="json-ld"),
             new_state=in_second.serialize(format="json-ld"),
         )
-        # OEKG_Modifications_instance.save()
+        OEKG_Modifications_instance.save()
 
         response = JsonResponse(
             "factsheet updated!", safe=False, content_type="application/json"
@@ -1426,8 +1427,7 @@ def delete_entities(request, *args, **kwargs):
     return response
 
 
-@login_required
-def update_an_entity(request, *args, **kwargs):
+def perform_entity_update(request, *args, **kwargs):
     """
     Updates an entity in OEKG. The minimum requirements for updating an entity are the type, the old label, and the new label.
 
@@ -1463,6 +1463,28 @@ def update_an_entity(request, *args, **kwargs):
     )
     patch_response_headers(response, cache_timeout=1)
     return response
+
+
+@login_required
+def update_an_entity(request, *args, **kwargs):
+    #find resource (entity) name
+    request_body = json.loads(request.body)
+    entity_iri = request_body["entity_iri"]
+    
+    #generate transaction id
+    now = dt.datetime.now().isoformat(timespec="seconds")
+    t_id = "t_" + str(now)
+
+    if(acquire_lock(entity_iri, 300, t_id)): #if the entity is not locked
+         response = perform_entity_update(request, *args, **kwargs)
+         print("________________________ Entity edited successfully!")
+         release_lock(entity_iri, t_id)
+         return response
+    else:
+         print("________________________ Entity is currently being edited!")
+         response = JsonResponse(
+        "entity not updated!", safe=False, content_type="application/json")
+         return response
 
 
 def get_all_factsheets(request, *args, **kwargs):
@@ -1849,3 +1871,36 @@ def filter_scenario_view(request):
     html_content = render(request, "partials/related_oekg_scenarios.html", context).content.decode("utf-8")
     # Render the template with the context
     return HttpResponse(html_content)
+    
+def acquire_lock(r_name: str, timeout_in_s: int, t_id: str) -> bool:
+    #retrieve existing lock for entity
+    existing_lock = LockTable.objects.filter(resource_name = r_name)
+    
+    #get timeout time for new lock (based on timeout_in_s)
+    new_timeout = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=timeout_in_s)).isoformat(
+         timespec="seconds")
+         
+    if not (existing_lock): #if no lock exists, insert one
+         new_lock = LockTable(resource_name = r_name, timeout_time = new_timeout, transaction_id = t_id)
+         new_lock.save()
+         return True
+    else:
+         current_lock = LockTable.objects.get(resource_name = r_name)
+         currtimeout = current_lock.timeout_time  #find timeout time for active lock
+         if(currtimeout < dt.datetime.now(dt.timezone.utc)): #if lock is timed out
+              current_lock.transaction_id = t_id
+              current_lock.timeout_time = new_timeout
+              current_lock.save()
+              return True
+    return False #if there's an active, not timed out lock, return False
+         
+def release_lock(r_name: str, t_id: str) -> bool:
+    try:
+         current_lock = LockTable.objects.get(resource_name = r_name)
+         current_lock.delete()
+         return True
+    except:
+         print("________________________ Could not Delete")
+         return False
+         
+LockTable
