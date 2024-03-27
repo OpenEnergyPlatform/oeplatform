@@ -1,10 +1,11 @@
 # Development setup
 
 See our [developer guidelines](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) and get in touch with our [developer team](https://openenergyplatform.github.io/organisation/family_community/contact/).
+Have a look at the official [git-Book](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup) instructions on how to setup your git on a new system to be able to contribute to our GitHub repository.
 
 ## Choose your development environment and tools
 
-As a software developer, you learn your own way of working and refine it as your experience grows. The choice of developer environment & tools is therefore largely a personal preference. Here we want to suggest how new developers can get started and how we can implement successful, efficient development. 
+As a software developer, you learn your own way of working and refine it as your experience grows. The choice of developer environment & tools is therefore largely a personal preference. Here we want to suggest how new developers can get started and how we can implement successful, efficient development.
 
 In addition, there are some tools that are absolutely necessary to ensure the quality of the software while new code from various sources is collaboratively fed into a code repository on github.
 
