@@ -114,9 +114,9 @@ After you have activated your virtual environment, install the required python l
 
     pip install -r requirements.txt
 
-### 3 Setup the OpenEnergyOntology integration
+## 3 Setup the OpenEnergyOntology integration
 
-#### 3.1 Include the full oeo
+### 3.1 Include the full oeo
 
 It is necessary to include the source files of the OpenEnergyOntology (OEO) in this project.
 The goal is to have a new directory like you see below inside the oeplatform directory. The new folder should be stored alongside the django apps and other code related files.
@@ -198,7 +198,7 @@ We use `alembic` to keep track of changes to the general structure of the primar
 
 Only start the following steps if you have completed step 3 above.
 
-#### 6.1 Setup the OEO-viewer app
+### 6.1 Setup the OEO-viewer app
 
 !!! note "Optional Step"
     This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website including most ontology pages except for the oeo-viewer.
@@ -207,13 +207,15 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 
 1- Install npm:
 
-- On linux: `sudo apt install npm`
+To install npm it is suggested to use the node version manager.
 
-- On MacOS: `brew install node`
+- On Linux & Mac go [here](https://github.com/nvm-sh/nvm)
 
-- On windows see [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
+- On windows see [here](https://github.com/coreybutler/nvm-windows).
 
-2- Get the ontology files (see [Section 4.1](#41-include-the-full-oeo))
+- install node version 18
+
+2- Get the ontology files (see [Section 3](#3-setup-the-openenergyontology-integration))
 
 3- Build the oeo-viewer:
 
@@ -223,7 +225,7 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 
 After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
 
-### 7 Setup the Scenario-Bundles app
+## 7 Setup the Scenario-Bundles app
 
 !!! note "Optional Step"
     This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website except scenario-bundle pages including the scenario-comparison React modules.
