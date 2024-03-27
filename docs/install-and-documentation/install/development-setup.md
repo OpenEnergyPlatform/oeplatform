@@ -2,6 +2,24 @@
 
 See our [developer guidelines](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) and get in touch with our [developer team](https://openenergyplatform.github.io/organisation/family_community/contact/).
 
+## Choose your development environment and tools
+
+As a software developer, you learn your own way of working and refine it as your experience grows. The choice of developer environment & tools is therefore largely a personal preference. Here we want to suggest how new developers can get started and how we can implement successful, efficient development. 
+
+In addition, there are some tools that are absolutely necessary to ensure the quality of the software while new code from various sources is collaboratively fed into a code repository on github.
+
+### The operating system
+
+In our installation guide we offer the installation for all common OS (Linux/Apple, Windows). Since the server on which the developed software (especially web applications) is operated is usually a Linux-based system, it is also highly advisable to design the local development environment as similarly as possible.
+
+Especially for developers using a Windows computer, there are relevant considerations here to avoid constant additional work that is necessary to install certain packages in order to remain compatible with the latest developments.
+
+Those who want to participate in software development in the long term should therefore consider whether it is worth using either a container solution such as [Docker](https://www.docker.com/products/docker-desktop/) in which the software and databases are installed. New code can then be written or tested directly in the container via an IDE. On the other hand, [WSL](https://learn.microsoft.com/de-de/windows/wsl/install) has also been available for some time, which can be used to run a Linux system on a Windows computer. As Microsoft itself developed the solution, it is particularly well integrated.
+
+### Developement tools
+
+We mainly use VSCode or PyCharm as an integrated development environment (IDE). These IDEs are particularly easy to install, can be flexibly extended with pugins and enable all relevant tools for development to be operated in one window, which in our view increases productivity
+
 ## Run all tests
 
 We aim to develope the oeplatform by using the test driven development approach. Fundamentally this requires a testing framework that is provided by [django](https://docs.djangoproject.com/en/3.2/topics/testing/). If you want to check if your changes to the codebase affect the existing functionality run all available tests:
