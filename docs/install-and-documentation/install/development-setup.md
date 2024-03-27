@@ -21,6 +21,34 @@ Those who want to participate in software development in the long term should th
 
 We mainly use VSCode or PyCharm as an integrated development environment (IDE). These IDEs are particularly easy to install, can be flexibly extended with plugins and enable all relevant tools for development to be operated in one window, which in our view increases productivity.
 
+#### pre-commit-hooks
+
+We encourage you to install our pre-commit hooks. They will probably get in the way sometimes when you try to "just commit" your code, but they help us to ensure the quality of the code, especially the formatting of the code.
+
+    pip install pre-commit
+
+And install our hooks as defined in the '.pre-commit-config.yaml' file
+
+    pre-commit install
+
+From now on, you can only transfer if the hooks are successful.
+
+### Useful VSCode plugins
+
+You can search the name in the VSCode Extensions tab:
+
+- Black Formatter
+- isort
+- Flake8
+- Pylance
+- Python
+- Python Debugger
+- Code Spell Checker
+- Database Client
+- ESLint
+- markdownlint
+- GitLens
+
 ## Run all tests
 
 We aim to develop the oeplatform by using the test driven development approach. Fundamentally this requires a testing framework that is provided by [django](https://docs.djangoproject.com/en/3.2/topics/testing/). If you want to check if your changes to the codebase affect the existing functionality run all available tests:
