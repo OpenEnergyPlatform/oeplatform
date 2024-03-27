@@ -114,7 +114,7 @@ After you have activated your virtual environment, install the required python l
 
     pip install -r requirements.txt
 
-### 3 Setup the OpenEnergyOntology integation
+### 3 Setup the OpenEnergyOntology integration
 
 #### 3.1 Include the full oeo
 
