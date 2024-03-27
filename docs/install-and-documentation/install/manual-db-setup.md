@@ -8,6 +8,7 @@ Below we describe the complete manual installation of the OpenEnergyPlatform dat
 
 2. Apache Jena Fuseki
     - and a SPARQL server for the OEKG
+    - requires java
 
 ## 1 Install the database infrastructure
 
@@ -101,6 +102,10 @@ After successfully installing PostGIS (see [step 1.1](#11-install-postgresql)), 
     create extension postgis;
     create extension postgis_topology;
     create extension hstore;
+
+The database installation is now complete and you can exit the psql command line by typing:
+
+    \q
 
 ## 3 Connect database to the Django project
 
@@ -213,7 +218,6 @@ dbname = os.environ.get("LOCAL_DB_NAME", "oedb")
     !!! Tip
         If you kept the default name from the above example in 2.1, then the environment variables
         `LOCAL_DB_USER` and `LOCAL_DB_NAME` should have the values `oedb_user` and `oedb`, respectively.
-
 
 ## 4 Create the database tables
 
