@@ -2,6 +2,8 @@
 
 ## Changes
 
+- Move query_endpoint and update_endpoint to settings.py
+
 ## Features
 
 - Add NFDI to our list of Partners [(#1605)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1605).
