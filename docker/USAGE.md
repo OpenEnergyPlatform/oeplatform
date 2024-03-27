@@ -47,15 +47,17 @@ We assume, that you choose the repository root as your working directory. If you
 
 This can be used, if you want to use a local installation for development and don't want to mess with the database setup (which should be the normal case).
 
+First step is to include the OpenEnergyOntology, as described in [installation docs, step 3.1](../docs/install-and-documentation/install/installation.md).
+
 We start the database container and expose the database to our host. Afterwards, we prepare the `securitysettings.py` with the correct credentials and migrate the database to our current branch.
 
 ```sh
 docker run -p "5432:5432" -v "$(pwd)/oeplatform_data:/var/lib/postgresql/data" ghcr.io/openenergyplatform/oeplatform-postgres:latest
 ```
 
-This command starts a container with the `oeplatform-postgres` docker image. It automagically creates the needed tables. The database saves its information at your current working directory within the `oeplatform_data` folder. It also tunnels the PostgreSQL port to your local machine to make it accessable from your host. This enables you to connect your OEP instance to your machine.
+This command starts a container with the `oeplatform-postgres` docker image. It automagically creates the needed tables. The database saves its information at your current working directory within the `oeplatform_data` folder. It also tunnels the PostgreSQL port to your local machine to make it accessible from your host. This enables you to connect your OEP instance to your machine.
 
-Connecting the OEP to the database container is similar to any other PostgreSQL instance. You need to adapt the `securitysettings.py` to the correct values **OR** set the correct environment, if you use the default values.
+Connecting the OEP to the database container is similar to any other PostgreSQL instance. You need to adapt the `oeplatform/securitysettings.py` to the correct values **OR** set the correct environment, if you use the default values.
 
 | Description          | Value      | Environment Value                 |
 | -------------------- | ---------- | --------------------------------- |
@@ -66,7 +68,8 @@ Connecting the OEP to the database container is similar to any other PostgreSQL 
 | Database Host        | localhost  | `OEP_DJANGO_HOST`,`LOCAL_DB_HOST` |
 | Database Port        | 5432       | `LOCAL_DB_PORT`                   |
 
-Afterwards, the application should be able to connect to the empty databases. You need to run the migrations as usual. The following commands are a short summary from the installation instructions.
+Afterwards, the application should be able to connect to the empty databases. You need to run the Django preparations and migrations as usual.
+The following commands are a short summary from the installation instructions.
 
 ```sh
 # Make sure, you expose the environment correctly to run migrations.
@@ -80,9 +83,13 @@ export LOCAL_DB_PASSWORD=postgres
 export LOCAL_DB_NAME=oedb
 export LOCAL_DB_HOST=localhost
 
+# Preparation
+python manage.py collectstatic 
+python manage.py compress
+
 # Running Migrations
-python manage.py alembic upgrade head
 python manage.py migrate
+python manage.py alembic upgrade head
 ```
 
 If the PostgreSQL container gets stopped, it can be recreated with the existing `oeplatform_data` folder. You do **NOT** need to run migrations on an existing folder except a changed application version.
@@ -104,7 +111,7 @@ If you followed this documentation, you can skip the entire `Setup Your Database
   - Database will recreate all needed tables
   - You need to reapply the migrations
 
-##### Build oeplatform image
+##### Build the oeplatform image
 If you want to build the oeplatform docker image yourself, e.g. after you've changed the code, you can do this by running the following command in the main directory of this repository.
 ```shell
 docker build -t oeplatform -f docker/Dockerfile .
