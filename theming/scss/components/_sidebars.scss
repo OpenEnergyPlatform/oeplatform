@@ -1,0 +1,30 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.table-sidebar {
+  &__section {
+    @extend .py-4;
+    @extend .border-bottom;
+
+    &:first-of-type {
+      @extend .pt-0;
+    }
+
+    &:last-of-type {
+      @extend .border-0;
+    }
+  }
+
+  &__btn-review {
+    @extend .btn;
+    @extend .w-100;
+
+    &--request {
+      @extend .btn-primary;
+    }
+
+    &--start {
+      @extend .btn-outline-primary;
+    }
+  }
+}
