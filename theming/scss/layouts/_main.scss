@@ -31,7 +31,7 @@ main.main {
             width: 100%;
     
             @include media-breakpoint-up(md) {
-                padding-right: $C--padding-standard;
+                padding-right: calc(#{$C--padding-standard} * 2);
                 width: calc(100% - #{$C--db-side-width});
             }
 
@@ -48,6 +48,7 @@ main.main {
             width: 100%;
     
             @include media-breakpoint-up(md) {
+                @include translateY(-1.5rem);
                 width: $C--db-side-width;
             }
 
