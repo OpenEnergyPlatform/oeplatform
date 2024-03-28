@@ -8,6 +8,7 @@ Below we describe the complete manual installation of the OpenEnergyPlatform dat
 
 2. Apache Jena Fuseki
     - and a SPARQL server for the OEKG
+    - requires java
 
 ## 1 Install the database infrastructure
 
@@ -24,6 +25,12 @@ To setup the PostgreSQL database on your own machine you have to install the dat
 
 If postgresql is not installed yet on your computer, you can follow this [guide](https://wam.readthedocs.io/en/latest/getting_started.html#installation-from-scratch).
 
+Using linux it is most likely already installed. But you can use the following command to install it.
+
+    sudo apt-get update
+    sudo apt-get upgrade
+    sudo apt-get install postgresql
+
 During the installation, make sure that you note the superuser and password. Other relevant details are the host and the port, these will most likely be set to the default value. In the oeplatoform default configuration the values are:
 
 - Host `127.0.0.1` or `localhost`.
@@ -37,6 +44,11 @@ For the creation of spatial objects we use the [PostGIS](https://postgis.net/ins
     - On Windows, We recommend installing the postgis for your local PostgreSQL installation from [Application Stack Builder](https://www.enterprisedb.com/edb-docs/d/postgresql/installation-getting-started/installation-guide-installers/9.6/PostgreSQL_Installation_Guide.1.09.html) under `Spatial Extensions`. There should automatically be an entry for `PostGIS bundle ...` based on the installed version of PostgreSQL, please make sure it is checked and click next. The stack builder will then continue to download and install PostGIS. Alternately PostGIS can also be downloaded from [this official ftp server](http://ftp.postgresql.org/pub/postgis/) by PostgreSQL. Proceed to install the package. (Flag it as safe in the downloads if prompted, and select Run anyway from the Windows SmartScreen Application Blocked Window)
 
     - On Linux/Unix based systems the installation could be specific to the package manager being employed and the operating system, so please refer to the official installation instructions [here](https://postgis.net/install/). The section `Binary Installers` covers the installation instructions for various operating systems.
+    
+    ```
+    sudo apt-getinstallbinutilslibproj-devgdal-bin
+    sudo apt install postgresql-14-postgis-3
+    ```
 
 ### 1.2 Install Apache Jena Fuseki
 
@@ -65,6 +77,9 @@ As you dont have to setup the graph databse to run most parts of the oeplatform 
 
 Once logged into your psql session (for linux: `sudo -u postgres psql`, for windows: `psql`), run the following lines:
 
+    # set the password for the postgresql user, if not done already to avoide later issues
+    ALTER USER postgres WITH PASSWORD 'postgres';
+
     # optional: .. with owner = postgres;
     create database oep_django;
 
@@ -87,6 +102,10 @@ After successfully installing PostGIS (see [step 1.1](#11-install-postgresql)), 
     create extension postgis;
     create extension postgis_topology;
     create extension hstore;
+
+The database installation is now complete and you can exit the psql command line by typing:
+
+    \q
 
 ## 3 Connect database to the Django project
 
@@ -200,12 +219,8 @@ dbname = os.environ.get("LOCAL_DB_NAME", "oedb")
         If you kept the default name from the above example in 2.1, then the environment variables
         `LOCAL_DB_USER` and `LOCAL_DB_NAME` should have the values `oedb_user` and `oedb`, respectively.
 
-### 3.2 Verify the connection
-
-If you have already set up the oeplatoform environment from [installation guide](installation.md#2-setup-virtual-environment) and have set up the connection details in the oeplatform/securitysettings.py, you can verify that the database connection has been successfully set up by attempting to start the django development server.
-
-    python manage.py runserver
-
 ## 4 Create the database tables
 
-Proceed with the next steps in section [3.2 Create the database table structures](installation.md#32-create-the-database-table-structures) of the oeplatform installation guide.
+To complete the database installation, the table structures must then be installed. [Step 3](./installation.md#3-setup-the-openenergyontology-integation) & [Step 4](./installation.md#4-loading-and-compressing-static-assets-from-the-oeplattform-applications) must be completed first so that the necessary commands can be executed after.
+
+After that Proceed with the next steps in section [4.2 Create the database table structures](installation.md#32-create-the-database-table-structures) of the oeplatform installation guide.

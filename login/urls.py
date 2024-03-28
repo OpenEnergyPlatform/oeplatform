@@ -120,4 +120,5 @@ urlpatterns = [
     url(r"^detach$", views.DetachView.as_view()),
     url(r"^activate/(?P<token>[\w\d\-\s]+)$", views.activate),
     url(r"^activate/$", views.ActivationNoteView.as_view(), name="activate"),
+    url(r"^reset/token$", views.token_reset, name="reset-token"),
 ]
