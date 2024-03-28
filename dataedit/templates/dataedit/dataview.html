@@ -123,9 +123,9 @@
         <div class="panel-group">
           <div class="panel panel-default">
             <div class="panel-heading">
-              <h4 class="panel-title">
+              <p class="panel-title">
                 <a data-bs-toggle="collapse" href="#collapseBuilder">Filter dataset</a>
-              </h4>
+              </p>
             </div>
             <div id="collapseBuilder" class="panel-collapse collapse">
               <div class="panel-body">
@@ -309,63 +309,91 @@
   </div>
 
   <div class="table-sidebar__section">
-    <h4>Tags</h4>
+    <h2 class="table-sidebar__heading">Tags</h2>
 
     {% load dataedit.taghandler %}
     {% get_tags table=table schema=schema as table_tags %}
     {% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=table_tags %}
   </div>
   
-  <h4>Downloads</h4>
-  <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
-    <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=csv" type="button" class="btn btn-success">Download
-      CSV</a>
-    <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=datapackage" type="button"
-      class="btn btn-warning">Download Datapackage</a>
+  <div class="table-sidebar__section">
+    <h2 class="table-sidebar__heading">Downloads</h2>
+      <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=csv" type="button" class="table-sidebar__btn">
+        <svg width="14" height="14" version="1.1" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <path d="m81.98 80.184h-63.961c-1.9688 0-3.5664 1.5977-3.5664 3.5664s1.5977 3.5664 3.5664 3.5664h63.961c1.9688 0 3.5664-1.5977 3.5664-3.5664 0-1.9727-1.5977-3.5664-3.5664-3.5664z"/>
+            <path d="m47.477 67.758c0.16406 0.16406 0.34766 0.3125 0.54297 0.44531 0.089844 0.058594 0.1875 0.10156 0.27734 0.15234 0.10938 0.0625 0.21875 0.12891 0.33594 0.17578 0.007813 0.003906 0.015626 0.007812 0.023438 0.011719 0.11328 0.046875 0.23047 0.070312 0.34375 0.10156 0.10156 0.027344 0.19531 0.066407 0.29688 0.089844 0.46094 0.09375 0.9375 0.09375 1.3984 0 0.10156-0.019531 0.19922-0.058594 0.29688-0.089844 0.12109-0.035156 0.24609-0.066406 0.36719-0.11328 0.11719-0.050781 0.22266-0.11719 0.33594-0.17578 0.09375-0.050781 0.19141-0.09375 0.27734-0.15234 0.19531-0.13281 0.37891-0.27734 0.54297-0.44531l13.75-13.75c1.3945-1.3945 1.3945-3.6523 0-5.0469-1.3945-1.3945-3.6523-1.3945-5.0469 0l-7.6602 7.6602 0.007812-40.371c0-1.9727-1.5977-3.5664-3.5664-3.5664-1.9727 0-3.5664 1.5977-3.5664 3.5664v40.371l-7.6602-7.6602c-1.3945-1.3945-3.6523-1.3945-5.0469 0-1.3945 1.3945-1.3945 3.6523 0 5.0469z"/>
+          </g>
+        </svg>
+        CSV
+      </a>
+      <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=datapackage" type="button" class="table-sidebar__btn">
+        <svg width="14" height="14" version="1.1" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <path d="m81.98 80.184h-63.961c-1.9688 0-3.5664 1.5977-3.5664 3.5664s1.5977 3.5664 3.5664 3.5664h63.961c1.9688 0 3.5664-1.5977 3.5664-3.5664 0-1.9727-1.5977-3.5664-3.5664-3.5664z"/>
+            <path d="m47.477 67.758c0.16406 0.16406 0.34766 0.3125 0.54297 0.44531 0.089844 0.058594 0.1875 0.10156 0.27734 0.15234 0.10938 0.0625 0.21875 0.12891 0.33594 0.17578 0.007813 0.003906 0.015626 0.007812 0.023438 0.011719 0.11328 0.046875 0.23047 0.070312 0.34375 0.10156 0.10156 0.027344 0.19531 0.066407 0.29688 0.089844 0.46094 0.09375 0.9375 0.09375 1.3984 0 0.10156-0.019531 0.19922-0.058594 0.29688-0.089844 0.12109-0.035156 0.24609-0.066406 0.36719-0.11328 0.11719-0.050781 0.22266-0.11719 0.33594-0.17578 0.09375-0.050781 0.19141-0.09375 0.27734-0.15234 0.19531-0.13281 0.37891-0.27734 0.54297-0.44531l13.75-13.75c1.3945-1.3945 1.3945-3.6523 0-5.0469-1.3945-1.3945-3.6523-1.3945-5.0469 0l-7.6602 7.6602 0.007812-40.371c0-1.9727-1.5977-3.5664-3.5664-3.5664-1.9727 0-3.5664 1.5977-3.5664 3.5664v40.371l-7.6602-7.6602c-1.3945-1.3945-3.6523-1.3945-5.0469 0-1.3945 1.3945-1.3945 3.6523 0 5.0469z"/>
+          </g>
+        </svg>
+        Datapackage
+      </a>
   </div>
-  <hr>
+  
 
   {% if schema == "model_draft" %}
-  <h4>Uploads</h4>
-  <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
+  <div class="table-sidebar__section">
+    <h2 class="table-sidebar__heading">Uploads</h2>
+    <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
     title="You need write permissions on this table to upload data" {% endif %}>
-    <a class="btn btn-sm btn-success {% if not can_add %} disabled {% endif %}"
-      href="{% url 'dataedit:wizard_upload' schema=schema table=table %}">
-      Upload CSV (Wizard)
-    </a>
-  </span>
-  <hr>
+      <a class="table-sidebar__btn {% if not can_add %} disabled {% endif %}" href="{% url 'dataedit:wizard_upload' schema=schema table=table %}">
+        <svg width="14" height="14" version="1.1" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <path d="m18.02 19.816h63.961c1.9688 0 3.5664-1.5977 3.5664-3.5664s-1.5977-3.5664-3.5664-3.5664h-63.961c-1.9688 0-3.5664 1.5977-3.5664 3.5664 0 1.9727 1.5977 3.5664 3.5664 3.5664z"/>
+            <path d="m52.523 32.242c-0.16406-0.16406-0.34766-0.3125-0.54297-0.44531-0.089844-0.058594-0.1875-0.10156-0.27734-0.15234-0.10938-0.0625-0.21875-0.12891-0.33594-0.17578-0.007813-0.003906-0.015626-0.007812-0.023438-0.011719-0.11328-0.046875-0.23047-0.070312-0.34375-0.10156-0.10156-0.027344-0.19531-0.066407-0.29688-0.089844-0.46094-0.09375-0.9375-0.09375-1.3984 0-0.10156 0.019531-0.19922 0.058594-0.29688 0.089844-0.12109 0.035156-0.24609 0.066406-0.36719 0.11328-0.11719 0.050781-0.22266 0.11719-0.33594 0.17578-0.09375 0.050781-0.19141 0.09375-0.27734 0.15234-0.19531 0.13281-0.37891 0.27734-0.54297 0.44531l-13.758 13.75c-1.3945 1.3945-1.3945 3.6523 0 5.0469 1.3945 1.3945 3.6523 1.3945 5.0469 0l7.6602-7.6602v40.371c0 1.9727 1.5977 3.5664 3.5664 3.5664 1.9727 0 3.5664-1.5977 3.5664-3.5664l0.003906-40.371 7.6602 7.6602c1.3945 1.3945 3.6523 1.3945 5.0469 0 1.3945-1.3945 1.3945-3.6523 0-5.0469z"/>
+          </g>
+        </svg>
+        CSV (Wizard)
+      </a>
+    </span>
+  </div>
   {% endif %}
 
-  <h4>API Usage</h4>
-  <textarea class="form-control" rows="6" cols="50"
-    style="white-space: nowrap;font-size: 12px;resize: none;overflow-y: hidden;font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
-  from requests import get
-
-  result = get('https://{{ host }}/api/v0/schema/{{ schema }}/tables/{{ table }}/rows')
-  for row in result.json():
-    # Process the row
+  <div class="table-sidebar__section">
+    <h2 class="table-sidebar__heading">API Usage</h2>
+    <textarea class="form-control" rows="6" cols="50"
+      style="white-space: nowrap;font-size: 12px;resize: none;overflow-y: hidden;font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
+    from requests import get
+  
+    result = get('https://{{ host }}/api/v0/schema/{{ schema }}/tables/{{ table }}/rows')
+    for row in result.json():
+      # Process the row
     </textarea>
-  <hr>
-
-  <h4>Permissions</h4>
-  <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
-    <a href="{{ table }}/permissions" type="button" class="btn btn-danger">Permissions</a>
   </div>
-  <hr>
-
-  {% if can_add %} 
-  <h4>Management</h4>
-  <div>
-    <button class="btn btn-danger mt-2 {% if not can_add %} disabled {% endif %}" id="dataview-table-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>
+  
+  <div class="table-sidebar__section">
+    <a href="{{ table }}/permissions" type="button" class="table-sidebar__btn-info">
+      <svg width="14" height="14" version="1.1" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <g>
+          <path d="m84.699 21.5c-24.301-2.5-31.301-16.5-31.598-17.102-0.60156-1.1992-1.6992-1.8984-3-1.8984-1.3008 0-2.5 0.80078-3 1.8984-0.40234 0.60156-7.5 14.602-31.801 17.102-1.6992 0.19922-3 1.6016-3 3.3984v24.5c0 28.801 34.699 47 36.199 47.801 0.5 0.19922 1 0.39844 1.5 0.39844s1.1016-0.10156 1.5-0.39844c1.5-0.80078 36.199-18.898 36.199-47.801v-24.598c0.10156-1.6992-1.3008-3.1016-3-3.3008zm-3.6992 27.898c0 21.5-24.5 37.102-31 40.898-6.5-3.7969-31-19.297-31-40.898v-21.598c17.5-2.5 26.699-10.699 31-15.898 4.3008 5.1992 13.5 13.398 31 15.898z"/>
+          <path d="m37 38.898c0 6 4.1016 11 9.6016 12.5v24.102c0 1.8984 1.5 3.3984 3.3984 3.3984s3.3984-1.5 3.3984-3.3984v-3.8008h4.1992c1.8984 0 3.3984-1.5 3.3984-3.3984 0-1.8984-1.5-3.3984-3.3984-3.3984h-4.1992v-13.504c5.5-1.5 9.6016-6.5 9.6016-12.5 0-7.1992-5.8008-13-13-13-7.1992 0.10156-13 5.9023-13 13zm19.199 0c0 3.3984-2.8008 6.1992-6.1992 6.1992s-6.1992-2.8008-6.1992-6.1992c0-3.3984 2.8008-6.1992 6.1992-6.1992s6.1992 2.8008 6.1992 6.1992z"/>
+        </g>
+      </svg>
+      Permissions
+    </a>
+    {% if can_add %} 
+    <button class="table-sidebar__btn-danger {% if not can_add %} disabled {% endif %}" id="dataview-table-delete">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+      </svg>
+      Delete table
+    </button>
     <div id="dataview-table-create-msg" class="invisible dataview-status">
       <span class="spinner spinner-border spinner-border-sm"></span>
       <span class="message"></span>
     </div>
+    {% endif %}
+    </div>
   </div>
-  <hr>
-</div>
-{% endif %}
 
 {% endblock main-right-sidebar-content-additional %}
 
