@@ -24,11 +24,12 @@ from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View
 from metadata.v160.schema import OEMETADATA_V160_SCHEMA
+from metadata.v160.template import OEMETADATA_V160_TEMPLATE
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api.actions import describe_columns
+from api.actions import assert_has_metadata, describe_columns
 
 try:
     import oeplatform.securitysettings as sec
@@ -1571,13 +1572,18 @@ def update_table_tags(request):
         int(field[len("tag_") :]) for field in request.POST if field.startswith("tag_")
     }
 
-    # update tags in db and harmonize metadata
-    metadata = get_tag_keywords_synchronized_metadata(
-        table=table, schema=schema, tag_ids_new=ids
-    )
-
     with _get_engine().connect() as con:
         with con.begin():
+            if not actions.assert_has_metadata(table=table, schema=schema):
+                actions.set_table_metadata(
+                    table=table, schema=schema, metadata=OEMETADATA_V160_TEMPLATE, cursor=con
+                )
+                # update tags in db and harmonize metadata
+                
+            metadata = get_tag_keywords_synchronized_metadata(
+                table=table, schema=schema, tag_ids_new=ids
+            )
+
             # TODO Add metadata to table (JSONB field) somewhere here
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=con
@@ -1587,6 +1593,7 @@ def update_table_tags(request):
         request,
         'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
     )
+
     return render(
         request,
         "dataedit/dataview.html",
@@ -2244,6 +2251,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                         review=review_datamodel,
                         reviewer=request.user,
                         contributor=contributor,
+                        oemetadata=load_metadata_from_db(schema=schema, table=table),
                     )
                     table_review.save(review_type=review_post_type)
                 else:
