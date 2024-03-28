@@ -44,11 +44,11 @@
 
         .nav-link svg {
             @extend .me-1;
-            fill: $primary;
+            fill: $black;
         }
 
         .nav-link.active svg {
-            fill: $black;
+            fill: $secondary;
         }
 
         .nav-link.status::after {
