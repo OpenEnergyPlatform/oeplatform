@@ -10,14 +10,14 @@ The installation steps have been proofed on linux and windows for python 3.6 and
 
     [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
 
-!!! tip
+<!-- !!! tip
     Use our Make script to automate most of the installation and setup process and get started in a simple and reusable way. Don't forget to familiarize yourself with the structure of the oeplattform architecture and know the credentials for each component (e.g. the user information of the databases).
 
     ``` bash
         make -f script/setup_and_migrate_db all
     ```
 
-    !!! info "Only proven on Linux based systems."
+    !!! info "Only proven on Linux based systems." -->
 
 ??? Info "All steps & commands in one list"
 
@@ -66,6 +66,16 @@ The installation steps have been proofed on linux and windows for python 3.6 and
 
         - [create a test user.](./development-setup.md#user-management)
 
+## 0 Prequisit
+
+The installation instructions mainly refer to the creation of a local instance of the oeplatform with a focus on the development or contribution to the software development on github. Before you start the installation look at [this section](./development-setup.md#choose-your-development-environment-and-tools) and think about which operating system you want to use.
+
+Deploying the software on a server to make it publicly accessible via the Internet is a further step.
+
+### Notes for deployment
+
+We do not currently provide instructions for deployment. It also depends heavily on the server environment. In general, a web server (e.g. [Appache](https://httpd.apache.org/)) and a [web server gateway for Python](https://peps.python.org/pep-3333/) (e.g. [mod_wsgi](https://modwsgi.readthedocs.io/en/master/)) are required to make the software available on the internet.
+
 ## 1 Setup the repository
 
 Recommended: Create a directory to store the oeplatform code and additional resources.
@@ -104,48 +114,9 @@ After you have activated your virtual environment, install the required python l
 
     pip install -r requirements.txt
 
-## 3 Databases setup
+## 3 Setup the OpenEnergyOntology integration
 
-We use two relational databases to store the oeplatform data:
-
-- The oep-django database is our internal database. It is used to store the django application related data. This includes things like user information, reviews, table names, ...
-- Our primary database is the OEDB (Open Energy Database). It is used to store all data the user uploaded. In production it stores multiple terabyte of data.
-
-Additional we use a graph database:
-
-- Store the open energy ontologies and open energy knowledge graph
-- For now this is not part of the installation guide as it is not mandatory to run the oeplatform and can be added later.
-
-### 3.1 How to install the databases
-
-You have two options:
-
-1. You chose to install the databases manually by installing PostgreSQL and complete the setup. In this case you can follow our [manual database setup guide](./manual-db-setup.md).
-
-2. You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system.
-[Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
-
-### 3.2 Create the database table structures
-
-Before you can start development, you need to setup tables in the two PostgreSQL databases. To do this, you can run two management commands. The django command will set up all structures required by the oep system in the oep_django database and the alembic command will create all the structures in the OEDB. These structures define how large amounts of uploaded user data is stored in the database. On a high level this is similar to partitions on you personal computer. This structure help's the developers and the system to find the data and group data together.
-
-### 3.2.1 Django setup - oep_django
-
-In order to run the OEP website, the django database needs some extra management tables.
-We use the django specific migrations. Each django app defines it own migrations that keep track of all changes made to any app related tabes. The table structure itself is defined as an abstraction in the models.py for each django app.
-
-    python manage.py migrate
-
-### 3.2.2 Alembic setup - oedb
-
-In order to run the OEP website, the primary database needs some extra management tables.
-We use `alembic` to keep track of changes to the general structure of the primary database and its initial state e.g. what tables should be there and more. To create all tables that are needed, simply type:
-
-    python manage.py alembic upgrade head
-
-### 4 Setup the OpenEnergyOntology integation
-
-#### 4.1 Include the full oeo
+### 3.1 Include the full oeo
 
 It is necessary to include the source files of the OpenEnergyOntology (OEO) in this project.
 The goal is to have a new directory like you see below inside the oeplatform directory. The new folder should be stored alongside the django apps and other code related files.
@@ -175,7 +146,59 @@ If you use the default naming "ontologies" you should create this directory. The
 
     Get only the oeo `full-oeo.owl` from the [openenergyplatform.org](https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl)
 
-#### 4.2 Setup the OEO-viewer app
+## 4 Loading and compressing static assets from the Oeplattform applications
+
+Static data is often stored in the django apps and various additional scripts are loaded, e.g. in HTML files. To enable django to access these resources more efficiently, various management commands are used to collect and partially compress the relevant files.
+
+Make sure the python environment is activated and then run:
+
+    python manage.py collectstatic
+    python manage.py compress
+
+## 5 Databases setup
+
+We use two relational databases to store the oeplatform data:
+
+- The oep-django database is our internal database. It is used to store the django application related data. This includes things like user information, reviews, table names, ...
+- Our primary database is the OEDB (Open Energy Database). It is used to store all data the user uploaded. In production it stores multiple terabyte of data.
+
+Additional we use a graph database:
+
+- Store the open energy ontologies and open energy knowledge graph
+- For now this is not part of the installation guide as it is not mandatory to run the oeplatform and can be added later.
+
+### 5.1 How to install the databases
+
+You have two options:
+
+1. You chose to install the databases manually by installing PostgreSQL and complete the setup. In this case you can follow our [manual database setup guide](./manual-db-setup.md).
+
+2. You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system.
+[Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+
+### 5.2 Create the database table structures
+
+Before you can start development, you need to setup tables in the two PostgreSQL databases. To do this, you can run two management commands. The django command will set up all structures required by the oep system in the oep_django database and the alembic command will create all the structures in the OEDB. These structures define how large amounts of uploaded user data is stored in the database. On a high level this is similar to partitions on you personal computer. This structure help's the developers and the system to find the data and group data together.
+
+### 5.2.1 Django setup - oep_django
+
+In order to run the OEP website, the django database needs some extra management tables.
+We use the django specific migrations. Each django app defines it own migrations that keep track of all changes made to any app related tabes. The table structure itself is defined as an abstraction in the models.py for each django app.
+
+    python manage.py migrate
+
+### 5.2.2 Alembic setup - oedb
+
+In order to run the OEP website, the primary database needs some extra management tables.
+We use `alembic` to keep track of changes to the general structure of the primary database and its initial state e.g. what tables should be there and more. To create all tables that are needed, simply type:
+
+    python manage.py alembic upgrade head
+
+## 6 Install the OpenEnergyOntology tools
+
+Only start the following steps if you have completed step 3 above.
+
+### 6.1 Setup the OEO-viewer app
 
 !!! note "Optional Step"
     This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website including most ontology pages except for the oeo-viewer.
@@ -184,13 +207,15 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 
 1- Install npm:
 
-- On linux: `sudo apt install npm`
+To install npm it is suggested to use the node version manager.
 
-- On MacOS: `brew install node`
+- On Linux & Mac go [here](https://github.com/nvm-sh/nvm)
 
-- On windows see [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
+- On windows see [here](https://github.com/coreybutler/nvm-windows).
 
-2- Get the ontology files (see [Section 4.1](#41-include-the-full-oeo))
+- install node version 18
+
+2- Get the ontology files (see [Section 3](#3-setup-the-openenergyontology-integration))
 
 3- Build the oeo-viewer:
 
@@ -200,7 +225,7 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 
 After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
 
-### 5 Setup the Scenario-Bundles app
+## 7 Setup the Scenario-Bundles app
 
 !!! note "Optional Step"
     This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website except scenario-bundle pages including the scenario-comparison React modules.

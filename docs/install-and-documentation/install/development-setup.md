@@ -1,10 +1,57 @@
 # Development setup
 
 See our [developer guidelines](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) and get in touch with our [developer team](https://openenergyplatform.github.io/organisation/family_community/contact/).
+Have a look at the official [git-Book](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup) instructions on how to setup your git on a new system to be able to contribute to our GitHub repository.
+
+## Choose your development environment and tools
+
+As a software developer, you learn your own way of working and refine it as your experience grows. The choice of developer environment & tools is therefore largely a personal preference. Here we want to suggest how new developers can get started and how we can implement successful, efficient development.
+
+In addition, there are some tools that are absolutely necessary to ensure the quality of the software while new code from various sources is collaboratively fed into a code repository on github.
+
+### The operating system
+
+In our installation guide we offer the installation for all common OS (Linux/Apple, Windows). Since the server on which the developed software (especially web applications) is operated is usually a Linux-based system, it is also highly advisable to design the local development environment as similarly as possible.
+
+Especially for developers using a Windows computer, there are relevant considerations here to avoid constant additional work that is necessary to install certain packages in order to remain compatible with the latest developments.
+
+Those who want to participate in software development in the long term should therefore consider whether it is worth using either a container solution such as [Docker](https://www.docker.com/products/docker-desktop/) in which the software and databases are installed. New code can then be written or tested directly in the container via an IDE. On the other hand, [WSL](https://learn.microsoft.com/de-de/windows/wsl/install) has also been available for some time, which can be used to run a Linux system on a Windows computer. As Microsoft itself developed the solution, it is particularly well integrated.
+
+### Development tools
+
+We mainly use VSCode or PyCharm as an integrated development environment (IDE). These IDEs are particularly easy to install, can be flexibly extended with plugins and enable all relevant tools for development to be operated in one window, which in our view increases productivity.
+
+#### pre-commit-hooks
+
+We encourage you to install our pre-commit hooks. They will probably get in the way sometimes when you try to "just commit" your code, but they help us to ensure the quality of the code, especially the formatting of the code.
+
+    pip install pre-commit
+
+And install our hooks as defined in the '.pre-commit-config.yaml' file
+
+    pre-commit install
+
+From now on, you can only transfer if the hooks are successful.
+
+### Useful VSCode plugins
+
+You can search the name in the VSCode Extensions tab:
+
+- Black Formatter
+- isort
+- Flake8
+- Pylance
+- Python
+- Python Debugger
+- Code Spell Checker
+- Database Client
+- ESLint
+- markdownlint
+- GitLens
 
 ## Run all tests
 
-We aim to develope the oeplatform by using the test driven development approach. Fundamentally this requires a testing framework that is provided by [django](https://docs.djangoproject.com/en/3.2/topics/testing/). If you want to check if your changes to the codebase affect the existing functionality run all available tests:
+We aim to develop the oeplatform by using the test driven development approach. Fundamentally this requires a testing framework that is provided by [django](https://docs.djangoproject.com/en/3.2/topics/testing/). If you want to check if your changes to the codebase affect the existing functionality run all available tests:
 
     python manage.py test
 
@@ -25,9 +72,10 @@ To create a dummy user for functionality testing purposes
 
 Then execute this python code (either directly in a terminal or from a file)
 
+    import os    
     import django
+
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "oeplatform.settings")
-    django.setup()
     django.setup()
     from login.models import myuser
     u = myuser.objects.create_devuser('test','test@mail.com')
@@ -36,7 +84,7 @@ Then execute this python code (either directly in a terminal or from a file)
 
 ## Create test tables
 
-You have multiple options to create tables and upload data. We will not explain the any approach using a SQL dump that is imported into the postgresql database. The easiest approach that will get you started quickly is based on the OEP-Website UI. The related functionality is part of the `dataedit` app in the django project.
+You have multiple options to create tables and upload data. We will not explain the approach using a SQL dump that is imported into the postgresql database. The easiest approach that will get you started quickly is based on the OEP-Website UI. The related functionality is part of the `dataedit` app in the django project.
 
 Before we can get started we have to register the topics where data can be grouped to. Initially all data is uploaded to the topic `model_draft`. Once it is published it is moved to another topic e.g. `demand` or `scenario`. You can use the management command to register our predefined topics:
 
@@ -44,7 +92,7 @@ Before we can get started we have to register the topics where data can be group
 
 ### Using the HTTP-API
 
-You can either use the http api that is available once u started you local development server using the `runserver` command. To understand how to use the api you can have a look at our academy courses but keep in mind that you have to modify the URL of the api endpoints to you locally running oep instance. You can to this by changing the beginning of the url from something like `https://www.oeplatform.org/` to `http://127.0.0.1/`. [Have a look at this course to get started with the http api.](https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/)
+You can either use the http api that is available once you started your local development server using the `runserver` command. To understand how to use the api you can have a look at our academy courses but keep in mind that you have to modify the URL of the api endpoints to you locally running oep instance. You can to this by changing the beginning of the url from something like `https://www.oeplatform.org/` to `http://127.0.0.1/`. [Have a look at this course to get started with the http api.](https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/)
 
 ### Using the OEP-Website UI
 

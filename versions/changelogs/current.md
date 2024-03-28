@@ -6,11 +6,15 @@
 
 - Add NFDI to our list of Partners [(#1605)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1605).
 
+- Add feature to reset a api token via the profile/settings page [(#1637)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1637)
+
 ## Bugs
 
 - Bugfix: Adding tags if metadata is empty does not result in a server error anymore. [(#1528)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1528)
 
 - OEMetaBuilder: Readd missing autocomplete functionality that was not added after the oemetadata schema update for metadata version 0.1.6 [(#1608)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1608)
+
+- Fix migration dataedit 0033: Provide default value for not nullable oemetdata field. [(1635)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1635)
 
 - Docker: docker-entrypoint.sh wasn't running compression of stylesheets on startup [(#1627)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1627)
 
@@ -25,3 +29,5 @@ New section!
 - Update the REST-API page of the documentation [(#1636)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1636):
   - It is currently work in progress and will be updated within the next couple months.
   - This update adds more context and links to the academy api tutorials.
+  
+- Update docker documentation [(#1644)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1644)
