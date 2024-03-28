@@ -313,25 +313,26 @@ class SettingsView(View):
 class GroupsView(View):
     def get(self, request, user_id):
         """
-        TBD
+        Get all groups where the current user is listed as member. Also
+        indicate weather the user is the group Admin or Member.
+        Additionally provide context information like member count or
+        Group description.
+
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :return: Profile renderer
         """
-        user = get_object_or_404(OepUser, pk=user_id)
-        user_groups = None
-        if request.user.is_authenticated:
-            user_groups = request.user.memberships
+        
+        # In case a new Group is created lookup query parameters for user id
+        if request.GET.get("profile_user"):
+            user_id = request.GET.get("profile_user")
 
-        # if user_groups:
-        #     for group in user_groups:
-        #         membership = GroupMembership.objects.filter(
-        #             group=group, user=request.user
-        #         ).first()
+        user = get_object_or_404(OepUser, pk=user_id)
+        
         return render(
             request,
             "login/user_groups.html",
-            {"profile_user": user, "groups": user_groups},
+            {"profile_user": user},
         )
 
 
