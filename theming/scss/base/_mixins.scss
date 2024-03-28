@@ -35,7 +35,8 @@
   user-select: none;
 }
 
-.btn-tertiary {
+// Buttons
+.btn-secondary {
   @include button-variant($gray-300, $gray-300);
 }
   

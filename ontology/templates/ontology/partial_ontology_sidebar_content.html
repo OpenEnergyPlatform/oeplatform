@@ -5,10 +5,10 @@
     <div class="row">
         <div class="col">
             <div class="btn-group float-end" role="group" aria-label="Basic example">
-                <a class="btn btn-secondary" href="/ontology/{{ontology}}/BFO_0000001/">
+                <a class="btn btn-primary" href="/ontology/{{ontology}}/BFO_0000001/">
                     Browse oeo classes
                 </a>
-                <a class="btn btn-secondary" href="/viewer/oeo/">
+                <a class="btn btn-primary" href="/viewer/oeo/">
                     Graphical oeo viewer
                 </a>
             </div>
@@ -20,7 +20,7 @@
     </div>
     <div class="row">
         <div class="col">
-            <a class="btn btn-secondary" href="https://github.com/OpenEnergyPlatform/ontology/releases" target="_blank">
+            <a class="btn btn-primary" href="https://github.com/OpenEnergyPlatform/ontology/releases" target="_blank">
                 <i class="fas fa-external-link-alt"></i>
                 Download release from GitHub.
             </a>
@@ -35,16 +35,16 @@
     <p>Download the full owl file for oeo version {{version}} and more ... </p>
     <div class="row">
         <div class="col">
-            <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/oeo-full.owl">
+            <a class="btn btn-primary" href="/ontology/{{ontology}}/releases/oeo-full.owl">
                 full-oeo-owl
             </a>
             <div class="btn-group float-end" role="group" aria-label="Basic example">
                 {% for ex in main_module.extensions %}
-                <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{main_module.name}}.{{ex}}">
+                <a class="btn btn-primary" href="/ontology/{{ontology}}/releases/{{main_module.name}}.{{ex}}">
                     {{ex}}
                 </a>
                 {% endfor %}
-                <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/oeo-closure.owl">
+                <a class="btn btn-primary" href="/ontology/{{ontology}}/releases/oeo-closure.owl">
                     closure
                 </a>
             </div>

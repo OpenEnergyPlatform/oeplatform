@@ -1,0 +1,48 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+$tag-mark-width: 7rem;
+
+@mixin tag-mark {
+    @extend .rounded-pill;
+    @extend .d-inline-block;
+    @extend .fs-8;
+    @include user-select-none;
+    line-height: 1.35rem;
+    margin-bottom: 0.25rem;
+    background-color: $gray-200;
+    padding: 1px 1rem;
+    height: 1.5rem;
+
+    &--highlight {
+        @extend .text-white;
+        background-color: $gray-600;
+    }
+
+    &--info {
+        @extend .background-info;
+        color: $cyan-700 !important;
+        border: 1px solid $cyan-700;
+    }
+
+    &--danger {
+        @extend .bg-white;
+        @extend .text-danger;
+        border: 1px solid $danger;
+    }
+
+    &--success {
+        @extend .background-success;
+        color: $green-700 !important;
+        width: $tag-mark-width;
+        min-width: $tag-mark-width;
+    }
+
+    &--warning {
+        @extend .background-warning;
+        color: $yellow-800 !important;
+        width: $tag-mark-width;
+        min-width: $tag-mark-width;
+        border: 1px solid $warning;
+    }
+}

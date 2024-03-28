@@ -4,7 +4,7 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, View
@@ -13,7 +13,11 @@ from django.views.generic.edit import DeleteView, UpdateView
 from rest_framework.authtoken.models import Token
 
 import login.models as models
-from dataedit.models import PeerReviewManager, Table, PeerReview
+from login.utilities import (
+    get_badge_icon_path,
+    get_review_badge_from_table_metadata,
+)
+from dataedit.models import PeerReviewManager, Table
 from dataedit.views import schema_whitelist
 
 
@@ -32,6 +36,10 @@ from .models import myuser as OepUser
 
 from login.utilities import validate_open_data_license
 
+###########################################################################
+#            User Tables related views & partial views for htmx           #
+###########################################################################
+
 
 class TablesView(View):
     def get(self, request, user_id):
@@ -39,17 +47,35 @@ class TablesView(View):
         tables = Table.objects.all().select_related()
         draft_tables = []
         published_tables = []
-        published_but_license_issue = []
+        # published_but_license_issue = []
 
         for table in tables:
             permission_level = user.get_table_permission_level(table)
             license_status = validate_open_data_license(django_table_obj=table)
+
+            review_badge = None
+            badge_icon = None
+            badge_msg = None
+            if table.oemetadata:
+                review_badge = get_review_badge_from_table_metadata(table)
+
+            if review_badge and review_badge[0]:
+                badge_icon = get_badge_icon_path(review_badge[1])
+
+            if review_badge and not review_badge[0]:
+                badge_msg = review_badge[1]
 
             table_data = {
                 "name": table.name,
                 "schema": table.schema.name,
                 "is_publish": table.is_publish,
                 "is_reviewed": table.is_reviewed,
+                "review_badge_context": {
+                    "error_msg": badge_msg,
+                    "badge": review_badge,
+                    "icon": badge_icon,
+                },
+                "icon_path": badge_icon,
                 "license_status": {
                     "status": license_status[0],
                     "error": license_status[1],
@@ -72,6 +98,11 @@ class TablesView(View):
         if request.is_ajax():
             return render(request, "login/user_tables.html", context)
         return render(request, "login/user_tables.html", context)
+
+
+##############################################################################
+#          User Open Peer Review related views & partial views for htmx      #
+##############################################################################
 
 
 class ReviewsView(View):
@@ -277,22 +308,80 @@ class SettingsView(View):
         )
 
 
-class GroupManagement(View, LoginRequiredMixin):
-    def get(self, request):
+###########################################################################
+#            User Group related views & partial views for htmx            #
+###########################################################################
+
+
+class GroupsView(View):
+    def get(self, request, user_id):
         """
-        Load and list the available groups by groupadmin.
+        Get all groups where the current user is listed as member. Also
+        indicate weather the user is the group Admin or Member.
+        Additionally provide context information like member count or
+        Group description.
+
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :return: Profile renderer
         """
+        
+        # In case a new Group is created lookup query parameters for user id
+        if request.GET.get("profile_user"):
+            user_id = request.GET.get("profile_user")
 
-        membership = request.user.memberships
+        user = get_object_or_404(OepUser, pk=user_id)
+        
         return render(
-            request, "login/list_memberships.html", {"membership": membership}
+            request,
+            "login/user_groups.html",
+            {"profile_user": user},
         )
 
 
-class GroupCreate(View, LoginRequiredMixin):
+class PartialGroupsView(View):
+    def get(self, request, user_id):
+        """
+        TBD
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :return: Profile renderer
+        """
+        user = get_object_or_404(OepUser, pk=user_id)
+        user_groups = None
+        if request.user.is_authenticated:
+            user_groups = request.user.memberships
+
+        # if user_groups:
+        #     for user_group in user_groups:
+        #     membership = GroupMembership.objects.filter(
+        #         group=group, user=request.user
+        #     ).first()
+        return render(
+            request,
+            "login/partials/groups.html",
+            {"profile_user": user, "groups": user_groups},
+        )
+
+
+# class GroupManagement(View, LoginRequiredMixin):
+# def get(self, request):
+#     """
+#     Load and list the available groups by groupadmin.
+#     :param request: A HTTP-request object sent by the Django framework.
+#     :param user_id: An user id
+#     :return: Profile renderer
+#     """
+
+#     membership = request.user.memberships
+#     return render(
+#         request, "login/list_memberships.html", {"membership": membership}
+#     )
+
+
+class GroupManagement(View, LoginRequiredMixin):
+    form_is_valid = False
+
     def get(self, request, group_id=None):
         """
         Load the chosen action(create or edit) for a group.
@@ -301,18 +390,26 @@ class GroupCreate(View, LoginRequiredMixin):
         :param user_id: An group id
         :return: Profile renderer
         """
-
+        group = None
         if group_id:
             group = UserGroup.objects.get(id=group_id)
             form = GroupForm(instance=group)
             membership = get_object_or_404(
                 GroupMembership, group=group, user=request.user
             )
+            is_admin = False
             if membership.level < ADMIN_PERM:
                 raise PermissionDenied
+            else:
+                is_admin = True
         else:
+            is_admin = False
             form = GroupForm()
-        return render(request, "login/group_create.html", {"form": form})
+        return render(
+            request,
+            "login/partials/group_management.html",
+            {"form": form, "group": group, "is_admin": is_admin},
+        )
 
     def post(self, request, group_id=None):
         """
@@ -324,9 +421,22 @@ class GroupCreate(View, LoginRequiredMixin):
         :param user_id: An group id
         :return: Profile renderer
         """
+        self.form_is_valid = False
         group = UserGroup.objects.get(id=group_id) if group_id else None
         form = GroupForm(request.POST, instance=group)
+        status = None
         if form.is_valid():
+            self.form_is_valid = True
+
+        if not self.form_is_valid:
+            return render(
+                request,
+                "login/partials/group_component_form_edit.html",
+                {"form": form},
+            )
+
+        if self.form_is_valid:
+            # status = 201
             if group_id:
                 group = form.save()
                 membership = get_object_or_404(
@@ -334,35 +444,24 @@ class GroupCreate(View, LoginRequiredMixin):
                 )
                 if membership.level < ADMIN_PERM:
                     raise PermissionDenied
+                return render(
+                    request,
+                    "login/partials/group_component_form_edit.html",
+                    {"form": form, "group": group},
+                    status=status,
+                )
             else:
                 group = form.save()
                 membership = GroupMembership.objects.create(
                     user=request.user, group=group, level=ADMIN_PERM
                 )
                 membership.save()
-            return redirect("/user/groups/{id}".format(id=group.id), {"group": group})
-        else:
-            return render(request, "login/group_create.html", {"form": form})
+                response = HttpResponse()
+                response["HX-Redirect"] = "/user/profile/1/groups?create_msg=True"
+                return response
 
 
-class GroupView(View, LoginRequiredMixin):
-    def get(self, request, group_id):
-        """
-        Load the chosen action(create or edit) for a group.
-        :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An user id
-        :param user_id: An group id
-        :return: Profile renderer
-        """
-        group = get_object_or_404(UserGroup, pk=group_id)
-        return render(
-            request,
-            "login/group.html",
-            {"group": group},
-        )
-
-
-class GroupEdit(View, LoginRequiredMixin):
+class PartialGroupMemberManagement(View, LoginRequiredMixin):
     def get(self, request, group_id):
         """
         Load the chosen action(create or edit) for a group.
@@ -380,7 +479,7 @@ class GroupEdit(View, LoginRequiredMixin):
             is_admin = membership.level >= ADMIN_PERM
         return render(
             request,
-            "login/change_form.html",
+            "login/partials/group_component_membership.html",
             {"group": group, "choices": GroupMembership.choices, "is_admin": is_admin},
         )
 
@@ -396,24 +495,14 @@ class GroupEdit(View, LoginRequiredMixin):
         """
         mode = request.POST["mode"]
         group = get_object_or_404(UserGroup, id=group_id)
+        # group_member_count = group.memberships.all
         membership = get_object_or_404(GroupMembership, group=group, user=request.user)
 
         errors = {}
-        if mode == "add_user":
-            if membership.level < models.WRITE_PERM:
-                raise PermissionDenied
-            try:
-                user = OepUser.objects.get(name=request.POST["name"])
-                membership, _ = GroupMembership.objects.get_or_create(
-                    group=group, user=user
-                )
-                membership.save()
-            except OepUser.DoesNotExist:
-                errors["name"] = "User does not exist"
-        elif mode == "remove_user":
+        if mode == "remove_user":
             if membership.level < models.DELETE_PERM:
                 raise PermissionDenied
-            user = OepUser.objects.get(id=request.POST["user_id"])
+            user = OepUser.objects.get(id=request.user.id)
             membership = GroupMembership.objects.get(group=group, user=user)
             if membership.level >= ADMIN_PERM:
                 admins = GroupMembership.objects.filter(group=group).exclude(user=user)
@@ -426,7 +515,7 @@ class GroupEdit(View, LoginRequiredMixin):
         elif mode == "alter_user":
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied
-            user = OepUser.objects.get(id=request.POST["user_id"])
+            user = OepUser.objects.get(id=request.user.id)
             if user == request.user:
                 errors["name"] = "You can not change your own permissions"
             else:
@@ -437,25 +526,124 @@ class GroupEdit(View, LoginRequiredMixin):
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied
             group.delete()
-            return redirect("/user/groups")
+            response = HttpResponse()
+            response["HX-Redirect"] = "/user/profile/1/groups?delete_msg=True"
+            return response
         else:
             raise PermissionDenied
-        return render(
-            request,
-            "login/change_form.html",
-            {
-                "group": group,
-                "choices": GroupMembership.choices,
-                "errors": errors,
-                "is_admin": True,
-            },
-        )
+        return JsonResponse({"success": True})
 
     def __add_user(self, request, group):
         user = OepUser.objects.filter(id=request.POST["user_id"]).first()
         g = user.groups.add(group)
         g.save()
         return self.get(request)
+
+
+# TODO: Post should not return render ... Get might never be used
+class PartialGroupEditForm(View, LoginRequiredMixin):
+    def get(self, request, group_id):
+        """
+        Returns a edit form component for a group.
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :param user_id: An group id
+        :return: Profile renderer
+        """
+        group = get_object_or_404(UserGroup, pk=group_id)
+        is_admin = False
+        membership = GroupMembership.objects.filter(
+            group=group, user=request.user
+        ).first()
+        if membership:
+            is_admin = membership.level >= ADMIN_PERM
+        return render(
+            request,
+            "login/partials/group_component_form_edit.html",
+            {"group": group, "choices": GroupMembership.choices, "is_admin": is_admin},
+        )
+
+    def post(self, request, group_id):
+        group = UserGroup.objects.get(id=group_id) if group_id else None
+        form = GroupForm(request.POST, instance=group)
+        if form.is_valid():
+            if group_id:
+                group = form.save()
+                membership = get_object_or_404(
+                    GroupMembership, group=group, user=request.user
+                )
+                if membership.level < ADMIN_PERM:
+                    raise PermissionDenied
+                return render(
+                    request,
+                    "login/partials/group_component_form_edit.html",
+                    {"form": form, "group": group},
+                    status=201,
+                )
+
+
+class PartialGroupInvite(View, LoginRequiredMixin):
+    def get(self, request, group_id):
+        group = get_object_or_404(UserGroup, pk=group_id)
+        is_admin = False
+        membership = GroupMembership.objects.filter(
+            group=group, user=request.user
+        ).first()
+        if membership:
+            is_admin = membership.level >= ADMIN_PERM
+
+        return render(
+            request,
+            "login/partials/group_component_invite_user.html",
+            {
+                "choices": GroupMembership.choices,
+                "is_admin": is_admin,
+                "group": group,
+                "membership": membership,
+            },
+        )
+
+    def post(self, request, group_id):
+        """
+        Performs selected action(save or delete) for a group.
+        If a groupname already exists, then a error will be output.
+        The selected users become members of this group. The groupadmin is already set.
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :param user_id: An group id
+        :return: Profile renderer
+        """
+        mode = request.POST.get("mode")
+        if mode is None:
+            return HttpResponseNotAllowed("Mode not specified")
+
+        group = get_object_or_404(UserGroup, id=group_id)
+        # group_member_count = group.memberships.all
+        membership = get_object_or_404(GroupMembership, group=group, user=request.user)
+
+        context = {}
+        if mode == "add_user":
+            if membership.level < models.WRITE_PERM:
+                raise PermissionDenied
+            try:
+                user = OepUser.objects.get(name=request.POST["name"])
+                membership, _ = GroupMembership.objects.get_or_create(
+                    group=group, user=user
+                )
+                membership.save()
+                context["added_user"] = user.id
+                return HttpResponse(context, status=201)
+            except OepUser.DoesNotExist:
+                context["error"] = "User does not exist"
+                return HttpResponse(context, status=400)
+        else:
+            raise PermissionDenied
+        # return HttpResponse(context, status=201)
+
+
+##############################################################################
+#                    User Profile/Account related views                      #
+##############################################################################
 
 
 class ProfileUpdateView(UpdateView, LoginRequiredMixin):

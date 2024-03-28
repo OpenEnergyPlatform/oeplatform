@@ -1,0 +1,13 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.pagination-nav {
+    ul {
+        @extend .pagination;
+        @extend .justify-content-end;
+
+        a {
+            @extend .fs-7;
+        }
+    }
+}
