@@ -56,4 +56,16 @@
       @extend .btn-outline-primary;
     }
   }
+
+  &__collapse {
+    @extend .pt-2;
+
+    textarea {
+      @extend .fs-8;
+      white-space: nowrap;
+      resize: none;
+      overflow-y: hidden;
+      font-family: 'Roboto Mono' ,monospace;
+    }
+  }
 }
