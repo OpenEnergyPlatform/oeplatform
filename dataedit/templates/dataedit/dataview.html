@@ -178,12 +178,12 @@
     </a>
 </span>
     </div>
-    <div class="metadata__container">
+    <div class="table-container">
       {{ meta_widget }}
     </div>
   </div>
   
-  <div class="tab-pane open-peer-review fade" id="opr-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
+  <div class="tab-pane opr fade" id="opr-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
     <div class="alert alert-variant--info alert-variant--sm alert-variant--center" role="alert">
       <span class="alert-variant__content">Under review</span>
     </div>
@@ -196,6 +196,25 @@
         Not reviewed
       </span>
     </div>
+    <div class="table-container">
+      <table>
+        <tbody>
+          <tr>
+            <th>Finished</th>
+            <td>05/05/2024</td>
+          </tr>
+          <tr>
+            <th>Reviewer</th>
+            <td><a href="#">jh-rli</a></td>
+          </tr>
+          <tr>
+            <th>Badge</th>
+            <td>Badge</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
     <!-- {% if opr_result.review_exists %}
     <div class="metadata__options">
       <span>
