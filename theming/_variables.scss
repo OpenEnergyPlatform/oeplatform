@@ -82,6 +82,24 @@ $secondary: $blue-700;
 $body-color: $gray-700;
 $text-muted: #5F7484;
 
+// Grid
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+);
+
+$new-breakpoints: (
+  x3l: 1800px,
+  x4l: 2400px,
+  x5l: 3000px
+);
+
+$grid-breakpoints: map-merge($grid-breakpoints, $new-breakpoints);
+
 //// Typography
 $font-size-base:              1rem;
 $h1-font-size:                $font-size-base * 2;

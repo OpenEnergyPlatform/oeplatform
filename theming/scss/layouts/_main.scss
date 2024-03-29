@@ -25,6 +25,18 @@ main.main {
                 @include flex-row;
                 max-width: $C--container-width;
             }
+
+            @include media-breakpoint-up(x3l) {
+                max-width: $C--container-width-x3l;
+            }
+
+            @include media-breakpoint-up(x4l) {
+                max-width: $C--container-width-x4l;
+            }
+
+            @include media-breakpoint-up(x5l) {
+                max-width: $C--container-width-x5l;
+            }
         }
     
         &__main {
@@ -33,6 +45,18 @@ main.main {
             @include media-breakpoint-up(md) {
                 padding-right: calc(#{$C--padding-standard} * 2);
                 width: calc(100% - #{$C--db-side-width});
+            }
+
+            @include media-breakpoint-up(x3l) {
+                max-width: $C--container-width-x3l;
+            }
+
+            @include media-breakpoint-up(x4l) { 
+                max-width: $C--container-width-x4l;
+            }
+
+            @include media-breakpoint-up(x5l) {
+                max-width: $C--container-width-x5l;
             }
 
             h2 {
