@@ -36,11 +36,13 @@ import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
-import oedb_iris from '../data/datasets_iris.json';
-import oedb_names from '../data/datasets_names.json';
 import LCC from '../data/countries.json';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
+import axios from 'axios';
+import { createFilterOptions } from "@material-ui/lab/Autocomplete";
+import CSRFToken from './csrfToken';
+import conf from "../conf.json";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -107,32 +109,23 @@ export default function Scenario(props) {
   } = props;
 
 
-  function createData(
-    Model: string,
-    Scenario: number,
-    Region: number,
-    Year: number,
-    Capacity: number,
-  ) {
-    return { Model, Scenario, Region, Year, Capacity };
-  }
-  const rows = [
-    createData('dea_technology_data_generation', 'WEM', 'Germany', 2015, 4.0),
-    createData('dea_technology_data_generation', 'WAM', 'Germany', 2015, 4.3),
-    createData('dea_technology_data_generation', 'WEM', 'Europe', 2015, 6.0),
-    createData('dea_technology_data_generation', 'WAM', 'Europe', 2020, 4.3),
-    createData('dea_technology_data_generation', 'WAM', 'Europe', 2020, 3.9),
-  ];
-
-
 
   const [scenariosInputDatasetsObj, setScenariosInputDatasetsObj] = useState(data.input_datasets);
   const [scenariosOutputDatasetsObj, setScenariosOutputDatasetsObj] = useState(data.output_datasets);
+
+  console.log(scenariosInputDatasetsObj);
+
+  scenariosInputDatasetsObj.forEach((element, index) => {
+    console.log(element);
+  });
+
+
   const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
   const [value, setValue] = React.useState(0);
 
   const [expandedDesciptorList, setExpandedDesciptorList] = useState([]);
 
+  const [dataTableList, setDataTableList] = useState([]);
 
   const findNestedObj = (entireObj, keyToFind, valToFind) => {
     let foundObj;
@@ -157,25 +150,19 @@ export default function Scenario(props) {
     setOpenRemovedDialog(false);
   };
   const addInputDatasetItem = uid => {
-    setScenariosInputDatasetsObj(prevScenariosInputDatasetsObj => [...prevScenariosInputDatasetsObj, { key: uid, idx: scenariosInputDatasetsObj.length, value: { label: '', iri: '' } }]);
+    setScenariosInputDatasetsObj(prevScenariosInputDatasetsObj => [...prevScenariosInputDatasetsObj, { key: uid, idx: scenariosInputDatasetsObj.length, value: { label: '', url: '' } }]);
   };
 
-  const updateInputDatasetIRI = (value, key, index) => {
-    const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj;
-    updateScenariosInputDatasetsObj[index].value.label = value.name;
-    updateScenariosInputDatasetsObj[index].value.iri = value.label;
-    updateScenariosInputDatasetsObj[index].idx = index;
-    updateScenariosInputDatasetsObj[index].key = key;
-    setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
-    scenariosInputDatasetsHandler(updateScenariosInputDatasetsObj, data.id);
-  };
 
-  const updateInputDatasetName = (value, key, index) => {
+  const updateInputDatasetName = (element, key, index) => {
+    console.log(element, key, index);
     const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj;
-    updateScenariosInputDatasetsObj[index].value.label = value.label;
-    updateScenariosInputDatasetsObj[index].value.iri = value.iri;
+    console.log(updateScenariosInputDatasetsObj);
+    updateScenariosInputDatasetsObj[index].value.label = element.label;
+    updateScenariosInputDatasetsObj[index].value.url = element.url;
     updateScenariosInputDatasetsObj[index].idx = index;
     updateScenariosInputDatasetsObj[index].key = key;
+    console.log(updateScenariosInputDatasetsObj);
     setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
     scenariosInputDatasetsHandler(updateScenariosInputDatasetsObj, data.id);
   };
@@ -187,23 +174,14 @@ export default function Scenario(props) {
   };
 
   const addOutputDatasetItem = uid => {
-    setScenariosOutputDatasetsObj(prevScenariosOutputDatasetsObj => [...prevScenariosOutputDatasetsObj, { key: uid, idx: scenariosOutputDatasetsObj.length, value: { label: '', iri: '' } }]);
+    setScenariosOutputDatasetsObj(prevScenariosOutputDatasetsObj => [...prevScenariosOutputDatasetsObj, { key: uid, idx: scenariosOutputDatasetsObj.length, value: { label: '', url: '' } }]);
   };
 
-  const updateOutputDatasetIRI = (value, key, index) => {
-    const updateScenariosOutputDatasetsObj = scenariosOutputDatasetsObj;
-    updateScenariosOutputDatasetsObj[index].value.label = value.name;
-    updateScenariosOutputDatasetsObj[index].value.iri = value.label;
-    updateScenariosOutputDatasetsObj[index].idx = index;
-    updateScenariosOutputDatasetsObj[index].key = key;
-    setScenariosOutputDatasetsObj(updateScenariosOutputDatasetsObj);
-    scenariosOutputDatasetsHandler(updateScenariosOutputDatasetsObj, data.id);
-  };
 
   const updateOutputDatasetName = (value, key, index) => {
     const updateScenariosOutputDatasetsObj = scenariosOutputDatasetsObj;
     updateScenariosOutputDatasetsObj[index].value.label = value.label;
-    updateScenariosOutputDatasetsObj[index].value.iri = value.iri;
+    updateScenariosOutputDatasetsObj[index].value.url = value.url;
     updateScenariosOutputDatasetsObj[index].idx = index;
     updateScenariosOutputDatasetsObj[index].key = key;
     setScenariosOutputDatasetsObj(updateScenariosOutputDatasetsObj);
@@ -225,8 +203,6 @@ export default function Scenario(props) {
 
 
 
-  const options_db_names = oedb_iris;
-  const options_db_iris = oedb_names;
   const options_LCC = LCC.sort((a, b) => a.name.localeCompare(b.name));
 
   const [, updateState] = React.useState();
@@ -252,6 +228,26 @@ export default function Scenario(props) {
   }));
   const classes = useStyles();
   const tabClasses = { root: classes.tab };
+
+  const getDAtaTableList = async () => {
+    const { data } = await axios.get(conf.toep + `api/v0/datasets/list_all/scenario/`, {
+      headers: { 'X-CSRFToken': CSRFToken() }
+    });
+    return data;
+  };
+
+  useEffect(() => {
+    getDAtaTableList().then((data) => {
+      const tmp = [];
+      console.log(data);
+      data.map((item) => tmp.push({ 'url': item.url, 'label': item.name, 'id': item.id }));
+      setDataTableList(tmp);
+    });
+  }, []);
+
+  function handleInputChange(event, value) {
+    console.log(value);
+  }
 
   return (
     <Typography variant="body2">
@@ -444,27 +440,14 @@ export default function Scenario(props) {
           renderField={() =>
             Object.keys(scenariosInputDatasetsObj).length > 0 && scenariosInputDatasetsObj.map((item, index) => (
               <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
-                <Grid item xs={5} >
+                <Grid item xs={11} >
                   <Autocomplete
                     disableCloseOnSelect
-                    options={options_db_names}
+                    options={dataTableList}
                     renderInput={(params) => <TextField {...params} label="Name" size="small" variant='outlined' />}
                     onChange={(event, value) => updateInputDatasetName(value, item.key, index)}
                     value={item.value.label}
-                    size="small"
-                    variant='standard'
-                  />
-                </Grid>
-                <Grid item xs={1} sx={{ textAlign: "center" }} >
-                  <b style={{ verticalAlign: "sub" }}>OR</b>
-                </Grid>
-                <Grid item xs={5} >
-                  <Autocomplete
-                    disableCloseOnSelect
-                    options={options_db_iris}
-                    renderInput={(params) => <TextField {...params} label="IRI" size="small" variant='outlined' />}
-                    onChange={(event, value) => updateInputDatasetIRI(value, item.key, index)}
-                    value={item.value.iri}
+
                   />
                 </Grid>
                 <Grid item xs={1} >
@@ -481,6 +464,7 @@ export default function Scenario(props) {
           }
           TooltipComponent={HtmlTooltip}
         />
+
         <BundleScenariosGridItem
           {...props}
           labelGridSize={3}
@@ -501,25 +485,13 @@ export default function Scenario(props) {
           renderField={() =>
             Object.keys(scenariosOutputDatasetsObj).length > 0 && scenariosOutputDatasetsObj.map((item, index) => (
               <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
-                <Grid item xs={5} >
+                <Grid item xs={11} >
                   <Autocomplete
                     disableCloseOnSelect
-                    options={options_db_names}
-                    renderInput={(params) => <TextField {...params} label="Name" size="small" variant='outlined' />}
+                    options={dataTableList}
+                    renderInput={(params) => <TextField {...params} label="name" size="small" variant='outlined' />}
                     onChange={(event, value) => updateOutputDatasetName(value, item.key, index)}
                     value={item.value.label}
-                  />
-                </Grid>
-                <Grid item xs={1} style={{ textAlign: 'center' }}>
-                  <b style={{ verticalAlign: "sub" }}>OR</b>
-                </Grid>
-                <Grid item xs={5} >
-                  <Autocomplete
-                    disableCloseOnSelect
-                    options={options_db_iris}
-                    renderInput={(params) => <TextField {...params} label="IRI" size="small" variant='outlined' />}
-                    onChange={(event, value) => updateOutputDatasetIRI(value, item.key, index)}
-                    value={item.value.iri}
                   />
                 </Grid>
                 <Grid item xs={1}>
@@ -536,7 +508,6 @@ export default function Scenario(props) {
           }
           TooltipComponent={HtmlTooltip}
         />
-
       </Grid>
     </Typography>
   );

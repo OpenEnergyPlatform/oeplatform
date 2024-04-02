@@ -63,14 +63,14 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-# query_endpoint = "http://localhost:3030/ds/query"
-# update_endpoint = "http://localhost:3030/ds/update"
+query_endpoint = "http://localhost:3030/ds/query"
+update_endpoint = "http://localhost:3030/ds/update"
 
 # query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
 # update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
+#query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
+#update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -416,7 +416,7 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 input_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(input_dataset["value"]["iri"]),
+                                Literal(input_dataset["value"]["url"]),
                             )
                         )
                         bundle.add(
@@ -454,7 +454,7 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 output_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(output_dataset["value"]["iri"]),
+                                Literal(output_dataset["value"]["url"]),
                             )
                         )
                         bundle.add(
@@ -647,6 +647,11 @@ def update_factsheet(request, *args, **kwargs):
                     "http://openenergy-platform.org/ontology/oekg/scenario/"
                     + item["id"]
                 )
+                
+                for s, p, o in oekg.triples((scenario_URI, None, None)):
+                    oekg.remove((o, p, o))
+
+
                 new_bundle.add(
                     (scenario_URI, OEKG["scenario_uuid"], Literal(item["id"]))
                 )
@@ -735,10 +740,16 @@ def update_factsheet(request, *args, **kwargs):
 
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
+                        print(input_dataset)
                         input_dataset_URI = URIRef(
                             "http://openenergy-platform.org/ontology/oekg/input_datasets/"
                             + input_dataset["key"]
                         )
+
+                        for s, p, o in oekg.triples((input_dataset_URI, None, None)):
+                            print(((o, p, o)))
+                            oekg.remove((o, p, o))
+
                         new_bundle.add((input_dataset_URI, RDF.type, OEO.OEO_00030030))
                         new_bundle.add(
                             (
@@ -751,7 +762,7 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 input_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(input_dataset["value"]["iri"]),
+                                Literal(input_dataset["value"]["url"]),
                             )
                         )
                         new_bundle.add(
@@ -790,7 +801,7 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 output_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(output_dataset["value"]["iri"]),
+                                Literal(output_dataset["value"]["url"]),
                             )
                         )
                         new_bundle.add(
@@ -914,6 +925,10 @@ def update_factsheet(request, *args, **kwargs):
         in_both, in_first, in_second = graph_diff(iso_old_bundle, iso_new_bundle)
 
         # remove old bundle from oekg
+        for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
+            oekg.remove((o, None, None))
+        oekg.remove((study_URI, None, None))
+
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
             oekg.remove((o, None, None))
         oekg.remove((study_URI, None, None))
@@ -1152,7 +1167,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 {
                     "key": o2_key,
                     "idx": o2_idx,
-                    "value": {"label": o2_label, "iri": o2_iri},
+                    "value": {"label": o2_label, "url": o2_iri},
                 }
             )
 
@@ -1166,7 +1181,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 {
                     "key": o3_key,
                     "idx": o3_idx,
-                    "value": {"label": o3_label, "iri": o3_iri},
+                    "value": {"label": o3_label, "url": o3_iri},
                 }
             )
 

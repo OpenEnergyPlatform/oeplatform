@@ -16,7 +16,7 @@ import CSRFToken from './csrfToken';
 import conf from "../conf.json";
 
 const ColorToggleButton = (props) => {
-  const [isOwner, setIsOwner] = useState(false);
+  const [isOwner, setIsOwner] = useState(true);
   const [snackbarOpen, setNotTheOwner] = useState(false);
 
   const param_2 = String(window.location.href).split('/')[5];
