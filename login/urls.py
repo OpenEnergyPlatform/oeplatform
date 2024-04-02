@@ -112,6 +112,11 @@ urlpatterns = [
         views.PartialGroupEditForm.as_view(),
         name="group-partial-edit-form",
     ),
+    url(
+        r"^groups/(?P<group_id>[\w\d_\s]+)/members/count$",
+        views.group_member_count,
+        name="count-group-memberships",
+    ),
     # url(
     #     r"^groups/(?P<group_id>[\w\d_\s]+)/$",
     #     views.GroupView.as_view(),
