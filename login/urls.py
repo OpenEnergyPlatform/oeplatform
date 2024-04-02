@@ -117,6 +117,11 @@ urlpatterns = [
         views.group_member_count,
         name="count-group-memberships",
     ),
+    url(
+        r"^groups/(?P<group_id>[\w\d_\s]+)/leave$",
+        views.group_leave,
+        name="group-leave",
+    ),
     # url(
     #     r"^groups/(?P<group_id>[\w\d_\s]+)/$",
     #     views.GroupView.as_view(),
