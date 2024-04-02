@@ -363,24 +363,30 @@ def group_member_count(request, group_id: int):
 
 @login_required
 def group_leave(request, group_id: int):
-
+    """ """
     user: OepUser = request.user
+    user_id: int = request.user.id
     group = get_object_or_404(UserGroup, id=group_id)
     membership = get_object_or_404(GroupMembership, group=group, user=request.user)
 
     errors: dict = {}
-    if membership.level >= ADMIN_PERM:
-        admins = (
-            GroupMembership.objects.filter(group=group).exclude(user=user.id).count()
-        )
-        if admins == 0:
-            errors["name"] = "A group needs at least one admin!"
-            return JsonResponse(errors, status=400)
-
     members = GroupMembership.objects.filter(group=group).exclude(user=user.id).count()
     if members == 0:
-        errors["name"] = "Please delete the group instead (you are the only member)."
+        errors["err_leave"] = "Please delete the group instead (you are the only member)."
         return JsonResponse(errors, status=400)
+
+    if membership.level >= ADMIN_PERM:
+        admins = (
+            GroupMembership.objects.filter(group=group, level=ADMIN_PERM).exclude(user=user.id).count()
+        )
+        if admins == 0:
+            errors["err_leave"] = "A group needs at least one admin!"
+            return JsonResponse(errors, status=400)
+
+    membership.delete()
+    response = HttpResponse()
+    response["HX-Redirect"] = f"/user/profile/1/groups?profile_user={user_id}"
+    return response
 
 
 class PartialGroupsView(View):
@@ -559,7 +565,7 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
 
             elif target_membership.level >= ADMIN_PERM:
                 admins = (
-                    GroupMembership.objects.filter(group=group)
+                    GroupMembership.objects.filter(group=group, level=ADMIN_PERM)
                     .exclude(user=user_to_remove)
                     .count()
                 )
