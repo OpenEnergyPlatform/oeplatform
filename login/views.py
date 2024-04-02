@@ -474,6 +474,7 @@ class GroupManagement(View, LoginRequiredMixin):
         :return: Profile renderer
         """
         self.form_is_valid = False
+        user = request.user.id
         group = UserGroup.objects.get(id=group_id) if group_id else None
         form = GroupForm(request.POST, instance=group)
         status = None
@@ -509,7 +510,10 @@ class GroupManagement(View, LoginRequiredMixin):
                 )
                 membership.save()
                 response = HttpResponse()
-                response["HX-Redirect"] = "/user/profile/1/groups?create_msg=True"
+                # response["profile_user"] = user
+                response["HX-Redirect"] = (
+                    f"/user/profile/1/groups?create_msg=True&profile_user={user}"
+                )
                 return response
 
 
