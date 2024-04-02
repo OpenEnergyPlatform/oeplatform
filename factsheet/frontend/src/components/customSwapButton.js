@@ -16,7 +16,7 @@ import CSRFToken from './csrfToken';
 import conf from "../conf.json";
 
 const ColorToggleButton = (props) => {
-  const [isOwner, setIsOwner] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
   const [snackbarOpen, setNotTheOwner] = useState(false);
 
   const param_2 = String(window.location.href).split('/')[5];
@@ -81,7 +81,7 @@ const ColorToggleButton = (props) => {
             value="edit"
             disabled={String(window.location.href).split('/').pop() === "new"}
             onClick={(e) => handleChange(e, 'edit')}
-          // disabled={!isOwner} // Disable the button if the user is not the owner
+            disabled={!isOwner} // Disable the button if the user is not the owner
           >
             <EditOutlinedIcon sx={{ mr: 1 }} /> <span>Edit</span>
           </Button>
