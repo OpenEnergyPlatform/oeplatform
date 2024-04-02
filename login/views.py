@@ -339,6 +339,21 @@ class GroupsView(View):
         )
 
 
+def group_member_count(request, group_id: int):
+    """
+    Return the member count for the current group.
+
+    :param request: A HTTP-request object sent by the Django framework.
+    :params group_id: Group id
+
+    :returns: Django HttpResponse with member count
+    """
+    group = get_object_or_404(UserGroup, id=group_id)
+    mem = group.memberships.all()
+    member_count = len(mem)
+
+    return HttpResponse(f"{member_count} member")
+
 class PartialGroupsView(View):
     def get(self, request, user_id):
         """
