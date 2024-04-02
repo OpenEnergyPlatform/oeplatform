@@ -62,7 +62,9 @@ function App() {
       return <ThemeProvider theme={theme}><Factsheet id={param_2} fsData={factsheet} /></ThemeProvider>
     }
   } else {
-    return <CircularProgress />
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <CircularProgress />
+    </div>
   }
 }
 
