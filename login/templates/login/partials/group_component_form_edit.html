@@ -15,19 +15,15 @@
         {% bootstrap_form form %}
         <!-- <input form="group-form" class="btn btn-success" type="submit" value="Submit"> -->
     </form>
-    <div class="profile-category__btns">
-        <button form="group-form" type="submit" value="Submit" class="profile-category__btn  profile-category__btn--save">Save</button>
-    </div>
     {% else %}
-    <form id="group-form" hx-post="{% url 'group-create' %}" hx-target=".htmxFormComponent">
+    <form id="group-form" hx-post="{% url 'group-create' %}" hx-trigger="submit" hx-target=".htmxFormComponent">
         {% csrf_token %}
         {% bootstrap_form form %}
-        <!-- <input form="group-form" class="btn btn-success" type="submit" value="Submit"> -->
     </form>
+    {% endif %}
     <div class="profile-category__btns">
         <button form="group-form" type="submit" value="Submit" class="profile-category__btn  profile-category__btn--save">Save</button>
     </div>
-    {% endif %}
     
 </section>
 
