@@ -541,51 +541,80 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
             {"group": group, "choices": GroupMembership.choices, "is_admin": is_admin},
         )
 
-    def post(self, request, group_id):
+    def post(self, request, group_id: int):
         """
         Performs selected action(save or delete) for a group.
         If a groupname already exists, then a error will be output.
         The selected users become members of this group. The groupadmin is already set.
         :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An user id
-        :param user_id: An group id
-        :return: Profile renderer
+        :param group_id: An group id
+        :return: get-request -> Profile renderer, post-request ->
         """
         mode = request.POST["mode"]
+        if mode is None:
+            return HttpResponseNotAllowed(
+                "Post request required field 'mode' not specified!"
+            )
+
         group = get_object_or_404(UserGroup, id=group_id)
-        # group_member_count = group.memberships.all
         membership = get_object_or_404(GroupMembership, group=group, user=request.user)
 
         errors = {}
         if mode == "remove_user":
             if membership.level < models.DELETE_PERM:
                 raise PermissionDenied
-            user = OepUser.objects.get(id=request.user.id)
-            membership = GroupMembership.objects.get(group=group, user=user)
-            if membership.level >= ADMIN_PERM:
-                admins = GroupMembership.objects.filter(group=group).exclude(user=user)
-                if not admins:
+
+            user_to_remove: OepUser = OepUser.objects.get(id=request.POST["user_id"])
+            target_membership = GroupMembership.objects.get(
+                group=group, user=user_to_remove
+            )
+
+            if request.user.id == user_to_remove.id:
+                errors["name"] = "Please leave the group to remove your own membership."
+                return JsonResponse(errors, status=400)
+
+            elif target_membership.level >= ADMIN_PERM:
+                admins = (
+                    GroupMembership.objects.filter(group=group)
+                    .exclude(user=user_to_remove)
+                    .count()
+                )
+                if admins == 0:
                     errors["name"] = "A group needs at least one admin"
-                else:
-                    membership.delete()
-            else:
-                membership.delete()
+                    return JsonResponse(errors, status=405)
+            elif membership.level < target_membership.level:
+                errors["name"] = (
+                    "You cant remove memberships with higher permission level."
+                )
+                return JsonResponse(errors, status=400)
+
+            target_membership.delete()
+            response = HttpResponse(status=204)
+            return response
+
         elif mode == "alter_user":
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied
-            user = OepUser.objects.get(id=request.user.id)
+            user = OepUser.objects.get(id=request.POST["user_id"])
             if user == request.user:
                 errors["name"] = "You can not change your own permissions"
+                # errors['HX-Trigger'] = 'own-permissions-error'
+                return JsonResponse(errors, status=405)
             else:
                 membership = GroupMembership.objects.get(group=group, user=user)
-                membership.level = request.POST["level"]
+                membership.level = request.POST["selected_value"]
                 membership.save()
+
         elif mode == "delete_group":
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied
             group.delete()
             response = HttpResponse()
-            response["HX-Redirect"] = "/user/profile/1/groups?delete_msg=True"
+            user_id = request.user.id
+            response["profile_user"] = user_id
+            response["HX-Redirect"] = (
+                f"/user/profile/1/groups?delete_msg=True&profile_user={user_id}"
+            )
             return response
         else:
             raise PermissionDenied
