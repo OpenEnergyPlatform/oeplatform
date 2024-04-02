@@ -314,7 +314,7 @@ class SettingsView(View):
 
 
 class GroupsView(View):
-    def get(self, request, user_id):
+    def get(self, request, user_id: int):
         """
         Get all groups where the current user is listed as member. Also
         indicate weather the user is the group Admin or Member.
@@ -325,13 +325,15 @@ class GroupsView(View):
         :param user_id: An user id
         :return: Profile renderer
         """
-        
-        # In case a new Group is created lookup query parameters for user id
+
+        # Retrieve the profile owner after a htmx redirect:
+        # In case a new Group is created or deleted,
+        # check lookup query parameters for user id.
         if request.GET.get("profile_user"):
             user_id = request.GET.get("profile_user")
 
         user = get_object_or_404(OepUser, pk=user_id)
-        
+
         return render(
             request,
             "login/user_groups.html",
