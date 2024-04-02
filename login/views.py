@@ -428,6 +428,9 @@ class GroupManagement(View, LoginRequiredMixin):
         :param user_id: An group id
         :return: Profile renderer
         """
+        is_admin = False
+        can_delete = False
+        can_edit = False
         group = None
         if group_id:
             group = UserGroup.objects.get(id=group_id)
@@ -435,18 +438,29 @@ class GroupManagement(View, LoginRequiredMixin):
             membership = get_object_or_404(
                 GroupMembership, group=group, user=request.user
             )
-            is_admin = False
-            if membership.level < ADMIN_PERM:
+
+            if membership.level < WRITE_PERM:
                 raise PermissionDenied
-            else:
+            elif membership.level == ADMIN_PERM:
                 is_admin = True
+            elif membership.level == DELETE_PERM:
+                can_delete = True
+            elif membership.level == WRITE_PERM:
+                can_edit = WRITE_PERM
+
         else:
-            is_admin = False
             form = GroupForm()
         return render(
             request,
             "login/partials/group_management.html",
-            {"form": form, "group": group, "is_admin": is_admin},
+            {
+                "form": form,
+                "group": group,
+                "choices": GroupMembership.choices,
+                "is_admin": is_admin,
+                "can_delete": can_delete,
+                "can_edit": can_edit,
+            },
         )
 
     def post(self, request, group_id=None):
