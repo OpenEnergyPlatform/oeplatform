@@ -8,6 +8,8 @@
 
 - Add feature to reset a api token via the profile/settings page [(#1637)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1637)
 
+- Connect scenario input and output datasets to API(#1649)](<https://github.com/OpenEnergyPlatform/oeplatform/pull/1649>)
+
 ## Bugs
 
 - Bugfix: Adding tags if metadata is empty does not result in a server error anymore. [(#1528)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1528)
