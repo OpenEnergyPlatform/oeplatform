@@ -1,4 +1,5 @@
 from itertools import groupby
+import json
 
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -9,6 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
+from django.contrib.auth.decorators import login_required
 
 from rest_framework.authtoken.models import Token
 
@@ -31,7 +33,9 @@ from .forms import (
     GroupForm,
     OEPPasswordChangeForm,
 )
-from .models import ADMIN_PERM, GroupMembership, UserGroup
+
+# NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
+from .models import WRITE_PERM, DELETE_PERM, ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
 from login.utilities import validate_open_data_license
@@ -380,7 +384,7 @@ def group_leave(request, group_id: int):
 
 
 class PartialGroupsView(View):
-    def get(self, request, user_id):
+    def get(self, request, user_id: int):
         """
         TBD
         :param request: A HTTP-request object sent by the Django framework.
@@ -392,31 +396,11 @@ class PartialGroupsView(View):
         if request.user.is_authenticated:
             user_groups = request.user.memberships
 
-        # if user_groups:
-        #     for user_group in user_groups:
-        #     membership = GroupMembership.objects.filter(
-        #         group=group, user=request.user
-        #     ).first()
         return render(
             request,
             "login/partials/groups.html",
             {"profile_user": user, "groups": user_groups},
         )
-
-
-# class GroupManagement(View, LoginRequiredMixin):
-# def get(self, request):
-#     """
-#     Load and list the available groups by groupadmin.
-#     :param request: A HTTP-request object sent by the Django framework.
-#     :param user_id: An user id
-#     :return: Profile renderer
-#     """
-
-#     membership = request.user.memberships
-#     return render(
-#         request, "login/list_memberships.html", {"membership": membership}
-#     )
 
 
 class GroupManagement(View, LoginRequiredMixin):
@@ -520,7 +504,7 @@ class GroupManagement(View, LoginRequiredMixin):
 
 
 class PartialGroupMemberManagement(View, LoginRequiredMixin):
-    def get(self, request, group_id):
+    def get(self, request, group_id: int):
         """
         Load the chosen action(create or edit) for a group.
         :param request: A HTTP-request object sent by the Django framework.
@@ -620,11 +604,11 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
             raise PermissionDenied
         return JsonResponse({"success": True})
 
-    def __add_user(self, request, group):
-        user = OepUser.objects.filter(id=request.POST["user_id"]).first()
-        g = user.groups.add(group)
-        g.save()
-        return self.get(request)
+    # def __add_user(self, request, group):
+    #     user = OepUser.objects.filter(id=request.POST["user_id"]).first()
+    #     g = user.groups.add(group)
+    #     g.save()
+    #     return self.get(request)
 
 
 # TODO: Post should not return render ... Get might never be used
@@ -632,9 +616,9 @@ class PartialGroupEditForm(View, LoginRequiredMixin):
     def get(self, request, group_id):
         """
         Returns a edit form component for a group.
+
         :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An user id
-        :param user_id: An group id
+        :param group_id: An group id
         :return: Profile renderer
         """
         group = get_object_or_404(UserGroup, pk=group_id)
@@ -651,6 +635,18 @@ class PartialGroupEditForm(View, LoginRequiredMixin):
         )
 
     def post(self, request, group_id):
+        """
+        Returns a validated edit form component the current group.
+
+        NOTE: This breaks some htmx usage suggestions but currently
+        it seems to be very convenient and helps to make the implementation
+        quite efficient.
+
+        :param request: A HTTP-request object sent by the Django framework.
+        :param group_id: An group id
+        :return: Profile renderer
+        """
+
         group = UserGroup.objects.get(id=group_id) if group_id else None
         form = GroupForm(request.POST, instance=group)
         if form.is_valid():
@@ -683,7 +679,6 @@ class PartialGroupInvite(View, LoginRequiredMixin):
             request,
             "login/partials/group_component_invite_user.html",
             {
-                "choices": GroupMembership.choices,
                 "is_admin": is_admin,
                 "group": group,
                 "membership": membership,
@@ -694,9 +689,9 @@ class PartialGroupInvite(View, LoginRequiredMixin):
         """
         Performs selected action(save or delete) for a group.
         If a groupname already exists, then a error will be output.
-        The selected users become members of this group. The groupadmin is already set.
+        The selected users become members of this group.
+
         :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An user id
         :param user_id: An group id
         :return: Profile renderer
         """
@@ -719,10 +714,10 @@ class PartialGroupInvite(View, LoginRequiredMixin):
                 )
                 membership.save()
                 context["added_user"] = user.id
-                return HttpResponse(context, status=201)
+                return JsonResponse(context, status=201)
             except OepUser.DoesNotExist:
                 context["error"] = "User does not exist"
-                return HttpResponse(context, status=400)
+                return JsonResponse(context, status=404)
         else:
             raise PermissionDenied
         # return HttpResponse(context, status=201)
