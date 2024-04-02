@@ -23,16 +23,6 @@
                 </div>
                 
             </div>
-            <form hx-post="{% url 'partial-group-membership' group_id=group.id %}" 
-                hx-target="#alter-user-result" 
-                hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ group.name }} and retract all permissions?"
-                hx-swap="outerHTML"
-                data-error-display="alter-user-result">
-
-                <input type="hidden" name="mode" value="remove_user">
-                <input type="hidden" name="user_id" value="{{ membership.user.id }}">
-                <input type="submit" class="btn btn-danger" value="Remove user">
-            </form>
             {% else %}
             <div class="profile-category__member">
                 <div class="profile-category__profile-name">
@@ -45,7 +35,18 @@
                 </div>
             </div>
             {% endif %}
-           
+            {% if can_delete or is_admin %}
+            <form hx-post="{% url 'partial-group-membership' group_id=group.id %}" 
+            hx-target="#alter-user-result" 
+            hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ group.name }} and retract all permissions?"
+            hx-swap="outerHTML"
+            data-error-display="alter-user-result">
+
+                <input type="hidden" name="mode" value="remove_user">
+                <input type="hidden" name="user_id" value="{{ membership.user.id }}">
+                <input type="submit" class="btn btn-danger" value="Remove user">
+            </form>
+            {% endif %}
         {% endfor %}
 
         {% include 'login/partials/group_component_invite_user.html' %}
