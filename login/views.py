@@ -354,6 +354,29 @@ def group_member_count(request, group_id: int):
 
     return HttpResponse(f"{member_count} member")
 
+
+@login_required
+def group_leave(request, group_id: int):
+
+    user: OepUser = request.user
+    group = get_object_or_404(UserGroup, id=group_id)
+    membership = get_object_or_404(GroupMembership, group=group, user=request.user)
+
+    errors: dict = {}
+    if membership.level >= ADMIN_PERM:
+        admins = (
+            GroupMembership.objects.filter(group=group).exclude(user=user.id).count()
+        )
+        if admins == 0:
+            errors["name"] = "A group needs at least one admin!"
+            return JsonResponse(errors, status=400)
+
+    members = GroupMembership.objects.filter(group=group).exclude(user=user.id).count()
+    if members == 0:
+        errors["name"] = "Please delete the group instead (you are the only member)."
+        return JsonResponse(errors, status=400)
+
+
 class PartialGroupsView(View):
     def get(self, request, user_id):
         """
