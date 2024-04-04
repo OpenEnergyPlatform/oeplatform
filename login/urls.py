@@ -7,7 +7,7 @@ from django.contrib.auth.views import (
 )
 from django.urls import path
 
-from login import views
+from login import partial_views, views
 
 # from login.views import AccountDeleteView
 
@@ -52,6 +52,11 @@ urlpatterns = [
         r"^profile/(?P<user_id>[\d]+)/tables$",
         views.TablesView.as_view(),
         name="tables",
+    ),
+    url(
+        r"^profile/(?P<user_id>[\d]+)/tables/(?P<table_name>[\w]+)/review-badge$",
+        partial_views.metadata_review_badge_indicator_icon_file,
+        name="metadata-review-badge-icon",
     ),
     url(
         r"^profile/(?P<user_id>[\d]+)/review$",
