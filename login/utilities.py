@@ -9,6 +9,7 @@ from functools import lru_cache
 from pathlib import Path
 
 
+from dataedit.models import Table
 from oeplatform.settings import STATIC_ROOT
 
 #####################################################
@@ -117,7 +118,7 @@ def validate_badge_name_match(badge_name_normalized):
     return matched_badge
 
 
-def get_review_badge_from_table_metadata(django_table_obj):
+def get_review_badge_from_table_metadata(django_table_obj: Table):
     metadata = django_table_obj.oemetadata
 
     if metadata is None:
@@ -137,10 +138,10 @@ def get_review_badge_from_table_metadata(django_table_obj):
         )
 
     badge_name_normalized = badge.upper()
-    badge_check_result = validate_badge_name_match(badge_name_normalized)
+    check_is_badge = validate_badge_name_match(badge_name_normalized)
 
-    if badge_check_result:
-        return True, badge_check_result.name
+    if check_is_badge:
+        return True, check_is_badge.name
     else:
         return False, f"No match found for badge name: {badge}"
 
