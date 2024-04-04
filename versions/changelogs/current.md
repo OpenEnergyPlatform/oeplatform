@@ -2,6 +2,8 @@
 
 ## Changes
 
+- Update design sidebar on table detail page [(#1652)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1652)
+
 ## Features
 
 - Add NFDI to our list of Partners [(#1605)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1605).
