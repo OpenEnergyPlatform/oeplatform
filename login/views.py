@@ -38,7 +38,7 @@ from .forms import (
 from .models import WRITE_PERM, DELETE_PERM, ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
-from login.utilities import validate_open_data_license
+from login.utilities import validate_open_data_license, get_user_tables
 
 ###########################################################################
 #            User Tables related views & partial views for htmx           #
@@ -48,7 +48,8 @@ from login.utilities import validate_open_data_license
 class TablesView(View):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-        tables = Table.objects.all().select_related()
+        # tables = Table.objects.all().select_related()
+        tables = get_user_tables(user_id)
         draft_tables = []
         published_tables = []
         # published_but_license_issue = []
@@ -66,7 +67,7 @@ class TablesView(View):
             if review_badge and review_badge[0]:
                 badge_icon = get_badge_icon_path(review_badge[1])
 
-            if review_badge and not review_badge[0]:
+            if review_badge and review_badge[0]:
                 badge_msg = review_badge[1]
 
             table_data = {
@@ -372,12 +373,16 @@ def group_leave(request, group_id: int):
     errors: dict = {}
     members = GroupMembership.objects.filter(group=group).exclude(user=user.id).count()
     if members == 0:
-        errors["err_leave"] = "Please delete the group instead (you are the only member)."
+        errors["err_leave"] = (
+            "Please delete the group instead (you are the only member)."
+        )
         return JsonResponse(errors, status=400)
 
     if membership.level >= ADMIN_PERM:
         admins = (
-            GroupMembership.objects.filter(group=group, level=ADMIN_PERM).exclude(user=user.id).count()
+            GroupMembership.objects.filter(group=group, level=ADMIN_PERM)
+            .exclude(user=user.id)
+            .count()
         )
         if admins == 0:
             errors["err_leave"] = "A group needs at least one admin!"
@@ -426,10 +431,15 @@ class GroupManagement(View, LoginRequiredMixin):
         group = None
         if group_id:
             group = UserGroup.objects.get(id=group_id)
-            form = GroupForm(instance=group)
             membership = get_object_or_404(
                 GroupMembership, group=group, user=request.user
             )
+
+            # In case the group is down to one member make sure
+            # the remaining user gets admin permissions
+            if len(group.memberships.all()) == 1:
+                membership.level = ADMIN_PERM
+                membership.save()
 
             if membership.level < WRITE_PERM:
                 raise PermissionDenied
@@ -440,6 +450,7 @@ class GroupManagement(View, LoginRequiredMixin):
             elif membership.level == WRITE_PERM:
                 can_edit = WRITE_PERM
 
+            form = GroupForm(instance=group)
         else:
             form = GroupForm()
         return render(
@@ -512,7 +523,9 @@ class GroupManagement(View, LoginRequiredMixin):
 class PartialGroupMemberManagement(View, LoginRequiredMixin):
     def get(self, request, group_id: int):
         """
-        Load the chosen action(create or edit) for a group.
+        Renders the group detail page component for user invites and
+        permissions.
+
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :param user_id: An group id
@@ -661,7 +674,7 @@ class PartialGroupEditForm(View, LoginRequiredMixin):
                 membership = get_object_or_404(
                     GroupMembership, group=group, user=request.user
                 )
-                if membership.level < ADMIN_PERM:
+                if membership.level < WRITE_PERM:
                     raise PermissionDenied
                 return render(
                     request,
