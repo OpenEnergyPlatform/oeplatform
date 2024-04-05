@@ -17,6 +17,8 @@
                 <div class="profile-table-card">
                     <div class="profile-table-card__content">
                         <div class="profile-table-card__content--left">
+                            <!-- Add as soon as the open peer review is finalized -->
+                            {% comment %}
                             {% if table.is_reviewed %}
                             <div class="profile-table-card__tag profile-table-card__tag--success" data-bs-toggle="tooltip" data-bs-placement="top" title="The table has been successfully reviewed">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
@@ -34,6 +36,7 @@
                                 Not reviewed
                             </div>
                             {% endif %}
+                            {% endcomment %}
                             <div class="profile-table-card__link">
                                 <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }}</a>
                             </div>
@@ -134,6 +137,8 @@
                 <div class="profile-table-card">
                     <div class="profile-table-card__content">
                         <div class="profile-table-card__content--left">
+                            <!-- Add as soon as the open peer review is finalized -->
+                            {% comment %}
                             {% if table.is_reviewed %}
                             <div class="profile-table-card__tag profile-table-card__tag--success" data-bs-toggle="tooltip" data-bs-placement="top" title="The table has been successfully reviewed">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
@@ -152,6 +157,7 @@
                                 Not reviewed
                             </div>
                             {% endif %}
+                            {% endcomment %}
                             <div class="profile-table-card__link">
                                 <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }}</a>
                             </div>
