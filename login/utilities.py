@@ -3,6 +3,8 @@ import logging
 import re
 from enum import Enum, auto
 
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.templatetags.static import static
 
 from functools import lru_cache
@@ -10,11 +12,50 @@ from pathlib import Path
 
 
 from dataedit.models import Table
+from login.models import myuser as OEPUser
+from login.models import GroupPermission
 from oeplatform.settings import STATIC_ROOT
 
 #####################################################
 # Utilities mainly used for the Tables profile page #
 #####################################################
+
+
+from typing import List
+
+
+def get_user_tables(user_id: int) -> List[Table]:
+    """
+    Collects all tables to which the current user has access rights.
+    This includes tables 1. that the user has created 2. to which the
+    user have been added, and tables in which a PermissionGroup to which
+    the user belongs has been added.
+    """
+    try:
+        user = OEPUser.objects.get(id=user_id)
+    except OEPUser.DoesNotExist:
+        # Consider logging this exception
+        raise Http404
+
+    # All tables where the user holds access permissions
+    direct_memberships = user.get_table_memberships()
+    tables = [membership.table for membership in direct_memberships]
+    user_groups = user.memberships.all()
+    for g in user_groups:
+        group_permissions = None
+        group_permissions = GroupPermission.objects.filter(
+            holder_id=g.group.id
+        ).prefetch_related("table")
+        # add table if it is part of the user group with any
+        # permission level above 0|None
+        if group_permissions:
+            group_memberships = [perm.table for perm in group_permissions]
+            tables.extend(group_memberships)
+
+    # Remove duplicates
+    tables = list(set(tables))
+    return tables
+
 
 # Functions below implement the automated license check
 
