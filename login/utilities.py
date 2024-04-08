@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 from dataedit.models import Table
-from login.models import myuser as OEPUser
+from login.models import UserGroup, myuser as OEPUser
 from login.models import GroupPermission
 from oeplatform.settings import STATIC_ROOT
 
@@ -207,7 +207,22 @@ def get_badge_icon_path(badge_name):
 # Utilities mainly used for the Group Management profile page #
 ###############################################################
 
-# Add functionality here
+
+def get_tables_if_group_assigned(group: UserGroup) -> List[Table]:
+    """
+    Get all tables assinged to a group
+    """
+
+    group_table_relation = GroupPermission.objects.filter(
+        holder_id=group.id
+    ).prefetch_related("table")
+
+    group_tables = []
+
+    for rel in group_table_relation:
+        group_tables.append(rel.table)
+    return group_tables
+
 
 #######################################################
 # Utilities mainly used for the Settings profile page #
