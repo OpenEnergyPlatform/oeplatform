@@ -27,7 +27,7 @@ jobs:
     services:
       postgres:
         # We use our own prepared postgres image for this.
-        image: ghcr.io/openenergyplatform/oeplatform-postgres:0.3.0
+        image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
