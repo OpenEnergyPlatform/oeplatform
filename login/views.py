@@ -38,7 +38,11 @@ from .forms import (
 from .models import WRITE_PERM, DELETE_PERM, ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
-from login.utilities import validate_open_data_license, get_user_tables
+from login.utilities import (
+    validate_open_data_license,
+    get_user_tables,
+    get_tables_if_group_assigned,
+)
 
 ###########################################################################
 #            User Tables related views & partial views for htmx           #
@@ -48,7 +52,6 @@ from login.utilities import validate_open_data_license, get_user_tables
 class TablesView(View):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-        # tables = Table.objects.all().select_related()
         tables = get_user_tables(user_id)
         draft_tables = []
         published_tables = []
@@ -61,6 +64,7 @@ class TablesView(View):
             review_badge = None
             badge_icon = None
             badge_msg = None
+            # oemetadata is None by default
             if table.oemetadata:
                 review_badge = get_review_badge_from_table_metadata(table)
 
@@ -453,6 +457,10 @@ class GroupManagement(View, LoginRequiredMixin):
             form = GroupForm(instance=group)
         else:
             form = GroupForm()
+
+        if group:
+            group_tables = get_tables_if_group_assigned(group=group)
+
         return render(
             request,
             "login/partials/group_management.html",
@@ -460,6 +468,7 @@ class GroupManagement(View, LoginRequiredMixin):
                 "form": form,
                 "group": group,
                 "choices": GroupMembership.choices,
+                "group_tables": group_tables,
                 "is_admin": is_admin,
                 "can_delete": can_delete,
                 "can_edit": can_edit,
