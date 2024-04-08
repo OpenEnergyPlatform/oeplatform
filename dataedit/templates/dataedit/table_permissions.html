@@ -1,4 +1,6 @@
 {% extends "dataedit/base.html" %}
+{% load static %}
+{% load compress %}
 {% block title %} - {{schema}}{% endblock %}
 
 {% block main-right-sidebar-content-additional %}
@@ -21,7 +23,7 @@
 
             {% if is_admin %}
                 <div style="position:relative;">
-                    <form style="position:absolute; right: 0%;" action="permissions" method="post">
+                    <form id="addGroupForm" style="position:absolute; right: 0%;" action="permissions" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="mode" value="add_group">
                         <input name="name" type="text" placeholder="Add a group" id="group_field"><input type="submit" value="Add">
@@ -32,9 +34,6 @@
                 <h4>Group Permissions</h4>
             </div>
         </div>
-        {% if is_admin %}
-        
-        {% endif %}
         {% if not group_perms %}
             No permissions for groups set, yet.
         {% endif %}
@@ -73,10 +72,11 @@
 
             {% if is_admin %}
                 <div style="position:relative;">
-                    <form style="position:absolute; right: 0%;" action="permissions" method="post">
+                    <form id="addUserForm" style="position:absolute; right: 0%;" action="permissions" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="mode" value="add_user">
-                        <input name="name" type="text" placeholder="Add an user" id="user_field"><input type="submit" value="Add">
+                        <input name="name" type="text" placeholder="Add an user" id="user_field">
+                        <input type="submit" value="Add">
                     </form>
                 </div>
             {% endif %}
@@ -123,22 +123,71 @@
 {% block after-body-bottom-js %}
 
 {% if is_admin %}
-<script>                            
-    $('#group_field').bind('input', function() {
-        var dfd = new $.Deferred();
-        var request = $.ajax({type: 'GET',
-            url:'/api/grpprop/', dataType:'json',
-            data: {
-                name: $(this).val()
+<script>  
+    /*
+    * Handle group autocomplete and add client side form validation.
+    */
+    $(function() {
+        let validSelection = false;
+        let autocompleteSource = []; // This will be filled with your autocomplete data
+
+        $('#group_field').autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: '/api/grpprop/',
+                    dataType: 'json',
+                    data: { name: request.term },
+                    success: function(data) {
+                        autocompleteSource = data; // Assuming 'data' is an array of strings
+                        response(data);
+                    }
+                });
+            },
+            select: function(event, ui) {
+                validSelection = true;
             }
         });
-        request.done(function(users)
-        {
-            console.log(users);
-            $('#group_field').autocomplete({
-                source: users
+
+        $('#addGroupForm').on('submit', function(e) {
+            var inputValue = $('#group_field').val();
+            if (!validSelection || !autocompleteSource.includes(inputValue)) {
+                e.preventDefault(); // Prevent form submission
+                alert('Please select a valid group name from the list that appears after you start typing.');
+            }
+        });
+    });
+
+    /*
+    * Handle user autocomplete and add client side form validation.
+    */
+    $(function() {
+        let validSelection = false;
+        let autocompleteSource = []; // This will be filled with your autocomplete data
+    
+        $('#user_field').bind('input', function() {
+            var dfd = new $.Deferred();
+            var request = $.ajax({type: 'GET',
+                url:'/api/usrprop/', dataType:'json',
+                data: {
+                    name: $(this).val()
+                }
             });
-            dfd.resolve({})
+            request.done(function(users)
+            {
+                console.log(users);
+                $('#user_field').autocomplete({
+                    source: users
+                });
+                dfd.resolve({})
+            });
+        });
+
+        $('#addUserForm').on('submit', function(e) {
+            var inputValue = $('#user_field').val();
+            if (!validSelection || !autocompleteSource.includes(inputValue)) {
+                e.preventDefault(); // Prevent form submission
+                alert('Please select a valid group name from the list that appears after you start typing.');
+            }
         });
     });
 </script>
