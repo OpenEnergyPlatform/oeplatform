@@ -458,8 +458,13 @@ class GroupManagement(View, LoginRequiredMixin):
         else:
             form = GroupForm()
 
+        group_tables = None
         if group:
             group_tables = get_tables_if_group_assigned(group=group)
+
+        # Redirect if the request is not triggered using htmx methods
+        if "HX-Request" not in request.headers:
+            return redirect("groups", user_id=request.user.id)
 
         return render(
             request,
