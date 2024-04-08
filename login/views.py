@@ -5,12 +5,18 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
+from django.http import (
+    HttpResponse,
+    JsonResponse,
+    HttpResponseNotAllowed,
+    HttpResponseForbidden,
+)
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 from rest_framework.authtoken.models import Token
 
@@ -74,6 +80,7 @@ class TablesView(View):
             if review_badge and review_badge[0]:
                 badge_msg = review_badge[1]
 
+            # Use attributes in the templates
             table_data = {
                 "name": table.name,
                 "schema": table.schema.name,
@@ -97,10 +104,31 @@ class TablesView(View):
                 else:
                     draft_tables.append(table_data)
 
+        # Pagination
+        ITEMS_PER_PAGE = 5
+
+        # Paginate tables
+        published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)
+        draft_paginator = Paginator(draft_tables, ITEMS_PER_PAGE)
+
+        # Check if the request contains a page
+        if request.GET.get("published_page"):
+            page_number = request.GET.get("published_page")
+            published_page_obj = published_paginator.get_page(page_number)
+        # Always return page 1 if not requested otherwise
+        else:
+            published_page_obj = published_paginator.get_page(1)
+
+        if request.GET.get("draft_page"):
+            page_number = request.GET.get("draft_page")
+            draft_page_obj = draft_paginator.get_page(page_number)
+        else:
+            draft_page_obj = draft_paginator.get_page(1)
+
         context = {
             "profile_user": user,
-            "draft_tables": draft_tables,
-            "published_tables": published_tables,
+            "draft_tables_page": draft_page_obj,
+            "published_tables_page": published_page_obj,
             "schema_whitelist": schema_whitelist,
         }
 
