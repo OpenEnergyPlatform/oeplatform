@@ -1,60 +1,3 @@
-{% extends "base/base-profile.html" %}
-{% load django_bootstrap5 %}
-{% load static %}
-{% load compress %}
-{% block main-content-body %}
-{% include "login/user_nav.html" %}
-
-{% if profile_user == request.user %}
-<h2 class="header">Your Security Information</h2>
-<table class="table">
-        <tr>
-            <th> API-Token: </th>
-            <td>
-                <a id="toggler" href="#" onclick="toggler('token');">Show token</a>
-                <div style="display:none" id="token">
-                {% if token %}
-                    <div class="userApiToken">
-                        {{ token }}
-                    </div>
-                    <div>
-                        <button hx-post="{% url 'reset-token' %}" hx-target=".userApiToken">Reset token</button>
-                        <i>Resetting the token will affect your REST-API based requests. In most cases it only makes sense to reset it in case it was accidentally published.</i>
-                    </div>
-                {% endif %}
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <th> Password </th>
-            <td>
-                <a href="password_change">Change your password</a>
-            </td>
-        </tr>
-        {% comment %}
-        {# TODO: implement tests before we allow user deletion  #}
-        <tr>
-            <th> Account </th>
-            <td>
-                <a href="{% url 'account-delete' request.user.id %}">Delete your account</a>
-            </td>
-        </tr>
-        {% endcomment %}
-</table>
-<br>
-    {% if request.user.is_authenticated and request.user == user%}
-    <hr>
-    <h2 class="header">Manage Profile</h2>
-    <div style="overflow: hidden;">
-        <a href="{% url 'edit' request.user.id %}" class="btn btn-primary">Edit</a>
-    </div>
-    <hr>
-
-    {% endif %}
-{% endif %}
-{% endblock %}
-
-{% block main-right-sidebar-content %}
 {% if profile_user == request.user %}
 <div class="profile-sidebar">
     <div class="profile-sidebar__img">
@@ -150,17 +93,5 @@
         </div>
     {% endif %} 
 </div>
+
 {% endif %}
-{% endblock %}
-
-
-{% block after-body-bottom-js %}
-{% compress js %}
-<script src="{% static 'ontology/htmx.js' %}"></script>
-{% endcompress %}
-<script>
-    document.body.addEventListener('htmx:configRequest', (event) => {
-        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-    })
-</script>
-{% endblock %}

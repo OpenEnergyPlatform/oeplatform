@@ -2,6 +2,10 @@
 
 ## Changes
 
+- Reworked user group section (part of the profile page). User can create and manage groups that can be added to tables and in the future also to scenario bundles [(#1611)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1611).
+  - Also includes updates to the profile tables section where a reworked UI was implemented for #1607.
+  - Fix broken autocomplete & client side validate user input when assigning groups or users to table permissions.
+
 ## Features
 
 - Add NFDI to our list of Partners [(#1605)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1605).

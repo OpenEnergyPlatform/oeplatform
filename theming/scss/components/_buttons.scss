@@ -12,4 +12,23 @@
     &__icon {
         @extend .me-1;
     }
+
+    &--xs {
+        @extend .py-0;
+        height: 1.75rem;
+    }
+}
+
+.backlink {
+    @extend .pb-2;
+    
+    a {
+        @extend .text-decoration-none;
+        @extend .fw-semibold;
+    }
+
+    svg {
+        @extend .me-1;
+        @include translateY(-2px);
+    }
 }

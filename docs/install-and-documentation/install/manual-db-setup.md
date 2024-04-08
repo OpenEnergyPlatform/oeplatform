@@ -97,11 +97,13 @@ Once logged into your psql session (for linux: `sudo -u postgres psql`, for wind
     # optional: .. with owner = postgres;
     create database oedb;
 
-After successfully installing PostGIS (see [step 1.1](#11-install-postgresql)), enter in `oedb` (`\c oedb;`) and type the additional commands:
+After successfully installing PostGIS (see [step 1.1](#11-install-postgresql)), add the database extensions. We keep both database setups equal please enter the commands to both databases 1. `oedb` (`\c oedb;`) and also 2. `oep_django` (`\c oep_django;`). Type the commands:
 
-    create extension postgis;
-    create extension postgis_topology;
-    create extension hstore;
+    create extension IF NOT EXISTS postgis;
+    create extension IF NOT EXISTS postgis_topology;
+    create extension IF NOT EXISTS hstore;
+    # This extension enable search for similar objects (e.g. by name)
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 The database installation is now complete and you can exit the psql command line by typing:
 
