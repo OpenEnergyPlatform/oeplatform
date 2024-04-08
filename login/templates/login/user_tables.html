@@ -10,6 +10,9 @@
 
 <section class="profile-category">
     <h2 class="profile-category__heading">Published tables</h2>
+    <span class="current">
+        Page {{ published_tables_page.number }} of {{ published_tables_page.paginator.num_pages }}.
+    </span>
     <div class="profile-tables">
         <div class="profile-tables__row">
             {% for table in published_tables_page %}
@@ -112,7 +115,7 @@
             {% endfor %}
         </div>
     </div>
-    <nav aria-label="Page navigation profile tables" class="pagination pagination-nav">
+    <nav aria-label="Page navigation profile tables" class="pagination-nav">
         <ul>
             {% if published_tables_page.has_previous %}
             <li class="page-item">
@@ -131,15 +134,17 @@
             </li>
             {% endif %}
         </ul>
-        <span class="current">
-            Page {{ published_tables_page.number }} of {{ published_tables_page.paginator.num_pages }}.
-        </span>
+        
     </nav>
+    
 </section>
 
 <!-- ###### Draft Tables ###### -->
 <section class="profile-category">
     <h2 class="profile-category__heading">Draft tables</h2>
+    <span class="current">
+        Page {{ draft_tables_page.number }} of {{ draft_tables_page.paginator.num_pages }}.
+    </span>
     <div class="profile-tables">
         <div class="profile-tables__row">
             {% for table in draft_tables_page %}
@@ -253,9 +258,6 @@
             </li>
             {% endif %}
         </ul>
-        <span class="current">
-            Page {{ draft_tables_page.number }} of {{ draft_tables_page.paginator.num_pages }}.
-        </span>
     </nav>
 </section>
 {% endif %}
