@@ -12,7 +12,7 @@
 
 - Add feature to reset a api token via the profile/settings page [(#1637)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1637)
 
-- Add Pagination to user tables section in the profile page [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+- Add Pagination to user tables section in the profile page [(#1655)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1655)
 
 ## Bugs
 
