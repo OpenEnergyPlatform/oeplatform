@@ -64,8 +64,8 @@ oeo.parse(Ontology_URI.as_uri())
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
 rdfdb = RDF_DATABASES["knowledge"]
-query_endpoint = "%(host)s:%(port)s/%(name)s/query" % rdfdb
-update_endpoint = "%(host)s:%(port)s/%(name)s/update" % rdfdb
+query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
+update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
 
 
 sparql = SPARQLWrapper(query_endpoint)
