@@ -1,23 +1,23 @@
 import logging
-
-from rdflib import Graph, Literal, RDF, URIRef
-from rdflib.plugins.stores import sparqlstore
-from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 import os
+import sys
+from pathlib import Path
+
+from owlready2 import get_ontology
+from rdflib import RDF, Graph, Literal, URIRef
+from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
+from rdflib.plugins.stores import sparqlstore
 
 # from datetime import date
 from SPARQLWrapper import SPARQLWrapper
-import sys
-from owlready2 import get_ontology
-from pathlib import Path
 
-from oeplatform.settings import (
-    ONTOLOGY_ROOT,
-    RDF_DATABASES,
-    OPEN_ENERGY_ONTOLOGY_NAME,
-    DEBUG,
-)
 from factsheet.oekg.namespaces import bind_all_namespaces
+from oeplatform.settings import (
+    DEBUG,
+    ONTOLOGY_ROOT,
+    OPEN_ENERGY_ONTOLOGY_NAME,
+    RDF_DATABASES,
+)
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
@@ -40,8 +40,8 @@ oeo.parse(Ontology_URI.as_uri())
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
 rdfdb = RDF_DATABASES["knowledge"]
-query_endpoint = "%(host)s:%(port)s/{%(name)s}/query" % rdfdb
-update_endpoint = "%(host)s:%(port)s/{%(name)s}/update" % rdfdb
+query_endpoint = "%(host)s:%(port)s/%(name)s/query" % rdfdb
+update_endpoint = "%(host)s:%(port)s/%(name)s/update" % rdfdb
 
 
 sparql = SPARQLWrapper(query_endpoint)
