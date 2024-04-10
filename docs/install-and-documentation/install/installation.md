@@ -1,7 +1,7 @@
 # Install and setup the OpenEnergyPlatform Application
 
 Below we describe the manual installation of the oeplatform code and infrastructure.
-The installation steps have been proofed on linux and windows for python 3.6 and 3.9.
+The installation steps have been proofed on linux and windows for python 3.10.
 
 !!! tip
     We also offer the possibility to use [docker](https://www.docker.com/), to install the oeplatform and additional databases. As the hole setup is pre-configured docker can be used to automatically install the hole infrastructure.
@@ -10,6 +10,8 @@ The installation steps have been proofed on linux and windows for python 3.6 and
 
     [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
 
+    !!! Danger 
+        Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features. It is not mandatory to run the core functionality of the oeplatform. You need to install it manually as described in the installation guide.
 <!-- !!! tip
     Use our Make script to automate most of the installation and setup process and get started in a simple and reusable way. Don't forget to familiarize yourself with the structure of the oeplattform architecture and know the credentials for each component (e.g. the user information of the databases).
 
@@ -36,18 +38,21 @@ The installation steps have been proofed on linux and windows for python 3.6 and
         - Automatically added in docker container
     
     3. Loading and compressing static assets
+        - Create your `securitysettings.py` config file from our default settings: Copy & rename `oeplatform/securitysettings.py.default` >  `securitysettings.py`
         - `python manage.py collectstatic`
         - `python manage.py compress`
-        - Automatically added in docker container
+        - These steps are automatically added in the docker container
 
     4. Install databases & setup connection
-        - Chose option 1 to use docker to install PostgreSQL chose 2 to install it on your system
+        - Chose option 1 to use docker to install PostgreSQL and most of the setup automatically. You need to install jenna-fuseki additionally as it is not part of the docker container.
+        - Chose 2 to install everything on your directly on your system.
 
         ??? info "Option 1: Use docker"
             - [Install docker](https://docs.docker.com/get-docker/)
             - while in oeplatform directory `cd docker`
             - `docker compose -f docker-compose.yaml`
             - start docker container
+            - Additionally install and start jenna-fuseki db as docker or install it locally.
 
         ??? info "Option 2: Manual database setup"
             - [install manually](./manual-db-setup.md)
@@ -55,7 +60,7 @@ The installation steps have been proofed on linux and windows for python 3.6 and
         Summary:
 
         - Setup databases PostgreSQL, Jenna-Fuseki
-        - Install & start Jenna-Fuseki and create datastore `OEKG_DS` via the web interface
+        - Install & start Jenna-Fuseki and create datastore `OEKG_DS` via the web interface: http://127.0.0.1:3030/
         - Install PostgreSQL  
         - Use db user `postgres` with password `postgres`: 
         - Create databases: `oep_django`, `oedb`: `sudo -u postgres psql`
@@ -88,6 +93,9 @@ The installation steps have been proofed on linux and windows for python 3.6 and
 
     7. Deploy locally
         - Check if the all connected database servers are running.
+            - sudo service postgresql start
+            - in the directory where you installed 
+
         - `python manage.py runserver`
         - Open Browser URL: 127.0.0.1:8000
 
