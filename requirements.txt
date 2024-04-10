@@ -20,7 +20,8 @@ django-bootstrap5~=21.2
 django-fontawesome-5~=1.0
 omi==0.2.1
 zipstream-new~=1.1
-rdflib~=5.0
+rdflib==7.0.0
+pyparsing<3 # otherwise: sparql queries as text cannot be parsed
 django_better_admin_arrayfield~=1.4
 sparqlwrapper~=1.8
 GeoAlchemy2~=0.11

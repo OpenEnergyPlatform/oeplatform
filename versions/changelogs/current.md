@@ -5,6 +5,8 @@
 - Reworked user group section (part of the profile page). User can create and manage groups that can be added to tables and in the future also to scenario bundles [(#1611)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1611).
   - Also includes updates to the profile tables section where a reworked UI was implemented for #1607.
   - Fix broken autocomplete & client side validate user input when assigning groups or users to table permissions.
+  - requirements updated for python 3.10
+  - read knowledge graph endpoints from securitysettings.py
 
 ## Features
 
@@ -35,5 +37,4 @@ New section!
 - Update the REST-API page of the documentation [(#1636)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1636):
   - It is currently work in progress and will be updated within the next couple months.
   - This update adds more context and links to the academy api tutorials.
-  
 - Update docker documentation [(#1644)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1644)
