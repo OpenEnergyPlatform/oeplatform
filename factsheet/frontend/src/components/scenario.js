@@ -367,12 +367,12 @@ export default function Scenario(props) {
               noTooltip={true}
             />
           )}
-          /* <CustomAutocomplete  width="100%" type="interacting region" 
+          /* <CustomAutocomplete  width="100%" type="interacting region"
            editHandler={HandleEditInteractingRegion}
             addNewHandler={HandleAddNewInteractingRegion}
-             showSelectedElements={true} 
-             selectedElements={data.interacting_regions} 
-             manyItems optionsSet={scenarioInteractingRegion} 
+             showSelectedElements={true}
+             selectedElements={data.interacting_regions}
+             manyItems optionsSet={scenarioInteractingRegion}
              kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/> */
           TooltipComponent={HtmlTooltip}
         />
@@ -438,7 +438,7 @@ export default function Scenario(props) {
               </IconButton>
             </span>}
           renderField={() =>
-            Object.keys(scenariosInputDatasetsObj).length > 0 && scenariosInputDatasetsObj.map((item, index) => (
+            Object.keys(scenariosInputDatasetsObj).length > 0 &&  scenariosInputDatasetsObj.map((item, index) => (
               <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
                 <Grid item xs={11} >
                   <Autocomplete
@@ -512,4 +512,3 @@ export default function Scenario(props) {
     </Typography>
   );
 }
-

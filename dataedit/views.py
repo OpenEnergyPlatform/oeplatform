@@ -11,17 +11,17 @@ from subprocess import call
 from wsgiref.util import FileWrapper
 
 import sqlalchemy as sqla
-from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Count, Q
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_str
+from django.views.decorators.cache import never_cache
 from django.views.generic import View
 from metadata.v160.schema import OEMETADATA_V160_SCHEMA
 from metadata.v160.template import OEMETADATA_V160_TEMPLATE
@@ -1232,7 +1232,13 @@ class PermissionView(View):
             return self.__remove_group(request, schema, table)
 
     def __add_user(self, request, schema, table):
-        user = login_models.myuser.objects.filter(name=request.POST["name"]).first()
+        user_name = request.POST.get("name")
+        # Check if the user name is empty
+        if not user_name:
+            # Return an HTTP 400 Bad Request response
+            return HttpResponseBadRequest("User name is required.")
+
+        user = login_models.myuser.objects.filter(name=user_name).first()
         table_obj = Table.load(schema, table)
         p, _ = login_models.UserPermission.objects.get_or_create(
             holder=user, table=table_obj
@@ -1241,7 +1247,13 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
     def __change_user(self, request, schema, table):
-        user = login_models.myuser.objects.filter(id=request.POST["user_id"]).first()
+        user_id = request.POST.get("user_id")
+        # Check if the user id is empty
+        if not user_id:
+            # Return an HTTP 400 Bad Request response
+            return HttpResponseBadRequest("User id is required.")
+
+        user = login_models.myuser.objects.filter(id=user_id).first()
         table_obj = Table.load(schema, table)
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.level = request.POST["level"]
@@ -1249,14 +1261,26 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
     def __remove_user(self, request, schema, table):
-        user = get_object_or_404(login_models.myuser, id=request.POST["user_id"])
+        user_id = request.POST.get("user_id")
+        # Check if the user id is empty
+        if not user_id:
+            # Return an HTTP 400 Bad Request response
+            return HttpResponseBadRequest("User id is required.")
+
+        user = get_object_or_404(login_models.myuser, id=user_id)
         table_obj = Table.load(schema, table)
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.delete()
         return self.get(request, schema, table)
 
     def __add_group(self, request, schema, table):
-        group = get_object_or_404(login_models.UserGroup, name=request.POST["name"])
+        group_name = request.POST.get("name")
+        # Check if the group name is empty
+        if not group_name:
+            # Return an HTTP 400 Bad Request response
+            return HttpResponseBadRequest("Group name is required.")
+
+        group = get_object_or_404(login_models.UserGroup, name=group_name)
         table_obj = Table.load(schema, table)
         p, _ = login_models.GroupPermission.objects.get_or_create(
             holder=group, table=table_obj
@@ -1265,7 +1289,12 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
     def __change_group(self, request, schema, table):
-        group = get_object_or_404(login_models.UserGroup, id=request.POST["group_id"])
+        group_id = request.POST.get("group_id")
+        if not group_id:
+            # Return an HTTP 400 Bad Request response
+            return HttpResponseBadRequest("Group id is required.")
+
+        group = get_object_or_404(login_models.UserGroup, id=group_id)
         table_obj = Table.load(schema, table)
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
@@ -1275,7 +1304,12 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
     def __remove_group(self, request, schema, table):
-        group = get_object_or_404(login_models.UserGroup, id=request.POST["group_id"])
+        group_id = request.POST.get("group_id")
+        if not group_id:
+            # Return an HTTP 400 Bad Request response
+            return HttpResponseBadRequest("Group id is required.")
+
+        group = get_object_or_404(login_models.UserGroup, id=group_id)
         table_obj = Table.load(schema, table)
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
@@ -1576,10 +1610,13 @@ def update_table_tags(request):
         with con.begin():
             if not actions.assert_has_metadata(table=table, schema=schema):
                 actions.set_table_metadata(
-                    table=table, schema=schema, metadata=OEMETADATA_V160_TEMPLATE, cursor=con
+                    table=table,
+                    schema=schema,
+                    metadata=OEMETADATA_V160_TEMPLATE,
+                    cursor=con,
                 )
                 # update tags in db and harmonize metadata
-                
+
             metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, tag_ids_new=ids
             )

@@ -1,46 +1,49 @@
-import logging
-from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse, HttpResponseForbidden
-from rest_framework import status
 import json
-from django.views.decorators.csrf import csrf_exempt
-from django.core import serializers
-from django.utils.cache import patch_response_headers
-
-import uuid
-import requests
-import rdflib
-from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode, XSD
-
-from rdflib.compare import to_isomorphic, graph_diff
-from rdflib.plugins.stores import sparqlstore
-from rdflib.namespace import XSD, Namespace
-from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
+import logging
 import os
-from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES, OPEN_ENERGY_ONTOLOGY_NAME
-
-from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
-from owlready2 import get_ontology
+import uuid
 from pathlib import Path
 
+import rdflib
+import requests
+from django.contrib.auth.decorators import login_required
+from django.core import serializers
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseForbidden,
+    JsonResponse,
+    StreamingHttpResponse,
+)
+from django.shortcuts import render
+from django.utils.cache import patch_response_headers
+from django.views.decorators.csrf import csrf_exempt
+from owlready2 import get_ontology
+from rdflib import RDF, XSD, BNode, ConjunctiveGraph, Graph, Literal, URIRef
+from rdflib.compare import graph_diff, to_isomorphic
+from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
+from rdflib.namespace import XSD, Namespace
+from rdflib.plugins.stores import sparqlstore
+from rest_framework import status
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
     permission_classes,
 )
+from SPARQLWrapper import JSON, SPARQLWrapper
+
+from factsheet.oekg.filters import OekgQuery
+from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
+from login import models as login_models
+from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME, RDF_DATABASES
+
+from .models import OEKG_Modifications, ScenarioBundleAccessControl
 
 # from rest_framework.authentication import TokenAuthentication
 # from rest_framework.permissions import IsAuthenticated
 # from rest_framework.authtoken.models import Token
 
-from django.contrib.auth.decorators import login_required
-
-from .models import OEKG_Modifications, ScenarioBundleAccessControl
-from login import models as login_models
-
-from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
-from factsheet.oekg.filters import OekgQuery
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, "oeo")
@@ -63,20 +66,16 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-query_endpoint = "http://localhost:3030/ds/query"
-update_endpoint = "http://localhost:3030/ds/update"
+rdfdb = RDF_DATABASES["knowledge"]
+query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
+update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
 
-# query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-# update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
-
-#query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-#update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
 """ store = sparqlstore.SPARQLUpdateStore(
     auth=(
-        RDF_DATABASES.get("factsheet").get("dbuser"), 
+        RDF_DATABASES.get("factsheet").get("dbuser"),
         RDF_DATABASES.get("factsheet").get("dbpasswd")
     )
 ) """
@@ -1235,8 +1234,8 @@ def query_oekg(request, *args, **kwargs):
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
         PREFIX DC: <http://purl.org/dc/terms/>
 
-        SELECT DISTINCT ?study_acronym 
-        WHERE 
+        SELECT DISTINCT ?study_acronym
+        WHERE
         {{
         ?s OEO:OEO_00000510 ?institutes ;
             {authors_exp}
@@ -1861,6 +1860,8 @@ def filter_scenario_view(request):
         "input_dataset_scenarios": input_dataset_acronyms,
         "output_dataset_scenarios": output_dataset_acronyms,
     }
-    html_content = render(request, "partials/related_oekg_scenarios.html", context).content.decode("utf-8")
+    html_content = render(
+        request, "partials/related_oekg_scenarios.html", context
+    ).content.decode("utf-8")
     # Render the template with the context
     return HttpResponse(html_content)

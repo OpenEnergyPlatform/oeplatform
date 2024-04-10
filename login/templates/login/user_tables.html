@@ -1,253 +1,301 @@
 {% extends "base/base-profile.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
+{% load compress %}
 {% block main-content-body %}
 {% if profile_user == request.user %}
 {% include "login/user_nav.html" %}
 
-<div class="container">
-    <div class="row">
-        
-        <div class="accordion" id="accordionTables">
-            <div class="accordion-item">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTables" aria-expanded="true" aria-controls="collapseTables">
-                    How to manage your data resources?
-                </button>
-                </h2>
-                <div id="collapseTables" class="accordion-collapse collapse" aria-labelledby="headingTables" data-bs-parent="#accordionTables">
-                <div class="accordion-body">
-                    <strong>Access your data tables:</strong> Listed below are tables associated with you, either created by you or by a group you're part of, 
-                    which has permission to access the table. This simplifies resource identification and access. 
-                    Expect future enhancements for better data management through additional grouping and sorting options. 
-                    <br>
-                    <br>
-                    <strong>Publish your complete, openly licensed and preferable open peer reviewed data:</strong> 
-                    The displayed categories indicate whether a table has been published and assigned 
-                    to a specific topic. The "model_draft" section is where you initially create and review your table. 
-                    Once data is uploaded to "model_draft," an optional open peer review assesses metadata and data quality, performed by a user other than the creator. 
-                    A automated license check verifies the license name you provided in the table metadata. It checks the license name against the SPDX list for open licenses.
-                    If your data is openly licensed you can publish your table by moving it to one of the suggested topics on the Open Energy Platform. 
-                    The "Publish" button becomes visible once all criteria for publishing are met.
-                </div>
+<!-- ###### Published ###### -->
+
+<section class="profile-category">
+    <h2 class="profile-category__heading">Published tables</h2>
+    <span class="current">
+        Page {{ published_tables_page.number }} of {{ published_tables_page.paginator.num_pages }}.
+    </span>
+    <div class="profile-tables">
+        <div class="profile-tables__row">
+            {% for table in published_tables_page %}
+            <div class="profile-tables__col">
+                <div class="profile-table-card">
+                    <div class="profile-table-card__content">
+                        <div class="profile-table-card__content--left">
+                            <!-- Add as soon as the open peer review is finalized -->
+                            {% comment %}
+                            {% if table.is_reviewed %}
+                            <div class="profile-table-card__tag profile-table-card__tag--success" data-bs-toggle="tooltip" data-bs-placement="top" title="The table has been successfully reviewed">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                                </svg>
+                                Reviewed
+                            </div>
+                            <div class="profile-table-card__badge">
+                                <img style="width:112px;height: 23px;" src="/static/img/badges/badge_iron.png">
+                                <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_bronze.png"> -->
+                                <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_platinum.png"> -->
+                            </div>
+                            {% else %}
+                            <div class="profile-table-card__tag profile-table-card__tag--warning" data-bs-toggle="tooltip" data-bs-placement="top" title="The table hasn't been reviewed yet">
+                                Not reviewed
+                            </div>
+                            {% endif %}
+                            {% endcomment %}
+                            <div class="profile-table-card__link">
+                                <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }}</a>
+                            </div>
+                        </div>
+                        <div class="profile-table-card__content--right">
+                            {% if table.license_status.status %}
+                            <div class="profile-table-card__tag profile-table-card__tag--info" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check successful">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                                </svg>
+                                License
+                            </div>
+                            {% else %}
+                            <div class="profile-table-card__tag profile-table-card__tag--danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check failed">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                </svg>
+                                License check failed
+                            </div>
+                            {% endif %}
+
+                            <div class="profile-table-card__tag">
+                                <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"></path>
+                                </svg>
+                                {{ table.schema }}
+                            </div>
+                        </div>
+
+                        <!-- Add once embargo branch is merged PR https://github.com/OpenEnergyPlatform/oeplatform/pull/1534 -->
+                        <!-- <div class="profile-table-card__content-secondary">
+                            <span class="profile-table-card__embargo">
+                                Embargo until 06/05/2024
+                                <button type="button" class="btn btn-outline-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Test text">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#294456" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                                    </svg>
+                                </button>
+                            </span>
+                        </div> -->
+                    </div>
+                    {% if table.license_status.error %}
+                    <div class="profile-table-card__content-danger">
+                        <div class="profile-table-card__content-danger-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                            </svg>
+                        </div>
+                        <div class="profile-table-card__content-danger-message">
+                            Potential publishing without an open license.
+                        </div>
+                        <div class="profile-table-card__content-danger-details">
+                            <p>
+                                <button type="button" data-bs-toggle="collapse" data-bs-target="#collapseWarningDetails{{ table.name }}" aria-expanded="false" aria-controls="collapseWarningDetails{{ table.name }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+                                        <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                                    </svg>
+                                    Details
+                                </button>
+                            </p>
+                            <div class="collapse" id="collapseWarningDetails{{ table.name }}">
+                                License check failed because of: {{ table.license_status.error }} <br><br>
+                                <a href={{EXTERNAL_URLS.spdx_licenses}} class="card-link">Please use a SPDX license identifier.</a> <br><br>
+                                Please revisit your metadata and check the license information. Do not publish data that does not hold an open license.
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
+            {% endfor %}
         </div>
     </div>
-    <div class="row" id="tableContainer" hx-get="/profile/{{ profile_user.id }}/tables" hx-trigger="load">
-        <h2>Published</h2>
-        <div class="container">
-            <div class="row">
-                {% for table in published_tables %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card">
-                            <div class="card">
-                                <h5 class="card-header">Datatable</h5>
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
-                                    <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="btn btn-primary">View Table</a>
-                                    <p class="card-text">
-                                        <h5>License check</h5> 
-                                        Automated open data license check
-                                        {% if table.license_status.status %}
-                                        <span class="badge text-bg-success">Success</span>
+    <nav aria-label="Page navigation profile tables" class="pagination-nav">
+        <ul>
+            {% if published_tables_page.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?published_page={{ published_tables_page.previous_page_number }}" tabindex="-1" aria-disabled="true">&laquo;Previous</a>
+                <a href="?published_page=1">1</a>
+            </li>
+            {% endif %}
 
-                                        {% else %}
-                                        <span class="badge text-bg-danger">Failed</span>
-                                        {% endif %}
-                                    </p>
-                                    {% if table.license_status.error %}
-                                    
-                                    <div class="alert alert-danger" role="alert">
-                                        <strong>Reason:</strong> {{ table.license_status.error }}
-                                    </div>
-                                    
-                                    <div class="alert alert-danger" role="alert">
-                                        <strong>Potential publishing without an open license.</strong> Please revisit your metadata and check the license information. 
-                                        Please do not publish data that does not hold an open license. 
-                                        <br>
-                                        
-                                    </div>
-                                    <a href={{EXTERNAL_URLS.spdx_licenses}} class="card-link">Please use a SPDX license identifier.</a>
-                                    {% endif %}                                
-                                    
+            <li class="page-item active">
+                <a class="page-link" href="?published_page={{ published_tables_page.number }}"> {{ published_tables_page.number  }} </a>
+            </li>
+
+            {% if published_tables_page.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?published_page={{published_tables_page.next_page_number}}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+
+    </nav>
+
+</section>
+
+<!-- ###### Draft Tables ###### -->
+<section class="profile-category">
+    <h2 class="profile-category__heading">Draft tables</h2>
+    <span class="current">
+        Page {{ draft_tables_page.number }} of {{ draft_tables_page.paginator.num_pages }}.
+    </span>
+    <div class="profile-tables">
+        <div class="profile-tables__row">
+            {% for table in draft_tables_page %}
+            <div class="profile-tables__col">
+                <div class="profile-table-card">
+                    <div class="profile-table-card__content">
+                        <div class="profile-table-card__content--left">
+                            <!-- Add as soon as the open peer review is finalized -->
+                            {% comment %}
+                            {% if table.is_reviewed %}
+                            <div class="profile-table-card__tag profile-table-card__tag--success" data-bs-toggle="tooltip" data-bs-placement="top" title="The table has been successfully reviewed">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                                </svg>
+                                Reviewed
+                            </div>
+                            <div class="profile-table-card__badge">
+                                <div id="badge-container" hx-get="{% url 'metadata-review-badge-icon' request.user.id table.name %}" hx-trigger="load" hx-swap="outerHTML">
                                 </div>
+                                <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_bronze.png"> -->
+                                <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_platinum.png"> -->
+                            </div>
+                            {% else %}
+                            <div class="profile-table-card__tag profile-table-card__tag--warning" data-bs-toggle="tooltip" data-bs-placement="top" title="The table hasn't been reviewed yet">
+                                Not reviewed
+                            </div>
+                            {% endif %}
+                            {% endcomment %}
+                            <div class="profile-table-card__link">
+                                <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }}</a>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
+                        <div class="profile-table-card__content--right">
+                            {% if table.license_status.status %}
+                            <div class="profile-table-card__tag profile-table-card__tag--info" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check successful">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                                </svg>
+                                License
+                            </div>
+                            <button class="profile-table-card__btn profile-table-card__btn--sm publish-button" data-bs-toggle="modal" data-bs-target="#publishModal" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
 
-        <h2>Draft</h2>
-        <div class="container">
-            <div class="row">
-                {% for table in draft_tables %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card">
-                            <h5 class="card-header">Datatable</h5>
-                            <div class="card-body">
-                                
-                                <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
-                                <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}" class="btn btn-primary">View Table</a>
-                                <p class="card-text">
-                                    <h5>License check</h5>
-                                    Automated open data license check
-                                    {% if table.license_status.status %}
-                                    <span class="badge text-bg-success">Success</span>
+                            {% else %}
+                            <div class="profile-table-card__tag profile-table-card__tag--danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check failed">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                </svg>
+                                License check failed
+                            </div>
+                            <button class="profile-table-card__btn profile-table-card__btn--sm disabled">Publish</button>
+                            {% endif %}
 
-                                    {% else %}
-                                    <span class="badge text-bg-danger">Failed</span>
-                                    {% endif %}
-                                    {% if table.license_status.error %}
-                                    <div class="alert alert-danger" role="alert">
-                                        <strong>Reason:</strong> {{ table.license_status.error }}
-                                    </div>
-                                    <a href={{EXTERNAL_URLS.spdx_licenses}} class="card-link">Please use a SPDX license identifier.</a>
-                                    {% endif %}
-                                </p>
-                                
-                                <p class="card-text">
-                                    
-                                    {% if table.license_status.status and not table.is_publish %}
-                                    <h5>Publish data</h5>
-                                    {% if not table.is_reviewed %}
-                                    
-                                    <span class="badge text-bg-warning">Optional</span>
-                                    <span class="badge text-bg-warning">Open Peer Review is still in development.</span>
-                                    <div class="alert alert-warning" role="alert">
-                                    <strong>Before publishing your data, please note:</strong> 
-                                    While you can publish with an open license, we encourage your participation in the ongoing peer review for this table. 
-                                    Your involvement enhances data quality and credibility. Connect on GitHub or initiate a review on the OpenEnergyPlatform. 
-                                    Thanks for advancing open data practices!
-                                    </div>
-                                </p>
-                                {% endif %}
-                                    <button class="btn btn-primary publish-button" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
-                                    <div class="publish-options" style="display: none;">
-                                        <select class="schema-dropdown"></select>
-                                        <button class="btn btn-secondary confirm-publish">Confirm</button>
-                                    </div>
-                                {% endif %}
+                            <div class="profile-table-card__tag">
+                                <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"></path>
+                                </svg>
+                                {{ table.schema }}
                             </div>
                         </div>
+
+
+                        <!-- Add once embargo branch is merged PR https://github.com/OpenEnergyPlatform/oeplatform/pull/1534 -->
+                        <!-- <div class="profile-table-card__content-secondary">
+                        <span class="profile-table-card__embargo">
+                                Embargo until 06/05/2024
+                                <button type="button" class="btn btn-outline-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Test text">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#294456" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                                    </svg>
+                                </button>
+                            </span>
+                        </div>  -->
                     </div>
-                {% endfor %}
+                    {% if table.license_status.error %}
+                    <div class="profile-table-card__content-danger">
+                        <div class="profile-table-card__content-danger-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                            </svg>
+                        </div>
+                        <div class="profile-table-card__content-danger-message">
+                            {{ table.license_status.error }}
+                        </div>
+                        <div class="profile-table-card__content-danger-details">
+                            <a href="{{EXTERNAL_URLS.spdx_licenses}}">Please use a SPDX license identifier</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
+            {% endfor %}
         </div>
     </div>
-    {% endif %}
-    <div id="reviewedTablesData" style="display: none;">{{ reviewed_tables|json_script:"reviewedTablesData" }}</div>
-    <div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
-    {% endblock %}
-</div>
+    <nav aria-label="Page navigation profile tables" class="pagination-nav">
+        <ul>
+            {% if draft_tables_page.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?draft_page={{ draft_tables_page.previous_page_number }}" tabindex="-1" aria-disabled="true">&laquo;Previous</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <a class="page-link" href="?draft_page={{ draft_tables_page.number }}"> {{ draft_tables_page.number  }} </a>
+            </li>
+
+            {% if draft_tables_page.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?draft_page={{draft_tables_page.next_page_number}}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</section>
+{% endif %}
+
+<div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
 
 
-{% block main-right-sidebar-content %}
-{% if profile_user == request.user %}
-<div class="profile-sidebar">
-    <div class="profile-sidebar__img">
-        {% if profile_user.profile_img %}
-        <img class="rounded-circle account-img" src="{{ profile_user.profile_img.url }}" width="200" height="200" alt="Profile picture">
-        {% else %}
-        <svg width="200" height="200" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <rect width="200" height="200" fill="#e5eef5"/>
-            <path d="m50 48.551c5.543 0 10.078-4.5352 10.078-10.078 0-5.543-4.5352-10.078-10.078-10.078s-10.078 4.5352-10.078 10.078c0 5.543 4.5352 10.078 10.078 10.078zm0-17.633c4.1562 0 7.5586 3.4023 7.5586 7.5586s-3.4023 7.5586-7.5586 7.5586-7.5586-3.4023-7.5586-7.5586 3.4023-7.5586 7.5586-7.5586z" fill="#5295c6"/>
-            <path d="m35.391 71.602h29.156c0.62891 0 1.3242-0.25 1.7617-0.75391 0.44141-0.50391 0.69141-1.1953 0.62891-1.8906-0.62891-9.6367-7.9336-16.879-17.004-16.879-9.0664 0-16.309 7.3047-16.938 16.941-0.0625 0.69141 0.1875 1.3867 0.62891 1.8906 0.50391 0.4375 1.1328 0.69141 1.7656 0.69141zm14.609-17.004c7.6836 0 13.918 6.2344 14.484 14.484h-28.969c0.56641-8.25 6.8008-14.484 14.484-14.484z" fill="#5295c6"/>
-        </svg>
-    {% endif %}
-    </div>
-    <div class="profile-sidebar__block">
-        <div>
-            <p class="profile-sidebar__name"> {{ profile_user.name }} </p>
-        </div>
-        <p>
-            {% if profile_user.fullname %}
-                {{ profile_user.fullname }}
-            {% endif %}
-        </p>
-        {% if profile_user.affiliation %}
-            <div class="profile-sidebar__affiliation">
-                {{ profile_user.affiliation }}
+<!-- Modal for publishing functionality (after pressing publish button) -->
+
+<div class="modal fade" id="publishModal" tabindex="-1" aria-labelledby="publishModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="publishModalLabel">Publish Table</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        {% endif %}
-        <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
-    </div>
-    <div class="profile-sidebar__block">
-        <div class="profile-sidebar__detail">{% if profile_user.work %}
-            <p>
-                <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <path d="m79.305 23.227h-12.359c-2.0547 0.003907-3.7734-1.5508-3.9805-3.5938-0.47656-4.7852-4.5117-8.4297-9.3242-8.418h-7.2812c-4.8125-0.011719-8.8477 3.6328-9.3242 8.418-0.20703 2.043-1.9258 3.5977-3.9805 3.5938h-12.359c-6.9023 0-12.5 5.5938-12.5 12.5v40.559c0 3.3125 1.3203 6.4922 3.6641 8.8398 2.3438 2.3438 5.5234 3.6602 8.8359 3.6602h58.609c3.3125 0 6.4922-1.3164 8.8359-3.6602 2.3438-2.3477 3.6641-5.5273 3.6641-8.8398v-40.559c0-3.3164-1.3203-6.4961-3.6641-8.8398s-5.5234-3.6602-8.8359-3.6602zm-36.051-2.9531c0.16016-1.5977 1.5-2.8125 3.1055-2.8125h7.2812c1.6055 0 2.9453 1.2148 3.1055 2.8125 0.11719 1.0156 0.38672 2.0117 0.80078 2.9531h-15.094c0.41406-0.94141 0.68359-1.9375 0.80078-2.9531zm-22.559 9.2031h58.609c1.6562 0 3.2461 0.65625 4.418 1.8281 1.1719 1.1719 1.832 2.7617 1.832 4.4219v15.457-0.003906c-10.984 5.6797-23.195 8.5664-35.555 8.4062-12.363 0.16016-24.574-2.7266-35.555-8.4062v-15.453c0-3.4531 2.8008-6.25 6.25-6.25zm58.609 53.059h-58.609c-3.4492 0-6.25-2.8008-6.25-6.25v-18.07c10.184 4.6953 21.219 7.2617 32.43 7.543v1.7656c0 1.7227 1.3984 3.125 3.125 3.125s3.125-1.4023 3.125-3.125v-1.7656c11.211-0.28125 22.246-2.8477 32.43-7.543v18.07c0 1.6562-0.66016 3.2461-1.832 4.418s-2.7617 1.832-4.418 1.832z"/>
-                </svg>
-                {{ profile_user.work }}
-            </p>
-        {% endif %}
-        </div>
-        <div class="profile-sidebar__detail">{% if profile_user.location %}
-            <p>
-                <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <path d="m50,2.5c-18.69,0-33.94,15.54-33.94,37.33,0,27.84,18.8,47.83,31.99,57.05h0c1.16.82,2.72.82,3.89,0,13.19-9.22,32-29.23,32-57.05,0-21.79-15.25-37.33-33.94-37.33h0Zm0,6.79c15.02,0,27.15,11.81,27.15,30.54,0,23.44-15.43,41.16-27.15,50.02-11.72-8.86-27.15-26.58-27.15-50.02,0-18.74,12.13-30.54,27.15-30.54Zm0,9.05c-10.58,0-19.23,8.65-19.23,19.23s8.65,19.23,19.23,19.23,19.23-8.65,19.23-19.23-8.65-19.23-19.23-19.23Zm0,6.79c6.91,0,12.44,5.53,12.44,12.44s-5.53,12.44-12.44,12.44-12.44-5.53-12.44-12.44,5.53-12.44,12.44-12.44Z"/>
-                </svg>
-                {{ profile_user.location }}
-            </p>
-        {% endif %}
-        </div>
-        <div class="profile-sidebar__detail">{% if profile_user.email %}
-            <p>
-                <svg width="16" height="16" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <path d="m86 15h-72c-4.8203 0.003906-8.7305 3.9102-8.7383 8.7305v52.59c0.003906 4.8242 3.9141 8.7305 8.7383 8.7305h72c4.8203-0.007812 8.7227-3.9102 8.7305-8.7305v-52.629c-0.027344-4.8047-3.9258-8.6875-8.7305-8.6914zm-3.1914 6-32.199 24.379c-0.35938 0.27734-0.85938 0.27734-1.2188 0l-32.199-24.379zm3.1914 58.051h-72c-1.5078 0-2.7344-1.2227-2.7383-2.7305v-52.32l34.5 26.16c2.5 1.9023 5.9648 1.9023 8.4688 0l34.5-26.16v52.32c0 0.72266-0.28906 1.418-0.80078 1.9297-0.51172 0.51172-1.207 0.80078-1.9297 0.80078z"/>
-                </svg>
-                {{ profile_user.email }}
-            </p>
-            {% endif %}
-            <p> {% if profile_user.linkedin %}
-                <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <path d="m81.676 18.324c-7.7148-7.7148-20.273-7.707-27.992 0l-5.8906 5.8945c-1.2227 1.2227-1.2227 3.1992 0 4.4219 1.2227 1.2227 3.1992 1.2227 4.4219 0l5.8906-5.8945c5.2773-5.2734 13.867-5.2852 19.152 0 5.2773 5.2852 5.2773 13.875 0 19.152l-11.789 11.785c-5.1133 5.1211-14.027 5.1211-19.148 0-1.2227-1.2148-3.1992-1.2266-4.4219 0-1.2227 1.2227-1.2227 3.1992 0 4.4219 3.7344 3.7383 8.707 5.8008 13.992 5.8008s10.258-2.0586 13.992-5.8008l11.789-11.785c7.7148-7.7148 7.7148-20.27 0-27.992z"/>
-                    <path d="m47.793 71.363-5.8906 5.8906c-5.2773 5.2695-13.867 5.2773-19.152 0-5.2773-5.2852-5.2773-13.871 0-19.152l11.789-11.785c5.1133-5.1172 14.039-5.1172 19.148 0 1.2227 1.2227 3.1992 1.2227 4.4219 0 1.2227-1.2148 1.2227-3.1992 0-4.4219-3.7344-3.7383-8.707-5.7969-13.992-5.7969-5.2852 0-10.258 2.0586-13.992 5.7969l-11.789 11.785c-7.7148 7.7227-7.7148 20.27 0 27.992 3.8594 3.8594 8.9297 5.7891 13.992 5.7891s10.141-1.9297 13.996-5.7891l5.8906-5.8906c1.2227-1.2227 1.2227-3.1992 0-4.4219s-3.1992-1.2227-4.4219 0z"/>
-                </svg>
-                <a href="{{ profile_user.linkedin }}">
-                    {{ profile_user.linkedin }}
-                </a>
-                {% endif %}
-            </p>
-            <p> {% if profile_user.facebook %}
-                <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <path d="m81.676 18.324c-7.7148-7.7148-20.273-7.707-27.992 0l-5.8906 5.8945c-1.2227 1.2227-1.2227 3.1992 0 4.4219 1.2227 1.2227 3.1992 1.2227 4.4219 0l5.8906-5.8945c5.2773-5.2734 13.867-5.2852 19.152 0 5.2773 5.2852 5.2773 13.875 0 19.152l-11.789 11.785c-5.1133 5.1211-14.027 5.1211-19.148 0-1.2227-1.2148-3.1992-1.2266-4.4219 0-1.2227 1.2227-1.2227 3.1992 0 4.4219 3.7344 3.7383 8.707 5.8008 13.992 5.8008s10.258-2.0586 13.992-5.8008l11.789-11.785c7.7148-7.7148 7.7148-20.27 0-27.992z"/>
-                    <path d="m47.793 71.363-5.8906 5.8906c-5.2773 5.2695-13.867 5.2773-19.152 0-5.2773-5.2852-5.2773-13.871 0-19.152l11.789-11.785c5.1133-5.1172 14.039-5.1172 19.148 0 1.2227 1.2227 3.1992 1.2227 4.4219 0 1.2227-1.2148 1.2227-3.1992 0-4.4219-3.7344-3.7383-8.707-5.7969-13.992-5.7969-5.2852 0-10.258 2.0586-13.992 5.7969l-11.789 11.785c-7.7148 7.7227-7.7148 20.27 0 27.992 3.8594 3.8594 8.9297 5.7891 13.992 5.7891s10.141-1.9297 13.996-5.7891l5.8906-5.8906c1.2227-1.2227 1.2227-3.1992 0-4.4219s-3.1992-1.2227-4.4219 0z"/>
-                </svg>
-                <a target="_blank" href="{{ profile_user.facebook }}">
-                    {{ profile_user.facebook }}
-                </a>
-                {% endif %}
-            </p>
-            <p> {% if profile_user.twitter %}
-                <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <path d="m81.676 18.324c-7.7148-7.7148-20.273-7.707-27.992 0l-5.8906 5.8945c-1.2227 1.2227-1.2227 3.1992 0 4.4219 1.2227 1.2227 3.1992 1.2227 4.4219 0l5.8906-5.8945c5.2773-5.2734 13.867-5.2852 19.152 0 5.2773 5.2852 5.2773 13.875 0 19.152l-11.789 11.785c-5.1133 5.1211-14.027 5.1211-19.148 0-1.2227-1.2148-3.1992-1.2266-4.4219 0-1.2227 1.2227-1.2227 3.1992 0 4.4219 3.7344 3.7383 8.707 5.8008 13.992 5.8008s10.258-2.0586 13.992-5.8008l11.789-11.785c7.7148-7.7148 7.7148-20.27 0-27.992z"/>
-                    <path d="m47.793 71.363-5.8906 5.8906c-5.2773 5.2695-13.867 5.2773-19.152 0-5.2773-5.2852-5.2773-13.871 0-19.152l11.789-11.785c5.1133-5.1172 14.039-5.1172 19.148 0 1.2227 1.2227 3.1992 1.2227 4.4219 0 1.2227-1.2148 1.2227-3.1992 0-4.4219-3.7344-3.7383-8.707-5.7969-13.992-5.7969-5.2852 0-10.258 2.0586-13.992 5.7969l-11.789 11.785c-7.7148 7.7227-7.7148 20.27 0 27.992 3.8594 3.8594 8.9297 5.7891 13.992 5.7891s10.141-1.9297 13.996-5.7891l5.8906-5.8906c1.2227-1.2227 1.2227-3.1992 0-4.4219s-3.1992-1.2227-4.4219 0z"/>
-                </svg>
-                <a href="{{ profile_user.twitter }}">
-                    {{ profile_user.twitter }}
-                </a>
-                {% endif %}
-            </p>
-        </div>
-    </div>
-    {% if profile_user.description %}
-        <div class="profile-sidebar__block">
-            <div class="profile-sidebar__detail">
-                <div>
-                    <p class="profile-sidebar__detail--header">About</p>
-                    <p>{{ profile_user.description }}</p>
+            <div class="modal-body">
+                <div class="publish-options">
+                    <select class="form-select schema-dropdown"></select>
+                    <button class="btn btn-primary confirm-publish" data-bs-dismiss="modal">Confirm</button>
                 </div>
             </div>
         </div>
-    {% endif %}
+    </div>
 </div>
-
-    {% endif %}
 {% endblock %}
 
 
+{% block main-right-sidebar-content %}
+    {% include "login/sidebar_user.html" %}
+{% endblock main-right-sidebar-content %}
+
 {% block after-body-bottom-js %}
+
+{% compress js %}
+<script src="{% static 'ontology/htmx.js' %}"></script>
+{% endcompress %}
+
 <script type="text/javascript">
 function getCookie(name) {
   let cookieValue = null;
@@ -282,49 +330,49 @@ function publishTable(schema, tableName, toSchema) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-  // Извлекаем данные о схемах
-  let schemaWhitelist = [];
-  const schemaDataElement = document.querySelector('#schemaWhitelistData');
-  if (schemaDataElement) {
-    schemaWhitelist = JSON.parse(schemaDataElement.textContent);
-  }
+    let schemaWhitelist = [];
+    let relatedButton;
+    let publishModalInstance; // Declare publishModalInstance in a higher scope
 
-  document.querySelectorAll('.publish-button').forEach(button => {
-    button.addEventListener('click', function () {
-      const publishOptions = this.nextElementSibling;
-      const dropdown = publishOptions.querySelector('.schema-dropdown');
-      dropdown.innerHTML = '';
-      schemaWhitelist.forEach(schema => {
-        dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
-      });
-      publishOptions.style.display = 'block';
+    const schemaDataElement = document.querySelector('#schemaWhitelistData');
+    if (schemaDataElement) {
+        schemaWhitelist = JSON.parse(schemaDataElement.textContent);
+    }
+
+    // Event listener for modal show event
+    var publishModal = new bootstrap.Modal(document.getElementById('publishModal'));
+    publishModalInstance = bootstrap.Modal.getInstance(publishModal._element);
+
+    publishModalInstance._element.addEventListener('show.bs.modal', function (event) {
+        relatedButton = event.relatedTarget;
+        const dropdown = this.querySelector('.schema-dropdown');
+        dropdown.innerHTML = '';
+        schemaWhitelist.forEach(schema => {
+            dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
+        });
     });
-  });
 
-  document.querySelectorAll('.confirm-publish').forEach(button => {
-    button.addEventListener('click', function () {
-      const publishOptions = this.parentElement;
-      const dropdown = publishOptions.querySelector('.schema-dropdown');
-      const cardElement = this.closest('.card');
-      const publishButton = cardElement.querySelector('.publish-button');
-      const schema = publishButton.getAttribute('data-schema');
-      const tableName = publishButton.getAttribute('data-tableName');
-      const toSchema = dropdown.value;
+    // Event listener for Confirm button click inside the modal
+    document.querySelector('.confirm-publish').addEventListener('click', function () {
+        const dropdown = document.querySelector('.schema-dropdown');
+        if (relatedButton) {
+            const schema = relatedButton.getAttribute('data-schema');
+            const tableName = relatedButton.getAttribute('data-tableName');
+            const toSchema = dropdown.value;
 
-      publishTable(schema, tableName, toSchema);
-      publishOptions.style.display = 'none';
+            publishTable(schema, tableName, toSchema);
+        } else {
+            console.error('relatedButton is not defined.');
+        }
     });
-  });
 });
 </script>
 
-
+<script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+  </script>
 
 {% endblock after-body-bottom-js %}
-
-
-
-
-
-
-

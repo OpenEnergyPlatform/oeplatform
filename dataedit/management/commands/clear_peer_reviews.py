@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
+
 from dataedit.models import PeerReview, PeerReviewManager, Table
 from oeplatform.securitysettings import ONTOLOGY_FOLDER
 
@@ -80,7 +81,6 @@ class Command(BaseCommand):
             table_id = Table.load(schema=peer_review.schema, table=peer_review.table)
 
             try:
-
                 # Update the specific row by ID to set is_reviewed to False
                 table = Table.objects.get(id=table_id)
                 table.is_reviewed = False

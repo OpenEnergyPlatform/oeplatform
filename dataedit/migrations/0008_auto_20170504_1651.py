@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("dataedit", "0007_auto_20160825_1028")]
 
     operations = [

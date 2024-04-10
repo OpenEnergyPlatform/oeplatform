@@ -59,7 +59,7 @@ function App() {
       return <ThemeProvider theme={theme}><ComparisonBoardMain params={param_2} /></ThemeProvider>
     }
     if (param_1 === 'id') {
-      return <ThemeProvider theme={theme}><Factsheet id={param_2} fsData={factsheet} /></ThemeProvider>
+      return <ThemeProvider theme={theme}><Factsheet id={param_2} fsData={factsheet}/></ThemeProvider>
     }
   } else {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
