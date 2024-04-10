@@ -197,19 +197,26 @@ We use two relational databases to store the oeplatform data:
 - The oep-django database is our internal database. It is used to store the django application related data. This includes things like user information, reviews, table names, ...
 - Our primary database is the OEDB (Open Energy Database). It is used to store all data the user uploaded. In production it stores multiple terabyte of data.
 
-Additional we use a graph database:
+Additional we use a triple store database:
 
 - Store the open energy ontologies and open energy knowledge graph
 - For now this is not part of the installation guide as it is not mandatory to run the oeplatform and can be added later.
 
 ### 5.1 How to install the databases
 
-You have two options:
+The required steps are:
 
-1. You chose to install the databases manually by installing PostgreSQL and complete the setup. In this case you can follow our [manual database setup guide](./manual-db-setup.md).
+1. Install the database manually
 
-2. You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system.
-[Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+    - You chose to install the databases manually by installing PostgreSQL & jenna-fuseki and complete the setup. In this case you can follow our [manual database setup guide](./manual-db-setup.md).
+
+    - Using this option you will install the jenna-fuseki & postgresql databases on your local system. You need to start both databases manually before you can start using them for development.
+
+2. User Docker
+
+    - You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system. [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+
+    - The jenna-fuseki triple store is not part of the docker image so far. You would either have to setup the public docker image here and adjust the credentials in the `securitysettings.py` or you can perform the steps explained in [Section 1.2 of the manual database setup](./manual-db-setup.md#12-install-apache-jena-fuseki) to install the jenna-fuseki database on your system. You will have to start the service manually afterwards.
 
 ### 5.2 Create the database table structures
 
