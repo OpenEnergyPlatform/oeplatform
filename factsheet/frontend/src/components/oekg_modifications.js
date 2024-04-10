@@ -27,8 +27,8 @@ export default function Diff() {
     if (loading === false) {
         return (
         <Box sx={{ width: '100%', height: '85vh', overflow:'auto' }}>
-            {  
-                modifications.map((row, index) => 
+            {
+                modifications.map((row, index) =>
                     <Box>
                        <div style={{ backgroundColor: "#001c30e6", color: "white" }}>
                             <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
@@ -51,7 +51,7 @@ export default function Diff() {
                     </Box>
                 )
             }
-            
+
         </Box>
     );
     } else {

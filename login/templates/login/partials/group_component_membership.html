@@ -3,10 +3,10 @@
     <div id="alter-user-result"></div>
     <div class="profile-category__members">
         {% for membership in group.memberships.all %}
-        
+
             {% if is_admin %}
             <div class="profile-category__member">
-                 
+
                 <div class="profile-category__profile-name">
                     {{ membership.user.name }}
                 </div>
@@ -21,7 +21,7 @@
                         </select>
                     </form>
                 </div>
-                
+
             </div>
             {% else %}
             <div class="profile-category__member">
@@ -36,8 +36,8 @@
             </div>
             {% endif %}
             {% if can_delete or is_admin %}
-            <form hx-post="{% url 'partial-group-membership' group_id=group.id %}" 
-            hx-target="#alter-user-result" 
+            <form hx-post="{% url 'partial-group-membership' group_id=group.id %}"
+            hx-target="#alter-user-result"
             hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ group.name }} and retract all permissions?"
             hx-swap="outerHTML"
             data-error-display="alter-user-result">
@@ -50,32 +50,32 @@
         {% endfor %}
 
         {% include 'login/partials/group_component_invite_user.html' %}
-       
+
     </div>
 </section>
 
 
 
 <script>
-  
+
     document.body.addEventListener('htmx:responseError', function(event) {
         // Identify the form that triggered the error
         var form = event.target;
-        
+
         // Use the form's data attribute to find where to display the error message
         var errorDisplayId = form.getAttribute('data-error-display');
         var errorMessageDiv = document.getElementById(errorDisplayId);
 
         // Parse the error message from the response
         var response = JSON.parse(event.detail.xhr.responseText);
-        
+
         // Handle different error keys appropriately
         if (response.error) { // For the invite form error
             errorMessageDiv.innerText = response.error;
         } else if (response.name) { // For the alter user permissions error
             errorMessageDiv.innerText = response.name;
         }
-        
+
         errorMessageDiv.style.display = 'block'; // Make the error message visible
         errorMessageDiv.style.color = 'red'; // Optional styling
     });

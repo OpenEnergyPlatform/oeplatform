@@ -137,7 +137,7 @@
 {% block after-body-bottom-js %}
 
 {% if is_admin %}
-<script>  
+<script>
     /*
     * Handle group autocomplete and add client side form validation.
     */
@@ -177,7 +177,7 @@
     $(function() {
         let validSelection = false;
         let autocompleteSource = []; // This will be filled with your autocomplete data
-    
+
         $('#user_field').bind('input', function() {
             var dfd = new $.Deferred();
             var request = $.ajax({type: 'GET',

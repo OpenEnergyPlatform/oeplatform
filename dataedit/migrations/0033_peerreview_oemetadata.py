@@ -24,7 +24,6 @@ def migrate_oemetadata_rev(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dataedit", "0032_alter_table_is_publish"),
     ]

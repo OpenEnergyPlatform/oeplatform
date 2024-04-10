@@ -10,7 +10,6 @@ class Command(BaseCommand):
         parser.add_argument("command", choices=["download", "update"])
 
     def handle(self, *args, **options):
-
         if options["command"] == "download":
             os.system("git pull --recurse-submodules")
 

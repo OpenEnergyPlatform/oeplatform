@@ -6,7 +6,7 @@
     @include flex-row;
     padding-top: $C--padding-standard;
     padding-bottom: $C--padding-standard;
-    
+
     @include media-breakpoint-up(md) {
         justify-content: center;
     }
