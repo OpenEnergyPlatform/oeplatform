@@ -6,7 +6,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dataedit", "0011_tablerevision_size"),
         ("dataedit", "0009_auto_20170404_1222"),

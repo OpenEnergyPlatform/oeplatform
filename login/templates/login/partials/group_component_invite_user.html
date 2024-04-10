@@ -7,7 +7,7 @@
                 {% if error %}
                     <div style="color:#ff0000">{{ error.value }}</div>
                 {% endif %}
-                
+
             </form>
             <div id="error-message"></div>
             <button form="invite-form" type="submit" value="Submit">
@@ -21,12 +21,12 @@
     </div>
 </div>
 
-<!-- 
+<!--
 <script>
     document.body.addEventListener('htmx:responseError', function(event) {
         var usernameInput = document.getElementById('username-input');
         usernameInput.classList.add('error-outline'); // Highlight the input in red
-        
+
         var errorMessageDiv = document.getElementById('error-message');
         var response = JSON.parse(event.detail.xhr.responseText);
         errorMessageDiv.innerText = response.error;
@@ -36,7 +36,7 @@
         // Remove error styling and message before a new request
         var usernameInput = document.getElementById('username-input');
         usernameInput.classList.remove('error-outline');
-        
+
         var errorMessageDiv = document.getElementById('error-message');
         errorMessageDiv.innerText = '';
     });

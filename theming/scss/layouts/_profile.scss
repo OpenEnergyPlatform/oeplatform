@@ -143,7 +143,7 @@ main.main .content .content__container.content__container--profile {
 
         &__item--done {
             @extend .border;
-            
+
             .profile-rvw__item-type {
                 @extend .ps-3;
             }
@@ -192,7 +192,7 @@ main.main .content .content__container.content__container--profile {
 
             button {
                 @extend .btn;
-                @extend .btn-light; 
+                @extend .btn-light;
                 @extend .dropdown-toggle;
             }
         }
@@ -255,7 +255,7 @@ main.main .content .content__container.content__container--profile {
     &__btn {
         @extend .btn;
         min-width: 8rem;
-        
+
         &--undo {
             @extend .btn-link;
         }

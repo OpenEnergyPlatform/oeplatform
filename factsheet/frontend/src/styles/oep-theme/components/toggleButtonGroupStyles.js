@@ -14,4 +14,3 @@ const toggleButtonGroupStyles = {
 };
 
 export default toggleButtonGroupStyles;
-

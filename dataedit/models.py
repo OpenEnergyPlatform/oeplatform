@@ -1,6 +1,6 @@
-from enum import Enum
 import json
 import logging
+from enum import Enum
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError

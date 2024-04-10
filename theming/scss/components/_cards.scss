@@ -21,7 +21,7 @@
             &:first-of-type {
                 @extend .ps-0;
             }
-    
+
             &:last-of-type {
                 @extend .pe-0;
             }
@@ -142,7 +142,7 @@
         max-width: 20rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;  
+        -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: normal;

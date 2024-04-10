@@ -27,7 +27,7 @@ function App() {
       return data;
     }
   };
-  
+
   useEffect(() => {
     getData().then((data) => {
       setFactsheet(data);
@@ -41,7 +41,7 @@ function App() {
         <Home />
       </ThemeProvider>
     );
-  } 
+  }
 
 
   if (param_1 === 'oekg_history') {
@@ -53,13 +53,13 @@ function App() {
   }
 
   if (loading === false) {
-   
+
     if (param_1 === 'compare') {
       return <ThemeProvider theme={theme}><ComparisonBoardMain params={param_2} /></ThemeProvider>
     }
     if (param_1 === 'id') {
       return <ThemeProvider theme={theme}><Factsheet id={param_2} fsData={factsheet}/></ThemeProvider>
-    } 
+    }
   } else {
     return <LinearProgress />
   }

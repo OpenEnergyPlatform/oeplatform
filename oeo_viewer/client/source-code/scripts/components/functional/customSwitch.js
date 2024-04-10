@@ -82,8 +82,8 @@ export default function CustomSwitch(props) {
           checked={state.checkedB}
           onChange={handleChange}
           name="checkedB"
-        />  
-      
+        />
+
     </div>
   );
 }

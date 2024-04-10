@@ -124,15 +124,15 @@ export default function Scenario(props) {
     createData('dea_technology_data_generation', 'WAM', 'Europe', 2020, 3.9),
   ];
 
-    
-    
+
+
     const [scenariosInputDatasetsObj, setScenariosInputDatasetsObj] = useState(data.input_datasets);
     const [scenariosOutputDatasetsObj, setScenariosOutputDatasetsObj] = useState(data.output_datasets);
     const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
     const [value, setValue] = React.useState(0);
 
     const [expandedDesciptorList, setExpandedDesciptorList] = useState([]);
-    
+
 
     const findNestedObj = (entireObj, keyToFind, valToFind) => {
       let foundObj;
@@ -216,14 +216,14 @@ export default function Scenario(props) {
         scenariosOutputDatasetsHandler(updateScenariosOutputDatasetsObj, data.id);
       };
 
-    
+
     const expandDescriptorsHandler = (expandedDescriptorList) => {
       const zipped = []
       expandedDescriptorList.map((v) => zipped.push({ "value": v, "label": v }));
       setExpandedDesciptorList(zipped);
     };
 
-    
+
 
     const options_db_names = oedb_iris;
     const options_db_iris = oedb_names;
@@ -239,7 +239,7 @@ export default function Scenario(props) {
 
 
 
-    const mapping = 
+    const mapping =
           "@prefix rr: <http://www.w3.org/ns/r2rml#>. \n \
           @prefix oeo: <http://openenergy-platform.org/ontology/oeo/>. \n \
           <#Mapping> \n \
@@ -281,14 +281,14 @@ export default function Scenario(props) {
 
   return (
     <Typography variant="body2">
-      <Grid 
+      <Grid
         container
         direction="row"
         justifyContent="space-between"
         alignItems="start"
-        spacing={2} 
+        spacing={2}
       >
-        
+
         <BundleScenariosGridItem
           {...props}
           labelGridSize = {3}
@@ -297,7 +297,7 @@ export default function Scenario(props) {
           tooltipText="A study is a project with the goal to investigate something."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020011"
           renderField={() => (
-            <TextField 
+            <TextField
               size="small"
               variant='outlined'
               style={{  width: '100%' }}
@@ -319,7 +319,7 @@ export default function Scenario(props) {
           tooltipText="An acronym is an abbreviation of the title by using the first letters of each part of the title."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000048"
           renderField={() => (
-            <TextField 
+            <TextField
               size="small"
               variant='outlined'
               style={{  width: '100%' }}
@@ -342,7 +342,7 @@ export default function Scenario(props) {
           hrefLink="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract"
           linkText="More info..."
           renderField={() => (
-            <TextField 
+            <TextField
               size="small"
               variant='outlined'
               style={{  width: '100%' }}
@@ -367,7 +367,7 @@ export default function Scenario(props) {
           tooltipText="A study region is a spatial region that is under investigation and consists entirely of one or more subregions."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020032"
           renderField={() => (
-            <CustomAutocompleteWithoutAddNew  
+            <CustomAutocompleteWithoutAddNew
               width="100%"
               showSelectedElements={true}
               optionsSet={options_LCC}
@@ -387,7 +387,7 @@ export default function Scenario(props) {
           tooltipText="An interacting region is a spatial region that interacts with a study region. It is part of a considered region, but not a study region."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020036"
           renderField={() => (
-            <CustomAutocompleteWithoutAddNew  
+            <CustomAutocompleteWithoutAddNew
               width="100%"
               showSelectedElements={true}
               optionsSet={options_LCC}
@@ -397,12 +397,12 @@ export default function Scenario(props) {
               noTooltip={true}
             />
           )}
-          /* <CustomAutocomplete  width="100%" type="interacting region" 
+          /* <CustomAutocomplete  width="100%" type="interacting region"
            editHandler={HandleEditInteractingRegion}
             addNewHandler={HandleAddNewInteractingRegion}
-             showSelectedElements={true} 
-             selectedElements={data.interacting_regions} 
-             manyItems optionsSet={scenarioInteractingRegion} 
+             showSelectedElements={true}
+             selectedElements={data.interacting_regions}
+             manyItems optionsSet={scenarioInteractingRegion}
              kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/> */
           TooltipComponent={HtmlTooltip}
         />
@@ -423,7 +423,7 @@ export default function Scenario(props) {
               selectedElements={data.scenario_years}
               manyItems optionsSet={scenarioYears}
               kind=''
-              handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)} 
+              handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}
             />
           )}
           TooltipComponent={HtmlTooltip}
@@ -436,16 +436,16 @@ export default function Scenario(props) {
           tooltipText="A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
           renderField={() => (
-            <CustomTreeViewWithCheckBox 
-              showFilter={true} 
-              size="300px" 
-              checked={data.descriptors} 
+            <CustomTreeViewWithCheckBox
+              showFilter={true}
+              size="300px"
+              checked={data.descriptors}
               expanded={getNodeIds(descriptors)}
-              handler={(list, nodes, id) => scenarioDescriptorHandler(list, nodes, data.id)} 
-              expandedHandler={expandDescriptorsHandler} 
-              data={descriptors} 
-              title={""} 
-              toolTipInfo={['A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000364']} 
+              handler={(list, nodes, id) => scenarioDescriptorHandler(list, nodes, data.id)}
+              expandedHandler={expandDescriptorsHandler}
+              data={descriptors}
+              title={""}
+              toolTipInfo={['A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000364']}
             />
           )}
           TooltipComponent={HtmlTooltip}
@@ -467,7 +467,7 @@ export default function Scenario(props) {
                 <AddIcon />
               </IconButton>
             </span>}
-          renderField={() => 
+          renderField={() =>
             Object.keys(scenariosInputDatasetsObj).length > 0 &&  scenariosInputDatasetsObj.map((item, index) => (
               <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
                 <Grid item xs={5} >
@@ -524,7 +524,7 @@ export default function Scenario(props) {
                 <AddIcon />
               </IconButton>
             </span>}
-          renderField={() => 
+          renderField={() =>
             Object.keys(scenariosOutputDatasetsObj).length > 0 && scenariosOutputDatasetsObj.map((item, index) => (
              <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
               <Grid item xs={5} >
@@ -567,4 +567,3 @@ export default function Scenario(props) {
     </Typography>
   );
 }
-

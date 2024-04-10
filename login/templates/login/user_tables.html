@@ -60,7 +60,7 @@
                                 License check failed
                             </div>
                             {% endif %}
-                            
+
                             <div class="profile-table-card__tag">
                                 <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"></path>
@@ -80,7 +80,7 @@
                                     </svg>
                                 </button>
                             </span>
-                        </div> -->    
+                        </div> -->
                     </div>
                     {% if table.license_status.error %}
                     <div class="profile-table-card__content-danger">
@@ -123,7 +123,7 @@
                 <a href="?published_page=1">1</a>
             </li>
             {% endif %}
-            
+
             <li class="page-item active">
                 <a class="page-link" href="?published_page={{ published_tables_page.number }}"> {{ published_tables_page.number  }} </a>
             </li>
@@ -134,9 +134,9 @@
             </li>
             {% endif %}
         </ul>
-        
+
     </nav>
-    
+
 </section>
 
 <!-- ###### Draft Tables ###### -->
@@ -186,7 +186,7 @@
                                 License
                             </div>
                             <button class="profile-table-card__btn profile-table-card__btn--sm publish-button" data-bs-toggle="modal" data-bs-target="#publishModal" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
-                            
+
                             {% else %}
                             <div class="profile-table-card__tag profile-table-card__tag--danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check failed">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
@@ -196,7 +196,7 @@
                             </div>
                             <button class="profile-table-card__btn profile-table-card__btn--sm disabled">Publish</button>
                             {% endif %}
-                            
+
                             <div class="profile-table-card__tag">
                                 <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"></path>
@@ -204,8 +204,8 @@
                                 {{ table.schema }}
                             </div>
                         </div>
-                        
-                            
+
+
                         <!-- Add once embargo branch is merged PR https://github.com/OpenEnergyPlatform/oeplatform/pull/1534 -->
                         <!-- <div class="profile-table-card__content-secondary">
                         <span class="profile-table-card__embargo">
@@ -217,7 +217,7 @@
                                     </svg>
                                 </button>
                             </span>
-                        </div>  -->                               
+                        </div>  -->
                     </div>
                     {% if table.license_status.error %}
                     <div class="profile-table-card__content-danger">
@@ -247,7 +247,7 @@
                 <a class="page-link" href="?draft_page={{ draft_tables_page.previous_page_number }}" tabindex="-1" aria-disabled="true">&laquo;Previous</a>
             </li>
             {% endif %}
-            
+
             <li class="page-item active">
                 <a class="page-link" href="?draft_page={{ draft_tables_page.number }}"> {{ draft_tables_page.number  }} </a>
             </li>
@@ -373,13 +373,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl)
     })
-  </script>  
+  </script>
 
 {% endblock after-body-bottom-js %}
-
-
-
-
-
-
-

@@ -64,7 +64,6 @@ class MetaDataWidget:
             html = mark_safe("")
 
         if isinstance(data, dict):
-
             html += mark_safe("") if level == 0 else mark_safe("<ul>")
             for key, value in data.items():
                 if level == 0:
@@ -89,7 +88,6 @@ class MetaDataWidget:
             html += mark_safe("") if level == 0 else mark_safe("</ul>")
 
         elif isinstance(data, list):
-
             # For list item control
             no_valid_item = True
 
