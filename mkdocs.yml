@@ -105,7 +105,7 @@ nav:
         - install-and-documentation/oeplatform-code/web-api/index.md
         - OEDB REST-API: 
           - install-and-documentation/oeplatform-code/web-api/oedb-rest-api/index.md
-          - Draft open-API schema: install-and-documentation/oeplatform-code/web-api/oedb-rest-api/swagger-ui.html
+          # - Draft open-API schema: install-and-documentation/oeplatform-code/web-api/oedb-rest-api/swagger-ui.html
         - OEKG API:
           - install-and-documentation/oeplatform-code/web-api/oekg-api/index.md 
       - Features:
