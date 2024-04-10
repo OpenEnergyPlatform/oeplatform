@@ -1,6 +1,6 @@
-from enum import Enum
 import json
 import logging
+from enum import Enum
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
@@ -178,7 +178,7 @@ class PeerReview(models.Model):
     review = JSONField(null=True)
     # TODO: Maybe oemetadata should be stored in a separate table and imported
     # via FK here / change also for Tables model
-    oemetadata = JSONField(null=False, default=None)
+    oemetadata = JSONField(null=False, default=dict)
 
     # laden
     @classmethod

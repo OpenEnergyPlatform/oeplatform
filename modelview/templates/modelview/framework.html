@@ -8,9 +8,9 @@
 
 {% block main-right-sidebar-content-actions %}
   <a class="btn btn-info" href="edit">Edit</a>
-  <a class="btn btn-danger" 
-    hx-delete="{% url 'modelview:delete-factsheet' sheettype='framework' pk=model.pk %}" 
-    hx-confirm="Are you sure you want to delete this entry?" 
+  <a class="btn btn-danger"
+    hx-delete="{% url 'modelview:delete-factsheet' sheettype='framework' pk=model.pk %}"
+    hx-confirm="Are you sure you want to delete this entry?"
     >
     Delete
   </a>
@@ -28,7 +28,7 @@
         <div class="toast-body" id="toastBody"></div>
     </div>
   </div>
-  
+
   <div class="card-container">
     <div class="card ">
       <div class="card-header">

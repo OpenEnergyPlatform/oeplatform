@@ -400,7 +400,7 @@ function Factsheet(props) {
             }
 
           }
-          
+
         }).catch(error => {
           if (error.response && error.response.status === 403) {
             // Handle "Access Denied" error
@@ -2638,12 +2638,12 @@ function Factsheet(props) {
       // case 9:
       //   return (
       //     <div>
-      //       <Sunburst 
-      //         width="700" 
-      //         data={sunburstData} 
-      //         handleNonFittingLabel={handleNonFittingLabelFn}  
-      //         minSliceAngle={0.4} 
-      //         label={"label"} 
+      //       <Sunburst
+      //         width="700"
+      //         data={sunburstData}
+      //         handleNonFittingLabel={handleNonFittingLabelFn}
+      //         minSliceAngle={0.4}
+      //         label={"label"}
       //         sort={((a, b) => a.value - b.value)}
       //         excludeRoot={true}
       //         radiusScaleExponent={1}

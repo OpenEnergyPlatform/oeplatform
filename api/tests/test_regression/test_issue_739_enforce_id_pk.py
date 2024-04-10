@@ -48,7 +48,6 @@ class Test_issue_739_enforce_id_pk(APITestCase):
         self.assertGreaterEqual(res[0]["id"], 0)  # auto generated id
 
     def test_id_type_and_pk(self):
-
         res = self.create_table(
             {"columns": [{"name": "id", "data_type": "int", "primary_key": True}]},
             "test_id_ok",
