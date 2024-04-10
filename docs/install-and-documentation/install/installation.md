@@ -21,6 +21,9 @@ The installation steps have been proofed on linux and windows for python 3.6 and
 
 ??? Info "All steps & commands in one list"
 
+    This list of commands will only work on systems where the core system dependencies
+    already exists. Please use the full installation guide in case you encounter errors.
+
     1. Get code & install dependencies.
         - `git clone https://github.com/OpenEnergyPlatform/oeplatform.git`
         - `cd oeplatform`
@@ -28,9 +31,17 @@ The installation steps have been proofed on linux and windows for python 3.6 and
         - `source env/bin/activate`
         - `pip install -r requirements.txt`
 
-    2. Install databases & setup connection
-        - Setup database 
-        - Setup the connection to the database server to the Django project by adding the credentials in the `oeplatoform/securitysettings.py`
+    2. Setup the OEO integration
+        - Instructions on [Section 4](#41-include-the-full-oeo)
+        - Automatically added in docker container
+    
+    3. Loading and compressing static assets
+        - `python manage.py collectstatic`
+        - `python manage.py compress`
+        - Automatically added in docker container
+
+    4. Install databases & setup connection
+        - Chose option 1 to use docker to install PostgreSQL chose 2 to install it on your system
 
         ??? info "Option 1: Use docker"
             - [Install docker](https://docs.docker.com/get-docker/)
@@ -40,31 +51,47 @@ The installation steps have been proofed on linux and windows for python 3.6 and
 
         ??? info "Option 2: Manual database setup"
             - [install manually](./manual-db-setup.md)
+        
+        Summary:
 
-    3. Setup the OEO integration
-        - Instructions on [Section 4](#41-include-the-full-oeo)
+        - Setup databases PostgreSQL, Jenna-Fuseki
+        - Install & start Jenna-Fuseki and create datastore `OEKG_DS` via the web interface
+        - Install PostgreSQL  
+        - Use db user `postgres` with password `postgres`: 
+        - Create databases: `oep_django`, `oedb`: `sudo -u postgres psql`
+        - Install postgresql extensions `hstore`, `postgis`, `postgis_topology`, `pg_trgm`
+        - Setup the connection to the database server to the Django project by adding the credentials in the `oeplatoform/securitysettings.py`
     
-    4. Run management commands
-        - `python manage.py collectstatic`
-        - `python manage.py compress`
+    5. Run management commands to complete the database setup
         - `python manage.py migrate`
         - `python manage.py alembic upgrade head`
 
         ??? Info "Sept 3.1: Management commands:" 
-            These commands are most likely not relevant if you are setting up oeplatform for the first time. One exception is the mirror command. If you have created some tables manually in the oedb database, you can use the mirror command to register them in the oeplatform.
-
-            - `python manage.py mirror`
-
-            Use the following command to show a list of all available management commands.
+            These commands are most likely not relevant if you are setting up oeplatform for the first time. Use the following command to show a list of all available management commands.
+            
             - `python manage.py -h`
+    
+    6. Install react app
 
+        - Install node oder nvm on your system
+        - navigate into `factsheet/frontend` to install the scenario bundles 
+        - navigate into the `oeo_viewer/client` to install the oeo viewer
+        - Run `npm install`
+        - Navigate back `cd ../..` to oeplatform root
+        - Make sure the jenna-fuseki database is up and running locally
+        - Run management commands to install bot react apps
+            - `python manage.py build_factsheet_app`
+            - `python manage.py build_oeo_viewer`
+        - Update the served javaScript bundle files in templates:
+            - `factsheet/static/js/main###.js` -> `factsheet/template/index.html`
+            - `oeo_viewer/static/js/main###.js` -> `oeo_viewer/template/index.html`
 
-    5. Deploy locally
+    7. Deploy locally
         - Check if the all connected database servers are running.
         - `python manage.py runserver`
         - Open Browser URL: 127.0.0.1:8000
 
-        - [create a test user.](./development-setup.md#user-management)
+        - [create a test user.](./development-setup.md#user-management-setup-a-test-user)
 
 ## 0 Prequisit
 
@@ -150,7 +177,15 @@ If you use the default naming "ontologies" you should create this directory. The
 
 Static data is often stored in the django apps and various additional scripts are loaded, e.g. in HTML files. To enable django to access these resources more efficiently, various management commands are used to collect and partially compress the relevant files.
 
-Make sure the python environment is activated and then run:
+To be able to run the commands below we first need to Setup the security settings file for local development. This file is specific to your local settings. In production environment it is used to store / retrieve critical information that must not be pushed to any publicly available source control system like GitHub.
+
+- Navigate to `oeplatform/oeplatform`
+- copy the file `securitysettings.py.default` and rename it to  `securitysettings.py`
+
+??? note "How to configure securitysettings.py"
+    The security settings provide information to django to connect to your databases relevant for step 5. below . You can provide the access credentials directly in the script or import them using environment variables. For detailed instructions see section [3. of the manual database setup guide](./manual-db-setup.md#3-connect-database-to-the-django-project).
+
+After the above setup is done make sure the python environment is activated and then run:
 
     python manage.py collectstatic
     python manage.py compress
@@ -180,6 +215,10 @@ You have two options:
 
 Before you can start development, you need to setup tables in the two PostgreSQL databases. To do this, you can run two management commands. The django command will set up all structures required by the oep system in the oep_django database and the alembic command will create all the structures in the OEDB. These structures define how large amounts of uploaded user data is stored in the database. On a high level this is similar to partitions on you personal computer. This structure help's the developers and the system to find the data and group data together.
 
+First verify that your database service is running. In case you are using docker start the container. If you installed postgresql locally start the service. On Linux you can use the following command in the terminal:
+
+    sudo service postgresql start
+
 ### 5.2.1 Django setup - oep_django
 
 In order to run the OEP website, the django database needs some extra management tables.
@@ -193,6 +232,9 @@ In order to run the OEP website, the primary database needs some extra managemen
 We use `alembic` to keep track of changes to the general structure of the primary database and its initial state e.g. what tables should be there and more. To create all tables that are needed, simply type:
 
     python manage.py alembic upgrade head
+
+!!! Note
+    If you encounter errors in this step verify that your database service is available, the databases `oep_django` and `oedb` exist and your `securitysettings.py` provide the correct access credentials.  
 
 ## 6 Install the OpenEnergyOntology tools
 

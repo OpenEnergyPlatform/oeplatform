@@ -46,20 +46,28 @@ For the creation of spatial objects we use the [PostGIS](https://postgis.net/ins
     - On Linux/Unix based systems the installation could be specific to the package manager being employed and the operating system, so please refer to the official installation instructions [here](https://postgis.net/install/). The section `Binary Installers` covers the installation instructions for various operating systems.
     
     ```
-    sudo apt-getinstallbinutilslibproj-devgdal-bin
+    sudo apt update
+    sudo apt upgrade
     sudo apt install postgresql-14-postgis-3
+
+    # might be relevant in some cases:
+    # sudo apt-get install bin utils libproj-dev gdal-bin
     ```
+
+- on linux you can start the service by running: `sudo service postgresql start`
 
 ### 1.2 Install Apache Jena Fuseki
 
 !!! note
     - Skip the installation if your development task is not aimed at the [OEKG](https://openenergyplatform.github.io/organisation/family_members/knowledge-representation/oekg/).
     - For more information about Apache Jena Fuseki please visit [this page.](https://jena.apache.org/documentation/fuseki2/)
+    - Note that java is required to run the software
 
 1. Download [apache-jena-fuseki-4.2.0.tar.gz](https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-4.2.0.tar.gz)
 (for other versions please check [here](https://jena.apache.org/download/))
-2. Extract the downloaded file.
-3. Navigate to the directory where the files are extracted and execute the following command to start the server:
+2. Create a new directory on your system where you install oeplatform infrastructure components e.g. `~/oep-infra/` as alternative you can use the jenna-fuseki db via docker container. In this case you need to specify the correct credentails for that container in the `securitysettings.py` (See [Step 3.](#3-connect-database-to-the-django-project))
+3. Extract the downloaded file to the new directory e.g. `tar -zxvf apache-jena-fuseki-4.2.0.tar.gz -C ~/oep-infra/`.
+4. Navigate to the directory where the files are extracted and execute the following command to start the server:
 
         ./fuseki-server
 
