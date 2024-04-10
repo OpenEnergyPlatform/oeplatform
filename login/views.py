@@ -1,34 +1,34 @@
-from itertools import groupby
 import json
+from itertools import groupby
 
 from django import forms
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.http import (
     HttpResponse,
-    JsonResponse,
-    HttpResponseNotAllowed,
     HttpResponseForbidden,
+    HttpResponseNotAllowed,
+    JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-
 from rest_framework.authtoken.models import Token
 
 import login.models as models
+from dataedit.models import PeerReviewManager, Table
+from dataedit.views import schema_whitelist
 from login.utilities import (
     get_badge_icon_path,
     get_review_badge_from_table_metadata,
+    get_tables_if_group_assigned,
+    get_user_tables,
+    validate_open_data_license,
 )
-from dataedit.models import PeerReviewManager, Table
-from dataedit.views import schema_whitelist
-
-
 from oeplatform.settings import UNVERSIONED_SCHEMAS
 
 from .forms import (
@@ -41,14 +41,8 @@ from .forms import (
 )
 
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
-from .models import WRITE_PERM, DELETE_PERM, ADMIN_PERM, GroupMembership, UserGroup
+from .models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
-
-from login.utilities import (
-    validate_open_data_license,
-    get_user_tables,
-    get_tables_if_group_assigned,
-)
 
 ###########################################################################
 #            User Tables related views & partial views for htmx           #
@@ -405,9 +399,9 @@ def group_leave(request, group_id: int):
     errors: dict = {}
     members = GroupMembership.objects.filter(group=group).exclude(user=user.id).count()
     if members == 0:
-        errors["err_leave"] = (
-            "Please delete the group instead (you are the only member)."
-        )
+        errors[
+            "err_leave"
+        ] = "Please delete the group instead (you are the only member)."
         return JsonResponse(errors, status=400)
 
     if membership.level >= ADMIN_PERM:
@@ -556,9 +550,9 @@ class GroupManagement(View, LoginRequiredMixin):
                 membership.save()
                 response = HttpResponse()
                 # response["profile_user"] = user
-                response["HX-Redirect"] = (
-                    f"/user/profile/1/groups?create_msg=True&profile_user={user}"
-                )
+                response[
+                    "HX-Redirect"
+                ] = f"/user/profile/1/groups?create_msg=True&profile_user={user}"
                 return response
 
 
@@ -628,9 +622,9 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
                     errors["name"] = "A group needs at least one admin"
                     return JsonResponse(errors, status=405)
             elif membership.level < target_membership.level:
-                errors["name"] = (
-                    "You cant remove memberships with higher permission level."
-                )
+                errors[
+                    "name"
+                ] = "You cant remove memberships with higher permission level."
                 return JsonResponse(errors, status=400)
 
             target_membership.delete()
@@ -657,9 +651,9 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
             response = HttpResponse()
             user_id = request.user.id
             response["profile_user"] = user_id
-            response["HX-Redirect"] = (
-                f"/user/profile/1/groups?delete_msg=True&profile_user={user_id}"
-            )
+            response[
+                "HX-Redirect"
+            ] = f"/user/profile/1/groups?delete_msg=True&profile_user={user_id}"
             return response
         else:
             raise PermissionDenied
@@ -906,7 +900,6 @@ def activate(request, token):
 
 def token_reset(request):
     if request.user.is_authenticated:
-
         user_token = get_object_or_404(
             Token, user=request.user.id
         )  # Get the current user's token

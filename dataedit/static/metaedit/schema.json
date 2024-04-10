@@ -1,1136 +1,896 @@
 {
-    "title": "oemetaBuilder - Create & edit oemetadata json files using OEMetadata v1.6",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/master/oemetadata/latest/schema.json",
-    "description": "Create & edit oemetadata json files using the OEMetadata v1.6 schema. See the Open Energy Platform metadata standard: https://github.com/OpenEnergyPlatform/oemetadata",
-    "type": "object",
-    "properties": {
-        "name": {
-            "description": "File name or database table name",
-            "example": "oep_metadata_table_example_v160",
-            "type": [
-                "string",
-                "null"
-            ],
-            "badge": "Silver",
+  "title": "oemetaBuilder - Create & edit oemetadata json files using OEMetadata v1.6",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/master/oemetadata/latest/schema.json",
+  "description": "Create & edit oemetadata json files using the OEMetadata v1.6 schema. See the Open Energy Platform metadata standard: https://github.com/OpenEnergyPlatform/oemetadata",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "File name or database table name",
+      "example": "oep_metadata_table_example_v160",
+      "type": ["string", "null"],
+      "badge": "Silver",
+      "title": "Name"
+    },
+    "title": {
+      "description": "A Human readable, full title , including author.",
+      "example": "RLI - OEMetadata - Metadata example table",
+      "type": ["string", "null"],
+      "badge": "Silver",
+      "title": "Title"
+    },
+    "id": {
+      "description": "Uniform Resource Identifier (URI) that unambiguously identifies the resource. This can be a URL on the data set. It can also be a Digital Object Identifier (DOI).",
+      "example": "https://example.com",
+      "type": ["string", "null"],
+      "badge": "Bronze",
+      "title": "ID",
+      "readonly": true
+    },
+    "description": {
+      "description": "A description of the package. It should be usable as summary information for the entire package that is described by the metadata.",
+      "example": "Example table used to illustrate the metadata structure and meaning.",
+      "type": ["string", "null"],
+      "badge": "Silver",
+      "title": "Description"
+    },
+    "subject": {
+      "description": "Reference the topic of the resource in ontology terms",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The class label of the OEO term.",
+            "example": "energy",
+            "format": "autocomplete",
+            "options": {
+              "autocomplete": {
+                "search": "search_name",
+                "getResultValue": "getResultValue_name",
+                "renderResult": "renderResult_name",
+                "autoSelect": true
+              }
+            },
+            "type": ["string", "null"],
+            "badge": "Platinum",
             "title": "Name"
+          },
+          "path": {
+            "description": "The URI of the class.",
+            "example": "https://openenergy-platform.org/ontology/oeo/OEO_00000150",
+            "type": ["string", "null"],
+            "badge": "Platinum",
+            "title": "Path",
+            "format": "uri"
+          }
         },
-        "title": {
-            "description": "A Human readable, full title , including author.",
-            "example": "RLI - OEMetadata - Metadata example table",
-            "type": [
-                "string",
-                "null"
-            ],
+        "badge": "Platinum",
+        "title": "Subject",
+        "additionalProperties": false
+      },
+      "badge": "Platinum",
+      "title": "Subject"
+    },
+    "language": {
+      "description": "List of languages used within the described data structures (e.g. titles, descriptions). Standard: IETF (BCP47).",
+      "example": "[en-GB, de-DE, fr-FR]",
+      "type": "array",
+      "items": {
+        "description": "Language used within the described data structures (e.g. titles, descriptions). The language key can be repeated if more languages are used. Standard: IETF (BCP47)",
+        "example": "en-GB",
+        "type": ["string", "null"],
+        "badge": "Gold",
+        "title": "Language"
+      },
+      "badge": "Gold",
+      "title": "Language"
+    },
+    "keywords": {
+      "description": "A list of string keywords to assist users searching for the package in catalogs.",
+      "example": "[example, template, test]",
+      "type": "array",
+      "items": {
+        "description": "A keyword to assist users searching for the package in catalogs.",
+        "example": "template",
+        "type": ["string", "null"],
+        "badge": "Silver",
+        "title": "Keyword"
+      },
+      "badge": "Silver",
+      "title": "Keywords"
+    },
+    "publicationDate": {
+      "description": "Date of publishing. Date Format is ISO 8601 (YYYY-MM-DD)",
+      "example": "2019-02-06",
+      "type": ["string", "null"],
+      "badge": "Bronze",
+      "title": "Publication date",
+      "format": "date"
+    },
+    "context": {
+      "description": "An Object that describes the general setting, evironment or project leading to the creation or maintenance of this dataset. In science this can be the research project.",
+      "type": "object",
+      "properties": {
+        "homepage": {
+          "description": "URL of project.",
+          "example": "https://openenergy-platform.org/",
+          "type": ["string", "null"],
+          "badge": "Gold",
+          "title": "Homepage",
+          "format": "uri"
+        },
+        "documentation": {
+          "description": "A URL of the project's documentation.",
+          "example": "https://openenergy-platform.org/about/",
+          "type": ["string", "null"],
+          "badge": "Gold",
+          "title": "Documentation"
+        },
+        "sourceCode": {
+          "description": "A URL of the projects source code.",
+          "example": "https://github.com/OpenEnergyPlatform",
+          "type": ["string", "null"],
+          "badge": "Gold",
+          "title": "Source Code"
+        },
+        "contact": {
+          "description": "A reference to the creator or maintainer of the data set. This can be an email address or a GitHub handle.",
+          "example": "contact@example.com",
+          "type": ["string", "null"],
+          "badge": "Gold",
+          "title": "E-Mail Contact",
+          "format": "email"
+        },
+        "grantNo": {
+          "description": "An identifying grant number. In case of a publicly funded project, this number is assigned by the funding agency.",
+          "example": "01AB2345",
+          "type": ["string", "null"],
+          "badge": "Gold",
+          "title": "Grant no"
+        },
+        "fundingAgency": {
+          "description": "In a funded project this is the funding agency, which can be a governmental or a company.",
+          "example": "Bundesministerium für Wirtschaft und Klimaschutz",
+          "type": ["string", "null"],
+          "badge": "Gold",
+          "title": "Funding agency"
+        },
+        "fundingAgencyLogo": {
+          "description": "A URL to the logo or image of the funding agency.",
+          "example": "https://commons.wikimedia.org/wiki/File:BMWi_Logo_2021.svg#/media/File:BMWi_Logo_2021.svg",
+          "type": ["string", "null"],
+          "badge": "Gold",
+          "title": "Funding agency logo",
+          "format": "uri"
+        },
+        "publisherLogo": {
+          "description": "A URL to the logo of the agency publishing the data.",
+          "example": "https://reiner-lemoine-institut.de//wp-content/uploads/2015/09/rlilogo.png",
+          "type": ["string", "null"],
+          "badge": "Gold",
+          "title": "Publisher logo",
+          "format": "uri"
+        }
+      },
+      "badge": "Gold",
+      "title": "Context",
+      "additionalProperties": false
+    },
+    "spatial": {
+      "description": "An object that describes the spatial context of the data it contains.",
+      "type": "object",
+      "properties": {
+        "location": {
+          "description": "A location of the data. In case of data where the location can be described as a point. May be specified as coordinates, URI or addresses with street, house number and zip code.",
+          "example": "52.433509, 13.535855",
+          "type": ["string", "null"],
+          "badge": "Silver",
+          "title": "Location"
+        },
+        "extent": {
+          "description": "A covered area. May be the name of a region, or the geometry of a bounding box.",
+          "example": "Europe",
+          "type": ["string", "null"],
+          "badge": "Silver",
+          "title": "Extent"
+        },
+        "resolution": {
+          "description": "Pixel size in case of a regular raster image. Reference to administrative level or other spatial division that is present as the smallest spatially distinguished unit size.",
+          "example": "3 m",
+          "type": ["string", "null"],
+          "badge": "Silver",
+          "title": "Resolution"
+        }
+      },
+      "badge": "Silver",
+      "title": "Spatial",
+      "additionalProperties": false
+    },
+    "temporal": {
+      "description": "An object with the time period covered in the data. Temporal information should either contain a \"referenceDate\" or the keys describing a time series; in rare cases both.",
+      "type": "object",
+      "properties": {
+        "referenceDate": {
+          "description": "The base year, month or day. Point in time for which the data is meant to be accurate. The census data or a satellite image will have a reference date. Date Format is ISO 8601.",
+          "example": "2016-01-01",
+          "type": ["string", "null"],
+          "badge": "Bronze",
+          "title": "Reference date",
+          "format": "date"
+        },
+        "timeseries": {
+          "description": "A list of objects that describe the timeseries. It contains start, end, resolution, alignment and aggregation type properties.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "description": "The beginning point in time of a time series.",
+                "example": "2019-02-06T10:12:04+00:00",
+                "type": ["string", "null"],
+                "badge": "Silver",
+                "title": "Start",
+                "format": "date-time"
+              },
+              "end": {
+                "description": "The end point in time of a time series.",
+                "example": "2019-02-07T10:12:04+00:00",
+                "type": ["string", "null"],
+                "badge": "Silver",
+                "title": "End",
+                "format": "date-time"
+              },
+              "resolution": {
+                "description": "The time span between individual points of information in a time series.",
+                "example": " 30 s",
+                "type": ["string", "null"],
+                "badge": "Silver",
+                "title": "Resolution"
+              },
+              "alignment": {
+                "description": "An indicator whether stamps in a time series are left, right or middle.",
+                "example": "left",
+                "type": ["string", "null"],
+                "badge": "Silver",
+                "title": "Alignment"
+              },
+              "aggregationType": {
+                "description": "Indicates whether the values are a sum, average or current.",
+                "example": "sum",
+                "type": ["string", "null"],
+                "badge": "Silver",
+                "title": "Aggregation type"
+              }
+            },
             "badge": "Silver",
-            "title": "Title"
-        },
-        "id": {
-            "description": "Uniform Resource Identifier (URI) that unambiguously identifies the resource. This can be a URL on the data set. It can also be a Digital Object Identifier (DOI).",
-            "example": "https://example.com",
-            "type": [
-                "string",
-                "null"
-            ],
+            "title": "Timeseries",
+            "additionalProperties": false
+          },
+          "badge": "Silver",
+          "title": "Timeseries"
+        }
+      },
+      "badge": "Silver",
+      "title": "Temporal",
+      "additionalProperties": false
+    },
+    "sources": {
+      "description": "List of source objects. Each object has all name-value-pairs.",
+      "type": "array",
+      "items": {
+        "description": "Source object in list of source objects. Each object has all name-value-pairs.",
+        "type": "object",
+        "properties": {
+          "title": {
+            "description": "A human readable title of the source, a document title or organisation name.",
+            "example": "IPCC Fifth Assessment Report",
+            "type": ["string", "null"],
             "badge": "Bronze",
-            "title": "ID",
-            "readonly": true
-        },
-        "description": {
-            "description": "A description of the package. It should be usable as summary information for the entire package that is described by the metadata.",
-            "example": "Example table used to illustrate the metadata structure and meaning.",
-            "type": [
-                "string",
-                "null"
-            ],
-            "badge": "Silver",
+            "title": "Title"
+          },
+          "description": {
+            "description": "A free text description of the data set.",
+            "example": "Scientific climate change report by the UN",
+            "type": ["string", "null"],
+            "badge": "Bronze",
             "title": "Description"
-        },
-        "subject": {
-            "description": "Reference the topic of the resource in ontology terms",
+          },
+          "path": {
+            "description": "A URL to the original source.",
+            "example": "https://www.ipcc.ch/site/assets/uploads/2018/02/ipcc_wg3_ar5_full.pdf",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Path",
+            "format": "uri"
+          },
+          "licenses": {
+            "description": "The license(s) under which the source(s) is/are provided. List of objects.",
             "type": "array",
             "items": {
-                "type": "object",
-                "properties": {
+              "description": "A license object under which the described source is provided. Each object has all name-value-pairs.",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "THe SPDX identifier.",
+                  "example": "ODbL-1.0",
+                  "type": ["string", "null"],
+                  "badge": "Bronze",
+                  "title": "Name"
+                },
+                "title": {
+                  "description": "The official (human readable) title of the license.",
+                  "example": "Open Data Commons Open Database License 1.0",
+                  "type": ["string", "null"],
+                  "badge": "Bronze",
+                  "title": "Title"
+                },
+                "path": {
+                  "description": "A link to the license text.",
+                  "example": "https://opendatacommons.org/licenses/odbl/1-0/index.html",
+                  "type": ["string", "null"],
+                  "badge": "Bronze",
+                  "title": "Path"
+                },
+                "instruction": {
+                  "description": "A short description of rights and restrictions. The use of tl;drLegal is recommended.",
+                  "example": "You are free to share and change, but you must attribute, and share derivations under the same license. See https://tldrlegal.com/license/odc-open-database-license-(odbl) for further information.",
+                  "type": ["string", "null"],
+                  "badge": "Bronze",
+                  "title": "Instruction"
+                },
+                "attribution": {
+                  "description": "The copyright owner of the source. Copyright owner name must be acknowledged if attribution licenses are used.",
+                  "example": "© Intergovernmental Panel on Climate Change 2014",
+                  "type": ["string", "null"],
+                  "badge": "Bronze",
+                  "title": "Attribution"
+                }
+              },
+              "badge": "Bronze",
+              "title": "Licenses"
+            },
+            "badge": "Bronze",
+            "title": "Licenses"
+          }
+        },
+        "badge": "Bronze",
+        "title": "Sources",
+        "additionalProperties": false
+      },
+      "badge": "Bronze",
+      "title": "Sources"
+    },
+    "licenses": {
+      "description": "The license(s) under which the described package is provided. List of objects.",
+      "type": "array",
+      "items": {
+        "description": "A license object under which the described package is provided. Each object has all name-value-pairs.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The SPDX identifier.",
+            "example": "ODbL-1.0",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Name"
+          },
+          "title": {
+            "description": "The official (human readable) title of the license.",
+            "example": "Open Data Commons Open Database License 1.0",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Title"
+          },
+          "path": {
+            "description": "A url-or-path string, that is a fully qualified HTTP address, or a relative POSIX path (see the url-or-path definition in Data Resource for details).",
+            "example": "https://opendatacommons.org/licenses/odbl/1-0/index.html",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Path"
+          },
+          "instruction": {
+            "description": "A short description of rights and restrictions. The use of tl;drLegal is recommended.",
+            "example": "You are free to share and change, but you must attribute, and share derivations under the same license. See https://tldrlegal.com/license/odc-open-database-license-(odbl) for further information.",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Instruction"
+          },
+          "attribution": {
+            "description": "The copyrightholder of the data set. If attribution licenses are used, that name must be acknowledged.",
+            "example": "© Reiner Lemoine Institut",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Attribution"
+          }
+        },
+        "badge": "Bronze",
+        "title": "Licenses",
+        "additionalProperties": false
+      },
+      "badge": "Bronze",
+      "title": "Licenses"
+    },
+    "contributors": {
+      "description": "The people or organizations who contributed to this data package. List of objects.",
+      "type": "array",
+      "items": {
+        "description": "A person or organizations who contributed to this data package. Each object refers to one contributor. Every contributor must have a title and property. A path, email, role and organization properties are optional extras.",
+        "type": "object",
+        "properties": {
+          "title": {
+            "description": "Name/title of the contributor (name for a person, name or title for an organization).",
+            "example": "John Doe",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Title"
+          },
+          "email": {
+            "description": "E-mail address of the contributor.",
+            "example": "contact@example.com",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Email",
+            "format": "email"
+          },
+          "date": {
+            "description": "Date of the contribution. If the contribution took more than a day, use the date of the final contribiution. Date Format is ISO 8601.",
+            "example": "2016-06-16",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Date",
+            "format": "date"
+          },
+          "object": {
+            "description": "Target of contribution. Which part of the package was supplied/changed.",
+            "example": "data and metadata",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Object"
+          },
+          "comment": {
+            "description": "Free text comment on what has been done.",
+            "example": "Fix typo in the title.",
+            "type": ["string", "null"],
+            "badge": "Bronze",
+            "title": "Comment"
+          }
+        },
+        "badge": "Bronze",
+        "title": "Contributors",
+        "additionalProperties": false
+      },
+      "badge": "Bronze",
+      "title": "Contributors"
+    },
+    "resources": {
+      "description": "Resources, described as a list of data resource format objects.",
+      "type": "array",
+      "items": {
+        "description": "The data resource format describes a data resource as an individual file or table.",
+        "type": "object",
+        "properties": {
+          "profile": {
+            "description": "A string identifying the profile of this descriptor as per the profiles specification. This information is retained in order to comply with the \"Tabular Data Package\" standard. If at all in doubt the value should read \"tabular-data-resource\".",
+            "example": "tabular-data-resource",
+            "type": ["string", "null"],
+            "badge": "Gold",
+            "title": "Profile",
+            "options": {
+              "hidden": true
+            }
+          },
+          "name": {
+            "description": "A resource MUST contain a name unique to amongst all resources in this data package. To comply with the data package standard it must consist of only lowercase alphanumeric character plus \".\", \"-\" and \"_\". It may not start with a number. In a database this will be the name of the table within its containing schema. It would be usual for the name to correspond to the file name (minus the file-extension) of the data file the resource describes. Example:",
+            "example": "sandbox.example_table",
+            "type": ["string", "null"],
+            "badge": "Iron",
+            "title": "Name"
+          },
+          "path": {
+            "description": "A URL that should be a permanent http(s) address or other path directly linking to the resource.",
+            "example": "https://openenergy-platform.org/dataedit/view/openstreetmap/osm_deu_line",
+            "type": ["string", "null"],
+            "badge": "Gold",
+            "title": "Path",
+            "options": {
+              "hidden": true
+            }
+          },
+          "format": {
+            "description": "The file extension. 'csv', 'xls', 'json' etc. are expected to be the standard file extension for this type of resource. When you upload your data to the OEDB, in the shown metadata string, the format will be changed accordingly to 'PostgreSQL', since the data there are stored in a database.",
+            "example": "csv",
+            "type": ["string", "null"],
+            "badge": "Gold",
+            "title": "Format",
+            "options": {
+              "hidden": true
+            }
+          },
+          "encoding": {
+            "description": "Specifies the character encoding of the resource's data file. The values should be one of the \"Preferred MIME Names\" for a character encoding registered with IANA. If no value for this key is specified then the default is UTF-8.",
+            "example": "UTF-8",
+            "type": ["string", "null"],
+            "badge": "Gold",
+            "title": "Encoding",
+            "options": {
+              "hidden": true
+            }
+          },
+          "schema": {
+            "description": "Object containing fields, primary key and for foreign keys. Describes the structure of the present data.",
+            "type": "object",
+            "properties": {
+              "fields": {
+                "description": "List of field objects.",
+                "type": "array",
+                "items": {
+                  "description": "Field object. Every object describes a column and provides name, description, type and unit.",
+                  "type": "object",
+                  "properties": {
                     "name": {
-                        "description": "The class label of the OEO term.",
-                        "example": "energy",
-                        "format": "autocomplete",
-                        "options": {
-                            "autocomplete": {
+                      "description": "The name of the field. The string must be unique within it's scope",
+                      "example": "year",
+                      "type": ["string", "null"],
+                      "badge": "Iron",
+                      "title": "Name",
+                      "readonly": true
+                    },
+                    "description": {
+                      "description": "A text describing the field.",
+                      "example": "Reference year for which the data were collected.",
+                      "type": ["string", "null"],
+                      "badge": "Silver",
+                      "title": "Description"
+                    },
+                    "type": {
+                      "description": "The data type of the field. In case of a geom column in a database, also indicate the shape and CRS.",
+                      "example": "geometry(Point, 4326)",
+                      "type": ["string", "null"],
+                      "badge": "Iron",
+                      "title": "Type",
+                      "readonly": true
+                    },
+                    "isAbout": {
+                      "description": "Ontology URI to describe the column header",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "description": "A class label of the OEO terms.",
+                            "example": "wind energy converting unit",
+                            "format": "autocomplete",
+                            "options": {
+                              "autocomplete": {
                                 "search": "search_name",
                                 "getResultValue": "getResultValue_name",
                                 "renderResult": "renderResult_name",
                                 "autoSelect": true
-                            }
+                              }
+                            },
+                            "type": ["string", "null"],
+                            "badge": "Platinum",
+                            "title": "Name"
+                          },
+                          "path": {
+                            "description": "Path to the OEO class (URI)",
+                            "example": "https://openenergy-platform.org/ontology/oeo/OEO_00000044",
+                            "type": ["string", "null"],
+                            "badge": "Platinum",
+                            "title": "Path",
+                            "format": "uri"
+                          }
                         },
-                        "type": [
-                            "string",
-                            "null"
-                        ],
                         "badge": "Platinum",
-                        "title": "Name"
+                        "title": "isAbout",
+                        "additionalProperties": false
+                      },
+                      "badge": "Platinum",
+                      "title": "isAbout"
                     },
-                    "path": {
-                        "description": "The URI of the class.",
-                        "example": "https://openenergy-platform.org/ontology/oeo/OEO_00000150",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Platinum",
-                        "title": "Path",
-                        "format": "uri"
-                    }
-                },
-                "badge": "Platinum",
-                "title": "Subject",
-                "additionalProperties": false
-            },
-            "badge": "Platinum",
-            "title": "Subject"
-        },
-        "language": {
-            "description": "List of languages used within the described data structures (e.g. titles, descriptions). Standard: IETF (BCP47).",
-            "example": "[en-GB, de-DE, fr-FR]",
-            "type": "array",
-            "items": {
-                "description": "Language used within the described data structures (e.g. titles, descriptions). The language key can be repeated if more languages are used. Standard: IETF (BCP47)",
-                "example": "en-GB",
-                "type": [
-                    "string",
-                    "null"
-                ],
-                "badge": "Gold",
-                "title": "Language"
-            },
-            "badge": "Gold",
-            "title": "Language"
-        },
-        "keywords": {
-            "description": "A list of string keywords to assist users searching for the package in catalogs.",
-            "example": "[example, template, test]",
-            "type": "array",
-            "items": {
-                "description": "A keyword to assist users searching for the package in catalogs.",
-                "example": "template",
-                "type": [
-                    "string",
-                    "null"
-                ],
-                "badge": "Silver",
-                "title": "Keyword"
-            },
-            "badge": "Silver",
-            "title": "Keywords"
-        },
-        "publicationDate": {
-            "description": "Date of publishing. Date Format is ISO 8601 (YYYY-MM-DD)",
-            "example": "2019-02-06",
-            "type": [
-                "string",
-                "null"
-            ],
-            "badge": "Bronze",
-            "title": "Publication date",
-            "format": "date"
-        },
-        "context": {
-            "description": "An Object that describes the general setting, evironment or project leading to the creation or maintenance of this dataset. In science this can be the research project.",
-            "type": "object",
-            "properties": {
-                "homepage": {
-                    "description": "URL of project.",
-                    "example": "https://openenergy-platform.org/",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Gold",
-                    "title": "Homepage",
-                    "format": "uri"
-                },
-                "documentation": {
-                    "description": "A URL of the project's documentation.",
-                    "example": "https://openenergy-platform.org/about/",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Gold",
-                    "title": "Documentation"
-                },
-                "sourceCode": {
-                    "description": "A URL of the projects source code.",
-                    "example": "https://github.com/OpenEnergyPlatform",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Gold",
-                    "title": "Source Code"
-                },
-                "contact": {
-                    "description": "A reference to the creator or maintainer of the data set. This can be an email address or a GitHub handle.",
-                    "example": "contact@example.com",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Gold",
-                    "title": "E-Mail Contact",
-                    "format": "email"
-                },
-                "grantNo": {
-                    "description": "An identifying grant number. In case of a publicly funded project, this number is assigned by the funding agency.",
-                    "example": "01AB2345",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Gold",
-                    "title": "Grant no"
-                },
-                "fundingAgency": {
-                    "description": "In a funded project this is the funding agency, which can be a governmental or a company.",
-                    "example": "Bundesministerium für Wirtschaft und Klimaschutz",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Gold",
-                    "title": "Funding agency"
-                },
-                "fundingAgencyLogo": {
-                    "description": "A URL to the logo or image of the funding agency.",
-                    "example": "https://commons.wikimedia.org/wiki/File:BMWi_Logo_2021.svg#/media/File:BMWi_Logo_2021.svg",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Gold",
-                    "title": "Funding agency logo",
-                    "format": "uri"
-                },
-                "publisherLogo": {
-                    "description": "A URL to the logo of the agency publishing the data.",
-                    "example": "https://reiner-lemoine-institut.de//wp-content/uploads/2015/09/rlilogo.png",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Gold",
-                    "title": "Publisher logo",
-                    "format": "uri"
-                }
-            },
-            "badge": "Gold",
-            "title": "Context",
-            "additionalProperties": false
-        },
-        "spatial": {
-            "description": "An object that describes the spatial context of the data it contains.",
-            "type": "object",
-            "properties": {
-                "location": {
-                    "description": "A location of the data. In case of data where the location can be described as a point. May be specified as coordinates, URI or addresses with street, house number and zip code.",
-                    "example": "52.433509, 13.535855",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Silver",
-                    "title": "Location"
-                },
-                "extent": {
-                    "description": "A covered area. May be the name of a region, or the geometry of a bounding box.",
-                    "example": "Europe",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Silver",
-                    "title": "Extent"
-                },
-                "resolution": {
-                    "description": "Pixel size in case of a regular raster image. Reference to administrative level or other spatial division that is present as the smallest spatially distinguished unit size.",
-                    "example": "3 m",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Silver",
-                    "title": "Resolution"
-                }
-            },
-            "badge": "Silver",
-            "title": "Spatial",
-            "additionalProperties": false
-        },
-        "temporal": {
-            "description": "An object with the time period covered in the data. Temporal information should either contain a \"referenceDate\" or the keys describing a time series; in rare cases both.",
-            "type": "object",
-            "properties": {
-                "referenceDate": {
-                    "description": "The base year, month or day. Point in time for which the data is meant to be accurate. The census data or a satellite image will have a reference date. Date Format is ISO 8601.",
-                    "example": "2016-01-01",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Bronze",
-                    "title": "Reference date",
-                    "format": "date"
-                },
-                "timeseries": {
-                    "description": "A list of objects that describe the timeseries. It contains start, end, resolution, alignment and aggregation type properties.",
-                    "type": "array",
-                    "items": {
+                    "valueReference": {
+                      "description": "Ontology URI for an extended description of the values in the column",
+                      "type": "array",
+                      "items": {
                         "type": "object",
                         "properties": {
-                            "start": {
-                                "description": "The beginning point in time of a time series.",
-                                "example": "2019-02-06T10:12:04+00:00",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "badge": "Silver",
-                                "title": "Start",
-                                "format": "date-time"
+                          "value": {
+                            "description": "The name of the value in the column.",
+                            "example": "onshore",
+                            "type": ["string", "null"],
+                            "badge": "Platinum",
+                            "title": "Value"
+                          },
+                          "name": {
+                            "description": "The class label of the OEO terms.",
+                            "example": "onshore wind farm",
+                            "format": "autocomplete",
+                            "options": {
+                              "autocomplete": {
+                                "search": "search_name",
+                                "getResultValue": "getResultValue_name",
+                                "renderResult": "renderResult_name",
+                                "autoSelect": true
+                              }
                             },
-                            "end": {
-                                "description": "The end point in time of a time series.",
-                                "example": "2019-02-07T10:12:04+00:00",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "badge": "Silver",
-                                "title": "End",
-                                "format": "date-time"
-                            },
-                            "resolution": {
-                                "description": "The time span between individual points of information in a time series.",
-                                "example": " 30 s",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "badge": "Silver",
-                                "title": "Resolution"
-                            },
-                            "alignment": {
-                                "description": "An indicator whether stamps in a time series are left, right or middle.",
-                                "example": "left",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "badge": "Silver",
-                                "title": "Alignment"
-                            },
-                            "aggregationType": {
-                                "description": "Indicates whether the values are a sum, average or current.",
-                                "example": "sum",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "badge": "Silver",
-                                "title": "Aggregation type"
-                            }
+                            "type": ["string", "null"],
+                            "badge": "Platinum",
+                            "title": "Name"
+                          },
+                          "path": {
+                            "description": " The URI of the OEO class",
+                            "example": "https://openenergy-platform.org/ontology/oeo/OEO_00000311",
+                            "type": ["string", "null"],
+                            "badge": "Platinum",
+                            "title": "Path",
+                            "format": "uri"
+                          }
                         },
-                        "badge": "Silver",
-                        "title": "Timeseries",
+                        "badge": "Platinum",
+                        "title": "valueReference",
                         "additionalProperties": false
+                      },
+                      "badge": "Platinum",
+                      "title": "valueReference"
                     },
-                    "badge": "Silver",
-                    "title": "Timeseries"
-                }
-            },
-            "badge": "Silver",
-            "title": "Temporal",
-            "additionalProperties": false
-        },
-        "sources": {
-            "description": "List of source objects. Each object has all name-value-pairs.",
-            "type": "array",
-            "items": {
-                "description": "Source object in list of source objects. Each object has all name-value-pairs.",
-                "type": "object",
-                "properties": {
-                    "title": {
-                        "description": "A human readable title of the source, a document title or organisation name.",
-                        "example": "IPCC Fifth Assessment Report",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Title"
-                    },
-                    "description": {
-                        "description": "A free text description of the data set.",
-                        "example": "Scientific climate change report by the UN",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Description"
-                    },
-                    "path": {
-                        "description": "A URL to the original source.",
-                        "example": "https://www.ipcc.ch/site/assets/uploads/2018/02/ipcc_wg3_ar5_full.pdf",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Path",
-                        "format": "uri"
-                    },
-                    "licenses": {
-                        "description": "The license(s) under which the source(s) is/are provided. List of objects.",
-                        "type": "array",
-                        "items": {
-                            "description": "A license object under which the described source is provided. Each object has all name-value-pairs.",
-                            "type": "object",
-                            "properties": {
-                                "name": {
-                                    "description": "THe SPDX identifier.",
-                                    "example": "ODbL-1.0",
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ],
-                                    "badge": "Bronze",
-                                    "title": "Name"
-                                },
-                                "title": {
-                                    "description": "The official (human readable) title of the license.",
-                                    "example": "Open Data Commons Open Database License 1.0",
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ],
-                                    "badge": "Bronze",
-                                    "title": "Title"
-                                },
-                                "path": {
-                                    "description": "A link to the license text.",
-                                    "example": "https://opendatacommons.org/licenses/odbl/1-0/index.html",
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ],
-                                    "badge": "Bronze",
-                                    "title": "Path"
-                                },
-                                "instruction": {
-                                    "description": "A short description of rights and restrictions. The use of tl;drLegal is recommended.",
-                                    "example": "You are free to share and change, but you must attribute, and share derivations under the same license. See https://tldrlegal.com/license/odc-open-database-license-(odbl) for further information.",
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ],
-                                    "badge": "Bronze",
-                                    "title": "Instruction"
-                                },
-                                "attribution": {
-                                    "description": "The copyright owner of the source. Copyright owner name must be acknowledged if attribution licenses are used.",
-                                    "example": "© Intergovernmental Panel on Climate Change 2014",
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ],
-                                    "badge": "Bronze",
-                                    "title": "Attribution"
-                                }
-                            },
-                            "badge": "Bronze",
-                            "title": "Licenses"
-                        },
-                        "badge": "Bronze",
-                        "title": "Licenses"
+                    "unit": {
+                      "description": "The unit, preferably SI-unit, that values in this field are mapped to. If 'unit' doesn't apply to a field, use 'null'. If the unit is given in a seperate field, reference this field.",
+                      "example": "MW",
+                      "type": ["string", "null"],
+                      "badge": "Silver",
+                      "title": "Unit"
                     }
+                  },
+                  "additionalProperties": false,
+                  "title": "Field"
                 },
-                "badge": "Bronze",
-                "title": "Sources",
-                "additionalProperties": false
+                "title": "Field"
+              },
+              "primaryKey": {
+                "description": "A primary key is a field or set of fields that uniquely identifies each row in the table. It's recorded as a list of strings, since it is possible to define the primary key as made up of several columns.",
+                "example": "id",
+                "type": "array",
+                "items": {
+                  "description": "A primary key is a field or set of fields that uniquely identifies each row in the table.",
+                  "example": "id",
+                  "type": ["string", "null"],
+                  "badge": "Iron",
+                  "title": "Primary key"
+                },
+                "badge": "Iron",
+                "title": "Primary key"
+              },
+              "foreignKeys": {
+                "description": "List of foreign keys.",
+                "type": "array",
+                "items": {
+                  "description": "A foreign key is a field that refers to a column in another table.",
+                  "type": "object",
+                  "properties": {
+                    "fields": {
+                      "description": "The column (as list of items) in the table that is constrainted by the foreign key.",
+                      "example": "version",
+                      "type": "array",
+                      "items": {
+                        "description": "The column in the table that is constrainted by the foreign key.",
+                        "example": "version",
+                        "type": ["string", "null"],
+                        "badge": "Iron",
+                        "title": "Field"
+                      },
+                      "badge": "Iron",
+                      "title": "Fields"
+                    },
+                    "reference": {
+                      "description": "The reference to the foreign table.",
+                      "type": "object",
+                      "properties": {
+                        "resource": {
+                          "description": "The foreign resource (table).",
+                          "example": "schema.table",
+                          "type": ["string", "null"],
+                          "badge": "Iron",
+                          "title": "Resource"
+                        },
+                        "fields": {
+                          "description": "The foreign resource column.",
+                          "example": "version",
+                          "type": "array",
+                          "items": {
+                            "description": "The foreign resource column.",
+                            "example": "version",
+                            "type": ["string", "null"],
+                            "badge": "Iron",
+                            "title": "Field"
+                          },
+                          "badge": "Iron",
+                          "title": "Field"
+                        }
+                      },
+                      "badge": "Iron",
+                      "title": "Reference",
+                      "additionalProperties": false
+                    }
+                  },
+                  "title": "Foreign Key",
+                  "additionalProperties": false
+                },
+                "badge": "Iron",
+                "title": "Foreign Keys"
+              }
             },
-            "badge": "Bronze",
-            "title": "Sources"
+            "title": "Schema",
+            "additionalProperties": false
+          },
+          "dialect": {
+            "description": "Object. A CSV Dialect defines a simple format to describe the various dialects of CSV files in a language agnostic manner. In case of a database, the values in the containing fields are \"null\".",
+            "type": "object",
+            "properties": {
+              "delimiter": {
+                "description": "The delimiter specifies the character sequence which should separate fields (columns). Common characters are \",\" (comma), \".\" (point) and \"\\t\" (tab).",
+                "example": ",",
+                "type": ["string", "null"],
+                "badge": "Silver",
+                "title": "Delimiter"
+              },
+              "decimalSeparator": {
+                "description": "A symbol used to separate the integer part from the fractional part of a number written in decimal form. Depending on language and region this symbol can be \".\" or \",\".",
+                "example": ".",
+                "type": ["string", "null"],
+                "badge": "Silver",
+                "title": "Decimal separator"
+              }
+            },
+            "additionalProperties": false,
+            "title": "Dialect",
+            "options": {
+              "hidden": true
+            }
+          }
+        },
+        "additionalProperties": false,
+        "title": "Resource"
+      },
+      "title": "Resource"
+    },
+    "@context": {
+      "description": "Explanation of metadata keys in ontology terms.",
+      "example": "https://raw.githubusercontent.com/LOD-GEOSS/databus-snippets/master/oep_metadata/context.jsonld",
+      "type": ["string", "null"],
+      "badge": null,
+      "title": "@context"
+    },
+    "@id": {
+      "description": "A Uniform Resource Identifier (URI) that links the resource via the DBpedia Databus",
+      "example": "https://databus.dbpedia.org/kurzum/mastr/bnetza-mastr/01.04.00",
+      "type": ["string", "null"],
+      "badge": null,
+      "title": "@Id"
+    },
+    "review": {
+      "description": "Data uploaded through the OEP needs to go through review. The review will cover the areas described here: https://github.com/OpenEnergyPlatform/data-preprocessing/wiki and carried out by a team of the platform. The review itself is documented at the specified path and a badge is rewarded with regards to completeness.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "A URL or path string, that should be a permanent http(s) address directly linking to the documented review.",
+          "example": "https://www.example.com",
+          "type": ["string", "null"],
+          "badge": null,
+          "title": "Path"
+        },
+        "badge": {
+          "description": "A badge of either Bronze, Silver, Gold or Platinum is used to label the given metadata based on its quality.",
+          "example": "Platinum",
+          "type": ["string", "null"],
+          "badge": null,
+          "title": "Badge"
+        }
+      },
+      "additionalProperties": false,
+      "title": "Review",
+      "options": {
+        "hidden": true
+      }
+    },
+    "metaMetadata": {
+      "description": "Object. Description about the metadata themselves, their format, version and license. These fields should already be provided when you’re filling out your metadata.",
+      "type": "object",
+      "properties": {
+        "metadataVersion": {
+          "description": "Type and version number of the metadata.",
+          "example": "OEM-1.6.0",
+          "type": ["string", "null"],
+          "badge": null,
+          "title": "Metadata version"
+        },
+        "metadataLicense": {
+          "description": "Object describing the license of the provided metadata.",
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "SPDX identifier",
+              "example": "CC0-1.0",
+              "type": ["string", "null"],
+              "badge": null,
+              "title": "Name"
+            },
+            "title": {
+              "description": "Official (human readable) license title.",
+              "example": "Creative Commons Zero v1.0 Universal",
+              "type": ["string", "null"],
+              "badge": null,
+              "title": "Title"
+            },
+            "path": {
+              "description": "Url or path string, that is a fully qualified HTTP address.",
+              "example": "https://creativecommons.org/publicdomain/zero/1.0",
+              "type": ["string", "null"],
+              "badge": null,
+              "title": "Path"
+            }
+          },
+          "badge": null,
+          "title": "Metadata license",
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "title": "Meta Metadata",
+      "options": {
+        "hidden": true
+      }
+    },
+    "_comment": {
+      "description": "Object. The “_comment”-section is used as a self-description of the final metadata-file. It is text, intended for humans and can include a link to the metadata documentation(s), required value formats and similar remarks. The comment section has no fix structure or mandatory values, but a useful self-description, similar to the one depicted here, is encouraged.",
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "description": "Reference to the metadata documentation in use. Example: Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",
+          "type": ["string", "null"],
+          "title": "Metadata"
+        },
+        "dates": {
+          "description": "Comment on data/time format. Example: Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
+          "type": ["string", "null"],
+          "title": "Dates"
+        },
+        "units": {
+          "description": "Comment on units. Example: If you must use units in cells (which is discouraged), leave a space between numbers and units (100 m)",
+          "type": ["string", "null"],
+          "title": "Units"
+        },
+        "languages": {
+          "description": "Comment on language format. Example: Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
+          "type": ["string", "null"],
+          "title": "Languages"
         },
         "licenses": {
-            "description": "The license(s) under which the described package is provided. List of objects.",
-            "type": "array",
-            "items": {
-                "description": "A license object under which the described package is provided. Each object has all name-value-pairs.",
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "description": "The SPDX identifier.",
-                        "example": "ODbL-1.0",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Name"
-                    },
-                    "title": {
-                        "description": "The official (human readable) title of the license.",
-                        "example": "Open Data Commons Open Database License 1.0",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Title"
-                    },
-                    "path": {
-                        "description": "A url-or-path string, that is a fully qualified HTTP address, or a relative POSIX path (see the url-or-path definition in Data Resource for details).",
-                        "example": "https://opendatacommons.org/licenses/odbl/1-0/index.html",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Path"
-                    },
-                    "instruction": {
-                        "description": "A short description of rights and restrictions. The use of tl;drLegal is recommended.",
-                        "example": "You are free to share and change, but you must attribute, and share derivations under the same license. See https://tldrlegal.com/license/odc-open-database-license-(odbl) for further information.",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Instruction"
-                    },
-                    "attribution": {
-                        "description": "The copyrightholder of the data set. If attribution licenses are used, that name must be acknowledged.",
-                        "example": "© Reiner Lemoine Institut",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Attribution"
-                    }
-                },
-                "badge": "Bronze",
-                "title": "Licenses",
-                "additionalProperties": false
-            },
-            "badge": "Bronze",
-            "title": "Licenses"
-        },
-        "contributors": {
-            "description": "The people or organizations who contributed to this data package. List of objects.",
-            "type": "array",
-            "items": {
-                "description": "A person or organizations who contributed to this data package. Each object refers to one contributor. Every contributor must have a title and property. A path, email, role and organization properties are optional extras.",
-                "type": "object",
-                "properties": {
-                    "title": {
-                        "description": "Name/title of the contributor (name for a person, name or title for an organization).",
-                        "example": "John Doe",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Title"
-                    },
-                    "email": {
-                        "description": "E-mail address of the contributor.",
-                        "example": "contact@example.com",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Email",
-                        "format": "email"
-                    },
-                    "date": {
-                        "description": "Date of the contribution. If the contribution took more than a day, use the date of the final contribiution. Date Format is ISO 8601.",
-                        "example": "2016-06-16",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Date",
-                        "format": "date"
-                    },
-                    "object": {
-                        "description": "Target of contribution. Which part of the package was supplied/changed.",
-                        "example": "data and metadata",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Object"
-                    },
-                    "comment": {
-                        "description": "Free text comment on what has been done.",
-                        "example": "Fix typo in the title.",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Bronze",
-                        "title": "Comment"
-                    }
-                },
-                "badge": "Bronze",
-                "title": "Contributors",
-                "additionalProperties": false
-            },
-            "badge": "Bronze",
-            "title": "Contributors"
-        },
-        "resources": {
-            "description": "Resources, described as a list of data resource format objects.",
-            "type": "array",
-            "items": {
-                "description": "The data resource format describes a data resource as an individual file or table.",
-                "type": "object",
-                "properties": {
-                    "profile": {
-                        "description": "A string identifying the profile of this descriptor as per the profiles specification. This information is retained in order to comply with the \"Tabular Data Package\" standard. If at all in doubt the value should read \"tabular-data-resource\".",
-                        "example": "tabular-data-resource",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Gold",
-                        "title": "Profile",
-                        "options": {
-                            "hidden": true
-                        }
-                    },
-                    "name": {
-                        "description": "A resource MUST contain a name unique to amongst all resources in this data package. To comply with the data package standard it must consist of only lowercase alphanumeric character plus \".\", \"-\" and \"_\". It may not start with a number. In a database this will be the name of the table within its containing schema. It would be usual for the name to correspond to the file name (minus the file-extension) of the data file the resource describes. Example:",
-                        "example": "sandbox.example_table",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Iron",
-                        "title": "Name"
-                    },
-                    "path": {
-                        "description": "A URL that should be a permanent http(s) address or other path directly linking to the resource.",
-                        "example": "https://openenergy-platform.org/dataedit/view/openstreetmap/osm_deu_line",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Gold",
-                        "title": "Path",
-                        "options": {
-                            "hidden": true
-                        }
-                    },
-                    "format": {
-                        "description": "The file extension. 'csv', 'xls', 'json' etc. are expected to be the standard file extension for this type of resource. When you upload your data to the OEDB, in the shown metadata string, the format will be changed accordingly to 'PostgreSQL', since the data there are stored in a database.",
-                        "example": "csv",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Gold",
-                        "title": "Format",
-                        "options": {
-                            "hidden": true
-                        }
-                    },
-                    "encoding": {
-                        "description": "Specifies the character encoding of the resource's data file. The values should be one of the \"Preferred MIME Names\" for a character encoding registered with IANA. If no value for this key is specified then the default is UTF-8.",
-                        "example": "UTF-8",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "badge": "Gold",
-                        "title": "Encoding",
-                        "options": {
-                            "hidden": true
-                        }
-                    },
-                    "schema": {
-                        "description": "Object containing fields, primary key and for foreign keys. Describes the structure of the present data.",
-                        "type": "object",
-                        "properties": {
-                            "fields": {
-                                "description": "List of field objects.",
-                                "type": "array",
-                                "items": {
-                                    "description": "Field object. Every object describes a column and provides name, description, type and unit.",
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "description": "The name of the field. The string must be unique within it's scope",
-                                            "example": "year",
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ],
-                                            "badge": "Iron",
-                                            "title": "Name",
-                                            "readonly": true
-                                        },
-                                        "description": {
-                                            "description": "A text describing the field.",
-                                            "example": "Reference year for which the data were collected.",
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ],
-                                            "badge": "Silver",
-                                            "title": "Description"
-                                        },
-                                        "type": {
-                                            "description": "The data type of the field. In case of a geom column in a database, also indicate the shape and CRS.",
-                                            "example": "geometry(Point, 4326)",
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ],
-                                            "badge": "Iron",
-                                            "title": "Type",
-                                            "readonly": true
-                                        },
-                                        "isAbout": {
-                                            "description": "Ontology URI to describe the column header",
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "name": {
-                                                        "description": "A class label of the OEO terms.",
-                                                        "example": "wind energy converting unit",
-                                                        "format": "autocomplete",
-                                                        "options": {
-                                                            "autocomplete": {
-                                                                "search": "search_name",
-                                                                "getResultValue": "getResultValue_name",
-                                                                "renderResult": "renderResult_name",
-                                                                "autoSelect": true
-                                                            }
-                                                        },
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ],
-                                                        "badge": "Platinum",
-                                                        "title": "Name"
-                                                    },
-                                                    "path": {
-                                                        "description": "Path to the OEO class (URI)",
-                                                        "example": "https://openenergy-platform.org/ontology/oeo/OEO_00000044",
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ],
-                                                        "badge": "Platinum",
-                                                        "title": "Path",
-                                                        "format": "uri"
-                                                    }
-                                                },
-                                                "badge": "Platinum",
-                                                "title": "isAbout",
-                                                "additionalProperties": false
-                                            },
-                                            "badge": "Platinum",
-                                            "title": "isAbout"
-                                        },
-                                        "valueReference": {
-                                            "description": "Ontology URI for an extended description of the values in the column",
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "value": {
-                                                        "description": "The name of the value in the column.",
-                                                        "example": "onshore",
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ],
-                                                        "badge": "Platinum",
-                                                        "title": "Value"
-                                                    },
-                                                    "name": {
-                                                        "description": "The class label of the OEO terms.",
-                                                        "example": "onshore wind farm",
-                                                        "format": "autocomplete",
-                                                        "options": {
-                                                            "autocomplete": {
-                                                                "search": "search_name",
-                                                                "getResultValue": "getResultValue_name",
-                                                                "renderResult": "renderResult_name",
-                                                                "autoSelect": true
-                                                            }
-                                                        },
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ],
-                                                        "badge": "Platinum",
-                                                        "title": "Name"
-                                                    },
-                                                    "path": {
-                                                        "description": " The URI of the OEO class",
-                                                        "example": "https://openenergy-platform.org/ontology/oeo/OEO_00000311",
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ],
-                                                        "badge": "Platinum",
-                                                        "title": "Path",
-                                                        "format": "uri"
-                                                    }
-                                                },
-                                                "badge": "Platinum",
-                                                "title": "valueReference",
-                                                "additionalProperties": false
-                                            },
-                                            "badge": "Platinum",
-                                            "title": "valueReference"
-                                        },
-                                        "unit": {
-                                            "description": "The unit, preferably SI-unit, that values in this field are mapped to. If 'unit' doesn't apply to a field, use 'null'. If the unit is given in a seperate field, reference this field.",
-                                            "example": "MW",
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ],
-                                            "badge": "Silver",
-                                            "title": "Unit"
-                                        }
-                                    },
-                                    "additionalProperties": false,
-                                    "title": "Field"
-                                },
-                                "title": "Field"
-                            },
-                            "primaryKey": {
-                                "description": "A primary key is a field or set of fields that uniquely identifies each row in the table. It's recorded as a list of strings, since it is possible to define the primary key as made up of several columns.",
-                                "example": "id",
-                                "type": "array",
-                                "items": {
-                                    "description": "A primary key is a field or set of fields that uniquely identifies each row in the table.",
-                                    "example": "id",
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ],
-                                    "badge": "Iron",
-                                    "title": "Primary key"
-                                },
-                                "badge": "Iron",
-                                "title": "Primary key"
-                            },
-                            "foreignKeys": {
-                                "description": "List of foreign keys.",
-                                "type": "array",
-                                "items": {
-                                    "description": "A foreign key is a field that refers to a column in another table.",
-                                    "type": "object",
-                                    "properties": {
-                                        "fields": {
-                                            "description": "The column (as list of items) in the table that is constrainted by the foreign key.",
-                                            "example": "version",
-                                            "type": "array",
-                                            "items": {
-                                                "description": "The column in the table that is constrainted by the foreign key.",
-                                                "example": "version",
-                                                "type": [
-                                                    "string",
-                                                    "null"
-                                                ],
-                                                "badge": "Iron",
-                                                "title": "Field"
-                                            },
-                                            "badge": "Iron",
-                                            "title": "Fields"
-                                        },
-                                        "reference": {
-                                            "description": "The reference to the foreign table.",
-                                            "type": "object",
-                                            "properties": {
-                                                "resource": {
-                                                    "description": "The foreign resource (table).",
-                                                    "example": "schema.table",
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ],
-                                                    "badge": "Iron",
-                                                    "title": "Resource"
-                                                },
-                                                "fields": {
-                                                    "description": "The foreign resource column.",
-                                                    "example": "version",
-                                                    "type": "array",
-                                                    "items": {
-                                                        "description": "The foreign resource column.",
-                                                        "example": "version",
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ],
-                                                        "badge": "Iron",
-                                                        "title": "Field"
-                                                    },
-                                                    "badge": "Iron",
-                                                    "title": "Field"
-                                                }
-                                            },
-                                            "badge": "Iron",
-                                            "title": "Reference",
-                                            "additionalProperties": false
-                                        }
-                                    },
-                                    "title": "Foreign Key",
-                                    "additionalProperties": false
-                                },
-                                "badge": "Iron",
-                                "title": "Foreign Keys"
-                            }
-                        },
-                        "title": "Schema",
-                        "additionalProperties": false
-                    },
-                    "dialect": {
-                        "description": "Object. A CSV Dialect defines a simple format to describe the various dialects of CSV files in a language agnostic manner. In case of a database, the values in the containing fields are \"null\".",
-                        "type": "object",
-                        "properties": {
-                            "delimiter": {
-                                "description": "The delimiter specifies the character sequence which should separate fields (columns). Common characters are \",\" (comma), \".\" (point) and \"\\t\" (tab).",
-                                "example": ",",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "badge": "Silver",
-                                "title": "Delimiter"
-                            },
-                            "decimalSeparator": {
-                                "description": "A symbol used to separate the integer part from the fractional part of a number written in decimal form. Depending on language and region this symbol can be \".\" or \",\".",
-                                "example": ".",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "badge": "Silver",
-                                "title": "Decimal separator"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "title": "Dialect",
-                        "options": {
-                            "hidden": true
-                        }
-                    }
-                },
-                "additionalProperties": false,
-                "title": "Resource"
-            },
-            "title": "Resource"
-        },
-        "@context": {
-            "description": "Explanation of metadata keys in ontology terms.",
-            "example": "https://raw.githubusercontent.com/LOD-GEOSS/databus-snippets/master/oep_metadata/context.jsonld",
-            "type": [
-                "string",
-                "null"
-            ],
-            "badge": null,
-            "title": "@context"
-        },
-        "@id": {
-            "description": "A Uniform Resource Identifier (URI) that links the resource via the DBpedia Databus",
-            "example": "https://databus.dbpedia.org/kurzum/mastr/bnetza-mastr/01.04.00",
-            "type": [
-                "string",
-                "null"
-            ],
-            "badge": null,
-            "title": "@Id"
+          "description": "Reference to license format. Example: License name must follow the SPDX License List (https://spdx.org/licenses/)",
+          "type": ["string", "null"],
+          "title": "Licenses"
         },
         "review": {
-            "description": "Data uploaded through the OEP needs to go through review. The review will cover the areas described here: https://github.com/OpenEnergyPlatform/data-preprocessing/wiki and carried out by a team of the platform. The review itself is documented at the specified path and a badge is rewarded with regards to completeness.",
-            "type": "object",
-            "properties": {
-                "path": {
-                    "description": "A URL or path string, that should be a permanent http(s) address directly linking to the documented review.",
-                    "example": "https://www.example.com",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": null,
-                    "title": "Path"
-                },
-                "badge": {
-                    "description": "A badge of either Bronze, Silver, Gold or Platinum is used to label the given metadata based on its quality.",
-                    "example": "Platinum",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": null,
-                    "title": "Badge"
-                }
-            },
-            "additionalProperties": false,
-            "title": "Review",
-            "options": {
-                "hidden": true
-            }
+          "description": "Reference to review documentation. Example: Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
+          "type": ["string", "null"],
+          "title": "Review"
         },
-        "metaMetadata": {
-            "description": "Object. Description about the metadata themselves, their format, version and license. These fields should already be provided when you’re filling out your metadata.",
-            "type": "object",
-            "properties": {
-                "metadataVersion": {
-                    "description": "Type and version number of the metadata.",
-                    "example": "OEM-1.6.0",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": null,
-                    "title": "Metadata version"
-                },
-                "metadataLicense": {
-                    "description": "Object describing the license of the provided metadata.",
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "description": "SPDX identifier",
-                            "example": "CC0-1.0",
-                            "type": [
-                                "string",
-                                "null"
-                            ],
-                            "badge": null,
-                            "title": "Name"
-                        },
-                        "title": {
-                            "description": "Official (human readable) license title.",
-                            "example": "Creative Commons Zero v1.0 Universal",
-                            "type": [
-                                "string",
-                                "null"
-                            ],
-                            "badge": null,
-                            "title": "Title"
-                        },
-                        "path": {
-                            "description": "Url or path string, that is a fully qualified HTTP address.",
-                            "example": "https://creativecommons.org/publicdomain/zero/1.0",
-                            "type": [
-                                "string",
-                                "null"
-                            ],
-                            "badge": null,
-                            "title": "Path"
-                        }
-                    },
-                    "badge": null,
-                    "title": "Metadata license",
-                    "additionalProperties": false
-                }
-            },
-            "additionalProperties": false,
-            "title": "Meta Metadata",
-            "options": {
-                "hidden": true
-            }
+        "null": {
+          "description": "Feel free to add more descriptive comments. Like \"null\". Example: If a field is not applicable just enter \"null\"",
+          "type": ["string", "null"],
+          "title": "Null"
         },
-        "_comment": {
-            "description": "Object. The “_comment”-section is used as a self-description of the final metadata-file. It is text, intended for humans and can include a link to the metadata documentation(s), required value formats and similar remarks. The comment section has no fix structure or mandatory values, but a useful self-description, similar to the one depicted here, is encouraged.",
-            "type": "object",
-            "properties": {
-                "metadata": {
-                    "description": "Reference to the metadata documentation in use. Example: Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "title": "Metadata"
-                },
-                "dates": {
-                    "description": "Comment on data/time format. Example: Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "title": "Dates"
-                },
-                "units": {
-                    "description": "Comment on units. Example: If you must use units in cells (which is discouraged), leave a space between numbers and units (100 m)",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "title": "Units"
-                },
-                "languages": {
-                    "description": "Comment on language format. Example: Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "title": "Languages"
-                },
-                "licenses": {
-                    "description": "Reference to license format. Example: License name must follow the SPDX License List (https://spdx.org/licenses/)",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "title": "Licenses"
-                },
-                "review": {
-                    "description": "Reference to review documentation. Example: Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "title": "Review"
-                },
-                "null": {
-                    "description": "Feel free to add more descriptive comments. Like \"null\". Example: If a field is not applicable just enter \"null\"",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "title": "Null"
-                },
-                "todo": {
-                    "description": "If an applicable value is not yet available and will be inserted later on use: 'todo' ",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "title": "Todo"
-                }
-            },
-            "title": "_comment",
-            "options": {
-                "hidden": true
-            }
+        "todo": {
+          "description": "If an applicable value is not yet available and will be inserted later on use: 'todo' ",
+          "type": ["string", "null"],
+          "title": "Todo"
         }
-    },
-    "additionalProperties": false
+      },
+      "title": "_comment",
+      "options": {
+        "hidden": true
+      }
+    }
+  },
+  "additionalProperties": false
 }

@@ -41,7 +41,7 @@
   {% endif %}
 {% endblock %}
 
-{% block main-right-sidebar-content %}  
+{% block main-right-sidebar-content %}
     {% include "login/sidebar_user.html" %}
 {% endblock %}
 
@@ -58,7 +58,7 @@
         var target = event.detail.target; // Get the target element where the response was inserted
         var xhr = event.detail.xhr; // Get the XMLHttpRequest object containing the response
         var response = xhr.response; // Get the JSON response
-        
+
         if (response && response.detail_html) {
             // Replace the content of the target element with the HTML content for the detail page
             target.innerHTML = response.detail_html;

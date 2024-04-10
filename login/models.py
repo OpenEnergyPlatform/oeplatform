@@ -9,7 +9,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
-
 import dataedit.models as datamodels
 from login.permissions import CanEditScenarioBundle
 
@@ -155,7 +154,7 @@ class UserGroup(Group, PermissionHolder):
             )
         )
 
-    # TODO @jh-RLI: Check later - keep for now 
+    # TODO @jh-RLI: Check later - keep for now
     # def get_table_group_memberships(self):
     #     return GroupPermission.objects.filter(holder__in=self).prefetch_related('table')
 

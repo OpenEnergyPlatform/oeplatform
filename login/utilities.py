@@ -2,26 +2,22 @@ import json
 import logging
 import re
 from enum import Enum, auto
+from functools import lru_cache
+from pathlib import Path
+from typing import List
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.templatetags.static import static
 
-from functools import lru_cache
-from pathlib import Path
-
-
 from dataedit.models import Table
-from login.models import UserGroup, myuser as OEPUser
-from login.models import GroupPermission
+from login.models import GroupPermission, UserGroup
+from login.models import myuser as OEPUser
 from oeplatform.settings import STATIC_ROOT
 
 #####################################################
 # Utilities mainly used for the Tables profile page #
 #####################################################
-
-
-from typing import List
 
 
 def get_user_tables(user_id: int) -> List[Table]:

@@ -22,7 +22,7 @@ rename_security_settings:
 	mv ../oeplatform/securitysettings.py.default ../oeplatform/securitysettings.py
 
 	@echo "Database variables in securitysettings.py have been automatically set."
-	
+
 
 .PHONY: setup-db create-db migrate include_security_settings
 
@@ -46,7 +46,7 @@ setup-db: include_security_settings
 	sudo -u postgres psql -d $(LOCAL_DB_NAME) -c "CREATE EXTENSION postgis;"
 
 create-db:
-	
+
 
 migrate-databases:
 	# Create Django databases and apply migrations
@@ -74,4 +74,3 @@ clean:
 .PHONY: all
 
 all: rename_security_settings setup-db create-db migrate run-fuseki
-

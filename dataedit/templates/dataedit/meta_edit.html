@@ -44,7 +44,7 @@
     {% compress js %}
     <script src="/static/metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js"></script>
     <script src="/static/metaedit/metaedit.js"></script>
-    {% endcompress %} 
+    {% endcompress %}
     <!-- fix imports below - we dont use cdn anymore -->
     <script src="https://unpkg.com/@trevoreyre/autocomplete-js"></script>
 
@@ -52,13 +52,13 @@
       rel="stylesheet"
       href="https://unpkg.com/@trevoreyre/autocomplete-js/dist/style.css"
     />
-    
+
     <script>
         var config = JSON.parse("{{ config|escapejs }}");
         MetaEdit(config);
         $(function () {
             $('[data-bs-toggle="popover"]').popover()
-            
+
             $('.popover-dismiss').popover({
             trigger: 'focus'
             })

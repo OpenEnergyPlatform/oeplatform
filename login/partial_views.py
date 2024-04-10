@@ -2,10 +2,7 @@ from django.shortcuts import get_object_or_404, render
 
 from api.parser import get_or_403
 from dataedit.models import Table
-from login.utilities import (
-    get_review_badge_from_table_metadata,
-    get_badge_icon_path,
-)
+from login.utilities import get_badge_icon_path, get_review_badge_from_table_metadata
 
 
 def metadata_review_badge_indicator_icon_file(request, user_id, table_name):

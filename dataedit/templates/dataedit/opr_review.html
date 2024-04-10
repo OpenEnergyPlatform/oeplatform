@@ -64,7 +64,7 @@
       </div>
     </div>
   </div>
-    
+
   <div class="fullwidth-tabs">
     <div class="fullwidth-tabs__container">
       <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
@@ -151,7 +151,7 @@
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
-                </div>  
+                </div>
                 {% endfor %}
                 <p class="review__items-cat">Temporal</p>
                 {% for item in meta.temporal %}
@@ -173,7 +173,7 @@
             </div>
             <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
               <div class="review__items">
-              {% for item in meta.source %} 
+              {% for item in meta.source %}
                 <div id="field_{{item.field}}" class="field review__item" data-category="source" onclick="click_field('{{item.field}}', '{{ item.value }}', 'source');">
                   <p class="review__item-content">
                     {% if item.field is Null %}
@@ -186,7 +186,7 @@
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
-                </div> 
+                </div>
               {% endfor %}
               </div>
             </div>
@@ -205,7 +205,7 @@
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
-                </div>  
+                </div>
               {% endfor %}
               </div>
             </div>
@@ -224,7 +224,7 @@
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
-                </div>  
+                </div>
               {% endfor %}
               </div>
             </div>
@@ -243,7 +243,7 @@
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
-                </div>  
+                </div>
               {% endfor %}
               </div>
             </div>
@@ -350,7 +350,7 @@
       $(field_id).addClass(`field-${value}`);
     }
 }
-    
+
     // var existing_review = JSON.parse("{{ existing_review | escapejs }}");
   </script>
 <script type="text/javascript">

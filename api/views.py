@@ -13,21 +13,14 @@ import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import PermissionDenied
+from django.core.serializers import serialize
 from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
-from django.core.serializers import serialize
-
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
-from rest_framework import status
+from rest_framework import generics, status
 from rest_framework.views import APIView
-from rest_framework import generics
-from api.serializers import (
-    EnergyframeworkSerializer,
-    EnergymodelSerializer,
-    ScenarioDataTablesSerializer,
-)
 
 import api.parser
 import login.models as login_models
@@ -35,12 +28,16 @@ from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
+from api.serializers import (
+    EnergyframeworkSerializer,
+    EnergymodelSerializer,
+    ScenarioDataTablesSerializer,
+)
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
-
 from modelview.models import Energyframework, Energymodel
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 logger = logging.getLogger("oeplatform")
 
@@ -718,10 +715,10 @@ class Rows(APIView):
                 content_type="text/csv",
                 session=session,
             )
-            response["Content-Disposition"] = (
-                'attachment; filename="{schema}__{table}.csv"'.format(
-                    schema=schema, table=table
-                )
+            response[
+                "Content-Disposition"
+            ] = 'attachment; filename="{schema}__{table}.csv"'.format(
+                schema=schema, table=table
             )
             return response
         elif format == "datapackage":
@@ -749,10 +746,10 @@ class Rows(APIView):
                 content_type="application/zip",
                 session=session,
             )
-            response["Content-Disposition"] = (
-                'attachment; filename="{schema}__{table}.zip"'.format(
-                    schema=schema, table=table
-                )
+            response[
+                "Content-Disposition"
+            ] = 'attachment; filename="{schema}__{table}.zip"'.format(
+                schema=schema, table=table
             )
             return response
         else:

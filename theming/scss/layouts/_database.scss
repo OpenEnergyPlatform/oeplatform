@@ -7,7 +7,7 @@
     width: 100%;
     max-width: calc(100vw - (#{$C--padding-standard} * 2));
 
-    @include media-breakpoint-up(md) { 
+    @include media-breakpoint-up(md) {
         max-width: $C--db-main-max-width;
     }
 
