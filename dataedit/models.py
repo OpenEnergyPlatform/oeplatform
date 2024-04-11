@@ -17,8 +17,6 @@ from django.db.models import (
 )
 from django.utils import timezone
 
-from dataedit.helper import get_readable_table_name
-
 # Create your models here.
 
 
@@ -128,7 +126,8 @@ class Table(Tagable):
         self.is_publish = False
         self.save()
 
-    def set_human_readable_name(self):
+    # used in api action every time the table metadata is updated
+    def set_human_readable_name(self, current_name, readable_table_name: str | None):
         """
         Set the readable table name for this table.
         The function attempts to retrieve a string form the tables
@@ -136,11 +135,11 @@ class Table(Tagable):
 
         return: str
         """
-
-        table_title = get_readable_table_name(self)
-
-        if table_title:
-            self.human_readable_name = table_title
+        # avoid writing none values & writing non changes
+        # non changes mean that the oemetadata was updated
+        # but not the title field
+        if readable_table_name and readable_table_name is not current_name:
+            self.human_readable_name = readable_table_name
             self.save()
 
     class Meta:
