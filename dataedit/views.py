@@ -897,7 +897,7 @@ class DataView(View):
     This view is displayed when a table is clicked on after choosing a schema
     on the website
 
-    Initialises the session data (if necessary)
+    Initializes the session data (if necessary)
     """
 
     # TODO Check if this hits bad in performance
@@ -964,6 +964,8 @@ class DataView(View):
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
+        table_label = table_obj.human_readable_name
+
         table_views = DBView.objects.filter(table=table).filter(schema=schema)
 
         default = DBView(name="default", type="table", table=table, schema=schema)
@@ -981,9 +983,10 @@ class DataView(View):
 
         table_views = list(chain((default,), table_views))
 
-        #########################################################################
-        # Get open peer review process related metadata
-        #########################################################################
+        #########################################################
+        #   Get open peer review process related metadata       #
+        #########################################################
+
         # Context data for the open peer review (data view side panel)
         opr_context = {}
         # Context data for review result tab
@@ -1041,7 +1044,10 @@ class DataView(View):
             opr_context.update({"opr_id": None, "opr_current_reviewer": None})
             opr_result_context.update({"review_exists": False})
 
-        #########################################################################
+        #########################################################
+        #   Construct the context object for the template       #
+        #########################################################
+
         context_dict = {
             # Not in use?
             # "comment_on_table": dict(metadata),
@@ -1050,6 +1056,7 @@ class DataView(View):
             "kinds": ["table", "map", "graph"],
             "table": table,
             "schema": schema,
+            "table_label": table_label,
             "tags": tags,
             "data": data,
             "display_message": display_message,
