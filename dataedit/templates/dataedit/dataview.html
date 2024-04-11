@@ -14,7 +14,7 @@
       Database
   </h1>
   <div class="main-header__wizard">
-    <a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/{{ schema }}">{{ schema }}</a> / {{ table }}
+    <a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/{{ schema }}">{{ schema }}</a> / {% if table_label %} {{ table_label }} {% else %} {{ table }} {% endif %}
   </div>
 </div>
 
