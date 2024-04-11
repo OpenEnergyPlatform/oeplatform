@@ -8,6 +8,8 @@
 
 ## Features
 
+- Add human readable table name / title from metadata to table model [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+
 ## Bugs
 
 ## Documentation updates
