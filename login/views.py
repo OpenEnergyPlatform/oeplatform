@@ -1,4 +1,3 @@
-import json
 from itertools import groupby
 
 from django import forms
@@ -20,7 +19,7 @@ from django.views.generic.edit import DeleteView, UpdateView
 from rest_framework.authtoken.models import Token
 
 import login.models as models
-from dataedit.models import PeerReviewManager, Table
+from dataedit.models import PeerReviewManager
 from dataedit.views import schema_whitelist
 from login.utilities import (
     get_badge_icon_path,
@@ -78,6 +77,7 @@ class TablesView(View):
             table_data = {
                 "name": table.name,
                 "schema": table.schema.name,
+                "table_label": table.human_readable_name,
                 "is_publish": table.is_publish,
                 "is_reviewed": table.is_reviewed,
                 "review_badge_context": {
@@ -168,14 +168,15 @@ class ReviewsView(View):
                 PeerReviewManager.filter_latest_open_opr_by_reviewer(reviewer_user=user)
             )
 
-            if active_peer_review_revewier is not None:
-                review_history = peer_review_reviews.exclude(
-                    pk=active_peer_review_revewier.pk
-                )  # noqa
-            else:
-                # Handle the case when active_peer_review_revewier is None.
-                # Maybe set review_history to some default value or just leave it as None.
-                review_history = None
+            # if active_peer_review_revewier is not None:
+            #     review_history = peer_review_reviews.exclude(
+            #         pk=active_peer_review_revewier.pk
+            #     )  # noqa
+            # else:
+            # Handle the case when active_peer_review_revewier is None.
+            # Maybe set review_history to some default value or just leave
+            # it as None.
+            # review_history = None
 
             # Context da for the "All reviews" section on the profile page
             reviewed_context.update(
@@ -250,7 +251,8 @@ class ReviewsView(View):
                 )
             else:
                 # Handle the case when active_peer_review_contributor is None.
-                # Maybe set reviewed_contribution_history to some default value or just leave it as None.
+                # Maybe set reviewed_contribution_history to some default
+                # value or just leave it as None.
                 reviewed_contribution_history = None
 
             reviewed_contributions_context = {
