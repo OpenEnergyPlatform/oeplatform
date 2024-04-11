@@ -10,6 +10,9 @@
 
 - Add human readable table name / title from metadata to table model [(#1663)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1663)
 
+- Connect scenario input and output datasets to API[#1649](https://github.com/OpenEnergyPlatform/oeplatform/pull/1649)
+
+
 ## Bugs
 
 ## Documentation updates

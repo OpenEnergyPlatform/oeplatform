@@ -36,11 +36,13 @@ import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
-import oedb_iris from '../data/datasets_iris.json';
-import oedb_names from '../data/datasets_names.json';
 import LCC from '../data/countries.json';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
+import axios from 'axios';
+import { createFilterOptions } from "@material-ui/lab/Autocomplete";
+import CSRFToken from './csrfToken';
+import conf from "../conf.json";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -104,164 +106,112 @@ export default function Scenario(props) {
     HandleAddNNewScenarioYear,
     descriptors,
     scenarioDescriptorHandler
-   } = props;
+  } = props;
 
 
-  function createData(
-    Model: string,
-    Scenario: number,
-    Region: number,
-    Year: number,
-    Capacity: number,
-  ) {
-    return { Model, Scenario, Region, Year, Capacity };
+
+  const [scenariosInputDatasetsObj, setScenariosInputDatasetsObj] = useState(data.input_datasets);
+  const [scenariosOutputDatasetsObj, setScenariosOutputDatasetsObj] = useState(data.output_datasets);
+
+  console.log(scenariosInputDatasetsObj);
+
+  scenariosInputDatasetsObj.forEach((element, index) => {
+    console.log(element);
+  });
+
+
+  const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
+  const [value, setValue] = React.useState(0);
+
+  const [expandedDesciptorList, setExpandedDesciptorList] = useState([]);
+
+  const [dataTableList, setDataTableList] = useState([]);
+
+  const findNestedObj = (entireObj, keyToFind, valToFind) => {
+    let foundObj;
+    JSON.stringify(entireObj, (_, nestedValue) => {
+      if (nestedValue && nestedValue[keyToFind] === valToFind) {
+        foundObj = nestedValue;
+      }
+      return nestedValue;
+    });
+    return foundObj;
+  };
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
+  const handleClickOpenRemovedDialog = () => {
+    setOpenRemovedDialog(true);
+  };
+
+  const handleClickCloseRemovedDialog = () => {
+    setOpenRemovedDialog(false);
+  };
+  const addInputDatasetItem = uid => {
+    setScenariosInputDatasetsObj(prevScenariosInputDatasetsObj => [...prevScenariosInputDatasetsObj, { key: uid, idx: scenariosInputDatasetsObj.length, value: { label: '', url: '' } }]);
+  };
+
+
+  const updateInputDatasetName = (element, key, index) => {
+    console.log(element, key, index);
+    const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj;
+    console.log(updateScenariosInputDatasetsObj);
+    updateScenariosInputDatasetsObj[index].value.label = element.label;
+    updateScenariosInputDatasetsObj[index].value.url = element.url;
+    updateScenariosInputDatasetsObj[index].idx = index;
+    updateScenariosInputDatasetsObj[index].key = key;
+    console.log(updateScenariosInputDatasetsObj);
+    setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
+    scenariosInputDatasetsHandler(updateScenariosInputDatasetsObj, data.id);
+  };
+
+  const removeInputDataset = (uid, idx) => {
+    const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj.filter(e => e.key != uid);
+    setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
+    scenariosInputDatasetsHandler(updateScenariosInputDatasetsObj, data.id);
+  };
+
+  const addOutputDatasetItem = uid => {
+    setScenariosOutputDatasetsObj(prevScenariosOutputDatasetsObj => [...prevScenariosOutputDatasetsObj, { key: uid, idx: scenariosOutputDatasetsObj.length, value: { label: '', url: '' } }]);
+  };
+
+
+  const updateOutputDatasetName = (value, key, index) => {
+    const updateScenariosOutputDatasetsObj = scenariosOutputDatasetsObj;
+    updateScenariosOutputDatasetsObj[index].value.label = value.label;
+    updateScenariosOutputDatasetsObj[index].value.url = value.url;
+    updateScenariosOutputDatasetsObj[index].idx = index;
+    updateScenariosOutputDatasetsObj[index].key = key;
+    setScenariosOutputDatasetsObj(updateScenariosOutputDatasetsObj);
+    scenariosOutputDatasetsHandler(updateScenariosOutputDatasetsObj, data.id);
+  };
+
+  const removeOutputDataset = (uid, idx) => {
+    const updateScenariosOutputDatasetsObj = scenariosOutputDatasetsObj.filter(e => e.key != uid);
+    setScenariosOutputDatasetsObj(updateScenariosOutputDatasetsObj);
+    scenariosOutputDatasetsHandler(updateScenariosOutputDatasetsObj, data.id);
+  };
+
+
+  const expandDescriptorsHandler = (expandedDescriptorList) => {
+    const zipped = []
+    expandedDescriptorList.map((v) => zipped.push({ "value": v, "label": v }));
+    setExpandedDesciptorList(zipped);
+  };
+
+
+
+  const options_LCC = LCC.sort((a, b) => a.name.localeCompare(b.name));
+
+  const [, updateState] = React.useState();
+  const forceUpdate = React.useCallback(() => updateState({}), []);
+
+  const handleRemoveScenario = () => {
+    removeScenario(data.id);
+    forceUpdate();
   }
-  const rows = [
-    createData('dea_technology_data_generation', 'WEM', 'Germany', 2015, 4.0),
-    createData('dea_technology_data_generation', 'WAM', 'Germany', 2015, 4.3),
-    createData('dea_technology_data_generation', 'WEM', 'Europe', 2015, 6.0),
-    createData('dea_technology_data_generation', 'WAM', 'Europe', 2020, 4.3),
-    createData('dea_technology_data_generation', 'WAM', 'Europe', 2020, 3.9),
-  ];
-
-
-
-    const [scenariosInputDatasetsObj, setScenariosInputDatasetsObj] = useState(data.input_datasets);
-    const [scenariosOutputDatasetsObj, setScenariosOutputDatasetsObj] = useState(data.output_datasets);
-    const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
-    const [value, setValue] = React.useState(0);
-
-    const [expandedDesciptorList, setExpandedDesciptorList] = useState([]);
-
-
-    const findNestedObj = (entireObj, keyToFind, valToFind) => {
-      let foundObj;
-      JSON.stringify(entireObj, (_, nestedValue) => {
-        if (nestedValue && nestedValue[keyToFind] === valToFind) {
-          foundObj = nestedValue;
-        }
-        return nestedValue;
-      });
-      return foundObj;
-    };
-
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-      setValue(newValue);
-    };
-
-    const handleClickOpenRemovedDialog = () => {
-      setOpenRemovedDialog(true);
-    };
-
-    const handleClickCloseRemovedDialog = () => {
-      setOpenRemovedDialog(false);
-    };
-    const addInputDatasetItem = uid => {
-      setScenariosInputDatasetsObj(prevScenariosInputDatasetsObj => [...prevScenariosInputDatasetsObj, { key: uid, idx: scenariosInputDatasetsObj.length, value: { label: '', iri: '' } } ]);
-    };
-
-    const updateInputDatasetIRI = (value, key, index) => {
-      const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj;
-      updateScenariosInputDatasetsObj[index].value.label = value.name;
-      updateScenariosInputDatasetsObj[index].value.iri = value.label;
-      updateScenariosInputDatasetsObj[index].idx = index;
-      updateScenariosInputDatasetsObj[index].key = key;
-      setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
-      scenariosInputDatasetsHandler(updateScenariosInputDatasetsObj, data.id);
-    };
-
-    const updateInputDatasetName = (value, key, index) => {
-      const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj;
-      updateScenariosInputDatasetsObj[index].value.label = value.label;
-      updateScenariosInputDatasetsObj[index].value.iri = value.iri;
-      updateScenariosInputDatasetsObj[index].idx = index;
-      updateScenariosInputDatasetsObj[index].key = key;
-      setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
-      scenariosInputDatasetsHandler(updateScenariosInputDatasetsObj, data.id);
-    };
-
-    const removeInputDataset = (uid, idx) => {
-      const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj.filter(e => e.key != uid);
-      setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
-      scenariosInputDatasetsHandler(updateScenariosInputDatasetsObj, data.id);
-    };
-
-    const addOutputDatasetItem = uid => {
-      setScenariosOutputDatasetsObj(prevScenariosOutputDatasetsObj => [...prevScenariosOutputDatasetsObj, { key: uid, idx: scenariosOutputDatasetsObj.length, value: { label: '', iri: '' } } ]);
-    };
-
-    const updateOutputDatasetIRI = (value, key, index) => {
-      const updateScenariosOutputDatasetsObj = scenariosOutputDatasetsObj;
-      updateScenariosOutputDatasetsObj[index].value.label = value.name;
-      updateScenariosOutputDatasetsObj[index].value.iri = value.label;
-      updateScenariosOutputDatasetsObj[index].idx = index;
-      updateScenariosOutputDatasetsObj[index].key = key;
-      setScenariosOutputDatasetsObj(updateScenariosOutputDatasetsObj);
-      scenariosOutputDatasetsHandler(updateScenariosOutputDatasetsObj, data.id);
-      };
-
-    const updateOutputDatasetName = (value, key, index) => {
-      const updateScenariosOutputDatasetsObj = scenariosOutputDatasetsObj;
-      updateScenariosOutputDatasetsObj[index].value.label = value.label;
-      updateScenariosOutputDatasetsObj[index].value.iri = value.iri;
-      updateScenariosOutputDatasetsObj[index].idx = index;
-      updateScenariosOutputDatasetsObj[index].key = key;
-      setScenariosOutputDatasetsObj(updateScenariosOutputDatasetsObj);
-      scenariosOutputDatasetsHandler(updateScenariosOutputDatasetsObj, data.id);
-      };
-
-    const removeOutputDataset = (uid, idx) => {
-        const updateScenariosOutputDatasetsObj = scenariosOutputDatasetsObj.filter(e => e.key != uid);
-        setScenariosOutputDatasetsObj(updateScenariosOutputDatasetsObj);
-        scenariosOutputDatasetsHandler(updateScenariosOutputDatasetsObj, data.id);
-      };
-
-
-    const expandDescriptorsHandler = (expandedDescriptorList) => {
-      const zipped = []
-      expandedDescriptorList.map((v) => zipped.push({ "value": v, "label": v }));
-      setExpandedDesciptorList(zipped);
-    };
-
-
-
-    const options_db_names = oedb_iris;
-    const options_db_iris = oedb_names;
-    const options_LCC =  LCC.sort((a, b) => a.name.localeCompare(b.name));
-
-    const [, updateState] = React.useState();
-    const forceUpdate = React.useCallback(() => updateState({}), []);
-
-    const handleRemoveScenario = () => {
-      removeScenario(data.id);
-      forceUpdate();
-    }
-
-
-
-    const mapping =
-          "@prefix rr: <http://www.w3.org/ns/r2rml#>. \n \
-          @prefix oeo: <http://openenergy-platform.org/ontology/oeo/>. \n \
-          <#Mapping> \n \
-          rr:logicalTable [ \n \
-            rr:tableName 'my_csv_file' \n \
-          ]; \n \
-          rr:subjectMap [ \n \
-            rr:class oeo:PowerPlant ; \n \
-            rr:template 'http://oeo.org/plants/{region}/{year}/{model}/{scenario}' ; \n \
-            rr:termType rr:IRI ; \n \
-            rr:column 'region' ; \n \
-            rr:column 'year' ; \n \
-            rr:column 'model' ; \n \
-            rr:column 'scenario' ; \n \
-          ]; \n \
-          rr:predicateObjectMap [ \n \
-            rr:predicate oeo:hasCapacity ; \n \
-            rr:objectMap [ \n \
-              rr:datatype xsd:double ; \n \
-              rr:column 'capacity' ; \n \
-            ]; \n \
-          ]."
 
   const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -277,7 +227,27 @@ export default function Scenario(props) {
     },
   }));
   const classes = useStyles();
-  const tabClasses = {root: classes.tab};
+  const tabClasses = { root: classes.tab };
+
+  const getDAtaTableList = async () => {
+    const { data } = await axios.get(conf.toep + `api/v0/datasets/list_all/scenario/`, {
+      headers: { 'X-CSRFToken': CSRFToken() }
+    });
+    return data;
+  };
+
+  useEffect(() => {
+    getDAtaTableList().then((data) => {
+      const tmp = [];
+      console.log(data);
+      data.map((item) => tmp.push({ 'url': item.url, 'label': item.name, 'id': item.id }));
+      setDataTableList(tmp);
+    });
+  }, []);
+
+  function handleInputChange(event, value) {
+    console.log(value);
+  }
 
   return (
     <Typography variant="body2">
@@ -291,8 +261,8 @@ export default function Scenario(props) {
 
         <BundleScenariosGridItem
           {...props}
-          labelGridSize = {3}
-          fieldGridSize = {9}
+          labelGridSize={3}
+          fieldGridSize={9}
           spanValue="Name"
           tooltipText="A study is a project with the goal to investigate something."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020011"
@@ -300,7 +270,7 @@ export default function Scenario(props) {
             <TextField
               size="small"
               variant='outlined'
-              style={{  width: '100%' }}
+              style={{ width: '100%' }}
               id="outlined-basic"
               label=""
               name={'name_' + data.id}
@@ -313,8 +283,8 @@ export default function Scenario(props) {
         />
         <BundleScenariosGridItem
           {...props}
-          labelGridSize = {3}
-          fieldGridSize = {9}
+          labelGridSize={3}
+          fieldGridSize={9}
           spanValue="Acronym"
           tooltipText="An acronym is an abbreviation of the title by using the first letters of each part of the title."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000048"
@@ -322,7 +292,7 @@ export default function Scenario(props) {
             <TextField
               size="small"
               variant='outlined'
-              style={{  width: '100%' }}
+              style={{ width: '100%' }}
               id="outlined-basic"
               label=""
               name={'acronym_' + data.id}
@@ -335,8 +305,8 @@ export default function Scenario(props) {
         />
         <BundleScenariosGridItem
           {...props}
-          labelGridSize = {3}
-          fieldGridSize = {9}
+          labelGridSize={3}
+          fieldGridSize={9}
           spanValue="Abstract"
           tooltipText="A summary of the resource."
           hrefLink="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract"
@@ -345,7 +315,7 @@ export default function Scenario(props) {
             <TextField
               size="small"
               variant='outlined'
-              style={{  width: '100%' }}
+              style={{ width: '100%' }}
               id="outlined-basic"
               label=""
               multiline
@@ -361,8 +331,8 @@ export default function Scenario(props) {
         />
         <BundleScenariosGridItem
           {...props}
-          labelGridSize = {3}
-          fieldGridSize = {9}
+          labelGridSize={3}
+          fieldGridSize={9}
           spanValue="Spatial regions"
           tooltipText="A study region is a spatial region that is under investigation and consists entirely of one or more subregions."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020032"
@@ -381,8 +351,8 @@ export default function Scenario(props) {
         />
         <BundleScenariosGridItem
           {...props}
-          labelGridSize = {3}
-          fieldGridSize = {9}
+          labelGridSize={3}
+          fieldGridSize={9}
           spanValue="Interacting regions"
           tooltipText="An interacting region is a spatial region that interacts with a study region. It is part of a considered region, but not a study region."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020036"
@@ -408,8 +378,8 @@ export default function Scenario(props) {
         />
         <BundleScenariosGridItem
           {...props}
-          labelGridSize = {3}
-          fieldGridSize = {9}
+          labelGridSize={3}
+          fieldGridSize={9}
           spanValue="Scenario years"
           tooltipText="A scenario year is a time step that has a duration of one year and is part of a scenario horizon."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020097"
@@ -430,8 +400,8 @@ export default function Scenario(props) {
         />
         <BundleScenariosGridItem
           {...props}
-          labelGridSize = {3}
-          fieldGridSize = {9}
+          labelGridSize={3}
+          fieldGridSize={9}
           spanValue="Scenario type"
           tooltipText="A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
@@ -452,45 +422,32 @@ export default function Scenario(props) {
         />
         <BundleScenariosGridItem
           {...props}
-          labelGridSize = {3}
-          fieldGridSize = {9}
+          labelGridSize={3}
+          fieldGridSize={9}
           spanValue="Input dataset(s)"
           tooltipText="Endogenous data is a data item whose quantity value is determined by a model."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
-          customSpan = {
+          customSpan={
             <span>
               <IconButton
                 color="primary"
                 aria-label="add"
                 onClick={() => addInputDatasetItem(uuid())}
-                >
+              >
                 <AddIcon />
               </IconButton>
             </span>}
           renderField={() =>
             Object.keys(scenariosInputDatasetsObj).length > 0 &&  scenariosInputDatasetsObj.map((item, index) => (
               <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
-                <Grid item xs={5} >
+                <Grid item xs={11} >
                   <Autocomplete
                     disableCloseOnSelect
-                    options={options_db_names}
-                    renderInput={(params) => <TextField {...params} label="Name" size="small"  variant='outlined' />}
+                    options={dataTableList}
+                    renderInput={(params) => <TextField {...params} label="Name" size="small" variant='outlined' />}
                     onChange={(event, value) => updateInputDatasetName(value, item.key, index)}
                     value={item.value.label}
-                    size="small"
-                    variant='standard'
-                  />
-                </Grid>
-                <Grid item xs={1} sx={{ textAlign: "center"}} >
-                  <b style={{ verticalAlign: "sub"}}>OR</b>
-                </Grid>
-                <Grid item xs={5} >
-                  <Autocomplete
-                    disableCloseOnSelect
-                    options={options_db_iris}
-                    renderInput={(params) => <TextField {...params} label="IRI" size="small"  variant='outlined' />}
-                    onChange={(event, value) => updateInputDatasetIRI(value, item.key, index)}
-                    value={ item.value.iri}
+
                   />
                 </Grid>
                 <Grid item xs={1} >
@@ -507,14 +464,15 @@ export default function Scenario(props) {
           }
           TooltipComponent={HtmlTooltip}
         />
+
         <BundleScenariosGridItem
           {...props}
-          labelGridSize = {3}
-          fieldGridSize = {9}
+          labelGridSize={3}
+          fieldGridSize={9}
           spanValue="Output dataset(s)"
           tooltipText="Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00030029"
-          customSpan = {
+          customSpan={
             <span>
               <IconButton
                 color="primary"
@@ -526,43 +484,30 @@ export default function Scenario(props) {
             </span>}
           renderField={() =>
             Object.keys(scenariosOutputDatasetsObj).length > 0 && scenariosOutputDatasetsObj.map((item, index) => (
-             <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
-              <Grid item xs={5} >
-                <Autocomplete
-                  disableCloseOnSelect
-                  options={options_db_names}
-                  renderInput={(params) => <TextField {...params} label="Name" size="small"  variant='outlined'/>}
-                  onChange={(event, value) => updateOutputDatasetName(value, item.key, index)}
-                  value={item.value.label}
-                />
+              <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
+                <Grid item xs={11} >
+                  <Autocomplete
+                    disableCloseOnSelect
+                    options={dataTableList}
+                    renderInput={(params) => <TextField {...params} label="name" size="small" variant='outlined' />}
+                    onChange={(event, value) => updateOutputDatasetName(value, item.key, index)}
+                    value={item.value.label}
+                  />
+                </Grid>
+                <Grid item xs={1}>
+                  <IconButton
+                    color="primary"
+                    aria-label="add"
+                    onClick={() => removeOutputDataset(item.key, data.index)}
+                  >
+                    <DeleteOutlineIcon />
+                  </IconButton>
+                </Grid>
               </Grid>
-              <Grid item xs={1} style={{ textAlign: 'center' }}>
-                <b style={{ verticalAlign: "sub"}}>OR</b>
-              </Grid>
-              <Grid item xs={5} >
-                <Autocomplete
-                  disableCloseOnSelect
-                  options={options_db_iris}
-                  renderInput={(params) => <TextField {...params} label="IRI" size="small"  variant='outlined'/>}
-                  onChange={(event, value) => updateOutputDatasetIRI(value, item.key, index)}
-                  value={item.value.iri}
-                />
-              </Grid>
-              <Grid item xs={1}>
-                <IconButton
-                  color="primary"
-                  aria-label="add"
-                  onClick={() => removeOutputDataset(item.key, data.index)}
-                >
-                  <DeleteOutlineIcon />
-                </IconButton>
-              </Grid>
-            </Grid>
             ))
           }
           TooltipComponent={HtmlTooltip}
         />
-
       </Grid>
     </Typography>
   );
