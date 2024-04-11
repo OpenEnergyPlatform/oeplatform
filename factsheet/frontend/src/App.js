@@ -1,5 +1,6 @@
 import React, { PureComponent, Fragment, useState, useEffect } from "react";
 import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import axios from "axios";
 import Home from './home.js';
 import Factsheet from './components/factsheet.js';
@@ -32,7 +33,7 @@ function App() {
     getData().then((data) => {
       setFactsheet(data);
       setLoading(false);
-  });
+    });
   }, []);
 
   if (param_1 === 'main') {
@@ -61,7 +62,9 @@ function App() {
       return <ThemeProvider theme={theme}><Factsheet id={param_2} fsData={factsheet}/></ThemeProvider>
     }
   } else {
-    return <LinearProgress />
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <CircularProgress />
+    </div>
   }
 }
 

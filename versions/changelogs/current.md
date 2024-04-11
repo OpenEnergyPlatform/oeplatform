@@ -8,6 +8,8 @@
 
 ## Features
 
+- Connect scenario input and output datasets to API[#1649](https://github.com/OpenEnergyPlatform/oeplatform/pull/1649)
+
 ## Bugs
 
 ## Documentation updates
