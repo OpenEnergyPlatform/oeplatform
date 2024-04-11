@@ -5,13 +5,12 @@ make the codebase more modular.
 
 from dataedit.models import Table
 
-
 ##############################################
 #          Table view related                #
 ##############################################
 
 
-def read_label(table, comment):
+def read_label(table, oemetadata) -> None | str:
     """
     Extracts the readable name from @comment and appends the real name in parens.
     If comment is not a JSON-dictionary or does not contain a field 'Name' None
@@ -24,10 +23,10 @@ def read_label(table, comment):
     :return: Readable name appended by the true table name as string or None
     """
     try:
-        if comment.get("title"):
-            return comment["title"].strip() + " (" + table + ")"
-        elif comment.get("Title"):
-            return comment["Title"].strip() + " (" + table + ")"
+        if oemetadata.get("title"):
+            return oemetadata["title"].strip() + " (" + table + ")"
+        elif oemetadata.get("Title"):
+            return oemetadata["Title"].strip() + " (" + table + ")"
 
         else:
             return None
@@ -36,7 +35,7 @@ def read_label(table, comment):
         return None
 
 
-def get_readable_table_name(table_obj: Table):
+def get_readable_table_name(table_obj: Table) -> None | str:
     """get readable table name from metadata
 
     Args:
@@ -45,10 +44,11 @@ def get_readable_table_name(table_obj: Table):
     Returns:
         str
     """
+
     try:
         label = read_label(table_obj.name, table_obj.oemetadata)
-    except Exception:
-        label = ""
+    except Exception as e:
+        raise e
     return label
 
 
@@ -62,16 +62,19 @@ def merge_field_reviews(current_json, new_json):
     Merge reviews from contributors and reviewers into a single JSON object.
 
     Args:
-        current_json (dict): The current JSON object containing reviewer's reviews.
+        current_json (dict): The current JSON object containing
+            reviewer's reviews.
         new_json (dict): The new JSON object containing contributor's reviews.
 
     Returns:
-        dict: The merged JSON object containing both contributor's and reviewer's reviews.
+        dict: The merged JSON object containing both contributor's and
+            reviewer's reviews.
 
     Note:
-        If the same key is present in both the contributor's and reviewer's reviews,
-        the function will merge the field evaluations. Otherwise, it will create a new entry
-        in the Review-Dict.
+        If the same key is present in both the contributor's and
+            reviewer's reviews, the function will merge the field
+            evaluations. Otherwise, it will create a new entry in
+            the Review-Dict.
     """
     merged_json = new_json.copy()
     review_dict = {}
@@ -113,11 +116,12 @@ def get_review_for_key(key, review_data):
 
     Args:
         key (str): The key for which to retrieve the review.
-        review_data (dict): The review data containing reviews for various keys.
+            review_data (dict): The review data containing
+            reviews for various keys.
 
     Returns:
-        Any: The new value associated with the specified key in the review data,
-        or None if the key is not found.
+        Any: The new value associated with the specified key
+            in the review data, or None if the key is not found.
     """
 
     for review in review_data["reviewData"]["reviews"]:
@@ -190,13 +194,14 @@ def process_review_data(review_data, metadata, categories):
         categories (list): A list of categories in the metadata.
 
     Returns:
-        dict: A state dictionary containing the state of each field after processing
-            the review data.
+        dict: A state dictionary containing the state of each field
+            after processing the review data.
 
     Note:
-        The function sorts the fieldReview entries by timestamp (newest first) and updates
-        the metadata with the latest reviewer suggestions, comments, and new values.
-        The resulting state dictionary indicates the state of each field after processing.
+        The function sorts the fieldReview entries by timestamp (newest first)
+        and updates the metadata with the latest reviewer suggestions,
+        comments, and new values. The resulting state dictionary indicates
+        the state of each field after processing.
     """
     state_dict = {}
 
