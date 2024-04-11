@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("modelview", "0003_basicfactsheet_energyframework_energymodel")]
 
     operations = [

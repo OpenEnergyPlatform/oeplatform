@@ -14,7 +14,7 @@
       Database
   </h1>
   <div class="main-header__wizard">
-    <a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/{{ schema }}">{{ schema }}</a> / {{ table }}
+    <a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/{{ schema }}">{{ schema }}</a> / {% if table_label %} {{ table_label }} {% else %} {{ table }} {% endif %}
   </div>
 </div>
 
@@ -110,16 +110,16 @@
         </li>
       </ul>
     </div>
-    
+
     <div>
       <div class="datatable">
         <table class="display" id="datatable" style="width:100%">
           <thead>
-            <tr>              
+            <tr>
             </tr>
           </thead>
         </table>
-    
+
         <div class="panel-group">
           <div class="panel panel-default">
             <div class="panel-heading">
@@ -136,9 +136,9 @@
             </div>
           </div>
         </div>
-    
+
         <div>
-    
+
         </div>
         {% if current_view.type == "map" %}
         <div style='height: 800px; width: 100%;' id="map"></div>
@@ -181,8 +181,7 @@
     <div class="table-container">
       {{ meta_widget }}
     </div>
-  </div>
-  
+  </div>  
   <div class="tab-pane opr fade" id="opr-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
     <div class="alert alert-variant--info alert-variant--sm alert-variant--center" role="alert">
       <span class="alert-variant__content">Under review</span>
@@ -218,7 +217,7 @@
     <!-- {% if opr_result.review_exists %}
     <div class="metadata__options">
       <span>
-        
+
       </span>
     </div>
     <div class="metadata__container">
@@ -240,10 +239,22 @@
     {% else %}
     <div class="metadata__container">
       <span>
-        This table is not reviewed yet. 
+        This table is not reviewed yet.
       </span>
     </div>
-    {% endif %} -->
+
+    {% endif %}
+  </div>
+
+  <div class="tab-pane oekg-scenarios fade" id="scenarios-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
+
+    <div class="metadata__container">
+      <span>
+        <div id="filteredScenariosContainer" hx-get="{% url 'factsheet:filter_scenario_view' %}?table_iri=dataedit/view/{{schema}}/{{table}}" hx-target="#filteredScenariosContainer" hx-swap="outerHTML" hx-trigger="load">
+          Loading ...
+        </div>
+      </span>
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -318,11 +329,13 @@
         <!-- Continue review -->
         <div class="review-status review-status--ongoing">
           The table is currently under review.
+
         </div>
         <a class="btn btn-success btn-sm" type="button"
         href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
           Continue Review
         </a>
+
       {% else %}
         <!-- Continue review but user does not identify as the reviewer -->
         <div class="review-status review-status--ongoing">

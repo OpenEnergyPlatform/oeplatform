@@ -10,6 +10,38 @@
 
 When working with data, it is very helpful to be able to implement programmatic solutions for managing data resources. The Rest API provides such functionality by opening the underlying database of the OEP website via HTTP. Users can access data tables under specific IRI's and retrieve various information artefacts. Following the REST specification, the common JSON format is used to transfer the data. External applications can easily process such JSON data and also upload new data to the database. This document provides information on the so called API Endpoint specification. This Information is relevant to use the CRUD functionality of the REST-API.
 
-## TBD
+## Open API
 
-OpenAPI-based documentation for all API endpoints will be created here.
+Below you see a draft version of the OpenAPI-based. It is the documentation for all HTTP-API endpoints and in the future it can be used to test out the API.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="dist/swagger-ui.css">
+    <script src="dist/swagger-ui-bundle.js"></script>
+    <script src="dist/swagger-ui-standalone-preset.js"></script>
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script>
+    window.onload = function() {
+      // Initialize SwaggerUI
+      const ui = SwaggerUIBundle({
+        url: "./schema.json",
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout"
+      })
+    }
+</script>
+</body>
+</html>

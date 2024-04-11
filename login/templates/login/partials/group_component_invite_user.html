@@ -1,0 +1,43 @@
+<div class="htmxComponentGroupMembership">
+        <div class="profile-category__member-invite">
+            <form id="invite-form" hx-post="{% url 'partial-group-invite' group_id=group.id %}" hx-target="#error-message" hx-encType="multipart/form-data" data-error-display="error-message">
+                {% csrf_token %}
+                <input type="hidden" name="mode" value="add_user">
+                <input class="form-control" id="username-input" name="name" type="text" placeholder="Add a user" >
+                {% if error %}
+                    <div style="color:#ff0000">{{ error.value }}</div>
+                {% endif %}
+
+            </form>
+            <div id="error-message"></div>
+            <button form="invite-form" type="submit" value="Submit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                </svg>
+                Invite member
+            </button>
+            <b>Note:</b> Users have to log in on the OEP at least once in order to be registered.<br>
+        </div>
+    </div>
+</div>
+
+<!--
+<script>
+    document.body.addEventListener('htmx:responseError', function(event) {
+        var usernameInput = document.getElementById('username-input');
+        usernameInput.classList.add('error-outline'); // Highlight the input in red
+
+        var errorMessageDiv = document.getElementById('error-message');
+        var response = JSON.parse(event.detail.xhr.responseText);
+        errorMessageDiv.innerText = response.error;
+        errorMessageDiv.style.color = 'red'; // Optional: make the error message text red
+    });
+    document.body.addEventListener('htmx:beforeRequest', function(event) {
+        // Remove error styling and message before a new request
+        var usernameInput = document.getElementById('username-input');
+        usernameInput.classList.remove('error-outline');
+
+        var errorMessageDiv = document.getElementById('error-message');
+        errorMessageDiv.innerText = '';
+    });
+</script> -->

@@ -540,7 +540,7 @@ class Layout extends Component {
           var lines = label.split(" ");
 
           // ctx.fillStyle =  node.id === this.state.currentNode.id ? "#78C1AE" :'#04678F';
-          // ctx.fillRect(node.x - 2, node.y - 8, (num_of_words * 2.4) + 6 , 14); 
+          // ctx.fillRect(node.x - 2, node.y - 8, (num_of_words * 2.4) + 6 , 14);
 
           const fontSize = 5;
           ctx.font = `bold ${fontSize}px Tahoma`;

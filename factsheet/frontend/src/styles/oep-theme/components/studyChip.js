@@ -13,12 +13,12 @@ const StudyChip = ({ index, label, included }) => {
       size='small'
       label={label}
       variant="outlined"
-      sx={{ 
+      sx={{
         marginBottom: variables.spacing[1],
         marginTop: variables.spacing[1],
         marginRight: variables.spacing[1],
         backgroundColor,
-        fontSize: variables.fontSize.sm 
+        fontSize: variables.fontSize.sm
       }}
     />
   );

@@ -84,7 +84,7 @@ export LOCAL_DB_NAME=oedb
 export LOCAL_DB_HOST=localhost
 
 # Preparation
-python manage.py collectstatic 
+python manage.py collectstatic
 python manage.py compress
 
 # Running Migrations
@@ -112,7 +112,9 @@ If you followed this documentation, you can skip the entire `Setup Your Database
   - You need to reapply the migrations
 
 ##### Build the oeplatform image
+
 If you want to build the oeplatform docker image yourself, e.g. after you've changed the code, you can do this by running the following command in the main directory of this repository.
+
 ```shell
 docker build -t oeplatform -f docker/Dockerfile .
 ```

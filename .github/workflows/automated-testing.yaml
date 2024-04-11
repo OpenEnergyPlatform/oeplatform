@@ -27,24 +27,23 @@ jobs:
     services:
       postgres:
         # We use our own prepared postgres image for this.
-        image: ghcr.io/openenergyplatform/oeplatform-postgres:0.3.0
+        image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         # We open up port 5432 to be able to use `localhost:5432` to connect to the database.
         # We also could omit this and use `postgres:5432` to connect to the database after modifying security settings.
         ports:
-           - 5432:5432
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
-    # production still uses python3.6
     strategy:
       matrix:
-        python-version: ['3.6', '3.9']
+        python-version: ["3.10"]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -97,4 +96,3 @@ jobs:
 
       - name: Run tests with tox
         run: tox -v
-      

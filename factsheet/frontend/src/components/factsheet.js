@@ -400,7 +400,7 @@ function Factsheet(props) {
             }
 
           }
-          
+
         }).catch(error => {
           if (error.response && error.response.status === 403) {
             // Handle "Access Denied" error
@@ -2047,7 +2047,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.url)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
@@ -2070,7 +2070,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.url)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
               </TableBody>
@@ -2418,242 +2418,7 @@ function Factsheet(props) {
     return `${label.slice(2, Math.round(numFitChars) - 3)}...`;
   });
 
-  function getStepContent(step: number) {
-    switch (step) {
-      case 0:
-        return (
-          <div style={{
-            display: 'flex',
-            alignItems: 'stretch',
-            flexWrap: 'wrap',
-            padding: '10px',
-          }}>
-            <TextField size="small" style={{ width: '40%', marginTop: '10px', backgroundColor: '#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="standard" value={studyName} onChange={handleStudyName} />
-            <div style={{ marginLeft: '10px', marginTop: '30px' }}>
-              <HtmlTooltip
-                title={
-                  <Typography color="inherit" variant="caption">
-                    {'A study is a project with the goal to investigate something.'} <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-                  </Typography>
-                }
-              >
-                <InfoOutlinedIcon sx={{ color: '#708696' }} />
-              </HtmlTooltip>
-            </div>
-            <TextField size="small" style={{ width: '40%', marginTop: '10px', marginLeft: '15%', backgroundColor: '#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
-            <div style={{ marginLeft: '10px', marginTop: '40px' }}>
-              <HtmlTooltip
-                title={
-                  <Typography color="inherit" variant="caption">
-                    {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'} <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Enrgy Ontology (OEO)...</a>
-                  </Typography>
-                }
-              >
-                <InfoOutlinedIcon sx={{ color: '#708696' }} />
-              </HtmlTooltip>
-            </div>
-            <CustomAutocomplete width="40%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution} />
-            <div style={{ marginLeft: '10px', marginRight: '15%', marginTop: '20px' }}>
-              <HtmlTooltip
-                title={
-                  <Typography color="inherit" variant="caption">
-                    {'An institution is an organisation that serves a social purpose.'}<br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info from Open Enrgy Ontology (OEO)...</a>
-                  </Typography>
-                }
-              >
-                <InfoOutlinedIcon sx={{ color: '#708696' }} />
-              </HtmlTooltip>
-            </div>
-            <CustomAutocomplete width="40%" type="contact person" showSelectedElements={true} editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson} manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson} />
-            <div style={{ marginTop: '40px' }}>
-              <HtmlTooltip
-                style={{ marginLeft: '10px' }}
-                placement="top"
-                title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="caption">
-                      {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info from Open Enrgy Ontology (OEO)...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-              >
-                <InfoOutlinedIcon sx={{ color: '#708696' }} />
-              </HtmlTooltip>
-            </div>
-          </div>
 
-
-        );
-      case 1:
-        return (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-          }}>
-            <CustomAutocomplete width="60%" type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource} />
-            <div style={{ marginTop: '10px' }}>
-              <HtmlTooltip
-                style={{ marginLeft: '10px' }}
-                placement="top"
-                title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="caption">
-                      {'A funder is a sponsor that supports by giving money.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-              >
-                <HelpOutlineIcon sx={{ color: '#708696' }} />
-              </HtmlTooltip>
-            </div>
-            <div style={{ width: '35%' }}></div>
-            <TextField size="small" variant="standard" style={{ width: '60%', MarginBottom: '10px', marginTop: '20px', backgroundColor: '#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract} />
-            <div style={{ width: '35%' }}></div>
-            <div style={{ marginTop: '30px' }}>
-              <HtmlTooltip
-                style={{ marginLeft: '10px' }}
-                placement="top"
-                title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="caption">
-                      {'A sector division is a specific way to subdivide a system.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info from Open Enrgy Ontology (OEO)...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-              >
-                <HelpOutlineIcon sx={{ color: '#708696' }} />
-              </HtmlTooltip>
-            </div>
-            <div style={{ marginTop: "10px", width: '80%' }}>
-              <Typography variant="subtitle1" gutterBottom style={{ marginTop: '30px', marginBottom: '10px' }}>
-                <b>Please select study descriptors.</b>
-              </Typography>
-            </div>
-            <div style={{ marginTop: "10px", width: '80%' }}>
-              <FormGroup>
-                <div >
-                  {
-                    StudyKeywords.map((item) => <FormControlLabel control={
-                      <div >
-                        <HtmlTooltip
-                          style={{ marginLeft: '10px' }}
-                          placement="top"
-                          title={
-                            <React.Fragment>
-                              <Typography color="inherit" variant="caption">
-                                {'A sector division is a specific way to subdivide a system.'}
-                                <br />
-                                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info from Open Enrgy Ontology (OEO)...</a>
-                              </Typography>
-                            </React.Fragment>
-                          }
-                        >
-                          <Checkbox size="small" color="default" />
-                        </HtmlTooltip>
-                      </div>
-                    } checked={selectedStudyKewords.includes(item)} onChange={handleStudyKeywords} label={item} name={item} />)
-                  }
-                </div>
-              </FormGroup>
-            </div>
-          </div>
-        );
-      case 2:
-        return (
-          <div>
-            <TextField size="small" variant="standard" style={{ marginTop: '20px', width: '70%' }} id="outlined-basic" label="Title" value={report_title} onChange={handleReportTitle} />
-            <CustomAutocomplete width="70%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors} addNewHandler={HandleAddNewAuthor} manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors} />
-            <TextField ssize="small" variant="standard" style={{ width: '70%', marginTop: '20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
-            <TextField size="small" variant="standard" style={{ width: '70%', marginTop: '20px' }} id="outlined-basic" label="Place of publication" value={place_of_publication} onChange={handlePlaceOfPublication} />
-            <TextField size="small" variant="standard" style={{ width: '70%', marginTop: '20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <Stack spacing={3} style={{ marginTop: '20px', width: '70%', marginBottom: '40px' }}>
-                <DesktopDatePicker
-                  label='Date of publication'
-                  inputFormat="YYYY-MM-DD"
-                  value={date_of_publication}
-                  onChange={(newValue) => {
-                    setDateOfPublication(newValue);
-                  }}
-                  renderInput={(params) => <TextField {...params} size="small" variant="standard" />}
-                />
-              </Stack>
-            </LocalizationProvider>
-          </div>
-        );
-      case 3:
-        return (
-          <div>
-            <CustomAutocompleteWithoutAddNew width="50%" showSelectedElements={true} optionsSet={sectorDivisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions} />
-            <CustomTreeViewWithCheckBox flat={true}
-              showFilter={false}
-              size="360px"
-              checked={selectedSectors}
-              expanded={expandedSectors}
-              handler={sectorsHandler}
-              expandedHandler={expandedSectorsHandler}
-              data={filteredSectors}
-              title={"Which sectors are considered in the study?"}
-              toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
-          </div>
-        );
-      case 4:
-        return (
-          <div>
-            <CustomTreeViewWithCheckBox showFilter={false}
-              size="260px"
-              checked={selectedTechnologies}
-              expanded={getNodeIds(technologies['children'])}
-              handler={technologyHandler}
-              expandedHandler={expandedTechnologyHandler}
-              data={technologies}
-              title={"What technologies are considered?"}
-              toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000407']}
-            />
-
-          </div>
-        );
-      case 5:
-        return (
-          renderScenario()
-        );
-      case 6:
-        return (
-          <CustomAutocompleteWithoutEdit width="60%" type="Model" manyItems showSelectedElements={true} optionsSet={oep_models} kind='Models' handler={modelsHandler} selectedElements={selectedModels} />
-        );
-      case 7:
-        return (
-          <CustomAutocompleteWithoutEdit width="60%" type="Frameworks" manyItems showSelectedElements={true} optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks} />
-        );
-      // case 9:
-      //   return (
-      //     <div>
-      //       <Sunburst 
-      //         width="700" 
-      //         data={sunburstData} 
-      //         handleNonFittingLabel={handleNonFittingLabelFn}  
-      //         minSliceAngle={0.4} 
-      //         label={"label"} 
-      //         sort={((a, b) => a.value - b.value)}
-      //         excludeRoot={true}
-      //         radiusScaleExponent={1}
-      //       />
-      //     </div>
-      //   );
-      default:
-        return 'Unknown step';
-    }
-  }
 
   return (
     <div>

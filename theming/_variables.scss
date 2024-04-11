@@ -78,7 +78,6 @@ $cyan-900: #02273D;
 $cyan: $cyan-500;
 // Others
 $black: $gray-900;
-$secondary: $blue-700;
 $body-color: $gray-700;
 $text-muted: #5F7484;
 
@@ -99,6 +98,42 @@ $new-breakpoints: (
 );
 
 $grid-breakpoints: map-merge($grid-breakpoints, $new-breakpoints);
+
+// New colors
+$primary:       $blue;
+$secondary:     $blue-700;
+$success:       $green;
+$info:          $cyan;
+$warning:       $yellow;
+$danger:        $red;
+$light:         $gray-100;
+$dark:          $gray-900 ;
+
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark
+);
+
+$theme-colors: map-merge($theme-colors, (
+  "background-success": $green-100,
+  "background-warning": $yellow-100,
+  "background-danger": $red-100,
+  "background-info": $blue-100,
+  "background-neutral": $gray-100
+));
+
+@each $color, $value in $theme-colors {
+  .#{$color} {
+    background-color: $value !important;
+  }
+}
+p
 
 //// Typography
 $font-size-base:              1rem;
@@ -139,6 +174,8 @@ $dropdown-border-radius: 0;
 $nav-tabs-border-radius: 0;
 $popover-border-radius: 0;
 $tooltip-border-radius: 0;
+$tooltip-font-size: 0.75rem;
+$tooltip-bg: $body-color;
 $alert-border-radius: 0;
 $badge-border-radius: 0;
 $toast-border-radius: 0;
@@ -149,10 +186,12 @@ $input-btn-padding-y-lg: .25rem;
 $input-btn-padding-x-lg: 0.75rem;
 $input-btn-font-size-lg: 1rem;
 $input-border-radius-sm: 0;
+$input-border-color: $gray-300;
 $btn-font-weight: 600;
 $border-radius: 0.5rem;
 $border-radius-lg: 1rem;
 $border-radius-sm: 0.4rem;
+$border-color: $gray-200;
 $card-border-color: #E3EAEF;
 $card-cap-padding-y: 0.75rem;
 $alert-bg-scale: -90%;

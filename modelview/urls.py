@@ -1,8 +1,7 @@
 from django.conf.urls import url
-from django.urls import path, include
+from django.urls import include, path
 
 from modelview import views
-
 
 app_name = "modelview"
 # urlpatterns = [

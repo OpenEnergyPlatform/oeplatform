@@ -58,9 +58,9 @@ export default function BreadcrumbsNavGrid({ acronym, id, mode, subheaderContent
           {subheaderContent ? (
             <span>{subheaderContent}</span>
           ) : (
-            <span> 
-              {id === "new" ? "new/" : mode + " /"} 
-            </span> 
+            <span>
+              {id === "new" ? "new/" : mode + " /"}
+            </span>
           )}
           {acronym}
         </Grid>
