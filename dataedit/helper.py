@@ -1,3 +1,64 @@
+"""
+Provide helper functionality for views to reduce code lines in views.py
+make the codebase more modular.
+"""
+
+from dataedit.models import Table
+
+
+##############################################
+#          Table view related                #
+##############################################
+
+
+def read_label(table, comment):
+    """
+    Extracts the readable name from @comment and appends the real name in parens.
+    If comment is not a JSON-dictionary or does not contain a field 'Name' None
+    is returned.
+
+    :param table: Name to append
+
+    :param comment: String containing a JSON-dictionary according to @Metadata
+
+    :return: Readable name appended by the true table name as string or None
+    """
+    try:
+        if comment.get("title"):
+            return comment["title"].strip() + " (" + table + ")"
+        elif comment.get("Name") and comment.get("Name") is not table:
+            return comment["Name"].strip() + " (" + table + ")"
+        elif comment.get("Title"):
+            return comment["Title"].strip() + " (" + table + ")"
+        
+        else:
+            return None
+
+    except Exception:
+        return None
+
+
+def get_readable_table_name(table_obj: Table):
+    """get readable table name from metadata
+
+    Args:
+        table_obj (object): django orm
+
+    Returns:
+        str
+    """
+    try:
+        label = read_label(table_obj.name, table_obj.oemetadata)
+    except Exception:
+        label = ""
+    return label
+
+
+##############################################
+#       Open Peer Review related             #
+##############################################
+
+
 def merge_field_reviews(current_json, new_json):
     """
     Merge reviews from contributors and reviewers into a single JSON object.
