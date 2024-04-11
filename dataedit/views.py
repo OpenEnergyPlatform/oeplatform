@@ -29,7 +29,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api.actions import assert_has_metadata, describe_columns
+from api.actions import describe_columns
 
 try:
     import oeplatform.securitysettings as sec
@@ -294,78 +294,6 @@ def listschemas(request):
     )
 
 
-def read_label(table, comment):
-    """
-    Extracts the readable name from @comment and appends the real name in parens.
-    If comment is not a JSON-dictionary or does not contain a field 'Name' None
-    is returned.
-
-    :param table: Name to append
-
-    :param comment: String containing a JSON-dictionary according to @Metadata
-
-    :return: Readable name appended by the true table name as string or None
-    """
-    try:
-        if comment.get("Name"):
-            return comment["Name"].strip() + " (" + table + ")"
-        elif comment.get("Title"):
-            return comment["Title"].strip() + " (" + table + ")"
-        elif comment.get("title"):
-            return comment["title"].strip() + " (" + table + ")"
-        elif comment.get("name"):
-            return comment["name"].strip() + " (" + table + ")"
-        else:
-            return None
-
-    except Exception:
-        return None
-
-
-def get_readable_table_names(schema):
-    """
-    Loads all tables from a schema with their corresponding comments, extracts
-    their readable names, if possible.
-
-    :param schema: The schema name as string
-
-    :return: A dictionary with that maps table names to readable names as
-        returned by :py:meth:`dataedit.views.read_label`
-    """
-    engine = actions._get_engine()
-    conn = engine.connect()
-    try:
-        res = conn.execute(
-            "SELECT table_name as TABLE "
-            "FROM information_schema.tables where table_schema='{table_schema}';".format(  # noqa
-                table_schema=schema
-            )
-        )
-    except Exception as e:
-        raise e
-        return {}
-    finally:
-        conn.close()
-    return {r[0]: read_label(r[0], load_metadata_from_db(schema, r[0])) for r in res}
-
-
-def get_readable_table_name(schema_name, table_name):
-    """get readable table name from metadata
-
-    Args:
-        schema_name (str): schema name
-        table_name (str): table name
-
-    Returns:
-        str
-    """
-    try:
-        label = read_label(table_name, load_metadata_from_db(schema_name, table_name))
-    except Exception:
-        label = ""
-    return label
-
-
 def get_session_query():
     engine = actions._get_engine()
     conn = engine.connect()
@@ -501,8 +429,7 @@ def listtables(request, schema_name):
     tables = [
         (
             table.name,
-            # TODO: slow, because must read metadata for each table!
-            get_readable_table_name(schema_name=schema_name, table_name=table.name),
+            table.human_readable_name,
             tags.get(table.name, []),
         )
         for table in tables
@@ -1986,10 +1913,12 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         Args:
             val (dict or list): The input dictionary or list to parse.
-            old (str, optional): The prefix for nested keys. Defaults to an empty string.
+            old (str, optional): The prefix for nested keys. Defaults to an
+                empty string.
 
         Returns:
-            list: A list of dictionaries, each containing 'field' and 'value' keys.
+            list: A list of dictionaries, each containing 'field' and 'value'
+                keys.
         """
         lines = []
         if isinstance(val, dict):
@@ -1997,7 +1926,8 @@ class PeerReviewView(LoginRequiredMixin, View):
                 lines += self.parse_keys(val[k], old + "." + str(k))
         elif isinstance(val, list):
             if not val:
-                lines += [{"field": old[1:], "value": str(val)}]  # handles empty list
+                # handles empty list
+                lines += [{"field": old[1:], "value": str(val)}]
                 # pass
             else:
                 for i, k in enumerate(val):
@@ -2103,11 +2033,14 @@ class PeerReviewView(LoginRequiredMixin, View):
         for further processing.
 
         Args:
-            json_schema (dict): The JSON schema to extract field descriptions from.
-            prefix (str, optional): The prefix for nested keys. Defaults to an empty string.
+            json_schema (dict): The JSON schema to extract field descriptions
+                from.
+            prefix (str, optional): The prefix for nested keys. Defaults to an
+                empty string.
 
         Returns:
-            dict: A dictionary containing field descriptions, examples, and other information.
+            dict: A dictionary containing field descriptions, examples, and
+                other information.
         """
 
         field_descriptions = {}
