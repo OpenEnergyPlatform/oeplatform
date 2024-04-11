@@ -71,6 +71,7 @@ class Table(Tagable):
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
     is_publish = BooleanField(null=False, default=False)
+    human_readable_name = CharField(max_length=1000, null=True)
 
     @classmethod
     def load(cls, schema, table):
