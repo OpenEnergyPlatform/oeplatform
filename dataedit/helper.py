@@ -26,11 +26,9 @@ def read_label(table, comment):
     try:
         if comment.get("title"):
             return comment["title"].strip() + " (" + table + ")"
-        elif comment.get("Name") and comment.get("Name") is not table:
-            return comment["Name"].strip() + " (" + table + ")"
         elif comment.get("Title"):
             return comment["Title"].strip() + " (" + table + ")"
-        
+
         else:
             return None
 
