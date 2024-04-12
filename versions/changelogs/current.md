@@ -12,6 +12,7 @@
 
 - Connect scenario input and output datasets to API[#1649](https://github.com/OpenEnergyPlatform/oeplatform/pull/1649)
 
+- Add autocomplete functionality to Group invite forms to ease the user invitation [(#1665)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1665)
 
 ## Bugs
 
