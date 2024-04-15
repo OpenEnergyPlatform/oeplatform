@@ -85,9 +85,6 @@
           <button class="nav-link" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="resource-tab" data-bs-toggle="tab" data-bs-target="#resource" type="button" role="tab" aria-controls="resource" aria-selected="false">Resource</button>
-        </li>
-        <li class="nav-item" role="presentation">
           <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Summary</button>
         </li>
       </ul>
@@ -231,25 +228,7 @@
               {% endfor %}
               </div>
             </div>
-            <div class="tab-pane fade" id="resource" role="tabpanel" aria-labelledby="resource-tab">
-              <div class="review__items">
-                {% for item in meta.resource %}
-                <div id="field_{{item.field}}" class="field review__item" data-category="resource" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
-                  <p class="review__item-content">
-                    {% if item.field is Null %}
-                      <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
-                    {% else %}
-                      <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.newValue|default:item.value }}</span>
-                      <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                      <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                    {% endif %}
-                  </p>
-                </div>
-              {% endfor %}
-              </div>
-            </div>
+          
             <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
             </div>
           </div>

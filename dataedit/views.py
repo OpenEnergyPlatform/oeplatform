@@ -2007,7 +2007,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "source": [...],
                 "license": [...],
                 "contributor": [...],
-                "resource": [...]
             }
 
         """
@@ -2019,7 +2018,6 @@ class PeerReviewView(LoginRequiredMixin, View):
         source_key_list = []
         license_key_list = []
         contributor_key_list = []
-        resource_key_list = []
 
         for i in val:
             fieldKey = list(i.values())[0]
@@ -2033,8 +2031,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                 license_key_list.append(i)
             elif fieldKey.split(".")[0] == "contributors":
                 contributor_key_list.append(i)
-            elif fieldKey.split(".")[0] == "resources":
-                resource_key_list.append(i)
             elif (
                 fieldKey.split(".")[0] == "name"
                 or fieldKey.split(".")[0] == "title"
@@ -2055,7 +2051,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             "source": source_key_list,
             "license": license_key_list,
             "contributor": contributor_key_list,
-            "resource": resource_key_list,
         }
 
         return meta
@@ -2147,7 +2142,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "source",
                 "license",
                 "contributor",
-                "resource",
             ]
             state_dict = process_review_data(
                 review_data=existing_review, metadata=metadata, categories=categories
@@ -2223,7 +2217,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             - After a review is finished, the table's metadata is updated, and the table
             can be moved to a different schema or topic (TODO).
         """
-        print(review_id)
         context = {}
         if request.method == "POST":
             # get the review data and additional application metadata
@@ -2338,7 +2331,6 @@ class PeerRreviewContributorView(PeerReviewView):
             "source",
             "license",
             "contributor",
-            "resource",
         ]
         state_dict = process_review_data(
             review_data=review_data, metadata=metadata, categories=categories
