@@ -977,38 +977,35 @@ class DataView(View):
     @never_cache
     def get(self, request, schema, table):
         """
-        Collects the following information on the specified table:
-            * Postgresql comment on this table
-            * A list of all columns
-            * A list of all revisions of this table
+                Collects the following information on the specified table:
+                    * Postgresql comment on this table
+                    * A list of all columns
+                    * A list of all revisions of this table
 
-        :param request: An HTTP-request object sent by the Django framework
-        :param schema: Name of a schema
-        :param table: Name of a table stored in this schema
-        :return:
-        """
+                :param request: An HTTP-request object sent by the Django framework
+                :param schema: Name of a schema
+                :param table: Name of a table stored in this schema
+                :return:
+                """
 
         if (
-            schema not in schema_whitelist and schema != schema_sandbox
+                schema not in schema_whitelist and schema != schema_sandbox
         ) or schema.startswith("_"):
             raise Http404("Schema not accessible")
-
-        tags = []  # TODO: Unused - Remove
-
-        # db = sec.dbname
 
         engine = actions._get_engine()
 
         if not engine.dialect.has_table(engine, table, schema=schema):
-            raise Http404
+            raise Http404("Table does not exist in the database")
 
-        # create a table for the metadata linked to the given table
         actions.create_meta(schema, table)
-
-        # the metadata are stored in the table's comment
         metadata = load_metadata_from_db(schema, table)
+        table_obj = Table.load(schema, table)
+        if table_obj is None:
+            raise Http404("Table object could not be loaded")
 
-        # setup oemetadata string order according to oem v1.5.1
+        oemetadata = table_obj.oemetadata
+
         from dataedit.metadata import TEMPLATE_V1_5
 
         def iter_oem_key_order(metadata: dict):
@@ -1017,113 +1014,71 @@ class DataView(View):
                 yield key, metadata.get(key)
 
         ordered_oem_151 = {key: value for key, value in iter_oem_key_order(metadata)}
-
-        # the key order of the metadata matters
         meta_widget = MetaDataWidget(ordered_oem_151)
-
         revisions = []
 
-        # load the admin interface
         api_changes = change_requests(schema, table)
         data = api_changes.get("data")
         display_message = api_changes.get("display_message")
         display_items = api_changes.get("display_items")
 
         is_admin = False
-        can_add = False  # can upload data
-        table_obj = Table.load(schema, table)
+        can_add = False
         if request.user and not request.user.is_anonymous:
             is_admin = request.user.has_admin_permissions(schema, table)
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
         table_views = DBView.objects.filter(table=table).filter(schema=schema)
-
         default = DBView(name="default", type="table", table=table, schema=schema)
-
         view_id = request.GET.get("view")
 
-        if view_id == "default":
-            current_view = default
-        else:
-            try:
-                # at first, try to use the view, that is passed as get argument
-                current_view = table_views.get(id=view_id)
-            except ObjectDoesNotExist:
-                current_view = default
+        current_view = default if view_id == "default" or not table_views.filter(
+            id=view_id).exists() else table_views.get(id=view_id)
 
         table_views = list(chain((default,), table_views))
 
-        #########################################################################
-        # Get open peer review process related metadata
-        #########################################################################
-        # Context data for the open peer review (data view side panel)
-        opr_context = {}
-        # Context data for review result tab
-        opr_result_context = {}
-        # maybe call the update also on this view to show the days open on page
         opr_manager = PeerReviewManager()
         reviews = opr_manager.filter_opr_by_table(schema=schema, table=table)
 
-        # Get contributions
-        contributor = PeerReviewManager.load_contributor(schema=schema, table=table)
-        if contributor is not None:
-            opr_context.update({"contributor": contributor})
-        else:
-            opr_context.update({"contributor": None})
+        opr_context = {
+            "contributor": PeerReviewManager.load_contributor(schema=schema, table=table),
+            "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
+            "opr_enabled": oemetadata is not None  # Используем это значение для управления доступностью кнопки
+        }
 
-        # Get reviews
-        reviewer = PeerReviewManager.load_reviewer(schema=schema, table=table)
-        if contributor is not None:
-            opr_context.update({"reviewer": reviewer})
-        else:
-            opr_context.update({"reviewer": None})
-
-        if reviews.last() is not None:
+        opr_result_context = {}
+        if reviews.exists():
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
             current_reviewer = opr_manager.load(latest_review).current_reviewer
-            opr_context.update(
-                {
-                    "opr_id": latest_review.id,
-                    "opr_current_reviewer": current_reviewer,
-                    "is_finished": latest_review.is_finished,
-                }
-            )
+            opr_context.update({
+                "opr_id": latest_review.id,
+                "opr_current_reviewer": current_reviewer,
+                "is_finished": latest_review.is_finished,
+            })
 
-            # OPR result tab for latest review
-            # TODO: Update this as soon as more then one review can be done per table:
-            # ... check if last review is finished
-            # ... check if any finished review for this table exists
-            # ... get the latest finished review
             if latest_review.is_finished:
                 badge = latest_review.review.get("badge")
                 date_finished = latest_review.date_finished
-                opr_result_context.update(
-                    {
-                        "badge": badge,
-                        "review_url": None,
-                        "date_finished": date_finished,
-                        "review_id": latest_review.id,
-                        "finished": latest_review.is_finished,
-                        "review_exists": True,
-                    }
-                )
-
+                opr_result_context.update({
+                    "badge": badge,
+                    "review_url": None,
+                    "date_finished": date_finished,
+                    "review_id": latest_review.id,
+                    "finished": latest_review.is_finished,
+                    "review_exists": True,
+                })
         else:
             opr_context.update({"opr_id": None, "opr_current_reviewer": None})
             opr_result_context.update({"review_exists": False})
 
-        #########################################################################
         context_dict = {
-            # Not in use?
-            # "comment_on_table": dict(metadata),
             "meta_widget": meta_widget.render(),
             "revisions": revisions,
             "kinds": ["table", "map", "graph"],
             "table": table,
             "schema": schema,
-            "tags": tags,
             "data": data,
             "display_message": display_message,
             "display_items": display_items,
@@ -1136,8 +1091,6 @@ class DataView(View):
             "opr": opr_context,
             "opr_result": opr_result_context,
         }
-
-        context_dict.update(current_view.options)
 
         return render(request, "dataedit/dataview.html", context=context_dict)
 
