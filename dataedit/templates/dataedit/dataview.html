@@ -190,84 +190,82 @@
   </div>
   
   <div class="tab-pane open-peer-review fade" id="opr-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
-  {% if opr.is_finished %} 
+  {% if opr.is_finished %}
   <!-- Review is finished -->
   <div class="review-status review-status--done">
     <h4>Table reviewed</h4>
   </div>
-{% else %}
-  {% if not opr.reviewer %} 
+  {% else %}
+    {% if not opr.reviewer %}
       {% if user.is_authenticated and opr.contributor.id != user.id %}
         <!-- Start -->
         <div class="review-status review-status--start">
           <h4>Table not reviewed</h4>
         </div>
-        <a class="btn btn-success btn-sm" type="button"
-        href="{% url 'dataedit:peer_review_create' table=table schema=schema %}">
-          Start Open-Peer-Review-Process
-        </a>
-          
+        {% if opr.opr_enabled %}
+          <a class="btn btn-success btn-sm" type="button"
+            href="{% url 'dataedit:peer_review_create' table=table schema=schema %}">
+            Start Open-Peer-Review-Process
+          </a>
+        {% else %}
+          <button class="btn btn-success btn-sm disabled" type="button">
+            Start Open-Peer-Review-Process
+          </button>
+          <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Metadata required to start review is not present."></i>
+        {% endif %}
       {% else %}
-        <!-- Start but user is table holder - diable start button -->
+        <!-- Start but user is table holder - disable start button -->
         <div class="review-status review-status--start">
           <h4>Table not reviewed</h4>
         </div>
-        <a class="btn btn-success btn-sm disabled" type="button"
-        href="{% url 'dataedit:peer_review_create' table=table schema=schema %}">
+        <button class="btn btn-success btn-sm disabled" type="button">
           Start Open-Peer-Review-Process
-        </a>
-        <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
-    {% endif %}
-  {% elif opr.reviewer.id == user.id and opr.contributor.id != user.id and opr.opr_current_reviewer == "reviewer" %}
+        </button>
+        <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You can't review this table if you are the table owner or not logged in."></i>
+      {% endif %}
+    {% elif opr.reviewer.id == user.id and opr.contributor.id != user.id and opr.opr_current_reviewer == "reviewer" %}
       <!-- Continue review -->
       <div class="review-status review-status--ongoing">
         <h4>The table is currently under review.</h4>
       </div>
       <a class="btn btn-success btn-sm" type="button"
-      href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
+        href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
         Continue Review
       </a>
     {% else %}
       <!-- Continue review but user does not identify as the reviewer -->
       <div class="review-status review-status--ongoing">
-        <h4>The table is currently under review.
-        Please visit your profile to view your active reviews.</h4>
+        <h4>The table is currently under review. Please visit your profile to view your active reviews.</h4>
       </div>
-      <a class="btn btn-success btn-sm disabled" type="button"
-      href="">
-      Continue Review
-      </a>
-    
-      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
+      <button class="btn btn-success btn-sm disabled" type="button">
+        Continue Review
+      </button>
+      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You can't continue a review that is already in progress if you are not the reviewer who started it."></i>
+    {% endif %}
   {% endif %}
-{% endif %}
-  
-    {% if opr_result.review_exists %}
+
+  {% if opr_result.review_exists %}
     <div class="metadata__options">
-      <span>
-        
-      </span>
+      <!-- Placeholder for potential future content -->
     </div>
     <div class="metadata__container">
-      <span>
-        <table class="table">
-          <tr>
-            <th>Access the Review</th>
-            <th>Badge</th>
-            <th>Date finished</th>
-          </tr>
-          <tr>
-            <td> <a class="btn btn-primary" href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr_result.review_id %}">Review details</a></td>
-            <td>{{ opr_result.badge }}</td>
-            <td>{{ opr_result.date_finished }}</td>
-          </tr>
-        </table>
-      </span>
+      <table class="table">
+        <tr>
+          <th>Access the Review</th>
+          <th>Badge</th>
+          <th>Date finished</th>
+        </tr>
+        <tr>
+          <td><a class="btn btn-primary" href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr_result.review_id %}">Review details</a></td>
+          <td>{{ opr_result.badge }}</td>
+          <td>{{ opr_result.date_finished }}</td>
+        </tr>
+      </table>
     </div>
-    {% endif %}
-  
+  {% endif %}
+</div>
 
-  </div>
+
 
   <div class="tab-pane oekg-scenarios fade" id="scenarios-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
    
