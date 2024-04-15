@@ -1,17 +1,13 @@
 import os
 import re
 from collections import defaultdict
-
 from pathlib import Path
 
 from django.shortcuts import Http404, HttpResponse, redirect, render
 from django.views import View
 from rdflib import Graph
 
-from oeplatform.settings import (
-    ONTOLOGY_ROOT,
-    OPEN_ENERGY_ONTOLOGY_NAME,
-)
+from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME
 
 
 def collect_modules(path):

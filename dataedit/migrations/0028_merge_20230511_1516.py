@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dataedit', '0020_alter_table_unique_together'),
-        ('dataedit', '0027_alter_peerreviewmanager_is_open_since'),
+        ("dataedit", "0020_alter_table_unique_together"),
+        ("dataedit", "0027_alter_peerreviewmanager_is_open_since"),
     ]
 
-    operations = [
-    ]
+    operations = []

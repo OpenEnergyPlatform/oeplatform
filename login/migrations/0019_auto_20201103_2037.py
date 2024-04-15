@@ -7,7 +7,6 @@ import login.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("login", "0018_auto_20190304_1306"),
     ]

@@ -1,4 +1,4 @@
-# Introduction
+# Web API´s
 
 This section describes the web APIs provided by the oeplatform. In the context of the oeplatform, the web APIs include http request interfaces that require an expected request body with a JSON data structure to formulate the specific request. As a result, a JSON response is sent back.
 

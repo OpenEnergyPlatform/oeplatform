@@ -1,8 +1,9 @@
 from django.test import TestCase
-from .models import PeerReview, Table, Schema
+from metadata.v160.example import OEMETADATA_V160_EXAMPLE
 
 from login.models import myuser
-from metadata.v160.example import OEMETADATA_V160_EXAMPLE
+
+from .models import PeerReview, Schema, Table
 
 
 # replicated functionality form dataedit migration 0033

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dataedit', '0029_alter_peerreviewmanager_current_reviewer'),
+        ("dataedit", "0029_alter_peerreviewmanager_current_reviewer"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='peerreview',
-            name='is_publish',
+            model_name="peerreview",
+            name="is_publish",
             field=models.BooleanField(default=True),
         ),
     ]

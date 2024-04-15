@@ -1,9 +1,9 @@
-from django.apps import AppConfig
-
 import logging
 import os
 
-from oeplatform.settings import OPEN_ENERGY_ONTOLOGY_FOLDER, DOCUMENTATION_LINKS
+from django.apps import AppConfig
+
+from oeplatform.settings import DOCUMENTATION_LINKS, OPEN_ENERGY_ONTOLOGY_FOLDER
 
 
 class OntologyConfig(AppConfig):
