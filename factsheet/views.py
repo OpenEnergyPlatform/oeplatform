@@ -63,14 +63,14 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-# query_endpoint = "http://localhost:3030/ds/query"
-# update_endpoint = "http://localhost:3030/ds/update"
+query_endpoint = "http://localhost:3030/ds/query"
+update_endpoint = "http://localhost:3030/ds/update"
 
-# query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-# update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+# query_endpoint = 'http://toekb.iks.cs.ovgu.de:3030/oekg/query'
+# update_endpoint = 'http://toekb.iks.cs.ovgu.de:3030/oekg/update'
 
-query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
+#query_endpoint = "http://oekb.iks.cs.ovgu.de:3030/oekg_main/query"
+#update_endpoint = "http://oekb.iks.cs.ovgu.de:3030/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -160,14 +160,19 @@ def is_owner(user, bundle_id):
 
 
 def check_ownership(request, bundle_id):
-    if is_owner(request.user.id, bundle_id):
-        return JsonResponse(
-            {"isOwner": True}, safe=False, content_type="application/json"
-        )
+    if bundle_id != 'new':
+        if is_owner(request.user.id, bundle_id):
+            return JsonResponse(
+                {"isOwner": True}, safe=False, content_type="application/json"
+            )
+        else:
+            return JsonResponse(
+                {"isOwner": False}, safe=False, content_type="application/json"
+            )
     else:
         return JsonResponse(
-            {"isOwner": False}, safe=False, content_type="application/json"
-        )
+                {"isOwner": True}, safe=False, content_type="application/json"
+            )
 
 
 def add_history(triple_subject, triple_predicate, triple_object, type_of_action, user):
@@ -258,6 +263,7 @@ def create_factsheet(request, *args, **kwargs):
     place_of_publication = request_body["place_of_publication"]
     link_to_study = request_body["link_to_study"]
     scenarios = request_body["scenarios"]
+    publications = request_body["publications"]
     models = request_body["models"]
     frameworks = request_body["frameworks"]
     date_of_publication = request_body["date_of_publication"]
@@ -293,25 +299,36 @@ def create_factsheet(request, *args, **kwargs):
         if report_title != "":
             bundle.add((study_URI, OEKG["report_title"], Literal(report_title)))
 
-        if date_of_publication != "01-01-1900" and date_of_publication != "":
-            bundle.add(
-                (
-                    study_URI,
-                    OEKG["date_of_publication"],
-                    Literal(date_of_publication),
-                )
+
+        # if place_of_publication:
+        #     bundle.add(
+        #         (study_URI, OEKG["place_of_publication"], Literal(place_of_publication))
+        #     )
+
+        _publications = json.loads(publications) if publications is not None else []
+        for item in _publications:
+            publications_URI = URIRef(
+                "http://openenergy-platform.org/ontology/oekg/publication/"
+                + item["id"]
             )
+            bundle.add((study_URI, OEKG["has_publication"], publications_URI))
+            if item["report_title"] != "":
+                bundle.add((publications_URI, RDFS.label, Literal(item["report_title"])))
 
-        if place_of_publication:
-            bundle.add(
-                (study_URI, OEKG["place_of_publication"], Literal(place_of_publication))
-            )
+            _authors = item["authors"]
+            for author in _authors:
+                author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + author["iri"])
+                bundle.add((publications_URI, OEO.OEO_00000506, author_URI))
+           
+            if item["doi"] != "":
+                bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
 
-        if link_to_study != "":
-            bundle.add((study_URI, OEKG["link_to_study"], Literal(link_to_study)))
+            if item["date_of_publication"] != "01-01-1900" and item["date_of_publication"] != "":
+                bundle.add((publications_URI, OEKG["date_of_publication"], Literal(item["date_of_publication"])))
 
-        if report_doi != "":
-            bundle.add((study_URI, OEKG["doi"], Literal(report_doi)))
+            if  item["link_to_study"] != "":
+                bundle.add((publications_URI, OEKG["link_to_study"], Literal(item["link_to_study"])))
+
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
@@ -610,6 +627,7 @@ def update_factsheet(request, *args, **kwargs):
     scenarios = request_body["scenarios"]
     models = request_body["models"]
     frameworks = request_body["frameworks"]
+    publications = request_body["publications"]
 
     Duplicate_study_factsheet = False
 
@@ -639,6 +657,32 @@ def update_factsheet(request, *args, **kwargs):
 
         new_bundle = Graph()
         new_bundle.add((study_URI, RDF.type, OEO.OEO_00010252))
+
+
+        _publications = json.loads(publications) if publications is not None else []
+        for item in _publications:
+            publications_URI = URIRef(
+                "http://openenergy-platform.org/ontology/oekg/publication/"
+                + item["id"]
+            )
+            new_bundle.add((study_URI, OEKG["has_publication"], publications_URI))
+            if item["report_title"] != "":
+                new_bundle.add((publications_URI, RDFS.label, Literal(item["report_title"])))
+
+            _authors = item["authors"]
+            for author in _authors:
+                author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + author["iri"])
+                new_bundle.add((publications_URI, OEO.OEO_00000506, author_URI))
+           
+            if item["doi"] != "":
+                new_bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
+
+            if item["date_of_publication"] != "01-01-1900" and item["date_of_publication"] != "":
+                new_bundle.add((publications_URI, OEKG["date_of_publication"], Literal(item["date_of_publication"])))
+
+            if  item["link_to_study"] != "":
+                new_bundle.add((publications_URI, OEKG["link_to_study"], Literal(item["link_to_study"])))
+
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
@@ -838,8 +882,7 @@ def update_factsheet(request, *args, **kwargs):
         if link_to_study != "":
             new_bundle.add((study_URI, OEKG["link_to_study"], Literal(link_to_study)))
 
-        if report_doi != "":
-            new_bundle.add((study_URI, OEKG["doi"], Literal(report_doi)))
+        
 
         institutions = json.loads(institution) if institution is not None else []
         for item in institutions:
