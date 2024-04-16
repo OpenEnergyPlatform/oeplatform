@@ -58,13 +58,13 @@
             <img src="{% static 'peer_review/img/opr-process-bpmn.png' %}" alt="Bild" class="img-fluid">
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
   </div>
-    
+
   <div class="fullwidth-tabs">
     <div class="fullwidth-tabs__container">
       <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
@@ -148,7 +148,7 @@
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
-                </div>  
+                </div>
                 {% endfor %}
                 <p class="review__items-cat">Temporal</p>
                 {% for item in meta.temporal %}
@@ -170,7 +170,7 @@
             </div>
             <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
               <div class="review__items">
-              {% for item in meta.source %} 
+              {% for item in meta.source %}
                 <div id="field_{{item.field}}" class="field review__item" data-category="source" onclick="click_field('{{item.field}}', '{{ item.value }}', 'source');">
                   <p class="review__item-content">
                     {% if item.field is Null %}
@@ -183,7 +183,7 @@
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
-                </div> 
+                </div>
               {% endfor %}
               </div>
             </div>
@@ -202,7 +202,7 @@
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
-                </div>  
+                </div>
               {% endfor %}
               </div>
             </div>
@@ -221,7 +221,26 @@
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
-                </div>  
+                </div>
+              {% endfor %}
+              </div>
+            </div>
+            <div class="tab-pane fade" id="resource" role="tabpanel" aria-labelledby="resource-tab">
+              <div class="review__items">
+                {% for item in meta.resource %}
+                <div id="field_{{item.field}}" class="field review__item" data-category="resource" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
+                  <p class="review__item-content">
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                    {% else %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
+                      <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
+                    {% endif %}
+                  </p>
+                </div>
               {% endfor %}
               </div>
             </div>
@@ -328,7 +347,7 @@
       $(field_id).addClass(`field-${value}`);
     }
 }
-    
+
     // var existing_review = JSON.parse("{{ existing_review | escapejs }}");
   </script>
 <script type="text/javascript">

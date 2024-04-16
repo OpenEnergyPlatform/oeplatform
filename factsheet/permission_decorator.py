@@ -1,7 +1,9 @@
-from django.http import HttpResponseForbidden
-from functools import wraps
-from factsheet.models import ScenarioBundleAccessControl
 import json
+from functools import wraps
+
+from django.http import HttpResponseForbidden
+
+from factsheet.models import ScenarioBundleAccessControl
 
 
 def only_if_user_is_owner_of_scenario_bundle(view_func):

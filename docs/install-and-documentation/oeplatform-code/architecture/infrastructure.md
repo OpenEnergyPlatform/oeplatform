@@ -12,6 +12,9 @@ The OEKB serves as a database for storing complex data. This involves data that 
 
 The entire productive system and the databases are replicated in a test environment. Here, new versions of the software are installed before the official release and can be tested under real conditions.
 
+!!! Note
+    LOEP-Service is currently not included in the installation instructions.
+
 ![test](../../../img/draft-infrastructure-oep-2023-10-24-1338.png)
 
 ## Technologies

@@ -45,7 +45,7 @@ export default function MultipleSelectChip({ options, label, sx, disabled }) {
   return (
     <div>
       <FormControl
-        sx={{ 
+        sx={{
           backgroundColor: palette.background.white,
           ...sx
         }}>

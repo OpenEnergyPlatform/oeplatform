@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("dataedit", "0012_merge_20170910_1002")]
 
     operations = [

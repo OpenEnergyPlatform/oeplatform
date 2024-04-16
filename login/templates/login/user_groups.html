@@ -1,0 +1,93 @@
+{% extends "base/base-profile.html" %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% load compress %}
+
+{% block main-content-body %}
+  {% include "login/user_nav.html" %}
+
+  {% if request.user.is_authenticated and request.user == user%}
+    {% include "login/partials/groups.html" %}
+  {% endif %}
+
+  {% if request.GET.create_msg == 'True' %}
+  <!-- Bootstrap Toast Message -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+      <div id="liveToast" class="toast text-white bg-primary toast-create" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto" id="toastTitle">Message</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastBody">
+          Group Created! Edit the group to invite members.
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if request.GET.delete_msg == 'True' %}
+  <!-- Bootstrap Toast Message -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+      <div id="liveToast" class="toast text-white bg-danger toast-delete" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto" id="toastTitle">Message</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastBody">
+          Group Deleted!
+        </div>
+      </div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+{% block main-right-sidebar-content %}
+    {% include "login/sidebar_user.html" %}
+{% endblock %}
+
+{% block after-body-bottom-js %}
+{% compress js %}
+<script src="{% static 'ontology/htmx.js' %}"></script>
+{% endcompress %}
+<script>
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    })
+
+    document.addEventListener('htmx:afterRequest', function(event) {
+        var target = event.detail.target; // Get the target element where the response was inserted
+        var xhr = event.detail.xhr; // Get the XMLHttpRequest object containing the response
+        var response = xhr.response; // Get the JSON response
+
+        if (response && response.detail_html) {
+            // Replace the content of the target element with the HTML content for the detail page
+            target.innerHTML = response.detail_html;
+        }
+    });
+
+    document.addEventListener("htmx:beforeSwap", function(event) {
+        if (window.location.search.includes('?')) {
+            var newUrl = window.location.href.split('?')[0];
+            window.history.replaceState({}, document.title, newUrl);
+        }
+    });
+
+</script>
+
+
+{% if request.GET.create_msg == 'True' %}
+<!-- Initialize the Bootstrap Toast -->
+<script>
+    var toast = new bootstrap.Toast(document.querySelector('.toast-create'));
+    toast.show();
+</script>
+{% endif %}
+{% if request.GET.delete_msg == 'True' %}
+<!-- Initialize the Bootstrap Toast -->
+<script>
+    var toast = new bootstrap.Toast(document.querySelector('.toast-delete'));
+    toast.show();
+</script>
+{% endif %}
+
+{% endblock after-body-bottom-js %}

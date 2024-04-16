@@ -11,7 +11,7 @@ const ComparisonControl = (props) => {
   const { items } = props;
 
   return (
-    <Box sx={{ 
+    <Box sx={{
       width: '97%',
       height: '10%',
       padding: '20px',

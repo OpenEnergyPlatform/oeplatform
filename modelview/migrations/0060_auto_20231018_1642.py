@@ -4,20 +4,19 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('modelview', '0059_energyframework_link_to_installation_guide'),
+        ("modelview", "0059_energyframework_link_to_installation_guide"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='energystudy',
-            name='tools_models',
+            model_name="energystudy",
+            name="tools_models",
         ),
         migrations.DeleteModel(
-            name='Energyscenario',
+            name="Energyscenario",
         ),
         migrations.DeleteModel(
-            name='Energystudy',
+            name="Energystudy",
         ),
     ]

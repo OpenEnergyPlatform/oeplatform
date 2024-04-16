@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dataedit', '0031_auto_20231204_1451'),
+        ("dataedit", "0031_auto_20231204_1451"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='table',
-            name='is_publish',
+            model_name="table",
+            name="is_publish",
             field=models.BooleanField(default=False),
         ),
     ]

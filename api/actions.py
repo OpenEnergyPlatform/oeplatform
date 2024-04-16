@@ -32,6 +32,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
+from dataedit.helper import get_readable_table_name
 from dataedit.models import PeerReview
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
@@ -2370,6 +2371,16 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     django_table_obj = DBTable.load(table=table, schema=schema)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
+
+    # ---------------------------------------
+    # update the table human readable name after oemetadata is available
+    # ---------------------------------------
+
+    readable_table_name = get_readable_table_name(django_table_obj)
+    django_table_obj.set_human_readable_name(
+        current_name=django_table_obj.human_readable_name,
+        readable_table_name=readable_table_name,
+    )
 
     # ---------------------------------------
     # update the table comment in oedb table if sqlalchemy curser is provided

@@ -1,0 +1,22 @@
+{% load django_bootstrap5 %}
+
+<section class="profile-category htmxFormComponent">
+
+    <h2 class="profile-category__heading profile-category__heading--border-btm">Group Tables</h2>
+
+
+    {% if group_tables %}
+    <div class="profile-category__group_table">
+        {% for table in group_tables %}
+        <div> - {{table.name}}</div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="profile-category__no_group_table">
+        No tables are assigned to this group.
+    </div>
+
+    {% endif %}
+
+
+</section>
