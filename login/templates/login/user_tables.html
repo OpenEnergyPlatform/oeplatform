@@ -41,7 +41,7 @@
                             {% endif %}
                             {% endcomment %}
                             <div class="profile-table-card__link">
-                                <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }}</a>
+                                <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{% if table.table_label %} {{ table.table_label }} {% else %} {{ table.name }} {% endif %}</a>
                             </div>
                         </div>
                         <div class="profile-table-card__content--right">
@@ -120,7 +120,6 @@
             {% if published_tables_page.has_previous %}
             <li class="page-item">
                 <a class="page-link" href="?published_page={{ published_tables_page.previous_page_number }}" tabindex="-1" aria-disabled="true">&laquo;Previous</a>
-                <a href="?published_page=1">1</a>
             </li>
             {% endif %}
 
@@ -174,7 +173,7 @@
                             {% endif %}
                             {% endcomment %}
                             <div class="profile-table-card__link">
-                                <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }}</a>
+                                <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{% if table.table_label %} {{ table.table_label }} {% else %} {{ table.name }} {% endif %}</a>
                             </div>
                         </div>
                         <div class="profile-table-card__content--right">

@@ -21,23 +21,30 @@
     </div>
 </div>
 
-<!--
 <script>
-    document.body.addEventListener('htmx:responseError', function(event) {
-        var usernameInput = document.getElementById('username-input');
-        usernameInput.classList.add('error-outline'); // Highlight the input in red
+    /*
+    * Handle user autocomplete and add client side form validation.
+    */
+    $(function() {
+        let validSelection = false;
+        let autocompleteSource = []; // This will be filled with your autocomplete data
 
-        var errorMessageDiv = document.getElementById('error-message');
-        var response = JSON.parse(event.detail.xhr.responseText);
-        errorMessageDiv.innerText = response.error;
-        errorMessageDiv.style.color = 'red'; // Optional: make the error message text red
+        $('#username-input').bind('input', function() {
+            var dfd = new $.Deferred();
+            var request = $.ajax({type: 'GET',
+                url:'/api/usrprop/', dataType:'json',
+                data: {
+                    name: $(this).val()
+                }
+            });
+            request.done(function(users)
+            {
+                console.log(users);
+                $('#username-input').autocomplete({
+                    source: users
+                });
+                dfd.resolve({})
+            });
+        });
     });
-    document.body.addEventListener('htmx:beforeRequest', function(event) {
-        // Remove error styling and message before a new request
-        var usernameInput = document.getElementById('username-input');
-        usernameInput.classList.remove('error-outline');
-
-        var errorMessageDiv = document.getElementById('error-message');
-        errorMessageDiv.innerText = '';
-    });
-</script> -->
+</script>

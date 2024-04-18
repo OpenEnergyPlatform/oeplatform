@@ -13,7 +13,6 @@ import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import PermissionDenied
-from django.core.serializers import serialize
 from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
@@ -276,13 +275,14 @@ class Metadata(APIView):
 
             # get_tag_keywords_synchronized_metadata returns the OLD metadata
             # but with the now harmonized keywords (harmonized with tags)
-            # so we only copy the resulting keywords before storing the metadata
+            # so we only copy the resulting keywords before storing the
+            # metadata
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
             metadata.keywords = _metadata["keywords"]
 
-            # Write oemetadata json to dataedit.models.tables oemetadata(JSONB) field
+            # Write oemetadata json to dataedit.models.tables
             # and to SQL comment on table
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
