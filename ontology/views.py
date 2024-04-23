@@ -1,168 +1,26 @@
+import logging
 import os
-import re
-from collections import defaultdict
 from pathlib import Path
 
-from django.shortcuts import Http404, HttpResponse, redirect, render
+from django.http import Http404
+from django.shortcuts import HttpResponse, render
 from django.views import View
-from rdflib import Graph
 
 from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME
+from ontology.utility import collect_modules, get_common_data, get_ontology_version
 
+LOGGER = logging.getLogger("oeplatform")
 
-def collect_modules(path):
-    modules = dict()
+LOGGER.info("Start loading the oeo from local static files.")
+OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
+OEO_PATH = OEO_BASE_PATH / OEO_VERSION
+OEO_MODULES_MAIN = collect_modules(OEO_PATH)
+OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
+OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
+LOGGER.info("Loading oeo files completed.")
 
-    for file in os.listdir(path):
-        if not os.path.isdir(os.path.join(path, file)):
-            match = re.match(r"^(?P<filename>.*)\.(?P<extension>\w+)$", file)
-            filename, extension = match.groups()
-            if filename not in modules:
-                modules[filename] = dict(extensions=[], comment="No description found")
-            if extension == "owl":
-                g = Graph()
-                g.parse(os.path.join(path, file))
-
-                # Set the namespaces in the graph
-                for prefix, uri in g.namespaces():
-                    g.bind(prefix, uri)
-
-                # Extract the description from the RDF graph (rdfs:comment)
-                comment_query = f"""
-                    SELECT ?description
-                    WHERE {{
-                        ?ontology rdf:type owl:Ontology .
-                        ?ontology rdfs:comment ?description .
-                    }}
-                """
-                # Execute the SPARQL query for comment
-                comment_results = g.query(comment_query)
-
-                # Update the comment in the modules dictionary if found
-                for row in comment_results:
-                    modules[filename]["comment"] = row[0]
-
-                # If the comment is still "No description found," try extracting from dc:description
-                if modules[filename]["comment"] == "No description found":
-                    description_query = f"""
-                        SELECT ?description
-                        WHERE {{
-                            ?ontology rdf:type owl:Ontology .
-                            ?ontology dc:description ?description .
-                        }}
-                    """
-                    # Execute the SPARQL query for description
-                    description_results = g.query(description_query)
-
-                    # Update the comment in the modules dictionary if found
-                    for row in description_results:
-                        modules[filename]["comment"] = row[0]
-
-            modules[filename]["extensions"].append(extension)
-    return modules
-
-
-def read_oeo_context_information(path, file):
-    Ontology_URI = path / file
-    g = Graph()
-    g.parse(Ontology_URI.as_posix())
-
-    q_global = g.query(
-        """
-        SELECT DISTINCT ?s ?o
-        WHERE { ?s rdfs:subClassOf ?o
-        filter(!isBlank(?o))
-        }
-        """
-    )
-
-    q_label = g.query(
-        """
-        SELECT DISTINCT ?s ?o
-        WHERE { ?s rdfs:label ?o }
-        """
-    )
-
-    q_definition = g.query(
-        """
-        SELECT DISTINCT ?s ?o
-        WHERE { ?s obo:IAO_0000115 ?o }
-        """
-    )
-
-    q_note = g.query(
-        """
-        SELECT DISTINCT ?s ?o
-        WHERE { ?s obo:IAO_0000116 ?o }
-        """
-    )
-
-    q_main_description = g.query(
-        """
-        SELECT ?s ?o
-        WHERE { ?s dc:description ?o }
-        """
-    )
-
-    classes_name = {}
-    for row in q_label:
-        class_name = row.s.split("/")[-1]
-        classes_name[class_name] = row.o
-
-    classes_definitions = defaultdict(list)
-    for row in q_definition:
-        class_name = row.s.split("/")[-1]
-        classes_definitions[class_name].append(row.o)
-
-    classes_notes = defaultdict(list)
-    for row in q_note:
-        class_name = row.s.split("/")[-1]
-        classes_notes[class_name].append(row.o)
-
-    ontology_description = ""
-    for row in q_main_description:
-        if row.s.split("/")[-1] == "":
-            ontology_description = row.o
-
-    result = {
-        "q_global": q_global,
-        "classes_name": classes_name,
-        "classes_definitions": dict(classes_definitions),
-        "classes_notes": dict(classes_notes),
-        "ontology_description": ontology_description,
-    }
-
-    return result
-
-
-def get_ontology_version(path, version=None):
-    if not path.exists():
-        raise Http404
-
-    versions = os.listdir(path)
-    if not version:
-        version = max(
-            (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
-        )
-
-    return version
-
-
-def get_common_data(ontology, version=None, path=None):
-    onto_base_path = Path(ONTOLOGY_ROOT, ontology)
-
-    version = get_ontology_version(onto_base_path, version=version)
-    file = "oeo-full.owl"
-
-    path = onto_base_path / version
-    oeo_context_data = read_oeo_context_information(path=path, file=file)
-
-    return {
-        "ontology": ontology,
-        "version": version,
-        "path": path,
-        "oeo_context_data": oeo_context_data,
-    }
+OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
 
 
 class OntologyVersion(View):
@@ -170,10 +28,9 @@ class OntologyVersion(View):
         onto_base_path = Path(ONTOLOGY_ROOT, ontology)
 
         if not onto_base_path.exists():
-            print("test")
             raise Http404
         versions = os.listdir(onto_base_path)
-        print(versions)
+        LOGGER.info(f"Loaded oeo version {version}")
         if not version:
             version = max(
                 (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
@@ -191,13 +48,9 @@ class PartialOntologyOverviewContent(View):
     def get(self, request):
         if request.headers.get("HX-Request") == "true":
             if request.method == "GET":
-                onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+                ontology_data = OEO_COMMON_DATA
 
-                version = get_ontology_version(onto_base_path)
-                path = onto_base_path / version
-                ontology_data = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
-
-                submodules = collect_modules(path / "modules")
+                submodules = OEO_MODULES_SUBMODULES
 
                 desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
 
@@ -208,7 +61,7 @@ class PartialOntologyOverviewContent(View):
                 }
 
                 # Collect all file names
-                imports = collect_modules(path / "imports")
+                imports = OEO_MODULES_IMPORTS
 
                 partial = render(
                     request,
@@ -229,18 +82,15 @@ class PartialOntologyOverviewContent(View):
 
 class PartialOntologyOverviewSidebarContent(View):
     def get(self, request):
-        onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+        version = OEO_VERSION
+        main_module = OEO_MODULES_MAIN
 
-        version = get_ontology_version(onto_base_path)
-        path = onto_base_path / version
-        main_module = collect_modules(
-            path
-        )  # TODO fix varname - not clear what path this is
         if OPEN_ENERGY_ONTOLOGY_NAME in main_module.keys():
             main_module_name = OPEN_ENERGY_ONTOLOGY_NAME
         else:
             raise Exception(
-                f"The main module '{OPEN_ENERGY_ONTOLOGY_NAME}' is not available in {path}."
+                f"The main module '{OPEN_ENERGY_ONTOLOGY_NAME}' "
+                + "is not available in {path}."
             )
 
         main_module = main_module[main_module_name]
@@ -265,9 +115,14 @@ def initial_for_pageload(request):
 
 
 class OntologyOverview(View):
-    def get(self, request, ontology, module_or_id=None, version=None, imports=False):
-        # ignore whatever is in ontology
-        ontology = OPEN_ENERGY_ONTOLOGY_NAME
+    def get(
+        self,
+        request,
+        ontology=OPEN_ENERGY_ONTOLOGY_NAME,
+        module_or_id=None,
+        version=None,
+        imports=False,
+    ):
         onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 
         if not onto_base_path.exists():
@@ -277,66 +132,22 @@ class OntologyOverview(View):
             version = max(
                 (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
             )
-
-        path = onto_base_path / version
-        # This is temporary (macOS related)
-
-        # Begin prepare data for oeo-viewer. Only need to be executed once per release
-        # graphLinks = []
-        # graphNodes = []
-        #
-        # for row in q_global:
-        #     source = row.o.split('/')[-1]
-        #     target = row.s.split('/')[-1]
-        #
-        #     #if source in classes_name.keys() and target in classes_name.keys():
-        #     graphLinks.append({
-        #         "source": source,
-        #         "target": target
-        #         })
-        #
-        #     target_found = False
-        #     source_found = False
-        #
-        #     for item in graphNodes:
-        #         if item["id"] == target:
-        #             target_found = True
-        #         if item["id"] == source:
-        #             source_found = True
-        #
-        #     try:
-        #         if not target_found:
-        #             graphNodes.append({
-        #                 "id": target,
-        #                 "name": classes_name[target],
-        #                 "description": classes_definitions[target],
-        #                 "editor_note": classes_notes[target]
-        #                 })
-        #
-        #         if not source_found:
-        #             graphNodes.append({
-        #                 "id": source,
-        #                 "name": classes_name[source],
-        #                 "description": classes_definitions[source],
-        #                 "editor_note": classes_notes[source]
-        #                 })
-        #     except:
-        #         pass
-        #
-        # with open('GraphData.json', 'w') as f:
-        #     json.dump({"nodes": graphNodes,
-        #                 "links": graphLinks}, f)
-        # End prepare data for oeo-viewer
-
         if "text/html" in request.headers.get("accept", "").split(","):
             if module_or_id and "oeo" in module_or_id:
+                # Possibly handle specific module or ID-based logic here
                 pass
             else:
                 return render(
                     request,
                     "ontology/oeo.html",
-                    {"ontology": OPEN_ENERGY_ONTOLOGY_NAME},
+                    {"ontology": OPEN_ENERGY_ONTOLOGY_NAME, "version": version},
                 )
+        else:
+            # Handling other types of requests or default case
+            return HttpResponse("Unsupported media type", status=415)
+
+        # If none of the above conditions are met
+        return HttpResponse("Invalid request parameters", status=400)
 
 
 class OntologyViewClasses(View):
@@ -348,7 +159,7 @@ class OntologyViewClasses(View):
         version=None,
         imports=False,
     ):
-        ontology_data = get_common_data(ontology=ontology)
+        ontology_data = OEO_COMMON_DATA
         sub_classes = []
         super_classes = []
         if module_or_id:
