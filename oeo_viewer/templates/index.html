@@ -1,8 +1,11 @@
 {% extends "base/base-wide-react.html" %}
 {% load static %}
+{% load compress %}
 
 {% block after-head %}
+{% compress css %}
 <link rel="stylesheet" href="{% static 'oeo_viewer/scripts.cf23d0f5.css' %}">
+{% endcompress %}
 {% endblock after-head %}
 
 {% block main-content-body %}
@@ -10,5 +13,7 @@
 {% endblock main-content-body %}
 
 {% block after-body-bottom-js %}
+{% compress js %}
 <script src="{% static 'oeo_viewer/scripts.be2500bb.js' %}"></script>
+{% endcompress %}
 {% endblock after-body-bottom-js %}
