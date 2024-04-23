@@ -11,6 +11,17 @@ from ontology.utility import collect_modules, get_common_data, get_ontology_vers
 
 LOGGER = logging.getLogger("oeplatform")
 
+LOGGER.info("Start loading the oeo from local static files.")
+OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
+OEO_PATH = OEO_BASE_PATH / OEO_VERSION
+OEO_MODULES_MAIN = collect_modules(OEO_PATH)
+OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
+OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
+LOGGER.info("Loading oeo files completed.")
+
+OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
+
 
 class OntologyVersion(View):
     def get(self, request, ontology="oeo", version=None):
@@ -37,13 +48,9 @@ class PartialOntologyOverviewContent(View):
     def get(self, request):
         if request.headers.get("HX-Request") == "true":
             if request.method == "GET":
-                onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+                ontology_data = OEO_COMMON_DATA
 
-                version = get_ontology_version(onto_base_path)
-                path = onto_base_path / version
-                ontology_data = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
-
-                submodules = collect_modules(path / "modules")
+                submodules = OEO_MODULES_SUBMODULES
 
                 desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
 
@@ -54,7 +61,7 @@ class PartialOntologyOverviewContent(View):
                 }
 
                 # Collect all file names
-                imports = collect_modules(path / "imports")
+                imports = OEO_MODULES_IMPORTS
 
                 partial = render(
                     request,
@@ -75,13 +82,9 @@ class PartialOntologyOverviewContent(View):
 
 class PartialOntologyOverviewSidebarContent(View):
     def get(self, request):
-        onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+        version = OEO_VERSION
+        main_module = OEO_MODULES_MAIN
 
-        version = get_ontology_version(onto_base_path)
-        path = onto_base_path / version
-        main_module = collect_modules(
-            path
-        )  # TODO fix varname - not clear what path this is
         if OPEN_ENERGY_ONTOLOGY_NAME in main_module.keys():
             main_module_name = OPEN_ENERGY_ONTOLOGY_NAME
         else:
@@ -156,7 +159,7 @@ class OntologyViewClasses(View):
         version=None,
         imports=False,
     ):
-        ontology_data = get_common_data(ontology=ontology)
+        ontology_data = OEO_COMMON_DATA
         sub_classes = []
         super_classes = []
         if module_or_id:
