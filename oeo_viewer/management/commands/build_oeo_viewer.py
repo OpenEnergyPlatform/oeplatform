@@ -49,14 +49,14 @@ class Command(BaseCommand):
 
         g = Graph()
 
-        g.bind("OEO", OEO)
-        g.bind("OBO", OBO)
-        g.bind("DC", DC)
-        g.bind("RDFS", RDFS)
-        g.bind("NPG", NPG)
-        g.bind("SCHEMA", SCHEMA)
-        g.bind("OEKG", OEKG)
-        g.bind("DBO", DBO)
+        g.bind("oeo", OEO)
+        g.bind("obo", OBO)
+        g.bind("dc", DC)
+        g.bind("rdfs", RDFS)
+        g.bind("npg", NPG)
+        g.bind("schema", SCHEMA)
+        g.bind("oekg", OEKG)
+        g.bind("dbo", DBO)
 
         g.parse(Ontology_URI)
 
