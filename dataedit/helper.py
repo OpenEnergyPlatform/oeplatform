@@ -10,7 +10,9 @@ from dataedit.models import Table
 ##############################################
 
 
-def read_label(table, oemetadata) -> None | str:
+# TODO: Add py 3.10 feature to annotate the return type as str | None
+# Dev´s need to update python version first ...
+def read_label(table, oemetadata) -> str:
     """
     Extracts the readable name from @comment and appends the real name in parens.
     If comment is not a JSON-dictionary or does not contain a field 'Name' None
