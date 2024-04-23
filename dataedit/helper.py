@@ -35,7 +35,7 @@ def read_label(table, oemetadata) -> None | str:
         return None
 
 
-def get_readable_table_name(table_obj: Table) -> None | str:
+def get_readable_table_name(table_obj: Table) -> str:
     """get readable table name from metadata
 
     Args:
