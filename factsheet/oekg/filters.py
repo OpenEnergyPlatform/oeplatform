@@ -1,8 +1,7 @@
-from rdflib import RDF, URIRef, Literal
+from rdflib import RDF, Literal, URIRef
 
-
-from factsheet.oekg.connection import oekg
 from factsheet.oekg import namespaces
+from factsheet.oekg.connection import oekg
 
 
 class OekgQuery:
@@ -78,7 +77,5 @@ class OekgQuery:
         return related_scenarios
 
     def get_scenario_acronym(self, scenario_uri):
-        for s, p, o in self.oekg.triples(
-            (scenario_uri, namespaces.RDFS.label, None)
-        ):
+        for s, p, o in self.oekg.triples((scenario_uri, namespaces.RDFS.label, None)):
             return o

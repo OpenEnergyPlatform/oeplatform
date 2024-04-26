@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
-from rdflib import Graph, RDF, URIRef, Literal
+
+from rdflib import RDF, Graph, Literal, URIRef
+
 from factsheet.oekg import namespaces
 from factsheet.oekg.filters import OekgQuery
 

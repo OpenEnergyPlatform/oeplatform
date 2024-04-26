@@ -37,4 +37,3 @@ const toolbarStyles = {
 }
 
 export default toolbarStyles;
-

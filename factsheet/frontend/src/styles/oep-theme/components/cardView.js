@@ -21,7 +21,7 @@ export const CardItem = ({ children }) => {
 
 export const CardHeader = ({ children }) => {
   return (
-    <div style={{ 
+    <div style={{
       backgroundColor: palette.background.lighter,
       borderTopLeftRadius: variables.borderRadius,
       borderTopRightRadius: variables.borderRadius,
@@ -58,8 +58,8 @@ export const CardRow = ({ rowKey, rowValue }) => {
     >
       <Typography
         variant="body2"
-        sx={{ 
-          fontWeight: variables.fontWeight.bold, 
+        sx={{
+          fontWeight: variables.fontWeight.bold,
           minWidth: '12rem'
         }}
       >

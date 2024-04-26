@@ -43,16 +43,16 @@ export const tableCellStyles = {
   },
   variants: [
     {
-      props: { 
-        variant: 'light' 
+      props: {
+        variant: 'light'
       },
       style: {
         backgroundColor: palette.background.lighter
       }
     },
     {
-      props: { 
-        variant: 'border' 
+      props: {
+        variant: 'border'
       },
       style: {
         borderBottom: `1px solid ${palette.border}`

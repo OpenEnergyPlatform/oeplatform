@@ -51,7 +51,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
   });
   const theme = useTheme();
 
- 
+
   const onDelete = (name) => () => {
     const newValue = value.filter((v) => v.name !== name);
     setValue(newValue);
@@ -101,7 +101,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
   const handleUpdatedLabel = e => {
     setUpdatedLabel(e.target.value);
   };
-  
+
   const handleAddNew = e => {
     const updauedValue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
     const updatedDialogeValue = { "iri": uuid(), "id": dialogValue.id, "name": dialogValue.id };
@@ -112,7 +112,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
     handler(updauedValue);
   };
 
-  
+
   const handleEdit = e => {
     editHandler(editLabel, updatedLabel, editIRI);
     setUpdatedLabel('');
@@ -122,12 +122,12 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
     value[objIndex].name = updatedLabel;
   }
 
- 
+
 
   return (
     <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '0px' :'0px', marginBottom: '20px'}}>
       <Autocomplete
-        size="small" 
+        size="small"
         multiple
         id="checkboxes-tags-demo"
         options={parameters.optionsSet}
@@ -164,7 +164,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined" 
+          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined"
           InputProps={{
             ...params.InputProps,
             classes: {
@@ -178,7 +178,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
           return filtered;
         }}
       />
-      
+
       <Dialog open={open} onClose={handleClose}  >
         <form onSubmit={handleSubmit}>
           <DialogContent>
@@ -293,5 +293,5 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
       </Box>}
     </Box>
   );
-  
+
 }

@@ -46,60 +46,9 @@
     <hr>
     <h2 class="header">Manage Profile</h2>
     <div style="overflow: hidden;">
-        <a href="{% url 'edit' request.user.id %}" class="btn btn-secondary">Edit</a>
+        <a href="{% url 'edit' request.user.id %}" class="btn btn-primary">Edit</a>
     </div>
     <hr>
-    
-    <div class="container">
-        <div class="row">
-            <h2 class="header">User Groups</h2>
-            <div class="accordion" id="accordionExample">
-                <div class="accordion-item">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                        How to use Groups on the Open Energy Platform?
-                    </button>
-                    </h2>
-                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-                        <strong>User Group management:</strong> On the profile page, you can oversee and control your groups, including those you are part of. 
-                        If you're an admin or owner, you have the authority to invite users, assigning them specific permissions to assist in group management. 
-                        To maintain user privacy, we currently require you to personally know and seek consent from individuals you wish to invite by requesting their usernames.
-                        <br>
-                        <br>
-                        <strong>User object permissions:</strong> Groups on the Open Energy Platform serve a singular purpose: simplifying object-level permissions. 
-                        This functionality currently is particularly relevant for data tables that users create in the database section of the platform. To grant permissions, 
-                        visit the detail view of the table where, as the owner or creator, you'll find the permissions button on the right side. From there, 
-                        you can add individual users with specific permissions or include a group to grant identical permissions to all its members. 
-                    </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <h2 class="header">Manage Groups</h2>
-                <div style="overflow: hidden;">
-                    <a href="/user/groups/" class="btn btn-secondary">Manage Groups</a>
-                </div>
-            </div>
-
-            <div class="col-md-9">
-                <div class="d-grid md-4" id="user-group-list">
-                    <h2 class="header">Group Memberships</h2>
-                    <ul class="list-group">
-                        {% if token %}
-                            {% for membership in request.user.memberships.all %}
-                                <li class="list-group-item">{{ membership.group }}</li>
-                                <li class="list-group-item">{{ membership.group.description }}</li>
-                                <hr> <!-- Add a horizontal line between each iteration -->
-                            {% endfor %}
-                        {% endif %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-    
 
     {% endif %}
 {% endif %}
@@ -123,7 +72,7 @@
         <div>
             <p class="profile-sidebar__name"> {{ profile_user.name }} </p>
         </div>
-        <p> 
+        <p>
             {% if profile_user.fullname %}
                 {{ profile_user.fullname }}
             {% endif %}
@@ -145,7 +94,7 @@
                     {{ profile_user.work }}
                 {% endif %}
             </p>
-            <p> 
+            <p>
                 {% if profile_user.location %}
                     <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <path d="m50,2.5c-18.69,0-33.94,15.54-33.94,37.33,0,27.84,18.8,47.83,31.99,57.05h0c1.16.82,2.72.82,3.89,0,13.19-9.22,32-29.23,32-57.05,0-21.79-15.25-37.33-33.94-37.33h0Zm0,6.79c15.02,0,27.15,11.81,27.15,30.54,0,23.44-15.43,41.16-27.15,50.02-11.72-8.86-27.15-26.58-27.15-50.02,0-18.74,12.13-30.54,27.15-30.54Zm0,9.05c-10.58,0-19.23,8.65-19.23,19.23s8.65,19.23,19.23,19.23,19.23-8.65,19.23-19.23-8.65-19.23-19.23-19.23Zm0,6.79c6.91,0,12.44,5.53,12.44,12.44s-5.53,12.44-12.44,12.44-12.44-5.53-12.44-12.44,5.53-12.44,12.44-12.44Z"/>
@@ -153,15 +102,15 @@
                     {{ profile_user.location }}
                 {% endif %}
             </p>
-            <p> 
+            <p>
                 {% if profile_user == request.user %}
                     <svg width="16" height="16" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <path d="m86 15h-72c-4.8203 0.003906-8.7305 3.9102-8.7383 8.7305v52.59c0.003906 4.8242 3.9141 8.7305 8.7383 8.7305h72c4.8203-0.007812 8.7227-3.9102 8.7305-8.7305v-52.629c-0.027344-4.8047-3.9258-8.6875-8.7305-8.6914zm-3.1914 6-32.199 24.379c-0.35938 0.27734-0.85938 0.27734-1.2188 0l-32.199-24.379zm3.1914 58.051h-72c-1.5078 0-2.7344-1.2227-2.7383-2.7305v-52.32l34.5 26.16c2.5 1.9023 5.9648 1.9023 8.4688 0l34.5-26.16v52.32c0 0.72266-0.28906 1.418-0.80078 1.9297-0.51172 0.51172-1.207 0.80078-1.9297 0.80078z"/>
                     </svg>
-                    {{ profile_user.email }} 
+                    {{ profile_user.email }}
                 {% endif %}
             </p>
-            <p> 
+            <p>
                 {% if profile_user.linkedin %}
                     <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <path d="m81.676 18.324c-7.7148-7.7148-20.273-7.707-27.992 0l-5.8906 5.8945c-1.2227 1.2227-1.2227 3.1992 0 4.4219 1.2227 1.2227 3.1992 1.2227 4.4219 0l5.8906-5.8945c5.2773-5.2734 13.867-5.2852 19.152 0 5.2773 5.2852 5.2773 13.875 0 19.152l-11.789 11.785c-5.1133 5.1211-14.027 5.1211-19.148 0-1.2227-1.2148-3.1992-1.2266-4.4219 0-1.2227 1.2227-1.2227 3.1992 0 4.4219 3.7344 3.7383 8.707 5.8008 13.992 5.8008s10.258-2.0586 13.992-5.8008l11.789-11.785c7.7148-7.7148 7.7148-20.27 0-27.992z"/>
@@ -170,7 +119,7 @@
                     <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
                 {% endif %}
             </p>
-            <p> 
+            <p>
                 {% if profile_user.facebook %}
                     <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <path d="m81.676 18.324c-7.7148-7.7148-20.273-7.707-27.992 0l-5.8906 5.8945c-1.2227 1.2227-1.2227 3.1992 0 4.4219 1.2227 1.2227 3.1992 1.2227 4.4219 0l5.8906-5.8945c5.2773-5.2734 13.867-5.2852 19.152 0 5.2773 5.2852 5.2773 13.875 0 19.152l-11.789 11.785c-5.1133 5.1211-14.027 5.1211-19.148 0-1.2227-1.2148-3.1992-1.2266-4.4219 0-1.2227 1.2227-1.2227 3.1992 0 4.4219 3.7344 3.7383 8.707 5.8008 13.992 5.8008s10.258-2.0586 13.992-5.8008l11.789-11.785c7.7148-7.7148 7.7148-20.27 0-27.992z"/>
@@ -179,7 +128,7 @@
                     <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
                 {% endif %}
             </p>
-            <p> 
+            <p>
                 {% if profile_user.twitter %}
                     <svg width="16" height="16" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <path d="m81.676 18.324c-7.7148-7.7148-20.273-7.707-27.992 0l-5.8906 5.8945c-1.2227 1.2227-1.2227 3.1992 0 4.4219 1.2227 1.2227 3.1992 1.2227 4.4219 0l5.8906-5.8945c5.2773-5.2734 13.867-5.2852 19.152 0 5.2773 5.2852 5.2773 13.875 0 19.152l-11.789 11.785c-5.1133 5.1211-14.027 5.1211-19.148 0-1.2227-1.2148-3.1992-1.2266-4.4219 0-1.2227 1.2227-1.2227 3.1992 0 4.4219 3.7344 3.7383 8.707 5.8008 13.992 5.8008s10.258-2.0586 13.992-5.8008l11.789-11.785c7.7148-7.7148 7.7148-20.27 0-27.992z"/>
@@ -199,7 +148,7 @@
                 </div>
             </div>
         </div>
-    {% endif %} 
+    {% endif %}
 </div>
 {% endif %}
 {% endblock %}
