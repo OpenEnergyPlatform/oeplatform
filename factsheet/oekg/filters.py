@@ -1,4 +1,4 @@
-from rdflib import RDF, Literal, URIRef
+from rdflib import RDF, Literal
 
 from factsheet.oekg import namespaces
 from factsheet.oekg.connection import oekg
@@ -14,7 +14,8 @@ class OekgQuery:
         input dataset.
 
         Special OEO classes & and relations:
-            OEO_00000365 = Scenario factsheet type
+            OEO_00020227 = Scenario Bundle
+            OEO_00000365 = Scenario factsheet type (IS STILL IN USE ???)
             RO_0002233 = has_input relation in the oekg
 
         Args:
@@ -23,20 +24,23 @@ class OekgQuery:
         """
         related_scenarios = set()
 
-        # Find scenarios where the given table is the input dataset
-        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00000365)):
-            for s1, p1, o1_input_ds_uid in self.oekg.triples(
-                (s, namespaces.OEO.RO_0002233, None)
-            ):
-                if o1_input_ds_uid is not None:
-                    for s2, p2, o2_input_ds_iri in oekg.triples(
-                        (o1_input_ds_uid, namespaces.OEO["has_iri"], Literal(table_iri))
-                    ):
-                        # if (
-                        #     o2_input_ds_iri is not None
-                        #     and str(o2_input_ds_iri) == table_iri
-                        # ):
-                        related_scenarios.add(s)
+        # Find all scenario bundles
+        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
+            # find all scenarios in any bundle
+            for s1, p1, o1 in oekg.triples((s, namespaces.OEKG["has_scenario"], None)):
+                # # Find scenarios where the given table is the input dataset
+                for s2, p2, o1_input_ds_uid in self.oekg.triples(
+                    (o1, namespaces.OEO.RO_0002233, None)
+                ):
+                    if o1_input_ds_uid is not None:
+                        for s3, p3, o3_input_ds_iri in oekg.triples(
+                            (
+                                o1_input_ds_uid,
+                                namespaces.OEO["has_iri"],
+                                Literal(table_iri),
+                            )
+                        ):
+                            related_scenarios.add(s2)
 
         return related_scenarios
 
