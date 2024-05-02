@@ -59,24 +59,24 @@ class OekgQuery:
         """
         related_scenarios = set()
 
-        # Find scenarios where the given table is the out dataset
-        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00000365)):
-            for s1, p1, o1_output_ds_uid in self.oekg.triples(
-                (s, namespaces.OEO.RO_0002234, None)
+        # Find all scenario bundles
+        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
+            # find all scenarios in any bundle
+            for s1, p1, o1 in self.oekg.triples(
+                (s, namespaces.OEKG["has_scenario"], None)
             ):
-                if o1_output_ds_uid is not None:
-                    for s2, p2, o2_input_ds_iri in oekg.triples(
-                        (
-                            o1_output_ds_uid,
-                            namespaces.OEO["has_iri"],
-                            Literal(table_iri),
-                        )
-                    ):
-                        # if (
-                        #     o2_input_ds_iri is not None
-                        #     and str(o2_input_ds_iri) == table_iri
-                        # ):
-                        related_scenarios.add(s)
+                for s2, p2, o2_output_ds_uid in self.oekg.triples(
+                    (o1, namespaces.OEO.RO_0002234, None)
+                ):
+                    if o2_output_ds_uid is not None:
+                        for s3, p3, o3_input_ds_iri in oekg.triples(
+                            (
+                                o2_output_ds_uid,
+                                namespaces.OEO["has_iri"],
+                                Literal(table_iri),
+                            )
+                        ):
+                            related_scenarios.add(s2)
 
         return related_scenarios
 
