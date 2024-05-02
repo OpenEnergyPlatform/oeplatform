@@ -1,0 +1,71 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.table-sidebar {
+  &__section {
+    @extend .py-4;
+    @extend .border-bottom;
+
+    &:first-of-type {
+      @extend .pt-0;
+    }
+
+    &:last-of-type {
+      @extend .border-0;
+    }
+  }
+
+  &__heading {
+    @extend .fs-6;
+    @extend .fw-semibold;
+    @extend .text-body;
+  }
+
+  &__btn {
+    @extend .btn;
+    @extend .btn-link;
+    @extend .btn-sm;
+    @extend .px-0;
+    @extend .me-3;
+    @extend .fw-semibold;
+    @extend .text-decoration-none;
+  }
+
+  &__btn-info {
+    @extend .btn;
+    @extend .btn-outline-primary;
+    @extend .btn-sm;
+    @extend .me-3;
+  }
+
+  &__btn-danger {
+    @extend .btn;
+    @extend .btn-outline-danger;
+    @extend .btn-sm;
+  }
+
+  &__btn-review {
+    @extend .btn;
+    @extend .w-100;
+
+    &--request {
+      @extend .btn-primary;
+    }
+
+    &--start {
+      @extend .btn-outline-primary;
+    }
+  }
+
+  &__collapse {
+    @extend .pt-2;
+
+    textarea {
+      @extend .fs-8;
+      white-space: nowrap;
+      resize: none;
+      overflow-y: hidden;
+      font-family: 'Roboto Mono' ,monospace;
+    }
+  }
+}

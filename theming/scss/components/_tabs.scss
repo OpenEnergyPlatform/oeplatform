@@ -18,7 +18,19 @@
 
         @include media-breakpoint-up(md) {
             max-width: $C--container-width;
-            padding-right: calc(#{$C--db-side-width} + #{$C--padding-standard});
+            padding-right: calc(#{$C--db-side-width} + #{$C--padding-standard} * 2);
+        }
+
+        @include media-breakpoint-up(x3l) {
+            max-width: $C--container-width-x3l;
+        }
+
+        @include media-breakpoint-up(x4l) {
+            max-width: $C--container-width-x4l;
+        }
+
+        @include media-breakpoint-up(x5l) {
+            max-width: $C--container-width-x5l;
         }
     }
 
@@ -44,11 +56,11 @@
 
         .nav-link svg {
             @extend .me-1;
-            fill: $primary;
+            fill: $black;
         }
 
         .nav-link.active svg {
-            fill: $black;
+            fill: $secondary;
         }
 
         .nav-link.status::after {
@@ -83,8 +95,20 @@
             padding-right: 0!important;
         }
 
-        @include media-breakpoint-up(xxl) {
-            width: $C--container-width;
+        @include media-breakpoint-up(xxl) { 
+            max-width: $C--container-width;
+        }
+    
+        @include media-breakpoint-up(x3l) { 
+            max-width: $C--container-width-x3l;
+        }
+    
+        @include media-breakpoint-up(x4l) { 
+            max-width: $C--container-width-x4l;
+        }
+    
+        @include media-breakpoint-up(x5l) {
+            max-width: $C--container-width-x5l;
         }
     }
 

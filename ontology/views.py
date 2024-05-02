@@ -18,9 +18,10 @@ OEO_PATH = OEO_BASE_PATH / OEO_VERSION
 OEO_MODULES_MAIN = collect_modules(OEO_PATH)
 OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
 OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
-LOGGER.info("Loading oeo files completed.")
-
 OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
+LOGGER.info(
+    "Loading completed! The content form the oeo files is parse into python data types."
+)
 
 
 class OntologyVersion(View):

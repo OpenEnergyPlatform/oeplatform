@@ -127,7 +127,7 @@ class Table(Tagable):
         self.save()
 
     # used in api action every time the table metadata is updated
-    def set_human_readable_name(self, current_name, readable_table_name: str | None):
+    def set_human_readable_name(self, current_name, readable_table_name: str):
         """
         Set the readable table name for this table.
         The function attempts to retrieve a string form the tables
