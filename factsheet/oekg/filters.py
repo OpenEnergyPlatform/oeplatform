@@ -81,5 +81,10 @@ class OekgQuery:
         return related_scenarios
 
     def get_scenario_acronym(self, scenario_uri):
+        """
+        Currently not in use.
+        Can be used to get the scenario acronym from scenario
+        uid.
+        """
         for s, p, o in self.oekg.triples((scenario_uri, namespaces.RDFS.label, None)):
             return o
