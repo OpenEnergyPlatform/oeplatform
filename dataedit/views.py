@@ -1019,7 +1019,7 @@ class DataView(View):
                 )
         else:
             opr_context.update({"opr_id": None, "opr_current_reviewer": None})
-            opr_result_context.update({"review_exists": False})
+            opr_result_context.update({"review_exists": False, "finished": False})
 
         #########################################################
         #   Construct the context object for the template       #

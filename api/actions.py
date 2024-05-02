@@ -1357,8 +1357,15 @@ def data_insert_check(schema, table, values, context):
                 val = row.get(column_name, None)
                 if val is None or (isinstance(val, str) and val.lower() == "null"):
                     if column_name in row or not column.get("column_default", None):
+                        # TODO: this error message is not clear to users. It is for
+                        # example shown if the user attempts to upload a csv data
+                        # and some id values from the csv are already available
+                        # in the table.
                         raise APIError(
-                            "Action violates not-null constraint on {col}. Failing row was {row}".format(  # noqa
+                            "Action violates not-null constraint on {col}. "
+                            "Failing row was {row}. Please check if there are "
+                            "id values in your upload data that are already "
+                            "exist in the table. Primary key's cant be duplicated".format(  # noqa
                                 col=column_name,
                                 row="("
                                 + (

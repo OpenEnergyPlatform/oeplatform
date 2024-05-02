@@ -6,7 +6,7 @@ app_name = "factsheet"
 urlpatterns = [
     path(r"", views.factsheets_index),
     path(r"main", views.factsheets_index),
-    re_path(r"^id/*", views.factsheets_index),
+    re_path(r"^id/*", views.factsheets_index, name="bundle-id-page"),
     re_path(r"^compare/*", views.factsheets_index),
     re_path(r"^oekg_history/*", views.factsheets_index),
     re_path(r"^oekg_modifications/*", views.factsheets_index),
@@ -34,8 +34,8 @@ urlpatterns = [
     ),
     path(
         r"filter-oekg-scenarios/",
-        views.filter_scenario_view,
-        name="filter_scenario_view",
+        views.filter_scenario_bundles_view,
+        name="filter_bundles_view",
     ),
     path(r"is_logged_in/", views.is_logged_in),
 ]

@@ -2,12 +2,10 @@ import json
 import logging
 import re
 from enum import Enum, auto
-from functools import lru_cache
 from pathlib import Path
 from typing import List
 
 from django.http import Http404
-from django.shortcuts import get_object_or_404
 from django.templatetags.static import static
 
 from dataedit.models import Table
@@ -61,7 +59,6 @@ def normalize_license_name(name):
     return re.sub(r"\s", "-", name).upper()
 
 
-@lru_cache(maxsize=None)
 def read_spdx_licenses_from_static():
     # Specify the path to your JSON file
     file = "data_licenses/licenses.json"
@@ -80,7 +77,6 @@ def read_spdx_licenses_from_static():
         raise e
 
 
-@lru_cache(maxsize=None)
 def create_license_id_set():
     licenses = read_spdx_licenses_from_static()
     # Check if the "licenses" key exists in the dictionary
@@ -171,7 +167,8 @@ def get_review_badge_from_table_metadata(django_table_obj: Table):
     if badge is None and badge != "":
         return (
             False,
-            "No badge information available in the metadata.Please start a community-based open peer review for this table first.",
+            "No badge information available in the metadata.Please start "
+            "a community-based open peer review for this table first.",
         )
 
     badge_name_normalized = badge.upper()
