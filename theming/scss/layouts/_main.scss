@@ -60,6 +60,11 @@ main.main {
                 max-width: $C--container-width-x5l;
             }
 
+            &.content__main--100w {
+                @extend .w-100;
+                @extend .pe-0;
+            }
+
             h2 {
                 padding-top: $C--padding-large;
             }

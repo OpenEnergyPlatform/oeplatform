@@ -24,6 +24,15 @@
         max-width: $C--container-width-x5l;
     }
 
+    &.tab-content--100w {
+        max-width: 100% !important;
+
+        table,
+        .dataTables_scrollHeadInner {
+            @extend .w-100;
+        }
+    }
+
     .data-view {
         @include flex-row;
         justify-content: center;

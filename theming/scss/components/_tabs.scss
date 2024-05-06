@@ -32,6 +32,11 @@
         @include media-breakpoint-up(x5l) {
             max-width: $C--container-width-x5l;
         }
+
+        &.table-tabs__container--100w {
+            @extend .w-100;
+            @extend .pe-0;
+        } 
     }
 
     .nav-tabs {

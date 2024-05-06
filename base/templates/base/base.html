@@ -109,7 +109,7 @@
             <div class="content__container">
                 {% block main-left-sidebar %}{% endblock main-left-sidebar %}
                 {% block main-content %}
-                    <section class="content__main">
+                    <section class="content__main" id="contentMain">
                         <button class="btn btn-outline-primary" id="toggleSettings">Toggle Settings</button>
                         {% block main-content-body %}{% endblock %}
                     </section>
@@ -175,24 +175,34 @@
     {% endcompress %}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            var settings = document.getElementById("contentSide");
-            var toggleSettingsBtn = document.getElementById("toggleSettings");
+            const tableTabsContainer = document.getElementById("tableTabsContainer");
+            const contentMain = document.getElementById("contentMain");
+            const tableTabsContent = document.getElementById("tableTabsContent");
+            const settings = document.getElementById("contentSide");
+            const toggleSettingsBtn = document.getElementById("toggleSettings");
 
             toggleSettingsBtn.addEventListener("click", function() {
-                if (settings.style.display === "none") {
-                settings.style.display = "block";
-                setTimeout(function() {
-                    settings.style.opacity = "1";
-                }, 10);
-                } else {
-                settings.style.opacity = "0";
-                setTimeout(function() {
-                    settings.style.display = "none";
-                }, 500);
-                }
+                if (contentMain.contains(tableTabsContent)){
+                    if (settings.style.display === "none") {
+                        settings.style.display = "block";
+                        setTimeout(function() {
+                            settings.style.opacity = "1";
+                            tableTabsContainer.classList.remove("table-tabs__container--100w");
+                            contentMain.classList.remove("content__main--100w");
+                            tableTabsContent.classList.remove("tab-content--100w");
+                        }, 10);
+                        } else {
+                        settings.style.opacity = "0";
+                        setTimeout(function() {
+                            settings.style.display = "none";
+                            tableTabsContainer.classList.add("table-tabs__container--100w");
+                            contentMain.classList.add("content__main--100w");
+                            tableTabsContent.classList.add("tab-content--100w");
+                        }, 500);
+                    }
+                } 
             });
-            });
-
+        });
     </script>
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
 {% endblock body-bottom-js %}
