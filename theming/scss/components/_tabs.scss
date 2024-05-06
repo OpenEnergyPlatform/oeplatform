@@ -13,6 +13,7 @@
 
     &__container {
         @include flex-row;
+        position: relative;
         width: 100%;
         margin: 0 $C--padding-standard;
 

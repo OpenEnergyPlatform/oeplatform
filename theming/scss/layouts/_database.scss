@@ -119,6 +119,20 @@
     }
 }
 
+#toggleContentSideContainer {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    button {
+        width: max-content;
+    }
+
+    @include media-breakpoint-down(md) {
+        display: none !important;
+    }
+}
+
 #contentSide {
     @extend .p-3;
     position: absolute;
