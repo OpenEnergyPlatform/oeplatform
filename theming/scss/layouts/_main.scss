@@ -19,6 +19,7 @@ main.main {
 
         &__container {
             @include flex-column;
+            position: relative;
             width: 100%;
 
             @include media-breakpoint-up(md) {

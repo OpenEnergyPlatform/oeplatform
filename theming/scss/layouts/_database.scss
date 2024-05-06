@@ -109,3 +109,19 @@
         }
     }
 }
+
+#contentSide {
+    @extend .p-3;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20rem;
+    background-color: #FFF;
+    transition: opacity 0.5s ease;
+    box-shadow: 4px 4px 16px 0px rgba(31,86,125,0.1);
+
+    &.hidden {
+        opacity: 0;
+        display: none;
+    }
+}
