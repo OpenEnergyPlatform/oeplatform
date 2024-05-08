@@ -72,7 +72,8 @@ def listsheets(request, sheettype):
     if c is None:
         # Handle the case where getClasses returned None
         # You can return an error message or take appropriate action here.
-        # For example, you can return an HttpResponse indicating that the requested sheettype is not supported.
+        # For example, you can return an HttpResponse indicating that the
+        # requested sheettype is not supported.
         sheettype_error_message = "Invalid sheettype"
         return render(
             request,
@@ -186,11 +187,9 @@ def model_to_csv(request, sheettype):
     )
 
     response = HttpResponse(content_type="text/csv")
-    response[
-        "Content-Disposition"
-    ] = 'attachment; filename="{filename}s.csv"'.format(  # noqa
+    response["Content-Disposition"] = 'attachment; filename="{filename}s.csv"'.format(
         filename=c.__name__
-    )
+    )  # noqa
 
     writer = csv.writer(response, quoting=csv.QUOTE_ALL)
     writer.writerow(header)

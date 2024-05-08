@@ -146,7 +146,8 @@ class MetaDataWidget:
 
             if no_valid_item:
                 html += mark_safe(
-                    '<p class="metaproperty">The entry is empty or there is no valid entry for this field.</p>'
+                    '<p class="metaproperty">The entry is empty or there is no valid '
+                    "entry for this field.</p>"
                 )
 
         elif isinstance(data, str) and re.match(self.url_regex, data):
