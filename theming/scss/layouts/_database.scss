@@ -144,6 +144,10 @@
     background-color: #FFF;
     transition: opacity 0.5s ease;
 
+    @include media-breakpoint-up(md) {
+        @include translateY(-1.5rem);
+    }
+
     &.hidden {
         opacity: 0;
         display: none;

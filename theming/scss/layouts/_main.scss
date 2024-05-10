@@ -78,7 +78,6 @@ main.main {
             width: 100%;
 
             @include media-breakpoint-up(md) {
-                @include translateY(-1.5rem);
                 width: $C--db-side-width;
             }
 
