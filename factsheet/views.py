@@ -180,6 +180,16 @@ def get_oekg_modifications(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
+def filter_oekg_modifications(request,*args,**kwargs):
+    field_name = input("Input the Field you want to filter by: ")
+    field_value = input("Input the field value: ")
+    if (str(field_name) in ("bundle_id","id","timestamp","user","user_id")):
+         kwargs = {field_name:field_value}
+         histroy = OEKG_Modifications.objects.all().filter(**kwargs)
+    else:
+         print("_________________________")
+         print("This field is not available or not available for filtering yet. \nAvailable options are: bundle_id, id, timestamp, user, user_id")
+         print("_________________________")
 
 # @login_required
 def create_factsheet(request, *args, **kwargs):
