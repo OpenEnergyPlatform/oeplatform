@@ -329,6 +329,8 @@ def create_factsheet(request, *args, **kwargs):
             if  item["link_to_study"] != "":
                 bundle.add((publications_URI, OEKG["link_to_study"], Literal(item["link_to_study"])))
 
+            bundle.add((study_URI, OEKG["has_publication"], publications_URI))
+
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
@@ -683,6 +685,7 @@ def update_factsheet(request, *args, **kwargs):
             if  item["link_to_study"] != "":
                 new_bundle.add((publications_URI, OEKG["link_to_study"], Literal(item["link_to_study"])))
 
+            new_bundle.add((study_URI, OEKG["has_publication"], publications_URI))
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
@@ -954,7 +957,17 @@ def update_factsheet(request, *args, **kwargs):
 
         iso_old_bundle = to_isomorphic(old_bundle)
         iso_new_bundle = to_isomorphic(new_bundle)
+
+
+
         in_both, in_first, in_second = graph_diff(iso_old_bundle, iso_new_bundle)
+
+        print('##############')
+        print(in_first.serialize(format="json-ld"))
+        print(in_second.serialize(format="json-ld"))
+
+        in_first_json = str(in_first.serialize(format="json-ld"))
+        in_second_json = str(in_second.serialize(format="json-ld"))
 
         # remove old bundle from oekg
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
@@ -971,7 +984,7 @@ def update_factsheet(request, *args, **kwargs):
             old_state=in_first.serialize(format="json-ld"),
             new_state=in_second.serialize(format="json-ld"),
         )
-        # OEKG_Modifications_instance.save()
+        #OEKG_Modifications_instance.save()
 
         response = JsonResponse(
             "factsheet updated!", safe=False, content_type="application/json"
@@ -1050,6 +1063,7 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples((study_URI, OEKG["doi"], None)):
         report_doi = o
 
+
     factsheet["acronym"] = acronym
     factsheet["uid"] = uid
     factsheet["study_name"] = study_name
@@ -1059,6 +1073,7 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["place_of_publication"] = place_of_publication
     factsheet["link_to_study"] = link_to_study
     factsheet["report_doi"] = report_doi
+    factsheet["publications"] = []
 
     factsheet["funding_sources"] = []
     for s, p, o in oekg.triples((study_URI, OEO.OEO_00000509, None)):
@@ -1144,6 +1159,32 @@ def factsheet_by_id(request, *args, **kwargs):
 
     for s, p, o in oekg.triples((study_URI, OEO["has_model"], None)):
         factsheet["models"].append({"id": o, "name": o})
+
+    factsheet["publications"] = []
+    for s, p, o in oekg.triples((study_URI, OEKG["has_publication"], None)):
+        publication = {}
+        label = oekg.value(o, RDFS.label)
+        if label != None:
+            publication["report_title"] = label
+
+        publication["authors"] = []
+        for s1, p1, o1 in oekg.triples((o, OEO.OEO_00000506, None)):
+            o1_label = oekg.value(o1, RDFS.label)
+            publication["authors"].append({"iri": o1, "name": o1_label})
+
+        publication["doi"] = ""
+        for s2, p2, o2 in oekg.triples((o, OEKG["doi"], None)):
+            publication["doi"] = o2
+
+        publication["date_of_publication"] = ""
+        for s3, p3, o3 in oekg.triples((o, OEKG["date_of_publication"], None)):
+            publication["date_of_publication"] = o3
+
+        publication["link_to_study"] = ""
+        for s4, p4, o4 in oekg.triples((o, OEKG["link_to_study"], None)):
+            publication["link_to_study"] = o4
+
+        factsheet["publications"].append(publication)
 
     factsheet["scenarios"] = []
     for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):

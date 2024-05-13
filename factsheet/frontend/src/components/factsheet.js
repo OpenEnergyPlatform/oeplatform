@@ -2158,157 +2158,170 @@ function Factsheet(props) {
   )
 
   const renderPublicationOverview = () => (
-    <TableContainer>
-      <Table>
-        <TableBody>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Report title</span>
-                <HtmlTooltip
-                  title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'A name given to the resource.'}
+    <Container maxWidth="lg2" sx={{ padding: '0px !important' }}>
+      {
+        publications.map((v, i) =>
+          <TableContainer>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <FirstRowTableCell>
+                    <div>
+                      <span>Report title</span>
+                      <HtmlTooltip
+                        title={
+                          <React.Fragment>
+                            <Typography color="inherit" variant="subtitle1">
+                              {'A name given to the resource.'}
+                              <br />
+                              <a href="http://purl.org/dc/elements/1.1/title">More info...</a>
+                            </Typography>
+                          </React.Fragment>
+                        }
+                      >
+                        <InfoOutlinedIcon sx={{ color: '#708696' }} />
+                      </HtmlTooltip>
+                    </div>
+                  </FirstRowTableCell>
+                  <ContentTableCell>
+                    {v.report_title !== undefined ? v.report_title : ""}
+                  </ContentTableCell>
+                </TableRow>
+
+                <TableRow>
+                  <FirstRowTableCell>
+                    <div>
+                      <span>Authors</span>
+                      <HtmlTooltip
+                        title={
+                          <React.Fragment>
+                            <Typography color="inherit" variant="subtitle1">
+                              {'An author is an agent that creates or has created written work.'}
+                              <br />
+                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
+                            </Typography>
+                          </React.Fragment>
+                        }
+                      >
+                        <InfoOutlinedIcon sx={{ color: '#708696' }} />
+                      </HtmlTooltip>
+                    </div>
+                  </FirstRowTableCell>
+                  <ContentTableCell>
+                    {v.authors.map((a, i) => (
+                      <span> <span> {a.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                    ))}
+                  </ContentTableCell>
+                </TableRow>
+
+                <TableRow>
+                  <FirstRowTableCell>
+                    <div>
+                      <span>DOI</span>
+                      <HtmlTooltip
+                        title={
+                          <React.Fragment>
+                            <Typography color="inherit" variant="subtitle1">
+                              {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
+                              <br />
+                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
+                            </Typography>
+                          </React.Fragment>
+                        }
+                      >
+                        <InfoOutlinedIcon sx={{ color: '#708696' }} />
+                      </HtmlTooltip>
+                    </div>
+                  </FirstRowTableCell>
+                  <ContentTableCell>
+                    <span> <span> {v.doi !== undefined ? v.doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                  </ContentTableCell>
+                </TableRow>
+
+                <TableRow>
+                  <FirstRowTableCell>
+                    <div>
+                      <span>Date of publication</span>
+                      {/* <HtmlTooltip
+                      title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="subtitle1">
+                          {'A study is a project with the goal to investigate something.'}
+                          <br />
+                          <a href="http://www.geneontology.org/formats/oboInOwl#date">More info...</a>
+                        </Typography>
+                      </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                    </HtmlTooltip> */}
+                    </div>
+                  </FirstRowTableCell>
+                  <ContentTableCell>
+                    <span> <span> {v.date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                  </ContentTableCell>
+                </TableRow>
+
+                <TableRow>
+                  <FirstRowTableCell>
+                    <div>
+                      <span>Link to study report</span>
+                      {/* <HtmlTooltip
+                        title={
+                        <React.Fragment>
+                          <Typography color="inherit" variant="subtitle1">
+                            {'A study is a project with the goal to investigate something.'}
+                            <br />
+                            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                          </Typography>
+                        </React.Fragment>
+                      }
+                      >
+                      <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                      </HtmlTooltip>
+                    */}
+                    </div>
+                  </FirstRowTableCell>
+                  <ContentTableCell>
+                    <span> <span>
+                      <a href={v.link_to_study} >
+                        <AttachmentIcon fontSize="large" />
+                      </a>
+                    </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                  </ContentTableCell>
+                </TableRow>
+
+
+
+                {/* <TableRow>
+                <FirstRowTableCell>
+                  <div>
+                    <span>Citation</span>
+                    <HtmlTooltip
+                      title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="subtitle1">
+                        {'A citation reference is a reference stating where a citation was taken from.'}
                         <br />
-                        <a href="http://purl.org/dc/elements/1.1/title">More info...</a>
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                >
-                  <InfoOutlinedIcon sx={{ color: '#708696' }} />
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {report_title !== undefined ? report_title : ""}
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Authors</span>
-                <HtmlTooltip
-                  title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'An author is an agent that creates or has created written work.'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                >
-                  <InfoOutlinedIcon sx={{ color: '#708696' }} />
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {selectedAuthors.map((v, i) => (
-                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>DOI</span>
-                <HtmlTooltip
-                  title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                >
-                  <InfoOutlinedIcon sx={{ color: '#708696' }} />
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              <span> <span> {doi !== undefined ? doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Date of publication</span>
-                {/* <HtmlTooltip
-                title={
-                <React.Fragment>
-                  <Typography color="inherit" variant="subtitle1">
-                    {'A study is a project with the goal to investigate something.'}
-                    <br />
-                    <a href="http://www.geneontology.org/formats/oboInOwl#date">More info...</a>
-                  </Typography>
-                </React.Fragment>
-              }
-              >
-              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-              </HtmlTooltip> */}
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Link to study report</span>
-                {/* <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A study is a project with the goal to investigate something.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-              */}
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              <span> <span>
-                <a href={link_to_study} >
-                  <AttachmentIcon fontSize="large" />
-                </a>
-              </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-            </ContentTableCell>
-          </TableRow>
-          {/* <TableRow>
-          <FirstRowTableCell>
-            <div>
-              <span>Citation</span>
-              <HtmlTooltip
-                title={
-                <React.Fragment>
-                  <Typography color="inherit" variant="subtitle1">
-                  {'A citation reference is a reference stating where a citation was taken from.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
-                </Typography>
-              </React.Fragment>
-              }
-              >
-                <InfoOutlinedIcon sx={{ color: '#708696' }} />
-              </HtmlTooltip>
-            </div>
-          </FirstRowTableCell>
-          <ContentTableCell>
-            <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-          </ContentTableCell>
-        </TableRow> */}
-        </TableBody>
-      </Table>
-    </TableContainer >
+                    }
+                    >
+                      <InfoOutlinedIcon sx={{ color: '#708696' }} />
+                    </HtmlTooltip>
+                  </div>
+                </FirstRowTableCell>
+                <ContentTableCell>
+                  <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                </ContentTableCell>
+              </TableRow> */}
+              </TableBody>
+            </Table>
+          </TableContainer >
+        )
+      }
+    </Container >
   )
 
   const renderSectorsAndTechnology = () => (
