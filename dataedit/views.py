@@ -988,7 +988,7 @@ class DataView(View):
             ),
             "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
             "opr_enabled": oemetadata
-            is not None,  # Используем это значение для управления доступностью кнопки
+            is not None,  # check if the table has the metadata
         }
 
         opr_result_context = {}
@@ -2075,8 +2075,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             can_add = level >= login_models.WRITE_PERM
 
         oemetadata = self.load_json(schema, table, review_id)
-        metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)
-        # Generate URL for peer_review_reviewer
+        metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)        # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
                 "dataedit:peer_review_reviewer",
@@ -2234,6 +2233,11 @@ class PeerReviewView(LoginRequiredMixin, View):
                 recursive_update(metadata, review_data)
 
                 save_metadata_to_db(schema, table, metadata)
+
+                if active_peer_review:
+                    # Update the oemetadata in the active PeerReview
+                    active_peer_review.oemetadata = metadata
+                    active_peer_review.save()
 
                 # TODO: also update reviewFinished in review datamodel json
                 # logging.INFO(f"Table {table.name} is now reviewed and can be moved
