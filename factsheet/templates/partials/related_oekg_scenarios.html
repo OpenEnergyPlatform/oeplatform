@@ -1,21 +1,23 @@
-Scenarios are part of the scenario bundles. You can find them in the column "Scenario" on the scenario bundles overview page.
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-6">
-            Scenarios where this table is listed as input dataset:
-            <ul class="list-group">
-                {% for acronym in input_dataset_scenarios %}
-                    <li class="list-group-item">{{ acronym }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="col-md-6">
-            Scenarios where this table is listed as output dataset:
-            <ul class="list-group">
-                {% for acronym in output_dataset_scenarios %}
-                    <li class="list-group-item">{{ acronym }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
+<!-- This partial template is specifically used in dataedit/templates/dataedit/dataview.html -->
+
+<div>
+Input:
+{% for acronym, uid in input_dataset_bundles %}
+<a href="/scenario-bundles/id/{{ uid }}" type="button" class="table-sidebar__btn">
+    {{ acronym }}
+</a>
+{% empty %}
+    Table not listed as Input-Dataset.
+    <br>
+{% endfor %}
+</div>
+<div>
+Output:
+{% for acronym, uid in output_dataset_bundles %}
+<a href="/scenario-bundles/id/{{ uid }}" type="button" class="table-sidebar__btn">
+    {{ acronym }}
+</a>
+{% empty %}
+    Table not listed as Output-Dataset.
+{% endfor %}
 </div>

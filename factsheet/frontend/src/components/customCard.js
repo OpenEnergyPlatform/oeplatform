@@ -19,7 +19,7 @@ export default function CustomCard(props) {
   return (
     <Box>
             <b>{acronym.substring(0,50)}</b>
-         
+
     </Box>
   );
 }

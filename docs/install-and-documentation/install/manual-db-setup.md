@@ -8,28 +8,35 @@ Below we describe the complete manual installation of the OpenEnergyPlatform dat
 
 2. Apache Jena Fuseki
     - and a SPARQL server for the OEKG
+    - requires java
 
 ## 1 Install the database infrastructure
 
 To setup the PostgreSQL database on your own machine you have to install the database software and setup additional packages. After the databases are installed you have to create the database tables that are already available as data model in the oeplatform code project. There we maintain the tables as python classes called models. You will use django and alembic to create these table automatically.
 
-!!! tip
-    We also offer the possibility to use [docker](https://www.docker.com/), if you are a developer you could manually install the OEP alongside the docker container to run the database or run everything in docker. This can facilitate the maintenance of the oeplattform infrastructure and the local deployment of the Oeplattform. However, Docker as additional software usually requires more resources, especially memory.
-
-    For this purpose, 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database) are published with each release, which can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
-
-    [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
-
 ### 1.1 Install postgresql
 
 If postgresql is not installed yet on your computer, you can follow this [guide](https://wam.readthedocs.io/en/latest/getting_started.html#installation-from-scratch).
+
+Using linux it is most likely already installed. But you can use the following command to install it.
+
+    sudo apt-get update
+    sudo apt-get upgrade
+    sudo apt-get install postgresql
 
 During the installation, make sure that you note the superuser and password. Other relevant details are the host and the port, these will most likely be set to the default value. In the oeplatoform default configuration the values are:
 
 - Host `127.0.0.1` or `localhost`.
 - Port `5432`
 
-For the creation of spatial objects we use the [PostGIS](https://postgis.net/install/) plugin for PostgreSQL.
+For the creation of spatial objects we use the [PostGIS](https://postgis.net/install/) plugin for PostgreSQL. On linux you can use:
+
+    sudo apt update
+    sudo apt upgrade
+    sudo apt install postgresql-14-postgis-3
+
+    # might be relevant in some cases:
+    # sudo apt-get install bin utils libproj-dev gdal-bin
 
 ??? Info "How to get PostGIS"
     PostGIS is a plugin for PostgreSQL and must be installed additionally. If you use an installation wizard, this step is probably included in the general PostgreSQL installation.
@@ -38,22 +45,31 @@ For the creation of spatial objects we use the [PostGIS](https://postgis.net/ins
 
     - On Linux/Unix based systems the installation could be specific to the package manager being employed and the operating system, so please refer to the official installation instructions [here](https://postgis.net/install/). The section `Binary Installers` covers the installation instructions for various operating systems.
 
+After the installation completed you can start the service. On linux you can simply run:
+
+    sudo service postgresql start
+
 ### 1.2 Install Apache Jena Fuseki
 
 !!! note
     - Skip the installation if your development task is not aimed at the [OEKG](https://openenergyplatform.github.io/organisation/family_members/knowledge-representation/oekg/).
     - For more information about Apache Jena Fuseki please visit [this page.](https://jena.apache.org/documentation/fuseki2/)
+    - Note that java is required to run the software
 
 1. Download [apache-jena-fuseki-4.2.0.tar.gz](https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-4.2.0.tar.gz)
 (for other versions please check [here](https://jena.apache.org/download/))
-2. Extract the downloaded file.
-3. Navigate to the directory where the files are extracted and execute the following command to start the server:
+2. Create a new directory on your system where you install oeplatform infrastructure components e.g. `~/oep-infra/` as alternative you can use the jenna-fuseki db via docker container. In this case you need to specify the correct credentails for that container in the `securitysettings.py` (See [Step 3.](#3-connect-database-to-the-django-project))
+3. Extract the downloaded file to the new directory e.g.:
+
+        tar -zxvf apache-jena-fuseki-4.2.0.tar.gz -C ~/oep-infra/
+
+4. Navigate to the directory where the files are extracted and execute the following command to start the server:
 
         ./fuseki-server
 
-4. To access the server UI, enter `http://localhost:3030/` in your web browser.
-5. First click the **manage datasets** tab and then choose the **add new dataset**.
-6. Enter `OEKG_DS` for the **dataset name** and choose the type of dataset (in-memory datasets do not persist if the server stops) and click **create dataset**.
+5. To access the server UI, enter `http://localhost:3030/` in your web browser.
+6. First click the **manage datasets** tab and then choose the **add new dataset**.
+7. Enter `OEKG_DS` for the **dataset name** and choose the type of dataset (in-memory datasets do not persist if the server stops) and click **create dataset**.
 
 ## 2 Create the PostgreSQL databases
 
@@ -63,7 +79,16 @@ As you dont have to setup the graph databse to run most parts of the oeplatform 
 
 #### 2.1.1 Posgresql command line setup
 
-Once logged into your psql session (for linux: `sudo -u postgres psql`, for windows: `psql`), run the following lines:
+Once logged into your psql session from your terminal
+
+- for linux: `sudo -u postgres psql`
+- for windows: `psql`
+
+then run the following lines to first set the database password as it will ease the further steps:
+
+    ALTER USER postgres WITH PASSWORD 'postgres';
+
+and then create the database:
 
     # optional: .. with owner = postgres;
     create database oep_django;
@@ -77,16 +102,40 @@ it will be instantiated by automated scripts later on.
 
 #### 2.2.1 Posgresql command line setup
 
-Once logged into your psql session (for linux: `sudo -u postgres psql`, for windows: `psql`), run the following lines:
+Once logged into your psql session from your terminal
+
+- for linux: `sudo -u postgres psql`
+- for windows: `psql`
+
+Then you run the following lines to create the primary database:
 
     # optional: .. with owner = postgres;
     create database oedb;
 
-After successfully installing PostGIS (see [step 1.1](#11-install-postgresql)), enter in `oedb` (`\c oedb;`) and type the additional commands:
+### 2.3 Install database extensions on both databases
 
-    create extension postgis;
-    create extension postgis_topology;
-    create extension hstore;
+After successfully installing PostGIS (see [step 1.1](#11-install-postgresql)), add the database extensions. We keep both database setups equal please enter the commands to both databases.
+
+Make sure you connect to psql
+
+    for linux: `sudo -u postgres psql`
+    for windows: `psql`
+
+`oedb` (`\c oedb;`) then create extensions.
+
+`oep_django` (`\c oep_django;`) then create extensions also here.
+
+After you connected type the commands below and repeat for both of the databases:
+
+    create extension IF NOT EXISTS postgis;
+    create extension IF NOT EXISTS postgis_topology;
+    create extension IF NOT EXISTS hstore;
+    # This extension enable search for similar objects (e.g. by name)
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+The database installation is now complete and you can exit the psql command line by typing:
+
+    \q
 
 ## 3 Connect database to the Django project
 
@@ -200,12 +249,8 @@ dbname = os.environ.get("LOCAL_DB_NAME", "oedb")
         If you kept the default name from the above example in 2.1, then the environment variables
         `LOCAL_DB_USER` and `LOCAL_DB_NAME` should have the values `oedb_user` and `oedb`, respectively.
 
-### 3.2 Verify the connection
-
-If you have already set up the oeplatoform environment from [installation guide](installation.md#2-setup-virtual-environment) and have set up the connection details in the oeplatform/securitysettings.py, you can verify that the database connection has been successfully set up by attempting to start the django development server.
-
-    python manage.py runserver
-
 ## 4 Create the database tables
 
-Proceed with the next steps in section [3.2 Create the database table structures](installation.md#32-create-the-database-table-structures) of the oeplatform installation guide.
+To complete the database installation, the table structures must then be installed. [Step 3](./installation.md#3-setup-the-openenergyontology-integation) & [Step 4](./installation.md#4-loading-and-compressing-static-assets-from-the-oeplattform-applications) must be completed first so that the necessary commands can be executed after.
+
+After that Proceed with the next steps in section [4.2 Create the database table structures](installation.md#32-create-the-database-table-structures) of the oeplatform installation guide.

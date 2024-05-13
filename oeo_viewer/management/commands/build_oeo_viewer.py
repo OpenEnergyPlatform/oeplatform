@@ -1,13 +1,12 @@
+import json
 import os
 import subprocess as sp
-from rdflib import Graph, RDFS, URIRef
-import json
-from rdflib.namespace import XSD, Namespace
 from collections import defaultdict
 
-from django.core.management.base import BaseCommand
-from django.conf import settings
 from django.apps import apps
+from django.core.management.base import BaseCommand
+from rdflib import Graph
+from rdflib.namespace import Namespace
 
 from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME
 
@@ -50,14 +49,14 @@ class Command(BaseCommand):
 
         g = Graph()
 
-        g.bind("OEO", OEO)
-        g.bind("OBO", OBO)
-        g.bind("DC", DC)
-        g.bind("RDFS", RDFS)
-        g.bind("NPG", NPG)
-        g.bind("SCHEMA", SCHEMA)
-        g.bind("OEKG", OEKG)
-        g.bind("DBO", DBO)
+        g.bind("oeo", OEO)
+        g.bind("obo", OBO)
+        g.bind("dc", DC)
+        g.bind("rdfs", RDFS)
+        g.bind("npg", NPG)
+        g.bind("schema", SCHEMA)
+        g.bind("oekg", OEKG)
+        g.bind("dbo", DBO)
 
         g.parse(Ontology_URI)
 
@@ -115,10 +114,12 @@ class Command(BaseCommand):
             class_name = row.s.split("/")[-1]
             classes_notes[class_name].append(row.o)
 
-        ontology_description = ""
+        # TODO: noqa F841:variable assigned to but never used
+        ontology_description = ""  # noqa: F841
         for row in q_main_description:
             if row.s.split("/")[-1] == "":
-                ontology_description = row.o
+                # noqa F841: TODO: variable assigned to but never used
+                ontology_description = row.o  # noqa: F841
 
         # Begin prepare data for oeo-viewer. Only need to be executed once per release
         graphLinks = []
@@ -160,7 +161,7 @@ class Command(BaseCommand):
                             "editor_note": classes_notes[source],
                         }
                     )
-            except:
+            except Exception:
                 pass
 
         # static_path = settings.STATIC_ROOT
@@ -174,7 +175,7 @@ class Command(BaseCommand):
 
         oeo_viewer_file_path = os.path.join(oeo_viewer_data_path, oeo_viewer_data_file)
 
-        with open(oeo_viewer_file_path, "w") as f:
+        with open(oeo_viewer_file_path, "w", encoding="utf-8") as f:
             json.dump({"nodes": graphNodes, "links": graphLinks}, f)
 
         print("The data for OEO viewer app has been created successfully!")

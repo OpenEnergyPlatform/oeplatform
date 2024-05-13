@@ -32,10 +32,10 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from dataedit.models import PeerReview
+from dataedit.helper import get_readable_table_name
+from dataedit.models import Embargo, PeerReview
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
-from dataedit.models import Embargo
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
@@ -135,6 +135,16 @@ def assert_add_tag_permission(user, table, permission, schema):
         or user.get_table_permission_level(DBTable.load(schema, table)) < permission
     ):
         raise PermissionDenied
+
+
+def assert_has_metadata(table, schema):
+    table = DBTable.load(schema, table)
+    if table.oemetadata is None:
+        result = False
+    else:
+        result = True
+
+    return result
 
 
 def _translate_fetched_cell(cell):
@@ -1347,8 +1357,15 @@ def data_insert_check(schema, table, values, context):
                 val = row.get(column_name, None)
                 if val is None or (isinstance(val, str) and val.lower() == "null"):
                     if column_name in row or not column.get("column_default", None):
+                        # TODO: this error message is not clear to users. It is for
+                        # example shown if the user attempts to upload a csv data
+                        # and some id values from the csv are already available
+                        # in the table.
                         raise APIError(
-                            "Action violates not-null constraint on {col}. Failing row was {row}".format(  # noqa
+                            "Action violates not-null constraint on {col}. "
+                            "Failing row was {row}. Please check if there are "
+                            "id values in your upload data that are already "
+                            "exist in the table. Primary key's cant be duplicated".format(  # noqa
                                 col=column_name,
                                 row="("
                                 + (
@@ -1589,6 +1606,7 @@ def move(from_schema, table, to_schema):
     finally:
         session.close()
 
+
 def move_publish(from_schema, table_name, to_schema, embargo_period):
     """
     Implementation note:
@@ -1661,14 +1679,14 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
                     weeks=duration_in_weeks
                 )
                 embargo.save()
-                
-        all_peer_reviews = PeerReview.objects.filter(table=table, schema=from_schema)
+
+        all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
 
         for peer_review in all_peer_reviews:
             peer_review.update_all_table_peer_reviews_after_table_moved(
                 to_schema=to_schema
             )
-            
+
         t.set_is_published()
         session.commit()
 
@@ -1683,6 +1701,7 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
         raise e
     finally:
         session.close()
+
 
 def create_meta(schema, table):
     # meta_schema = get_meta_schema_name(schema)
@@ -2460,6 +2479,16 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     django_table_obj = DBTable.load(table=table, schema=schema)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
+
+    # ---------------------------------------
+    # update the table human readable name after oemetadata is available
+    # ---------------------------------------
+
+    readable_table_name = get_readable_table_name(django_table_obj)
+    django_table_obj.set_human_readable_name(
+        current_name=django_table_obj.human_readable_name,
+        readable_table_name=readable_table_name,
+    )
 
     # ---------------------------------------
     # update the table comment in oedb table if sqlalchemy curser is provided

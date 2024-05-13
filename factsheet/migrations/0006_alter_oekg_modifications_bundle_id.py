@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('factsheet', '0005_auto_20231102_1244'),
+        ("factsheet", "0005_auto_20231102_1244"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='oekg_modifications',
-            name='bundle_id',
-            field=models.CharField(default='none', max_length=400),
+            model_name="oekg_modifications",
+            name="bundle_id",
+            field=models.CharField(default="none", max_length=400),
         ),
     ]

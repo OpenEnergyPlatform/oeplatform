@@ -1,46 +1,33 @@
-import logging
-from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse, HttpResponseForbidden
-from rest_framework import status
 import json
-from django.views.decorators.csrf import csrf_exempt
-from django.core import serializers
-from django.utils.cache import patch_response_headers
-
-import uuid
-import requests
-import rdflib
-from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode, XSD
-
-from rdflib.compare import to_isomorphic, graph_diff
-from rdflib.plugins.stores import sparqlstore
-from rdflib.namespace import XSD, Namespace
-from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
+import logging
 import os
-from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES, OPEN_ENERGY_ONTOLOGY_NAME
-
-from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
-from owlready2 import get_ontology
 from pathlib import Path
 
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
+from django.contrib.auth.decorators import login_required
+from django.core import serializers
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
+from django.shortcuts import render
+from django.utils.cache import patch_response_headers
+from owlready2 import get_ontology
+from rdflib import RDF, Graph, Literal, URIRef
+from rdflib.compare import graph_diff, to_isomorphic
+from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
+from rdflib.namespace import Namespace
+from rdflib.plugins.stores import sparqlstore
+from SPARQLWrapper import JSON, SPARQLWrapper
+
+from factsheet.oekg.filters import OekgQuery
+from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
+from login import models as login_models
+from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES
+
+from .models import OEKG_Modifications, ScenarioBundleAccessControl
 
 # from rest_framework.authentication import TokenAuthentication
 # from rest_framework.permissions import IsAuthenticated
 # from rest_framework.authtoken.models import Token
 
-from django.contrib.auth.decorators import login_required
-
-from .models import OEKG_Modifications, ScenarioBundleAccessControl
-from login import models as login_models
-
-from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
-from factsheet.oekg.filters import OekgQuery
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, "oeo")
@@ -63,20 +50,16 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-# query_endpoint = "http://localhost:3030/ds/query"
-# update_endpoint = "http://localhost:3030/ds/update"
+rdfdb = RDF_DATABASES["knowledge"]
+query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
+update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
 
-# query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-# update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
-
-query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
 
 sparql = SPARQLWrapper(query_endpoint)
 
 """ store = sparqlstore.SPARQLUpdateStore(
     auth=(
-        RDF_DATABASES.get("factsheet").get("dbuser"), 
+        RDF_DATABASES.get("factsheet").get("dbuser"),
         RDF_DATABASES.get("factsheet").get("dbpasswd")
     )
 ) """
@@ -171,7 +154,7 @@ def check_ownership(request, bundle_id):
 
 
 def add_history(triple_subject, triple_predicate, triple_object, type_of_action, user):
-    histroy_instance = HistoryOfOEKG(
+    histroy_instance = HistoryOfOEKG(  # noqa: F821
         triple_subject=triple_subject,
         triple_predicate=triple_predicate,
         triple_object=triple_object,
@@ -183,7 +166,7 @@ def add_history(triple_subject, triple_predicate, triple_object, type_of_action,
 
 
 def get_history(request, *args, **kwargs):
-    histroy = HistoryOfOEKG.objects.all()
+    histroy = HistoryOfOEKG.objects.all()  # noqa: F821
     histroy_json = serializers.serialize("json", histroy)
     response = JsonResponse(histroy_json, safe=False, content_type="application/json")
     patch_response_headers(response, cache_timeout=1)
@@ -201,8 +184,9 @@ def get_oekg_modifications(request, *args, **kwargs):
 # @login_required
 def create_factsheet(request, *args, **kwargs):
     """
-    Creates a scenario bundle based on user's data. Currently, the minimum requirement to create a bundle is the "acronym".
-    The "acronym" must be unique. If the provided acronym already exists in the OEKG, then the function returns a "Duplicate error".
+    Creates a scenario bundle based on user's data. Currently, the minimum requirement
+    to create a bundle is the "acronym". The "acronym" must be unique. If the provided
+    acronym already exists in the OEKG, then the function returns a "Duplicate error".
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
@@ -228,7 +212,8 @@ def create_factsheet(request, *args, **kwargs):
         report_title (str): The report title for the bundle.
 
     Returns:
-        "Factsheet saved" if successful, "Duplicate error" if the bundle's acronym exists.
+        "Factsheet saved" if successful, "Duplicate error" if the bundle's
+        acronym exists.
 
     """
 
@@ -236,7 +221,7 @@ def create_factsheet(request, *args, **kwargs):
         return HttpResponseForbidden("User not authenticated")
 
     request_body = json.loads(request.body)
-    name = request_body["name"]
+    name = request_body["name"]  # noqa
     uid = request_body["uid"]
     acronym = request_body["acronym"]
     study_name = request_body["study_name"]
@@ -247,11 +232,11 @@ def create_factsheet(request, *args, **kwargs):
     contact_person = request_body["contact_person"]
     sector_divisions = request_body["sector_divisions"]
     sectors = request_body["sectors"]
-    expanded_sectors = request_body["expanded_sectors"]
+    expanded_sectors = request_body["expanded_sectors"]  # noqa
     # energy_carriers = request_body['energy_carriers']
     # expanded_energy_carriers = request_body['expanded_energy_carriers']
     # energy_transformation_processes = request_body['energy_transformation_processes']
-    # expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes']
+    # expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes'] # noqa
     technologies = request_body["technologies"]
     study_keywords = request_body["study_keywords"]
     report_doi = request_body["report_doi"]
@@ -270,7 +255,7 @@ def create_factsheet(request, *args, **kwargs):
         if str(clean_name(acronym)) == str(study_acronym):
             Duplicate_study_factsheet = True
 
-    if Duplicate_study_factsheet == True:
+    if Duplicate_study_factsheet == True:  # noqa
         response = JsonResponse(
             "Factsheet exists", safe=False, content_type="application/json"
         )
@@ -416,7 +401,7 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 input_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(input_dataset["value"]["iri"]),
+                                Literal(input_dataset["value"]["url"]),
                             )
                         )
                         bundle.add(
@@ -439,7 +424,7 @@ def create_factsheet(request, *args, **kwargs):
                     for output_dataset in item["output_datasets"]:
                         # TODO- set in settings
                         output_dataset_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/output_datasets/"
+                            "http://openenergy-platform.org/ontology/oekg/output_datasets/"  # noqa
                             + output_dataset["key"]
                         )
                         bundle.add((output_dataset_URI, RDF.type, OEO.OEO_00030029))
@@ -454,7 +439,7 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 output_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(output_dataset["value"]["iri"]),
+                                Literal(output_dataset["value"]["url"]),
                             )
                         )
                         bundle.add(
@@ -583,9 +568,9 @@ def update_factsheet(request, *args, **kwargs):
     """
     request_body = json.loads(request.body)
     fsData = request_body["fsData"]
-    id = request_body["id"]
+    id = request_body["id"]  # noqa
     uid = request_body["uid"]
-    name = request_body["name"]
+    name = request_body["name"]  # noqa
     studyName = request_body["study_name"]
     acronym = request_body["acronym"]
     abstract = request_body["abstract"]
@@ -594,11 +579,11 @@ def update_factsheet(request, *args, **kwargs):
     contact_person = request_body["contact_person"]
     sector_divisions = request_body["sector_divisions"]
     sectors = request_body["sectors"]
-    expanded_sectors = request_body["expanded_sectors"]
+    expanded_sectors = request_body["expanded_sectors"]  # noqa
     # energy_carriers = request_body['energy_carriers']
     # expanded_energy_carriers = request_body['expanded_energy_carriers']
     # energy_transformation_processes = request_body['energy_transformation_processes']
-    # expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes']
+    # expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes'] # noqa
     technologies = request_body["technologies"]
     study_keywords = request_body["study_keywords"]
     report_title = request_body["report_title"]
@@ -620,14 +605,14 @@ def update_factsheet(request, *args, **kwargs):
         ) != str(fsData["acronym"]):
             Duplicate_study_factsheet = True
 
-    if Duplicate_study_factsheet == True:
+    if Duplicate_study_factsheet == True:  # noqa
         response = JsonResponse(
             "Factsheet exists", safe=False, content_type="application/json"
         )
         patch_response_headers(response, cache_timeout=1)
         return response
 
-    if Duplicate_study_factsheet == False:
+    if Duplicate_study_factsheet == False:  # noqa
         study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
 
         old_bundle = Graph()
@@ -647,6 +632,10 @@ def update_factsheet(request, *args, **kwargs):
                     "http://openenergy-platform.org/ontology/oekg/scenario/"
                     + item["id"]
                 )
+
+                for s, p, o in oekg.triples((scenario_URI, None, None)):
+                    oekg.remove((o, p, o))
+
                 new_bundle.add(
                     (scenario_URI, OEKG["scenario_uuid"], Literal(item["id"]))
                 )
@@ -656,7 +645,7 @@ def update_factsheet(request, *args, **kwargs):
                     new_bundle.add(
                         (scenario_URI, OEKG["has_full_name"], Literal(item["name"]))
                     )
-                if item["abstract"] != "" and item["abstract"] != None:
+                if item["abstract"] != "" and item["abstract"] != None:  # noqa
                     new_bundle.add(
                         (scenario_URI, DC.abstract, Literal(item["abstract"]))
                     )
@@ -736,9 +725,14 @@ def update_factsheet(request, *args, **kwargs):
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         input_dataset_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/input_datasets/"
+                            "http://openenergy-platform.org/ontology/oekg/input_datasets/"  # noqa
                             + input_dataset["key"]
                         )
+
+                        for s, p, o in oekg.triples((input_dataset_URI, None, None)):
+                            print(((o, p, o)))
+                            oekg.remove((o, p, o))
+
                         new_bundle.add((input_dataset_URI, RDF.type, OEO.OEO_00030030))
                         new_bundle.add(
                             (
@@ -751,7 +745,7 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 input_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(input_dataset["value"]["iri"]),
+                                Literal(input_dataset["value"]["url"]),
                             )
                         )
                         new_bundle.add(
@@ -775,7 +769,7 @@ def update_factsheet(request, *args, **kwargs):
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         output_dataset_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/output_datasets/"
+                            "http://openenergy-platform.org/ontology/oekg/output_datasets/"  # noqa: E501
                             + output_dataset["key"]
                         )
                         new_bundle.add((output_dataset_URI, RDF.type, OEO.OEO_00030029))
@@ -790,7 +784,7 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 output_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(output_dataset["value"]["iri"]),
+                                Literal(output_dataset["value"]["url"]),
                             )
                         )
                         new_bundle.add(
@@ -918,11 +912,15 @@ def update_factsheet(request, *args, **kwargs):
             oekg.remove((o, None, None))
         oekg.remove((study_URI, None, None))
 
+        for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
+            oekg.remove((o, None, None))
+        oekg.remove((study_URI, None, None))
+
         # add updated bundle to oekg
         for s, p, o in new_bundle.triples((None, None, None)):
             oekg.add((s, p, o))
 
-        OEKG_Modifications_instance = OEKG_Modifications(
+        OEKG_Modifications_instance = OEKG_Modifications(  # noqa
             bundle_id=uid,
             user=login_models.myuser.objects.filter(name=request.user).first(),
             old_state=in_first.serialize(format="json-ld"),
@@ -954,7 +952,7 @@ def is_logged_in(request, *args, **kwargs):
 
 def factsheet_by_name(request, *args, **kwargs):
     name = request.GET.get("name")
-    factsheet = Factsheet.objects.get(name=name)
+    factsheet = Factsheet.objects.get(name=name)  # noqa
     factsheet_json = serializers.serialize("json", factsheet)
     response = JsonResponse(factsheet_json, safe=False, content_type="application/json")
     patch_response_headers(response, cache_timeout=1)
@@ -1020,7 +1018,7 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["funding_sources"] = []
     for s, p, o in oekg.triples((study_URI, OEO.OEO_00000509, None)):
         label = oekg.value(o, RDFS.label)
-        if label != None:
+        if label != None:  # noqa
             factsheet["funding_sources"].append(
                 {"iri": str(o).split("/")[-1], "id": label, "name": label}
             )
@@ -1028,7 +1026,7 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["institution"] = []
     for s, p, o in oekg.triples((study_URI, OEO.OEO_00000510, None)):
         label = oekg.value(o, RDFS.label)
-        if label != None:
+        if label != None:  # noqa
             factsheet["institution"].append(
                 {"iri": str(o).split("/")[-1], "id": label, "name": label}
             )
@@ -1036,7 +1034,7 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["contact_person"] = []
     for s, p, o in oekg.triples((study_URI, OEO.OEO_00000508, None)):
         label = oekg.value(o, RDFS.label)
-        if label != None:
+        if label != None:  # noqa
             factsheet["contact_person"].append(
                 {"iri": str(o).split("/")[-1], "id": label, "name": label}
             )
@@ -1045,7 +1043,7 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples((study_URI, OEO["based_on_sector_division"], None)):
         label = oeo.value(o, RDFS.label)
         class_iri = o
-        if label != None:
+        if label != None:  # noqa
             factsheet["sector_divisions"].append(
                 {"value": label, "name": label, "class": class_iri}
             )
@@ -1054,7 +1052,7 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples((study_URI, OEO.OEO_00000505, None)):
         label = oeo.value(o, RDFS.label)
         class_iri = o
-        if label != None:
+        if label != None:  # noqa
             factsheet["sectors"].append(
                 {"value": label, "label": label, "class": class_iri}
             )
@@ -1064,18 +1062,18 @@ def factsheet_by_id(request, *args, **kwargs):
     #     label = oeo.value(o, RDFS.label)
     #     class_label = oeo.value(o, RDFS.label)
     #     if label != None:
-    #         factsheet['energy_carriers'].append({ "value": label, "label":label, "class": o })
+    #         factsheet['energy_carriers'].append({ "value": label, "label":label, "class": o }) # noqa: E501
 
     # factsheet['energy_transformation_processes'] = []
-    # for s, p, o in oekg.triples(( study_URI, OEO["covers_transformation_processes"], None )):
+    # for s, p, o in oekg.triples(( study_URI, OEO["covers_transformation_processes"], None )): # noqa: E501
     #     label = oeo.value(o, RDFS.label)
     #     if label != None:
-    #         factsheet['energy_transformation_processes'].append({ "value": label, "label":label, "class": o })
+    #         factsheet['energy_transformation_processes'].append({ "value": label, "label":label, "class": o }) # noqa: E501
 
     factsheet["technologies"] = []
     for s, p, o in oekg.triples((study_URI, OEO.OEO_00000522, None)):
         label = oeo.value(o, RDFS.label)
-        if label != None:
+        if label != None:  # noqa
             factsheet["technologies"].append(
                 {"value": label, "label": label, "class": o}
             )
@@ -1083,14 +1081,14 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["authors"] = []
     for s, p, o in oekg.triples((study_URI, OEO.OEO_00000506, None)):
         label = oekg.value(o, RDFS.label)
-        if label != None:
+        if label != None:  # noqa
             factsheet["authors"].append(
                 {"iri": str(o).split("/")[-1], "id": label, "name": label}
             )
 
     factsheet["study_keywords"] = []
     for s, p, o in oekg.triples((study_URI, OEO["has_study_keyword"], None)):
-        if o != None:
+        if o != None:  # noqa
             factsheet["study_keywords"].append(o)
 
     factsheet["models"] = []
@@ -1108,7 +1106,7 @@ def factsheet_by_id(request, *args, **kwargs):
         label = oekg.value(o, RDFS.label)
         scenario_uuid = oekg.value(o, OEKG["scenario_uuid"])
 
-        if label != None:
+        if label != None:  # noqa
             scenario["acronym"] = label
 
         scenario["id"] = scenario_uuid
@@ -1130,7 +1128,7 @@ def factsheet_by_id(request, *args, **kwargs):
             scenario["regions"].append({"iri": o1, "name": o1_label})
 
         for s1, p1, o1 in oekg.triples((o, OEO.OEO_00020222, None)):
-            o1_type = oekg.value(o1, RDF.type)
+            o1_type = oekg.value(o1, RDF.type)  # noqa
             o1_label = oekg.value(o1, RDFS.label)
             scenario["interacting_regions"].append(
                 {"iri": str(o1).split("/")[-1], "id": o1_label, "name": o1_label}
@@ -1152,7 +1150,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 {
                     "key": o2_key,
                     "idx": o2_idx,
-                    "value": {"label": o2_label, "iri": o2_iri},
+                    "value": {"label": o2_label, "url": o2_iri},
                 }
             )
 
@@ -1166,7 +1164,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 {
                     "key": o3_key,
                     "idx": o3_idx,
-                    "value": {"label": o3_label, "iri": o3_iri},
+                    "value": {"label": o3_label, "url": o3_iri},
                 }
             )
 
@@ -1192,12 +1190,15 @@ def factsheet_by_id(request, *args, **kwargs):
 @login_required
 def query_oekg(request, *args, **kwargs):
     """
-    This function takes filter objects provided by the user and utilises them to construct a SPARQL query.
+    This function takes filter objects provided by the user and utilises
+    them to construct a SPARQL query.
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
-        criteria (str): An object that contains institutions, authors, funding sources, start date of the publications, end date of publications
-        study descriptors, and a range for scenario years. All of these fields are utilised to construct a SPARQL query for execution on the OEKG.
+        criteria (str): An object that contains institutions, authors,
+        funding sources, start date of the publications, end date of publications
+        study descriptors, and a range for scenario years. All of these fields
+        are utilised to construct a SPARQL query for execution on the OEKG.
 
     """
     request_body = json.loads(request.body)
@@ -1220,8 +1221,8 @@ def query_oekg(request, *args, **kwargs):
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
         PREFIX DC: <http://purl.org/dc/terms/>
 
-        SELECT DISTINCT ?study_acronym 
-        WHERE 
+        SELECT DISTINCT ?study_acronym
+        WHERE
         {{
         ?s OEO:OEO_00000510 ?institutes ;
             {authors_exp}
@@ -1236,7 +1237,7 @@ def query_oekg(request, *args, **kwargs):
         || (?publication_date >= "{publication_date_start}"^^xsd:date && ?publication_date <= "{publication_date_end}"^^xsd:date)
         || (?study_keywords IN ({study_keywords}) ) )
 
-        }}"""
+        }}"""  # noqa: E501
 
     final_query = query_structure.format(
         institutes=str(institutes_list)
@@ -1264,7 +1265,9 @@ def query_oekg(request, *args, **kwargs):
     results = sparql.query().convert()
 
     response = JsonResponse(
-        results["results"]["bindings"], safe=False, content_type="application/json"
+        results["results"]["bindings"],
+        safe=False,
+        content_type="application/json",
     )
     return response
 
@@ -1296,7 +1299,7 @@ def delete_factsheet_by_id(request, *args, **kwargs):
 
 def test_query(request, *args, **kwargs):
     scenario_region = URIRef(
-        "http://openenergy-platform.org/ontology/oekg/region/UnitedKingdomOfGreatBritainAndNorthernIreland"
+        "http://openenergy-platform.org/ontology/oekg/region/UnitedKingdomOfGreatBritainAndNorthernIreland"  # noqa: E501
     )
     for s, p, o in oekg.triples((scenario_region, RDFS.label, None)):
         if str(o) == "None":
@@ -1308,7 +1311,8 @@ def test_query(request, *args, **kwargs):
 
 def get_entities_by_type(request, *args, **kwargs):
     """
-    Returns all entities (from OEKG) with a certain type. The type should be supplied by the user.
+    Returns all entities (from OEKG) with a certain type.
+    The type should be supplied by the user.
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
@@ -1338,7 +1342,8 @@ def get_entities_by_type(request, *args, **kwargs):
 @login_required
 def add_entities(request, *args, **kwargs):
     """
-    Add entities to OEKG. The minimum requirements for adding an entity are the type and label.
+    Add entities to OEKG. The minimum requirements for
+    adding an entity are the type and label.
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
@@ -1402,7 +1407,8 @@ def add_a_fact(request, *args, **kwargs):
 @login_required
 def delete_entities(request, *args, **kwargs):
     """
-    Removes an entity from OEKG. The minimum requirements for removing an entity are the type and label.
+    Removes an entity from OEKG. The minimum requirements for
+    removing an entity are the type and label.
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
@@ -1412,7 +1418,9 @@ def delete_entities(request, *args, **kwargs):
     entity_type = request.GET.get("entity_type")
     entity_label = request.GET.get("entity_label")
 
-    entity_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_type)
+    entity_URI = URIRef(  # noqa
+        "http://openenergy-platform.org/ontology/oekg/" + entity_type
+    )
     entity_Label = URIRef(
         "http://openenergy-platform.org/ontology/oekg/" + (entity_label)
     )
@@ -1429,7 +1437,9 @@ def delete_entities(request, *args, **kwargs):
 @login_required
 def update_an_entity(request, *args, **kwargs):
     """
-    Updates an entity in OEKG. The minimum requirements for updating an entity are the type, the old label, and the new label.
+    Updates an entity in OEKG. The minimum requirements for
+    updating an entity are the type, the old label, and the
+    new label.
 
     Args:
         request (HttpRequest): The incoming HTTP GET request.
@@ -1452,7 +1462,7 @@ def update_an_entity(request, *args, **kwargs):
     if vocab == "OBO":
         prefix = "http://purl.obolibrary.org/obo/"
 
-    entity_type_URI = URIRef(prefix + classId)
+    entity_type_URI = URIRef(prefix + classId)  # noqa
     entity_IRI = URIRef("http://openenergy-platform.org/ontology/oekg/" + (entity_id))
 
     oekg.add((entity_IRI, RDFS.label, Literal(new_entity_label)))
@@ -1474,30 +1484,30 @@ def get_all_factsheets(request, *args, **kwargs):
         study_name = oekg.value(s, OEKG["has_full_name"])
         abstract = oekg.value(s, DC.abstract)
         element["uid"] = uid
-        element["acronym"] = acronym if acronym != None else ""
-        element["study_name"] = study_name if study_name != None else ""
-        element["abstract"] = abstract if abstract != None else ""
+        element["acronym"] = acronym if acronym != None else ""  # noqa
+        element["study_name"] = study_name if study_name != None else ""  # noqa
+        element["abstract"] = abstract if abstract != None else ""  # noqa
         study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
         element["institutions"] = []
         for s, p, o in oekg.triples((study_URI, OEO.OEO_00000510, None)):
             label = oekg.value(o, RDFS.label)
-            if label != None:
+            if label != None:  # noqa
                 element["institutions"].append(label)
 
         element["funding_sources"] = []
         for s, p, o in oekg.triples((study_URI, OEO.OEO_00000509, None)):
             label = oekg.value(o, RDFS.label)
-            if label != None:
+            if label != None:  # noqa
                 element["funding_sources"].append(label)
 
         element["models"] = []
         for s, p, o in oekg.triples((study_URI, OEO["has_model"], None)):
-            if o != None:
+            if o != None:  # noqa
                 element["models"].append(o)
 
         element["frameworks"] = []
         for s, p, o in oekg.triples((study_URI, OEO["has_framework"], None)):
-            if o != None:
+            if o != None:  # noqa
                 element["frameworks"].append(o)
 
         element["scenarios"] = []
@@ -1511,7 +1521,7 @@ def get_all_factsheets(request, *args, **kwargs):
             abstract = oekg.value(o, DC.abstract)
             full_name = oekg.value(o, OEKG.has_full_name)
             uid = oekg.value(o, OEKG.scenario_uuid)
-            if label != None:
+            if label != None:  # noqa
                 element["scenarios"].append(
                     {
                         "label": label,
@@ -1652,11 +1662,11 @@ def populate_factsheets_elements(request, *args, **kwargs):
     )
     technology_subclasses = get_all_sub_classes(technology_class)
 
-    # energy_carrier_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020039")
+    # energy_carrier_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020039") # noqa
     # energy_carriers = get_all_sub_classes(energy_carrier_class)
 
-    # energy_transformation_process_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020003")
-    # energy_transformation_processes = get_all_sub_classes(energy_transformation_process_class)
+    # energy_transformation_process_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020003") # noqa
+    # energy_transformation_processes = get_all_sub_classes(energy_transformation_process_class) # noqa
 
     sector_divisions = ["OEO_00010056", "OEO_00000242", "OEO_00010304"]
 
@@ -1769,7 +1779,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
     #             for s3, p, o in oeo.triples(( None, RDFS.subClassOf, s2 )):
     #                 sl3 = oeo.value(s3, RDFS.label)
     #                 children3.append({
-    #                     'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2) + "^^" + str(sl3),
+    #                     'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2) + "^^" + str(sl3), # noqa
     #                     'label': sl3,
     #                     'class': s3
     #                 })
@@ -1812,7 +1822,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
     return response
 
 
-def filter_scenario_view(request):
+def filter_scenario_bundles_view(request):
     # Get the table IRI from the request or any other source
     table_iri = request.GET.get("table_iri", "")
     # table_iri = "dataedit/view/scenario/abbb_emob"
@@ -1821,31 +1831,39 @@ def filter_scenario_view(request):
     oekg_query = OekgQuery()
 
     # Get related scenarios where the table is the input dataset
-    input_dataset_scenarios = (
-        oekg_query.get_related_scenarios_where_table_is_input_dataset(table_iri)
+    input_dataset_bundles = oekg_query.get_scenario_bundles_where_table_is_input(
+        table_iri
     )
 
     # Get related scenarios where the table is the output dataset
-    output_dataset_scenarios = (
-        oekg_query.get_related_scenarios_where_table_is_output_dataset(table_iri)
+    output_dataset_bundles = oekg_query.get_scenario_bundles_where_table_is_output(
+        table_iri
     )
 
     # Get the acronyms for the scenarios
-    input_dataset_acronyms = [
-        oekg_query.get_scenario_acronym(scenario_uri)
-        for scenario_uri in input_dataset_scenarios
+    input_dataset_bundle_acronyms = [
+        (
+            oekg_query.get_bundle_acronym(bundle_uri),
+            oekg_query.get_bundle_uid(oekg_bundle),
+        )
+        for bundle_uri, oekg_bundle in input_dataset_bundles
     ]
 
-    output_dataset_acronyms = [
-        oekg_query.get_scenario_acronym(scenario_uri)
-        for scenario_uri in output_dataset_scenarios
+    output_dataset_bundle_acronyms = [
+        (
+            oekg_query.get_bundle_acronym(bundle_uri),
+            oekg_query.get_bundle_uid(oekg_bundle),
+        )
+        for bundle_uri, oekg_bundle in output_dataset_bundles
     ]
 
     # Prepare data for rendering in the template
     context = {
-        "input_dataset_scenarios": input_dataset_acronyms,
-        "output_dataset_scenarios": output_dataset_acronyms,
+        "input_dataset_bundles": input_dataset_bundle_acronyms,
+        "output_dataset_bundles": output_dataset_bundle_acronyms,
     }
-    html_content = render(request, "partials/related_oekg_scenarios.html", context).content.decode("utf-8")
+    html_content = render(
+        request, "partials/related_oekg_scenarios.html", context
+    ).content.decode("utf-8")
     # Render the template with the context
     return HttpResponse(html_content)

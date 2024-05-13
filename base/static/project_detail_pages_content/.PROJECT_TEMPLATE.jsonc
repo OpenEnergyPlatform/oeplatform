@@ -1,14 +1,14 @@
 {
-    "id": "template", // unige project identifyer
+    "id": "template", // unique project identifier
     "fullTitle": "", // Institute title
     "acronym": "", // Short title
     "projectStatus": "", // indicator about the project status use one of: isActive/isFinished
     "general": "", // general description
-    "tasks": [ // One or more tasks related to the OEP developement
+    "tasks": [ // One or more tasks related to the OEP development
         "",
         ""
     ],
-    "partners": [ // one or more project Partner includung the partner logo
+    "partners": [ // one or more project Partner including the partner logo
         {
             "name": "",
             "logo": "" // file name of a logo that is present in base/static/logos/partner

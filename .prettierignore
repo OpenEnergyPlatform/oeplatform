@@ -1,0 +1,3 @@
+# Ignore all HTML files, because they contain 
+# django markup that will not be broken by prettier
+**/*.html

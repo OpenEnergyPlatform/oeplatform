@@ -1,0 +1,57 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+@mixin alert-variant($alert-background, $alert-border, $alert-color) {
+  color: $alert-color;
+  @include gradient-bg($alert-background);
+  border-left: 6px solid $alert-border;
+
+  .alert-link {
+    color: shade-color($alert-color, 20%);
+  }
+
+  svg {
+    @extend .me-1;
+    @include translateY(-2px);
+  }
+}
+
+.alert-variant {
+  &--neutral {
+    @include alert-variant($gray-100, $gray-900, $gray-900);
+  }
+
+  &--info {
+    @include alert-variant($cyan-100, $cyan-500, $cyan-700);
+  }
+
+  &--success {
+    @include alert-variant($green-100, $green-500, $green-700);
+  }
+
+  &--warning {
+    @include alert-variant($yellow-100, $yellow-500, $yellow-800);
+  }
+
+  &--danger {
+    @include alert-variant($red-100, $red-500, $red-600);
+  }
+
+  &--sm {
+    @extend .py-1;
+  }
+
+  &--lg {
+    @extend .p-4;
+    @extend .fs-6;
+  }
+
+  &--center {
+    @extend .text-center;
+    @extend .fw-semibold;
+  }
+
+  &__heading {
+    @extend .fw-semibold;
+  }
+}

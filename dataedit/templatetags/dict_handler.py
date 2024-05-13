@@ -12,7 +12,6 @@ def get_item(dictionary, key):
 
 @register.filter
 def empty(dictionary):
-
     bool1 = dictionary is None
     bool2 = dictionary is False
     bool3 = len(dictionary) == 0
