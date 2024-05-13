@@ -2290,9 +2290,6 @@ function Factsheet(props) {
                     </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
                   </ContentTableCell>
                 </TableRow>
-
-
-
                 {/* <TableRow>
                 <FirstRowTableCell>
                   <div>
