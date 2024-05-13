@@ -8,6 +8,8 @@
 
 ## Features
 
+- Add toggle functionality to topics table sidebar in order for the table to take 100% of the view width [(#1683)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1683)
+
 ## Bugs
 
 ## Documentation updates
