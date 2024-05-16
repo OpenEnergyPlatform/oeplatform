@@ -999,10 +999,6 @@ def update_factsheet(request, *args, **kwargs):
 
         in_both, in_first, in_second = graph_diff(iso_old_bundle, iso_new_bundle)
 
-        print("##############")
-        print(in_first.serialize(format="json-ld"))
-        print(in_second.serialize(format="json-ld"))
-
         in_first_json = str(in_first.serialize(format="json-ld"))
         in_second_json = str(in_second.serialize(format="json-ld"))
 
