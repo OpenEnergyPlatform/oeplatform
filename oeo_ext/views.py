@@ -5,6 +5,10 @@ from django.views.generic import View
 
 # Suggested views maybe you will use other ones @adel
 class OeoExtPluginView(View, LoginRequiredMixin):
+    """
+    Some text Some textSome textSome textSome textSome textSome textSome
+    """
+
     def get(self, request):
         return render(request, "oeo_ext/partials/oeo-ext-plugin-ui.html")
 
