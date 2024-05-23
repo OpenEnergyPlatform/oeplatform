@@ -10,7 +10,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL(
-            "ALTER TABLE dataedit_peerreviewmanager ALTER COLUMN is_open_since TYPE text USING is_open_since::text"
+            "ALTER TABLE dataedit_peerreviewmanager ALTER COLUMN is_open_since TYPE "
+            "text USING is_open_since::text"
         ),
         migrations.AlterField(
             model_name="peerreviewmanager",

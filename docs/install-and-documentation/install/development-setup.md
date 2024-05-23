@@ -72,7 +72,7 @@ To create a dummy user for functionality testing purposes
 
 Then execute this python code (either directly in a terminal or from a file)
 
-    import os    
+    import os
     import django
 
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "oeplatform.settings")

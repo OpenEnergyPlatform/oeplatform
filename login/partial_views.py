@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404, render
 
-from api.parser import get_or_403
 from dataedit.models import Table
 from login.utilities import get_badge_icon_path, get_review_badge_from_table_metadata
 
