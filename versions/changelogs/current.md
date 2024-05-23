@@ -8,6 +8,8 @@
 
 ## Features
 
+- Enhance the OpenPeerReview: New values within a review result (coming from accepted value suggestions) are now also written back to the table metadata. The review now effects the oemetadata for a specific table. [(#1368)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1368)
+
 ## Bugs
 
 ## Documentation updates
