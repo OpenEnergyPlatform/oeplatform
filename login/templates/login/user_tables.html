@@ -266,23 +266,8 @@
 
 
 <!-- Modal for publishing functionality (after pressing publish button) -->
+{% include "login/modals/table_publish.html" %}
 
-<div class="modal fade" id="publishModal" tabindex="-1" aria-labelledby="publishModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="publishModalLabel">Publish Table</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="publish-options">
-                    <select class="form-select schema-dropdown"></select>
-                    <button class="btn btn-primary confirm-publish" data-bs-dismiss="modal">Confirm</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 
@@ -297,6 +282,10 @@
     {% endcompress %}
 
 <script type="text/javascript">
+    $(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip()
+    })
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
