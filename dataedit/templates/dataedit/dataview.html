@@ -51,15 +51,6 @@
           Open Peer Review
         </button>
       </li>
-      <!-- TODO: Show only if embargo available -->
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="embargo-tab" data-bs-toggle="tab" data-bs-target="#embargo-tab-pane" type="button" role="tab" aria-controls="embargo-tab-pane" aria-selected="false">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-          </svg>
-          Embargo time
-        </button>
-      </li>
     </ul>
   </div>
 </div>
@@ -75,6 +66,12 @@
   {% if embargo_time_left != "No embargo data available" and embargo_time_left != "The embargo is over" %}
       <div class="embargo-message">
         <p>Data in embargo zone</p>
+
+        {% if embargo_time_left != "No embargo data available" and embargo_time_left != "The embargo is over" %}
+        <div class="embargo-message">
+          <p>Embargo time left {{ embargo_time_left }}</p>
+        </div>
+        {% endif %}
       </div>
     {% else %}
     <div class="data-view">
@@ -270,12 +267,6 @@
     <a class="btn btn-primary" href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr_result.review_id %}">Review details</a>
     {% endif %}
   </div>
-
-  <div class="tab-pane fade" id="embargo-tab-pane" role="tabpanel" aria-labelledby="embargo-tab" tabindex="0">
-    <div class="embargo-content">
-        Embargo time left: {{ embargo_time_left }}
-    </div>
-  </div>
 </div>
 {% endblock %}
 
@@ -348,12 +339,6 @@
     {% get_tags table=table schema=schema as table_tags %}
     {% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=table_tags %}
   </div>
-
-  {% if embargo_time_left != "No embargo data available" and embargo_time_left != "The embargo is over" %}
-  <div class="embargo-message">
-    <p>Embargo time</p>
-  </div>
-  {% endif %}
 
   {% if schema == "scenario" %}
   <div class="table-sidebar__section">
