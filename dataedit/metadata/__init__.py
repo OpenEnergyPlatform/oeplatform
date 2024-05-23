@@ -1,4 +1,3 @@
-from api import actions
 from dataedit.metadata import v1_4 as __LATEST
 from dataedit.metadata.v1_3 import TEMPLATE_v1_3
 from dataedit.metadata.v1_4 import TEMPLATE_V1_4
@@ -128,8 +127,9 @@ def save_metadata_to_db(schema, table, updated_metadata):
         updated_metadata (dict): The updated metadata dictionary.
 
     Note:
-        This function loads the table object from the database, updates its metadata field,
-        and then saves the updated table object back to the database.
+        This function loads the table object from the database,
+        updates its metadata field, and then saves the updated
+        table object back to the database.
     """
 
     from dataedit.models import Table
@@ -215,9 +215,9 @@ def parse_meta_data(metadata, schema, table):
         except MetadataException as me:
             return {
                 "description": metadata,
-                "error": me.error.message
-                if hasattr(me.error, "message")
-                else str(me.error),
+                "error": (
+                    me.error.message if hasattr(me.error, "message") else str(me.error)
+                ),
             }
     return metadata
 

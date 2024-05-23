@@ -134,7 +134,7 @@ GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
 try:
-    ONTOLOGY_FOLDER  # noqa
+    ONTOLOGY_FOLDER  # noqa F405
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
