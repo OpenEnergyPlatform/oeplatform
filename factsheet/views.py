@@ -24,11 +24,6 @@ from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES
 
 from .models import OEKG_Modifications, ScenarioBundleAccessControl
 
-# from rest_framework.authentication import TokenAuthentication
-# from rest_framework.permissions import IsAuthenticated
-# from rest_framework.authtoken.models import Token
-
-
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, "oeo")
 )  # TODO bad - windows dev will get path error
@@ -53,7 +48,6 @@ oeo_owl = get_ontology(Ontology_URI_STR).load()
 rdfdb = RDF_DATABASES["knowledge"]
 query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
 update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
-
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -143,13 +137,18 @@ def is_owner(user, bundle_id):
 
 
 def check_ownership(request, bundle_id):
-    if is_owner(request.user.id, bundle_id):
-        return JsonResponse(
-            {"isOwner": True}, safe=False, content_type="application/json"
-        )
+    if bundle_id != "new":
+        if is_owner(request.user.id, bundle_id):
+            return JsonResponse(
+                {"isOwner": True}, safe=False, content_type="application/json"
+            )
+        else:
+            return JsonResponse(
+                {"isOwner": False}, safe=False, content_type="application/json"
+            )
     else:
         return JsonResponse(
-            {"isOwner": False}, safe=False, content_type="application/json"
+            {"isOwner": True}, safe=False, content_type="application/json"
         )
 
 
@@ -243,6 +242,7 @@ def create_factsheet(request, *args, **kwargs):
     place_of_publication = request_body["place_of_publication"]
     link_to_study = request_body["link_to_study"]
     scenarios = request_body["scenarios"]
+    publications = request_body["publications"]
     models = request_body["models"]
     frameworks = request_body["frameworks"]
     date_of_publication = request_body["date_of_publication"]
@@ -278,25 +278,56 @@ def create_factsheet(request, *args, **kwargs):
         if report_title != "":
             bundle.add((study_URI, OEKG["report_title"], Literal(report_title)))
 
-        if date_of_publication != "01-01-1900" and date_of_publication != "":
-            bundle.add(
-                (
-                    study_URI,
-                    OEKG["date_of_publication"],
-                    Literal(date_of_publication),
+        # if place_of_publication:
+        #     bundle.add(
+        #         (study_URI, OEKG["place_of_publication"], Literal(place_of_publication))
+        #     )
+
+        _publications = json.loads(publications) if publications is not None else []
+        for item in _publications:
+            publications_URI = URIRef(
+                "http://openenergy-platform.org/ontology/oekg/publication/" + item["id"]
+            )
+            bundle.add((publications_URI, OEKG["publication_uuid"], Literal(item["id"])))
+
+            bundle.add((study_URI, OEKG["has_publication"], publications_URI))
+            if item["report_title"] != "":
+                bundle.add(
+                    (publications_URI, RDFS.label, Literal(item["report_title"]))
                 )
-            )
 
-        if place_of_publication:
-            bundle.add(
-                (study_URI, OEKG["place_of_publication"], Literal(place_of_publication))
-            )
+            _authors = item["authors"]
+            for author in _authors:
+                author_URI = URIRef(
+                    "http://openenergy-platform.org/ontology/oekg/" + author["iri"]
+                )
+                bundle.add((publications_URI, OEO.OEO_00000506, author_URI))
 
-        if link_to_study != "":
-            bundle.add((study_URI, OEKG["link_to_study"], Literal(link_to_study)))
+            if item["doi"] != "":
+                bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
 
-        if report_doi != "":
-            bundle.add((study_URI, OEKG["doi"], Literal(report_doi)))
+            if (
+                item["date_of_publication"] != "01-01-1900"
+                and item["date_of_publication"] != ""
+            ):
+                bundle.add(
+                    (
+                        publications_URI,
+                        OEKG["date_of_publication"],
+                        Literal(item["date_of_publication"]),
+                    )
+                )
+
+            if item["link_to_study"] != "":
+                bundle.add(
+                    (
+                        publications_URI,
+                        OEKG["link_to_study"],
+                        Literal(item["link_to_study"]),
+                    )
+                )
+
+            bundle.add((study_URI, OEKG["has_publication"], publications_URI))
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
@@ -613,6 +644,7 @@ def update_factsheet(request, *args, **kwargs):
     scenarios = request_body["scenarios"]
     models = request_body["models"]
     frameworks = request_body["frameworks"]
+    publications = request_body["publications"]
 
     Duplicate_study_factsheet = False
 
@@ -642,6 +674,51 @@ def update_factsheet(request, *args, **kwargs):
 
         new_bundle = Graph()
         new_bundle.add((study_URI, RDF.type, OEO.OEO_00010252))
+
+        _publications = json.loads(publications) if publications is not None else []
+        for item in _publications:
+            publications_URI = URIRef(
+                "http://openenergy-platform.org/ontology/oekg/publication/" + item["id"]
+            )
+            new_bundle.add((publications_URI, OEKG["publication_uuid"], Literal(item["id"])))
+            new_bundle.add((study_URI, OEKG["has_publication"], publications_URI))
+            if item["report_title"] != "":
+                new_bundle.add(
+                    (publications_URI, RDFS.label, Literal(item["report_title"]))
+                )
+
+            _authors = item["authors"]
+            for author in _authors:
+                author_URI = URIRef(
+                    "http://openenergy-platform.org/ontology/oekg/" + author["iri"]
+                )
+                new_bundle.add((publications_URI, OEO.OEO_00000506, author_URI))
+
+            if item["doi"] != "":
+                new_bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
+
+            if (
+                item["date_of_publication"] != "01-01-1900"
+                and item["date_of_publication"] != ""
+            ):
+                new_bundle.add(
+                    (
+                        publications_URI,
+                        OEKG["date_of_publication"],
+                        Literal(item["date_of_publication"]),
+                    )
+                )
+
+            if item["link_to_study"] != "":
+                new_bundle.add(
+                    (
+                        publications_URI,
+                        OEKG["link_to_study"],
+                        Literal(item["link_to_study"]),
+                    )
+                )
+
+            new_bundle.add((study_URI, OEKG["has_publication"], publications_URI))
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
@@ -849,9 +926,6 @@ def update_factsheet(request, *args, **kwargs):
         if link_to_study != "":
             new_bundle.add((study_URI, OEKG["link_to_study"], Literal(link_to_study)))
 
-        if report_doi != "":
-            new_bundle.add((study_URI, OEKG["doi"], Literal(report_doi)))
-
         institutions = json.loads(institution) if institution is not None else []
         for item in institutions:
             institution_URI = URIRef(
@@ -940,7 +1014,11 @@ def update_factsheet(request, *args, **kwargs):
 
         iso_old_bundle = to_isomorphic(old_bundle)
         iso_new_bundle = to_isomorphic(new_bundle)
+
         in_both, in_first, in_second = graph_diff(iso_old_bundle, iso_new_bundle)
+
+        in_first_json = str(in_first.serialize(format="json-ld"))
+        in_second_json = str(in_second.serialize(format="json-ld"))
 
         # remove old bundle from oekg
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
@@ -1049,6 +1127,7 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["place_of_publication"] = place_of_publication
     factsheet["link_to_study"] = link_to_study
     factsheet["report_doi"] = report_doi
+    factsheet["publications"] = []
 
     factsheet["funding_sources"] = []
     for s, p, o in oekg.triples((study_URI, OEO.OEO_00000509, None)):
@@ -1141,6 +1220,35 @@ def factsheet_by_id(request, *args, **kwargs):
             model["iri"] = o1
 
         factsheet["models"].append(model)
+
+    factsheet["publications"] = []
+    for s, p, o in oekg.triples((study_URI, OEKG["has_publication"], None)):
+        publication = {}
+        label = oekg.value(o, RDFS.label)
+        if label != None:
+            publication["report_title"] = label
+
+        publication_uuid = oekg.value(o, OEKG["publication_uuid"])
+        publication["id"] = publication_uuid
+
+        publication["authors"] = []
+        for s1, p1, o1 in oekg.triples((o, OEO.OEO_00000506, None)):
+            o1_label = oekg.value(o1, RDFS.label)
+            publication["authors"].append({"iri": o1, "name": o1_label})
+
+        publication["doi"] = ""
+        for s2, p2, o2 in oekg.triples((o, OEKG["doi"], None)):
+            publication["doi"] = o2
+
+        publication["date_of_publication"] = ""
+        for s3, p3, o3 in oekg.triples((o, OEKG["date_of_publication"], None)):
+            publication["date_of_publication"] = o3
+
+        publication["link_to_study"] = ""
+        for s4, p4, o4 in oekg.triples((o, OEKG["link_to_study"], None)):
+            publication["link_to_study"] = o4
+
+        factsheet["publications"].append(publication)
 
     factsheet["scenarios"] = []
     for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
@@ -1263,6 +1371,8 @@ def query_oekg(request, *args, **kwargs):
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
         PREFIX DC: <http://purl.org/dc/terms/>
 
+        SELECT DISTINCT ?study_acronym
+        WHERE
         SELECT DISTINCT ?study_acronym
         WHERE
         {{
@@ -1904,6 +2014,9 @@ def filter_scenario_bundles_view(request):
         "input_dataset_bundles": input_dataset_bundle_acronyms,
         "output_dataset_bundles": output_dataset_bundle_acronyms,
     }
+    html_content = render(
+        request, "partials/related_oekg_scenarios.html", context
+    ).content.decode("utf-8")
     html_content = render(
         request, "partials/related_oekg_scenarios.html", context
     ).content.decode("utf-8")
