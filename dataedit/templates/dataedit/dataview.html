@@ -438,6 +438,7 @@ for row in result.json():
       Permissions
     </a>
     {% if can_add %}
+    {% if schema == "model_draft" %}
     <button class="table-sidebar__btn-danger {% if not can_add %} disabled {% endif %}" id="dataview-table-delete">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
@@ -445,6 +446,9 @@ for row in result.json():
       </svg>
       Delete table
     </button>
+    {% else %}
+      <!-- TODO: Add unpublish button here. Tables that are in another topic than model_draft cant be deleted right away they must be moved back to model_draft. -->
+    {% endif %}
     <div id="dataview-table-create-msg" class="invisible dataview-status">
       <span class="spinner spinner-border spinner-border-sm"></span>
       <span class="message"></span>
