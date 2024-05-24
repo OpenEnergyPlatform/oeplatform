@@ -14,7 +14,7 @@ import sqlalchemy as sqla
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -920,7 +920,7 @@ class DataView(View):
             schema not in schema_whitelist and schema != schema_sandbox
         ) or schema.startswith("_"):
             raise Http404("Schema not accessible")
-            
+
         engine = actions._get_engine()
 
         if not engine.dialect.has_table(engine, table, schema=schema):
@@ -981,7 +981,6 @@ class DataView(View):
                 current_view = table_views.get(id=view_id)
             except ObjectDoesNotExist:
                 current_view = default
-
 
         table_views = list(chain((default,), table_views))
 
@@ -2091,7 +2090,9 @@ class PeerReviewView(LoginRequiredMixin, View):
             can_add = level >= login_models.WRITE_PERM
 
         oemetadata = self.load_json(schema, table, review_id)
-        metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)        # Generate URL for peer_review_reviewer
+        metadata = self.sort_in_category(
+            schema, table, oemetadata=oemetadata
+        )  # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
                 "dataedit:peer_review_reviewer",
