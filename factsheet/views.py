@@ -504,9 +504,8 @@ def create_factsheet(request, *args, **kwargs):
         _models = json.loads(models) if models is not None else []
         for item in _models:
             model_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/models/" 
-                            + str(item["id"])
-                        )
+                "http://openenergy-platform.org/ontology/oekg/models/" + str(item["id"])
+            )
             bundle.add((model_URI, RDF.type, OEO.OEO_00000277))
             bundle.add(
                 (
@@ -903,9 +902,8 @@ def update_factsheet(request, *args, **kwargs):
         _models = json.loads(models) if models is not None else []
         for item in _models:
             model_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/models/" 
-                            + str(item["id"])
-                        )
+                "http://openenergy-platform.org/ontology/oekg/models/" + str(item["id"])
+            )
             new_bundle.add((model_URI, RDF.type, OEO.OEO_00000277))
             new_bundle.add(
                 (
@@ -1136,12 +1134,11 @@ def factsheet_by_id(request, *args, **kwargs):
 
     for s, p, o in oekg.triples((study_URI, OEO["has_model"], None)):
         model = {}
-        model["id"] = str(o).split('/')[-1]
+        model["id"] = str(o).split("/")[-1]
         label = oekg.value(o, RDFS.label)
         model["name"] = label
         for s1, p1, o1 in oekg.triples((o, OEO["has_iri"], None)):
             model["iri"] = o1
-        
 
         factsheet["models"].append(model)
 
