@@ -12,7 +12,8 @@
                 <div class="m-1 publishEmbargoOptions">
                     <label for="embargo">
                         Apply Embargo <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Set an embargo period to hide your data and restrict data access for a specific time period of 6 or 12 months. Other users will be able to find the data resource and its metadata but not the data values."></i></label>
-                    <select id="embargo" class="form-select">
+                    <select id="embargo" class="form-select embargo-dropdown">
+                        <!-- The value fields are coupled with the backend implementation -->
                         <option value="none">None</option>
                         <option value="6_months">6 Months</option>
                         <option value="1_year">1 Year</option>
