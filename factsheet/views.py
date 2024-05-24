@@ -975,6 +975,7 @@ def update_factsheet(request, *args, **kwargs):
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
+            print(item)
             model_URI = URIRef(
                 "http://openenergy-platform.org/ontology/oekg/models/" + str(item["id"])
             )
@@ -1217,7 +1218,7 @@ def factsheet_by_id(request, *args, **kwargs):
         label = oekg.value(o, RDFS.label)
         model["name"] = label
         for s1, p1, o1 in oekg.triples((o, OEO["has_iri"], None)):
-            model["iri"] = o1
+            model["url"] = o1
 
         factsheet["models"].append(model)
 
