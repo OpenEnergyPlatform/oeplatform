@@ -279,7 +279,6 @@ function getCategoryToTabIdMapping() {
     'source': 'source-tab',
     'license': 'license-tab',
     'contributor': 'contributor-tab',
-    'resource': 'resource-tab',
   };
   return mapping;
 }
@@ -679,7 +678,7 @@ function updateSubmitButtonColor() {
 
 
 function updateTabProgressIndicatorClasses() {
-  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor'];
 
   for (let i = 0; i < tabNames.length; i++) {
     let tabName = tabNames[i];
@@ -700,7 +699,7 @@ function updateTabProgressIndicatorClasses() {
 
 
 function updateTabClasses() {
-  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor'];
   for (let i = 0; i < tabNames.length; i++) {
     let tabName = tabNames[i];
     let tab = document.getElementById(tabName + '-tab');
@@ -730,39 +729,53 @@ window.addEventListener('DOMContentLoaded', updateTabClasses);
 /**
  * Hide and show revier controles once the user clicks the summary tab
  */
-const summaryTab = document.getElementById('summary-tab');
-const otherTabs = [
-  document.getElementById('general-tab'),
-  document.getElementById('spatiotemporal-tab'),
-  document.getElementById('source-tab'),
-  document.getElementById('license-tab'),
-  document.getElementById('contributor-tab'),
-  document.getElementById('resource-tab'),
-];
-const reviewContent = document.querySelector(".review__content");
+console.log('Script is running...');
 
-// Event listener for clicking the "Summary" tab button
-summaryTab.addEventListener('click', function() {
-  toggleReviewControls(false);
-  reviewContent.classList.toggle("tab-pane--100");
-});
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM fully loaded and parsed');
 
-// Event listener for clicking the other tabs
-otherTabs.forEach(function(tab) {
-  tab.addEventListener('click', function() {
-    toggleReviewControls(true);
-    reviewContent.classList.remove("tab-pane--100");
-  });
-});
+  const summaryTab = document.getElementById('summary-tab');
+  const otherTabs = [
+    document.getElementById('general-tab'),
+    document.getElementById('spatiotemporal-tab'),
+    document.getElementById('source-tab'),
+    document.getElementById('license-tab'),
+    document.getElementById('contributor-tab'),
+  ];
+  const reviewContent = document.querySelector(".review__content");
 
-/**
- * Function to toggle the review controls visibility
- */
-function toggleReviewControls(show) {
-  const reviewControls = document.querySelector('.review__controls');
-  if (reviewControls) {
-    reviewControls.style.display = show ? '' : 'none';
+  console.log('Summary Tab:', summaryTab);
+  console.log('Other Tabs:', otherTabs);
+  console.log('Review Content:', reviewContent);
+
+  if (summaryTab && reviewContent) {
+    summaryTab.addEventListener('click', function() {
+      toggleReviewControls(false);
+      reviewContent.classList.toggle("tab-pane--100");
+    });
+  } else {
+    console.error('Summary tab or review content not found');
   }
-}
+
+  otherTabs.forEach(function(tab, index) {
+    if (tab) {
+      tab.addEventListener('click', function() {
+        toggleReviewControls(true);
+        reviewContent.classList.remove("tab-pane--100");
+      });
+    } else {
+      console.error('Tab at index ' + index + ' not found');
+    }
+  });
+
+  function toggleReviewControls(show) {
+    const reviewControls = document.querySelector('.review__controls');
+    console.log('Review Controls:', reviewControls);
+    if (reviewControls) {
+      reviewControls.style.display = show ? '' : 'none';
+    }
+  }
+});
+
 
 peerReview(config);

@@ -4,15 +4,15 @@ The tree structure you see below describes the structure of the oeplatform code 
 
 The tree also shows several configurations and text files for the django application itself and also the project tooling and management we use to operate, test, maintain and document the system as well as the software code. Some files are also used to provide specific information about the development and deployment process and some other files are used for the project presentation on GitHub.
 
-In the following we will dive a bit deeper into the structure of the project. We aim to provide a general understanding of the different modules so that developers become enabled to get started with the development.  
+In the following we will dive a bit deeper into the structure of the project. We aim to provide a general understanding of the different modules so that developers become enabled to get started with the development.
 
-``` plaintext
+```plaintext
 .oeplatform
 ├── .github         # GitHub test automation & repository configuration
 │   └── ...
 ├── api             # Django app
 │   └── ...
-├── base            # Django app 
+├── base            # Django app
 │   └── ...
 ├── dataedit        # Django app
 │   └── ...
@@ -38,8 +38,8 @@ In the following we will dive a bit deeper into the structure of the project. We
 │   └── ...
 ├── static          # statics from all apps are collected here
 │   ├── CACHE
-│   └── ... 
-├── theming         # The general oep design / styling and ui components 
+│   └── ...
+├── theming         # The general oep design / styling and ui components
 │   └── ...
 ├── versions        # Changelogs
 │   ├── bumpversion.sh
@@ -67,7 +67,7 @@ In the following we will dive a bit deeper into the structure of the project. We
 
 Casual django app
 
-``` plaintext
+```plaintext
 ├── dataedit
 │   ├── __init__.py
 │   ├── admin.py
@@ -89,7 +89,7 @@ Casual django app
 
 Django app that integrates a react frontend
 
-``` plaintext
+```plaintext
 ├── factsheet
 │   ├── __init__.py
 │   ├── frontend
@@ -135,7 +135,7 @@ Integration of the OpenEnergyOntology (view, search download full .owl file that
 - theming
 - oep design system and workflow
 
-``` plaintext
+```plaintext
 ├── theming
 │   ├── Dockerfile
 │   ├── README.md
@@ -147,7 +147,7 @@ Integration of the OpenEnergyOntology (view, search download full .owl file that
 
 ### Django-Project configuration
 
-``` plaintext
+```plaintext
 ├── oeplatform
 │   ├── __init__.py
 │   ├── dumper.py
@@ -164,7 +164,7 @@ Integration of the OpenEnergyOntology (view, search download full .owl file that
 
 ### oedatabase
 
-``` plaintext
+```plaintext
 ├── oedb_datamodels
 │   ├── README
 │   ├── env.py
@@ -194,7 +194,7 @@ Integration of the OpenEnergyOntology (view, search download full .owl file that
 
 ### Documentation
 
-``` plaintext
+```plaintext
 ├── docs
 │   ├── css
 │   ├── dev
@@ -202,7 +202,7 @@ Integration of the OpenEnergyOntology (view, search download full .owl file that
 │   └── install-and-documentation
 ```
 
-``` plaintext
+```plaintext
 ├── docker
 │   ├── Dockerfile
 │   ├── USAGE.md

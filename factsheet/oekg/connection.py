@@ -1,10 +1,8 @@
-import logging
 import os
-import sys
 from pathlib import Path
 
 from owlready2 import get_ontology
-from rdflib import RDF, Graph, Literal, URIRef
+from rdflib import Graph
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 from rdflib.plugins.stores import sparqlstore
 
@@ -12,12 +10,7 @@ from rdflib.plugins.stores import sparqlstore
 from SPARQLWrapper import SPARQLWrapper
 
 from factsheet.oekg.namespaces import bind_all_namespaces
-from oeplatform.settings import (
-    DEBUG,
-    ONTOLOGY_ROOT,
-    OPEN_ENERGY_ONTOLOGY_NAME,
-    RDF_DATABASES,
-)
+from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME, RDF_DATABASES
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)

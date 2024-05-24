@@ -39,11 +39,14 @@ class MigrationTest(TestCase):
         )
 
         PeerReview.objects.create(
-            table=table.name,  # Make sure this assignment matches your model's expectations
-            schema=table.schema.name,  # Adjust based on how `schema` is related in `PeerReview`
+            # Make sure this assignment matches your model's expectations
+            table=table.name,
+            # Adjust based on how `schema` is related in `PeerReview`
+            schema=table.schema.name,
             contributor=test_contributor,
             reviewer=test_reviewer,
-            oemetadata={},  # Simulate a record that needs migration
+            # Simulate a record that needs migration
+            oemetadata={},
         )
 
     def test_migration(self):
