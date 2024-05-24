@@ -92,9 +92,10 @@ EXTERNAL_URLS = {
     "spdx_licenses": "https://spdx.github.io/license-list-data/",
 }
 
-# Kept this separate for now to avoid messing with the other list ... TODO move to EXTERNAL_URLS if possible
+# Kept this separate for now to avoid messing with the other list ...
+# TODO move to EXTERNAL_URLS if possible
 DOCUMENTATION_LINKS = {
-    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#4-setup-the-openenergyontology-integation"
+    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#4-setup-the-openenergyontology-integation"  # noqa
 }
 
 
@@ -132,12 +133,12 @@ GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
 try:
-    ONTOLOGY_FOLDER  # noqa
+    ONTOLOGY_FOLDER  # noqa F405
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
 OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
-OPEN_ENERGY_ONTOLOGY_FOLDER = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+OPEN_ENERGY_ONTOLOGY_FOLDER = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)  # noqa
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

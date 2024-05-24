@@ -68,6 +68,7 @@
                 <i class="fas fa-info-circle" title="Klick to open the OEMetadata - Key Description."></i>
             </a>
         </div>
+        {% if user.is_authenticated %}
         <div>
             <button type="button" class="btn btn-outline-primary" onclick="redirectToLink('/user/profile/{{ user.pk }}/tables')">
                 <span class="btn__icon">
@@ -78,6 +79,7 @@
                 <span class="btn__text">View my tables</span>
             </button>
         </div>
+        {% endif %}
     </div>
 </div>
 

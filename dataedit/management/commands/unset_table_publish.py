@@ -22,15 +22,18 @@ class Command(BaseCommand):
         is_publish field will be set to False after confirmation.
 
         Usage:
-        python manage.py unset_table_publish --all  # Set is_publish to False for all entries
-        python manage.py unset_table_publish        # Set is_publish to False for a single entry by ID
+        python manage.py unset_table_publish --all
+            # Set is_publish to False for all entries
+        python manage.py unset_table_publish
+            # Set is_publish to False for a single entry by ID
         """
 
         set_all = options["all"]
 
         if set_all:
             confirm = input(
-                "Are you sure you want to set is_publish to False for all entries? (yes/no): "
+                "Are you sure you want to set is_publish to False for all entries? "
+                "(yes/no): "
             )
             if confirm.lower() != "yes":
                 self.stdout.write("Aborted.")
@@ -53,7 +56,8 @@ class Command(BaseCommand):
                 with transaction.atomic():
                     table = Table.objects.get(id=entry_id)
                     confirm = input(
-                        f"Are you sure you want to set is_publish to False for the entry with ID {entry_id}? (yes/no): "
+                        f"Are you sure you want to set is_publish to False for the "
+                        f"entry with ID {entry_id}? (yes/no): "
                     )
                     if confirm.lower() != "yes":
                         self.stdout.write("Aborted.")

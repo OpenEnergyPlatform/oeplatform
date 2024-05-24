@@ -61,7 +61,8 @@ def normalize_license_name(name):
 
 def read_spdx_licenses_from_static():
     # Specify the path to your JSON file
-    file = "data_licenses/licenses.json"
+
+    file = Path(__file__).parent / "static/data_licenses/licenses.json"
     json_file_path = Path(STATIC_ROOT, file)
 
     try:

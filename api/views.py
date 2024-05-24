@@ -3,6 +3,7 @@ import itertools
 import json
 import logging
 import re
+from datetime import datetime
 from decimal import Decimal
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
@@ -12,10 +13,11 @@ import sqlalchemy as sqla
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.utils import timezone
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import generics, status
@@ -32,6 +34,7 @@ from api.serializers import (
     EnergymodelSerializer,
     ScenarioDataTablesSerializer,
 )
+from dataedit.models import Embargo
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
@@ -305,6 +308,8 @@ class Table(APIView):
     Handels the creation of tables and serves information on existing tables
     """
 
+    objects = None
+
     @api_exception
     def get(self, request, schema, table):
         """
@@ -404,15 +409,16 @@ class Table(APIView):
             raise PermissionDenied
         if actions.has_table(dict(schema=schema, table=table), {}):
             raise APIError("Table already exists")
-        json_data = request.data["query"]
+        json_data = request.data.get("query", {})
+        embargo_data = request.data.get("embargo") or json_data.get("embargo", {})
         constraint_definitions = []
         column_definitions = []
 
-        for constraint_definiton in json_data.get("constraints", []):
-            constraint_definiton.update(
+        for constraint_definition in json_data.get("constraints", []):
+            constraint_definition.update(
                 {"action": "ADD", "c_table": table, "c_schema": schema}
             )
-            constraint_definitions.append(constraint_definiton)
+            constraint_definitions.append(constraint_definition)
 
         if "columns" not in json_data:
             raise actions.APIError("Table contains no columns")
@@ -428,6 +434,7 @@ class Table(APIView):
             column_definitions,
             constraint_definitions,
             metadata=metadata,
+            embargo_data=embargo_data,
         )
 
         perm, _ = login_models.UserPermission.objects.get_or_create(
@@ -471,6 +478,7 @@ class Table(APIView):
         column_definitions,
         constraint_definitions,
         metadata=None,
+        embargo_data=None,
     ):
         self.validate_column_names(column_definitions)
 
@@ -497,6 +505,26 @@ class Table(APIView):
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
+        if embargo_data:
+            start_date = embargo_data.get("start")
+            end_date = embargo_data.get("end")
+            if start_date and end_date:
+                date_started = datetime.strptime(start_date, "%Y-%m-%d").date()
+                date_ended = datetime.strptime(end_date, "%Y-%m-%d").date()
+                duration_days = (date_ended - date_started).days
+                if duration_days <= 182:
+                    duration = "6_months"
+                elif duration_days <= 365:
+                    duration = "1_year"
+                else:
+                    duration = None
+                if date_started <= timezone.now().date() <= date_ended:
+                    Embargo.objects.create(
+                        table=table_object,
+                        date_started=date_started,
+                        date_ended=date_ended,
+                        duration=duration,
+                    )
 
     @api_exception
     @require_delete_permission
@@ -603,6 +631,26 @@ class Fields(APIView):
         pass
 
 
+class MovePublish(APIView):
+    @require_admin_permission
+    @api_exception
+    def post(self, request, schema, table, to_schema):
+        if schema not in schema_whitelist or to_schema not in schema_whitelist:
+            raise APIError("Invalid origin or target schema")
+        embargo_period = request.data.get("embargo", {}).get("duration", None)
+        actions.move_publish(schema, table, to_schema, embargo_period)
+
+        # tables = Table.objects.all()
+        # context = {
+        #     "draft_tables": [table for table in tables if not table.is_publish],
+        #     "published_tables": [table for table in tables if table.is_publish],
+        #     "schema_whitelist": schema_whitelist,
+        # }
+        # html = render_to_string("login/user_tables.html", context)
+        # return HttpResponse(html)
+        return HttpResponse(status=status.HTTP_200_OK)
+
+
 class Move(APIView):
     @require_admin_permission
     @api_exception
@@ -613,9 +661,26 @@ class Move(APIView):
         return HttpResponse(status=status.HTTP_200_OK)
 
 
+def check_embargo(schema, table):
+    try:
+        table_obj = DBTable.objects.get(name=table, schema__name=schema)
+        embargo = Embargo.objects.filter(table=table_obj).first()
+        if embargo and embargo.date_ended > timezone.now():
+            return True
+        return False
+    except ObjectDoesNotExist:
+        return False
+
+
 class Rows(APIView):
     @api_exception
     def get(self, request, schema, table, row_id=None):
+        if check_embargo(schema, table):
+            return JsonResponse(
+                {"error": "Access to this table is restricted due to embargo."},
+                status=403,
+            )
+
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         columns = request.GET.getlist("column")
 
@@ -769,6 +834,12 @@ class Rows(APIView):
     @api_exception
     @require_write_permission
     def post(self, request, schema, table, row_id=None, action=None):
+        if check_embargo(schema, table):
+            return JsonResponse(
+                {"error": "Access to this table is restricted due to embargo."},
+                status=403,
+            )
+
         schema, table = actions.get_table_name(schema, table)
         column_data = request.data["query"]
         status_code = status.HTTP_200_OK
@@ -788,6 +859,12 @@ class Rows(APIView):
     @api_exception
     @require_write_permission
     def put(self, request, schema, table, row_id=None, action=None):
+        if check_embargo(schema, table):
+            return JsonResponse(
+                {"error": "Access to this table is restricted due to embargo."},
+                status=403,
+            )
+
         if action:
             raise APIError(
                 "This request type (PUT) is not supported. The "
@@ -831,6 +908,12 @@ class Rows(APIView):
 
     @require_delete_permission
     def delete(self, request, table, schema, row_id=None):
+        if check_embargo(schema, table):
+            return JsonResponse(
+                {"error": "Access to this table is restricted due to embargo."},
+                status=403,
+            )
+
         schema, table = actions.get_table_name(schema, table)
         result = self.__delete_rows(request, schema, table, row_id)
         actions.apply_changes(schema, table)
@@ -838,6 +921,12 @@ class Rows(APIView):
 
     @load_cursor()
     def __delete_rows(self, request, schema, table, row_id=None):
+        if check_embargo(schema, table):
+            return JsonResponse(
+                {"error": "Access to this table is restricted due to embargo."},
+                status=403,
+            )
+
         where = request.GET.getlist("where")
         query = {"schema": schema, "table": table}
         if where:
@@ -916,6 +1005,12 @@ class Rows(APIView):
 
     @load_cursor()
     def __update_rows(self, request, schema, table, row, row_id=None):
+        if check_embargo(schema, table):
+            return JsonResponse(
+                {"error": "Access to this table is restricted due to embargo."},
+                status=403,
+            )
+
         context = {
             "connection_id": request.data["connection_id"],
             "cursor_id": request.data["cursor_id"],
