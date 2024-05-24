@@ -301,14 +301,17 @@
         return cookieValue;
     }
 
-    function publishTable(schema, tableName, toSchema) {
-        return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move/${toSchema}/`, {
+    function publishTable(schema, tableName, toSchema, embargoPeriod) {
+        const data = embargoPeriod ? { embargo: { duration: embargoPeriod } } : {};
+
+        return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move_publish/${toSchema}/`, {
             method: 'POST',
             headers: {
             'X-CSRFToken': getCookie("csrftoken"),
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            }
+            },
+            body: JSON.stringify(data)
         }).then(response => {
             if (response.ok) {
             alert('Table moved successfully.');
@@ -347,13 +350,15 @@
 
         // Event listener for Confirm button click inside the modal
         document.querySelector('.confirm-publish').addEventListener('click', function () {
-            const dropdown = document.querySelector('.schema-dropdown');
+            const schema_dropdown = document.querySelector('.schema-dropdown');
+            const embargo_dropdown = document.querySelector('.embargo-dropdown');
             if (relatedButton) {
                 const schema = relatedButton.getAttribute('data-schema');
                 const tableName = relatedButton.getAttribute('data-tableName');
-                const toSchema = dropdown.value;
+                const toSchema = schema_dropdown.value;
+                const embargoPeriod = embargo_dropdown.value;
 
-                publishTable(schema, tableName, toSchema);
+                publishTable(schema, tableName, toSchema, embargoPeriod);
             } else {
                 console.error('relatedButton is not defined.');
             }
