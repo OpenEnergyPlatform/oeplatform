@@ -1,7 +1,8 @@
 {% extends "base/base-profile.html" %}
+{% load compress %}
 {% load django_bootstrap5 %}
 {% load static %}
-{% load compress %}
+
 {% block main-content-body %}
 {% if profile_user == request.user %}
 {% include "login/user_nav.html" %}
@@ -265,23 +266,8 @@
 
 
 <!-- Modal for publishing functionality (after pressing publish button) -->
+{% include "login/modals/table_publish.html" %}
 
-<div class="modal fade" id="publishModal" tabindex="-1" aria-labelledby="publishModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="publishModalLabel">Publish Table</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="publish-options">
-                    <select class="form-select schema-dropdown"></select>
-                    <button class="btn btn-primary confirm-publish" data-bs-dismiss="modal">Confirm</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 
@@ -291,87 +277,98 @@
 
 {% block after-body-bottom-js %}
 
-{% compress js %}
-<script src="{% static 'ontology/htmx.js' %}"></script>
-{% endcompress %}
+    {% compress js %}
+    <script src="{% static 'ontology/htmx.js' %}"></script>
+    {% endcompress %}
 
 <script type="text/javascript">
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.startsWith(name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
+    $(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip()
+    })
 
-function publishTable(schema, tableName, toSchema) {
-  return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move/${toSchema}/`, {
-    method: 'POST',
-    headers: {
-      'X-CSRFToken': getCookie("csrftoken"),
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    }
-  }).then(response => {
-    if (response.ok) {
-      alert('Table moved successfully.');
-    } else {
-      response.text().then(text => { alert(`Error moving table: ${text}`); });
-    }
-  });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    let schemaWhitelist = [];
-    let relatedButton;
-    let publishModalInstance; // Declare publishModalInstance in a higher scope
-
-    const schemaDataElement = document.querySelector('#schemaWhitelistData');
-    if (schemaDataElement) {
-        schemaWhitelist = JSON.parse(schemaDataElement.textContent);
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 
-    // Event listener for modal show event
-    var publishModal = new bootstrap.Modal(document.getElementById('publishModal'));
-    publishModalInstance = bootstrap.Modal.getInstance(publishModal._element);
+    function publishTable(schema, tableName, toSchema, embargoPeriod) {
+        const data = embargoPeriod ? { embargo: { duration: embargoPeriod } } : {};
 
-    publishModalInstance._element.addEventListener('show.bs.modal', function (event) {
-        relatedButton = event.relatedTarget;
-        const dropdown = this.querySelector('.schema-dropdown');
-        dropdown.innerHTML = '';
-        schemaWhitelist.forEach(schema => {
-            dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
+        return fetch(`/api/v0/schema/${schema}/tables/${tableName}/move_publish/${toSchema}/`, {
+            method: 'POST',
+            headers: {
+            'X-CSRFToken': getCookie("csrftoken"),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            },
+            body: JSON.stringify(data)
+        }).then(response => {
+            if (response.ok) {
+            alert('Table moved successfully.');
+            } else {
+            response.text().then(text => { alert(`Error moving table: ${text}`); });
+            }
+        });
+    }
+
+    document.body.addEventListener('htmx:configRequest', function (event) {
+        event.detail.headers['X-CSRFToken'] = getCookie('csrftoken');
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        let schemaWhitelist = [];
+        let relatedButton;
+        let publishModalInstance; // Declare publishModalInstance in a higher scope
+
+        const schemaDataElement = document.querySelector('#schemaWhitelistData');
+        if (schemaDataElement) {
+            schemaWhitelist = JSON.parse(schemaDataElement.textContent);
+        }
+
+        // Event listener for modal show event
+        var publishModal = new bootstrap.Modal(document.getElementById('publishModal'));
+        publishModalInstance = bootstrap.Modal.getInstance(publishModal._element);
+
+        publishModalInstance._element.addEventListener('show.bs.modal', function (event) {
+            relatedButton = event.relatedTarget;
+            const dropdown = this.querySelector('.schema-dropdown');
+            dropdown.innerHTML = '';
+            schemaWhitelist.forEach(schema => {
+                dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
+            });
+        });
+
+        // Event listener for Confirm button click inside the modal
+        document.querySelector('.confirm-publish').addEventListener('click', function () {
+            const schema_dropdown = document.querySelector('.schema-dropdown');
+            const embargo_dropdown = document.querySelector('.embargo-dropdown');
+            if (relatedButton) {
+                const schema = relatedButton.getAttribute('data-schema');
+                const tableName = relatedButton.getAttribute('data-tableName');
+                const toSchema = schema_dropdown.value;
+                const embargoPeriod = embargo_dropdown.value;
+
+                publishTable(schema, tableName, toSchema, embargoPeriod);
+            } else {
+                console.error('relatedButton is not defined.');
+            }
         });
     });
 
-    // Event listener for Confirm button click inside the modal
-    document.querySelector('.confirm-publish').addEventListener('click', function () {
-        const dropdown = document.querySelector('.schema-dropdown');
-        if (relatedButton) {
-            const schema = relatedButton.getAttribute('data-schema');
-            const tableName = relatedButton.getAttribute('data-tableName');
-            const toSchema = dropdown.value;
-
-            publishTable(schema, tableName, toSchema);
-        } else {
-            console.error('relatedButton is not defined.');
-        }
-    });
-});
-</script>
-
-<script>
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl)
     })
-  </script>
+</script>
 
 {% endblock after-body-bottom-js %}

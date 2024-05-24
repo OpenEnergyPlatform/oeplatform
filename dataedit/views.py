@@ -14,7 +14,7 @@ import sqlalchemy as sqla
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -44,6 +44,7 @@ from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import merge_field_reviews, process_review_data, recursive_update
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import PeerReview, PeerReviewManager, Table
 from dataedit.models import View as DBView
@@ -962,11 +963,24 @@ class DataView(View):
         default = DBView(name="default", type="table", table=table, schema=schema)
         view_id = request.GET.get("view")
 
-        current_view = (
-            default
-            if view_id == "default" or not table_views.filter(id=view_id).exists()
-            else table_views.get(id=view_id)
-        )
+        embargo = Embargo.objects.filter(table=table_obj).first()
+        if embargo:
+            now = timezone.now()
+            if embargo.date_ended > now:
+                embargo_time_left = embargo.date_ended - now
+            else:
+                embargo_time_left = "The embargo is over"
+        else:
+            embargo_time_left = "No embargo data available"
+
+        if view_id == "default":
+            current_view = default
+        else:
+            try:
+                # at first, try to use the view, that is passed as get argument
+                current_view = table_views.get(id=view_id)
+            except ObjectDoesNotExist:
+                current_view = default
 
         table_views = list(chain((default,), table_views))
 
@@ -1044,6 +1058,7 @@ class DataView(View):
             "host": request.get_host(),
             "opr": opr_context,
             "opr_result": opr_result_context,
+            "embargo_time_left": embargo_time_left,
         }
 
         return render(request, "dataedit/dataview.html", context=context_dict)
@@ -2075,7 +2090,9 @@ class PeerReviewView(LoginRequiredMixin, View):
             can_add = level >= login_models.WRITE_PERM
 
         oemetadata = self.load_json(schema, table, review_id)
-        metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)        # Generate URL for peer_review_reviewer
+        metadata = self.sort_in_category(
+            schema, table, oemetadata=oemetadata
+        )  # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
                 "dataedit:peer_review_reviewer",

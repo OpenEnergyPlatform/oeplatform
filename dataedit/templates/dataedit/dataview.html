@@ -63,6 +63,17 @@
 
 <div class="tab-content" id="tableTabsContent">
   <div class="tab-pane fade show active" id="table-tab-pane" role="tabpanel" aria-labelledby="table-tab" tabindex="0">
+  {% if embargo_time_left != "No embargo data available" and embargo_time_left != "The embargo is over" %}
+      <div class="embargo-message">
+        <p>Data in embargo zone</p>
+
+        {% if embargo_time_left != "No embargo data available" and embargo_time_left != "The embargo is over" %}
+        <div class="embargo-message">
+          <p>Embargo time left {{ embargo_time_left }}</p>
+        </div>
+        {% endif %}
+      </div>
+    {% else %}
     <div class="data-view">
       <span class="data-view__label">View</span>
       <ul class="nav nav-tabs data-view__tabs">
@@ -116,7 +127,6 @@
         </li>
       </ul>
     </div>
-
     <div>
       <div class="datatable">
         <table class="display" id="datatable" style="width:100%">
@@ -168,6 +178,7 @@
         </div>
       </div>
     </div>
+   {% endif %}
   </div>
   <div class="tab-pane metadata fade" id="metadata-tab-pane" role="tabpanel" aria-labelledby="metadata-tab" tabindex="0">
     <div class="metadata__options">
@@ -328,6 +339,7 @@
     {% get_tags table=table schema=schema as table_tags %}
     {% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=table_tags %}
   </div>
+
   {% if schema == "scenario" %}
   <div class="table-sidebar__section">
     <h2 class="table-sidebar__heading">
@@ -362,7 +374,6 @@
       Datapackage
     </a>
   </div>
-
 
   {% if schema == "model_draft" %}
   <div class="table-sidebar__section">
@@ -404,6 +415,7 @@
     </button>
     <div class="collapse table-sidebar__collapse" id="collapseApi">
       <div>
+        <!-- Formatting below must stay for display purposes -->
         <textarea class="form-control" id="apiContent" rows="6" cols="50">
 from requests import get
 
@@ -426,6 +438,7 @@ for row in result.json():
       Permissions
     </a>
     {% if can_add %}
+    {% if schema == "model_draft" %}
     <button class="table-sidebar__btn-danger {% if not can_add %} disabled {% endif %}" id="dataview-table-delete">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
@@ -433,6 +446,9 @@ for row in result.json():
       </svg>
       Delete table
     </button>
+    {% else %}
+      <!-- TODO: Add unpublish button here. Tables that are in another topic than model_draft cant be deleted right away they must be moved back to model_draft. -->
+    {% endif %}
     <div id="dataview-table-create-msg" class="invisible dataview-status">
       <span class="spinner spinner-border spinner-border-sm"></span>
       <span class="message"></span>
