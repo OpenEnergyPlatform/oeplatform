@@ -172,39 +172,6 @@
     <script src="{% static 'js/jsi18n.js' %}"></script>
     <script src="{% static 'js/oep-tags.js' %}"></script>
     {% endcompress %}
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const tableTabsContainer = document.getElementById("tableTabsContainer");
-            const contentMain = document.getElementById("contentMain");
-            const tableTabsContent = document.getElementById("tableTabsContent");
-            const contentSide = document.getElementById("contentSide");
-            const toggleContentSideBtn = document.getElementById("toggleContentSideBtn");
-
-            toggleContentSideBtn.addEventListener("click", function() {
-                if (contentMain.contains(tableTabsContent)) {
-                    if (contentSide.style.display === "none") {
-                        contentSide.style.display = "block";
-                        setTimeout(function() {
-                            contentSide.style.opacity = "1";
-                            tableTabsContainer.classList.remove("table-tabs__container--100w");
-                            contentMain.classList.remove("content__main--100w");
-                            tableTabsContent.classList.remove("tab-content--100w");
-                            toggleContentSideBtn.innerHTML = "Hide options";
-                        }, 10);
-                    } else {
-                        contentSide.style.opacity = "0";
-                        setTimeout(function() {
-                            contentSide.style.display = "none";
-                            tableTabsContainer.classList.add("table-tabs__container--100w");
-                            contentMain.classList.add("content__main--100w");
-                            tableTabsContent.classList.add("tab-content--100w");
-                            toggleContentSideBtn.innerHTML = "Show options";
-                        }, 500);
-                    }
-                }
-            });
-        });
-    </script>
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
 {% endblock body-bottom-js %}
 

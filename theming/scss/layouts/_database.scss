@@ -119,13 +119,24 @@
     }
 }
 
+#contentMain {
+    flex: 1;
+}
+
 #toggleContentSideContainer {
     position: absolute;
     top: 0;
     right: 0;
 
     button {
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .align-items-center;
         width: max-content;
+
+        svg {
+            @extend .me-2;
+        }
     }
 
     @include media-breakpoint-down(md) {
@@ -137,9 +148,6 @@
     @extend .p-3;
     @extend .border;
     @extend .rounded;
-    position: absolute;
-    top: 0;
-    right: 0;
     width: 20rem;
     background-color: #FFF;
     transition: opacity 0.5s ease;
