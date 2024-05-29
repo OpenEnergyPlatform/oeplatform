@@ -8,6 +8,10 @@
 
 ## Features
 
+- Enhance the OpenPeerReview: New values within a review result (coming from accepted value suggestions) are now also written back to the table metadata. The review now effects the oemetadata for a specific table. [(#1368)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1368)
+
+- Add new embargo area feature: Users can set an embargo period once they create a table or once they publish a table. The embargo period restricts the data access for bot ui & api. [(#1534)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1534)
+
 ## Bugs
 
 ## Documentation updates

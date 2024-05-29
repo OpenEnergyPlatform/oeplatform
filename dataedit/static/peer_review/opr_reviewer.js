@@ -308,7 +308,6 @@ function getCategoryToTabIdMapping() {
     'source': 'source-tab',
     'license': 'license-tab',
     'contributor': 'contributor-tab',
-    'resource': 'resource-tab',
   };
   return mapping;
 }
@@ -822,7 +821,7 @@ function updateSubmitButtonColor() {
   // Color Save comment / new value
   $(submitButton).removeClass('btn-warning');
   $(submitButton).removeClass('btn-danger');
-  if (selectedState == "suggestion") {
+  if (selectedState === "suggestion") {
     $(submitButton).addClass('btn-warning');
   } else {
     $(submitButton).addClass('btn-danger');
@@ -839,11 +838,10 @@ const otherTabs = [
   document.getElementById('source-tab'),
   document.getElementById('license-tab'),
   document.getElementById('contributor-tab'),
-  document.getElementById('resource-tab'),
 ];
 const reviewContent = document.querySelector(".review__content");
 function updateTabClasses() {
-  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor'];
   for (let i = 0; i < tabNames.length; i++) {
     let tabName = tabNames[i];
     let tab = document.getElementById(tabName + '-tab');
@@ -898,7 +896,7 @@ function updatePercentageDisplay() {
 
 
 function updateTabProgressIndicatorClasses() {
-  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor'];
 
   for (let i = 0; i < tabNames.length; i++) {
     let tabName = tabNames[i];

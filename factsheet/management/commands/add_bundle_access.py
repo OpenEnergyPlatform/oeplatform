@@ -34,7 +34,8 @@ class Command(BaseCommand):
         ).exists():
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Entry already exists for user '{username}' with bundle ID '{bundle_id}'"
+                    f"Entry already exists for user '{username}' "
+                    f"with bundle ID '{bundle_id}'"
                 )
             )
             return
@@ -47,6 +48,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"User '{username}' added to ScenarioBundleAccessControl with bundle ID '{bundle_id}'"
+                f"User '{username}' added to ScenarioBundleAccessControl "
+                f"with bundle ID '{bundle_id}'"
             )
         )
