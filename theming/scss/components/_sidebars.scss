@@ -29,6 +29,16 @@
     @extend .me-3;
     @extend .fw-semibold;
     @extend .text-decoration-none;
+    
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $blue;
+      outline-offset: 2px;
+    }
   }
 
   &__btn-info {

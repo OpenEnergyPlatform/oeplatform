@@ -133,6 +133,16 @@
         @extend .align-items-center;
         width: max-content;
 
+        &:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        &:focus-visible {
+            outline: 2px solid $blue;
+            outline-offset: 2px;
+        }
+
         svg {
             @extend .me-2;
         }
