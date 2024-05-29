@@ -40,6 +40,7 @@ by [Vincent Driessen](https://nvie.com/posts/a-successful-git-branching-model/):
    ```
 
    If your branch does not exist on the remote server yet, git will provide you with instructions, simply follow them
+
 5. Submit a pull request (PR)
    - Follow the [steps](https://help.github.com/en/articles/creating-a-pull-request) of the github help to create the PR.
    - Please note that you PR should be directed from your branch (for example `myfeature`) towards the branch `develop`

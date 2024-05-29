@@ -54,7 +54,6 @@ class TablesView(View):
         tables = get_user_tables(user_id)
         draft_tables = []
         published_tables = []
-        # published_but_license_issue = []
 
         for table in tables:
             permission_level = user.get_table_permission_level(table)
@@ -126,9 +125,12 @@ class TablesView(View):
             "schema_whitelist": schema_whitelist,
         }
 
-        if request.is_ajax():
+        # TODO: Fix this is_ajax as it is outdated according to django documentation ...
+        # provide better api endpoint for http requests via HTMX
+        if "HX-Request" in request.headers:
+            return render(request, "login/partials/user_partial_tables.html", context)
+        else:
             return render(request, "login/user_tables.html", context)
-        return render(request, "login/user_tables.html", context)
 
 
 ##############################################################################
