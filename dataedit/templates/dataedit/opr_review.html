@@ -81,9 +81,6 @@
           <button class="nav-link" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor</button>
-        </li>
-        <li class="nav-item" role="presentation">
           <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Summary</button>
         </li>
       </ul>
@@ -191,25 +188,6 @@
               <div class="review__items">
               {% for item in meta.license %}
                 <div id="field_{{item.field}}" class="field review__item" data-category="license" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
-                  <p class="review__item-content">
-                    {% if item.field is Null %}
-                      <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
-                    {% else %}
-                      <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.newValue|default:item.value }}</span>
-                      <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
-                    {% endif %}
-                  </p>
-                </div>
-              {% endfor %}
-              </div>
-            </div>
-            <div class="tab-pane fade" id="contributor" role="tabpanel" aria-labelledby="contributor-tab">
-              <div class="review__items">
-              {% for item in meta.contributor %}
-                <div id="field_{{item.field}}" class="field review__item" data-category="contributor" onclick="click_field('{{item.field}}', '{{ item.value }}', 'contributor');">
                   <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
