@@ -114,7 +114,9 @@
         <div class="review__content">
           <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
-              <div class="review__items">
+
+              <!-- Commented out in order to show the placeholder below instead -->
+              <!-- <div class="review__items">
                 {% for item in meta.general %}
                 <div id="field_{{item.field}}" class="field review__item" data-category="general" onclick="click_field('{{item.field}}', '{{ item.value }}', 'general');">
                   <p class="review__item-content">
@@ -130,7 +132,186 @@
                   </p>
                 </div>
                 {% endfor %}
+              </div> -->
+
+              <!-- Start Placeholder for metadata grouping -->
+              <div class="review__items">
+                <!-- `.review__items-group` for non-categorized metadata -->
+                <div class="review__items-group">
+                  <div class="field review__item">
+                    <p class="review__item-content">
+                      <span class="key">Id</span>
+                      <span class="value">http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v152</span>
+                    </p>
+                  </div>
+                  <div class="field review__item">
+                    <p class="review__item-content">
+                      <span class="key">Name</span>
+                      <span class="value">oep_metadata_table_example_v152</span>
+                    </p>
+                  </div>
+                  <div class="field review__item">
+                    <p class="review__item-content">
+                      <span class="key">Title</span>
+                      <span class="value">Example title for metadata example - Version 1.5.2</span>
+                    </p>
+                  </div>
+                </div>
+                <!-- `.review__items-group.accordion` for categorized metadata we want to have inside an accordion item -->
+                <div class="review__items-group accordion" id="accordionGeneralContext">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingGeneralContext">
+                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeneralContext" aria-expanded="true" aria-controls="collapseGeneralContext">
+                        Context
+                      </button>
+                    </h2>
+                    <div id="collapseGeneralContext" class="accordion-collapse collapse show" aria-labelledby="headingGeneralContext" data-bs-parent="#accordionGeneralContext">
+                      <div class="field review__item">
+                        <p class="review__item-content">
+                          <span class="key">Contact</span>
+                          <span class="value">https://github.com/Ludee</span>
+                        </p>
+                      </div>
+                      <div class="field review__item">
+                        <p class="review__item-content">
+                          <span class="key">GrantNo</span>
+                          <span class="value">03EI1005</span>
+                        </p>
+                      </div>
+                      <div class="field review__item">
+                        <p class="review__item-content">
+                          <span class="key">Homepage</span>
+                          <span class="value">https://reiner-lemoine-institut.de/lod-geoss/</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="review__items-group accordion" id="accordionGeneralSubject">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingGeneralSubject">
+                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeneralSubject" aria-expanded="true" aria-controls="collapseGeneralSubject">
+                        Subject
+                      </button>
+                    </h2>
+                    <div id="collapseGeneralSubject" class="accordion-collapse collapse show" aria-labelledby="headingGeneralSubject" data-bs-parent="#accordionGeneralSubject">
+                      <!-- `.review__items-group.category` for categorized metadata we DON'T want to have inside an accordion item -->
+                      <div class="review__items-group category">
+                        <div class="category-item">
+                          <h3 class="category-header">0</h3>
+                          <div class="category-items">
+                            <div class="field review__item">
+                              <p class="review__item-content">
+                                <span class="key">Name</span>
+                                <span class="value">energy</span>
+                              </p>
+                            </div>
+                            <div class="field review__item">
+                              <p class="review__item-content">
+                                <span class="key">Path</span>
+                                <span class="value">https://openenergy-platform.org/ontology/oeo/OEO_00000150</span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="review__items-group category">
+                        <div class="category-item">
+                          <h3 class="category-header">1</h3>
+                          <div class="category-items">
+                            <div class="field review__item">
+                              <p class="review__item-content">
+                                <span class="key">Name</span>
+                                <span class="value">test data set</span>
+                              </p>
+                            </div>
+                            <div class="field review__item">
+                              <p class="review__item-content">
+                                <span class="key">Path</span>
+                                <span class="value">https://openenergy-platform.org/ontology/oeo/OEO_00000408</span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="review__items-group accordion" id="accordionGeneralKeywords">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingGeneralKeywords">
+                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeneralKeywords" aria-expanded="true" aria-controls="collapseGeneralKeywords">
+                        Keywords
+                      </button>
+                    </h2>
+                    <div id="collapseGeneralKeywords" class="accordion-collapse collapse show" aria-labelledby="headingGeneralKeywords" data-bs-parent="#accordionGeneralKeywords">
+                      <div class="field review__item">
+                        <p class="review__item-content">
+                          <span class="key">1</span>
+                          <span class="value">test</span>
+                        </p>
+                      </div>
+                      <div class="field review__item">
+                        <p class="review__item-content">
+                          <span class="key">2</span>
+                          <span class="value">stuff</span>
+                        </p>
+                      </div>
+                      <div class="field review__item">
+                        <p class="review__item-content">
+                          <span class="key">3</span>
+                          <span class="value">test1</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="review__items-group accordion" id="accordionGeneralLanguages">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingGeneralLanguages">
+                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeneralLanguages" aria-expanded="true" aria-controls="collapseGeneralLanguages">
+                        Languages
+                      </button>
+                    </h2>
+                    <div id="collapseGeneralLanguages" class="accordion-collapse collapse show" aria-labelledby="headingGeneralLanguages" data-bs-parent="#accordionGeneralLanguages">
+                      <div class="field review__item">
+                        <p class="review__item-content">
+                          <span class="key">1</span>
+                          <span class="value">en-US</span>
+                        </p>
+                      </div>
+                      <div class="field review__item">
+                        <p class="review__item-content">
+                          <span class="key">2</span>
+                          <span class="value">de-DE</span>
+                        </p>
+                      </div>
+                      <div class="field review__item">
+                        <p class="review__item-content">
+                          <span class="key">3</span>
+                          <span class="value">fr-FR</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="review__items-group">
+                  <div class="field review__item">
+                    <p class="review__item-content">
+                      <span class="key">Description</span>
+                      <span class="value">This is an metadata example for example data. There is a corresponding table on the OEP for each metadata version.</span>
+                    </p>
+                  </div>
+                  <div class="field review__item">
+                    <p class="review__item-content">
+                      <span class="key">PublicationDate</span>
+                      <span class="value">2022-05-04</span>
+                    </p>
+                  </div>
+                </div>
               </div>
+              <!-- End Placeholder for metadata grouping -->
+
             </div>
             <div class="tab-pane fade" id="spatiotemporal" role="tabpanel" aria-labelledby="spatiotemporal-tab">
               <div class="review__items">
