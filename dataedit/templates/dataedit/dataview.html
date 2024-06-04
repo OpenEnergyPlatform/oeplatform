@@ -1,4 +1,4 @@
-{% extends "dataedit/base.html" %}
+{% extends "dataedit/base-sidebar.html" %}
 {% load dataedit.metadata %}
 {% load static %}
 {% load django_bootstrap5 %}
@@ -25,7 +25,7 @@
 </div>
 
 <div class="table-tabs">
-  <div class="table-tabs__container">
+  <div class="table-tabs__container" id="tableTabsContainer">
     <ul class="nav nav-tabs" id="tableTabs" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">
@@ -52,6 +52,9 @@
         </button>
       </li>
     </ul>
+    <div id="toggleContentSideContainer">
+      <button class="btn btn-link" id="toggleContentSideBtn">Hide options</button>
+    </div>
   </div>
 </div>
 {% endblock site-header %}
@@ -342,34 +345,27 @@
 
   {% if schema == "scenario" %}
   <div class="table-sidebar__section">
-    <h2 class="table-sidebar__heading">
-      Scenario Bundles
-      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Scenario bundles weave together important information about one or more scenarios. They inform about studies made based on a scenario, including publications. Data tables can be assigned to a scenario that is part of a scenario bundle. The bundles this table relates to are listed below."></i>
-    </h2>
-    <span>
-      <div id="filteredScenariosContainer" hx-get="{% url 'factsheet:filter_bundles_view' %}?table_iri=/dataedit/view/{{schema}}/{{table}}" hx-target="#filteredScenariosContainer" hx-swap="outerHTML" hx-trigger="load">
-        Loading ...
-      </div>
-    </span>
+    <div id="filteredScenariosContainer" hx-get="{% url 'factsheet:filter_bundles_view' %}?table_iri=/dataedit/view/{{schema}}/{{table}}" hx-target="#filteredScenariosContainer" hx-swap="outerHTML" hx-trigger="load">
+      Loading ...
+    </div>
   </div>
   {% endif %}
+
+  
+
   <div class="table-sidebar__section">
     <h2 class="table-sidebar__heading">Downloads</h2>
     <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=csv" type="button" class="table-sidebar__btn">
-      <svg width="14" height="14" version="1.1" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <g>
-          <path d="m81.98 80.184h-63.961c-1.9688 0-3.5664 1.5977-3.5664 3.5664s1.5977 3.5664 3.5664 3.5664h63.961c1.9688 0 3.5664-1.5977 3.5664-3.5664 0-1.9727-1.5977-3.5664-3.5664-3.5664z"/>
-          <path d="m47.477 67.758c0.16406 0.16406 0.34766 0.3125 0.54297 0.44531 0.089844 0.058594 0.1875 0.10156 0.27734 0.15234 0.10938 0.0625 0.21875 0.12891 0.33594 0.17578 0.007813 0.003906 0.015626 0.007812 0.023438 0.011719 0.11328 0.046875 0.23047 0.070312 0.34375 0.10156 0.10156 0.027344 0.19531 0.066407 0.29688 0.089844 0.46094 0.09375 0.9375 0.09375 1.3984 0 0.10156-0.019531 0.19922-0.058594 0.29688-0.089844 0.12109-0.035156 0.24609-0.066406 0.36719-0.11328 0.11719-0.050781 0.22266-0.11719 0.33594-0.17578 0.09375-0.050781 0.19141-0.09375 0.27734-0.15234 0.19531-0.13281 0.37891-0.27734 0.54297-0.44531l13.75-13.75c1.3945-1.3945 1.3945-3.6523 0-5.0469-1.3945-1.3945-3.6523-1.3945-5.0469 0l-7.6602 7.6602 0.007812-40.371c0-1.9727-1.5977-3.5664-3.5664-3.5664-1.9727 0-3.5664 1.5977-3.5664 3.5664v40.371l-7.6602-7.6602c-1.3945-1.3945-3.6523-1.3945-5.0469 0-1.3945 1.3945-1.3945 3.6523 0 5.0469z"/>
-        </g>
+      <svg width="14" height="14" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
       </svg>
       CSV
     </a>
     <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=datapackage" type="button" class="table-sidebar__btn">
-      <svg width="14" height="14" version="1.1" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <g>
-          <path d="m81.98 80.184h-63.961c-1.9688 0-3.5664 1.5977-3.5664 3.5664s1.5977 3.5664 3.5664 3.5664h63.961c1.9688 0 3.5664-1.5977 3.5664-3.5664 0-1.9727-1.5977-3.5664-3.5664-3.5664z"/>
-          <path d="m47.477 67.758c0.16406 0.16406 0.34766 0.3125 0.54297 0.44531 0.089844 0.058594 0.1875 0.10156 0.27734 0.15234 0.10938 0.0625 0.21875 0.12891 0.33594 0.17578 0.007813 0.003906 0.015626 0.007812 0.023438 0.011719 0.11328 0.046875 0.23047 0.070312 0.34375 0.10156 0.10156 0.027344 0.19531 0.066407 0.29688 0.089844 0.46094 0.09375 0.9375 0.09375 1.3984 0 0.10156-0.019531 0.19922-0.058594 0.29688-0.089844 0.12109-0.035156 0.24609-0.066406 0.36719-0.11328 0.11719-0.050781 0.22266-0.11719 0.33594-0.17578 0.09375-0.050781 0.19141-0.09375 0.27734-0.15234 0.19531-0.13281 0.37891-0.27734 0.54297-0.44531l13.75-13.75c1.3945-1.3945 1.3945-3.6523 0-5.0469-1.3945-1.3945-3.6523-1.3945-5.0469 0l-7.6602 7.6602 0.007812-40.371c0-1.9727-1.5977-3.5664-3.5664-3.5664-1.9727 0-3.5664 1.5977-3.5664 3.5664v40.371l-7.6602-7.6602c-1.3945-1.3945-3.6523-1.3945-5.0469 0-1.3945 1.3945-1.3945 3.6523 0 5.0469z"/>
-        </g>
+      <svg width="14" height="14" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
       </svg>
       Datapackage
     </a>
@@ -381,11 +377,9 @@
     <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
     title="You need write permissions on this table to upload data" {% endif %}>
       <a class="table-sidebar__btn {% if not can_add %} disabled {% endif %}" href="{% url 'dataedit:wizard_upload' schema=schema table=table %}">
-        <svg width="14" height="14" version="1.1" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <g>
-            <path d="m18.02 19.816h63.961c1.9688 0 3.5664-1.5977 3.5664-3.5664s-1.5977-3.5664-3.5664-3.5664h-63.961c-1.9688 0-3.5664 1.5977-3.5664 3.5664 0 1.9727 1.5977 3.5664 3.5664 3.5664z"/>
-            <path d="m52.523 32.242c-0.16406-0.16406-0.34766-0.3125-0.54297-0.44531-0.089844-0.058594-0.1875-0.10156-0.27734-0.15234-0.10938-0.0625-0.21875-0.12891-0.33594-0.17578-0.007813-0.003906-0.015626-0.007812-0.023438-0.011719-0.11328-0.046875-0.23047-0.070312-0.34375-0.10156-0.10156-0.027344-0.19531-0.066407-0.29688-0.089844-0.46094-0.09375-0.9375-0.09375-1.3984 0-0.10156 0.019531-0.19922 0.058594-0.29688 0.089844-0.12109 0.035156-0.24609 0.066406-0.36719 0.11328-0.11719 0.050781-0.22266 0.11719-0.33594 0.17578-0.09375 0.050781-0.19141 0.09375-0.27734 0.15234-0.19531 0.13281-0.37891 0.27734-0.54297 0.44531l-13.758 13.75c-1.3945 1.3945-1.3945 3.6523 0 5.0469 1.3945 1.3945 3.6523 1.3945 5.0469 0l7.6602-7.6602v40.371c0 1.9727 1.5977 3.5664 3.5664 3.5664 1.9727 0 3.5664-1.5977 3.5664-3.5664l0.003906-40.371 7.6602 7.6602c1.3945 1.3945 3.6523 1.3945 5.0469 0 1.3945-1.3945 1.3945-3.6523 0-5.0469z"/>
-          </g>
+        <svg width="14" height="14" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+          <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
         </svg>
         CSV (Wizard)
       </a>
