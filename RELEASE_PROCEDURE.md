@@ -59,6 +59,8 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
    - copy the release summary from changelog into the description box
 1. Announce it on our mailing list: oep_dev-request@lists.riseup.net
    - again, copy the rendered HTML from the Github release directly in the email
+1. Create a GitHub D´discussion to collect feedback
+   - https://github.com/OpenEnergyPlatform/oeplatform/discussions/new?category=release
 
 And that's it! Whew...
 
