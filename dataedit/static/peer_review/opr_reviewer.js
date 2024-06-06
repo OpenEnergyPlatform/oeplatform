@@ -302,6 +302,7 @@ function switchCategoryTab(category) {
   }
 }
 
+
 /**
  * Function to provide the mapping of category to the correct tab ID
  */
@@ -715,8 +716,31 @@ function getFieldState(fieldKey) {
 /**
  * Checks if all fields are reviewed and activates submit button if ready
  */
-function checkReviewComplete() {
+/**
+ * Returns a list of all fields and their values.
+ * @returns {Array} List of objects with field names and values.
+ */
+function getAllFieldsAndValues() {
   const fields = document.querySelectorAll('.field');
+  const fieldList = [];
+
+  fields.forEach(field => {
+    const fieldName = field.id.slice(6);
+    const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+    fieldList.push({ fieldName, fieldValue });
+  });
+
+  return fieldList;
+}
+
+
+
+/**
+ * Checks if all fields are reviewed and activates submit button if ready
+ */
+function checkReviewComplete() {
+  const fields = getAllFieldsAndValues();
+
   for (let field of fields) {
     let fieldName = field.id.slice(6);
     const fieldState = getFieldState(fieldName);
