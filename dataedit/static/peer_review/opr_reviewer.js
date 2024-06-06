@@ -207,10 +207,13 @@ function cancelPeerReview() {
 /**
  * Identifies field name and value sets selected stlye and refreshes
  * reviewer box (side panel) infos.
- * @param {string} fieldKey Name of the field
- * @param {string} fieldValue Value of the field
- * @param {string} category Metadata catgeory related to the fieldKey
+ * @param value
  */
+
+
+function isEmptyValue(value) {
+    return value === "" || value === "None" || value === "[]";
+}
 
 function click_field(fieldKey, fieldValue, category) {
   // Check if the category tab needs to be switched
@@ -867,6 +870,8 @@ window.addEventListener('DOMContentLoaded', function() {
   updateTabClasses();
   // updatePercentageDisplay() ;
 });
+
+
 
 function getTotalFieldCount() {
   var allFields = makeFieldList();
