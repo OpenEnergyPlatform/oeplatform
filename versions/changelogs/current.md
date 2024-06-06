@@ -8,7 +8,12 @@
 
 ## Features
 
-- Scenario bundle: The drop-down menu for selecting framework and model factsheets now shows all currently available factsheets instead of retrieving the values from a static list. The factsheets are listed by ‘model_name’ as this is a mandatory field that must be filled in when creating a factsheet. [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
+- Scenario bundle: . [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
+
+- Scenario bundle: [(#1704)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1704)
+
+  - It is now possible to add multiple publications to a scenario bundle
+  - The drop-down menu for selecting framework and model factsheets now shows all currently available factsheets instead of retrieving the values from a static list. The factsheets are listed by ‘model_name’ as this is a mandatory field that must be filled in when creating a factsheet
 
 - Add toggle functionality to topics table sidebar in order for the table to take 100% of the view width [(#1683)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1683)
 
