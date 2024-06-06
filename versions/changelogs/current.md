@@ -8,6 +8,8 @@
 
 ## Features
 
+- Scenario bundles: The dropdown to select framework & model factsheets now shows all currently available factsheets instead of retrieving the values from a static list. The Factsheets are listed by "model_name" as it is a required field that must be filled out while creating a factsheet. [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
+
 ## Bugs
 
 ## Documentation updates
