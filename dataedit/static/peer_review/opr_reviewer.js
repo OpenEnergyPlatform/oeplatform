@@ -216,71 +216,74 @@ function isEmptyValue(value) {
 }
 
 function click_field(fieldKey, fieldValue, category) {
-  // Check if the category tab needs to be switched
-  switchCategoryTab(category);
+    var isEmpty = isEmptyValue(fieldValue);
 
-  // this seems unused but it is relevant to select next and prev field functions
-  selectedField = fieldKey;
-  selectedFieldValue = fieldValue;
-  selectedCategory = category;
-  const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
-  const selectedName = document.querySelector("#review-field-name");
-  selectedName.textContent = cleanedFieldKey + " " + fieldValue;
-  const fieldDescriptionsElement = document.getElementById("field-descriptions");
-  const reviewItem = document.querySelectorAll('.review__item');
+    // Далее остальная логика функции
+    switchCategoryTab(category);
 
-  let selectedDivId = 'field_' + fieldKey;
-  let selectedDiv = document.getElementById(selectedDivId);
+    selectedField = fieldKey;
+    selectedFieldValue = fieldValue;
+    selectedCategory = category;
+    const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
+    const selectedName = document.querySelector("#review-field-name");
+    selectedName.textContent = cleanedFieldKey + " " + fieldValue;
+    const fieldDescriptionsElement = document.getElementById("field-descriptions");
+    const reviewItem = document.querySelectorAll('.review__item');
 
-  // console.log("Field descriptions data:", fieldDescriptionsData);
-  // Populate the reviewer box
-  if (fieldDescriptionsData[cleanedFieldKey]) {
-    let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
-    let fieldInfoText = '<div class="reviewer-item">';
-    if (fieldInfo.title) {
-      fieldInfoText += '<div class="reviewer-item__row"><h2 class="reviewer-item__title">' + fieldInfo.title + '</h2></div>';
-    }
-    if (fieldInfo.description) {
-      fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Description:</div><div class="reviewer-item__value">' + fieldInfo.description + '</div></div>';
-    }
-    if (fieldInfo.example) {
-      fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Example:</div><div class="reviewer-item__value">' + fieldInfo.example + '</div></div>';
-    }
-    if (fieldInfo.badge) {
-      fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Badge:</div><div class="reviewer-item__value">' + fieldInfo.badge + '</div></div>';
-    }
-    fieldInfoText += '<div class="reviewer-item__row reviewer-item__row--border">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
-    fieldDescriptionsElement.innerHTML = fieldInfoText;
-  } else {
-    fieldDescriptionsElement.textContent = "No description found";
-  }
-  const fieldState = getFieldState(fieldKey);
-  if (fieldState) {
-    if (fieldState === 'ok') {
-      document.getElementById("ok-button").disabled = true;
-      document.getElementById("rejected-button").disabled = true;
-      document.getElementById("suggestion-button").disabled = true;
-    } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
-      document.getElementById("ok-button").disabled = false;
-      document.getElementById("rejected-button").disabled = false;
-      document.getElementById("suggestion-button").disabled = false;
-    }
-  } else {
-    document.getElementById("ok-button").disabled = false;
-    document.getElementById("rejected-button").disabled = false;
-    document.getElementById("suggestion-button").disabled = false;
-  }
+    let selectedDivId = 'field_' + fieldKey;
+    let selectedDiv = document.getElementById(selectedDivId);
 
-  // Set selected / not selected style on metadata fields
-  reviewItem.forEach(function(div) {
-    div.style.backgroundColor = '';
-  });
-  if (selectedDiv) {
-    selectedDiv.style.backgroundColor = '#F6F9FB';
-  }
-  clearInputFields();
-  hideReviewerOptions();
+    if (fieldDescriptionsData[cleanedFieldKey]) {
+        let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
+        let fieldInfoText = '<div class="reviewer-item">';
+        if (fieldInfo.title) {
+            fieldInfoText += '<div class="reviewer-item__row"><h2 class="reviewer-item__title">' + fieldInfo.title + '</h2></div>';
+        }
+        if (fieldInfo.description) {
+            fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Description:</div><div class="reviewer-item__value">' + fieldInfo.description + '</div></div>';
+        }
+        if (fieldInfo.example) {
+            fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Example:</div><div class="reviewer-item__value">' + fieldInfo.example + '</div></div>';
+        }
+        if (fieldInfo.badge) {
+            fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Badge:</div><div class="reviewer-item__value">' + fieldInfo.badge + '</div></div>';
+        }
+        fieldInfoText += '<div class="reviewer-item__row reviewer-item__row--border">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
+        fieldDescriptionsElement.innerHTML = fieldInfoText;
+    } else {
+        fieldDescriptionsElement.textContent = "No description found";
+    }
+    const fieldState = getFieldState(fieldKey);
+    if (fieldState) {
+        if (fieldState === 'ok') {
+            document.getElementById("ok-button").disabled = true;
+            document.getElementById("rejected-button").disabled = true;
+            document.getElementById("suggestion-button").disabled = true;
+        } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+            document.getElementById("ok-button").disabled = false;
+            document.getElementById("rejected-button").disabled = false;
+            document.getElementById("suggestion-button").disabled = false;
+        }
+    } else {
+        document.getElementById("ok-button").disabled = isEmpty;
+        document.getElementById("rejected-button").disabled = isEmpty;
+        document.getElementById("suggestion-button").disabled = isEmpty;
+    }
+
+    // Set selected / not selected style on metadata fields
+    reviewItem.forEach(function(div) {
+        div.style.backgroundColor = '';
+    });
+    if (selectedDiv) {
+        selectedDiv.style.backgroundColor = '#F6F9FB';
+    }
+    clearInputFields();
+    hideReviewerOptions();
 }
+
+// Initialize the review buttons state on page load
+
+
 
 /**
  * Switch to the category tab if needed
