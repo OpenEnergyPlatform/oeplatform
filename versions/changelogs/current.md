@@ -6,6 +6,8 @@
 
 - Update the code that loads the oeo-related files from local static files. All oeo data is not only loaded when the app is started. Starting the app now takes more time, but offers the advantage that the files do not have to be parsed again. This leads to a significantly faster page load of the ontology pages. [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
 
+- Change the profile tables by improving color contrast, splitting the tables in 2 rows on very large screens and making the whole title visible (https://github.com/OpenEnergyPlatform/oeplatform/pull/1706)
+
 ## Features
 
 - Add toggle functionality to topics table sidebar in order for the table to take 100% of the view width [(#1683)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1683)
