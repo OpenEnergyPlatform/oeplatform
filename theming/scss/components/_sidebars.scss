@@ -3,7 +3,7 @@
 
 .table-sidebar {
   &__section {
-    @extend .py-4;
+    @extend .py-3;
     @extend .border-bottom;
 
     &:first-of-type {
@@ -16,9 +16,10 @@
   }
 
   &__heading {
-    @extend .fs-6;
-    @extend .fw-semibold;
+    @extend .fs-7;
+    @extend .fw-normal;
     @extend .text-body;
+    margin-bottom: .25rem !important;
   }
 
   &__btn {
@@ -29,6 +30,20 @@
     @extend .me-3;
     @extend .fw-semibold;
     @extend .text-decoration-none;
+    
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $blue;
+      outline-offset: 2px;
+    }
+
+    svg {
+      @extend .me-1;
+    }
   }
 
   &__btn-info {
