@@ -6,15 +6,12 @@ from rdflib import Graph
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 from rdflib.plugins.stores import sparqlstore
 
-# from datetime import date
-from SPARQLWrapper import SPARQLWrapper
-
 from factsheet.oekg.namespaces import bind_all_namespaces
-from oeplatform.settings import (
-    DEBUG,
-    ONTOLOGY_ROOT,
-    OPEN_ENERGY_ONTOLOGY_NAME,
-)
+from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME, RDF_DATABASES
+
+# from datetime import date
+# from SPARQLWrapper import SPARQLWrapper
+
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
@@ -36,24 +33,9 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-if DEBUG:
-    query_endpoint = "http://localhost:3030/ds/query"
-    update_endpoint = "http://localhost:3030/ds/update"
-else:
-    # query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-    # update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
-
-    query_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/query"
-    update_endpoint = "https://oekb.iks.cs.ovgu.de:3443/oekg_main/update"
-
-sparql = SPARQLWrapper(query_endpoint)
-
-""" store = sparqlstore.SPARQLUpdateStore(
-    auth=(
-        RDF_DATABASES.get("factsheet").get("dbuser"),
-        RDF_DATABASES.get("factsheet").get("dbpasswd")
-    )
-) """
+rdfdb = RDF_DATABASES["knowledge"]
+query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
+update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
 
 
 store = sparqlstore.SPARQLUpdateStore()
