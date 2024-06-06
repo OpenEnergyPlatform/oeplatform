@@ -260,6 +260,23 @@ function Factsheet(props) {
     });
   }, []);
 
+  const [frameworksList, setFrameworkList] = useState([]);
+  
+  const getFrameworkList = async () => {
+    const { data } = await axios.get(conf.toep + `api/v0/factsheet/frameworks/`, {
+      headers: { 'X-CSRFToken': CSRFToken() }
+    });
+    return data;
+  };
+
+  useEffect(() => {
+    getFrameworkList().then((data) => {
+      const tmp = [];
+      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'id': item.id }));
+      setFrameworkList(tmp);
+    });
+  }, []);
+
   const StudyKeywords = [
     ['resilience', 'http://openenergy-platform.org/ontology/oeo/OEO_00360015', 'Resilience is a disposition of a system that represents the capacity of a system to absorb disturbance and reorganize so as to retain essentially the same function, structure, and feedbacks.'],
     ['life cycle analysis', 'http://www.openenergy-platform.org/ontology/oeo/OEO_00330023', 'A life cycle assessment is a methodology to calculate and analyse environmental impacts of the life cycle of a material entity or process.'],
@@ -1926,7 +1943,7 @@ function Factsheet(props) {
             type="Frameworks"
             manyItems
             showSelectedElements={true}
-            optionsSet={oep_frameworks}
+            optionsSet={frameworksList}
             kind='Frameworks'
             handler={frameworksHandler}
             selectedElements={selectedFrameworks}
