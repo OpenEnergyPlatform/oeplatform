@@ -112,6 +112,7 @@
     &__content {
         @extend .d-flex;
         @extend .flex-row;
+        @extend .flex-wrap;
         @extend .justify-content-between;
         @extend .card-body;
 
@@ -129,6 +130,13 @@
             @extend .align-items-center;
         }
 
+        &--title {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .justify-content-start;
+            @extend .w-100;
+        }
+
         @include media-breakpoint-down(xl) {
             flex-direction: column !important;
 
@@ -139,7 +147,7 @@
     }
 
     &__link {
-        max-width: 20rem;
+        @extend .pt-3;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;

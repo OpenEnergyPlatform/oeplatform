@@ -21,6 +21,32 @@
                 <div class="profile-table-card">
                     <div class="profile-table-card__content">
                         <div class="profile-table-card__content--left">
+                            <div class="profile-table-card__tag">
+                                <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"></path>
+                                </svg>
+                                {{ table.schema }}
+                            </div>
+                            {% if table.license_status.status %}
+                            <div class="profile-table-card__tag profile-table-card__tag--info" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check successful">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                                </svg>
+                                License
+                            </div>
+                            {% else %}
+                            <div class="profile-table-card__tag profile-table-card__tag--danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check failed">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                </svg>
+                                License check failed
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="profile-table-card__content--right">
+                            <!-- When badges are there, content will also be added here -->
+                        </div>
+                        <div class="profile-table-card__content--title">
                             <!-- Add as soon as the open peer review is finalized -->
                             {% comment %}
                             {% if table.is_reviewed %}
@@ -43,30 +69,6 @@
                             {% endcomment %}
                             <div class="profile-table-card__link">
                                 <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{% if table.table_label %} {{ table.table_label }} {% else %} {{ table.name }} {% endif %}</a>
-                            </div>
-                        </div>
-                        <div class="profile-table-card__content--right">
-                            {% if table.license_status.status %}
-                            <div class="profile-table-card__tag profile-table-card__tag--info" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check successful">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
-                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
-                                </svg>
-                                License
-                            </div>
-                            {% else %}
-                            <div class="profile-table-card__tag profile-table-card__tag--danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check failed">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                                </svg>
-                                License check failed
-                            </div>
-                            {% endif %}
-
-                            <div class="profile-table-card__tag">
-                                <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"></path>
-                                </svg>
-                                {{ table.schema }}
                             </div>
                         </div>
 
@@ -152,6 +154,37 @@
                 <div class="profile-table-card">
                     <div class="profile-table-card__content">
                         <div class="profile-table-card__content--left">
+                            <div class="profile-table-card__tag">
+                                <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"></path>
+                                </svg>
+                                {{ table.schema }}
+                            </div>
+                            {% if table.license_status.status %}
+                            <div class="profile-table-card__tag profile-table-card__tag--info" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check successful">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                                </svg>
+                                License
+                            </div>
+
+                            {% else %}
+                            <div class="profile-table-card__tag profile-table-card__tag--danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check failed">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                </svg>
+                                License check failed
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="profile-table-card__content--right">
+                            {% if table.license_status.status %}
+                            <button class="profile-table-card__btn profile-table-card__btn--sm publish-button" data-bs-toggle="modal" data-bs-target="#publishModal" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
+                            {% else %}
+                            <button class="profile-table-card__btn profile-table-card__btn--sm disabled">Publish</button>
+                            {% endif %}
+                        </div>
+                        <div class="profile-table-card__content--title">
                             <!-- Add as soon as the open peer review is finalized -->
                             {% comment %}
                             {% if table.is_reviewed %}
@@ -175,33 +208,6 @@
                             {% endcomment %}
                             <div class="profile-table-card__link">
                                 <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{% if table.table_label %} {{ table.table_label }} {% else %} {{ table.name }} {% endif %}</a>
-                            </div>
-                        </div>
-                        <div class="profile-table-card__content--right">
-                            {% if table.license_status.status %}
-                            <div class="profile-table-card__tag profile-table-card__tag--info" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check successful">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
-                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
-                                </svg>
-                                License
-                            </div>
-                            <button class="profile-table-card__btn profile-table-card__btn--sm publish-button" data-bs-toggle="modal" data-bs-target="#publishModal" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
-
-                            {% else %}
-                            <div class="profile-table-card__tag profile-table-card__tag--danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check failed">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                                </svg>
-                                License check failed
-                            </div>
-                            <button class="profile-table-card__btn profile-table-card__btn--sm disabled">Publish</button>
-                            {% endif %}
-
-                            <div class="profile-table-card__tag">
-                                <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"></path>
-                                </svg>
-                                {{ table.schema }}
                             </div>
                         </div>
 
