@@ -14,7 +14,8 @@
 
 - Add new embargo area feature: Users can set an embargo period once they create a table or once they publish a table. The embargo period restricts the data access for bot ui & api. [(#1534)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1534)
 
-
 ## Bugs
+
+- REST-API: Retrieve oemetadata from database instead of comment on table. [(#1703)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1703)
 
 ## Documentation updates
