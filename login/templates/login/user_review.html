@@ -363,11 +363,9 @@
                 <div class="profile-rvw__item-right">
                     <!-- placeholder open: day number -->
                     {% comment %}
-                    <!-- <div class="profile-rvw__item-days">Open {{ reviewer_reviewed.latest_days_open }} days ago</div>
-                    <div>&nbsp—&nbsp</div> -->
+                    <div class="profile-rvw__item-days">Open {{ reviewer_reviewed.latest_days_open }} days ago</div>
                     {% endcomment %}
                     {% if review.is_finished == False %}
-                    <!-- placeholder date -->
                     <div class="profile-rvw__item-date">Started on {{ review.date_started }}</div>
                     {% else %}
                     <!-- placeholder date -->

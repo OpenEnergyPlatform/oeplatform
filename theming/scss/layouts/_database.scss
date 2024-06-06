@@ -24,6 +24,15 @@
         max-width: $C--container-width-x5l;
     }
 
+    &.tab-content--100w {
+        max-width: 100% !important;
+
+        table,
+        .dataTables_scrollHeadInner {
+            @extend .w-100;
+        }
+    }
+
     .data-view {
         @include flex-row;
         justify-content: center;
@@ -107,5 +116,58 @@
             min-width: auto;
             width: 10rem;
         }
+    }
+}
+
+#contentMain {
+    flex: 1;
+}
+
+#toggleContentSideContainer {
+    button {
+        @extend .position-absolute;
+        @extend .top-0;
+        @extend .end-0;
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .align-items-center;
+        @extend .pe-0;
+        width: max-content;
+
+        &:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        &:focus-visible {
+            outline: 2px solid $blue;
+            outline-offset: 2px;
+        }
+
+        svg {
+            @extend .me-2;
+        }
+    }
+
+    @include media-breakpoint-down(md) {
+        display: none !important;
+    }
+}
+
+#contentSide {
+    @extend .p-3;
+    @extend .border;
+    @extend .rounded;
+    width: 20rem;
+    background-color: #FFF;
+    transition: opacity 0.5s ease;
+
+    @include media-breakpoint-up(md) {
+        @include translateY(-1.5rem);
+    }
+
+    &.hidden {
+        opacity: 0;
+        display: none;
     }
 }
