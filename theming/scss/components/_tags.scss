@@ -46,3 +46,13 @@ $tag-mark-width: 7rem;
         border: 1px solid $warning;
     }
 }
+
+.early-access {
+    @extend .fs-8;
+    @extend .fw-semibold;
+    @extend .text-white;
+    @extend .rounded-pill;
+    @extend .px-2;
+    background-color: $danger;
+    letter-spacing: -0.02rem;
+}
