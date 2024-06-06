@@ -154,11 +154,6 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: normal;
-        max-height: calc(2 * 21px);
-
-        @include media-breakpoint-up(xxl) {
-            max-width: 25rem;
-        }
 
         a {
             @extend .text-decoration-none;
