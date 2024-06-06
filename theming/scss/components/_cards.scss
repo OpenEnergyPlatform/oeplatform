@@ -137,7 +137,7 @@
             @extend .w-100;
         }
 
-        @include media-breakpoint-down(xl) {
+        @include media-breakpoint-down(lg) {
             flex-direction: column !important;
 
             &--left {
