@@ -742,18 +742,17 @@ function checkReviewComplete() {
   const fields = getAllFieldsAndValues();
 
   for (let field of fields) {
-    let fieldName = field.id.slice(6);
-    const fieldState = getFieldState(fieldName);
-    let reviewed = current_review["reviews"].find((review) => review.key === fieldName);
+    const fieldState = getFieldState(field.fieldName);
+    const reviewed = current_review["reviews"].find((review) => review.key === field.fieldName);
 
-    if (!reviewed && fieldState !== 'ok') {
+    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(field.fieldValue)) {
       $('#submit_summary').addClass('disabled');
       return;
     }
   }
   $('#submit_summary').removeClass('disabled');
   if (!clientSideReviewFinished) {
-    showToast("Success", "You have reviewed all fields an can submit the review to get feedback!", 'success');
+    showToast("Success", "You have reviewed all fields and can submit the review to get feedback!", 'success');
   }
 }
 
