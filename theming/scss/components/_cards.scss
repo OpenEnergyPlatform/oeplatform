@@ -2,7 +2,7 @@
 @use '../base/mixins' as *;
 @use '../components/tags' as *;
 
-@mixin cards-layout {
+@mixin cards-layout($apply-2-cols-x4l-screens: true) {
     @extend .container-fluid;
 
     &__row {
@@ -11,16 +11,19 @@
 
     &__col {
         @extend .col-12;
-        @extend .col-x4l-6;
         @extend .px-0;
         margin-bottom: 1.5rem;
 
-        &:nth-of-type(odd) {
-            @extend .pe-x4l-4;
-        }
+        @if $apply-2-cols-x4l-screens {
+            @extend .col-x4l-6;
 
-        &:nth-of-type(even) {
-            @extend .ps-x4l-4;
+            &:nth-of-type(odd) {
+                @extend .pe-x4l-4;
+            }
+    
+            &:nth-of-type(even) {
+                @extend .ps-x4l-4;
+            }
         }
 
         &--4 {
