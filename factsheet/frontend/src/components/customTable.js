@@ -318,8 +318,7 @@ function EnhancedTableToolbar(props) {
               }
             >
               <span>
-                {/* disabled={logged_in === "NOT_LOGGED_IN"} */}
-                <Button  component={Link} variant="contained" size="small" className="linkButton" to={`scenario-bundles/id/new`} onClick={() => this.forceUpdate}>
+                <Button disabled={logged_in === "NOT_LOGGED_IN"} component={Link} variant="contained" size="small" className="linkButton" to={`scenario-bundles/id/new`} onClick={() => this.forceUpdate}>
                   <AddIcon />
                   Create new
                 </Button>
