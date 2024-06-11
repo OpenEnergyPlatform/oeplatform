@@ -48,8 +48,6 @@ import fromKapsule from 'react-kapsule';
 import Select from '@mui/material/Select';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
 import IconButton from '@mui/material/IconButton';
-import oep_models from '../data/models.json';
-import oep_frameworks from '../data/frameworks.json';
 import Divider from '@mui/material/Divider';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
@@ -190,15 +188,9 @@ function Factsheet(props) {
   const [sectorDivisions, setSectorDivisions] = useState([]);
   const [filteredSectors, setFilteredSectors] = useState([]);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
-  const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
-  const [report_title, setReportTitle] = useState(id !== 'new' ? fsData.report_title : '');
-  const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '01-01-1900');
-  const [doi, setDOI] = useState(id !== 'new' ? fsData.report_doi : '');
-  const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
-  const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
   const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios : [{
     id: uuid(),
     name: '',
@@ -213,6 +205,16 @@ function Factsheet(props) {
   }
   ]);
 
+  const [publications, setPublications] = useState(id !== 'new' ? fsData.publications : [{
+    id: uuid(),
+    report_title: '',
+    authors: [],
+    doi: '',
+    link_to_study_report: '',
+    date_of_publication: '',
+  }
+  ]);
+
 
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
@@ -224,6 +226,7 @@ function Factsheet(props) {
   const [openEditDialog, setOpenEditDialog] = React.useState(false);
   const [editedEntity, setEditedEntity] = useState(false);
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
+  const [publicatioTabValue, setPublicationTabValue] = React.useState(0);
 
   const [technologies, setTechnologies] = React.useState([]);
   const [selectedTechnologies, setSelectedTechnologies] = useState(id !== 'new' ? fsData.technologies : []);
@@ -232,6 +235,39 @@ function Factsheet(props) {
   const [scenarioDescriptors, setScenarioDescriptors] = React.useState([]);
   const [selectedScenarioDescriptors, setSelectedScenarioDescriptors] = useState([]);
 
+  const [modelsList, setModelsList] = useState([]);
+
+  const getModelList = async () => {
+    const { data } = await axios.get(conf.toep + `api/v0/factsheet/models/`, {
+      headers: { 'X-CSRFToken': CSRFToken() }
+    });
+    return data;
+  };
+
+  useEffect(() => {
+    getModelList().then((data) => {
+      const tmp = [];
+      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'id': item.id }));
+      setModelsList(tmp);
+    });
+  }, []);
+
+  const [frameworksList, setFrameworkList] = useState([]);
+  
+  const getFrameworkList = async () => {
+    const { data } = await axios.get(conf.toep + `api/v0/factsheet/frameworks/`, {
+      headers: { 'X-CSRFToken': CSRFToken() }
+    });
+    return data;
+  };
+
+  useEffect(() => {
+    getFrameworkList().then((data) => {
+      const tmp = [];
+      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'id': item.id }));
+      setFrameworkList(tmp);
+    });
+  }, []);
 
   const StudyKeywords = [
     ['resilience', 'http://openenergy-platform.org/ontology/oeo/OEO_00360015', 'Resilience is a disposition of a system that represents the capacity of a system to absorb disturbance and reorganize so as to retain essentially the same function, structure, and feedbacks.'],
@@ -254,6 +290,11 @@ function Factsheet(props) {
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
   }
+
+  const handlePublicationTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setPublicationTabValue(newValue);
+  }
+
 
   const populateFactsheetElements = async () => {
     const { data } = await axios.get(conf.toep + `scenario-bundles/populate_factsheets_elements/`);
@@ -370,13 +411,8 @@ function Factsheet(props) {
             expanded_sectors: JSON.stringify(expandedSectors),
             technologies: JSON.stringify(selectedTechnologies),
             study_keywords: JSON.stringify(selectedStudyKewords),
-            report_title: report_title,
-            date_of_publication: date_of_publication,
-            report_doi: doi,
-            place_of_publication: place_of_publication,
-            link_to_study: link_to_study,
-            authors: JSON.stringify(selectedAuthors),
             scenarios: JSON.stringify(scenarios),
+            publications: JSON.stringify(publications),
             models: JSON.stringify(selectedModels),
             frameworks: JSON.stringify(selectedFrameworks),
           },
@@ -427,13 +463,8 @@ function Factsheet(props) {
               expanded_sectors: JSON.stringify(expandedSectors),
               technologies: JSON.stringify(selectedTechnologies),
               study_keywords: JSON.stringify(selectedStudyKewords),
-              report_title: report_title,
-              date_of_publication: date_of_publication,
-              report_doi: doi,
-              place_of_publication: place_of_publication,
-              link_to_study: link_to_study,
-              authors: JSON.stringify(selectedAuthors),
               scenarios: JSON.stringify(scenarios),
+              publications: JSON.stringify(publications),
               models: JSON.stringify(selectedModels),
               frameworks: JSON.stringify(selectedFrameworks),
             },
@@ -508,14 +539,16 @@ function Factsheet(props) {
     factsheetObjectHandler('abstract', e.target.value);
   };
 
-  const handleReportTitle = e => {
-    setReportTitle(e.target.value);
-    factsheetObjectHandler('report_title', e.target.value);
+  const handleReportTitle = (event, index) => {
+    const updatePublications = [...publications];
+    updatePublications[index].report_title = event.target.value;
+    setPublications(updatePublications);
   };
 
-  const handleDOI = e => {
-    setDOI(e.target.value);
-    factsheetObjectHandler('doi', e.target.value);
+  const handleDOI = (event, index) => {
+    const updatePublications = [...publications];
+    updatePublications[index].doi = event.target.value;
+    setPublications(updatePublications);
   };
 
   const handleFactsheetName = e => {
@@ -523,20 +556,21 @@ function Factsheet(props) {
     factsheetObjectHandler('name', e.target.value);
   };
 
-  const handlePlaceOfPublication = e => {
-    setPlaceOfPublication(e.target.value);
-    factsheetObjectHandler('place_of_publication', e.target.value);
+  // const handlePlaceOfPublication = e => {
+  //   setPlaceOfPublication(e.target.value);
+  //   factsheetObjectHandler('place_of_publication', e.target.value);
+  // };
+
+  const handleLinkToStudy = (event, index) => {
+    const updatePublications = [...publications];
+    updatePublications[index].link_to_study_report = event.target.value;
+    setPublications(updatePublications);
   };
 
-  const handleLinkToStudy = e => {
-    setLinkToStudy(e.target.value);
-    factsheetObjectHandler('link_to_study', e.target.value);
-  };
-
-  const handleDateOfPublication = e => {
-    setDateOfPublication(e.target.value);
-    factsheetObjectHandler('date_of_publication', e.target.value);
-  };
+  // const handleDateOfPublication = e => {
+  //   setDateOfPublication(e.target.value);
+  //   factsheetObjectHandler('date_of_publication', e.target.value);
+  // };
 
   const handleClickOpenSavedDialog = () => {
     openSavedDialog(true);
@@ -623,6 +657,19 @@ function Factsheet(props) {
       output_datasets: [],
     });
     setScenarios(newScenarios);
+  };
+
+  const handleAddPublication = () => {
+    const newPublications = [...publications];
+    newPublications.push({
+      id: uuid(),
+      report_title: '',
+      authors: [],
+      doi: '',
+      link_to_study_report: '',
+      date_of_publication: '',
+    });
+    setPublications(newPublications);
   };
 
   const removeScenario = (id) => {
@@ -1204,8 +1251,16 @@ function Factsheet(props) {
   };
 
 
-  const authorsHandler = (authorsList) => {
-    setSelectedAuthors(authorsList);
+  const authorsHandler = (authorsList, index) => {
+    const updatePublications = [...publications];
+    updatePublications[index].authors = authorsList;
+    setPublications(updatePublications);
+  };
+
+  const dateOfPublicationHandler = (date, index) => {
+    const updatePublications = [...publications];
+    updatePublications[index].date_of_publication = date;
+    setPublications(updatePublications);
   };
 
   const modelsHandler = (modelsList) => {
@@ -1259,9 +1314,6 @@ function Factsheet(props) {
         return value;
       }, indent);
     }
-
-    console.log(safeStringify(objFiltered));
-
 
     JSON.stringify(objFiltered, (_, nestedValue) => {
       if (nestedValue && nestedValue[keyToFind] === valToFind) {
@@ -1438,6 +1490,150 @@ function Factsheet(props) {
     </div >
   }
 
+  const renderPublications = () => {
+    return <div>
+      <Box sx={{ flexGrow: 1, display: 'flex', overflow: 'auto' }} >
+        <Tabs
+          orientation="vertical"
+          value={publicatioTabValue}
+          onChange={handlePublicationTabChange}
+          aria-label="Vertical tabs example"
+          sx={{ borderRight: 1, borderColor: 'divider' }}
+          key={'Publications_tabs'}
+          classes={'tabs'}
+        >
+          {publications.map((item, i) =>
+            <Tab
+              label={item.acronym !== undefined && item.acronym !== '' ? item.acronym.substring(0, 16) : 'Publication ' + (Number(i) + Number(1))}
+              key={'Publication_tab_' + item.id}
+              classes={tabClasses}
+              style={{ border: '1px solid #cecece', marginBottom: '5px' }}
+            />
+          )}
+          <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px', 'paddingRight': '10px', }} >
+            <IconButton
+              color="primary"
+              aria-label="add"
+              size="small"
+              onClick={handleAddPublication}
+            >
+              <AddIcon />
+            </IconButton>
+          </Box>
+        </Tabs>
+        {publications.map((item, i) =>
+          <TabPanel
+            value={publicatioTabValue}
+            index={i}
+            style={{ width: '100%', overflow: 'auto' }}
+            key={'Publication_panel_' + item.id}
+          >
+            <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
+              <BundleScenariosGridItem
+                {...props}
+                spanValue="Report title"
+                tooltipText="A name given to the resource."
+                hrefLink="http://purl.org/dc/elements/1.1/title"
+                linkText="More info..."
+                renderField={() => (
+                  <TextField
+                    size="small"
+                    id="outlined-basic"
+                    style={{ width: '100%' }}
+                    variant="outlined"
+                    value={item.report_title}
+                    onChange={(event) => handleReportTitle(event, i)}
+                  />
+                )}
+                TooltipComponent={HtmlTooltip}
+              />
+              <BundleScenariosGridItem
+                {...props}
+                spanValue="Authors"
+                tooltipText="An author is an agent that creates or has created written work."
+                hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000064"
+                renderField={() => (
+                  <CustomAutocomplete
+                    width="100%"
+                    type="author"
+                    showSelectedElements={true}
+                    editHandler={HandleEditAuthors}
+                    addNewHandler={HandleAddNewAuthor}
+                    manyItems
+                    optionsSet={authors}
+                    handler={(e) => authorsHandler(e, i)}
+                    selectedElements={publications[i].authors}
+                  />
+                )}
+                TooltipComponent={HtmlTooltip}
+              />
+              <BundleScenariosGridItem
+                {...props}
+                spanValue="DOI"
+                tooltipText="A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO)."
+                hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000133"
+                renderField={() => (
+                  <TextField
+                    size="small"
+                    id="outlined-basic"
+                    style={{ width: '100%' }}
+                    variant="outlined"
+                    value={item.doi}
+                    onChange={(event) => handleDOI(event, i)}
+                  />
+                )}
+                TooltipComponent={HtmlTooltip}
+              />
+              <BundleScenariosGridItem
+                {...props}
+                showTooltip={false}
+                spanValue="Link to study report"
+                tooltipText="A funder is a sponsor that supports by giving money."
+                hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+                renderField={() => (
+                  <TextField
+                    size="small"
+                    id="outlined-basic"
+                    style={{ width: '100%' }}
+                    variant="outlined"
+                    value={item.link_to_study_report}
+                    onChange={(event) => handleLinkToStudy(event, i)}
+                  />
+                )}
+                TooltipComponent={HtmlTooltip}
+              />
+              <BundleScenariosGridItem
+                {...props}
+                showTooltip={false}
+                spanValue="Date of publication"
+                tooltipText="A funder is a sponsor that supports by giving money."
+                hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+                renderField={() => (
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <Stack spacing={3} style={{ width: '20rem' }}>
+                      <DesktopDatePicker
+                        label=''
+                        inputFormat="YYYY/MM/DD"
+                        value={publications[i].date_of_publication}
+                        onChange={(newValue) => {
+                          const dateObj = new Date(newValue);
+                          const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate())
+                          const d = new Date(dateString);
+                          dateOfPublicationHandler(dateString, i);
+                        }}
+                        renderInput={(params) => <TextField {...params} size="small" variant="outlined" />}
+                      />
+                    </Stack>
+                  </LocalizationProvider>
+                )}
+                TooltipComponent={HtmlTooltip}
+              />
+            </Grid>
+          </TabPanel>
+        )}
+      </Box>
+    </div >
+  }
 
 
   const renderBasicInformation = () => (
@@ -1629,114 +1825,7 @@ function Factsheet(props) {
     </Grid >
   );
 
-  const renderStudyPublications = () => (
-    <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
 
-      <BundleScenariosGridItem
-        {...props}
-        spanValue="Report title"
-        tooltipText="A name given to the resource."
-        hrefLink="http://purl.org/dc/elements/1.1/title"
-        linkText="More info..."
-        renderField={() => (
-          <TextField
-            size="small"
-            id="outlined-basic"
-            style={{ width: '100%' }}
-            variant="outlined"
-            value={report_title}
-            onChange={handleReportTitle}
-          />
-        )}
-        TooltipComponent={HtmlTooltip}
-      />
-      <BundleScenariosGridItem
-        {...props}
-        spanValue="Authors"
-        tooltipText="An author is an agent that creates or has created written work."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000064"
-        renderField={() => (
-          <CustomAutocomplete
-            width="100%"
-            type="author"
-            showSelectedElements={true}
-            editHandler={HandleEditAuthors}
-            addNewHandler={HandleAddNewAuthor}
-            manyItems
-            optionsSet={authors}
-            handler={authorsHandler}
-            selectedElements={selectedAuthors}
-          />
-        )}
-        TooltipComponent={HtmlTooltip}
-      />
-      <BundleScenariosGridItem
-        {...props}
-        spanValue="DOI"
-        tooltipText="A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO)."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000133"
-        renderField={() => (
-          <TextField
-            size="small"
-            id="outlined-basic"
-            style={{ width: '100%' }}
-            variant="outlined"
-            value={doi}
-            onChange={handleDOI}
-          />
-        )}
-        TooltipComponent={HtmlTooltip}
-      />
-      <BundleScenariosGridItem
-        {...props}
-        showTooltip={false}
-        spanValue="Link to study report"
-        tooltipText="A funder is a sponsor that supports by giving money."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
-        renderField={() => (
-          <TextField
-            size="small"
-            id="outlined-basic"
-            style={{ width: '100%' }}
-            variant="outlined"
-            value={link_to_study}
-            onChange={handleLinkToStudy}
-          />
-        )}
-        TooltipComponent={HtmlTooltip}
-      />
-      <BundleScenariosGridItem
-        {...props}
-        showTooltip={false}
-        spanValue="Date of publication"
-        tooltipText="A funder is a sponsor that supports by giving money."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
-        renderField={() => (
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Stack spacing={3} style={{ width: '10rem' }}>
-              <DesktopDatePicker
-                label=''
-                inputFormat="YYYY/MM/DD"
-                value={date_of_publication}
-                onChange={(newValue) => {
-                  const dateObj = new Date(newValue);
-                  const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate())
-                  const d = new Date(dateString);
-                  console.log(d);
-                  console.log(dateString);
-
-                  setDateOfPublication(dateString);
-                }}
-                renderInput={(params) => <TextField {...params} size="small" variant="outlined" />}
-              />
-            </Stack>
-          </LocalizationProvider>
-        )}
-        TooltipComponent={HtmlTooltip}
-      />
-
-    </Grid>
-  );
 
 
   const renderSectorsAndTecnology = () => (
@@ -1816,7 +1905,7 @@ function Factsheet(props) {
             type="Model"
             manyItems
             showSelectedElements={true}
-            optionsSet={oep_models}
+            optionsSet={modelsList}
             kind='Models'
             handler={modelsHandler}
             selectedElements={selectedModels}
@@ -1834,7 +1923,7 @@ function Factsheet(props) {
             type="Frameworks"
             manyItems
             showSelectedElements={true}
-            optionsSet={oep_frameworks}
+            optionsSet={frameworksList}
             kind='Frameworks'
             handler={frameworksHandler}
             selectedElements={selectedFrameworks}
@@ -1851,10 +1940,10 @@ function Factsheet(props) {
     contents: [
       renderBasicInformation(),
       renderStudyDetail(),
-      renderStudyPublications(),
+      renderPublications(),
       renderSectorsAndTecnology(),
       renderScenario(),
-      renderModelsAndFrameworks()
+      renderModelsAndFrameworks() 
     ]
   }
   const scenario_count = 'Scenarios' + ' (' + scenarios.length + ')';
@@ -2047,7 +2136,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.url)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
@@ -2070,7 +2159,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.url)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
               </TableBody>
@@ -2082,157 +2171,167 @@ function Factsheet(props) {
   )
 
   const renderPublicationOverview = () => (
-    <TableContainer>
-      <Table>
-        <TableBody>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Report title</span>
-                <HtmlTooltip
-                  title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'A name given to the resource.'}
+    <Container maxWidth="lg2" sx={{ padding: '0px !important' }}>
+      {
+        publications.map((v, i) =>
+          <TableContainer>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <FirstRowTableCell>
+                    <div>
+                      <span>Report title</span>
+                      <HtmlTooltip
+                        title={
+                          <React.Fragment>
+                            <Typography color="inherit" variant="subtitle1">
+                              {'A name given to the resource.'}
+                              <br />
+                              <a href="http://purl.org/dc/elements/1.1/title">More info...</a>
+                            </Typography>
+                          </React.Fragment>
+                        }
+                      >
+                        <InfoOutlinedIcon sx={{ color: '#708696' }} />
+                      </HtmlTooltip>
+                    </div>
+                  </FirstRowTableCell>
+                  <ContentTableCell>
+                    {v.report_title !== undefined ? v.report_title : ""}
+                  </ContentTableCell>
+                </TableRow>
+
+                <TableRow>
+                  <FirstRowTableCell>
+                    <div>
+                      <span>Authors</span>
+                      <HtmlTooltip
+                        title={
+                          <React.Fragment>
+                            <Typography color="inherit" variant="subtitle1">
+                              {'An author is an agent that creates or has created written work.'}
+                              <br />
+                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
+                            </Typography>
+                          </React.Fragment>
+                        }
+                      >
+                        <InfoOutlinedIcon sx={{ color: '#708696' }} />
+                      </HtmlTooltip>
+                    </div>
+                  </FirstRowTableCell>
+                  <ContentTableCell>
+                    {v.authors.map((a, i) => (
+                      <span> <span> {a.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                    ))}
+                  </ContentTableCell>
+                </TableRow>
+
+                <TableRow>
+                  <FirstRowTableCell>
+                    <div>
+                      <span>DOI</span>
+                      <HtmlTooltip
+                        title={
+                          <React.Fragment>
+                            <Typography color="inherit" variant="subtitle1">
+                              {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
+                              <br />
+                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
+                            </Typography>
+                          </React.Fragment>
+                        }
+                      >
+                        <InfoOutlinedIcon sx={{ color: '#708696' }} />
+                      </HtmlTooltip>
+                    </div>
+                  </FirstRowTableCell>
+                  <ContentTableCell>
+                    <span> <span> {v.doi !== undefined ? v.doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                  </ContentTableCell>
+                </TableRow>
+
+                <TableRow>
+                  <FirstRowTableCell>
+                    <div>
+                      <span>Date of publication</span>
+                      {/* <HtmlTooltip
+                      title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="subtitle1">
+                          {'A study is a project with the goal to investigate something.'}
+                          <br />
+                          <a href="http://www.geneontology.org/formats/oboInOwl#date">More info...</a>
+                        </Typography>
+                      </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                    </HtmlTooltip> */}
+                    </div>
+                  </FirstRowTableCell>
+                  <ContentTableCell>
+                    <span> <span> {v.date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                  </ContentTableCell>
+                </TableRow>
+
+                <TableRow>
+                  <FirstRowTableCell>
+                    <div>
+                      <span>Link to study report</span>
+                      {/* <HtmlTooltip
+                        title={
+                        <React.Fragment>
+                          <Typography color="inherit" variant="subtitle1">
+                            {'A study is a project with the goal to investigate something.'}
+                            <br />
+                            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                          </Typography>
+                        </React.Fragment>
+                      }
+                      >
+                      <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                      </HtmlTooltip>
+                    */}
+                    </div>
+                  </FirstRowTableCell>
+                  <ContentTableCell>
+                    <span> <span>
+                      <a href={v.link_to_study_report} >
+                        <AttachmentIcon fontSize="large" />
+                      </a>
+                    </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                  </ContentTableCell>
+                </TableRow>
+                {/* <TableRow>
+                <FirstRowTableCell>
+                  <div>
+                    <span>Citation</span>
+                    <HtmlTooltip
+                      title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="subtitle1">
+                        {'A citation reference is a reference stating where a citation was taken from.'}
                         <br />
-                        <a href="http://purl.org/dc/elements/1.1/title">More info...</a>
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                >
-                  <InfoOutlinedIcon sx={{ color: '#708696' }} />
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {report_title !== undefined ? report_title : ""}
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Authors</span>
-                <HtmlTooltip
-                  title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'An author is an agent that creates or has created written work.'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                >
-                  <InfoOutlinedIcon sx={{ color: '#708696' }} />
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              {selectedAuthors.map((v, i) => (
-                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>DOI</span>
-                <HtmlTooltip
-                  title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                >
-                  <InfoOutlinedIcon sx={{ color: '#708696' }} />
-                </HtmlTooltip>
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              <span> <span> {doi !== undefined ? doi : ''} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Date of publication</span>
-                {/* <HtmlTooltip
-                title={
-                <React.Fragment>
-                  <Typography color="inherit" variant="subtitle1">
-                    {'A study is a project with the goal to investigate something.'}
-                    <br />
-                    <a href="http://www.geneontology.org/formats/oboInOwl#date">More info...</a>
-                  </Typography>
-                </React.Fragment>
-              }
-              >
-              <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-              </HtmlTooltip> */}
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-            </ContentTableCell>
-          </TableRow>
-          <TableRow>
-            <FirstRowTableCell>
-              <div>
-                <span>Link to study report</span>
-                {/* <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A study is a project with the goal to investigate something.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-              */}
-              </div>
-            </FirstRowTableCell>
-            <ContentTableCell>
-              <span> <span>
-                <a href={link_to_study} >
-                  <AttachmentIcon fontSize="large" />
-                </a>
-              </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-            </ContentTableCell>
-          </TableRow>
-          {/* <TableRow>
-          <FirstRowTableCell>
-            <div>
-              <span>Citation</span>
-              <HtmlTooltip
-                title={
-                <React.Fragment>
-                  <Typography color="inherit" variant="subtitle1">
-                  {'A citation reference is a reference stating where a citation was taken from.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
-                </Typography>
-              </React.Fragment>
-              }
-              >
-                <InfoOutlinedIcon sx={{ color: '#708696' }} />
-              </HtmlTooltip>
-            </div>
-          </FirstRowTableCell>
-          <ContentTableCell>
-            <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
-          </ContentTableCell>
-        </TableRow> */}
-        </TableBody>
-      </Table>
-    </TableContainer >
+                    }
+                    >
+                      <InfoOutlinedIcon sx={{ color: '#708696' }} />
+                    </HtmlTooltip>
+                  </div>
+                </FirstRowTableCell>
+                <ContentTableCell>
+                  <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                </ContentTableCell>
+              </TableRow> */}
+              </TableBody>
+            </Table>
+          </TableContainer >
+        )
+      }
+    </Container >
   )
 
   const renderSectorsAndTechnology = () => (
@@ -2417,8 +2516,6 @@ function Factsheet(props) {
     const numFitChars = Math.round(availablePx / 7); // ~7px per char
     return `${label.slice(2, Math.round(numFitChars) - 3)}...`;
   });
-
-
 
   return (
     <div>

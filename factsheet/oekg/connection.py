@@ -5,12 +5,14 @@ from owlready2 import get_ontology
 from rdflib import Graph
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 from rdflib.plugins.stores import sparqlstore
-
-# from datetime import date
 from SPARQLWrapper import SPARQLWrapper
 
 from factsheet.oekg.namespaces import bind_all_namespaces
 from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME, RDF_DATABASES
+
+# from datetime import date
+# from SPARQLWrapper import SPARQLWrapper
+
 
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
@@ -37,14 +39,6 @@ query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
 update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
 
 sparql = SPARQLWrapper(query_endpoint)
-
-""" store = sparqlstore.SPARQLUpdateStore(
-    auth=(
-        RDF_DATABASES.get("factsheet").get("dbuser"),
-        RDF_DATABASES.get("factsheet").get("dbpasswd")
-    )
-) """
-
 
 store = sparqlstore.SPARQLUpdateStore()
 
