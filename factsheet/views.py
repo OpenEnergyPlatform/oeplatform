@@ -1,88 +1,24 @@
 import json
 import logging
-import os
-import sys
-from pathlib import Path
 
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils.cache import patch_response_headers
-from owlready2 import get_ontology
 from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.compare import graph_diff, to_isomorphic
-from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
-from rdflib.namespace import Namespace
-from rdflib.plugins.stores import sparqlstore
-from SPARQLWrapper import JSON, SPARQLWrapper
+from SPARQLWrapper import JSON
 
+from factsheet.oekg.connection import oekg, oeo, oeo_owl, sparql
 from factsheet.oekg.filters import OekgQuery
+from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 from login import models as login_models
-from oeplatform.settings import ONTOLOGY_ROOT, RDF_DATABASES
 
 from .models import OEKG_Modifications, ScenarioBundleAccessControl
 
-versions = os.listdir(
-    Path(ONTOLOGY_ROOT, "oeo")
-)  # TODO bad - windows dev will get path error
-# Bryans custom hack!! print(versions.remove(".DS_Store"))
-version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
-ONTHOLOGY_NAME = "oeo"
-onto_base_path = Path(ONTOLOGY_ROOT, ONTHOLOGY_NAME)
-path = onto_base_path / version  # TODO bad - windows dev will get path error
-# file = "reasoned-oeo-full.owl" # TODO- set in settings
-file = "oeo-full.owl"  # TODO- set in settings
-
-Ontology_URI = path / file
-Ontology_URI_STR = Ontology_URI.as_posix()
-
-sys.path.append(path)
-
-oeo = Graph()
-oeo.parse(Ontology_URI.as_uri())
-
-oeo_owl = get_ontology(Ontology_URI_STR).load()
-
-rdfdb = RDF_DATABASES["knowledge"]
-query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
-update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
-
-sparql = SPARQLWrapper(query_endpoint)
-
-""" store = sparqlstore.SPARQLUpdateStore(
-    auth=(
-        RDF_DATABASES.get("factsheet").get("dbuser"),
-        RDF_DATABASES.get("factsheet").get("dbpasswd")
-    )
-) """
-
-
-store = sparqlstore.SPARQLUpdateStore()
-
-store.open((query_endpoint, update_endpoint))
-oekg = Graph(store, identifier=default)
-
-
-# TODO- Alot of hardcoded URL, transfer to settings or other config
-OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
-OBO = Namespace("http://purl.obolibrary.org/obo/")
-DC = Namespace("http://purl.org/dc/terms/")
-RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
-NPG = Namespace("http://ns.nature.com/terms/")
-SCHEMA = Namespace("https://schema.org/")
-OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
-DBO = Namespace("http://dbpedia.org/ontology/")
-
-oekg.bind("OEO", OEO)
-oekg.bind("OBO", OBO)
-oekg.bind("DC", DC)
-oekg.bind("RDFS", RDFS)
-oekg.bind("NPG", NPG)
-oekg.bind("SCHEMA", SCHEMA)
-oekg.bind("OEKG", OEKG)
-oekg.bind("DBO", DBO)
+oekg = bind_all_namespaces(graph=oekg)
 
 
 def clean_name(name):
@@ -228,7 +164,6 @@ def create_factsheet(request, *args, **kwargs):
     abstract = request_body["abstract"]
     institution = request_body["institution"]
     funding_source = request_body["funding_source"]
-    # authors = request_body["authors"]
     contact_person = request_body["contact_person"]
     sector_divisions = request_body["sector_divisions"]
     sectors = request_body["sectors"]
@@ -239,15 +174,10 @@ def create_factsheet(request, *args, **kwargs):
     # expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes'] # noqa
     technologies = request_body["technologies"]
     study_keywords = request_body["study_keywords"]
-    # report_doi = request_body["report_doi"]
-    # place_of_publication = request_body["place_of_publication"]
-    # link_to_study = request_body["link_to_study_report"]
     scenarios = request_body["scenarios"]
     publications = request_body["publications"]
     models = request_body["models"]
     frameworks = request_body["frameworks"]
-    # date_of_publication = request_body["date_of_publication"]
-    # report_title = request_body["report_title"]
 
     Duplicate_study_factsheet = False
 
@@ -276,18 +206,9 @@ def create_factsheet(request, *args, **kwargs):
             bundle.add((study_URI, OEKG["has_full_name"], Literal(study_name)))
         if abstract != "":
             bundle.add((study_URI, DC.abstract, Literal(abstract)))
-        # if report_title != "":
-        #     bundle.add((study_URI, OEKG["report_title"], Literal(report_title)))
-
-        # if place_of_publication:
-        #     bundle.add(
-        #         (study_URI, OEKG["place_of_publication"],
-        #           Literal(place_of_publication))
-        #     )
 
         _publications = json.loads(publications) if publications is not None else []
         for item in _publications:
-            print(item)
             publications_URI = URIRef(
                 "http://openenergy-platform.org/ontology/oekg/publication/" + item["id"]
             )
@@ -563,13 +484,6 @@ def create_factsheet(request, *args, **kwargs):
         for item in _frameworks:
             bundle.add((study_URI, OEO["has_framework"], Literal(item["name"])))
 
-        # _authors = json.loads(authors) if authors is not None else []
-        # for item in _authors:
-        #     author_URI = URIRef(
-        #         "http://openenergy-platform.org/ontology/oekg/" + item["iri"]
-        #     )
-        #     bundle.add((study_URI, OEO.OEO_00000506, author_URI))
-
         _study_keywords = (
             json.loads(study_keywords) if study_keywords is not None else []
         )
@@ -640,12 +554,6 @@ def update_factsheet(request, *args, **kwargs):
     # expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes'] # noqa
     technologies = request_body["technologies"]
     study_keywords = request_body["study_keywords"]
-    # report_title = request_body["report_title"]
-    # date_of_publication = request_body["date_of_publication"]
-    # report_doi = request_body["report_doi"]
-    # place_of_publication = request_body["place_of_publication"]
-    # link_to_study = request_body["link_to_study_report"]
-    # authors = request_body["authors"]
     scenarios = request_body["scenarios"]
     models = request_body["models"]
     frameworks = request_body["frameworks"]
@@ -920,26 +828,6 @@ def update_factsheet(request, *args, **kwargs):
 
         new_bundle.add((study_URI, OEKG["has_full_name"], Literal(studyName)))
 
-        # if report_title != "":
-        #     new_bundle.add((study_URI, OEKG["report_title"], Literal(report_title)))
-
-        # if date_of_publication != "01-01-1900" and date_of_publication != "":
-        #     new_bundle.add(
-        #         (
-        #             study_URI,
-        #             OEKG["date_of_publication"],
-        #             Literal(date_of_publication),
-        #         )
-        #     )
-
-        # if place_of_publication != "":
-        #     new_bundle.add(
-        #         (study_URI, OEKG["place_of_publication"], Literal(place_of_publication)) # noqa
-        #     )
-
-        # if link_to_study != "":
-        #     new_bundle.add((study_URI, OEKG["link_to_study"], Literal(link_to_study)))
-
         institutions = json.loads(institution) if institution is not None else []
         for item in institutions:
             institution_URI = URIRef(
@@ -989,7 +877,6 @@ def update_factsheet(request, *args, **kwargs):
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
-            print(item)
             model_URI = URIRef(
                 "http://openenergy-platform.org/ontology/oekg/models/" + str(item["id"])
             )
@@ -1123,11 +1010,6 @@ def factsheet_by_id(request, *args, **kwargs):
     acronym = ""
     study_name = ""
     abstract = ""
-    # report_title = ""
-    # date_of_publication = ""
-    # place_of_publication = ""
-    # link_to_study = ""
-    # report_doi = ""
 
     for s, p, o in oekg.triples((study_URI, DC.acronym, None)):
         acronym = o
@@ -1138,30 +1020,10 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples((study_URI, DC.abstract, None)):
         abstract = o
 
-    # for s, p, o in oekg.triples((study_URI, OEKG["report_title"], None)):
-    #     report_title = o
-
-    # for s, p, o in oekg.triples((study_URI, OEKG["date_of_publication"], None)):
-    #     date_of_publication = o
-
-    # for s, p, o in oekg.triples((study_URI, OEKG["place_of_publication"], None)):
-    #     place_of_publication = o
-
-    # for s, p, o in oekg.triples((study_URI, OEKG["link_to_study"], None)):
-    #     link_to_study = o
-
-    # for s, p, o in oekg.triples((study_URI, OEKG["doi"], None)):
-    #     report_doi = o
-
     factsheet["acronym"] = acronym
     factsheet["uid"] = uid
     factsheet["study_name"] = study_name
     factsheet["abstract"] = abstract
-    # factsheet["report_title"] = report_title
-    # factsheet["date_of_publication"] = date_of_publication
-    # factsheet["place_of_publication"] = place_of_publication
-    # factsheet["link_to_study"] = link_to_study
-    # factsheet["report_doi"] = report_doi
     factsheet["publications"] = []
 
     factsheet["funding_sources"] = []
@@ -1226,14 +1088,6 @@ def factsheet_by_id(request, *args, **kwargs):
             factsheet["technologies"].append(
                 {"value": label, "label": label, "class": o}
             )
-
-    # factsheet["authors"] = []
-    # for s, p, o in oekg.triples((study_URI, OEO.OEO_00000506, None)):
-    #     label = oekg.value(o, RDFS.label)
-    #     if label != None:  # noqa
-    #         factsheet["authors"].append(
-    #             {"iri": str(o).split("/")[-1], "id": label, "name": label}
-    #         )
 
     factsheet["study_keywords"] = []
     for s, p, o in oekg.triples((study_URI, OEO["has_study_keyword"], None)):
