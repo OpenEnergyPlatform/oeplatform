@@ -188,15 +188,9 @@ function Factsheet(props) {
   const [sectorDivisions, setSectorDivisions] = useState([]);
   const [filteredSectors, setFilteredSectors] = useState([]);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
-  // const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
-  // const [report_title, setReportTitle] = useState(id !== 'new' ? fsData.report_title : '');
-  // const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '01-01-1900');
-  // const [doi, setDOI] = useState(id !== 'new' ? fsData.report_doi : '');
-  // const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
-  // const [link_to_study_report, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study_report : '');
   const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios : [{
     id: uuid(),
     name: '',
@@ -417,12 +411,6 @@ function Factsheet(props) {
             expanded_sectors: JSON.stringify(expandedSectors),
             technologies: JSON.stringify(selectedTechnologies),
             study_keywords: JSON.stringify(selectedStudyKewords),
-            // report_title: report_title,
-            // date_of_publication: date_of_publication,
-            // report_doi: doi,
-            // place_of_publication: place_of_publication,
-            // link_to_study_report: link_to_study_report,
-            // authors: JSON.stringify(selectedAuthors),
             scenarios: JSON.stringify(scenarios),
             publications: JSON.stringify(publications),
             models: JSON.stringify(selectedModels),
@@ -475,12 +463,6 @@ function Factsheet(props) {
               expanded_sectors: JSON.stringify(expandedSectors),
               technologies: JSON.stringify(selectedTechnologies),
               study_keywords: JSON.stringify(selectedStudyKewords),
-              // report_title: report_title,
-              // date_of_publication: date_of_publication,
-              // report_doi: doi,
-              // place_of_publication: place_of_publication,
-              // link_to_study_report: link_to_study_report,
-              // authors: JSON.stringify(selectedAuthors),
               scenarios: JSON.stringify(scenarios),
               publications: JSON.stringify(publications),
               models: JSON.stringify(selectedModels),
@@ -574,10 +556,10 @@ function Factsheet(props) {
     factsheetObjectHandler('name', e.target.value);
   };
 
-  const handlePlaceOfPublication = e => {
-    setPlaceOfPublication(e.target.value);
-    factsheetObjectHandler('place_of_publication', e.target.value);
-  };
+  // const handlePlaceOfPublication = e => {
+  //   setPlaceOfPublication(e.target.value);
+  //   factsheetObjectHandler('place_of_publication', e.target.value);
+  // };
 
   const handleLinkToStudy = (event, index) => {
     const updatePublications = [...publications];
@@ -585,10 +567,10 @@ function Factsheet(props) {
     setPublications(updatePublications);
   };
 
-  const handleDateOfPublication = e => {
-    setDateOfPublication(e.target.value);
-    factsheetObjectHandler('date_of_publication', e.target.value);
-  };
+  // const handleDateOfPublication = e => {
+  //   setDateOfPublication(e.target.value);
+  //   factsheetObjectHandler('date_of_publication', e.target.value);
+  // };
 
   const handleClickOpenSavedDialog = () => {
     openSavedDialog(true);
