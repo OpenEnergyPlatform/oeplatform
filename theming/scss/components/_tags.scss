@@ -48,11 +48,13 @@ $tag-mark-width: 7rem;
 }
 
 .early-access {
-    @extend .fs-8;
-    @extend .fw-semibold;
-    @extend .text-white;
+    @extend .badge;
     @extend .rounded-pill;
-    @extend .px-2;
     background-color: $danger;
-    letter-spacing: -0.02rem;
+}
+
+.success-badge {
+    @extend .badge;
+    @extend .rounded-pill;
+    background-color: $success;
 }
