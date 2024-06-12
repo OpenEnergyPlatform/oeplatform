@@ -3,12 +3,13 @@
 Below we describe the complete manual installation of the OpenEnergyPlatform database infrastructure, which is currently composed by multiple databases:
 
 1. PostgreSQL
-    - Internal django database (oep_django)
-    - as well as the primay database OpenEnergyDatabase (oedb)
+
+   - Internal django database (oep_django)
+   - as well as the primay database OpenEnergyDatabase (oedb)
 
 2. Apache Jena Fuseki
-    - and a SPARQL server for the OEKG
-    - requires java
+   - and a SPARQL server for the OEKG
+   - requires java
 
 ## 1 Install the database infrastructure
 
@@ -39,7 +40,7 @@ For the creation of spatial objects we use the [PostGIS](https://postgis.net/ins
     # sudo apt-get install bin utils libproj-dev gdal-bin
 
 ??? Info "How to get PostGIS"
-    PostGIS is a plugin for PostgreSQL and must be installed additionally. If you use an installation wizard, this step is probably included in the general PostgreSQL installation.
+PostGIS is a plugin for PostgreSQL and must be installed additionally. If you use an installation wizard, this step is probably included in the general PostgreSQL installation.
 
     - On Windows, We recommend installing the postgis for your local PostgreSQL installation from [Application Stack Builder](https://www.enterprisedb.com/edb-docs/d/postgresql/installation-getting-started/installation-guide-installers/9.6/PostgreSQL_Installation_Guide.1.09.html) under `Spatial Extensions`. There should automatically be an entry for `PostGIS bundle ...` based on the installed version of PostgreSQL, please make sure it is checked and click next. The stack builder will then continue to download and install PostGIS. Alternately PostGIS can also be downloaded from [this official ftp server](http://ftp.postgresql.org/pub/postgis/) by PostgreSQL. Proceed to install the package. (Flag it as safe in the downloads if prompted, and select Run anyway from the Windows SmartScreen Application Blocked Window)
 
@@ -51,25 +52,22 @@ After the installation completed you can start the service. On linux you can sim
 
 ### 1.2 Install Apache Jena Fuseki
 
-!!! note
-    - Skip the installation if your development task is not aimed at the [OEKG](https://openenergyplatform.github.io/organisation/family_members/knowledge-representation/oekg/).
-    - For more information about Apache Jena Fuseki please visit [this page.](https://jena.apache.org/documentation/fuseki2/)
-    - Note that java is required to run the software
+!!! note - Skip the installation if your development task is not aimed at the [OEKG](https://openenergyplatform.github.io/organisation/family_members/knowledge-representation/oekg/). - For more information about Apache Jena Fuseki please visit [this page.](https://jena.apache.org/documentation/fuseki2/) - Note that java is required to run the software
 
-1. Download [apache-jena-fuseki-4.2.0.tar.gz](https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-4.2.0.tar.gz)
-(for other versions please check [here](https://jena.apache.org/download/))
-2. Create a new directory on your system where you install oeplatform infrastructure components e.g. `~/oep-infra/` as alternative you can use the jenna-fuseki db via docker container. In this case you need to specify the correct credentails for that container in the `securitysettings.py` (See [Step 3.](#3-connect-database-to-the-django-project))
-3. Extract the downloaded file to the new directory e.g.:
+1.  Download [apache-jena-fuseki-4.2.0.tar.gz](https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-4.2.0.tar.gz)
+    (for other versions please check [here](https://jena.apache.org/download/))
+2.  Create a new directory on your system where you install oeplatform infrastructure components e.g. `~/oep-infra/` as alternative you can use the jenna-fuseki db via docker container. In this case you need to specify the correct credentails for that container in the `securitysettings.py` (See [Step 3.](#3-connect-database-to-the-django-project))
+3.  Extract the downloaded file to the new directory e.g.:
 
         tar -zxvf apache-jena-fuseki-4.2.0.tar.gz -C ~/oep-infra/
 
-4. Navigate to the directory where the files are extracted and execute the following command to start the server:
+4.  Navigate to the directory where the files are extracted and execute the following command to start the server:
 
         ./fuseki-server
 
-5. To access the server UI, enter `http://localhost:3030/` in your web browser.
-6. First click the **manage datasets** tab and then choose the **add new dataset**.
-7. Enter `OEKG_DS` for the **dataset name** and choose the type of dataset (in-memory datasets do not persist if the server stops) and click **create dataset**.
+5.  To access the server UI, enter `http://localhost:3030/` in your web browser.
+6.  First click the **manage datasets** tab and then choose the **add new dataset**.
+7.  Enter `OEKG_DS` for the **dataset name** and choose the type of dataset (in-memory datasets do not persist if the server stops) and click **create dataset**.
 
 ## 2 Create the PostgreSQL databases
 
@@ -127,9 +125,9 @@ Make sure you connect to psql
 
 After you connected type the commands below and repeat for both of the databases:
 
-    create extension IF NOT EXISTS postgis;
-    create extension IF NOT EXISTS postgis_topology;
-    create extension IF NOT EXISTS hstore;
+    CREATE EXTENSION IF NOT EXISTS postgis;
+    CREATE EXTENSION IF NOT EXISTS postgis_topology;
+    CREATE EXTENSION IF NOT EXISTS hstore;
     # This extension enable search for similar objects (e.g. by name)
     CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
@@ -146,18 +144,18 @@ In the oeplatform repository, copy the file `oeplatform/securitysettings.py.defa
 To setup the connection in the oeplatform project you can either setup environment variables that store the database connection credentials locally on your system or you can change the default value in the securitysetting. For production systems it is recommended to use the concept of environment variables.
 
 !!! Note
-    You have to provide the user name and password (with access to the oep_django and oedb database). Additionally you can configure the database name and the host and port variables if you don't run the database server using the default values.
+You have to provide the user name and password (with access to the oep_django and oedb database). Additionally you can configure the database name and the host and port variables if you don't run the database server using the default values.
 
 #### 3.1.1 oep_django internal database
 
 In the oeplatform/securitysettings.py file enter the database connection details in this section:
 
 !!! Info
-    This code will attempt to collect the value from a environment variable in case it is not available the fallback value is used.
+This code will attempt to collect the value from a environment variable in case it is not available the fallback value is used.
 
     `'NAME': os.environ.get("OEP_DJANGO_NAME", "oep_django")`
 
-``` python
+```python
 # oeplatform/securitysettings.py
 
 DATABASES = {
@@ -173,7 +171,7 @@ DATABASES = {
 ```
 
 ??? Note "Setup environment variables"
-    Create environment variables `OEP_DJANGO_USER` and `OEP_DJANGO_PW` with values `oep_django_user` and `<oep_django_password>`, respectively.
+Create environment variables `OEP_DJANGO_USER` and `OEP_DJANGO_PW` with values `oep_django_user` and `<oep_django_password>`, respectively.
 
     | environment variable | required |
     | -------------------- | -------- |
@@ -187,7 +185,7 @@ DATABASES = {
     - On windows
     We recommend you set the environment variables [via menus](https://www.computerhope.com/issues/ch000549.htm). However, we still provide you with the terminal commands (before you can set environment variables in your terminal you should first type `cmd/v`).
 
-        ``` bash
+        ```bash
         set OEP_DJANGO_USER=oep_django_user
         set OEP_DJANGO_PW=<oep_django_password>
         ```
@@ -196,7 +194,7 @@ DATABASES = {
 
     - On linux
 
-        ``` bash
+        ```bash
         export OEP_DJANGO_USER=oep_django_user
         export OEP_DJANGO_PW=<oep_django_password>
         ```
@@ -205,7 +203,7 @@ DATABASES = {
 
 In the oeplatform/securitysettings.py file enter the database connection details in this section:
 
-``` python
+```python
 # oeplatform/securitysettings.py
 
 dbuser = os.environ.get("LOCAL_DB_USER", "postgres")
@@ -231,7 +229,7 @@ dbname = os.environ.get("LOCAL_DB_NAME", "oedb")
 
     - On windows
 
-        ``` bash
+        ```bash
         set LOCAL_DB_USER=oedb_user
         set LOCAL_DB_PASSWORD=<oedb_password>
         set LOCAL_DB_NAME=oedb
@@ -239,7 +237,7 @@ dbname = os.environ.get("LOCAL_DB_NAME", "oedb")
 
     - On linux
 
-        ``` bash
+        ```bash
         export LOCAL_DB_USER=oedb_user
         export LOCAL_DB_PASSWORD=<oedb_password>
         export LOCAL_DB_NAME=oedb

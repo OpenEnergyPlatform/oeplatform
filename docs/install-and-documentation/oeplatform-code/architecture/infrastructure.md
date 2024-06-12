@@ -1,5 +1,4 @@
-
-The diagram shows the software architecture of openenergyplatform.org.  
+The diagram shows the software architecture of openenergyplatform.org.
 
 In summary, the architecture is made up of various technologies that are installed on several servers.The individual servers each take on a specific responsibility in order to guarantee the functional scope of the open energy platform. As shown, the individual elements communicate via defined interfaces either via the internet (http) or in the internal network (TCP/IP).
 
@@ -13,7 +12,7 @@ The OEKB serves as a database for storing complex data. This involves data that 
 The entire productive system and the databases are replicated in a test environment. Here, new versions of the software are installed before the official release and can be tested under real conditions.
 
 !!! Note
-    LOEP-Service is currently not included in the installation instructions.
+LOEP-Service is currently not included in the installation instructions.
 
 ![test](../../../img/draft-infrastructure-oep-2023-10-24-1338.png)
 

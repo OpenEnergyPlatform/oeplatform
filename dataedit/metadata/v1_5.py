@@ -1,5 +1,3 @@
-from omi.dialects.oep.dialect import OEP_V_1_5_Dialect
-
 from api import actions
 
 TEMPLATE_V1_5 = {
@@ -100,12 +98,12 @@ TEMPLATE_V1_5 = {
         },
     },
     "_comment": {
-        "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/oemetadata)",
-        "dates": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
+        "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/oemetadata)",  # noqa
+        "dates": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",  # noqa
         "units": "Use a space between numbers and units (100 m)",
-        "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
-        "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
-        "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/blob/master/data-review/manual/review_manual.md)",
+        "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",  # noqa
+        "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",  # noqa
+        "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/blob/master/data-review/manual/review_manual.md)",  # noqa
         "": "If not applicable use: " "",
         "todo": "If a value is not yet available, use: todo",
     },
