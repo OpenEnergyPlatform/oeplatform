@@ -6,7 +6,7 @@
 
 - Update the code that loads the oeo-related files from local static files. All oeo data is not only loaded when the app is started. Starting the app now takes more time, but offers the advantage that the files do not have to be parsed again. This leads to a significantly faster page load of the ontology pages. [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
 
-- Change the profile tables by improving color contrast, splitting the tables in 2 rows on very large screens and making the whole title visible (https://github.com/OpenEnergyPlatform/oeplatform/pull/1706)
+- Change the profile tables by improving color contrast, splitting the tables in 2 rows on very large screens and making the whole title visible [(#1706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1706)
 
 ## Features
 
@@ -16,6 +16,7 @@
 
 - Add new embargo area feature: Users can set an embargo period once they create a table or once they publish a table. The embargo period restricts the data access for bot ui & api. [(#1534)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1534)
 
+- Profile page Tables: Add "unpublish" button to published tables. [(#1706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1706)
 
 ## Bugs
 
