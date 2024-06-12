@@ -1114,9 +1114,9 @@ def _get_table(schema, table):
 
 
 def get_table_metadata(schema, table):
-    table_obj = _get_table(schema=schema, table=table)
-    comment = table_obj.comment
-    return json.loads(comment) if comment else {}
+    django_obj = DBTable.load(schema=schema, table=table)
+    oemetadata = django_obj.oemetadata
+    return oemetadata if oemetadata else {}
 
 
 def __internal_select(query, context):
