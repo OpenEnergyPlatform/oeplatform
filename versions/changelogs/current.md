@@ -26,3 +26,5 @@
 - REST-API: Retrieve oemetadata from database instead of comment on table. [(#1703)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1703)
 
 ## Documentation updates
+
+- Added documentation for Design System and Accessibility  [(#1716)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1716)
