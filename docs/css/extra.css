@@ -28,6 +28,10 @@ p, h1, h2, h3, h4, h5, h6 {
   color: var(--md-main-text-color);
 }
 
+.md-main {
+  padding-bottom: 2rem;
+}
+
 .md-content a {
   font-weight: 700;
 }

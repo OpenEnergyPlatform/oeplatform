@@ -71,7 +71,9 @@ nav:
       - Users: dev/personas.md
     - Best Practices:
       - dev/best-practice.md
-      - Design System: dev/design-system.md
+      - Design System:
+        - dev/design-system/design-system.md
+        - Accessibility: dev/design-system/accessibility.md
     - Collaboration:
       - Community: dev/community.md
       - Git & GitHub: dev/git-github.md
