@@ -3,7 +3,7 @@
 @use '../components/cards' as *;
 
 .topics {
-    @include cards-layout;
+    @include cards-layout($apply-2-cols-x4l-screens: false);
 
     .topic-card {
         @include card-container;

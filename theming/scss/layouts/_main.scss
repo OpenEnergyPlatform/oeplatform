@@ -76,6 +76,7 @@ main.main {
 
         &__side {
             width: 100%;
+            height: fit-content;
 
             @include media-breakpoint-up(md) {
                 width: $C--db-side-width;

@@ -2,6 +2,7 @@
 @use '../base/mixins' as *;
 @use '../components/buttons' as *;
 @use '../components/cards' as *;
+@use '../components/empty_states' as *;
 
 main.main .content .content__container.content__container--profile {
     .content {
@@ -280,6 +281,10 @@ main.main .content .content__container.content__container--profile {
         }
     }
 
+    &__empty-state {
+        @include empty-state;
+    }
+
     &__members {
         width: 100%;
 
@@ -459,7 +464,7 @@ main.main .content .content__container.content__container--profile {
             }
 
             &__btn--sm {
-                height: 2rem;
+                height: 1.5rem;
             }
         }
     }
