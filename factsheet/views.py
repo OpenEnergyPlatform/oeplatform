@@ -1099,7 +1099,7 @@ def factsheet_by_id(request, *args, **kwargs):
         report_doi = o
 
     """
-    
+
     factsheet["acronym"] = acronym
     factsheet["uid"] = uid
     factsheet["study_name"] = study_name
@@ -1731,62 +1731,6 @@ def get_all_factsheets_as_json_ld(request, *args, **kwargs):
     response['Content-Disposition'] = 'attachment; filename="oekg.jsonld"'
 
     return response
-
-def bundle_re_structure_by_id(request, *args, **kwargs):
-    uid = '0f85e6ba-0cd0-6345-a452-7d593e2988c2'
-
-    bundle_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
-
-    publication_uuid = str(uuid.uuid4())
-    publications_URI = URIRef(
-                "http://openenergy-platform.org/ontology/oekg/publication/" + publication_uuid
-                )
-
-    oekg.add((publications_URI, OEKG["publication_uuid"], Literal(publication_uuid)))
-
-    for s, p, o in oekg.triples((bundle_URI, OEKG["report_title"], None)):
-        oekg.add(
-            (publications_URI, RDFS.label, o)
-            )
-
-    for s, p, o in oekg.triples((bundle_URI, OEKG["date_of_publication"], None)):
-        oekg.add(
-            (
-                publications_URI,
-                OEKG["date_of_publication"],
-                o,
-            )
-        )
-
-    for s, p, o in oekg.triples((bundle_URI, OEKG["place_of_publication"], None)):
-        oekg.add(
-            (
-                publications_URI,
-                OEKG["place_of_publication"],
-                o,
-            )
-        )
-
-    for s, p, o in oekg.triples((bundle_URI, OEKG["link_to_study"], None)):
-        oekg.add(
-            (
-                publications_URI,
-                OEKG["link_to_study"],
-                o,
-            )
-        )
-
-    for s, p, o in oekg.triples((bundle_URI, OEKG["doi"], None)):
-        oekg.add((publications_URI, OEKG["doi"], o))
-
-    for s, p, o in oekg.triples((bundle_URI, OEO.OEO_00000506, None)):
-        oekg.add((publications_URI, OEO.OEO_00000506, o))
-
-    oekg.add((bundle_URI, OEKG["has_publication"], publications_URI))
-    
-    response = JsonResponse('Done!', safe=False, content_type="application/json")
-    return response
-
 
 def get_all_sub_classes(cls, visited=None):
     if visited is None:
