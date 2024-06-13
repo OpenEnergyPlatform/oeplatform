@@ -1605,7 +1605,7 @@ function Factsheet(props) {
               <BundleScenariosGridItem
                 {...props}
                 showTooltip={false}
-                spanValue="Date of publication"
+                spanValue="Year of publication"
                 tooltipText="A funder is a sponsor that supports by giving money."
                 hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
                 renderField={() => (
@@ -1613,7 +1613,7 @@ function Factsheet(props) {
                     <Stack spacing={3} style={{ width: '20rem' }}>
                       <DesktopDatePicker
                         label=''
-                        inputFormat="YYYY/MM/DD"
+                        views={['year']}
                         value={publications[i].date_of_publication}
                         onChange={(newValue) => {
                           const dateObj = new Date(newValue);
@@ -2254,7 +2254,7 @@ function Factsheet(props) {
                 <TableRow>
                   <FirstRowTableCell>
                     <div>
-                      <span>Date of publication</span>
+                      <span>Year of publication</span>
                       {/* <HtmlTooltip
                       title={
                       <React.Fragment>
