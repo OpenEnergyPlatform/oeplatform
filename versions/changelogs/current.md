@@ -8,6 +8,8 @@
 
 - Change the profile tables by improving color contrast, splitting the tables in 2 rows on very large screens and making the whole title visible [(#1706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1706)
 
+- Scenario Bundles: extend list of available study descriptors [(#1717)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1717)
+
 ## Features
 
 - Scenario bundle: . [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
