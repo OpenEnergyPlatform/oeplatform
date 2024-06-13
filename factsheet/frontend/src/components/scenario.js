@@ -108,16 +108,10 @@ export default function Scenario(props) {
     scenarioDescriptorHandler
   } = props;
 
-
+  console.log(scenarioYears);
 
   const [scenariosInputDatasetsObj, setScenariosInputDatasetsObj] = useState(data.input_datasets);
   const [scenariosOutputDatasetsObj, setScenariosOutputDatasetsObj] = useState(data.output_datasets);
-
-  console.log(scenariosInputDatasetsObj);
-
-  scenariosInputDatasetsObj.forEach((element, index) => {
-    console.log(element);
-  });
 
 
   const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
@@ -239,7 +233,6 @@ export default function Scenario(props) {
   useEffect(() => {
     getDAtaTableList().then((data) => {
       const tmp = [];
-      console.log(data);
       data.map((item) => tmp.push({ 'url': item.url, 'label': item.name, 'id': item.id }));
       setDataTableList(tmp);
     });
@@ -384,14 +377,14 @@ export default function Scenario(props) {
           tooltipText="A scenario year is a time step that has a duration of one year and is part of a scenario horizon."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020097"
           renderField={() => (
-            <CustomAutocomplete
+            <CustomAutocompleteWithoutAddNew
               width="100%"
               type="scenario year"
-              editHandler={HandleEditScenarioYear}
-              addNewHandler={HandleAddNNewScenarioYear}
               showSelectedElements={true}
               selectedElements={data.scenario_years}
-              manyItems optionsSet={scenarioYears}
+              manyItems 
+              noTooltip
+              optionsSet={scenarioYears}
               kind=''
               handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}
             />
