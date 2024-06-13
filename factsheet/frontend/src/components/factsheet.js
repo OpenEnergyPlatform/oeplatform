@@ -386,12 +386,12 @@ function Factsheet(props) {
             expanded_sectors: JSON.stringify(expandedSectors),
             technologies: JSON.stringify(selectedTechnologies),
             study_keywords: JSON.stringify(selectedStudyKewords),
-            report_title: report_title,
-            date_of_publication: date_of_publication,
-            report_doi: doi,
-            place_of_publication: place_of_publication,
-            link_to_study: link_to_study,
-            authors: JSON.stringify(selectedAuthors),
+            //report_title: report_title,
+            //date_of_publication: date_of_publication,
+            //report_doi: doi,
+            //place_of_publication: place_of_publication,
+            //link_to_study: link_to_study,
+            //authors: JSON.stringify(selectedAuthors),
             scenarios: JSON.stringify(scenarios),
             publications: JSON.stringify(publications),
             models: JSON.stringify(selectedModels),
@@ -444,12 +444,12 @@ function Factsheet(props) {
               expanded_sectors: JSON.stringify(expandedSectors),
               technologies: JSON.stringify(selectedTechnologies),
               study_keywords: JSON.stringify(selectedStudyKewords),
-              report_title: report_title,
-              date_of_publication: date_of_publication,
-              report_doi: doi,
-              place_of_publication: place_of_publication,
-              link_to_study: link_to_study,
-              authors: JSON.stringify(selectedAuthors),
+              //report_title: report_title,
+              //date_of_publication: date_of_publication,
+              //report_doi: doi,
+              //place_of_publication: place_of_publication,
+              //link_to_study: link_to_study,
+              //authors: JSON.stringify(selectedAuthors),
               scenarios: JSON.stringify(scenarios),
               publications: JSON.stringify(publications),
               models: JSON.stringify(selectedModels),
@@ -2513,9 +2513,6 @@ function Factsheet(props) {
       >
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
         <Container maxWidth="lg2">
-
-
-
           <Grid item xs={12}>
             <Backdrop
               sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}

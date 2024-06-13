@@ -37,4 +37,5 @@ urlpatterns = [
         name="filter_scenario_view",
     ),
     path(r"is_logged_in/", views.is_logged_in),
+    path(r"bundle_re_structure_by_id/", views.bundle_re_structure_by_id),
 ]

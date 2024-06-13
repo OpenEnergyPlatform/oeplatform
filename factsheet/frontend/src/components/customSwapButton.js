@@ -79,9 +79,8 @@ const ColorToggleButton = (props) => {
           <Button
             size="small"
             value="edit"
-            disabled={String(window.location.href).split('/').pop() === "new"}
+            disabled={String(window.location.href).split('/').pop() === "new" | !isOwner}
             onClick={(e) => handleChange(e, 'edit')}
-          // disabled={!isOwner} // Disable the button if the user is not the owner
           >
             <EditOutlinedIcon sx={{ mr: 1 }} /> <span>Edit</span>
           </Button>
