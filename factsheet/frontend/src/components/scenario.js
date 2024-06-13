@@ -261,6 +261,22 @@ export default function Scenario(props) {
 
         <BundleScenariosGridItem
           {...props}
+          labelGridSize={11}
+          fieldGridSize={1}
+          renderField={() => (
+            <IconButton 
+                size="small"
+                variant="outlined" 
+                color="error" 
+                style={{ marginLeft: '90%' }}
+                onClick={handleRemoveScenario}>  
+              <DeleteOutlineIcon />
+            </IconButton>
+          )}
+        />
+
+        <BundleScenariosGridItem
+          {...props}
           labelGridSize={3}
           fieldGridSize={9}
           spanValue="Name"

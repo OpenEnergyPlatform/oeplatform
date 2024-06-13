@@ -2673,7 +2673,7 @@ function Factsheet(props) {
                 <DialogContentText>
                   <div>
                     <pre>
-                      Your selected scenario is now removed from your factsheet!
+                      The scenario is now removed from your bundle!
                     </pre>
                   </div>
                 </DialogContentText>
