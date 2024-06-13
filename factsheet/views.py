@@ -15,6 +15,7 @@ from django.http import (
     HttpResponseForbidden,
     JsonResponse,
     StreamingHttpResponse,
+    FileResponse,
 )
 from django.shortcuts import render
 from django.utils.cache import patch_response_headers
@@ -1714,20 +1715,17 @@ def get_scenarios(request, *args, **kwargs):
 @login_required
 def get_all_factsheets_as_turtle(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="ttl")
-    response = JsonResponse(
-        all_factsheets_as_turtle, safe=False, content_type="application/json"
-    )
-    patch_response_headers(response, cache_timeout=1)
-
+    
+    response = HttpResponse(all_factsheets_as_turtle, content_type='text/turtle')
+    response['Content-Disposition'] = 'attachment; filename="oekg.ttl"'
     return response
 
 
 def get_all_factsheets_as_json_ld(request, *args, **kwargs):
-    all_factsheets_as_turtle = oekg.serialize(format="json-ld")
-    response = JsonResponse(
-        all_factsheets_as_turtle, safe=False, content_type="application/json"
-    )
-    patch_response_headers(response, cache_timeout=1)
+    all_factsheets_as_json_ld = oekg.serialize(format="json-ld")
+
+    response = HttpResponse(all_factsheets_as_json_ld, content_type='application/ld+json')
+    response['Content-Disposition'] = 'attachment; filename="oekg.jsonld"'
 
     return response
 
