@@ -25,6 +25,8 @@
 
 - Profile page Tables: Add "unpublish" button to published tables. [(#1706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1706)
 
+- Scenario Bundle: Allow only year for publication date [(#1723)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1723)
+
 ## Bugs
 
 - REST-API: Retrieve oemetadata from database instead of comment on table. [(#1703)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1703)
