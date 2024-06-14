@@ -1585,12 +1585,17 @@ def get_scenarios(request, *args, **kwargs):
     scenarios_uid = [
         i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_uid"))
     ]
+
     scenarios = []
+
+    # Create an instance of OekgQuery
+    oekg_query = OekgQuery()
 
     for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00000365)):
         scenario_uid = str(s).split("/")[-1]
         if str(scenario_uid) in scenarios_uid:
-            descriptors = []
+            study_descriptors = []
+            scenario_descriptors = []
             regions = []
             interacting_regions = []
             scenario_years = []
@@ -1602,7 +1607,7 @@ def get_scenarios(request, *args, **kwargs):
                 abstract = o
 
             for s1, p1, o1 in oekg.triples((s, OEO["has_scenario_descriptor"], None)):
-                descriptors.append(str(oeo.value(o1, RDFS.label)))
+                scenario_descriptors.append(str(oeo.value(o1, RDFS.label)))
 
             for s1, p1, o1 in oekg.triples((s, OEO.OEO_00020220, None)):
                 o1_label = oekg.value(o1, RDFS.label)
@@ -1623,12 +1628,20 @@ def get_scenarios(request, *args, **kwargs):
                 study_label = oekg.value(s1, OEKG["has_full_name"])
                 study_abstract = oekg.value(s1, DC.abstract)
 
+            # additionally get the study descriptors from the scenario bundle
+            study_descriptors = (
+                oekg_query.get_bundle_study_descriptors_where_scenario_is_part_of(
+                    scenario_uid=scenario_uid
+                )
+            )
+
             scenarios.append(
                 {
                     "acronym": oekg.value(s, RDFS.label),
                     "data": {
                         "uid": scenario_uid,
-                        "descriptors": descriptors,
+                        "study_descriptors": study_descriptors,
+                        "scenario_descriptors": scenario_descriptors,
                         "regions": regions,
                         "interacting_regions": interacting_regions,
                         "scenario_years": scenario_years,
@@ -1640,6 +1653,7 @@ def get_scenarios(request, *args, **kwargs):
                     },
                 }
             )
+            print(scenarios)
 
     response = JsonResponse(scenarios, safe=False, content_type="application/json")
     return response
