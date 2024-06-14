@@ -10,8 +10,6 @@
 
 ## Features
 
-- Scenario bundle: . [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
-
 - Scenario bundle: [(#1704)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1704)
 
   - It is now possible to add multiple publications to a scenario bundle
@@ -24,6 +22,8 @@
 - Add new embargo area feature: Users can set an embargo period once they create a table or once they publish a table. The embargo period restricts the data access for bot ui & api. [(#1534)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1534)
 
 - Profile page Tables: Add "unpublish" button to published tables. [(#1706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1706)
+
+- Scenario Bundles: Add delete feature for scenarios that belong to bundles [(#1722)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1722)
 
 ## Bugs
 
