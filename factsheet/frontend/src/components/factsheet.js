@@ -299,15 +299,7 @@ function Factsheet(props) {
     ['heating grid', 'https://openenergy-platform.org/ontology/oeo/OEO_00020005', 'A heating grid is a supply grid that distributes thermal energy via circulating steam or liquids.'],
     ['scenario projection comparison', 'https://openenergy-platform.org/ontology/oeo/OEO_00360003', 'Scenario projection comparison is the analysis of different future scenarios to evaluate potential outcomes and impacts.'],
     ['model intercomparison study', 'https://openenergy-platform.org/ontology/oeo/OEO_00360002', 'Model intercomparison study involves comparing the outputs of different models to understand variability and improve accuracy in projections.'],
-    ['policies and measures', 'https://openenergy-platform.org/ontology/oeo/OEO_00140151', 'Policy instrument is a means through which governments or organizations implement strategies to influence economic or social outcomes.'],
-    ['emission scenario', 'https://openenergy-platform.org/ontology/oeo/OEO_00140151', 'An emission scenario is a scenario that describes a possible emission trajectory.'],
-    ['economic scenario', 'https://openenergy-platform.org/ontology/oeo/OEO_00030008', ' An economic scenario is a scenario that describes a possible future state of economic systems.'],
-    ['explorative scenario', 'https://openenergy-platform.org/ontology/oeo/OEO_00020248', 'An explorative scenario is a scenario that contains certain constraints / statements regarding measures that are taken in the near future / today to explore where these measures will lead to in a later future. The later future is not predefined in the scenario.'],
-    ['climate scenario', 'https://openenergy-platform.org/ontology/oeo/OEO_00030007', 'A climate scenario is a scenario that describes a possible future state of a climate system.'],
-    ['sufficiency scenario', 'https://openenergy-platform.org/ontology/oeo/OEO_00020345', 'A sufficiency scenario is a scenario that comprises sufficiency strategies.'],
-    ['energy scenario', 'https://openenergy-platform.org/ontology/oeo/OEO_00030010', 'An energy scenario is a scenario that describes a possible future state of an energy system.'],
-    ['reference scenario', 'https://openenergy-platform.org/ontology/oeo/OEO_00020314', 'A reference scenario is a scenario that is used as a reference, e.g. in a scenario comparison. It has the reference role.'],
-    ['target driven scenario', 'https://openenergy-platform.org/ontology/oeo/OEO_00020247', 'A target driven scenario is a scenario that contains certain target constraints/ statements that in a possible future shall be realized. The path how the targets will be met is not predefined in the scenario.']
+    ['policies and measures', 'https://openenergy-platform.org/ontology/oeo/OEO_00140151', 'Policy instrument is a means through which governments or organizations implement strategies to influence economic or social outcomes.']
   ];
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
