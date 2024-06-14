@@ -31,4 +31,6 @@
 
 - REST-API: Retrieve oemetadata from database instead of comment on table. [(#1703)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1703)
 
+- Scenario Comparison: Split "Descriptors" into Study & Scenario descriptors adding the missing study descriptors. Additionally remove scenario descriptors for study descriptor section list. [(#1721)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1721)
+
 ## Documentation updates
