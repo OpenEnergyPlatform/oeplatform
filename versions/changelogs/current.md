@@ -29,4 +29,6 @@
 
 - REST-API: Retrieve oemetadata from database instead of comment on table. [(#1703)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1703)
 
+- Scenario Bundle: Fix issues scenario years, a static list of years without the possibility to edit [(#1724)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1724)
+
 ## Documentation updates
