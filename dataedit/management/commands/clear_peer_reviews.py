@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
+
 from dataedit.models import PeerReview, PeerReviewManager, Table
-from oeplatform.securitysettings import ONTOLOGY_FOLDER
 
 
 class Command(BaseCommand):
@@ -62,7 +62,8 @@ class Command(BaseCommand):
                     manager = PeerReviewManager.objects.get(opr_id=entry_id)
 
                     confirm = input(
-                        f"Are you sure you want to delete the entry with ID {entry_id}? (yes/no): "
+                        "Are you sure you want to delete the entry with "
+                        f"ID {entry_id}? (yes/no): "
                     )
                     if confirm.lower() != "yes":
                         self.stdout.write("Aborted.")
@@ -80,7 +81,6 @@ class Command(BaseCommand):
             table_id = Table.load(schema=peer_review.schema, table=peer_review.table)
 
             try:
-
                 # Update the specific row by ID to set is_reviewed to False
                 table = Table.objects.get(id=table_id)
                 table.is_reviewed = False

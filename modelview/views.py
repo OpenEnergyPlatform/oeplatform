@@ -16,21 +16,17 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles import finders
 from django.http import Http404, HttpResponse  # noqa
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import View
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_http_methods
+from django.views.generic import View
 from scipy import stats
 from sqlalchemy.orm import sessionmaker
 
 from api.actions import _get_engine
 from dataedit.structures import Tag
 
-from django.views.decorators.http import require_http_methods
-from django.urls import reverse
-
-from .forms import (
-    EnergyframeworkForm,
-    EnergymodelForm,
-)
+from .forms import EnergyframeworkForm, EnergymodelForm
 from .models import Energyframework, Energymodel
 
 
@@ -76,7 +72,8 @@ def listsheets(request, sheettype):
     if c is None:
         # Handle the case where getClasses returned None
         # You can return an error message or take appropriate action here.
-        # For example, you can return an HttpResponse indicating that the requested sheettype is not supported.
+        # For example, you can return an HttpResponse indicating that the
+        # requested sheettype is not supported.
         sheettype_error_message = "Invalid sheettype"
         return render(
             request,
@@ -190,11 +187,9 @@ def model_to_csv(request, sheettype):
     )
 
     response = HttpResponse(content_type="text/csv")
-    response[
-        "Content-Disposition"
-    ] = 'attachment; filename="{filename}s.csv"'.format(  # noqa
+    response["Content-Disposition"] = 'attachment; filename="{filename}s.csv"'.format(
         filename=c.__name__
-    )
+    )  # noqa
 
     writer = csv.writer(response, quoting=csv.QUOTE_ALL)
     writer.writerow(header)
@@ -343,7 +338,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     If the image is not present or outdated it will be reconstructed
 
     Note:
-        Keep in mind that a external (GitHub) API is called and your server 
+        Keep in mind that a external (GitHub) API is called and your server
         needs to allow such connections.
     """
     path = "GitHub_{0}_{1}_Contribution.png".format(org, repo)

@@ -64,7 +64,6 @@ class MetaDataWidget:
             html = mark_safe("")
 
         if isinstance(data, dict):
-
             html += mark_safe("") if level == 0 else mark_safe("<ul>")
             for key, value in data.items():
                 if level == 0:
@@ -89,7 +88,6 @@ class MetaDataWidget:
             html += mark_safe("") if level == 0 else mark_safe("</ul>")
 
         elif isinstance(data, list):
-
             # For list item control
             no_valid_item = True
 
@@ -148,7 +146,8 @@ class MetaDataWidget:
 
             if no_valid_item:
                 html += mark_safe(
-                    '<p class="metaproperty">The entry is empty or there is no valid entry for this field.</p>'
+                    '<p class="metaproperty">The entry is empty or there is no valid '
+                    "entry for this field.</p>"
                 )
 
         elif isinstance(data, str) and re.match(self.url_regex, data):

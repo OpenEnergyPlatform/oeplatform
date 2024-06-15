@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node dev-server.js",
-    "build": "cd .. && rm -r static && mkdir static && cd static && mkdir oeo_viewer && cd ../client && parcel build source-code/index.html --out-dir ../static/oeo_viewer"
+    "build": "cd .. && rm -r static && mkdir static && cd static && mkdir oeo_viewer && cd ../client && npx parcel build source-code/index.html --out-dir ../static/oeo_viewer"
   },
   "keywords": [
     "Graph"

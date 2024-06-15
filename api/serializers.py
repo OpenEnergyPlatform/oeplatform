@@ -1,7 +1,8 @@
-from rest_framework import serializers
-from modelview.models import Energyframework, Energymodel
-from dataedit.models import Table
 from django.urls import reverse
+from rest_framework import serializers
+
+from dataedit.models import Table
+from modelview.models import Energyframework, Energymodel
 
 
 class EnergyframeworkSerializer(serializers.ModelSerializer):

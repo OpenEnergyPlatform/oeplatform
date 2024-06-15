@@ -10,7 +10,6 @@ import login.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dataedit", "0011_tablerevision_size"),
         ("auth", "0008_alter_user_username_max_length"),

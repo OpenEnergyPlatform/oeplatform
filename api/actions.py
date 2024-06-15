@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
@@ -32,7 +32,8 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from dataedit.models import PeerReview
+from dataedit.helper import get_readable_table_name
+from dataedit.models import Embargo, PeerReview
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
@@ -1113,9 +1114,9 @@ def _get_table(schema, table):
 
 
 def get_table_metadata(schema, table):
-    table_obj = _get_table(schema=schema, table=table)
-    comment = table_obj.comment
-    return json.loads(comment) if comment else {}
+    django_obj = DBTable.load(schema=schema, table=table)
+    oemetadata = django_obj.oemetadata
+    return oemetadata if oemetadata else {}
 
 
 def __internal_select(query, context):
@@ -1356,8 +1357,15 @@ def data_insert_check(schema, table, values, context):
                 val = row.get(column_name, None)
                 if val is None or (isinstance(val, str) and val.lower() == "null"):
                     if column_name in row or not column.get("column_default", None):
+                        # TODO: this error message is not clear to users. It is for
+                        # example shown if the user attempts to upload a csv data
+                        # and some id values from the csv are already available
+                        # in the table.
                         raise APIError(
-                            "Action violates not-null constraint on {col}. Failing row was {row}".format(  # noqa
+                            "Action violates not-null constraint on {col}. "
+                            "Failing row was {row}. Please check if there are "
+                            "id values in your upload data that are already "
+                            "exist in the table. Primary key's cant be duplicated".format(  # noqa
                                 col=column_name,
                                 row="("
                                 + (
@@ -1532,6 +1540,11 @@ def clear_dict(d):
 
 
 def move(from_schema, table, to_schema):
+    """
+    Implementation note:
+        Currently we implemented two versions of the move functionality
+        this will later be harmonized. See 'move_publish'.
+    """
     table = read_pgid(table)
     engine = _get_engine()
     Session = sessionmaker(engine)
@@ -1584,12 +1597,108 @@ def move(from_schema, table, to_schema):
                 to_schema=to_schema
             )
 
-        t.set_is_published()
+        t.set_is_published(to_schema=to_schema)
         session.commit()
-        # t.save()
+        t.save()
     except Exception:
         session.rollback()
         raise
+    finally:
+        session.close()
+
+
+def move_publish(from_schema, table_name, to_schema, embargo_period):
+    """
+    Implementation note:
+        Currently we implemented two versions of the move functionality
+        this will later be harmonized. See 'move'.
+    """
+    engine = _get_engine()
+    Session = sessionmaker(engine)
+    session = Session()
+
+    try:
+        t = DBTable.objects.get(name=table_name, schema__name=from_schema)
+        to_schema_reg = DBSchema.objects.get(name=to_schema)
+
+        if from_schema == to_schema:
+            raise APIError("Target schema same as current schema")
+
+        t.schema = to_schema_reg
+
+        meta_to_schema = get_meta_schema_name(to_schema)
+        meta_from_schema = get_meta_schema_name(from_schema)
+
+        movements = [
+            (from_schema, table_name, to_schema),
+            (
+                meta_from_schema,
+                get_edit_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+            (
+                meta_from_schema,
+                get_insert_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+            (
+                meta_from_schema,
+                get_delete_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+        ]
+
+        for fr, tab, to in movements:
+            session.execute(
+                "ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
+                    from_schema=fr, table=tab, to_schema=to
+                )
+            )
+
+        session.query(OEDBTableTags).filter(
+            OEDBTableTags.schema_name == from_schema,
+            OEDBTableTags.table_name == table_name,
+        ).update({OEDBTableTags.schema_name: to_schema})
+        if embargo_period in ["6_months", "1_year"]:
+            duration_in_weeks = 26 if embargo_period == "6_months" else 52
+            embargo, created = Embargo.objects.get_or_create(
+                table=t,
+                defaults={
+                    "duration": embargo_period,
+                    "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
+                },
+            )
+            if not created and embargo.date_started is not None:
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+                embargo.save()
+            elif not created:
+                embargo.date_started = datetime.now()
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+                embargo.save()
+
+        all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
+
+        for peer_review in all_peer_reviews:
+            peer_review.update_all_table_peer_reviews_after_table_moved(
+                to_schema=to_schema
+            )
+
+        t.set_is_published(to_schema=to_schema)
+        session.commit()
+
+    except DBTable.DoesNotExist:
+        session.rollback()
+        raise APIError("Table for schema movement not found")
+    except DBSchema.DoesNotExist:
+        session.rollback()
+        raise APIError("Target schema not found")
+    except Exception as e:
+        session.rollback()
+        raise e
     finally:
         session.close()
 
@@ -2370,6 +2479,16 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     django_table_obj = DBTable.load(table=table, schema=schema)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
+
+    # ---------------------------------------
+    # update the table human readable name after oemetadata is available
+    # ---------------------------------------
+
+    readable_table_name = get_readable_table_name(django_table_obj)
+    django_table_obj.set_human_readable_name(
+        current_name=django_table_obj.human_readable_name,
+        readable_table_name=readable_table_name,
+    )
 
     # ---------------------------------------
     # update the table comment in oedb table if sqlalchemy curser is provided

@@ -1,5 +1,8 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
+@use '../components/buttons' as *;
+@use '../components/cards' as *;
+@use '../components/empty_states' as *;
 
 main.main .content .content__container.content__container--profile {
     .content {
@@ -21,8 +24,8 @@ main.main .content .content__container.content__container--profile {
             @extend .align-items-center;
             @extend .rounded-circle;
             @extend .overflow-hidden;
-            width: 200px;
-            height: 200px;
+            width: 100px;
+            height: 100px;
 
             img,
             svg {
@@ -141,7 +144,7 @@ main.main .content .content__container.content__container--profile {
 
         &__item--done {
             @extend .border;
-            
+
             .profile-rvw__item-type {
                 @extend .ps-3;
             }
@@ -190,7 +193,7 @@ main.main .content .content__container.content__container--profile {
 
             button {
                 @extend .btn;
-                @extend .btn-light; 
+                @extend .btn-light;
                 @extend .dropdown-toggle;
             }
         }
@@ -205,6 +208,263 @@ main.main .content .content__container.content__container--profile {
                 span {
                     @extend .fw-semibold;
                 }
+            }
+        }
+    }
+}
+
+.profile-category {
+    @extend .pb-3;
+
+    &__heading {
+        @extend .py-2;
+        @extend .fs-6;
+        @extend .fw-bold;
+        @extend .text-body;
+        @extend .d-inline-block;
+
+        &--sm {
+            @extend .fs-7;
+            @extend .fw-light;
+        }
+
+        &--border-btm {
+            @extend .border-bottom;
+            @extend .mb-3;
+        }
+    }
+
+    &__input {
+        @extend .pb-3;
+
+        label {
+            @extend .form-label;
+        }
+
+        input,
+        textarea {
+            @extend .form-control;
+        }
+    }
+
+    &__btns {
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .justify-content-end;
+    }
+
+    &__btn {
+        @extend .btn;
+        min-width: 8rem;
+
+        &--undo {
+            @extend .btn-link;
+        }
+
+        &--save {
+            @extend .btn-primary;
+        }
+
+        &--leave {
+            @extend .btn-outline-primary;
+            min-width: 10rem;
+        }
+
+        &--delete {
+            @extend .btn-danger;
+            min-width: 10rem;
+        }
+
+        &--add {
+            @include translateY(-3px);
+            @extend .btn-link;
+        }
+    }
+
+    &__empty-state {
+        @include empty-state;
+    }
+
+    &__members {
+        width: 100%;
+
+        @include media-breakpoint-up(sm) {
+            width: 24rem;
+        }
+    }
+
+    &__member {
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .pb-3;
+    }
+
+    &__profile-name {
+        @extend .fw-bold;
+        width: 50%;
+
+        a {
+            @extend .text-decoration-none;
+        }
+    }
+
+    &__member-status {
+        flex: 1;
+
+        select {
+            @extend .form-select;
+            @extend .form-select-sm;
+        }
+    }
+
+    &__member-invite {
+        @extend .py-2;
+
+        button {
+            @extend .btn;
+            @extend .btn-secondary;
+            @extend .w-100;
+        }
+    }
+
+    &__danger {
+        div {
+            @extend .pb-4;
+        }
+    }
+}
+
+.group-management {
+    @extend .mb-4;
+
+    @include cards-layout {
+        &__col {
+            margin-bottom: 0.75rem !important;
+        }
+    }
+
+    .group-card {
+        @include card-container {
+            &__header-top {
+                @extend .align-items-center;
+                padding-bottom: 0;
+            }
+
+            &__tag {
+                @extend .border;
+                @extend .fw-normal;
+                @extend .py-0;
+                @extend .ms-1;
+                margin-bottom: 0;
+
+                &--admin {
+                    background-color: $purple-100;
+                    border-color: $purple-200 !important;
+                    color: $purple-700;
+                }
+
+                &--member {
+                    background-color: $yellow-100;
+                    border-color: $yellow-300 !important;
+                    color: $yellow-800;
+                }
+            }
+
+            &__top-end {
+                @extend .d-flex;
+                @extend .flex-row;
+                @extend .justify-content-end;
+            }
+
+            &__members {
+                @extend .d-flex;
+                @extend .flex-row;
+                @extend .align-items-center;
+                @extend .fs-7;
+                @extend .fw-normal;
+
+                svg {
+                    @extend .me-2;
+                }
+
+                @include media-breakpoint-down(lg) {
+                    font-size: 0.75rem !important;
+
+                    svg {
+                        display: none !important;
+                    }
+                }
+            }
+
+            &__btn {
+                @extend .btn;
+                @extend .btn--xs;
+                @extend .ms-3;
+
+                @include media-breakpoint-down(lg) {
+                    margin-left: 0.5rem !important;
+                    font-size: 0.75rem !important;
+
+                    svg {
+                        display: none !important;
+                    }
+                }
+            }
+
+            &__btn--invite {
+                @extend .btn-link;
+                @extend .text-decoration-none;
+
+                svg {
+                    @extend .me-1;
+                }
+            }
+
+            &__btn--edit {
+                @extend .btn-outline-info;
+            }
+
+            &__btn--accept {
+                @extend .btn-primary;
+            }
+        }
+    }
+}
+
+.profile-tables {
+    @include cards-layout {
+        &__col {
+            margin-bottom: 0.75rem !important;
+        }
+    }
+
+    .profile-table-card {
+        @include card-simple-container {
+            margin-bottom: 0.75rem !important;
+
+            .profile-table-card__tag {
+                @extend .mb-0;
+            }
+
+            .profile-table-card__tag.profile-table-card__tag--warning,
+            .profile-table-card__tag.profile-table-card__tag--success {
+                @extend .ms-0;
+                @extend .me-3;
+                @extend .px-1;
+                @extend .text-center;
+            }
+
+            &__btn {
+                @extend .btn;
+                @extend .btn-primary;
+                @extend .fw-semibold;
+                @extend .py-0;
+                @extend .px-4;
+                @extend .ms-3;
+            }
+
+            &__btn--sm {
+                height: 1.5rem;
             }
         }
     }

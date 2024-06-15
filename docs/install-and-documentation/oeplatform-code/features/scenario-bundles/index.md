@@ -1,4 +1,3 @@
-
 # Scenario Bundles feature
 
 The scenario bundles feature is a response to the complex requirements for the transparent publication of scenarios in a complete and comprehensible manner. Various technologies are used to enable researchers to publish scenarios and any additional information. In addition, existing resources from the open energy platform are used and bundled together. This is intended to increase the visibility of available research work and enable comparability of the scenarios.
@@ -29,7 +28,7 @@ Database
 ### Django view for the scenario bundles
 
 !!! note
-    Some of the information on this page may be changed in the future. To review the most recent information, please revisit.
+Some of the information on this page may be changed in the future. To review the most recent information, please revisit.
 
 `def create_factsheet(request, *args, **kwargs):`
 

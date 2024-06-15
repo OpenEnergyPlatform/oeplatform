@@ -91,6 +91,16 @@
                         </div>
                     </div>
                     <div class="row mt-5">
+                        <div class="col-4">
+                            <label for="wizard-embargo">Apply Embargo <span class="label help-title" data-bs-toggle="tooltip" title="Set an embargo period to hide your data and restrict data access for a specific time period of 6 or 12 months. Other users will be able to find the data resource and its metadata but not the data values."></span></label>
+                            <select id="wizard-embargo" class="form-control">
+                                <option value="none">None</option>
+                                <option value="6_months">6 Months</option>
+                                <option value="1_year">1 Year</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-5">
                         <div class="col-2">
                             <button class="btn btn-success mt-2" id="wizard-table-create"><i class="fa fa-table mr-2"></i>Create table</button>
                             <button class="btn btn-danger mt-2" id="wizard-table-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>
@@ -294,11 +304,11 @@
                 Do you want to delete the table (including data and metadata)?
             </div>
             <div class="modal-body">
-                <button class="btn btn-sm btn-dark mr-2" id="wizard-confirm-delete-delete">delete</buttton>
-                <button class="btn btn-sm btn-light" id="wizard-confirm-delete-cancel">cancel</buttton>
+                <button class="btn btn-sm btn-dark mr-2" id="wizard-confirm-delete-delete">delete</button>
+                <button class="btn btn-sm btn-light" id="wizard-confirm-delete-cancel">cancel</button>
             </div>
         </div>
-    </di>
+    </div>
 </div>
 
 <script src="/static/wizard/vendor/papaparse-5.0.2/papaparse.min.js"></script>

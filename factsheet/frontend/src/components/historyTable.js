@@ -72,13 +72,13 @@ export default function HistoryTable() {
         return (
         <Box sx={{ width: '100%' }}>
         <DataGrid
-            rows={history.map((row, index) => ({ id: index + 1, 
-                subject: row.fields.triple_subject, 
-                predicate: row.fields.triple_predicate, 
-                object: row.fields.triple_object, 
-                action: row.fields.type_of_action, 
-                user: row.fields.user, 
-                timestamp: row.fields.timestamp, 
+            rows={history.map((row, index) => ({ id: index + 1,
+                subject: row.fields.triple_subject,
+                predicate: row.fields.triple_predicate,
+                object: row.fields.triple_object,
+                action: row.fields.type_of_action,
+                user: row.fields.user,
+                timestamp: row.fields.timestamp,
             } ))}
             columns={columns}
             initialState={{

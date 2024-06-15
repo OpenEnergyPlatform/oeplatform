@@ -1,6 +1,7 @@
-from enum import Enum
 import json
 import logging
+from datetime import datetime, timedelta
+from enum import Enum
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
@@ -56,21 +57,25 @@ class Table(Tagable):
     Attributes:
         schema (Schema): The schema to which the table belongs.
         search (SearchVectorField): A field for full-text search.
-        oemetadata (JSONField): A field to store oemetadata related to the table.
-        is_reviewed (BooleanField): A flag indicating whether the table is reviewed.
+        oemetadata (JSONField): A field to store oemetadata related
+            to the table.
+        is_reviewed (BooleanField): A flag indicating whether
+            the table is reviewed.
 
     Note:
-        The oemetadata field helps avoid performance issues due to JSON string parsing.
+        The oemetadata field helps avoid performance issues due to
+        JSON string parsing.
     """
 
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
     search = SearchVectorField(default="")
-    # Add field to store oemetadata related to the table and avoide performance issues
-    # due to oem string (json) parsing like when reading the oem form comment on table
-    # TODO: Maybe oemetadata should be stored in a separate table and imported via FK here
+
+    # TODO: Maybe oemetadata should be stored in a separate table and
+    # imported via FK here
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
     is_publish = BooleanField(null=False, default=False)
+    human_readable_name = CharField(max_length=1000, null=True)
 
     @classmethod
     def load(cls, schema, table):
@@ -85,7 +90,8 @@ class Table(Tagable):
             Table: The loaded table object.
 
         Raises:
-            DoesNotExist: If no table with the given schema and name exists in the database.
+            DoesNotExist: If no table with the given schema and name exists
+            in the database.
         """
 
         table_obj = Table.objects.get(
@@ -102,23 +108,79 @@ class Table(Tagable):
         self.save()
 
     # TODO: Use function when implementing the publish button
-    def set_is_published(self):
+    def set_is_published(self, to_schema):
         """
-        Mark the table as published (ready for destination schema & public) and save the change to the database.
+        Mark the table as published (ready for destination schema & public)
+        and save the change to the database.
         """
-        self.is_publish = True
+        if to_schema != "model_draft":
+            self.is_publish = True
+        else:
+            self.is_publish = False
         self.save()
 
-    # TODO: Use function when implementing the publish button. It should be possible to unpublish a table. This button should be next to the tables listed in Published on the profile page.
+    # TODO: Use function when implementing the publish button. It should be
+    # possible to unpublish a table. This button should be next to the tables
+    # listed in Published on the profile page.
     def set_not_published(self):
         """
-        Mark the table as not published (making it a draft table again) and save the change to the database.
+        Mark the table as not published (making it a draft table again)
+        and save the change to the database.
         """
         self.is_publish = False
         self.save()
 
+    # used in api action every time the table metadata is updated
+    def set_human_readable_name(self, current_name, readable_table_name: str):
+        """
+        Set the readable table name for this table.
+        The function attempts to retrieve a string form the tables
+        oemetadata object. The name is read from the "title" field.
+
+        return: str
+        """
+        # avoid writing none values & writing non changes
+        # non changes mean that the oemetadata was updated
+        # but not the title field
+        if readable_table_name and readable_table_name is not current_name:
+            self.human_readable_name = readable_table_name
+            self.save()
+
     class Meta:
         unique_together = (("name",),)
+
+
+class Embargo(models.Model):
+    DURATION_CHOICES = [
+        ("6_months", "6 Months"),
+        ("1_year", "1 Year"),
+    ]
+
+    table = models.ForeignKey(Table, on_delete=models.CASCADE, related_name="embargoes")
+    date_started = models.DateTimeField(auto_now_add=True)
+    date_ended = models.DateTimeField()
+    duration = models.CharField(max_length=10, choices=DURATION_CHOICES)
+
+    def is_active(self):
+        return datetime.now() < self.date_ended
+
+    def remaining_days(self):
+        return (self.date_ended - datetime.now()).days if self.is_active() else 0
+
+    def __str__(self):
+        return f"Table {self.table} in embargo until {self.date_ended.strftime('%Y-%m-%d')}"  # noqa: E501
+
+    def save(self, *args, **kwargs):
+        if not self.date_started:
+            self.date_started = timezone.now()
+        if self.duration == "6_months":
+            self.date_ended = self.date_started + timedelta(weeks=26)
+        elif self.duration == "1_year":
+            self.date_ended = self.date_started + timedelta(weeks=52)
+        else:
+            self.date_ended = None
+
+        super().save(*args, **kwargs)
 
 
 class View(models.Model):
@@ -192,7 +254,8 @@ class PeerReview(models.Model):
             table (string): Table name
 
         Returns:
-            opr (PeerReview): PeerReview object related to the latest date started.
+            opr (PeerReview): PeerReview object related to the latest
+            date started.
         """
         opr = (
             PeerReview.objects.filter(table=table, schema=schema)
@@ -205,10 +268,11 @@ class PeerReview(models.Model):
     # related ones (reviews on same table) .. procedures false results
     def get_prev_and_next_reviews(self, schema, table):
         """
-        Sets the prev_review and next_review fields based on the date_started field of
-        the PeerReview objects associated with the same table.
+        Sets the prev_review and next_review fields based on the date_started
+        field of the PeerReview objects associated with the same table.
         """
-        # Get all the PeerReview objects associated with the same schema and table name
+        # Get all the PeerReview objects associated with the same schema
+        # and table name
         peer_reviews = PeerReview.objects.filter(table=table, schema=schema).order_by(
             "date_started"
         )

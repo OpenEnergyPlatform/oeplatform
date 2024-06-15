@@ -6,20 +6,38 @@
     @include flex-row;
     padding-top: $C--padding-standard;
     padding-bottom: $C--padding-standard;
-    
+
     @include media-breakpoint-up(md) {
         justify-content: center;
     }
 
     &__container {
         @include flex-row;
+        position: relative;
         width: 100%;
         margin: 0 $C--padding-standard;
 
         @include media-breakpoint-up(md) {
             max-width: $C--container-width;
-            padding-right: calc(#{$C--db-side-width} + #{$C--padding-standard});
+            padding-right: calc(#{$C--db-side-width} + #{$C--padding-standard} * 2);
         }
+
+        @include media-breakpoint-up(x3l) {
+            max-width: $C--container-width-x3l;
+        }
+
+        @include media-breakpoint-up(x4l) {
+            max-width: $C--container-width-x4l;
+        }
+
+        @include media-breakpoint-up(x5l) {
+            max-width: $C--container-width-x5l;
+        }
+
+        &.table-tabs__container--100w {
+            @extend .w-100;
+            @extend .pe-0;
+        } 
     }
 
     .nav-tabs {
@@ -44,11 +62,11 @@
 
         .nav-link svg {
             @extend .me-1;
-            fill: $primary;
+            fill: $black;
         }
 
         .nav-link.active svg {
-            fill: $black;
+            fill: $secondary;
         }
 
         .nav-link.status::after {
@@ -84,7 +102,19 @@
         }
 
         @include media-breakpoint-up(xxl) {
-            width: $C--container-width;
+            max-width: $C--container-width;
+        }
+
+        @include media-breakpoint-up(x3l) {
+            max-width: $C--container-width-x3l;
+        }
+
+        @include media-breakpoint-up(x4l) {
+            max-width: $C--container-width-x4l;
+        }
+
+        @include media-breakpoint-up(x5l) {
+            max-width: $C--container-width-x5l;
         }
     }
 
@@ -150,5 +180,17 @@
     svg {
         @extend .me-1;
         vertical-align: text-bottom;
+    }
+
+    @include media-breakpoint-down(lg) {
+        a {
+            font-size: 1rem !important;
+            padding-right: 0.75rem !important;
+            padding-left: 0.75rem !important;
+        }
+
+        svg {
+            display: none !important;
+        }
     }
 }

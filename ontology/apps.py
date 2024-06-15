@@ -1,9 +1,9 @@
-from django.apps import AppConfig
-
 import logging
 import os
 
-from oeplatform.settings import OPEN_ENERGY_ONTOLOGY_FOLDER, DOCUMENTATION_LINKS
+from django.apps import AppConfig
+
+from oeplatform.settings import DOCUMENTATION_LINKS, OPEN_ENERGY_ONTOLOGY_FOLDER
 
 
 class OntologyConfig(AppConfig):
@@ -32,8 +32,11 @@ class OntologyConfig(AppConfig):
         # file_path = os.path.(file_to_check)
         if not os.path.exists(file_to_check):
             logger.error(
-                f"The oeo release files in '{file_to_check}' are missing! The app can`t start.!"
+                f"The oeo release files in '{file_to_check}' are missing! "
+                "The app can`t start.!"
             )
             raise ImportError(
-                f"The oeo release files in '{file_to_check}' are missing! The app can`t start. Please refer to the documentation: {DOCUMENTATION_LINKS.get('oeo_setup')}"
+                f"The oeo release files in '{file_to_check}' are missing! "
+                "The app can`t start. Please refer to the documentation: "
+                f"{DOCUMENTATION_LINKS.get('oeo_setup')}"
             )

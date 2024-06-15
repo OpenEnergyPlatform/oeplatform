@@ -142,7 +142,7 @@ export default function CustomAutocomplete(parameters) {
               style={{ marginRight: 8 }}
               checked={selected}
             />}
-            {!option.inputValue && <HtmlTooltip
+            {/* {!option.inputValue && <HtmlTooltip
               style={{ marginRight: '5px' }}
               placement="top"
               title={
@@ -156,7 +156,7 @@ export default function CustomAutocomplete(parameters) {
               }
             >
               <HelpOutlineIcon sx={{ color: '#bdbdbd' }} />
-            </HtmlTooltip>}
+            </HtmlTooltip>} */}
             {option.name}
           </li>
         )}

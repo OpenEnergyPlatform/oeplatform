@@ -83,11 +83,11 @@ export default function CustomTabs(props) {
   return (
     <Box >
       <Box className={classes.root}>
-        <Tabs value={value} 
-          onChange={handleChange} 
-          allowScrollButtonsMobile 
-          scrollButtons 
-          classes={'tabs'} 
+        <Tabs value={value}
+          onChange={handleChange}
+          allowScrollButtonsMobile
+          scrollButtons
+          classes={'tabs'}
           variant="fullWidth"
           TabIndicatorProps={{
             style: {

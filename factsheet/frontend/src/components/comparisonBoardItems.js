@@ -12,7 +12,7 @@ const reorder = (list, startIndex, endIndex) => {
   return result;
 };
 
-const aspectStyle = { 
+const aspectStyle = {
   marginBottom: variables.spacing[0],
   padding: variables.spacing[3],
   color: palette.text.primary,
@@ -77,7 +77,7 @@ export default function  ComparisonBoardItems (props) {
               ref={provided.innerRef}
               style={getListStyle(snapshot.isDraggingOver)}
               {...provided.droppableProps}
-            > 
+            >
              {state.items.map((item, index) => (
                 <Draggable key={item.data.uid} draggableId={item.data.uid} index={index}>
                   {(provided, snapshot) => (
@@ -93,21 +93,21 @@ export default function  ComparisonBoardItems (props) {
                     }
                     >
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent:'center', height: '4rem', marginBottom: variables.spacing[3], backgroundColor: index === 0 ? palette.background.highlight : palette.background.lighter,  color: index === 0 ? palette.primary.contrastText : palette.text.primary }} >
-                    
+
                       <Typography variant="h6">
                         { index === 0 ? <b>{item.acronym}</b> : item.acronym }
                       </Typography>
                       <Typography variant="caption">
                       { index === 0 ? 'Base scenario' : ''  }
                       </Typography>
-                    </div> 
+                    </div>
 
-                    <div style={{ height: '60vh',overflow: 'auto', }}> 
+                    <div style={{ height: '60vh',overflow: 'auto', }}>
 
-                    
+
                       {c_aspects.includes("Study name") && <div style= {aspectStyle} >
                         <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Study name:</b> 
+                          <b>Study name:</b>
                         </Typography>
                         <Typography variant="body2">
                           {item.data.study_label}
@@ -116,7 +116,7 @@ export default function  ComparisonBoardItems (props) {
 
                       {c_aspects.includes("Study abstract") &&<div style= {aspectStyle} >
                         <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Study abstract:</b> 
+                          <b>Study abstract:</b>
                         </Typography>
                         <Typography variant="body2">
                           {item.data.study_abstract}
@@ -125,23 +125,37 @@ export default function  ComparisonBoardItems (props) {
 
                       {c_aspects.includes("Scenario abstract") && <div style= {{  marginBottom: '10px', padding: '10px' }} >
                         <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Scenario abstract:</b> 
+                          <b>Scenario abstract:</b>
                         </Typography>
                         <Typography variant="body2">
                           {item.data.abstract}
                         </Typography>
                       </div>}
 
-                      {c_aspects.includes("Descriptors") && <div style={aspectStyle}>
+                      {c_aspects.includes("Study descriptors") && <div style={aspectStyle}>
                         <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Descriptors:</b>
+                          <b>Study descriptors:</b>
                         </Typography>
-                        {item.data.descriptors.map((descriptor) => (
-                          <StudyChip 
-                            key={descriptor}
+                        {item.data.study_descriptors.map((study_descriptor) => (
+                          <StudyChip
+                            key={study_descriptor}
                             index={index}
-                            label={descriptor}
-                            included={state.items[0].data.descriptors.includes(descriptor)}
+                            label={study_descriptor}
+                            included={state.items[0].data.study_descriptors.includes(study_descriptor)}
+                          />
+                        ))}
+                      </div>}
+
+                      {c_aspects.includes("Scenario descriptors") && <div style={aspectStyle}>
+                        <Typography variant="subtitle2" gutterBottom component="div">
+                          <b>Scenario descriptors:</b>
+                        </Typography>
+                        {item.data.scenario_descriptors.map((scenario_descriptor) => (
+                          <StudyChip
+                            key={scenario_descriptor}
+                            index={index}
+                            label={scenario_descriptor}
+                            included={state.items[0].data.scenario_descriptors.includes(scenario_descriptor)}
                           />
                         ))}
                       </div>}
@@ -151,7 +165,7 @@ export default function  ComparisonBoardItems (props) {
                           <b>Regions:</b>
                         </Typography>
                         {item.data.regions.map((region) => (
-                          <StudyChip 
+                          <StudyChip
                             key={region}
                             index={index}
                             label={region}
@@ -165,7 +179,7 @@ export default function  ComparisonBoardItems (props) {
                           <b>Interacting regions:</b>
                         </Typography>
                         {item.data.interacting_regions.map((interacting_region) => (
-                          <StudyChip 
+                          <StudyChip
                             key={interacting_region}
                             index={index}
                             label={interacting_region}
@@ -179,7 +193,7 @@ export default function  ComparisonBoardItems (props) {
                           <b>Scenario years:</b>
                         </Typography>
                         {item.data.scenario_years.map((scenario_year) => (
-                          <StudyChip 
+                          <StudyChip
                             key={scenario_year}
                             index={index}
                             label={scenario_year}
@@ -193,7 +207,7 @@ export default function  ComparisonBoardItems (props) {
                           <b>Input datasets:</b>
                         </Typography>
                         {item.data.input_datasets.map((input_dataset) => (
-                          <StudyChip 
+                          <StudyChip
                             key={input_dataset}
                             index={index}
                             label={input_dataset}
@@ -207,7 +221,7 @@ export default function  ComparisonBoardItems (props) {
                           <b>Output datasets:</b>
                         </Typography>
                         {item.data.output_datasets.map((output_dataset) => (
-                          <StudyChip 
+                          <StudyChip
                             key={output_dataset}
                             index={index}
                             label={output_dataset}
@@ -216,16 +230,16 @@ export default function  ComparisonBoardItems (props) {
                         ))}
                       </div>}
 
-                    </div> 
+                    </div>
 
-                    </div> 
+                    </div>
                   )}
                 </Draggable>
-              ))} 
-            </div> 
+              ))}
+            </div>
           )}
         </Droppable>
-      </DragDropContext> 
-    </div> 
+      </DragDropContext>
+    </div>
   );
 }

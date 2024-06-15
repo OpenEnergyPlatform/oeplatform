@@ -5,12 +5,12 @@
     @extend .row;
     @extend .w-100;
     @extend .g-0;
-    
+
     &__content {
       @extend .col-6;
       flex: 0 0 50%;
       max-width: 50%;
-      
+
       &.tab-pane--100 {
         width: 100%;
         max-width: 100%;
@@ -20,7 +20,7 @@
         }
       }
     }
-  
+
     &__controls {
       @extend .col-6;
       @extend .ps-4;
@@ -174,7 +174,7 @@
         @extend .p-4;
         @extend .bg-light;
     }
-    
+
     .flex-reviewer {
         @extend .d-flex;
         @extend .flex-column;
@@ -195,7 +195,7 @@
 
         button {
             @extend .btn;
-            @extend .btn-tertiary;
+            @extend .btn-secondary;
             @extend .w-100;
         }
     }
@@ -250,7 +250,7 @@
         button {
             @extend .btn;
             @extend .px-0;
-            
+
             &:first-of-type {
                 @extend .btn-light;
             }

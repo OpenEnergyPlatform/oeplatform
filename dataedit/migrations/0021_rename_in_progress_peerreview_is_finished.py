@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dataedit', '0020_peerreview'),
+        ("dataedit", "0020_peerreview"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='peerreview',
-            old_name='in_progress',
-            new_name='is_finished',
+            model_name="peerreview",
+            old_name="in_progress",
+            new_name="is_finished",
         ),
     ]

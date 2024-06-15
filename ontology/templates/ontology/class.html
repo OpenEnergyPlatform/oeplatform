@@ -6,7 +6,7 @@
 {% block site-header %}
     <div class="main-header">
         <h1 class="main-header__title">
-            <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg" width="16" height="16" alt="OEO">         
+            <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg" width="16" height="16" alt="OEO">
             Ontology
         </h1>
         <div class="main-header__wizard">
@@ -28,7 +28,7 @@
         {{super_class.name}}
       </a>
       <div class="btn-group float-end" role="group" aria-label="Basic example">
-        <a class="btn btn-secondary" href="{% url 'oeo-classes' ontology=ontology module_or_id=super_class.ID %}">
+        <a class="btn btn-primary" href="{% url 'oeo-classes' ontology=ontology module_or_id=super_class.ID %}">
           view
         </a>
       </div>
@@ -114,7 +114,7 @@ No editor note found.
         {{sub_class.name}}
       </a>
       <div class="btn-group float-end" role="group" aria-label="Basic example">
-        <a class="btn btn-secondary" href="{% url 'oeo-classes' ontology=ontology module_or_id=sub_class.ID %}">
+        <a class="btn btn-primary" href="{% url 'oeo-classes' ontology=ontology module_or_id=sub_class.ID %}">
           view
         </a>
       </div>

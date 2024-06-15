@@ -9,9 +9,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
-
 import dataedit.models as datamodels
-from login.permissions import CanEditScenarioBundle
 
 try:
     import oeplatform.securitysettings as sec  # noqa
@@ -155,6 +153,10 @@ class UserGroup(Group, PermissionHolder):
             )
         )
 
+    # TODO @jh-RLI: Check later - keep for now
+    # def get_table_group_memberships(self):
+    #     return GroupPermission.objects.filter(holder__in=self).prefetch_related('table') # noqa
+
 
 # class ScenarioBundlePermissionGroup(Group):
 
@@ -219,6 +221,10 @@ class myuser(AbstractBaseUser, PermissionHolder):
     @property
     def is_staff(self):
         return self.is_admin
+
+    def get_table_memberships(self):
+        direct_memberships = self.table_permissions.all().prefetch_related("table")
+        return direct_memberships
 
     def get_table_permission_level(self, table):
         # Check admin permissions for user

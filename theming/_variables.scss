@@ -44,6 +44,7 @@ $yellow-800: #5F4F03;
 $yellow-900: #3D3200;
 $yellow: $yellow-500;
 // Red
+$red-050: #FFF4F5;
 $red-100: #FFEBED;
 $red-200: #FAC7CD;
 $red-300: #F09EA9;
@@ -78,9 +79,61 @@ $cyan-900: #02273D;
 $cyan: $cyan-500;
 // Others
 $black: $gray-900;
-$secondary: $blue-700;
 $body-color: $gray-700;
 $text-muted: #5F7484;
+
+// Grid
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+);
+
+$new-breakpoints: (
+  x3l: 1800px,
+  x4l: 2400px,
+  x5l: 3000px
+);
+
+$grid-breakpoints: map-merge($grid-breakpoints, $new-breakpoints);
+
+// New colors
+$primary:       $blue;
+$secondary:     $blue-700;
+$success:       $green;
+$info:          $cyan;
+$warning:       $yellow;
+$danger:        $red;
+$light:         $gray-100;
+$dark:          $gray-900 ;
+
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark
+);
+
+$theme-colors: map-merge($theme-colors, (
+  "background-success": $green-100,
+  "background-warning": $yellow-100,
+  "background-danger": $red-050,
+  "background-info": $blue-100,
+  "background-neutral": $gray-100
+));
+
+@each $color, $value in $theme-colors {
+  .#{$color} {
+    background-color: $value !important;
+  }
+}
 
 //// Typography
 $font-size-base:              1rem;
@@ -118,9 +171,12 @@ $thumbnail-border-radius: 0;
 $nav-pills-border-radius: 0;
 $progress-border-radius: 0;
 $dropdown-border-radius: 0;
+$nav-tabs-border-color: $gray-200;
 $nav-tabs-border-radius: 0;
 $popover-border-radius: 0;
 $tooltip-border-radius: 0;
+$tooltip-font-size: 0.75rem;
+$tooltip-bg: $body-color;
 $alert-border-radius: 0;
 $badge-border-radius: 0;
 $toast-border-radius: 0;
@@ -131,10 +187,11 @@ $input-btn-padding-y-lg: .25rem;
 $input-btn-padding-x-lg: 0.75rem;
 $input-btn-font-size-lg: 1rem;
 $input-border-radius-sm: 0;
+$input-border-color: $gray-300;
 $btn-font-weight: 600;
 $border-radius: 0.5rem;
 $border-radius-lg: 1rem;
 $border-radius-sm: 0.4rem;
-$card-border-color: #E3EAEF;
+$card-border-color: $gray-300;
 $card-cap-padding-y: 0.75rem;
 $alert-bg-scale: -90%;

@@ -1,13 +1,7 @@
 import os
 import subprocess as sp
-from rdflib import Graph, RDFS, URIRef
-import json
-from rdflib.namespace import XSD, Namespace
-from collections import defaultdict
 
 from django.core.management.base import BaseCommand
-from django.conf import settings
-from django.apps import apps
 
 
 def execute(cmd, cwd):
