@@ -2541,9 +2541,6 @@ function Factsheet(props) {
       >
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
         <Container maxWidth="lg2">
-
-
-
           <Grid item xs={12}>
             <Backdrop
               sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
