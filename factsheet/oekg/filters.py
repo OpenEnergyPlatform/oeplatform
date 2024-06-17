@@ -1,4 +1,4 @@
-from rdflib import RDF, Literal
+from rdflib import RDF, Literal, URIRef
 
 from factsheet.oekg import namespaces
 from factsheet.oekg.connection import oekg
@@ -167,3 +167,22 @@ class OekgQuery:
 
         uid = bundle.split("/")[-1]
         return uid
+
+    def get_bundle_study_descriptors_where_scenario_is_part_of(self, scenario_uid):
+        scenario_URI = URIRef(
+            "http://openenergy-platform.org/ontology/oekg/scenario/" + scenario_uid
+        )
+        study_descriptors: list = []
+
+        # find bundle for the current scenario
+        for s1, p1, o1 in self.oekg.triples(
+            (None, namespaces.OEKG["has_scenario"], scenario_URI)
+        ):
+            # find all study descriptors for the scenario bundle
+            for s2, p2, o2 in oekg.triples(
+                (s1, namespaces.OEO["has_study_keyword"], None)
+            ):
+                if o2 != None:  # noqa
+                    study_descriptors.append(o2)
+
+        return study_descriptors
