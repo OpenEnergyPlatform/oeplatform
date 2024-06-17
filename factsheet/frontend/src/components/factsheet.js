@@ -275,22 +275,37 @@ function Factsheet(props) {
     });
   }, []);
 
+  // See https://github.com/OpenEnergyPlatform/oekg/issues/19
   const StudyKeywords = [
-    ['resilience', 'http://openenergy-platform.org/ontology/oeo/OEO_00360015', 'Resilience is a disposition of a system that represents the capacity of a system to absorb disturbance and reorganize so as to retain essentially the same function, structure, and feedbacks.'],
+    ['resilience', 'https://openenergy-platform.org/ontology/oeo/OEO_00360015', 'Resilience is a disposition of a system that represents the capacity of a system to absorb disturbance and reorganize so as to retain essentially the same function, structure, and feedbacks.'],
     ['life cycle analysis', 'http://www.openenergy-platform.org/ontology/oeo/OEO_00330023', 'A life cycle assessment is a methodology to calculate and analyse environmental impacts of the life cycle of a material entity or process.'],
-    ['CO2 emissions', 'http://openenergy-platform.org/ontology/oeo/OEO_00260007', 'A CO2 emission is an emission that releases carbon dioxide.'],
-    ['Greenhouse gas emissions', 'http://openenergy-platform.org/ontology/oeo/OEO_00000199', 'A greenhouse gas emission is an emission that releases a greenhouse gas.'],
-    ['Reallabor', '', ''],
-    ['100% renewables', 'http://openenergy-platform.org/ontology/oeo/OEO_00140133', 'A renewable energy share is a process attribute that indicates the fraction of renewable energy related to the total energy of an energy generation or consumption process.'],
-    ['acceptance', 'http://openenergy-platform.org/ontology/oeo/OEO_00360000', 'Acceptance is a realizable entity that represents the attitude of a person or organisation with respect to a certain constructional, (infra)structural or political measure that may be realized in, affected by or results of complex processes like discussions, communications, transformative measures or former personal experiences.'],
-    ['sufficiency', 'http://openenergy-platform.org/ontology/oeo/OEO_00010444', 'Sufficiency is a plan specification for reducing, in absolute terms, the consumption and production of end-use products and services through changes in social practices in order to comply with environmental sustainability while ensuring an adequate social foundation for all people.'],
+    ['CO2 emissions', 'https://openenergy-platform.org/ontology/oeo/OEO_00260007', 'A CO2 emission is an emission that releases carbon dioxide.'],
+    ['Greenhouse gas emissions', 'https://openenergy-platform.org/ontology/oeo/OEO_00000199', 'A greenhouse gas emission is an emission that releases a greenhouse gas.'],
+    ['100% renewables', 'https://openenergy-platform.org/ontology/oeo/OEO_00140133', 'A renewable energy share is a process attribute that indicates the fraction of renewable energy related to the total energy of an energy generation or consumption process.'],
+    ['acceptance', 'https://openenergy-platform.org/ontology/oeo/OEO_00360000', 'Acceptance is a realizable entity that represents the attitude of a person or organisation with respect to a certain constructional, (infra)structural or political measure that may be realized in, affected by or results of complex processes like discussions, communications, transformative measures or former personal experiences.'],
+    ['sufficiency', 'https://openenergy-platform.org/ontology/oeo/OEO_00010444', 'Sufficiency is a plan specification for reducing, in absolute terms, the consumption and production of end-use products and services through changes in social practices in order to comply with environmental sustainability while ensuring an adequate social foundation for all people.'],
     ['(changes in) demand', '', ''],
-    ['degree of electrifiaction', 'http://openenergy-platform.org/ontology/oeo/OEO_00020254', 'Electrical energy share is a process attribute that indicates the fraction of electrical energy related to the total energy of an energy generation or consumption process.'],
-    ['regionalisation', 'http://openenergy-platform.org/ontology/oeo/OEO_00340006', 'Regionalisation is a methodology to calculate spatially distributed energy producers and consumers with the aim to highlight regional differences in energy supply and potentials, particularly related to renewable energies.'],
-    ['total gross electricity generation', 'http://openenergy-platform.org/ontology/oeo/OEO_00240012', 'Gross electricity generation is a process attribute that refers to the total amount of electrical energy produced in an electricity generation process.'],
+    ['degree of electrifiaction', 'https://openenergy-platform.org/ontology/oeo/OEO_00020254', 'Electrical energy share is a process attribute that indicates the fraction of electrical energy related to the total energy of an energy generation or consumption process.'],
+    ['regionalisation', 'https://openenergy-platform.org/ontology/oeo/OEO_00340006', 'Regionalisation is a methodology to calculate spatially distributed energy producers and consumers with the aim to highlight regional differences in energy supply and potentials, particularly related to renewable energies.'],
+    ['total gross electricity generation', 'https://openenergy-platform.org/ontology/oeo/OEO_00240012', 'Gross electricity generation is a process attribute that refers to the total amount of electrical energy produced in an electricity generation process.'],
     ['total net electricity generation', '', ''],
-    ['peak electricity generation', '', ''],
-    ['study report due to legal obligation', 'http://openenergy-platform.org/ontology/oeo/OEO_00020373', 'A study report due to legal obligation is a study report that is created beacause of a legal obligation.']
+    ['peak electricity generation', 'https://github.com/OpenEnergyPlatform/ontology/issues/1837', ''],
+    ['study report due to legal obligation', 'https://openenergy-platform.org/ontology/oeo/OEO_00020373', 'A study report due to legal obligation is a study report that is created beacause of a legal obligation.'],
+    ['carbon neutrality', 'https://openenergy-platform.org/ontology/oeo/OEO_00360010', 'Climate neutrality criteria are measures to achieve a balance between the amount of greenhouse gases emitted and the amount removed from the atmosphere.'],
+    ['negative emissions', 'https://openenergy-platform.org/ontology/oeo/OEO_00000293', 'Negative emission refers to the removal of greenhouse gases from the atmosphere, typically through various forms of carbon capture and storage.'],
+    ['decarbonization pathways', 'https://openenergy-platform.org/ontology/oeo/OEO_00010212', 'Decarbonization pathways are strategic plans to reduce carbon emissions through various technological, structural, and behavioral changes.'],
+    ['Flexibility', 'https://openenergy-platform.org/ontology/oeo/OEO_00360007', 'Flexibility in energy systems refers to the ability to adapt to changes in supply and demand, often through diverse generation and storage options.'],
+    ['Efficiency', 'https://openenergy-platform.org/ontology/oeo/OEO_00140050', 'Efficiency value is the ratio of useful output to the total input in any system, often related to energy conversion processes.'],
+    ['Efficiency', 'https://openenergy-platform.org/ontology/oeo/OEO_00140049', 'Energy conversion efficiency is the ratio of useful energy output to total energy input, important for evaluating the performance of energy systems.'],
+    ['primary energy demand', 'https://openenergy-platform.org/ontology/oeo/OEO_00140146', 'Energy demand refers to the total amount of energy required by consumers, including both primary and final energy needs.'],
+    ['final energy demand', 'https://openenergy-platform.org/ontology/oeo/OEO_00140146', 'Energy demand refers to the total amount of energy required by consumers, including both primary and final energy needs.'],
+    ['control area', 'https://openenergy-platform.org/ontology/oeo/OEO_00360004', 'A control area is a supply grid that is under the responsibility of a transmission system operator and is a part of a supply grid.'],
+    ['electricity grid', 'https://openenergy-platform.org/ontology/oeo/OEO_00000143', 'An electricity grid is a supply grid that distributes electrical energy / electricity.'],
+    ['gas grid', 'https://openenergy-platform.org/ontology/oeo/OEO_00020004', 'A gas grid is a supply grid that distributes gaseous fuel, e.g. methane.'],
+    ['heating grid', 'https://openenergy-platform.org/ontology/oeo/OEO_00020005', 'A heating grid is a supply grid that distributes thermal energy via circulating steam or liquids.'],
+    ['scenario projection comparison', 'https://openenergy-platform.org/ontology/oeo/OEO_00360003', 'Scenario projection comparison is the analysis of different future scenarios to evaluate potential outcomes and impacts.'],
+    ['model intercomparison study', 'https://openenergy-platform.org/ontology/oeo/OEO_00360002', 'Model intercomparison study involves comparing the outputs of different models to understand variability and improve accuracy in projections.'],
+    ['policies and measures', 'https://openenergy-platform.org/ontology/oeo/OEO_00140151', 'Policy instrument is a means through which governments or organizations implement strategies to influence economic or social outcomes.']
   ];
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -1557,7 +1572,7 @@ function Factsheet(props) {
                 {...props}
                 spanValue="Authors"
                 tooltipText="An author is an agent that creates or has created written work."
-                hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000064"
+                hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000064"
                 renderField={() => (
                   <CustomAutocomplete
                     width="100%"
@@ -1577,7 +1592,7 @@ function Factsheet(props) {
                 {...props}
                 spanValue="DOI"
                 tooltipText="A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO)."
-                hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000133"
+                hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000133"
                 renderField={() => (
                   <TextField
                     size="small"
@@ -1595,7 +1610,7 @@ function Factsheet(props) {
                 showTooltip={false}
                 spanValue="Link to study report"
                 tooltipText="A funder is a sponsor that supports by giving money."
-                hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+                hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00090001"
                 renderField={() => (
                   <TextField
                     size="small"
@@ -1611,15 +1626,15 @@ function Factsheet(props) {
               <BundleScenariosGridItem
                 {...props}
                 showTooltip={false}
-                spanValue="Date of publication"
+                spanValue="Year of publication"
                 tooltipText="A funder is a sponsor that supports by giving money."
-                hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+                hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00090001"
                 renderField={() => (
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <Stack spacing={3} style={{ width: '20rem' }}>
                       <DesktopDatePicker
                         label=''
-                        inputFormat="YYYY/MM/DD"
+                        views={['year']}
                         value={publications[i].date_of_publication}
                         onChange={(newValue) => {
                           const dateObj = new Date(newValue);
@@ -1650,7 +1665,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Study name"
         tooltipText="A study is a project with the goal to investigate something."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020011"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00020011"
         renderField={() => (
           <TextField
             size="small"
@@ -1667,7 +1682,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Acronym"
         tooltipText="An acronym is an abbreviation of the title by using the first letters of each part of the title."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000048"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000048"
         renderField={() => (
           <TextField
             size="small"
@@ -1684,7 +1699,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Institutions"
         tooltipText="An institution is an organisation that serves a social purpose."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000238"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000238"
         renderField={() => (
           <CustomAutocomplete
             width="100%"
@@ -1704,7 +1719,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Contact person"
         tooltipText="A contact person is an agent that can be contacted for help or information about a specific service or good."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000107"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000107"
         renderField={() => (
           <CustomAutocomplete
             width="100%"
@@ -1732,7 +1747,7 @@ function Factsheet(props) {
         showTooltip={false}
         spanValue="Funding sources"
         tooltipText="A funder is a sponsor that supports by giving money."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00090001"
         renderField={() => (
           <CustomAutocomplete
             width="100%"
@@ -1774,7 +1789,7 @@ function Factsheet(props) {
         showTooltip={false}
         spanValue="Study descriptors"
         tooltipText="A funder is a sponsor that supports by giving money.."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00090001"
         renderField={() => (
           <FormGroup>
             <div >
@@ -1841,7 +1856,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Sector divisions"
         tooltipText="A sector division is a specific way to subdivide a system."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000368"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000368"
         renderField={() => (
           <CustomAutocompleteWithoutAddNew
             showSelectedElements={true}
@@ -1857,7 +1872,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Sectors"
         tooltipText="A sector is generically dependent continuant that is a subdivision of a system."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000367"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000367"
         renderField={() => (
           <CustomTreeViewWithCheckBox
             flat={true}
@@ -1869,7 +1884,7 @@ function Factsheet(props) {
             expandedHandler={expandedSectorsHandler}
             data={filteredSectors}
             title={"Which sectors are considered in the study?"}
-            toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']}
+            toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'https://openenergy-platform.org/ontology/oeo/OEO_00000367']}
           />
         )}
         TooltipComponent={HtmlTooltip}
@@ -1878,7 +1893,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Technologies"
         tooltipText="A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000407"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000407"
         renderField={() => (
           <CustomTreeViewWithCheckBox
             showFilter={false}
@@ -1889,7 +1904,7 @@ function Factsheet(props) {
             expandedHandler={expandedTechnologyHandler}
             data={technologies}
             title={"What technologies are considered?"}
-            toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000407']}
+            toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'https://openenergy-platform.org/ontology/oeo/OEO_00000407']}
           />
         )}
         TooltipComponent={HtmlTooltip}
@@ -1905,7 +1920,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Models"
         tooltipText="A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000274"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000274"
         renderField={() => (
           <CustomAutocompleteWithoutEdit
             type="Model"
@@ -1923,7 +1938,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Frameworks"
         tooltipText="A software framework is a Software that is generic and can be adapted to a specific application."
-        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000382"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000382"
         renderField={() => (
           <CustomAutocompleteWithoutEdit
             type="Frameworks"
@@ -1971,7 +1986,7 @@ function Factsheet(props) {
                             <Typography color="inherit" variant="subtitle1">
                               {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -1994,7 +2009,7 @@ function Factsheet(props) {
                             <Typography color="inherit" variant="subtitle1">
                               {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2040,7 +2055,7 @@ function Factsheet(props) {
                             <Typography color="inherit" variant="subtitle1">
                               {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)....</a>
+                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)....</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2063,7 +2078,7 @@ function Factsheet(props) {
                             <Typography color="inherit" variant="subtitle1">
                               {'A scenario year is a time step that has a duration of one year and is part of a scenario horizon.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020097">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020097">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2086,7 +2101,7 @@ function Factsheet(props) {
                             <Typography color="inherit" variant="subtitle1">
                               {'A study region is a spatial region that is under investigation and consists entirely of one or more subregions.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020032">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020032">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2109,7 +2124,7 @@ function Factsheet(props) {
                             <Typography color="inherit" variant="subtitle1">
                               {'An interacting region is a spatial region that interacts with a study region. It is part of a considered region, but not a study region.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020036">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020036">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2132,7 +2147,7 @@ function Factsheet(props) {
                             <Typography color="inherit" variant="subtitle1">
                               {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2155,7 +2170,7 @@ function Factsheet(props) {
                             <Typography color="inherit" variant="subtitle1">
                               {'Output data is endogenous data that is determined by a model calculation and presented as a result.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020013">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020013">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2217,7 +2232,7 @@ function Factsheet(props) {
                             <Typography color="inherit" variant="subtitle1">
                               {'An author is an agent that creates or has created written work.'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
+                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2243,7 +2258,7 @@ function Factsheet(props) {
                             <Typography color="inherit" variant="subtitle1">
                               {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
                               <br />
-                              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
+                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2260,7 +2275,7 @@ function Factsheet(props) {
                 <TableRow>
                   <FirstRowTableCell>
                     <div>
-                      <span>Date of publication</span>
+                      <span>Year of publication</span>
                       {/* <HtmlTooltip
                       title={
                       <React.Fragment>
@@ -2291,7 +2306,7 @@ function Factsheet(props) {
                           <Typography color="inherit" variant="subtitle1">
                             {'A study is a project with the goal to investigate something.'}
                             <br />
-                            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                            <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                           </Typography>
                         </React.Fragment>
                       }
@@ -2319,7 +2334,7 @@ function Factsheet(props) {
                         <Typography color="inherit" variant="subtitle1">
                         {'A citation reference is a reference stating where a citation was taken from.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
+                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
                       </Typography>
                     </React.Fragment>
                     }
@@ -2354,7 +2369,7 @@ function Factsheet(props) {
                       <Typography color="inherit" variant="subtitle1">
                         {'A sector division is a specific way to subdivide a system.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info...</a>
+                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000368">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
@@ -2379,7 +2394,7 @@ function Factsheet(props) {
                       <Typography color="inherit" variant="subtitle1">
                         {'A sector is generically dependent continuant that is a subdivision of a system.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000367">More info...</a>
+                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000367">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
@@ -2404,7 +2419,7 @@ function Factsheet(props) {
                       <Typography color="inherit" variant="subtitle1">
                         {'A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000407">More info...</a>
+                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000407">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
@@ -2438,7 +2453,7 @@ function Factsheet(props) {
                       <Typography color="inherit" variant="subtitle1">
                         {'A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
+                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
@@ -2463,7 +2478,7 @@ function Factsheet(props) {
                       <Typography color="inherit" variant="subtitle1">
                         {'A software framework is a Software that is generic and can be adapted to a specific application.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
+                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
@@ -2532,9 +2547,6 @@ function Factsheet(props) {
       >
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
         <Container maxWidth="lg2">
-
-
-
           <Grid item xs={12}>
             <Backdrop
               sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -2790,7 +2802,7 @@ function Factsheet(props) {
                                 <Typography color="inherit" variant="subtitle1">
                                   {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
                                   <br />
-                                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
+                                  <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
                                 </Typography>
                               </React.Fragment>
                             }
@@ -2813,7 +2825,7 @@ function Factsheet(props) {
                                 <Typography color="inherit" variant="subtitle1">
                                   {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
                                   <br />
-                                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info...</a>
+                                  <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000107">More info...</a>
                                 </Typography>
                               </React.Fragment>
                             }
@@ -2838,7 +2850,7 @@ function Factsheet(props) {
                                 <Typography color="inherit" variant="subtitle1">
                                   {'An institution is an organisation that serves a social purpose.'}
                                   <br />
-                                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info...</a>
+                                  <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000238">More info...</a>
                                 </Typography>
                               </React.Fragment>
                             }
@@ -2863,7 +2875,7 @@ function Factsheet(props) {
                           <Typography color="inherit" variant="subtitle1">
                             {'A study is a project with the goal to investigate something.'}
                             <br />
-                            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                            <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                           </Typography>
                         </React.Fragment>
                       }
@@ -2888,7 +2900,7 @@ function Factsheet(props) {
                           <Typography color="inherit" variant="subtitle1">
                             {'A study is a project with the goal to investigate something.'}
                             <br />
-                            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                            <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                           </Typography>
                         </React.Fragment>
                       }

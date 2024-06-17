@@ -8,6 +8,8 @@
 
 - Change the profile tables by improving color contrast, splitting the tables in 2 rows on very large screens and making the whole title visible [(#1706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1706)
 
+- Scenario Bundles: extend list of available study descriptors [(#1717)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1717)
+
 ## Features
 
 - Scenario bundle: . [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
@@ -25,10 +27,19 @@
 
 - Profile page Tables: Add "unpublish" button to published tables. [(#1706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1706)
 
+- Scenario Bundle: Allow only year for publication date [(#1723)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1723)
+
+- Scenario bundle backend enhancements [(#1725)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1725)
+  - Add a Django management command to re-structure the old bundles to handle multiple publications
+  - Add a feature for downloading the OEKG as Turtle or JSON-LD
+
 ## Bugs
 
 - REST-API: Retrieve oemetadata from database instead of comment on table. [(#1703)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1703)
 
 - Scenario Bundle: Fix issues scenario years, a static list of years without the possibility to edit [(#1724)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1724)
+
+- Scenario Comparison: Split "Descriptors" into Study & Scenario descriptors adding the missing study descriptors. Additionally remove scenario descriptors for study descriptor section list. [(#1721)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1721)
+
 
 ## Documentation updates
