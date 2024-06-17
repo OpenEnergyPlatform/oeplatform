@@ -758,16 +758,19 @@ function checkReviewComplete() {
 
 
 function checkFieldStates() {
-  var fieldList = makeFieldList();
-  for (var i = 0; i < fieldList.length; i++) {
-    var fieldName = fieldList[i].replace('field_', '');
-    var fieldState = state_dict[fieldName];
-    if (fieldState !== 'ok') {
-      return false; // Ein Feld hat nicht den Status "ok"
+  const fieldList = getAllFieldsAndValues();
+
+  for (const { fieldName, fieldValue } of fieldList) {
+    if (!isEmptyValue(fieldValue)) {
+      const fieldState = state_dict[fieldName];
+      if (fieldState !== 'ok') {
+        return false;
+      }
     }
   }
-  return true; // Alle Felder haben den Status "ok"
+  return true;
 }
+
 
 
 /**
@@ -777,7 +780,7 @@ function checkFieldStates() {
 function check_if_review_finished() {
   if (checkFieldStates() && !clientSideReviewFinished) {
     clientSideReviewFinished = true;
-    showToast("Review completed!", "You completed the review an can now award a suitable  badge!", 'success');
+    showToast("Review completed!", "You completed the review and can now award a suitable badge!", 'success');
     // Creating the div with radio buttons
     var reviewerDiv = $('<div class="bg-warning" id="finish-review-div"></div>');
     var bronzeRadio = $('<input type="radio" name="reviewer-option" value="bronze"> Bronze<br>');
@@ -786,6 +789,8 @@ function check_if_review_finished() {
     var platinRadio = $('<input type="radio" name="reviewer-option" value="platin"> Platin <br>');
     var reviewText = $('<p>The review is complete. Please award a badge and finish the review.</p>');
     var finishButton = $('<button type="button" id="review-finish-button">Finish</button>');
+
+
 
     // Adding the radio buttons, text, and button to the div
     reviewerDiv.append(reviewText);
@@ -808,7 +813,6 @@ function check_if_review_finished() {
       // $('#review-window').hide();
       $('#review-window').css('visibility', 'hidden');
     }
-
 
     // Adding the div to the desired location in the document
     $('.content-finish-review').append(reviewerDiv);
