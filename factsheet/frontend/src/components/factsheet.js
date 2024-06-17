@@ -127,12 +127,18 @@ function Factsheet(props) {
   const [isCreated, setIsCreated] = useState(false);
   const [scenarioRegions, setScenarioRegions] = useState([]);
   const [scenarioInteractingRegions, setScenarioInteractingRegions] = useState([]);
-  const [scenarioYears, setScenarioYears] = useState([]);
   const [models, setModels] = useState([]);
   const [frameworks, setFrameworks] = useState([]);
   const [sunburstData, setSunburstData] = useState([]);
 
   const [openBackDrop, setOpenBackDrop] = React.useState(false);
+
+
+  const scenarioYears = Array.from({ length: 101 }, (_, i) => ({
+    id: 2000 + i,
+    name: String(2000 + i)
+  }));
+
   const handleCloseBackDrop = () => {
     setOpenBackDrop(false);
   };
@@ -744,10 +750,10 @@ function Factsheet(props) {
     return data;
   };
 
-  const getScenarioYears = async () => {
+/*   const getScenarioYears = async () => {
     const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
     return data;
-  };
+  }; */
 
   const getModels = async () => {
     const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000274' } });
@@ -807,13 +813,13 @@ function Factsheet(props) {
     });
   }, []);
 
-  useEffect(() => {
+/*   useEffect(() => {
     getScenarioYears().then((data) => {
       const tmp = [];
       data.map((item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }))
       setScenarioYears(tmp);
     });
-  }, []);
+  }, []); */
 
   useEffect(() => {
     getModels().then((data) => {
@@ -1115,7 +1121,7 @@ function Factsheet(props) {
     });
   }
 
-  const HandleAddNNewScenarioYears = (newElement) => {
+/*   const HandleAddNNewScenarioYears = (newElement) => {
     axios.post(conf.toep + 'scenario-bundles/add_entities/',
       {
         entity_type: 'OBO.OEO_00020097',
@@ -1136,9 +1142,9 @@ function Factsheet(props) {
         setScenarioYears(tmp);
       });
     });
-  }
+  } */
 
-  const HandleEditScenarioYears = (oldElement, newElement, editIRI) => {
+/*   const HandleEditScenarioYears = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
       {
         entity_type: 'OBO.OEO_00020097',
@@ -1160,7 +1166,7 @@ function Factsheet(props) {
         });
       }
     });
-  }
+  } */
 
   const HandleAddNewModel = (newElement) => {
     axios.post(conf.toep + 'scenario-bundles/add_entities/',
@@ -1495,8 +1501,8 @@ function Factsheet(props) {
               HandleAddNewRegion={HandleAddNewRegion}
               HandleEditInteractingRegion={HandleEditInteractingRegion}
               HandleAddNewInteractingRegion={HandleAddNewInteractingRegion}
-              HandleEditScenarioYear={HandleEditScenarioYears}
-              HandleAddNNewScenarioYear={HandleAddNNewScenarioYears}
+              //HandleEditScenarioYear={HandleEditScenarioYears}
+              //HandleAddNNewScenarioYear={HandleAddNNewScenarioYears}
               scenarioDescriptorHandler={scenarioDescriptorHandler}
             />
           </TabPanel>
