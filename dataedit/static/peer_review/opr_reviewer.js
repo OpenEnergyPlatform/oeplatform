@@ -937,8 +937,12 @@ function updateTabProgressIndicatorClasses() {
     if (!tab) continue;
 
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+    let values = getAllFieldsAndValues();
 
-    let allOk = fieldsInTab.every((field) => field.classList.contains('field-ok'));
+    let allOk = fieldsInTab.every((field, index) => {
+        let currentValue = values[index].fieldValue;
+        return isEmptyValue(currentValue) || field.classList.contains('field-ok');
+    });
 
     if (allOk) {
       tab.classList.add('status--done');
@@ -947,6 +951,7 @@ function updateTabProgressIndicatorClasses() {
     }
   }
 }
+
 
 summaryTab.addEventListener('click', function() {
   toggleReviewControls(false);
