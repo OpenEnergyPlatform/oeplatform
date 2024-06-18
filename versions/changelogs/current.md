@@ -25,14 +25,13 @@
 
 - Profile page Tables: Add "unpublish" button to published tables. [(#1706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1706)
 
-- Scenario Bundles: Add delete feature for scenarios that belong to bundles [(#1722)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1722)
+- Scenario Bundles: Add delete feature for publications & scenarios that belong to bundles [(#1722)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1722)
 
 - Scenario Bundle: Allow only year for publication date [(#1723)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1723)
 
 - Scenario bundle backend enhancements [(#1725)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1725)
   - Add a Django management command to re-structure the old bundles to handle multiple publications
   - Add a feature for downloading the OEKG as Turtle or JSON-LD
-
 
 ## Bugs
 
