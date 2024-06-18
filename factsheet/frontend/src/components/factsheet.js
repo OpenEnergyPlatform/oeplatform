@@ -48,8 +48,6 @@ import fromKapsule from 'react-kapsule';
 import Select from '@mui/material/Select';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
 import IconButton from '@mui/material/IconButton';
-import oep_models from '../data/models.json';
-import oep_frameworks from '../data/frameworks.json';
 import Divider from '@mui/material/Divider';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
@@ -190,15 +188,9 @@ function Factsheet(props) {
   const [sectorDivisions, setSectorDivisions] = useState([]);
   const [filteredSectors, setFilteredSectors] = useState([]);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
-  const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
-  const [report_title, setReportTitle] = useState(id !== 'new' ? fsData.report_title : '');
-  const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '01-01-1900');
-  const [doi, setDOI] = useState(id !== 'new' ? fsData.report_doi : '');
-  const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
-  const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
   const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios : [{
     id: uuid(),
     name: '',
@@ -243,6 +235,39 @@ function Factsheet(props) {
   const [scenarioDescriptors, setScenarioDescriptors] = React.useState([]);
   const [selectedScenarioDescriptors, setSelectedScenarioDescriptors] = useState([]);
 
+  const [modelsList, setModelsList] = useState([]);
+
+  const getModelList = async () => {
+    const { data } = await axios.get(conf.toep + `api/v0/factsheet/models/`, {
+      headers: { 'X-CSRFToken': CSRFToken() }
+    });
+    return data;
+  };
+
+  useEffect(() => {
+    getModelList().then((data) => {
+      const tmp = [];
+      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'id': item.id }));
+      setModelsList(tmp);
+    });
+  }, []);
+
+  const [frameworksList, setFrameworkList] = useState([]);
+  
+  const getFrameworkList = async () => {
+    const { data } = await axios.get(conf.toep + `api/v0/factsheet/frameworks/`, {
+      headers: { 'X-CSRFToken': CSRFToken() }
+    });
+    return data;
+  };
+
+  useEffect(() => {
+    getFrameworkList().then((data) => {
+      const tmp = [];
+      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'id': item.id }));
+      setFrameworkList(tmp);
+    });
+  }, []);
 
   const StudyKeywords = [
     ['resilience', 'http://openenergy-platform.org/ontology/oeo/OEO_00360015', 'Resilience is a disposition of a system that represents the capacity of a system to absorb disturbance and reorganize so as to retain essentially the same function, structure, and feedbacks.'],
@@ -386,12 +411,6 @@ function Factsheet(props) {
             expanded_sectors: JSON.stringify(expandedSectors),
             technologies: JSON.stringify(selectedTechnologies),
             study_keywords: JSON.stringify(selectedStudyKewords),
-            //report_title: report_title,
-            //date_of_publication: date_of_publication,
-            //report_doi: doi,
-            //place_of_publication: place_of_publication,
-            //link_to_study: link_to_study,
-            //authors: JSON.stringify(selectedAuthors),
             scenarios: JSON.stringify(scenarios),
             publications: JSON.stringify(publications),
             models: JSON.stringify(selectedModels),
@@ -444,12 +463,6 @@ function Factsheet(props) {
               expanded_sectors: JSON.stringify(expandedSectors),
               technologies: JSON.stringify(selectedTechnologies),
               study_keywords: JSON.stringify(selectedStudyKewords),
-              //report_title: report_title,
-              //date_of_publication: date_of_publication,
-              //report_doi: doi,
-              //place_of_publication: place_of_publication,
-              //link_to_study: link_to_study,
-              //authors: JSON.stringify(selectedAuthors),
               scenarios: JSON.stringify(scenarios),
               publications: JSON.stringify(publications),
               models: JSON.stringify(selectedModels),
@@ -543,21 +556,21 @@ function Factsheet(props) {
     factsheetObjectHandler('name', e.target.value);
   };
 
-  const handlePlaceOfPublication = e => {
-    setPlaceOfPublication(e.target.value);
-    factsheetObjectHandler('place_of_publication', e.target.value);
-  };
+  // const handlePlaceOfPublication = e => {
+  //   setPlaceOfPublication(e.target.value);
+  //   factsheetObjectHandler('place_of_publication', e.target.value);
+  // };
 
   const handleLinkToStudy = (event, index) => {
     const updatePublications = [...publications];
-    updatePublications[index].link_to_study = event.target.value;
+    updatePublications[index].link_to_study_report = event.target.value;
     setPublications(updatePublications);
   };
 
-  const handleDateOfPublication = e => {
-    setDateOfPublication(e.target.value);
-    factsheetObjectHandler('date_of_publication', e.target.value);
-  };
+  // const handleDateOfPublication = e => {
+  //   setDateOfPublication(e.target.value);
+  //   factsheetObjectHandler('date_of_publication', e.target.value);
+  // };
 
   const handleClickOpenSavedDialog = () => {
     openSavedDialog(true);
@@ -1477,6 +1490,14 @@ function Factsheet(props) {
     </div >
   }
 
+  const removePublication = (id) => {
+    console.log(id);
+    let newSpublications = [...publications].filter((obj => obj.id !== id));;
+    console.log(newSpublications);
+    setPublications(newSpublications);
+    setRemoveReport(true);
+  };
+
   const renderPublications = () => {
     return <div>
       <Box sx={{ flexGrow: 1, display: 'flex', overflow: 'auto' }} >
@@ -1516,6 +1537,24 @@ function Factsheet(props) {
             key={'Publication_panel_' + item.id}
           >
             <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
+
+            <BundleScenariosGridItem
+                {...props}
+                labelGridSize={11}
+                fieldGridSize={1}
+                renderField={() => (
+                  <IconButton 
+                      size="small"
+                      variant="outlined" 
+                      color="error" 
+                      style={{ marginLeft: '90%' }}
+                      onClick={() => removePublication(item.id)}
+                    >  
+                    <DeleteOutlineIcon />
+                  </IconButton>
+                )}
+              />
+
               <BundleScenariosGridItem
                 {...props}
                 spanValue="Report title"
@@ -1583,7 +1622,7 @@ function Factsheet(props) {
                     id="outlined-basic"
                     style={{ width: '100%' }}
                     variant="outlined"
-                    value={item.link_to_study}
+                    value={item.link_to_study_report}
                     onChange={(event) => handleLinkToStudy(event, i)}
                   />
                 )}
@@ -1892,7 +1931,7 @@ function Factsheet(props) {
             type="Model"
             manyItems
             showSelectedElements={true}
-            optionsSet={oep_models}
+            optionsSet={modelsList}
             kind='Models'
             handler={modelsHandler}
             selectedElements={selectedModels}
@@ -1910,7 +1949,7 @@ function Factsheet(props) {
             type="Frameworks"
             manyItems
             showSelectedElements={true}
-            optionsSet={oep_frameworks}
+            optionsSet={frameworksList}
             kind='Frameworks'
             handler={frameworksHandler}
             selectedElements={selectedFrameworks}
@@ -1930,7 +1969,7 @@ function Factsheet(props) {
       renderPublications(),
       renderSectorsAndTecnology(),
       renderScenario(),
-      renderModelsAndFrameworks()
+      renderModelsAndFrameworks() 
     ]
   }
   const scenario_count = 'Scenarios' + ' (' + scenarios.length + ')';
@@ -2284,7 +2323,7 @@ function Factsheet(props) {
                   </FirstRowTableCell>
                   <ContentTableCell>
                     <span> <span>
-                      <a href={v.link_to_study} >
+                      <a href={v.link_to_study_report} >
                         <AttachmentIcon fontSize="large" />
                       </a>
                     </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
@@ -2513,6 +2552,9 @@ function Factsheet(props) {
       >
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
         <Container maxWidth="lg2">
+
+
+
           <Grid item xs={12}>
             <Backdrop
               sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -2651,13 +2693,13 @@ function Factsheet(props) {
               aria-labelledby="responsive-dialog-title"
             >
               <DialogTitle id="responsive-dialog-title">
-                <b>Remove</b>
+                <b>Removed!</b>
               </DialogTitle>
               <DialogContent>
                 <DialogContentText>
                   <div>
                     <pre>
-                      Your selected scenario is now removed from your factsheet!
+                      The item is now removed from your bundle!
                     </pre>
                   </div>
                 </DialogContentText>
