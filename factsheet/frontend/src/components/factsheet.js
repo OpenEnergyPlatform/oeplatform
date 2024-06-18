@@ -296,7 +296,6 @@ function Factsheet(props) {
     ['decarbonization pathways', 'https://openenergy-platform.org/ontology/oeo/OEO_00010212', 'Decarbonization pathways are strategic plans to reduce carbon emissions through various technological, structural, and behavioral changes.'],
     ['Flexibility', 'https://openenergy-platform.org/ontology/oeo/OEO_00360007', 'Flexibility in energy systems refers to the ability to adapt to changes in supply and demand, often through diverse generation and storage options.'],
     ['Efficiency', 'https://openenergy-platform.org/ontology/oeo/OEO_00140050', 'Efficiency value is the ratio of useful output to the total input in any system, often related to energy conversion processes.'],
-    ['Efficiency', 'https://openenergy-platform.org/ontology/oeo/OEO_00140049', 'Energy conversion efficiency is the ratio of useful energy output to total energy input, important for evaluating the performance of energy systems.'],
     ['primary energy demand', 'https://openenergy-platform.org/ontology/oeo/OEO_00140146', 'Energy demand refers to the total amount of energy required by consumers, including both primary and final energy needs.'],
     ['final energy demand', 'https://openenergy-platform.org/ontology/oeo/OEO_00140146', 'Energy demand refers to the total amount of energy required by consumers, including both primary and final energy needs.'],
     ['control area', 'https://openenergy-platform.org/ontology/oeo/OEO_00360004', 'A control area is a supply grid that is under the responsibility of a transmission system operator and is a part of a supply grid.'],
@@ -1511,6 +1510,14 @@ function Factsheet(props) {
     </div >
   }
 
+  const removePublication = (id) => {
+    console.log(id);
+    let newSpublications = [...publications].filter((obj => obj.id !== id));;
+    console.log(newSpublications);
+    setPublications(newSpublications);
+    setRemoveReport(true);
+  };
+
   const renderPublications = () => {
     return <div>
       <Box sx={{ flexGrow: 1, display: 'flex', overflow: 'auto' }} >
@@ -1550,6 +1557,22 @@ function Factsheet(props) {
             key={'Publication_panel_' + item.id}
           >
             <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
+              <BundleScenariosGridItem
+                {...props}
+                labelGridSize={11}
+                fieldGridSize={1}
+                renderField={() => (
+                  <IconButton 
+                      size="small"
+                      variant="outlined" 
+                      color="error" 
+                      style={{ marginLeft: '90%' }}
+                      onClick={() => removePublication(item.id)}
+                    >  
+                    <DeleteOutlineIcon />
+                  </IconButton>
+                )}
+              />
               <BundleScenariosGridItem
                 {...props}
                 spanValue="Report title"
@@ -2685,13 +2708,13 @@ function Factsheet(props) {
               aria-labelledby="responsive-dialog-title"
             >
               <DialogTitle id="responsive-dialog-title">
-                <b>Remove</b>
+                <b>Removed!</b>
               </DialogTitle>
               <DialogContent>
                 <DialogContentText>
                   <div>
                     <pre>
-                      Your selected scenario is now removed from your factsheet!
+                      The item is now removed from your bundle!
                     </pre>
                   </div>
                 </DialogContentText>
