@@ -46,3 +46,15 @@ $tag-mark-width: 7rem;
         border: 1px solid $warning;
     }
 }
+
+.early-access {
+    @extend .badge;
+    @extend .rounded-pill;
+    background-color: $danger;
+}
+
+.success-badge {
+    @extend .badge;
+    @extend .rounded-pill;
+    background-color: $success;
+}

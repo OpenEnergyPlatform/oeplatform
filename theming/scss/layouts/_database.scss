@@ -1,5 +1,6 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
+@use '../components/tables' as *;
 
 .content .tab-content {
     overflow: hidden;
@@ -9,6 +10,27 @@
 
     @include media-breakpoint-up(md) {
         max-width: $C--db-main-max-width;
+    }
+
+    @include media-breakpoint-up(x3l) {
+        max-width: $C--container-width-x3l;
+    }
+
+    @include media-breakpoint-up(x4l) {
+        max-width: $C--container-width-x4l;
+    }
+
+    @include media-breakpoint-up(x5l) {
+        max-width: $C--container-width-x5l;
+    }
+
+    &.tab-content--100w {
+        max-width: 100% !important;
+
+        table,
+        .dataTables_scrollHeadInner {
+            @extend .w-100;
+        }
     }
 
     .data-view {
@@ -64,6 +86,7 @@
     }
 
     .metadata {
+        @include table-variant--rounded;
         overflow-x: hidden;
 
         &__options {
@@ -75,38 +98,88 @@
             & > * {
                 @extend .ms-1;
             }
+
+            button {
+                @extend .btn;
+                @extend .btn-outline-primary;
+                @extend .btn-sm;
+                @extend .me-3;
+            }
         }
 
-        &__container {
-            @extend .border;
-            @extend .rounded;
-            overflow-x: auto;
+        .table-container {
+            @include table-container;
+        }
+    }
+
+    .opr {
+        @include table-variant--rounded;
+
+        &__info {
+            @extend .pb-4;
+            max-width: 64rem;
         }
 
-        table {
-            @extend .mb-0;
+        .table-container {
+            @include table-container;
         }
 
-        table tr th,
-        table tr td {
-            @extend .px-3;
+        tr th {
+            min-width: auto;
+            width: 10rem;
+        }
+    }
+}
+
+#contentMain {
+    flex: 1;
+}
+
+#toggleContentSideContainer {
+    button {
+        @extend .position-absolute;
+        @extend .top-0;
+        @extend .end-0;
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .align-items-center;
+        @extend .pe-0;
+        width: max-content;
+
+        &:focus {
+            outline: none;
+            box-shadow: none;
         }
 
-        table tr:last-of-type th,
-        table tr:last-of-type td {
-            @extend .border-0;
+        &:focus-visible {
+            outline: 2px solid $blue;
+            outline-offset: 2px;
         }
 
-        table tr th {
-            @extend .bg-light;
+        svg {
+            @extend .me-2;
         }
+    }
 
-        table tr:first-child th:first-child {
-            border-top-left-radius: 5px;
-        }
+    @include media-breakpoint-down(md) {
+        display: none !important;
+    }
+}
 
-        table tr:last-child th:first-child {
-            border-bottom-left-radius: 5px;
-        }
+#contentSide {
+    @extend .p-3;
+    @extend .border;
+    @extend .rounded;
+    width: 20rem;
+    background-color: #FFF;
+    transition: opacity 0.5s ease;
+
+    @include media-breakpoint-up(md) {
+        @include translateY(-1.5rem);
+    }
+
+    &.hidden {
+        opacity: 0;
+        display: none;
     }
 }

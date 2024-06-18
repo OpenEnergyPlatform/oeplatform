@@ -74,6 +74,7 @@
     $secondary: $secondary,
     $body-color: $body-color,
     $text-muted:  $text-muted,
+    $grid-breakpoints: $grid-breakpoints,
     $font-size-base: $font-size-base,
     $h1-font-size: $h1-font-size,
     $h2-font-size: $h2-font-size,
@@ -94,6 +95,7 @@
     $nav-pills-border-radius: $nav-pills-border-radius,
     $progress-border-radius: $progress-border-radius,
     $dropdown-border-radius: $dropdown-border-radius,
+    $nav-tabs-border-color: $nav-tabs-border-color,
     $nav-tabs-border-radius: $nav-tabs-border-radius,
     $popover-border-radius: $popover-border-radius,
     $tooltip-border-radius: $tooltip-border-radius,
@@ -114,7 +116,6 @@
     $border-radius: $border-radius,
     $border-radius-lg: $border-radius,
     $border-radius-sm: $border-radius-sm,
-    $border-color: $border-color,
     $card-border-color: $card-border-color,
     $card-cap-padding-y: $card-cap-padding-y,
     $alert-bg-scale: $alert-bg-scale

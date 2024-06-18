@@ -1,0 +1,24 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+@mixin empty-state {
+  @extend .d-flex;
+  @extend .flex-column;
+  @extend .justify-content-center;
+  @extend .align-items-center;
+  @extend .py-5;
+  @extend .px-3;
+
+  &-text {
+    @extend .pb-5;
+    @extend .fs-6;
+
+    span {
+      @extend .text-center;
+    }
+  }
+
+  &-icon {
+    @extend .pb-2;
+  }
+}

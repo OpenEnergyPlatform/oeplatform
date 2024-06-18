@@ -44,6 +44,7 @@ $yellow-800: #5F4F03;
 $yellow-900: #3D3200;
 $yellow: $yellow-500;
 // Red
+$red-050: #FFF4F5;
 $red-100: #FFEBED;
 $red-200: #FAC7CD;
 $red-300: #F09EA9;
@@ -81,6 +82,24 @@ $black: $gray-900;
 $body-color: $gray-700;
 $text-muted: #5F7484;
 
+// Grid
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+);
+
+$new-breakpoints: (
+  x3l: 1800px,
+  x4l: 2400px,
+  x5l: 3000px
+);
+
+$grid-breakpoints: map-merge($grid-breakpoints, $new-breakpoints);
+
 // New colors
 $primary:       $blue;
 $secondary:     $blue-700;
@@ -105,7 +124,7 @@ $theme-colors: (
 $theme-colors: map-merge($theme-colors, (
   "background-success": $green-100,
   "background-warning": $yellow-100,
-  "background-danger": $red-100,
+  "background-danger": $red-050,
   "background-info": $blue-100,
   "background-neutral": $gray-100
 ));
@@ -152,6 +171,7 @@ $thumbnail-border-radius: 0;
 $nav-pills-border-radius: 0;
 $progress-border-radius: 0;
 $dropdown-border-radius: 0;
+$nav-tabs-border-color: $gray-200;
 $nav-tabs-border-radius: 0;
 $popover-border-radius: 0;
 $tooltip-border-radius: 0;
@@ -172,7 +192,6 @@ $btn-font-weight: 600;
 $border-radius: 0.5rem;
 $border-radius-lg: 1rem;
 $border-radius-sm: 0.4rem;
-$border-color: $gray-200;
-$card-border-color: #E3EAEF;
+$card-border-color: $gray-300;
 $card-cap-padding-y: 0.75rem;
 $alert-bg-scale: -90%;

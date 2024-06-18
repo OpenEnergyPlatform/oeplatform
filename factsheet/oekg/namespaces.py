@@ -20,3 +20,5 @@ def bind_all_namespaces(graph):
     graph.bind("SCHEMA", SCHEMA)
     graph.bind("OEKG", OEKG)
     graph.bind("DBO", DBO)
+
+    return graph
