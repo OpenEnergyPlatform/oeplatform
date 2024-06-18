@@ -1504,6 +1504,14 @@ function Factsheet(props) {
     </div >
   }
 
+  const removePublication = (id) => {
+    console.log(id);
+    let newSpublications = [...publications].filter((obj => obj.id !== id));;
+    console.log(newSpublications);
+    setPublications(newSpublications);
+    setRemoveReport(true);
+  };
+
   const renderPublications = () => {
     return <div>
       <Box sx={{ flexGrow: 1, display: 'flex', overflow: 'auto' }} >
@@ -1543,6 +1551,22 @@ function Factsheet(props) {
             key={'Publication_panel_' + item.id}
           >
             <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
+              <BundleScenariosGridItem
+                {...props}
+                labelGridSize={11}
+                fieldGridSize={1}
+                renderField={() => (
+                  <IconButton 
+                      size="small"
+                      variant="outlined" 
+                      color="error" 
+                      style={{ marginLeft: '90%' }}
+                      onClick={() => removePublication(item.id)}
+                    >  
+                    <DeleteOutlineIcon />
+                  </IconButton>
+                )}
+              />
               <BundleScenariosGridItem
                 {...props}
                 spanValue="Report title"
@@ -2678,13 +2702,13 @@ function Factsheet(props) {
               aria-labelledby="responsive-dialog-title"
             >
               <DialogTitle id="responsive-dialog-title">
-                <b>Remove</b>
+                <b>Removed!</b>
               </DialogTitle>
               <DialogContent>
                 <DialogContentText>
                   <div>
                     <pre>
-                      The scenario is now removed from your bundle!
+                      The item is now removed from your bundle!
                     </pre>
                   </div>
                 </DialogContentText>
