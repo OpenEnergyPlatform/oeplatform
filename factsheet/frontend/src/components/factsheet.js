@@ -1491,9 +1491,7 @@ function Factsheet(props) {
   }
 
   const removePublication = (id) => {
-    console.log(id);
     let newSpublications = [...publications].filter((obj => obj.id !== id));;
-    console.log(newSpublications);
     setPublications(newSpublications);
     setRemoveReport(true);
   };
