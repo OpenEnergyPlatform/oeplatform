@@ -1114,9 +1114,9 @@ def _get_table(schema, table):
 
 
 def get_table_metadata(schema, table):
-    table_obj = _get_table(schema=schema, table=table)
-    comment = table_obj.comment
-    return json.loads(comment) if comment else {}
+    django_obj = DBTable.load(schema=schema, table=table)
+    oemetadata = django_obj.oemetadata
+    return oemetadata if oemetadata else {}
 
 
 def __internal_select(query, context):
@@ -1597,7 +1597,7 @@ def move(from_schema, table, to_schema):
                 to_schema=to_schema
             )
 
-        t.set_is_published()
+        t.set_is_published(to_schema=to_schema)
         session.commit()
         t.save()
     except Exception:
@@ -1687,7 +1687,7 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
                 to_schema=to_schema
             )
 
-        t.set_is_published()
+        t.set_is_published(to_schema=to_schema)
         session.commit()
 
     except DBTable.DoesNotExist:

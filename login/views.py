@@ -98,7 +98,7 @@ class TablesView(View):
                     draft_tables.append(table_data)
 
         # Pagination
-        ITEMS_PER_PAGE = 5
+        ITEMS_PER_PAGE = 8
 
         # Paginate tables
         published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)

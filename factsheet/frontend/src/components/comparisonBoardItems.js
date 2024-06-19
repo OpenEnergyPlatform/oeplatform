@@ -132,16 +132,30 @@ export default function  ComparisonBoardItems (props) {
                         </Typography>
                       </div>}
 
-                      {c_aspects.includes("Descriptors") && <div style={aspectStyle}>
+                      {c_aspects.includes("Study descriptors") && <div style={aspectStyle}>
                         <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Descriptors:</b>
+                          <b>Study descriptors:</b>
                         </Typography>
-                        {item.data.descriptors.map((descriptor) => (
+                        {item.data.study_descriptors.map((study_descriptor) => (
                           <StudyChip
-                            key={descriptor}
+                            key={study_descriptor}
                             index={index}
-                            label={descriptor}
-                            included={state.items[0].data.descriptors.includes(descriptor)}
+                            label={study_descriptor}
+                            included={state.items[0].data.study_descriptors.includes(study_descriptor)}
+                          />
+                        ))}
+                      </div>}
+
+                      {c_aspects.includes("Scenario descriptors") && <div style={aspectStyle}>
+                        <Typography variant="subtitle2" gutterBottom component="div">
+                          <b>Scenario descriptors:</b>
+                        </Typography>
+                        {item.data.scenario_descriptors.map((scenario_descriptor) => (
+                          <StudyChip
+                            key={scenario_descriptor}
+                            index={index}
+                            label={scenario_descriptor}
+                            included={state.items[0].data.scenario_descriptors.includes(scenario_descriptor)}
                           />
                         ))}
                       </div>}

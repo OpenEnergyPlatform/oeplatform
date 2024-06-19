@@ -19,6 +19,7 @@ main.main {
 
         &__container {
             @include flex-column;
+            position: relative;
             width: 100%;
 
             @include media-breakpoint-up(md) {
@@ -59,6 +60,11 @@ main.main {
                 max-width: $C--container-width-x5l;
             }
 
+            &.content__main--100w {
+                @extend .w-100;
+                @extend .pe-0;
+            }
+
             h2 {
                 padding-top: $C--padding-large;
             }
@@ -70,9 +76,9 @@ main.main {
 
         &__side {
             width: 100%;
+            height: fit-content;
 
             @include media-breakpoint-up(md) {
-                @include translateY(-1.5rem);
                 width: $C--db-side-width;
             }
 
