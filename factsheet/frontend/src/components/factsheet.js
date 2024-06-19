@@ -1354,15 +1354,20 @@ function Factsheet(props) {
     }
   
     let processedURL = url.trim();
-  
+
     // Handle URLs with spaces in the middle
     processedURL = processedURL.replace(/\s+/g, '%20');
   
     // Prepend base URL if not starting with http:// or https://
     if (!processedURL.startsWith('http://') && !processedURL.startsWith('https://')) {
-      processedURL = `https://openenergy-platform.org/${processedURL}`;
+      const baseURL = window.location.origin;
+      processedURL = `${baseURL}${processedURL}`;
     }
-  
+
+    if (processedURL.startsWith('http://') && !processedURL.startsWith('http://127') && !processedURL.startsWith('http://local')){
+      processedURL = processedURL.replace('http://', 'https://');
+    }
+
     // Encode the URL to handle special characters
     try {
       const encodedURL = encodeURI(processedURL);
