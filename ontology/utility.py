@@ -14,7 +14,6 @@ def get_ontology_version(path, version=None):
         raise Http404
 
     versions = os.listdir(path)
-    versions.remove(".DS_Store")
 
     if not version:
         version = max(
