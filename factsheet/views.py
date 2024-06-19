@@ -3,14 +3,7 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
-from django.http import (
-    Http404,
-    HttpResponse,
-    HttpResponseForbidden,
-    JsonResponse,
-    StreamingHttpResponse,
-    FileResponse,
-)
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils.cache import patch_response_headers
 from rdflib import RDF, Graph, Literal, URIRef
@@ -1669,19 +1662,22 @@ def get_scenarios(request, *args, **kwargs):
 @login_required
 def get_all_factsheets_as_turtle(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="ttl")
-    
-    response = HttpResponse(all_factsheets_as_turtle, content_type='text/turtle')
-    response['Content-Disposition'] = 'attachment; filename="oekg.ttl"'
+
+    response = HttpResponse(all_factsheets_as_turtle, content_type="text/turtle")
+    response["Content-Disposition"] = 'attachment; filename="oekg.ttl"'
     return response
 
 
 def get_all_factsheets_as_json_ld(request, *args, **kwargs):
     all_factsheets_as_json_ld = oekg.serialize(format="json-ld")
 
-    response = HttpResponse(all_factsheets_as_json_ld, content_type='application/ld+json')
-    response['Content-Disposition'] = 'attachment; filename="oekg.jsonld"'
+    response = HttpResponse(
+        all_factsheets_as_json_ld, content_type="application/ld+json"
+    )
+    response["Content-Disposition"] = 'attachment; filename="oekg.jsonld"'
 
     return response
+
 
 def get_all_sub_classes(cls, visited=None):
     if visited is None:
@@ -1925,8 +1921,6 @@ def filter_scenario_bundles_view(request):
     html_content = render(
         request, "partials/related_oekg_scenarios.html", context
     ).content.decode("utf-8")
-    html_content = render(
-        request, "partials/related_oekg_scenarios.html", context
-    ).content.decode("utf-8")
+
     # Render the template with the context
     return HttpResponse(html_content)
