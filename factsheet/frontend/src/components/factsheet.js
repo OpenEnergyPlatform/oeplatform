@@ -253,7 +253,7 @@ function Factsheet(props) {
   useEffect(() => {
     getModelList().then((data) => {
       const tmp = [];
-      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'id': item.id }));
+      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'acronym':item.acronym, 'institutions': item.institutions, 'id': item.id }));
       setModelsList(tmp);
     });
   }, []);
@@ -270,7 +270,7 @@ function Factsheet(props) {
   useEffect(() => {
     getFrameworkList().then((data) => {
       const tmp = [];
-      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'id': item.id }));
+      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'acronym':item.acronym, 'institutions': item.institutions, 'id': item.id }));
       setFrameworkList(tmp);
     });
   }, []);
