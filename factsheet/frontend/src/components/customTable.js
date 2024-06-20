@@ -229,7 +229,7 @@ EnhancedTableHead.propTypes = {
 
 function EnhancedTableToolbar(props) {
   const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected, logged_in } = props;
-
+  const [isDisabled, setIsDisabled] = useState(true); 
   return (
     <div>
       <Grid
@@ -264,7 +264,7 @@ function EnhancedTableToolbar(props) {
             {/* <Tooltip title="Show all">
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
             </Tooltip> */}
-            <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
+            <Button   disabled={isDisabled} variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
             <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px' }} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
             <Tooltip title="Compare">
 
