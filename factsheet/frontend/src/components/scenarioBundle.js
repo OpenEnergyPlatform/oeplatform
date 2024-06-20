@@ -10,12 +10,12 @@ import TextField from '@mui/material/TextField';
 import ColorToggleButton from './customSwapButton.js';
 import CustomTabs from './customTabs.js';
 import CustomAutocomplete from './customAutocomplete.js';
-import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
+import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit.js';
 import Scenario from './scenario.js';
 import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
 import Snackbar from '@mui/material/Snackbar';
 import Typography from '@mui/material/Typography';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline.js';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -26,23 +26,23 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from '@mui/icons-material/Add.js';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import conf from "../conf.json";
 import { colors, Tooltip } from '@mui/material';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline.js';
 import { styled } from '@mui/material/styles';
-import SaveIcon from '@mui/icons-material/Save';
+import SaveIcon from '@mui/icons-material/Save.js';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import CircularProgress from '@mui/material/CircularProgress';
 import Badge from '@mui/material/Badge';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import ShareIcon from '@mui/icons-material/Share';
+import ShareIcon from '@mui/icons-material/Share.js';
 import sunburstKapsule from 'sunburst-chart';
 import fromKapsule from 'react-kapsule';
 import Select from '@mui/material/Select';
@@ -59,17 +59,17 @@ import Toolbar from '@mui/material/Toolbar';
 import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/components/tableStyles.js';
 import InfoListItem from '../styles/oep-theme/components/infoListItem.js'
 import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
-import AttachmentIcon from '@mui/icons-material/Attachment';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
-import LinkIcon from '@mui/icons-material/Link';
+import AttachmentIcon from '@mui/icons-material/Attachment.js';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined.js';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined.js';
+import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined.js';
+import LinkIcon from '@mui/icons-material/Link.js';
 import Chip from '@mui/material/Chip';
-import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined.js';
 import Container from '@mui/material/Container';
 import Backdrop from '@mui/material/Backdrop';
 
-import CSRFToken from './csrfToken';
+import CSRFToken from './csrfToken.js';
 
 import '../styles/App.css';
 import { TableRow } from '@mui/material';
@@ -250,10 +250,11 @@ function Factsheet(props) {
     return data;
   };
 
+
   useEffect(() => {
     getModelList().then((data) => {
       const tmp = [];
-      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'id': item.id }));
+      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'acronym':item.acronym, 'institutions': item.institutions, 'license': item.license, 'id': item.id }));
       setModelsList(tmp);
     });
   }, []);
@@ -270,7 +271,7 @@ function Factsheet(props) {
   useEffect(() => {
     getFrameworkList().then((data) => {
       const tmp = [];
-      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'id': item.id }));
+      data.map((item) => tmp.push({ 'url': item.url, 'name': item.model_name, 'acronym':item.acronym, 'institutions': item.institutions, 'license': item.license, 'id': item.id }));
       setFrameworkList(tmp);
     });
   }, []);
@@ -1345,9 +1346,35 @@ function Factsheet(props) {
   };
 
 
-  const handleOpenURL = (e) => {
-    if (e !== '') {
-      window.open(e, "_blank")
+  // enhance open url function to handle urls better
+  // TODO change once OEKG is migrated
+  const handleOpenURL = (url, setError) => {
+    if (!url || url.trim() === '') {
+      setError('Invalid URL');
+      return;
+    }
+  
+    let processedURL = url.trim();
+
+    // Handle URLs with spaces in the middle
+    processedURL = processedURL.replace(/\s+/g, '%20');
+  
+    // Prepend base URL if not starting with http:// or https://
+    if (!processedURL.startsWith('http://') && !processedURL.startsWith('https://')) {
+      const baseURL = window.location.origin;
+      processedURL = `${baseURL}${processedURL}`;
+    }
+
+    if (processedURL.startsWith('http://') && !processedURL.startsWith('http://127') && !processedURL.startsWith('http://local')){
+      processedURL = processedURL.replace('http://', 'https://');
+    }
+
+    // Encode the URL to handle special characters
+    try {
+      const encodedURL = encodeURI(processedURL);
+      window.open(encodedURL, "_blank");
+    } catch (error) {
+      setError('Invalid URL format');
     }
   };
 
@@ -2180,7 +2207,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+                    {v.input_datasets.map((e) => <span> <span> <Chip label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.url)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
@@ -2203,7 +2230,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.iri)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+                    {v.output_datasets.map((e) => <span> <span>  <Chip sx={{ marginTop: "5px" }} label={e.value.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.value.url)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
               </TableBody>
@@ -2486,9 +2513,16 @@ function Factsheet(props) {
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedModels.map((v, i) => (
-                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
+              {selectedModels.map((v) => (
+                <><Chip
+                  size='small'
+                  key={v.id}
+                  label={v.acronym}
+                  variant="outlined"
+                  sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)} /><b className="separator-dot"> . </b></>
+                ))
+              }
+
             </ContentTableCell>
           </TableRow>
           <TableRow>
@@ -2511,9 +2545,15 @@ function Factsheet(props) {
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedFrameworks.map((v, i) => (
-                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
+              {selectedFrameworks.map((v) => (
+                  <><Chip
+                    size='small'
+                    key={v.id}
+                    label={v.acronym}
+                    variant="outlined"
+                    sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)} /><b className="separator-dot"> . </b></>
+                  ))
+                }
             </ContentTableCell>
           </TableRow>
         </TableBody>

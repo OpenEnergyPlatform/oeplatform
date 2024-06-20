@@ -9,8 +9,8 @@ import Chip from '@mui/material/Chip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Typography from '@mui/material/Typography';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
-import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
-import { styled } from '@mui/material/styles';
+// import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
+// import { styled } from '@mui/material/styles';
 import { makeStyles } from '@material-ui/core/styles';
 
 const filter = createFilterOptions();

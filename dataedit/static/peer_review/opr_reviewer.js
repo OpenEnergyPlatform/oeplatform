@@ -207,77 +207,83 @@ function cancelPeerReview() {
 /**
  * Identifies field name and value sets selected stlye and refreshes
  * reviewer box (side panel) infos.
- * @param {string} fieldKey Name of the field
- * @param {string} fieldValue Value of the field
- * @param {string} category Metadata catgeory related to the fieldKey
+ * @param value
  */
 
-function click_field(fieldKey, fieldValue, category) {
-  // Check if the category tab needs to be switched
-  switchCategoryTab(category);
 
-  // this seems unused but it is relevant to select next and prev field functions
-  selectedField = fieldKey;
-  selectedFieldValue = fieldValue;
-  selectedCategory = category;
-  const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
-  const selectedName = document.querySelector("#review-field-name");
-  selectedName.textContent = cleanedFieldKey + " " + fieldValue;
-  const fieldDescriptionsElement = document.getElementById("field-descriptions");
-  const reviewItem = document.querySelectorAll('.review__item');
-
-  let selectedDivId = 'field_' + fieldKey;
-  let selectedDiv = document.getElementById(selectedDivId);
-
-  // console.log("Field descriptions data:", fieldDescriptionsData);
-  // Populate the reviewer box
-  if (fieldDescriptionsData[cleanedFieldKey]) {
-    let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
-    let fieldInfoText = '<div class="reviewer-item">';
-    if (fieldInfo.title) {
-      fieldInfoText += '<div class="reviewer-item__row"><h2 class="reviewer-item__title">' + fieldInfo.title + '</h2></div>';
-    }
-    if (fieldInfo.description) {
-      fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Description:</div><div class="reviewer-item__value">' + fieldInfo.description + '</div></div>';
-    }
-    if (fieldInfo.example) {
-      fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Example:</div><div class="reviewer-item__value">' + fieldInfo.example + '</div></div>';
-    }
-    if (fieldInfo.badge) {
-      fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Badge:</div><div class="reviewer-item__value">' + fieldInfo.badge + '</div></div>';
-    }
-    fieldInfoText += '<div class="reviewer-item__row reviewer-item__row--border">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
-    fieldDescriptionsElement.innerHTML = fieldInfoText;
-  } else {
-    fieldDescriptionsElement.textContent = "No description found";
-  }
-  const fieldState = getFieldState(fieldKey);
-  if (fieldState) {
-    if (fieldState === 'ok') {
-      document.getElementById("ok-button").disabled = true;
-      document.getElementById("rejected-button").disabled = true;
-      document.getElementById("suggestion-button").disabled = true;
-    } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
-      document.getElementById("ok-button").disabled = false;
-      document.getElementById("rejected-button").disabled = false;
-      document.getElementById("suggestion-button").disabled = false;
-    }
-  } else {
-    document.getElementById("ok-button").disabled = false;
-    document.getElementById("rejected-button").disabled = false;
-    document.getElementById("suggestion-button").disabled = false;
-  }
-
-  // Set selected / not selected style on metadata fields
-  reviewItem.forEach(function(div) {
-    div.style.backgroundColor = '';
-  });
-  if (selectedDiv) {
-    selectedDiv.style.backgroundColor = '#F6F9FB';
-  }
-  clearInputFields();
-  hideReviewerOptions();
+function isEmptyValue(value) {
+    return value === "" || value === "None" || value === "[]";
 }
+
+function click_field(fieldKey, fieldValue, category) {
+    var isEmpty = isEmptyValue(fieldValue);
+
+    // Далее остальная логика функции
+    switchCategoryTab(category);
+
+    selectedField = fieldKey;
+    selectedFieldValue = fieldValue;
+    selectedCategory = category;
+    const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
+    const selectedName = document.querySelector("#review-field-name");
+    selectedName.textContent = cleanedFieldKey + " " + fieldValue;
+    const fieldDescriptionsElement = document.getElementById("field-descriptions");
+    const reviewItem = document.querySelectorAll('.review__item');
+
+    let selectedDivId = 'field_' + fieldKey;
+    let selectedDiv = document.getElementById(selectedDivId);
+
+    if (fieldDescriptionsData[cleanedFieldKey]) {
+        let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
+        let fieldInfoText = '<div class="reviewer-item">';
+        if (fieldInfo.title) {
+            fieldInfoText += '<div class="reviewer-item__row"><h2 class="reviewer-item__title">' + fieldInfo.title + '</h2></div>';
+        }
+        if (fieldInfo.description) {
+            fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Description:</div><div class="reviewer-item__value">' + fieldInfo.description + '</div></div>';
+        }
+        if (fieldInfo.example) {
+            fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Example:</div><div class="reviewer-item__value">' + fieldInfo.example + '</div></div>';
+        }
+        if (fieldInfo.badge) {
+            fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Badge:</div><div class="reviewer-item__value">' + fieldInfo.badge + '</div></div>';
+        }
+        fieldInfoText += '<div class="reviewer-item__row reviewer-item__row--border">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
+        fieldDescriptionsElement.innerHTML = fieldInfoText;
+    } else {
+        fieldDescriptionsElement.textContent = "No description found";
+    }
+    const fieldState = getFieldState(fieldKey);
+    if (fieldState) {
+        if (fieldState === 'ok') {
+            document.getElementById("ok-button").disabled = true;
+            document.getElementById("rejected-button").disabled = true;
+            document.getElementById("suggestion-button").disabled = true;
+        } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+            document.getElementById("ok-button").disabled = false;
+            document.getElementById("rejected-button").disabled = false;
+            document.getElementById("suggestion-button").disabled = false;
+        }
+    } else {
+        document.getElementById("ok-button").disabled = isEmpty;
+        document.getElementById("rejected-button").disabled = isEmpty;
+        document.getElementById("suggestion-button").disabled = isEmpty;
+    }
+
+    // Set selected / not selected style on metadata fields
+    reviewItem.forEach(function(div) {
+        div.style.backgroundColor = '';
+    });
+    if (selectedDiv) {
+        selectedDiv.style.backgroundColor = '#F6F9FB';
+    }
+    clearInputFields();
+    hideReviewerOptions();
+}
+
+// Initialize the review buttons state on page load
+
+
 
 /**
  * Switch to the category tab if needed
@@ -296,6 +302,7 @@ function switchCategoryTab(category) {
   }
 }
 
+
 /**
  * Function to provide the mapping of category to the correct tab ID
  */
@@ -307,7 +314,6 @@ function getCategoryToTabIdMapping() {
     'temporal': 'spatiotemporal-tab',
     'source': 'source-tab',
     'license': 'license-tab',
-    'contributor': 'contributor-tab',
   };
   return mapping;
 }
@@ -710,36 +716,61 @@ function getFieldState(fieldKey) {
 /**
  * Checks if all fields are reviewed and activates submit button if ready
  */
-function checkReviewComplete() {
+/**
+ * Returns a list of all fields and their values.
+ * @returns {Array} List of objects with field names and values.
+ */
+function getAllFieldsAndValues() {
   const fields = document.querySelectorAll('.field');
-  for (let field of fields) {
-    let fieldName = field.id.slice(6);
-    const fieldState = getFieldState(fieldName);
-    let reviewed = current_review["reviews"].find((review) => review.key === fieldName);
+  const fieldList = [];
 
-    if (!reviewed && fieldState !== 'ok') {
+  fields.forEach(field => {
+    const fieldName = field.id.slice(6);
+    const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+    fieldList.push({ fieldName, fieldValue });
+  });
+
+  return fieldList;
+}
+
+
+
+/**
+ * Checks if all fields are reviewed and activates submit button if ready
+ */
+function checkReviewComplete() {
+  const fields = getAllFieldsAndValues();
+
+  for (let field of fields) {
+    const fieldState = getFieldState(field.fieldName);
+    const reviewed = current_review["reviews"].find((review) => review.key === field.fieldName);
+
+    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(field.fieldValue)) {
       $('#submit_summary').addClass('disabled');
       return;
     }
   }
   $('#submit_summary').removeClass('disabled');
   if (!clientSideReviewFinished) {
-    showToast("Success", "You have reviewed all fields an can submit the review to get feedback!", 'success');
+    showToast("Success", "You have reviewed all fields and can submit the review to get feedback!", 'success');
   }
 }
 
 
 function checkFieldStates() {
-  var fieldList = makeFieldList();
-  for (var i = 0; i < fieldList.length; i++) {
-    var fieldName = fieldList[i].replace('field_', '');
-    var fieldState = state_dict[fieldName];
-    if (fieldState !== 'ok') {
-      return false; // Ein Feld hat nicht den Status "ok"
+  const fieldList = getAllFieldsAndValues();
+
+  for (const { fieldName, fieldValue } of fieldList) {
+    if (!isEmptyValue(fieldValue)) {
+      const fieldState = state_dict[fieldName];
+      if (fieldState !== 'ok') {
+        return false;
+      }
     }
   }
-  return true; // Alle Felder haben den Status "ok"
+  return true;
 }
+
 
 
 /**
@@ -749,7 +780,7 @@ function checkFieldStates() {
 function check_if_review_finished() {
   if (checkFieldStates() && !clientSideReviewFinished) {
     clientSideReviewFinished = true;
-    showToast("Review completed!", "You completed the review an can now award a suitable  badge!", 'success');
+    showToast("Review completed!", "You completed the review and can now award a suitable badge!", 'success');
     // Creating the div with radio buttons
     var reviewerDiv = $('<div class="bg-warning" id="finish-review-div"></div>');
     var bronzeRadio = $('<input type="radio" name="reviewer-option" value="bronze"> Bronze<br>');
@@ -758,6 +789,8 @@ function check_if_review_finished() {
     var platinRadio = $('<input type="radio" name="reviewer-option" value="platin"> Platin <br>');
     var reviewText = $('<p>The review is complete. Please award a badge and finish the review.</p>');
     var finishButton = $('<button type="button" id="review-finish-button">Finish</button>');
+
+
 
     // Adding the radio buttons, text, and button to the div
     reviewerDiv.append(reviewText);
@@ -780,7 +813,6 @@ function check_if_review_finished() {
       // $('#review-window').hide();
       $('#review-window').css('visibility', 'hidden');
     }
-
 
     // Adding the div to the desired location in the document
     $('.content-finish-review').append(reviewerDiv);
@@ -837,11 +869,10 @@ const otherTabs = [
   document.getElementById('spatiotemporal-tab'),
   document.getElementById('source-tab'),
   document.getElementById('license-tab'),
-  document.getElementById('contributor-tab'),
 ];
 const reviewContent = document.querySelector(".review__content");
 function updateTabClasses() {
-  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor'];
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
   for (let i = 0; i < tabNames.length; i++) {
     let tabName = tabNames[i];
     let tab = document.getElementById(tabName + '-tab');
@@ -870,6 +901,8 @@ window.addEventListener('DOMContentLoaded', function() {
   // updatePercentageDisplay() ;
 });
 
+
+
 function getTotalFieldCount() {
   var allFields = makeFieldList();
   return allFields.length;
@@ -896,7 +929,7 @@ function updatePercentageDisplay() {
 
 
 function updateTabProgressIndicatorClasses() {
-  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor'];
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
 
   for (let i = 0; i < tabNames.length; i++) {
     let tabName = tabNames[i];
@@ -904,8 +937,12 @@ function updateTabProgressIndicatorClasses() {
     if (!tab) continue;
 
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+    let values = getAllFieldsAndValues();
 
-    let allOk = fieldsInTab.every((field) => field.classList.contains('field-ok'));
+    let allOk = fieldsInTab.every((field, index) => {
+        let currentValue = values[index].fieldValue;
+        return isEmptyValue(currentValue) || field.classList.contains('field-ok');
+    });
 
     if (allOk) {
       tab.classList.add('status--done');
@@ -914,6 +951,7 @@ function updateTabProgressIndicatorClasses() {
     }
   }
 }
+
 
 summaryTab.addEventListener('click', function() {
   toggleReviewControls(false);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ComparisonBoardItem from "./comparisonBoardItems";
+// import ComparisonBoardItem from "./comparisonBoardItems";
 import { Box } from "@mui/system";
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
