@@ -125,6 +125,37 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
     value[objIndex].name = updatedLabel;
   }
 
+   // enhance open url function to handle urls better
+  // TODO change once OEKG is migrated
+  const handleOpenURL = (url, setError) => {
+    if (!url || url.trim() === '') {
+      setError('Invalid URL');
+      return;
+    }
+  
+    let processedURL = url.trim();
+
+    // Handle URLs with spaces in the middle
+    processedURL = processedURL.replace(/\s+/g, '%20');
+  
+    // Prepend base URL if not starting with http:// or https://
+    if (!processedURL.startsWith('http://') && !processedURL.startsWith('https://')) {
+      const baseURL = window.location.origin;
+      processedURL = `${baseURL}${processedURL}`;
+    }
+
+    if (processedURL.startsWith('http://') && !processedURL.startsWith('http://127') && !processedURL.startsWith('http://local')){
+      processedURL = processedURL.replace('http://', 'https://');
+    }
+
+    // Encode the URL to handle special characters
+    try {
+      const encodedURL = encodeURI(processedURL);
+      window.open(encodedURL, "_blank");
+    } catch (error) {
+      setError('Invalid URL format');
+    }
+  };
 
 
   return (
@@ -135,7 +166,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         id="checkboxes-tags-demo"
         options={parameters.optionsSet}
         disableCloseOnSelect
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={(option) => option.acronym}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
              {!option.inputValue &&<Checkbox
@@ -150,9 +181,11 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
             title={
               <React.Fragment>
               <Typography color="inherit" variant="caption">
-                Description of <b>{option.name}</b> : TDB ...
+                
+                <FactsheetMetadataList data={option} />
               <br />
-              <a href={2}>More info from Open Enrgy Knowledge Graph (OEKG)...</a>
+              <a href={option.url}>More info ...</a>
+              
               </Typography>
               </React.Fragment>
             }
@@ -291,7 +324,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         }}
       >
         {value.map((v) => (
-          <Chip size='small' key={v.id}  label={v.name} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }}/>
+          <Chip size='small' key={v.id}  label={v.acronym} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)}/>
         ))}
       </Box>}
     </Box>
