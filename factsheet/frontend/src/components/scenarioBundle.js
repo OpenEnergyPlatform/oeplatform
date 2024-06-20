@@ -250,7 +250,6 @@ function Factsheet(props) {
     return data;
   };
 
-  console.log(fsData)
 
   useEffect(() => {
     getModelList().then((data) => {
