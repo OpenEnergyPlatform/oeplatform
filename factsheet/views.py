@@ -15,6 +15,7 @@ from factsheet.oekg.filters import OekgQuery
 from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 from login import models as login_models
+from modelview.utils import get_framework_metadata_by_id, get_model_metadata_by_id
 
 from .models import OEKG_Modifications, ScenarioBundleAccessControl
 
@@ -1151,18 +1152,27 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["models"] = []
     factsheet["frameworks"] = []
 
-    for s, p, o in oekg.triples((study_URI, OEO["has_framework"], None)):
-        factsheet["frameworks"].append({"id": o, "name": o})
+    for _, _, o in oekg.triples((study_URI, OEO["has_framework"], None)):
+        for _, _, o1 in oekg.triples((o, OEO["has_iri"], None)):
+            framework_id = int(str(o).split("/")[-1])
+            framework_metadata = get_framework_metadata_by_id(
+                framework_id, "energyframework"
+            )
 
-    for s, p, o in oekg.triples((study_URI, OEO["has_model"], None)):
-        model = {}
-        model["id"] = str(o).split("/")[-1]
-        label = oekg.value(o, RDFS.label)
-        model["name"] = label
-        for s1, p1, o1 in oekg.triples((o, OEO["has_iri"], None)):
-            model["url"] = o1
+            if framework_metadata:
+                framework_metadata["url"] = str(o1)
+                factsheet["frameworks"].append(framework_metadata)
+                print(factsheet["frameworks"])
 
-        factsheet["models"].append(model)
+    for _, _, o in oekg.triples((study_URI, OEO["has_model"], None)):
+        for _, _, o1 in oekg.triples((o, OEO["has_iri"], None)):
+            model_id = int(str(o).split("/")[-1])
+            model_metadata = get_model_metadata_by_id(model_id, "energymodel")
+
+            if model_metadata:
+                model_metadata["url"] = str(o1)
+                factsheet["models"].append(model_metadata)
+                print(factsheet["models"])
 
     factsheet["publications"] = []
     for s, p, o in oekg.triples((study_URI, OEKG["has_publication"], None)):
