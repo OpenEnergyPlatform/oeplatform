@@ -461,10 +461,10 @@ def create_factsheet(request, *args, **kwargs):
         _models = json.loads(models) if models is not None else []
         for item in _models:
             model_id = item.get("id")
-            model_name = item.get("name")
+            model_acronym = item.get("acronym")
             model_url = item.get("url")
 
-            if not model_id or not model_name or not model_url:
+            if not model_id or not model_acronym or not model_url:
                 continue  # Skip this item if any critical field is empty
 
             model_URI = URIRef(
@@ -475,7 +475,7 @@ def create_factsheet(request, *args, **kwargs):
                 (
                     model_URI,
                     RDFS.label,
-                    Literal(model_name),
+                    Literal(model_acronym),
                 )
             )
             bundle.add(
@@ -490,10 +490,10 @@ def create_factsheet(request, *args, **kwargs):
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
             framework_id = item.get("id")
-            framework_name = item.get("name")
+            framework_acronym = item.get("acronym")
             framework_url = item.get("url")
 
-            if not framework_id or not framework_name or not framework_url:
+            if not framework_id or not framework_acronym or not framework_url:
                 continue  # Skip this item if any critical field is empty
 
             framework_URI = URIRef(
@@ -503,12 +503,12 @@ def create_factsheet(request, *args, **kwargs):
 
             bundle.add((framework_URI, RDF.type, OEO.OEO_00000172))
 
-            if framework_name:
+            if framework_acronym:
                 bundle.add(
                     (
                         framework_URI,
                         RDFS.label,
-                        Literal(framework_name),
+                        Literal(framework_acronym),
                     )
                 )
 
