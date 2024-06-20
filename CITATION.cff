@@ -30,5 +30,5 @@ type: software
 license: AGPL-3.0-or-later
 version: 0.20.3
 doi:
-date-released: 2024-06-18
+date-released: 2024-06-20
 url: "https://github.com/OpenEnergyPlatform/oeplatform/"
