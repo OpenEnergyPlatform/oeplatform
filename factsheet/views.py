@@ -167,7 +167,7 @@ def create_factsheet(request, *args, **kwargs):
     contact_person = request_body["contact_person"]
     sector_divisions = request_body["sector_divisions"]
     sectors = request_body["sectors"]
-    expanded_sectors = request_body["expanded_sectors"]  # noqa
+    # expanded_sectors = request_body["expanded_sectors"]  # noqa
     # energy_carriers = request_body['energy_carriers']
     # expanded_energy_carriers = request_body['expanded_energy_carriers']
     # energy_transformation_processes = request_body['energy_transformation_processes']
@@ -460,29 +460,68 @@ def create_factsheet(request, *args, **kwargs):
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
+            model_id = item.get("id")
+            model_name = item.get("name")
+            model_url = item.get("url")
+
+            if not model_id or not model_name or not model_url:
+                continue  # Skip this item if any critical field is empty
+
             model_URI = URIRef(
-                "http://openenergy-platform.org/ontology/oekg/models/" + str(item["id"])
+                "http://openenergy-platform.org/ontology/oekg/models/" + str(model_id)
             )
             bundle.add((model_URI, RDF.type, OEO.OEO_00000277))
             bundle.add(
                 (
                     model_URI,
                     RDFS.label,
-                    Literal(item["name"]),
+                    Literal(model_name),
                 )
             )
             bundle.add(
                 (
                     model_URI,
                     OEO["has_iri"],
-                    Literal(item["url"]),
+                    Literal(model_url),
                 )
             )
             bundle.add((study_URI, OEO["has_model"], model_URI))
 
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
-            bundle.add((study_URI, OEO["has_framework"], Literal(item["name"])))
+            framework_id = item.get("id")
+            framework_name = item.get("name")
+            framework_url = item.get("url")
+
+            if not framework_id or not framework_name or not framework_url:
+                continue  # Skip this item if any critical field is empty
+
+            framework_URI = URIRef(
+                "http://openenergy-platform.org/ontology/oekg/frameworks/"
+                + str(framework_id)
+            )
+
+            bundle.add((framework_URI, RDF.type, OEO.OEO_00000172))
+
+            if framework_name:
+                bundle.add(
+                    (
+                        framework_URI,
+                        RDFS.label,
+                        Literal(framework_name),
+                    )
+                )
+
+            if framework_url:
+                bundle.add(
+                    (
+                        framework_URI,
+                        OEO["has_iri"],
+                        Literal(framework_url),
+                    )
+                )
+
+            bundle.add((study_URI, OEO["has_framework"], framework_URI))
 
         _study_keywords = (
             json.loads(study_keywords) if study_keywords is not None else []
