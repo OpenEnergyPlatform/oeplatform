@@ -2546,9 +2546,15 @@ function Factsheet(props) {
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedFrameworks.map((v, i) => (
-                <span> <span> {v.acronym} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-              ))}
+              {selectedFrameworks.map((v) => (
+                  <><Chip
+                    size='small'
+                    key={v.id}
+                    label={v.acronym}
+                    variant="outlined"
+                    sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)} /><b className="separator-dot"> . </b></>
+                  ))
+                }
             </ContentTableCell>
           </TableRow>
         </TableBody>
