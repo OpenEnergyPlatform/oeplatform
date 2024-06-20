@@ -3,7 +3,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import CircularProgress from '@mui/material/CircularProgress';
 import axios from "axios";
 import Home from './home.js';
-import Factsheet from './components/factsheet.js';
+import Factsheet from './components/scenarioBundle';
 import './styles/App.css';
 import conf from "./conf.json";
 import { ThemeProvider } from '@mui/material/styles';
