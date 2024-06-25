@@ -4,6 +4,8 @@
   "$id": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/master/oemetadata/latest/schema.json",
   "description": "Create & edit oemetadata json files using the OEMetadata v1.6 schema. See the Open Energy Platform metadata standard: https://github.com/OpenEnergyPlatform/oemetadata",
   "type": "object",
+  "format": "categories",
+  "basicCategoryTitle": "Main",
   "properties": {
     "name": {
       "description": "File name or database table name",
