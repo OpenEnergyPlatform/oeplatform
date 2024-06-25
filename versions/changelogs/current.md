@@ -3,6 +3,7 @@
 ## Changes
 
 ## Features
+- divide metadata builder flow into subsections
 
 ## Bugs
 
