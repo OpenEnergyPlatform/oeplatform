@@ -51,6 +51,7 @@ from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
+from .helper import order_metadata
 from .models import TableRevision
 from .models import View as DataViewModel
 
@@ -928,28 +929,17 @@ class DataView(View):
 
         actions.create_meta(schema, table)
         metadata = load_metadata_from_db(schema, table)
-        table_obj = Table.load(schema, table)
-        if table_obj is None:
-            raise Http404("Table object could not be loaded")
-
-        oemetadata = table_obj.oemetadata
-
-        from dataedit.metadata import TEMPLATE_V1_5
-
-        def iter_oem_key_order(metadata: dict):
-            oem_151_key_order = [key for key in TEMPLATE_V1_5.keys()]
-            for key in oem_151_key_order:
-                yield key, metadata.get(key)
-
-        ordered_oem_151 = {key: value for key, value in iter_oem_key_order(metadata)}
-        meta_widget = MetaDataWidget(ordered_oem_151)
-        revisions = []
+        ordered_metadata = order_metadata(metadata)
+        meta_widget = MetaDataWidget(ordered_metadata)
 
         api_changes = change_requests(schema, table)
         data = api_changes.get("data")
         display_message = api_changes.get("display_message")
         display_items = api_changes.get("display_items")
 
+        table_obj = Table.load(schema, table)
+        if table_obj is None:
+            raise Http404("Table object could not be loaded")
         is_admin = False
         can_add = False
         if request.user and not request.user.is_anonymous:
@@ -1001,7 +991,7 @@ class DataView(View):
                 schema=schema, table=table
             ),
             "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
-            "opr_enabled": oemetadata
+            "opr_enabled": metadata
             is not None,  # check if the table has the metadata
         }
 
@@ -1039,6 +1029,7 @@ class DataView(View):
         #   Construct the context object for the template       #
         #########################################################
 
+        revisions = []
         context_dict = {
             "meta_widget": meta_widget.render(),
             "revisions": revisions,
@@ -1858,6 +1849,17 @@ class StandaloneMetaEditView(LoginRequiredMixin, View):
             "dataedit/meta_edit.html",
             context=context_dict,
         )
+
+
+def get_metadata(request, schema, table):
+    """Return metadata as JSON in order consistent with MetadataBuilder"""
+    metadata = load_metadata_from_db(schema, table)
+    ordered_metadata = order_metadata(metadata)
+
+    json_data = json.dumps(ordered_metadata, indent=1)
+    response = HttpResponse(json_data, content_type='application/json')
+    response['Content-Disposition'] = f'attachment; filename="{table}.metadata.json"'
+    return response
 
 
 class PeerReviewView(LoginRequiredMixin, View):

@@ -4,6 +4,7 @@ make the codebase more modular.
 """
 
 from dataedit.models import Table
+from dataedit.metadata import TEMPLATE_V1_5
 
 ##############################################
 #          Table view related                #
@@ -53,6 +54,15 @@ def get_readable_table_name(table_obj: Table) -> str:
         raise e
     return label
 
+
+##############################################
+#            Metadata related                #
+##############################################
+
+def order_metadata(metadata: dict) -> dict:
+    """Brings metadata into consistent order based on TEMPLATE_V1_5"""
+    ordered_metadata = {key: metadata.get(key) for key in TEMPLATE_V1_5}
+    return ordered_metadata
 
 ##############################################
 #       Open Peer Review related             #
