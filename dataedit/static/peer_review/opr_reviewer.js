@@ -218,12 +218,12 @@ function isEmptyValue(value) {
 function click_field(fieldKey, fieldValue, category) {
     var isEmpty = isEmptyValue(fieldValue);
 
-    // Далее остальная логика функции
     switchCategoryTab(category);
 
     selectedField = fieldKey;
     selectedFieldValue = fieldValue;
     selectedCategory = category;
+
     const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
     const selectedName = document.querySelector("#review-field-name");
     selectedName.textContent = cleanedFieldKey + " " + fieldValue;
@@ -232,6 +232,7 @@ function click_field(fieldKey, fieldValue, category) {
 
     let selectedDivId = 'field_' + fieldKey;
     let selectedDiv = document.getElementById(selectedDivId);
+
 
     if (fieldDescriptionsData[cleanedFieldKey]) {
         let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
@@ -254,6 +255,7 @@ function click_field(fieldKey, fieldValue, category) {
         fieldDescriptionsElement.textContent = "No description found";
     }
     const fieldState = getFieldState(fieldKey);
+
     if (fieldState) {
         if (fieldState === 'ok') {
             document.getElementById("ok-button").disabled = true;
@@ -268,6 +270,17 @@ function click_field(fieldKey, fieldValue, category) {
         document.getElementById("ok-button").disabled = isEmpty;
         document.getElementById("rejected-button").disabled = isEmpty;
         document.getElementById("suggestion-button").disabled = isEmpty;
+        const explanationContainer = document.getElementById("explanation-container"); // Получаем новый контейнер
+        const existingExplanation = explanationContainer.querySelector('.explanation');
+
+        if (isEmpty && !existingExplanation) {
+            const explanationElement = document.createElement('p');
+            explanationElement.textContent = 'Field is empty. Reviewing is not possible.';
+            explanationElement.classList.add('explanation');
+            explanationContainer.appendChild(explanationElement);
+        } else if (!isEmpty && existingExplanation) {
+            explanationContainer.removeChild(existingExplanation);
+        }
     }
 
     // Set selected / not selected style on metadata fields
