@@ -40,7 +40,7 @@ class OeoExtPluginView(View, LoginRequiredMixin):
     Some text Some textSome textSome textSome textSome textSome textSome
     """
     
-    def take_user_input():
+    def get_class_data():
         units_used = []
         D = { 'linear_unit_numerators': [], 
         'squared_unit_numerators' : [],
