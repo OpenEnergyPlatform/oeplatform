@@ -1,0 +1,36 @@
+<!--
+    This partial template is a plug able ui to create a new oeo ext term on the fly.
+    This can be used in any html of the oepatform, currently it is planned ot add it
+    to the oemetabuilder feature to extend the annotation functionality for example
+    when annotation units.
+-->
+{% load django_bootstrap5 %}
+
+<!-- @adel: htmxComponent should be the hx-target -->
+<div class="htmxComponent">
+    <!-- @adel: This form is only a suggestion -->
+    <form id="oeo-ext-form" hx-post="{% url 'oeo_ext:oeo-ext-plugin-ui-create' %}" hx-target=".htmxComponent" hx-swap="outerHTML">
+        {% csrf_token %}
+
+        <!-- Input field 1 with autocomplete -->
+        <label for="inputField1">Input Field 1:</label>
+        <input type="text" id="inputField1" name="inputField1"
+                hx-get="/autocomplete-data1" hx-trigger="keyup changed delay:500ms" autocomplete="off">
+
+        <!-- Selection field -->
+        <label for="selectionField">Selection Field:</label>
+        <select id="selectionField" name="selectionField" hx-get="/selection-options" hx-trigger="load">
+            <option value="equals">Equals</option>
+            <!-- Add more options as needed -->
+        </select>
+
+        <!-- Input field 2 with autocomplete -->
+        <label for="inputField2">Input Field 2:</label>
+        <input type="text" id="inputField2" name="inputField2"
+                hx-get="/autocomplete-data2" hx-trigger="keyup changed delay:500ms" autocomplete="off">
+
+        <!-- Description text field -->
+        <label for="descriptionField">Description:</label>
+        <textarea id="descriptionField" name="descriptionField"></textarea>
+    </form>
+</div>
