@@ -1837,7 +1837,7 @@ class MetaEditView(LoginRequiredMixin, View):
         )
 
 
-class StandaloneMetaEditView(LoginRequiredMixin, View):
+class StandaloneMetaEditView(View):
     def get(self, request):
         context_dict = {
             "config": json.dumps(
