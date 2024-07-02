@@ -34,6 +34,13 @@ urlpatterns = [
         name="input",
     ),
     url(
+        r"^view/(?P<schema>{qual})/(?P<table>{qual})/download_metadata$".format(
+            qual=pgsql_qualifier
+        ),
+        views.get_metadata,
+        name="metadata",
+    ),
+    url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/permissions$".format(
             qual=pgsql_qualifier
         ),
