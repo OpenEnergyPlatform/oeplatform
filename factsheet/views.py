@@ -438,7 +438,7 @@ def create_factsheet(request, *args, **kwargs):
             contact_person_URI = URIRef(
                 "http://openenergy-platform.org/ontology/oekg/" + item["iri"]
             )
-            bundle.add((study_URI, OEO.OEO_0000050, contact_person_URI))
+            bundle.add((study_URI, OEO.OEO_00000508, contact_person_URI))
 
         _sector_divisions = (
             json.loads(sector_divisions) if sector_divisions is not None else []
