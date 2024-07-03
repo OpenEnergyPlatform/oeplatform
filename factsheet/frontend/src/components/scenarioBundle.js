@@ -60,12 +60,10 @@ import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/compone
 import InfoListItem from '../styles/oep-theme/components/infoListItem.js'
 import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
 import AttachmentIcon from '@mui/icons-material/Attachment.js';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined.js';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined.js';
 import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined.js';
 import LinkIcon from '@mui/icons-material/Link.js';
 import Chip from '@mui/material/Chip';
-import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined.js';
 import Container from '@mui/material/Container';
 import Backdrop from '@mui/material/Backdrop';
 
@@ -238,7 +236,7 @@ function Factsheet(props) {
   const [selectedTechnologies, setSelectedTechnologies] = useState(id !== 'new' ? fsData.technologies : []);
   const [expandedTechnologyList, setExpandedTechnologyList] = useState([]);
 
-  const [scenarioDescriptors, setScenarioDescriptors] = React.useState([]);
+  const [scenarioDescriptors, setScenarioTypes] = React.useState([]);
   const [selectedScenarioDescriptors, setSelectedScenarioDescriptors] = useState([]);
 
   const [modelsList, setModelsList] = useState([]);
@@ -367,8 +365,9 @@ function Factsheet(props) {
 
 
       // setTechnologies(data.technologies['children']);
-
-      setScenarioDescriptors(data.scenario_descriptors);
+      
+      // rephrase scenario descriptors to - types
+      setScenarioTypes(data.scenario_descriptors);
       const sectors_with_tooltips = data.sectors.map(item =>
       ({
         ...item,
@@ -2115,7 +2114,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.descriptors.map((e) => <span> <span> {e.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
+                    {v.descriptors.map((e) => <span> <span> <Chip sx={{ marginTop: "5px" }} label={e.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.class)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
