@@ -350,7 +350,7 @@ function renderSummaryPageFields() {
     const fields = document.querySelectorAll('.field');
     for (let field of fields) {
       let field_id = field.id.slice(6);
-      const fieldValue = $(field).text();
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
       if (fieldState === 'ok') {
@@ -365,7 +365,7 @@ function renderSummaryPageFields() {
 
   for (const review of current_review.reviews) {
     const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
-    const fieldValue = $(field_id).text();
+    const fieldValue = $(field_id).find('.value').text().replace(/\s+/g, ' ').trim();
     const isAccepted = review.fieldReview.some((fieldReview) => fieldReview.state === 'ok');
     const isRejected = review.fieldReview.some((fieldReview) => fieldReview.state === 'rejected');
 
@@ -389,7 +389,7 @@ function renderSummaryPageFields() {
     const category_fields = category.querySelectorAll(".field");
     for (field of category_fields) {
       const field_id = field.id.slice(6);
-      const fieldValue = $(field).text();
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const found = current_review.reviews.some((review) => review.key === field_id);
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
