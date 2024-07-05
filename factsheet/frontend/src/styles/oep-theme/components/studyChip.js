@@ -3,7 +3,7 @@ import Chip from '@mui/material/Chip';
 import palette from '../palette';
 import variables from '../variables';
 
-const StudyChip = ({ index, label, included }) => {
+const StudyChip = ({ index, label, included, onClick }) => {
   const chipColor = included ? 'success' : 'error';
   const backgroundColor = index === 0 ? palette.background.white : chipColor === 'success' ? palette.success.lighter : palette.error.lighter;
 
@@ -20,6 +20,7 @@ const StudyChip = ({ index, label, included }) => {
         backgroundColor,
         fontSize: variables.fontSize.sm
       }}
+      onClick={onClick}
     />
   );
 };
