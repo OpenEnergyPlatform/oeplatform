@@ -175,6 +175,9 @@ const handleOpenURL = (url, setError) => {
                             index={index}
                             label={study_descriptor}
                             included={state.items[0].data.study_descriptors.includes(study_descriptor)}
+                            onClick={() => {
+                              handleOpenURL((StudyKeywords.find((item) => item[0] === study_descriptor))[1]);
+                            }}
                           />
                         ))}
                       </div>}
