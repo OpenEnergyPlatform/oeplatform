@@ -5,6 +5,7 @@ import Chip from '@mui/material/Chip';
 import StudyChip from '../styles/oep-theme/components/studyChip';
 import palette from '../styles/oep-theme/palette';
 import variables from '../styles/oep-theme/variables';
+import StudyKeywords from './scenarioBundleMicroComponents/StudyDescriptors.js';
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
@@ -67,7 +68,7 @@ export default function  ComparisonBoardItems (props) {
 // enhance open url function to handle urls better
 // TODO change once OEKG is migrated
 const handleOpenURL = (url, setError) => {
-  if (!url || url.trim() === '') {
+  if (!url[1]) {
     setError('Invalid URL');
     return;
   }
@@ -181,13 +182,22 @@ const handleOpenURL = (url, setError) => {
                           />
                         ))}
                       </div>}
-
                       {c_aspects.includes("Scenario types") && <div style={aspectStyle}>
                         <Typography variant="subtitle2" gutterBottom component="div">
                           <b>Scenario types:</b>
                         </Typography>
-                        {console.log(item.data.scenario_descriptors)}
-                        {item.data.scenario_descriptors.map((scenario_descriptor) => <span> <span> <Chip sx={{ marginTop: "5px" }} key={scenario_descriptor[0]} index={index} label={scenario_descriptor[0]} size="small" variant="outlined" included={state.items[0].data.scenario_descriptors.includes(scenario_descriptor)} onClick={() => handleOpenURL(scenario_descriptor[1])} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
+
+                        {item.data.scenario_descriptors.map((scenario_descriptor) => (
+                          <StudyChip
+                            key={scenario_descriptor[0]}
+                            index={index}
+                            label={scenario_descriptor[0]}
+                            included={state.items[0].data.scenario_descriptors.some(desc => desc[0].includes(scenario_descriptor[0]))}
+                            onClick={() => {
+                              handleOpenURL(scenario_descriptor[1]);
+                            }}
+                          />
+                        ))}
                       </div>}
 
                       {c_aspects.includes("Regions") && <div style={aspectStyle}>
