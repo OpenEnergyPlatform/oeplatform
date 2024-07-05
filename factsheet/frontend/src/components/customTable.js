@@ -66,6 +66,7 @@ import '../styles/App.css';
 import variables from '../styles/oep-theme/variables.js';
 import palette from '../styles/oep-theme/palette.js';
 import CSRFToken from './csrfToken';
+import StudyKeywords from './scenarioBundleMicroComponents/StudyDescriptors.js';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -591,22 +592,6 @@ export default function CustomTable(props) {
     [order, orderBy, page, rowsPerPage],
   );
 
-  const StudyKeywords = [
-    'resilience',
-    'life cycle analysis',
-    'CO2 emissions',
-    'Greenhouse gas emissions',
-    'Reallabor',
-    '100% renewables',
-    'acceptance',
-    'sufficiency',
-    '(changes in) demand',
-    'degree of electrifiaction',
-    'regionalisation',
-    'total gross electricity generation',
-    'total net electricity generation',
-    'peak electricity generation'
-  ];
 
   const scenarioAspects = [
     "Descriptors",
@@ -941,7 +926,9 @@ export default function CustomTable(props) {
                 <FormGroup>
                   <div >
                     {
-                      StudyKeywords.map((item) => <FormControlLabel control={<Checkbox size="small" color="default" />} checked={selectedStudyKewords.includes(item)} onChange={handleStudyKeywords} label={item} name={item} />)
+                      StudyKeywords.map((item) => <FormControlLabel control={
+                        <Checkbox size="small" color="default" />
+                      } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]} />)
                     }
                   </div>
                 </FormGroup>
