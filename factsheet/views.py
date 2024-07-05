@@ -194,8 +194,6 @@ def create_factsheet(request, *args, **kwargs):
         patch_response_headers(response, cache_timeout=1)
         return response
     else:
-        # TODO- set in settings
-
         bundle = Graph()
 
         study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
@@ -438,7 +436,7 @@ def create_factsheet(request, *args, **kwargs):
             contact_person_URI = URIRef(
                 "http://openenergy-platform.org/ontology/oekg/" + item["iri"]
             )
-            bundle.add((study_URI, OEO.OEO_0000050, contact_person_URI))
+            bundle.add((study_URI, OEO.OEO_00000508, contact_person_URI))
 
         _sector_divisions = (
             json.loads(sector_divisions) if sector_divisions is not None else []
@@ -1645,6 +1643,34 @@ def get_all_factsheets(request, *args, **kwargs):
     return response
 
 
+def search_scenario_type_iris_by_label(label, input):
+    for child in input:
+        result = None
+
+        if str(child["label"]) == label:
+            result = str(child["iri"])
+            return result
+
+        elif child.get("children"):
+            result = search_scenario_type_iris_by_label(label, child["children"])
+            if result:
+                return result
+    return result
+
+
+def get_scenario_type_iri(scenario_type_label: str):
+    scenario_class = oeo_owl.search_one(
+        iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
+    )
+    scenario_subclasses = get_all_sub_classes(scenario_class)
+
+    result = search_scenario_type_iris_by_label(
+        label=scenario_type_label, input=scenario_subclasses["children"]
+    )
+
+    return result
+
+
 def get_scenarios(request, *args, **kwargs):
     scenarios_uid = [
         i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_uid"))
@@ -1671,7 +1697,12 @@ def get_scenarios(request, *args, **kwargs):
                 abstract = o
 
             for s1, p1, o1 in oekg.triples((s, OEO["has_scenario_descriptor"], None)):
-                scenario_descriptors.append(str(oeo.value(o1, RDFS.label)))
+                scenario_descriptors.append(
+                    (
+                        str(oeo.value(o1, RDFS.label)),
+                        get_scenario_type_iri(str(oeo.value(o1, RDFS.label))),
+                    )
+                )
 
             for s1, p1, o1 in oekg.triples((s, OEO.OEO_00020220, None)):
                 o1_label = oekg.value(o1, RDFS.label)
@@ -1717,7 +1748,7 @@ def get_scenarios(request, *args, **kwargs):
                     },
                 }
             )
-            print(scenarios)
+            # print(scenarios)
 
     response = JsonResponse(scenarios, safe=False, content_type="application/json")
     return response

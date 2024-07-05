@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Typography from '@mui/material/Typography';
+import Chip from '@mui/material/Chip';
 import StudyChip from '../styles/oep-theme/components/studyChip';
 import palette from '../styles/oep-theme/palette';
 import variables from '../styles/oep-theme/variables';
+import StudyKeywords from './scenarioBundleMicroComponents/StudyDescriptors.js';
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
@@ -62,6 +64,38 @@ export default function  ComparisonBoardItems (props) {
       items: newItems,
     });
   }
+
+// enhance open url function to handle urls better
+// TODO change once OEKG is migrated
+const handleOpenURL = (url, setError) => {
+  if (!url[1]) {
+    setError('Invalid URL');
+    return;
+  }
+
+  let processedURL = url.trim();
+
+  // Handle URLs with spaces in the middle
+  processedURL = processedURL.replace(/\s+/g, '%20');
+
+  // Prepend base URL if not starting with http:// or https://
+  if (!processedURL.startsWith('http://') && !processedURL.startsWith('https://')) {
+    const baseURL = window.location.origin;
+    processedURL = `${baseURL}${processedURL}`;
+  }
+
+  if (processedURL.startsWith('http://') && !processedURL.startsWith('http://127') && !processedURL.startsWith('http://local')){
+    processedURL = processedURL.replace('http://', 'https://');
+  }
+
+  // Encode the URL to handle special characters
+  try {
+    const encodedURL = encodeURI(processedURL);
+    window.open(encodedURL, "_blank");
+  } catch (error) {
+    setError('Invalid URL format');
+  }
+};
 
   const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
@@ -142,20 +176,26 @@ export default function  ComparisonBoardItems (props) {
                             index={index}
                             label={study_descriptor}
                             included={state.items[0].data.study_descriptors.includes(study_descriptor)}
+                            onClick={() => {
+                              handleOpenURL((StudyKeywords.find((item) => item[0] === study_descriptor))[1]);
+                            }}
                           />
                         ))}
                       </div>}
-
-                      {c_aspects.includes("Scenario descriptors") && <div style={aspectStyle}>
+                      {c_aspects.includes("Scenario types") && <div style={aspectStyle}>
                         <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Scenario descriptors:</b>
+                          <b>Scenario types:</b>
                         </Typography>
+
                         {item.data.scenario_descriptors.map((scenario_descriptor) => (
                           <StudyChip
-                            key={scenario_descriptor}
+                            key={scenario_descriptor[0]}
                             index={index}
-                            label={scenario_descriptor}
-                            included={state.items[0].data.scenario_descriptors.includes(scenario_descriptor)}
+                            label={scenario_descriptor[0]}
+                            included={state.items[0].data.scenario_descriptors.some(desc => desc[0].includes(scenario_descriptor[0]))}
+                            onClick={() => {
+                              handleOpenURL(scenario_descriptor[1]);
+                            }}
                           />
                         ))}
                       </div>}
