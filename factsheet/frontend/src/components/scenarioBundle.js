@@ -73,7 +73,8 @@ import '../styles/App.css';
 import { TableRow } from '@mui/material';
 import variables from '../styles/oep-theme/variables.js';
 
-import StudyKeywords from './scenarioBundleMicroComponents/StudyDescriptors.js';
+import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
+import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.js';
 
 
 function TabPanel(props: TabPanelProps) {
@@ -1316,38 +1317,6 @@ function Factsheet(props) {
     return foundObj;
   };
 
-
-  // enhance open url function to handle urls better
-  // TODO change once OEKG is migrated
-  const handleOpenURL = (url, setError) => {
-    if (!url || url.trim() === '') {
-      setError('Invalid URL');
-      return;
-    }
-  
-    let processedURL = url.trim();
-
-    // Handle URLs with spaces in the middle
-    processedURL = processedURL.replace(/\s+/g, '%20');
-  
-    // Prepend base URL if not starting with http:// or https://
-    if (!processedURL.startsWith('http://') && !processedURL.startsWith('https://')) {
-      const baseURL = window.location.origin;
-      processedURL = `${baseURL}${processedURL}`;
-    }
-
-    if (processedURL.startsWith('http://') && !processedURL.startsWith('http://127') && !processedURL.startsWith('http://local')){
-      processedURL = processedURL.replace('http://', 'https://');
-    }
-
-    // Encode the URL to handle special characters
-    try {
-      const encodedURL = encodeURI(processedURL);
-      window.open(encodedURL, "_blank");
-    } catch (error) {
-      setError('Invalid URL format');
-    }
-  };
 
   const scenarioDescriptorHandler = (descriptorList, nodes, id) => {
     const zipped = []

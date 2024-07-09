@@ -66,7 +66,7 @@ import '../styles/App.css';
 import variables from '../styles/oep-theme/variables.js';
 import palette from '../styles/oep-theme/palette.js';
 import CSRFToken from './csrfToken';
-import StudyKeywords from './scenarioBundleMicroComponents/StudyDescriptors.js';
+import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {

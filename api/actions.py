@@ -1026,7 +1026,7 @@ def table_change_column(column_definition):
     return perform_sql(sql_string)
 
 
-def table_change_constraint(table, constraint_definition):
+def table_change_constraint(constraint_definition):
     """
     Changes constraint of table
     :param schema: schema
