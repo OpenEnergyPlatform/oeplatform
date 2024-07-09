@@ -52,4 +52,4 @@ class ScenarioDataTablesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         # fields = ["id", "model_name", "acronym", "url"]
-        fields = ["id", "name", "url"]
+        fields = ["id", "name", "human_readable_name", "url"]
