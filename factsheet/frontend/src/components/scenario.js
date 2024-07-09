@@ -201,7 +201,7 @@ export default function Scenario(props) {
   const classes = useStyles();
   const tabClasses = { root: classes.tab };
 
-  const getDAtaTableList = async () => {
+  const getDataTableList = async () => {
     const { data } = await axios.get(conf.toep + `api/v0/datasets/list_all/scenario/`, {
       headers: { 'X-CSRFToken': CSRFToken() }
     });
@@ -209,9 +209,9 @@ export default function Scenario(props) {
   };
 
   useEffect(() => {
-    getDAtaTableList().then((data) => {
+    getDataTableList().then((data) => {
       const tmp = [];
-      data.map((item) => tmp.push({ 'url': item.url, 'label': item.name, 'id': item.id }));
+      data.map((item) => tmp.push({ 'url': item.url, 'label': `${item.human_readable_name ? item.human_readable_name : item.name}`,'name': item.name, 'id': item.id }));
       setDataTableList(tmp);
     });
   }, []);
