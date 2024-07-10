@@ -422,22 +422,24 @@ function renderSummaryPageFields() {
   const suggestingFields = [];
   const rejectedFields = [];
   const missingFields = [];
+  const emptyFields = [];
 
   if (state_dict && Object.keys(state_dict).length > 0) {
     const fields = document.querySelectorAll('.field');
     for (let field of fields) {
       let field_id = field.id.slice(6);
       const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
-      console.log("value " + fieldValue)
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
-      if (fieldState === 'ok') {
-        acceptedFields.push({field_id, fieldValue, fieldCategory});
+      if (isEmptyValue(fieldValue)) {
+        emptyFields.push({ field_id, fieldValue, fieldCategory: "emptyFields" });
+      } else if (fieldState === 'ok') {
+        acceptedFields.push({ field_id, fieldValue, fieldCategory });
+      } else if (fieldState === 'suggestion') {
+        suggestingFields.push({ field_id, fieldValue, fieldCategory });
+      } else if (fieldState === 'rejected') {
+        rejectedFields.push({ field_id, fieldValue, fieldCategory });
       }
-      // TODO: The following line duplicates enties in the summary tab
-      // else if (fieldState === 'suggestion' || fieldState === 'rejected') {
-      // missingFields.push({ field_id, fieldValue, fieldCategory });
-      // }
     }
   }
 
@@ -447,12 +449,14 @@ function renderSummaryPageFields() {
     const fieldState = review.fieldReview.state;
     const fieldCategory = review.category;
 
-    if (fieldState === 'ok') {
-      acceptedFields.push({field_id, fieldValue, fieldCategory});
+    if (isEmptyValue(fieldValue)) {
+      emptyFields.push({ field_id, fieldValue, fieldCategory: "emptyFields" });
+    } else if (fieldState === 'ok') {
+      acceptedFields.push({ field_id, fieldValue, fieldCategory });
     } else if (fieldState === 'suggestion') {
-      suggestingFields.push({field_id, fieldValue, fieldCategory});
+      suggestingFields.push({ field_id, fieldValue, fieldCategory });
     } else if (fieldState === 'rejected') {
-      rejectedFields.push({field_id, fieldValue, fieldCategory});
+      rejectedFields.push({ field_id, fieldValue, fieldCategory });
     }
   }
 
@@ -471,8 +475,8 @@ function renderSummaryPageFields() {
       const found = current_review.reviews.some((review) => review.key === field_id);
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
-      if (!found && fieldState !== 'ok') {
-        missingFields.push({field_id, fieldValue, fieldCategory});
+      if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
+        missingFields.push({ field_id, fieldValue, fieldCategory });
       }
     }
   }
@@ -531,14 +535,14 @@ function renderSummaryPageFields() {
   }
 
 
-  function updateSummaryTable() {
+    function updateSummaryTable() {
     clearSummaryTable();
-
     let allData = [];
     allData.push(...missingFields.map((item) => ({...item, fieldStatus: 'Missing'})));
     allData.push(...acceptedFields.map((item) => ({...item, fieldStatus: 'Accepted'})));
     allData.push(...suggestingFields.map((item) => ({...item, fieldStatus: 'Suggested'})));
     allData.push(...rejectedFields.map((item) => ({...item, fieldStatus: 'Rejected'})));
+    allData.push(...emptyFields.map((item) => ({...item, fieldStatus: 'Empty'})));
 
     let table = generateTable(allData);
     summaryContainer.appendChild(table);
@@ -546,7 +550,6 @@ function renderSummaryPageFields() {
 
   updateSummaryTable();
   updateTabProgressIndicatorClasses();
-  // updatePercentageDisplay();
 }
 
 /**
