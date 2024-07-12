@@ -123,7 +123,14 @@ def show(request, sheettype, model_name):
     Loads the requested factsheet
     """
     c, _ = getClasses(sheettype)
+
+    if not c:
+        raise Http404(
+            "We dropped the scenario factsheets in favor of scenario bundles."
+        )
+
     model = get_object_or_404(c, pk=model_name)
+
     d = load_tags()
     model.tags = [d[tag_id] for tag_id in model.tags]
 

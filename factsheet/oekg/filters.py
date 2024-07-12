@@ -8,6 +8,23 @@ class OekgQuery:
     def __init__(self):
         self.oekg = oekg
 
+    def serialize_table_iri(self, table_iri: str):
+        """
+        The OEKG stores the full iri to link its resources.
+        Due to structural changes it also stores the iri:urn instead.
+        the serialization will function als a validation preprocessing
+        step.
+
+        IRI Like 'dataedit/view/scenario/abbb_emob' or '
+        https://openenergyplatform.org/dataedit/view/scenario/abbb_emob'
+        becomes comparable even with more variation options.
+        """
+
+        # Trim down variations of table iri´s down to harmonized part.
+        id_from_url = table_iri.split("view/")
+
+        return id_from_url[1]
+
     def get_related_scenarios_where_table_is_input_dataset(self, table_iri):
         """
         Query the OEKG to get all scenarios that list the current table as
@@ -23,6 +40,7 @@ class OekgQuery:
                             IRI Like 'dataedit/view/scenario/abbb_emob'
         """
         related_scenarios = set()
+        table_iri = self.serialize_table_iri(table_iri)
 
         # Find all scenario bundles
         for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
@@ -34,13 +52,13 @@ class OekgQuery:
                 ):
                     if o1_input_ds_uid is not None:
                         for s3, p3, o3_input_ds_iri in oekg.triples(
-                            (
-                                o1_input_ds_uid,
-                                namespaces.OEO["has_iri"],
-                                Literal(table_iri),
-                            )
+                            (o1_input_ds_uid, namespaces.OEO["has_iri"], None)
                         ):
-                            related_scenarios.add(s2)
+                            if (
+                                self.serialize_table_iri(str(o3_input_ds_iri))
+                                == table_iri
+                            ):
+                                related_scenarios.add(s2)
 
         return related_scenarios
 
