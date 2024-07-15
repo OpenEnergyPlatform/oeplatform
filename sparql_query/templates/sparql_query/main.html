@@ -1,0 +1,25 @@
+{% extends "base/base-wide-react.html" %}
+{% load static %}
+
+{% block after-head %}
+<link rel="stylesheet" href="//cdn.jsdelivr.net/yasgui/2.5.0/yasgui.min.css">
+{% endblock after-head %}
+
+{% block main-content-body %}
+<div id="yasgui"></div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var yasgui = YASGUI(document.getElementById('yasgui'), {
+            requestConfig: {
+                endpoint: '{% url 'sparql_endpoint' %}'
+            }
+        });
+    });
+</script>
+</div>
+
+{% endblock main-content-body %}
+
+{% block after-body-bottom-js %}
+<script src="//cdn.jsdelivr.net/yasgui/2.5.0/yasgui.min.js"></script>
+{% endblock after-body-bottom-js %}
