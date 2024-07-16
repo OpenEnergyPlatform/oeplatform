@@ -358,10 +358,11 @@ function renderSummaryPageFields() {
       const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
+      const fieldName = field_id.split('.').pop();
       if (isEmptyValue(fieldValue)) {
-        emptyFields.push({ field_id, fieldValue, fieldCategory: "emptyFields" });
+        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
       } else if (fieldState === 'ok') {
-        acceptedFields.push({ field_id, fieldValue, fieldCategory });
+        acceptedFields.push({ fieldName, fieldValue, fieldCategory });
       }
     }
   }
@@ -371,15 +372,15 @@ function renderSummaryPageFields() {
     const fieldValue = $(field_id).find('.value').text().replace(/\s+/g, ' ').trim();
     const isAccepted = review.fieldReview.some((fieldReview) => fieldReview.state === 'ok');
     const isRejected = review.fieldReview.some((fieldReview) => fieldReview.state === 'rejected');
-
     const fieldCategory = review.category;
+    const fieldName = review.key.split('.').pop();
 
     if (isEmptyValue(fieldValue)) {
-      emptyFields.push({ field_id, fieldValue, fieldCategory: "emptyFields" });
+      emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
     } else if (isAccepted) {
-      acceptedFields.push({ field_id, fieldValue, fieldCategory });
+      acceptedFields.push({ fieldName, fieldValue, fieldCategory });
     } else if (isRejected) {
-      rejectedFields.push({ field_id, fieldValue, fieldCategory });
+      rejectedFields.push({ fieldName, fieldValue, fieldCategory });
     }
   }
 
@@ -398,16 +399,16 @@ function renderSummaryPageFields() {
       const found = current_review.reviews.some((review) => review.key === field_id);
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
+      const fieldName = field_id.split('.').pop();
 
       if (isEmptyValue(fieldValue)) {
-        emptyFields.push({ field_id, fieldValue, fieldCategory: "emptyFields" });
+        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
       } else if (!found && fieldState !== 'ok') {
-        missingFields.push({ field_id, fieldValue, fieldCategory });
+        missingFields.push({ fieldName, fieldValue, fieldCategory });
       }
     }
   }
 
-  // Отображение полей на странице сводки
   const summaryContainer = document.getElementById("summary");
 
   function clearSummaryTable() {
@@ -422,7 +423,7 @@ function renderSummaryPageFields() {
 
     let thead = document.createElement('thead');
     let header = document.createElement('tr');
-    header.innerHTML = '<th scope="col">Статус</th><th scope="col">Категория поля</th><th scope="col">Название поля</th><th scope="col">Значение поля</th>';
+    header.innerHTML = '<th scope="col">Status</th><th scope="col">Field Category</th><th scope="col">Field Name</th><th scope="col">Field Value</th>';
     thead.appendChild(header);
     table.appendChild(thead);
 
@@ -445,7 +446,7 @@ function renderSummaryPageFields() {
       row.appendChild(tdFieldCategory);
 
       let tdFieldId = document.createElement('td');
-      tdFieldId.textContent = item.field_id;
+      tdFieldId.textContent = item.fieldName;
       row.appendChild(tdFieldId);
 
       let tdFieldValue = document.createElement('td');
@@ -476,6 +477,7 @@ function renderSummaryPageFields() {
   updateSummaryTable();
   updateTabProgressIndicatorClasses();
 }
+
 
 
 /**

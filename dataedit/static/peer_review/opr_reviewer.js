@@ -431,14 +431,16 @@ function renderSummaryPageFields() {
       const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
+      const fieldName = field_id.split('.').pop();
+
       if (isEmptyValue(fieldValue)) {
-        emptyFields.push({ field_id, fieldValue, fieldCategory: "emptyFields" });
+        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
       } else if (fieldState === 'ok') {
-        acceptedFields.push({ field_id, fieldValue, fieldCategory });
+        acceptedFields.push({ fieldName, fieldValue, fieldCategory });
       } else if (fieldState === 'suggestion') {
-        suggestingFields.push({ field_id, fieldValue, fieldCategory });
+        suggestingFields.push({ fieldName, fieldValue, fieldCategory });
       } else if (fieldState === 'rejected') {
-        rejectedFields.push({ field_id, fieldValue, fieldCategory });
+        rejectedFields.push({ fieldName, fieldValue, fieldCategory });
       }
     }
   }
@@ -448,15 +450,17 @@ function renderSummaryPageFields() {
     const fieldValue = $(field_id).find('.value').text().replace(/\s+/g, ' ').trim();
     const fieldState = review.fieldReview.state;
     const fieldCategory = review.category;
+    const fieldName = review.key.split('.').pop();
+
 
     if (isEmptyValue(fieldValue)) {
-      emptyFields.push({ field_id, fieldValue, fieldCategory: "emptyFields" });
+      emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
     } else if (fieldState === 'ok') {
-      acceptedFields.push({ field_id, fieldValue, fieldCategory });
+      acceptedFields.push({ fieldName, fieldValue, fieldCategory });
     } else if (fieldState === 'suggestion') {
-      suggestingFields.push({ field_id, fieldValue, fieldCategory });
+      suggestingFields.push({ fieldName, fieldValue, fieldCategory });
     } else if (fieldState === 'rejected') {
-      rejectedFields.push({ field_id, fieldValue, fieldCategory });
+      rejectedFields.push({ fieldName, fieldValue, fieldCategory });
     }
   }
 
@@ -475,8 +479,9 @@ function renderSummaryPageFields() {
       const found = current_review.reviews.some((review) => review.key === field_id);
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
+      const fieldName = field_id.split('.').pop();
       if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
-        missingFields.push({ field_id, fieldValue, fieldCategory });
+        missingFields.push({ fieldName, fieldValue, fieldCategory });
       }
     }
   }
