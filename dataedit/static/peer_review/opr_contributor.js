@@ -698,7 +698,10 @@ function updateTabProgressIndicatorClasses() {
 
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-    let allOk = fieldsInTab.every((field) => field.classList.contains('field-ok'));
+    let allOk = fieldsInTab.every((field) => {
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      return isEmptyValue(fieldValue) || field.classList.contains('field-ok');
+    });
 
     if (allOk) {
       tab.classList.add('status--done');
@@ -707,7 +710,6 @@ function updateTabProgressIndicatorClasses() {
     }
   }
 }
-
 
 function updateTabClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
