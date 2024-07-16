@@ -184,6 +184,10 @@ function getFieldState(fieldKey) {
   return state_dict[fieldKey];
 }
 
+function isEmptyValue(value) {
+    return value === "" || value === "None" || value === "[]";
+}
+
 function click_field(fieldKey, fieldValue, category) {
   // Check if the category tab needs to be switched
   switchCategoryTab(category);
@@ -345,6 +349,7 @@ function renderSummaryPageFields() {
   const acceptedFields = [];
   const rejectedFields = [];
   const missingFields = [];
+  const emptyFields = [];
 
   if (state_dict && Object.keys(state_dict).length > 0) {
     const fields = document.querySelectorAll('.field');
@@ -353,13 +358,11 @@ function renderSummaryPageFields() {
       const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
-      if (fieldState === 'ok') {
-        acceptedFields.push({field_id, fieldValue, fieldCategory});
+      if (isEmptyValue(fieldValue)) {
+        emptyFields.push({ field_id, fieldValue, fieldCategory: "emptyFields" });
+      } else if (fieldState === 'ok') {
+        acceptedFields.push({ field_id, fieldValue, fieldCategory });
       }
-      // TODO: The following line duplicates enties in the summary tab
-      // else if (fieldState === 'suggestion' || fieldState === 'rejected') {
-      // missingFields.push({ field_id, fieldValue, fieldCategory });
-      // }
     }
   }
 
@@ -371,10 +374,12 @@ function renderSummaryPageFields() {
 
     const fieldCategory = review.category;
 
-    if (isAccepted) {
-      acceptedFields.push({field_id, fieldValue, fieldCategory});
+    if (isEmptyValue(fieldValue)) {
+      emptyFields.push({ field_id, fieldValue, fieldCategory: "emptyFields" });
+    } else if (isAccepted) {
+      acceptedFields.push({ field_id, fieldValue, fieldCategory });
     } else if (isRejected) {
-      rejectedFields.push({field_id, fieldValue, fieldCategory});
+      rejectedFields.push({ field_id, fieldValue, fieldCategory });
     }
   }
 
@@ -394,14 +399,15 @@ function renderSummaryPageFields() {
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
 
-      if (!found && fieldState !== 'ok') {
-        missingFields.push({field_id, fieldValue, fieldCategory});
+      if (isEmptyValue(fieldValue)) {
+        emptyFields.push({ field_id, fieldValue, fieldCategory: "emptyFields" });
+      } else if (!found && fieldState !== 'ok') {
+        missingFields.push({ field_id, fieldValue, fieldCategory });
       }
     }
   }
 
-
-  // Display fields on the Summary page
+  // Отображение полей на странице сводки
   const summaryContainer = document.getElementById("summary");
 
   function clearSummaryTable() {
@@ -416,7 +422,7 @@ function renderSummaryPageFields() {
 
     let thead = document.createElement('thead');
     let header = document.createElement('tr');
-    header.innerHTML = '<th scope="col">Status</th><th scope="col">Field Category</th><th scope="col">Field Name</th><th scope="col">Field Value</th>';
+    header.innerHTML = '<th scope="col">Статус</th><th scope="col">Категория поля</th><th scope="col">Название поля</th><th scope="col">Значение поля</th>';
     thead.appendChild(header);
     table.appendChild(thead);
 
@@ -454,7 +460,6 @@ function renderSummaryPageFields() {
     return table;
   }
 
-
   function updateSummaryTable() {
     clearSummaryTable();
 
@@ -462,6 +467,7 @@ function renderSummaryPageFields() {
     allData.push(...missingFields.map((item) => ({...item, fieldStatus: 'Missing'})));
     allData.push(...acceptedFields.map((item) => ({...item, fieldStatus: 'Accepted'})));
     allData.push(...rejectedFields.map((item) => ({...item, fieldStatus: 'Rejected'})));
+    allData.push(...emptyFields.map((item) => ({...item, fieldStatus: 'Empty'})));
 
     let table = generateTable(allData);
     summaryContainer.appendChild(table);
@@ -470,6 +476,7 @@ function renderSummaryPageFields() {
   updateSummaryTable();
   updateTabProgressIndicatorClasses();
 }
+
 
 /**
  * Creates an HTML list of fields with their categories
@@ -731,7 +738,7 @@ window.addEventListener('DOMContentLoaded', updateTabClasses);
 console.log('Script is running...');
 
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOM fully loaded and parsed');
+  // console.log('DOM fully loaded and parsed');
 
   const summaryTab = document.getElementById('summary-tab');
   const otherTabs = [
