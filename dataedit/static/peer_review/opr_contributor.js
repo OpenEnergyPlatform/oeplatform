@@ -631,17 +631,20 @@ function checkReviewComplete() {
   const fields = document.querySelectorAll('.field');
   for (let field of fields) {
     let fieldName = field.id.slice(6);
+    const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
     const fieldState = getFieldState(fieldName);
     let reviewed = current_review["reviews"].find((review) => review.key === fieldName);
 
-    if (!reviewed && fieldState !== 'ok') {
+    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
       $('#submit_summary').addClass('disabled');
       return;
     }
   }
   $('#submit_summary').removeClass('disabled');
-  showToast("Success", "You have reviewed all fields an can submit the review to get feedback!", 'success');
+  showToast("Success", "You have reviewed all fields and can submit the review to get feedback!", 'success');
 }
+
+
 
 
 /**
