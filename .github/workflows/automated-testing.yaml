@@ -48,7 +48,6 @@ jobs:
           --name fuseki
           -e FUSEKI_DATASET_1=ds
           -e FUSEKI_MEM_1=true
-          -p 3030:3030
 
     strategy:
       matrix:
