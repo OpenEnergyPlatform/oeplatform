@@ -106,39 +106,43 @@
     </nav>
 
 {% endblock header %}
+<main class="main">
+    <div class="" style="padding:0">
+        {% block site-header %}
+        {% endblock site-header %}
+        <div class="" style="padding:0">
+        {% block main %}
+            
+                {% block main-content %}
+                
+                        {% block main-content-body %}{% endblock %}
+                    
+                {% endblock main-content %}
+        
+        {% endblock main %}
+    </div>
+    </div>
+</main>
+{% block footer %}
+<footer class="footer mt-auto py-3 bg-secondary">
+    <nav class="navbar navbar-expand navbar-dark bg-secondary">
+        <div class="container-fluid justify-content-end">
+            <ul class="navbar-nav mr-auto">
 
-<div class="container-fluid base" style="padding:0">
-    {% block site-header %}
-    {% endblock site-header %}
-    {% block main %}
-        <div class="row">
-            {% block main-content %}
-                <div style="width: 100%">
-                    {% block main-content-body %}{% endblock %}
-                </div>
-            {% endblock main-content %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/contact/">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/legal/privacy_policy/">Privacy Policy</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/legal/tou/">Terms of Use</a>
+                </li>
+            </ul>
         </div>
-    {% endblock main %}
-    {% block footer %}
-        <footer class="navbar-footer bg-secondary">
-            <nav class="navbar navbar-expand navbar-dark bg-secondary">
-                <ul class="navbar-nav mr-auto">
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="/contact/">Contact</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/legal/privacy_policy/">Privacy Policy</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/legal/tou/">Terms of Use</a>
-                    </li>
-                </ul>
-            </nav>
-        </footer>
-    {% endblock footer %}
-</div>
-
+    </nav>
+</footer>
+{% endblock footer %}
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
     <script src="{% static 'js/jquery.min.js' %}"></script>
