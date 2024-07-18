@@ -1,6 +1,11 @@
 import requests
-from django.http import JsonResponse
+from django.core.exceptions import SuspiciousOperation
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
+from django.views.decorators.http import require_GET
+
+from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
+from sparql_query.utils import validate_sparql_query
 
 
 def main_view(request):
@@ -9,11 +14,17 @@ def main_view(request):
     return response
 
 
+@require_GET
 def sparql_endpoint(request):
     sparql_query = request.GET.get("query", "")
-    endpoint_url = (
-        "http://localhost:3030/ds/sparql"  # Must be replaced by the url for OEKG
-    )
+
+    if not sparql_query:
+        return HttpResponseBadRequest("Missing 'query' parameter.")
+
+    if not validate_sparql_query(sparql_query):
+        raise SuspiciousOperation("Invalid SPARQL query.")
+
+    endpoint_url = OEKG_SPARQL_ENDPOINT_URL
 
     headers = {"Accept": "application/sparql-results+json"}
 
