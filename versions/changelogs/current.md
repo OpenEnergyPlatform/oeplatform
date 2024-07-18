@@ -10,6 +10,8 @@
 
 ## Features
 
+- Add new sparql query endpoint and GUI (using YASGUI) to query the OEKG. This feature is linked via the scenario bundle overview page [#1758](https://github.com/OpenEnergyPlatform/oeplatform/pull/1758)
+
 ## Bugs
 
 ## Documentation updates
