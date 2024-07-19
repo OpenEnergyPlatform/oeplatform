@@ -14,6 +14,7 @@ from factsheet.oekg.connection import oekg, oeo, oeo_owl, sparql
 from factsheet.oekg.filters import OekgQuery
 from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
+from factsheet.utils import serialize_publication_date
 from login import models as login_models
 from modelview.utils import get_framework_metadata_by_id, get_model_metadata_by_id
 
@@ -658,7 +659,7 @@ def update_factsheet(request, *args, **kwargs):
                 new_bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
 
             if (
-                item["date_of_publication"] != "01-01-1900"
+                item["date_of_publication"] != "1900"
                 and item["date_of_publication"] != ""
             ):
                 new_bundle.add(
@@ -679,6 +680,13 @@ def update_factsheet(request, *args, **kwargs):
                 )
 
             new_bundle.add((study_URI, OEKG["has_publication"], publications_URI))
+
+            # remove old date in publication
+            # iterate to make sure it can only have unique publication date
+            for _s, _p, _o in oekg.triples(
+                (publications_URI, OEKG["date_of_publication"], None)
+            ):
+                oekg.remove((_s, _p, _o))
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
@@ -1172,6 +1180,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 factsheet["models"].append(model_metadata)
                 print(factsheet["models"])
 
+    factsheet["collected_scenario_publication_dates"] = []
     factsheet["publications"] = []
     for s, p, o in oekg.triples((study_URI, OEKG["has_publication"], None)):
         publication = {}
@@ -1195,7 +1204,10 @@ def factsheet_by_id(request, *args, **kwargs):
 
         publication["date_of_publication"] = ""
         for s3, p3, o3 in oekg.triples((o, OEKG["date_of_publication"], None)):
-            publication["date_of_publication"] = o3
+            publication["date_of_publication"] = serialize_publication_date(str(o3))
+            factsheet["collected_scenario_publication_dates"].append(
+                serialize_publication_date(str(o3))
+            )
 
         publication["link_to_study_report"] = ""
         for s4, p4, o4 in oekg.triples((o, OEKG["link_to_study_report"], None)):
@@ -1615,17 +1627,24 @@ def get_all_factsheets(request, *args, **kwargs):
             if o != None:  # noqa
                 element["frameworks"].append(o)
 
+        element["collected_scenario_publication_dates"] = []
+        for s, p, o in oekg.triples((s, OEKG["has_publication"], None)):
+            print(o)
+            pubs_per_bundle = []
+            for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
+                if o1:
+                    pubs_per_bundle.append(serialize_publication_date(str(o1)))
+
+            if pubs_per_bundle:
+                element["collected_scenario_publication_dates"].append(pubs_per_bundle)
+
         element["scenarios"] = []
-
-        element["date_of_publication"] = oekg.value(
-            study_URI, OEKG["date_of_publication"]
-        )
-
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
             label = oekg.value(o, RDFS.label)
             abstract = oekg.value(o, DC.abstract)
             full_name = oekg.value(o, OEKG.has_full_name)
             uid = oekg.value(o, OEKG.scenario_uuid)
+
             if label != None:  # noqa
                 element["scenarios"].append(
                     {
