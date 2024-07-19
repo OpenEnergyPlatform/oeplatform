@@ -1,6 +1,6 @@
 import React, { useState, useEffect, } from 'react';
 import Chart from "chart.js/auto";
-import { Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import ComparisonBoardItems from "./comparisonBoardItems";
 // import { Box } from "@mui/system";
 // import ComparisonControl from "./comparisonControl";
@@ -25,7 +25,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
-
+import Typography from '@mui/material/Typography';
 
 
 
@@ -82,78 +82,36 @@ const ComparisonBoardMain = (props) => {
     }
   }
 
-    const sampleData = [43, 40, 50, 40, 70, 40, 45, 33, 40, 60, 40, 50, 36];
-  
-    const canvasData = {
-      datasets: [
-        {
-          label: "eu_leg_data_2016_eea",
-          borderColor: "navy",
-          pointRadius: 0,
-          fill: true,
-          backgroundColor: 'lightblue',
-          lineTension: 0.4,
-          data: sampleData,
-          borderWidth: 1,
-          title: 's',
-        },
-      ],
-    };
-  
-    const options = {
-      scales: {
-        x: {
-          grid: {
-            display: false,
-          },
-          labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-          ticks: {
-            color: "blue",
-            font: {
-              family: "Nunito",
-              size: 10,
-            },
-          },
-        },
-        y: {
-          grid: {
-            display: false,
-          },
-          border: {
-            display: false,
-          },
-          min: 0,
-          max: 100,
-          ticks: {
-            stepSize: 10,
-            color: "blue",
-            font: {
-              family: "Nunito",
-              size: 12,
-            },
-          },
-        },
-      },
-      maintainAspectRatio: false,
-      responsive: true,
-      plugins: {
-        legend: {
-          display: true,
-        },
-        title: {
-          display: true,
-        },
-      },
-    };
-  
-    const graphStyle = {
-      minHeight: "20rem",
-      maxWidth: "100%",
-      width: "100%",
-      border: "1px solid #C4C4C4",
-      borderRadius: "0.375rem",
-      padding: "0.5rem",
-    };
+  const dataBar = {
+    labels: ["AT","BE","CY","CZ","DE","DK","EE","ES","FI","FR","GB","GR","HR","HU","IE","IS","IT","LT","LV","MT","NL","PL","PT","SE","SI","SK"],
+    datasets: [
+      {
+        label: "eu_leg_data_2016_eea",
+        backgroundColor: "lightblue",
+        borderColor: "rgba(120,99,132,1)",
+        borderWidth: 1,
+        hoverBackgroundColor: "rgba(255,99,132,0.4)",
+        hoverBorderColor: "rgba(255,99,132,1)",
+        data: [79,113,8.6,126,835,43,19,331,52,461,414,89,23,63,61,5,419,21,11,2,169,398,63,49,17,42]
+      }
+    ]
+  };
+
+  const options = {
+    plugins: {
+      datalabels: {
+        display: true,
+        color: "black",
+        formatter: Math.round,
+        anchor: "end",
+        offset: -20,
+        align: "start"
+      }
+    },
+    legend: {
+      display: false
+    }
+  };
 
   return (
     scenarios.length !== 0 &&
@@ -230,8 +188,17 @@ const ComparisonBoardMain = (props) => {
         } 
         {alignment == "Quantitative" && 
         <Grid item xs={12}>
-          <div style={graphStyle}>
-            <Line id="home" options={options} data={canvasData} />
+          <Typography variant="h6" gutterBottom>
+            with existing measures scenario' submitted in 2019
+          </Typography>
+          <Typography variant="subtitle1" gutterBottom>
+            This visualisation depicts the projected 2020 - 2035 data from the WEM scenario submissions made by European Member States to the European Commission in 2019. 
+          </Typography>
+          <Typography variant="subtitle1" gutterBottom>
+            The data displayed refers to total greenhouse gas emissions excluding LULUCF and excluding international aviation. 
+          </Typography>
+          <div>
+            <Bar data={dataBar} options={options} width={100} height={40} />
           </div>
         </Grid>
         } 
