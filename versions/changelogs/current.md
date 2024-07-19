@@ -14,7 +14,8 @@
 
 - Open peer review: Fixed several bugs that hindered the user to submit a review, broke the indicators dots that show the review progress & showed badly formatted data on the summary tab [(#1762)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1762)
 
-- (1763), 1756, 1755
+- Fixed multiple scenario bundle bugs [(#1764)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1764)
   - 1757 Fix incorrect rendering of multiple publication years and show None if no data available.
+  -
 
 ## Documentation updates
