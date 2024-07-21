@@ -963,6 +963,16 @@ def update_factsheet(request, *args, **kwargs):
 
             new_bundle.add((study_URI, OEO["has_model"], model_URI))
 
+            # remove old labels
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((model_URI, RDFS.label, None)):
+                oekg.remove((_s, _p, _o))
+
+            # remove old iri´s
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((model_URI, OEO["has_iri,"], None)):
+                oekg.remove((_s, _p, _o))
+
         # TODO: Fix
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
@@ -1000,6 +1010,16 @@ def update_factsheet(request, *args, **kwargs):
                 )
 
             new_bundle.add((study_URI, OEO["has_framework"], framework_URI))
+
+            # remove old labels
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((framework_URI, RDFS.label, None)):
+                oekg.remove((_s, _p, _o))
+
+            # remove old iri´s
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((framework_URI, OEO["has_iri,"], None)):
+                oekg.remove((_s, _p, _o))
 
         _study_keywords = (
             json.loads(study_keywords) if study_keywords is not None else []
@@ -1180,7 +1200,6 @@ def factsheet_by_id(request, *args, **kwargs):
             if framework_metadata:
                 framework_metadata["url"] = str(o1)
                 factsheet["frameworks"].append(framework_metadata)
-                print(factsheet["frameworks"])
 
     for _, _, o in oekg.triples((study_URI, OEO["has_model"], None)):
         for _, _, o1 in oekg.triples((o, OEO["has_iri"], None)):
@@ -1190,7 +1209,6 @@ def factsheet_by_id(request, *args, **kwargs):
             if model_metadata:
                 model_metadata["url"] = str(o1)
                 factsheet["models"].append(model_metadata)
-                print(factsheet["models"])
 
     factsheet["collected_scenario_publication_dates"] = []
     factsheet["publications"] = []
