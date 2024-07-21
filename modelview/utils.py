@@ -1,4 +1,15 @@
+from django.urls import reverse
+
 from modelview.models import Energyframework, Energymodel
+
+
+def get_url(sheettype, obj_id):
+    kwargs = {"sheettype": sheettype, "model_name": obj_id}
+    detail_url = reverse(
+        "modelview:show-factsheet",
+        kwargs=kwargs,
+    )
+    return detail_url
 
 
 def get_model_class(model_type: str):
@@ -23,6 +34,7 @@ def get_model_metadata_by_id(id_model: int, model_type: str):
         "id": id_model,
         "name": model_instance["model_name"],
         "acronym": model_instance["acronym"],
+        "urn": get_url("framework", id_model),
     }
 
     return model_metadata
@@ -43,6 +55,7 @@ def get_framework_metadata_by_id(id_framework: int, model_type: str):
         "id": id_framework,
         "name": model_instance["model_name"],
         "acronym": model_instance["acronym"],
+        "urn": get_url("model", id_framework),
     }
 
     return model_metadata
