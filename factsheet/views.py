@@ -1620,16 +1620,21 @@ def get_all_factsheets(request, *args, **kwargs):
         element["models"] = []
         for s, p, o in oekg.triples((study_URI, OEO["has_model"], None)):
             if o != None:  # noqa
-                element["models"].append(o)
+                label = oekg.value(o, RDFS.label)
+                if label:
+                    element["models"].append(label)
 
         element["frameworks"] = []
         for s, p, o in oekg.triples((study_URI, OEO["has_framework"], None)):
             if o != None:  # noqa
-                element["frameworks"].append(o)
+                label = oekg.value(o, RDFS.label)
+                if label is not None:
+                    element["frameworks"].append(label)
+                else:
+                    pass
 
         element["collected_scenario_publication_dates"] = []
         for s, p, o in oekg.triples((s, OEKG["has_publication"], None)):
-            print(o)
             pubs_per_bundle = []
             for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
                 if o1:
@@ -1767,7 +1772,6 @@ def get_scenarios(request, *args, **kwargs):
                     },
                 }
             )
-            # print(scenarios)
 
     response = JsonResponse(scenarios, safe=False, content_type="application/json")
     return response
