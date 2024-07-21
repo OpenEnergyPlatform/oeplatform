@@ -2457,7 +2457,7 @@ function Factsheet(props) {
                 <><Chip
                   size='small'
                   key={v.id}
-                  label={v.acronym}
+                  label={v.acronym ? v.acronym : v.name}
                   variant="outlined"
                   sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)} /><b className="separator-dot"> . </b></>
                 ))
@@ -2489,7 +2489,7 @@ function Factsheet(props) {
                   <><Chip
                     size='small'
                     key={v.id}
-                    label={v.acronym}
+                    label={v.acronym ? v.acronym : v.name}
                     variant="outlined"
                     sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)} /><b className="separator-dot"> . </b></>
                   ))
