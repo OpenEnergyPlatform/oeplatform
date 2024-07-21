@@ -461,7 +461,10 @@ def create_factsheet(request, *args, **kwargs):
         _models = json.loads(models) if models is not None else []
         for item in _models:
             model_id = item.get("id")
-            model_acronym = item.get("acronym")
+            if item.get("acronym"):
+                model_acronym = item.get("acronym")
+            else:
+                model_acronym = item.get("name")
             model_url = item.get("url")
 
             if not model_id or not model_acronym or not model_url:
@@ -490,7 +493,10 @@ def create_factsheet(request, *args, **kwargs):
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
             framework_id = item.get("id")
-            framework_acronym = item.get("acronym")
+            if item.get("acronym"):
+                framework_acronym = item.get("acronym")
+            else:
+                framework_acronym = item.get("name")
             framework_url = item.get("url")
 
             if not framework_id or not framework_acronym or not framework_url:
@@ -924,7 +930,11 @@ def update_factsheet(request, *args, **kwargs):
         _models = json.loads(models) if models is not None else []
         for item in _models:
             model_id = item.get("id")
-            model_acronym = item.get("acronym")
+
+            if item.get("acronym"):
+                model_acronym = item.get("acronym")
+            else:
+                model_acronym = item.get("name")
             model_url = item.get("url")
 
             if not model_id or not model_acronym or not model_url:
@@ -957,8 +967,10 @@ def update_factsheet(request, *args, **kwargs):
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
             framework_id = item.get("id")
-            # framework_name = item.get("name")
-            framework_acronym = item.get("acronym")
+            if item.get("acronym"):
+                framework_acronym = item.get("acronym")
+            else:
+                framework_acronym = item.get("name")
             framework_url = item.get("url")
 
             if not framework_id or not framework_url:
