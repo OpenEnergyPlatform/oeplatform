@@ -17,6 +17,8 @@
 - Fixed multiple scenario bundle bugs [(#1764)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1764)
   - 1757 Fix incorrect rendering of multiple publication years and show None if no data available.
   - Year of publication in scenario bundle detail view now renders only the year
-  - (1763), 1756, 1755
+  - Model & framework factsheets are now rendered as clickable chip that links to the detail page of the factsheet. The chip now renders either the acronym or the
+    name of the factsheet.
+  - (1763)
 
 ## Documentation updates
