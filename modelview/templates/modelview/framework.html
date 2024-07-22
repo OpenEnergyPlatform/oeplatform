@@ -3,12 +3,32 @@
 {% load static %}
 {% load modelview_extras %}
 {% load dataedit.taghandler %}
+{% load compress %}
+
 
 {% block main-right-sidebar-content-actions %}
   <a class="btn btn-info" href="edit">Edit</a>
+  <a class="btn btn-danger"
+    hx-delete="{% url 'modelview:delete-factsheet' sheettype='framework' pk=model.pk %}"
+    hx-confirm="Are you sure you want to delete this entry?"
+    >
+    Delete
+  </a>
+
 {% endblock main-right-sidebar-content-actions %}
 
 {% block factsheets_content %}
+  <!-- Bootstrap 5 Toast Container -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto" id="toastTitle"></strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastBody"></div>
+    </div>
+  </div>
+
   <div class="card-container">
     <div class="card ">
       <div class="card-header">
@@ -381,3 +401,32 @@
     </div>
   </div>
 {% endblock %}
+
+{% block after-body-bottom-js %}
+<script>
+  document.body.addEventListener('htmx:configRequest', (event) => {
+    event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+  })
+
+  document.addEventListener('htmx:responseError', function (event) {
+    var target = event.detail.target;
+    var messageContainer = document.getElementById('toastBody');
+    var toastTitle = document.getElementById('toastTitle');
+    var liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+
+    // Show error message in the toast
+    toastTitle.innerHTML = 'Error';
+    messageContainer.innerHTML = 'Error deleting entry. You have to be logged in!';
+
+    // Set red color to the toast
+    liveToast._element.classList.add('bg-danger', 'text-white');
+
+    liveToast.show();
+
+  });
+</script>
+
+{% compress js %}
+  <script src="/static/modelview/htmx.min.js"></script>
+{% endcompress %}
+{% endblock after-body-bottom-js %}

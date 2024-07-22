@@ -40,6 +40,7 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
    - Change filename to release version (x_x_x.md)
    - Copy template to `current.md`
    - Update version with `bumpversion --allow-dirty [minor|patch]`
+   - Update the release date in `CITATION.cff`
 1. Deploy release branch on TOEP.
    - Test the changes
    - Create a hotfix and merge changes into the release branch
@@ -58,6 +59,8 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
    - copy the release summary from changelog into the description box
 1. Announce it on our mailing list: oep_dev-request@lists.riseup.net
    - again, copy the rendered HTML from the Github release directly in the email
+1. Create a GitHub D´discussion to collect feedback
+   - https://github.com/OpenEnergyPlatform/oeplatform/discussions/new?category=release
 
 And that's it! Whew...
 

@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("dataedit", "0009_tablerevision_path")]
 
     operations = [

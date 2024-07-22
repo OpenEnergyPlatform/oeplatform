@@ -1,41 +1,37 @@
+import logging
 import os
-import re
-from collections import defaultdict
+from pathlib import Path
 
-from django.shortcuts import Http404, HttpResponse, redirect, render
+from django.http import Http404
+from django.shortcuts import HttpResponse, render
 from django.views import View
-from rdflib import Graph
 
-from oeplatform.settings import ONTOLOGY_FOLDER
+from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME
+from ontology.utils import collect_modules, get_common_data, get_ontology_version
 
+LOGGER = logging.getLogger("oeplatform")
 
-def collect_modules(path):
-    modules = dict()
-    for file in os.listdir(path):
-        if not os.path.isdir(os.path.join(path, file)):
-            match = re.match(r"^(?P<filename>.*)\.(?P<extension>\w+)$", file)
-            filename, extension = match.groups()
-            if filename not in modules:
-                modules[filename] = dict(extensions=[], comment="No description found")
-            if extension == "owl":
-                # g = Graph()
-                # g.parse(os.path.join(path, file))
-                # root = dict(g.namespaces())['']
-                # comments = g.objects(root, RDFS.comment)
-                # try:
-                #    modules[filename]["comment"] = next(comments)
-                # except StopIteration:
-                modules[filename]["comment"] = "No description found"
-            modules[filename]["extensions"].append(extension)
-    return modules
+LOGGER.info("Start loading the oeo from local static files.")
+OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
+OEO_PATH = OEO_BASE_PATH / OEO_VERSION
+OEO_MODULES_MAIN = collect_modules(OEO_PATH)
+OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
+OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
+OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
+LOGGER.info(
+    "Loading completed! The content form the oeo files is parse into python data types."
+)
 
 
 class OntologyVersion(View):
     def get(self, request, ontology="oeo", version=None):
-        if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
+        if not onto_base_path.exists():
             raise Http404
-        versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
-        print(versions)
+        versions = os.listdir(onto_base_path)
+        LOGGER.info(f"Loaded oeo version {version}")
         if not version:
             version = max(
                 (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
@@ -49,255 +45,232 @@ class OntologyVersion(View):
         )
 
 
+class PartialOntologyOverviewContent(View):
+    def get(self, request):
+        if request.headers.get("HX-Request") == "true":
+            if request.method == "GET":
+                ontology_data = OEO_COMMON_DATA
+
+                submodules = OEO_MODULES_SUBMODULES
+
+                desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
+
+                relevant_modules = {
+                    key: value
+                    for key, value in submodules.items()
+                    if key in desired_keys
+                }
+
+                # Collect all file names
+                imports = OEO_MODULES_IMPORTS
+
+                partial = render(
+                    request,
+                    "ontology/partial_ontology_content.html",
+                    dict(
+                        ontology=ontology_data["ontology"],
+                        version=ontology_data["version"],
+                        submodules=relevant_modules.items(),
+                        imports=imports.items(),
+                        ontology_description=ontology_data["oeo_context_data"][
+                            "ontology_description"
+                        ],
+                    ),
+                ).content.decode("utf-8")
+
+                return HttpResponse(partial)
+
+
+class PartialOntologyOverviewSidebarContent(View):
+    def get(self, request):
+        version = OEO_VERSION
+        main_module = OEO_MODULES_MAIN
+
+        if OPEN_ENERGY_ONTOLOGY_NAME in main_module.keys():
+            main_module_name = OPEN_ENERGY_ONTOLOGY_NAME
+        else:
+            raise Exception(
+                f"The main module '{OPEN_ENERGY_ONTOLOGY_NAME}' "
+                + "is not available in {path}."
+            )
+
+        main_module = main_module[main_module_name]
+        main_module["name"] = main_module_name
+        partial = render(
+            request,
+            "ontology/partial_ontology_sidebar_content.html",
+            dict(
+                ontology=OPEN_ENERGY_ONTOLOGY_NAME,
+                version=version,
+                main_module=main_module,
+            ),
+        ).content.decode("utf-8")
+
+        return HttpResponse(partial)
+
+
+def initial_for_pageload(request):
+    if request.headers.get("HTTP_HX_REQUEST") == "true":
+        if request.method == "GET":
+            return render(request, "ontology/initial_response_htmx.html")
+
+
 class OntologyOverview(View):
-    def get(self, request, ontology, module_or_id=None, version=None, imports=False):
-        if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
+    def get(
+        self,
+        request,
+        ontology=OPEN_ENERGY_ONTOLOGY_NAME,
+        module_or_id=None,
+        version=None,
+        imports=False,
+    ):
+        onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+
+        if not onto_base_path.exists():
             raise Http404
-        versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
+        versions = os.listdir(onto_base_path)
         if not version:
             version = max(
                 (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
             )
-
-        path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}"
-        # This is temporary (macOS related)
-        file = "oeo-full.owl"
-        Ontology_URI = os.path.join(path, file)
-        g = Graph()
-        g.parse(Ontology_URI)
-
-        q_global = g.query(
-            """
-            SELECT DISTINCT ?s ?o
-            WHERE { ?s rdfs:subClassOf ?o
-            filter(!isBlank(?o))
-            }
-            """
-        )
-
-        q_label = g.query(
-            """
-            SELECT DISTINCT ?s ?o
-            WHERE { ?s rdfs:label ?o }
-            """
-        )
-
-        q_definition = g.query(
-            """
-            SELECT DISTINCT ?s ?o
-            WHERE { ?s obo:IAO_0000115 ?o }
-            """
-        )
-
-        q_note = g.query(
-            """
-            SELECT DISTINCT ?s ?o
-            WHERE { ?s obo:IAO_0000116 ?o }
-            """
-        )
-
-        q_main_description = g.query(
-            """
-            SELECT ?s ?o
-            WHERE { ?s dc:description ?o }
-            """
-        )
-
-        classes_name = {}
-        for row in q_label:
-            class_name = row.s.split("/")[-1]
-            classes_name[class_name] = row.o
-
-        classes_definitions = defaultdict(list)
-        for row in q_definition:
-            class_name = row.s.split("/")[-1]
-            classes_definitions[class_name].append(row.o)
-
-        classes_notes = defaultdict(list)
-        for row in q_note:
-            class_name = row.s.split("/")[-1]
-            classes_notes[class_name].append(row.o)
-
-        ontology_description = ""
-        for row in q_main_description:
-            if row.s.split("/")[-1] == "":
-                ontology_description = row.o
-
-        # Begin prepare data for oeo-viewer. Only need to be executed once per release
-        # graphLinks = []
-        # graphNodes = []
-        #
-        # for row in q_global:
-        #     source = row.o.split('/')[-1]
-        #     target = row.s.split('/')[-1]
-        #
-        #     #if source in classes_name.keys() and target in classes_name.keys():
-        #     graphLinks.append({
-        #         "source": source,
-        #         "target": target
-        #         })
-        #
-        #     target_found = False
-        #     source_found = False
-        #
-        #     for item in graphNodes:
-        #         if item["id"] == target:
-        #             target_found = True
-        #         if item["id"] == source:
-        #             source_found = True
-        #
-        #     try:
-        #         if not target_found:
-        #             graphNodes.append({
-        #                 "id": target,
-        #                 "name": classes_name[target],
-        #                 "description": classes_definitions[target],
-        #                 "editor_note": classes_notes[target]
-        #                 })
-        #
-        #         if not source_found:
-        #             graphNodes.append({
-        #                 "id": source,
-        #                 "name": classes_name[source],
-        #                 "description": classes_definitions[source],
-        #                 "editor_note": classes_notes[source]
-        #                 })
-        #     except:
-        #         pass
-        #
-        # with open('GraphData.json', 'w') as f:
-        #     json.dump({"nodes": graphNodes,
-        #                 "links": graphLinks}, f)
-        # End prepare data for oeo-viewer
-
         if "text/html" in request.headers.get("accept", "").split(","):
-            if module_or_id:
-                sub_classes = []
-                super_classes = []
-
-                for row in q_global:
-                    if module_or_id in row.o:
-                        sub_class_ID = row.s.split("/")[-1]
-                        sub_class_name = ""
-                        sub_class_definition = ""
-                        sub_class_note = ""
-                        if sub_class_ID in classes_name.keys():
-                            sub_class_name = classes_name[sub_class_ID]
-                            if sub_class_ID in classes_definitions.keys():
-                                sub_class_definition = classes_definitions[sub_class_ID]
-                            if sub_class_ID in classes_notes.keys():
-                                sub_class_note = classes_notes[sub_class_ID]
-                            sub_classes.append(
-                                {
-                                    "URI": row.s,
-                                    "ID": sub_class_ID,
-                                    "name": sub_class_name,
-                                    "definitions": sub_class_definition,
-                                    "notes": sub_class_note,
-                                }
-                            )
-                    if module_or_id in row.s:
-                        super_class_ID = row.o.split("/")[-1]
-                        super_class_name = ""
-                        super_class_definition = ""
-                        super_class_note = ""
-                        if super_class_ID in classes_name.keys():
-                            super_class_name = classes_name[super_class_ID]
-                            if super_class_ID in classes_definitions.keys():
-                                super_class_definition = classes_definitions[
-                                    super_class_ID
-                                ]
-                            if super_class_ID in classes_notes.keys():
-                                super_class_note = classes_notes[super_class_ID]
-                            super_classes.append(
-                                {
-                                    "URI": row.o,
-                                    "ID": super_class_ID,
-                                    "name": super_class_name,
-                                    "definitions": super_class_definition,
-                                    "notes": super_class_note,
-                                }
-                            )
-
-                class_name = ""
-                if module_or_id in classes_name.keys():
-                    class_name = classes_name[module_or_id]
-
-                class_definitions = ""
-                if module_or_id in classes_definitions.keys():
-                    class_definitions = classes_definitions[module_or_id]
-
-                class_notes = ""
-                if module_or_id in classes_notes.keys():
-                    class_notes = classes_notes[module_or_id]
-
-                return render(
-                    request,
-                    "ontology/class.html",
-                    dict(
-                        class_id=module_or_id,
-                        class_name=class_name,
-                        sub_classes=sub_classes,
-                        super_classes=super_classes,
-                        class_definitions=class_definitions,
-                        class_notes=class_notes,
-                    ),
-                )
+            if module_or_id and "oeo" in module_or_id:
+                # Possibly handle specific module or ID-based logic here
+                pass
             else:
-                main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
-                main_module_name = list(main_module.keys())[0]
-                main_module = main_module[main_module_name]
-                main_module["name"] = main_module_name
-                submodules = collect_modules(
-                    f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules"
-                )
-                # Collect all file names
-                imports = collect_modules(
-                    f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports"
-                )
-
                 return render(
                     request,
                     "ontology/oeo.html",
-                    dict(
-                        ontology=ontology,
-                        version=version,
-                        main_module=main_module,
-                        submodules=submodules.items(),
-                        imports=imports.items(),
-                        ontology_description=ontology_description,
-                    ),
+                    {"ontology": OPEN_ENERGY_ONTOLOGY_NAME, "version": version},
                 )
         else:
-            module_name = None
-            if module_or_id:
-                if imports:
-                    submodules = collect_modules(
-                        f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports"
-                    )
-                else:
-                    submodules = collect_modules(
-                        f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules"
-                    )
-                # If module_or_id is the name of a valid submodule, use this module
-                if module_or_id in submodules:
-                    module_name = module_or_id
-                if imports:
-                    return redirect(
-                        f"/ontology/{ontology}/releases/{version}/imports/{module_name}.owl"  # noqa
-                    )
-                else:
-                    return redirect(
-                        f"/ontology/{ontology}/releases/{version}/{module_name}.owl"
-                    )
-            # If no module was requested or the requested id was not a module,
-            # serve main ontology
-            if module_name is None:
-                main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
-                module_name = list(main_module.keys())[0]
-            return redirect(
-                f"/ontology/{ontology}/releases/{version}/{module_name}.owl"
-            )
+            # Handling other types of requests or default case
+            return HttpResponse("Unsupported media type", status=415)
+
+        # If none of the above conditions are met
+        return HttpResponse("Invalid request parameters", status=400)
+
+
+class OntologyViewClasses(View):
+    def get(
+        self,
+        request,
+        ontology=OPEN_ENERGY_ONTOLOGY_NAME,
+        module_or_id=None,
+        version=None,
+        imports=False,
+    ):
+        ontology_data = OEO_COMMON_DATA
+        sub_classes = []
+        super_classes = []
+        if module_or_id:
+            for row in ontology_data["oeo_context_data"]["q_global"]:
+                if module_or_id in row.o:
+                    sub_class_ID = row.s.split("/")[-1]
+                    sub_class_name = ""
+                    sub_class_definition = ""
+                    sub_class_note = ""
+                    if (
+                        sub_class_ID
+                        in ontology_data["oeo_context_data"]["classes_name"].keys()
+                    ):
+                        sub_class_name = ontology_data["oeo_context_data"][
+                            "classes_name"
+                        ][sub_class_ID]
+                        if (
+                            sub_class_ID
+                            in ontology_data["oeo_context_data"][
+                                "classes_definitions"
+                            ].keys()
+                        ):
+                            sub_class_definition = ontology_data["oeo_context_data"][
+                                "classes_definitions"
+                            ][sub_class_ID]
+                        if (
+                            sub_class_ID
+                            in ontology_data["oeo_context_data"]["classes_notes"].keys()
+                        ):
+                            sub_class_note = ontology_data["oeo_context_data"][
+                                "classes_notes"
+                            ][sub_class_ID]
+                        sub_classes.append(
+                            {
+                                "URI": row.s,
+                                "ID": sub_class_ID,
+                                "name": sub_class_name,
+                                "definitions": sub_class_definition,
+                                "notes": sub_class_note,
+                            }
+                        )
+                if module_or_id in row.s:
+                    super_class_ID = row.o.split("/")[-1]
+                    super_class_name = ""
+                    super_class_definition = ""
+                    super_class_note = ""
+                    if (
+                        super_class_ID
+                        in ontology_data["oeo_context_data"]["classes_name"].keys()
+                    ):
+                        super_class_name = ontology_data["oeo_context_data"][
+                            "classes_name"
+                        ][super_class_ID]
+                        if (
+                            super_class_ID
+                            in ontology_data["oeo_context_data"][
+                                "classes_definitions"
+                            ].keys()
+                        ):
+                            super_class_definition = ontology_data["oeo_context_data"][
+                                "classes_definitions"
+                            ][super_class_ID]
+                        if (
+                            super_class_ID
+                            in ontology_data["oeo_context_data"]["classes_notes"].keys()
+                        ):
+                            super_class_note = ontology_data["oeo_context_data"][
+                                "classes_notes"
+                            ][super_class_ID]
+                        super_classes.append(
+                            {
+                                "URI": row.o,
+                                "ID": super_class_ID,
+                                "name": super_class_name,
+                                "definitions": super_class_definition,
+                                "notes": super_class_note,
+                            }
+                        )
+
+        class_name = ""
+        if module_or_id in ontology_data["oeo_context_data"]["classes_name"].keys():
+            class_name = ontology_data["oeo_context_data"]["classes_name"][module_or_id]
+
+        class_definitions = ""
+        if (
+            module_or_id
+            in ontology_data["oeo_context_data"]["classes_definitions"].keys()
+        ):
+            class_definitions = ontology_data["oeo_context_data"][
+                "classes_definitions"
+            ][module_or_id]
+
+        class_notes = ""
+        if module_or_id in ontology_data["oeo_context_data"]["classes_notes"].keys():
+            class_notes = ontology_data["oeo_context_data"]["classes_notes"][
+                module_or_id
+            ]
+        return render(
+            request,
+            "ontology/class.html",
+            dict(
+                ontology=ontology,
+                class_id=module_or_id,
+                class_name=class_name,
+                sub_classes=sub_classes,
+                super_classes=super_classes,
+                class_definitions=class_definitions,
+                class_notes=class_notes,
+            ),
+        )
 
 
 class OntologyStatics(View):
@@ -311,19 +284,20 @@ class OntologyStatics(View):
         :return:
         """
 
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
         if not extension:
             extension = "owl"
         if not version:
             version = max(
-                (d for d in os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")),
+                (d for d in os.listdir(onto_base_path)),
                 key=lambda d: [int(x) for x in d.split(".")],
             )
         if imports:
-            file_path = (
-                f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports/{file}.{extension}"
-            )
+            file_path = onto_base_path / version / "imports" / f"{file}.{extension}"
         else:
-            file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/{file}.{extension}"
+            file_path = onto_base_path / version / f"{file}.{extension}"
+
         if os.path.exists(file_path):
             with open(file_path, "br") as f:
                 response = HttpResponse(
@@ -334,9 +308,7 @@ class OntologyStatics(View):
                 ] = f'attachment; filename="{file}.{extension}"'
                 return response
         else:
-            file_path = (
-                f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules/{file}.{extension}"
-            )
+            file_path = onto_base_path / version / "modules" / f"{file}.{extension}"
             if not os.path.exists(file_path):
                 raise Http404
             with open(file_path, "br") as f:

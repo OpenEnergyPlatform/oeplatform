@@ -1,4 +1,83 @@
+"""
+Provide helper functionality for views to reduce code lines in views.py
+make the codebase more modular.
+"""
+
+from dataedit.models import Table
+
+##############################################
+#          Table view related                #
+##############################################
+
+
+# TODO: Add py 3.10 feature to annotate the return type as str | None
+# Dev´s need to update python version first ...
+def read_label(table, oemetadata) -> str:
+    """
+    Extracts the readable name from @comment and appends the real name in parens.
+    If comment is not a JSON-dictionary or does not contain a field 'Name' None
+    is returned.
+
+    :param table: Name to append
+
+    :param comment: String containing a JSON-dictionary according to @Metadata
+
+    :return: Readable name appended by the true table name as string or None
+    """
+    try:
+        if oemetadata.get("title"):
+            return oemetadata["title"].strip() + " (" + table + ")"
+        elif oemetadata.get("Title"):
+            return oemetadata["Title"].strip() + " (" + table + ")"
+
+        else:
+            return None
+
+    except Exception:
+        return None
+
+
+def get_readable_table_name(table_obj: Table) -> str:
+    """get readable table name from metadata
+
+    Args:
+        table_obj (object): django orm
+
+    Returns:
+        str
+    """
+
+    try:
+        label = read_label(table_obj.name, table_obj.oemetadata)
+    except Exception as e:
+        raise e
+    return label
+
+
+##############################################
+#       Open Peer Review related             #
+##############################################
+
+
 def merge_field_reviews(current_json, new_json):
+    """
+    Merge reviews from contributors and reviewers into a single JSON object.
+
+    Args:
+        current_json (dict): The current JSON object containing
+            reviewer's reviews.
+        new_json (dict): The new JSON object containing contributor's reviews.
+
+    Returns:
+        dict: The merged JSON object containing both contributor's and
+            reviewer's reviews.
+
+    Note:
+        If the same key is present in both the contributor's and
+            reviewer's reviews, the function will merge the field
+            evaluations. Otherwise, it will create a new entry in
+            the Review-Dict.
+    """
     merged_json = new_json.copy()
     review_dict = {}
 
@@ -33,7 +112,99 @@ def merge_field_reviews(current_json, new_json):
     return merged_json
 
 
+def get_review_for_key(key, review_data):
+    """
+    Retrieve the review for a specific key from the review data.
+
+    Args:
+        key (str): The key for which to retrieve the review.
+            review_data (dict): The review data containing
+            reviews for various keys.
+
+    Returns:
+        Any: The new value associated with the specified key
+            in the review data, or None if the key is not found.
+    """
+
+    for review in review_data["reviewData"]["reviews"]:
+        if review["key"] == key:
+            return review["fieldReview"].get("newValue", None)
+    return None
+
+
+def recursive_update(metadata, review_data):
+    """
+    Recursively update the metadata with new values from the review data.
+
+    Args:
+        metadata (dict): The original metadata dictionary to be updated.
+        review_data (dict): The review data containing new values for various keys.
+
+    Note:
+        The function traverses the review data, and for each key, it updates the
+        corresponding value in the metadata if a new value is present and is not
+        an empty string.
+    """
+
+    for review_key in review_data["reviewData"]["reviews"]:
+        keys = review_key["key"].split(".")
+
+        if isinstance(review_key["fieldReview"], list):
+            for field_review in review_key["fieldReview"]:
+                new_value = field_review.get("newValue", None)
+                if new_value is not None and new_value != "":
+                    set_nested_value(metadata, keys, new_value)
+        else:
+            new_value = review_key["fieldReview"].get("newValue", None)
+            if new_value is not None and new_value != "":
+                set_nested_value(metadata, keys, new_value)
+
+
+def set_nested_value(metadata, keys, value):
+    """
+    Set a nested value in a dictionary given a sequence of keys.
+
+    Args:
+        metadata (dict): The dictionary in which to set the value.
+        keys (list): A list of keys representing the path to the nested value.
+        value (Any): The value to set.
+
+    Note:
+        The function navigates through the dictionary using the keys and sets the value
+        at the position indicated by the last key in the list.
+    """
+
+    for key in keys[:-1]:
+        if key.isdigit():
+            key = int(key)
+        metadata = metadata[key]
+    last_key = keys[-1]
+    if last_key.isdigit():
+        last_key = int(last_key)
+    metadata[last_key] = value
+
+
 def process_review_data(review_data, metadata, categories):
+    """
+    Process the review data and update the metadata with the latest reviews
+    and suggestions.
+
+    Args:
+        review_data (list): A list of dictionaries containing review data for
+                            each field.
+        metadata (dict): The original metadata object that needs to be updated.
+        categories (list): A list of categories in the metadata.
+
+    Returns:
+        dict: A state dictionary containing the state of each field
+            after processing the review data.
+
+    Note:
+        The function sorts the fieldReview entries by timestamp (newest first)
+        and updates the metadata with the latest reviewer suggestions,
+        comments, and new values. The resulting state dictionary indicates
+        the state of each field after processing.
+    """
     state_dict = {}
 
     for review in review_data:
@@ -76,11 +247,10 @@ def process_review_data(review_data, metadata, categories):
         if newValue is not None:
             for category in categories:
                 for item in metadata[category]:
-                    if item['field'] == field_key:
-                        item['newValue'] = newValue
+                    if item["field"] == field_key:
+                        item["newValue"] = newValue
                         break
 
         state_dict[field_key] = state
 
     return state_dict
-

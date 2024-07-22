@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '0'
@@ -64,12 +65,18 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 ONTOLOGY_FOLDER = '/ontologies'
+ONTOLOGY_ROOT = Path(BASE_DIR, 'ontologies')
 
+# Connect to RDF database like jenna
 RDF_DATABASES = {
     'knowledge': {
         'host': 'host',
         'port': 'port',
         'name': 'your_rdf_dataset'
+    },
+    'factsheet': {
+        'dbuser': 'user',
+        'dbpasswd': 'pw'
     }
 }
 
@@ -77,3 +84,5 @@ if not DEBUG:
     AUTHENTICATION_BACKENDS = ['login.models.UserBackend', 'axes.backends.AxesBackend']
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+
+CORS_ORIGIN_ALLOW_ALL = True
