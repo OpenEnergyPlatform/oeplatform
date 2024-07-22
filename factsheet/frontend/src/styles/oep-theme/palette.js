@@ -24,6 +24,32 @@ const greyPalette = {
   900: '#001C30'
 }
 
+const successPalette = {
+  50: '#F6FFFC',
+  100: '#EBFFF9',
+  200: '#BDF8E5',
+  300: '#73DDBC',
+  400: '#4AC29D',
+  500: '#21A179',
+  600: '#13825F',
+  700: '#09684A',
+  800: '#06543B',
+  900: '#013D2A'
+}
+
+const errorPalette = {
+  50: '#FFF6F8',
+  100: '#FFEBED',
+  200: '#FAC7CD',
+  300: '#F09EA9',
+  400: '#E5707F',
+  500: '#CD4759',
+  600: '#AB2134',
+  700: '#860E1E',
+  800: '#640B17',
+  900: '#3E0109'
+}
+
 const palette = {
   primary: {
     lighter: primaryPalette[100],
@@ -33,8 +59,19 @@ const palette = {
     darker: primaryPalette[900],
     contrastText: '#FFFFFF',
   },
+  success: {
+    lighter: successPalette[100],
+    light: successPalette[300],
+    main: successPalette[600],
+    dark: successPalette[700],
+    darker: successPalette[900],
+  },
   error: {
-    main: '#e53e3e',
+    lighter: errorPalette[100],
+    light: errorPalette[300],
+    main: errorPalette[600],
+    dark: errorPalette[700],
+    darker: errorPalette[900],
   },
   neutral: {
     main: '#198BB9',
@@ -47,12 +84,14 @@ const palette = {
     secondary: '#5F7484',
     link: primaryPalette[700]
   },
+  link: primaryPalette[500],
   divider: '#E3EAEF',
   border: greyPalette[300],
   background: {
     white: '#FFFFFF',
     lighter: greyPalette[100],
-    light: greyPalette[200]
+    light: greyPalette[200],
+    highlight: primaryPalette[500]
   }
 }
 

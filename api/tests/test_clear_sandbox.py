@@ -13,7 +13,6 @@ class TestCommandClearSandbox(APITestCase):
     test_schema = SANDBOX_SCHEMA
 
     def test_clear_sandbox(self):
-
         # create a test table with data
         # so that sandbox is not empty
         self.create_table(

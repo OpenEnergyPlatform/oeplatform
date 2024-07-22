@@ -16,7 +16,6 @@ depends_on = None
 
 
 def upgrade():
-
     op.create_table(
         "api_constraints",
         sa.Column("id", sa.BigInteger(), nullable=False, primary_key=True),

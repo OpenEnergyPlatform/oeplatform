@@ -29,9 +29,7 @@ function MainApp(ref) {
   }
 
   return (
-      <div style={{ height: "100vh", width: "100vw" }}>
-          {<App />}
-      </div>
+    <App />
   );
 }
 

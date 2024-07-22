@@ -16,18 +16,17 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles import finders
 from django.http import Http404, HttpResponse  # noqa
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import View
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_http_methods
+from django.views.generic import View
 from scipy import stats
 from sqlalchemy.orm import sessionmaker
 
 from api.actions import _get_engine
 from dataedit.structures import Tag
 
-from .forms import (
-    EnergyframeworkForm,
-    EnergymodelForm,
-)
+from .forms import EnergyframeworkForm, EnergymodelForm
 from .models import Energyframework, Energymodel
 
 
@@ -44,10 +43,6 @@ def getClasses(sheettype):
         c = Energyframework
         f = EnergyframeworkForm
     return c, f
-
-
-def overview(request):
-    return render(request, "modelview/overview.html")
 
 
 def load_tags():
@@ -77,7 +72,8 @@ def listsheets(request, sheettype):
     if c is None:
         # Handle the case where getClasses returned None
         # You can return an error message or take appropriate action here.
-        # For example, you can return an HttpResponse indicating that the requested sheettype is not supported.
+        # For example, you can return an HttpResponse indicating that the
+        # requested sheettype is not supported.
         sheettype_error_message = "Invalid sheettype"
         return render(
             request,
@@ -127,7 +123,14 @@ def show(request, sheettype, model_name):
     Loads the requested factsheet
     """
     c, _ = getClasses(sheettype)
+
+    if not c:
+        raise Http404(
+            "We dropped the scenario factsheets in favor of scenario bundles."
+        )
+
     model = get_object_or_404(c, pk=model_name)
+
     d = load_tags()
     model.tags = [d[tag_id] for tag_id in model.tags]
 
@@ -144,7 +147,7 @@ def show(request, sheettype, model_name):
             )
             org = match.group("org")
             repo = match.group("repo")
-            _handle_github_contributions(org, repo)
+            # _handle_github_contributions(org, repo)
         except Exception:
             org = None
             repo = None
@@ -191,11 +194,9 @@ def model_to_csv(request, sheettype):
     )
 
     response = HttpResponse(content_type="text/csv")
-    response[
-        "Content-Disposition"
-    ] = 'attachment; filename="{filename}s.csv"'.format(  # noqa
+    response["Content-Disposition"] = 'attachment; filename="{filename}s.csv"'.format(
         filename=c.__name__
-    )
+    )  # noqa
 
     writer = csv.writer(response, quoting=csv.QUOTE_ALL)
     writer.writerow(header)
@@ -213,11 +214,12 @@ def processPost(post, c, f, files=None, pk=None, key=None):
     if "new" in fields and fields["new"] == "True":
         fields["study"] = key
     for field in c._meta.get_fields():
-        if type(field) == ArrayField: # noqa
+        if type(field) == ArrayField:  # noqa
             parts = []
             for fi in fields.keys():
                 if (
-                    re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi] # noqa
+                    re.match(r"^{}_\d$".format(field.name), str(fi))
+                    and fields[fi]  # noqa
                 ):
                     parts.append(fi)
             parts.sort()
@@ -322,14 +324,29 @@ class FSAdd(LoginRequiredMixin, View):
             )
 
 
+@require_http_methods(["DELETE"])
+@login_required
+def fs_delete(request, sheettype, pk):
+    c, _ = getClasses(sheettype)
+    model = get_object_or_404(c, pk=pk)
+    model.delete()
+
+    response_data = {"success": True, "message": "Entry deleted successfully."}
+
+    response = HttpResponse(response_data)
+    url = reverse("modelview:modellist", kwargs={"sheettype": sheettype})
+    response["HX-Redirect"] = url
+    return response
+
+
 def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     """
     This function returns the url of an image of recent GitHub contributions
     If the image is not present or outdated it will be reconstructed
 
     Note:
-        Keep in mind that a external (GitHub) API is called and you server need to allow
-        such connections.
+        Keep in mind that a external (GitHub) API is called and your server
+        needs to allow such connections.
     """
     path = "GitHub_{0}_{1}_Contribution.png".format(org, repo)
     full_path = os.path.join(djangoSettings.MEDIA_ROOT, path)

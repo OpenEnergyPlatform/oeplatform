@@ -3,4 +3,4 @@
 ## Collaboration
 
 !!! Note
-    Further information
+Further information

@@ -28,11 +28,11 @@
     <tbody>
         {% for table, label, tags in tables %}
 
-            <tr onclick="window.open('/dataedit/view/{{ schema }}/{{ table }}', name='_blank')">
+            <tr>
                 {% if label %}
-                    <td>{{ label }}</td>
+                    <td onclick="window.open('/dataedit/view/{{ schema }}/{{ table }}', name='_blank')">{{ label }}</td>
                 {% else %}
-                    <td>{{ table }}</td>
+                    <td onclick="window.open('/dataedit/view/{{ schema }}/{{ table }}', name='_blank')">{{ table }}</td>
                 {% endif %}
                 <td>
                     {% for tag in tags %}

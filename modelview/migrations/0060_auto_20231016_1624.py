@@ -13,7 +13,10 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="citation_DOI",
             field=models.CharField(
-                help_text="If  there are publications about the model that have a DOI please list the DOIs",
+                help_text=(
+                    "If  there are publications about the model that have a "
+                    "DOI please list the DOIs"
+                ),
                 max_length=10000,
                 null=True,
                 verbose_name="Citation DOI",
@@ -23,7 +26,12 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="link_to_source_code",
             field=models.CharField(
-                help_text="Is the source code to install and run a model available? If possible please provide a link to GitHub e.g. 'https://github.com/OpenEnergyPlatform/oeplatform'. You are free to provide a link to other sources then GitHub.",
+                help_text=(
+                    "Is the source code to install and run a model available? "
+                    "If possible please provide a link to GitHub e.g. "
+                    "'https://github.com/OpenEnergyPlatform/oeplatform'. "
+                    "You are free to provide a link to other sources then GitHub."
+                ),
                 max_length=200,
                 null=True,
                 verbose_name="Access to source code",

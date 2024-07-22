@@ -73,7 +73,6 @@ class IntegrationTestCase(APITestCase):
         self.checkStructure()
 
     def step_modify_table(self):
-
         data_column = {
             "type": "column",
             "name": "number",
@@ -93,7 +92,6 @@ class IntegrationTestCase(APITestCase):
         self.api_req("post", data=data_constraint)
 
     def step_insert_data(self):
-
         insert_data = [
             {
                 "query": {

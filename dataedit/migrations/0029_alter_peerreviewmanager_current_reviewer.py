@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dataedit', '0028_merge_20230511_1516'),
+        ("dataedit", "0028_merge_20230511_1516"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='peerreviewmanager',
-            name='current_reviewer',
-            field=models.CharField(choices=[('contributor', 'CONTRIBUTOR'), ('reviewer', 'REVIEWER')], default='reviewer', max_length=20),
+            model_name="peerreviewmanager",
+            name="current_reviewer",
+            field=models.CharField(
+                choices=[("contributor", "CONTRIBUTOR"), ("reviewer", "REVIEWER")],
+                default="reviewer",
+                max_length=20,
+            ),
         ),
     ]

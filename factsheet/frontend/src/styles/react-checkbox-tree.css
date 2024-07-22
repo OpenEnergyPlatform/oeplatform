@@ -4,14 +4,14 @@
   display: flex;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: reverse;
-      -ms-flex-direction: row-reverse;
-          flex-direction: row-reverse;
+  -ms-flex-direction: row-reverse;
+  flex-direction: row-reverse;
   font-size: 16px;
 }
 .react-checkbox-tree > ol {
   -webkit-box-flex: 1;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
 }
 .react-checkbox-tree ol {
   margin: 0;
@@ -38,7 +38,8 @@
 .react-checkbox-tree label:hover {
   background: rgba(51, 51, 204, 0.1);
 }
-.react-checkbox-tree label:active, .react-checkbox-tree label:focus {
+.react-checkbox-tree label:active,
+.react-checkbox-tree label:focus {
   background: rgba(51, 51, 204, 0.15);
 }
 .react-checkbox-tree:not(.rct-native-display) input {
@@ -73,14 +74,14 @@
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .rct-options {
   -webkit-box-flex: 0;
-      -ms-flex: 0 0 auto;
-          flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
   margin-left: 0.5rem;
   text-align: right;
 }
@@ -115,7 +116,7 @@
 
 .rct-collapse {
   -ms-flex-item-align: stretch;
-      align-self: stretch;
+  align-self: stretch;
   border: 0;
   background: none;
   line-height: normal;

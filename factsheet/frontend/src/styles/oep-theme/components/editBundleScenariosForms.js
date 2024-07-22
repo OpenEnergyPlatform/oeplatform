@@ -39,7 +39,7 @@ const BundleScenariosGridItem = ({
 }) => {
   return (
     <BundleScenariosGrid item xs={12}>
-      <Typography variant="small">
+      <Typography variant="body2">
         <Grid container>
           <Grid item xs={labelGridSize}>
             <LabelItem>

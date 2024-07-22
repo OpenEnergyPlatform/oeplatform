@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 from api import actions
 from login.models import myuser
 
-from .util import load_content_as_json
+from .utils import load_content_as_json
 
 
 class APITestCase(TestCase):

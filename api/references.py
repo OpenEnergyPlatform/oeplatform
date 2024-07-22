@@ -213,7 +213,7 @@ def read_bibtexfile(file_name):
     metadata.create_all(bind=engine)
     sess = Session(bind=engine)
 
-    with open(file_name) as bibtex_file:
+    with open(file_name, encoding="utf-8") as bibtex_file:
         bibtex_database = btp.load(bibtex_file)
     for ent in bibtex_database.entries:
         props = {

@@ -16,7 +16,6 @@ depends_on = None
 
 
 def upgrade():
-
     op.create_table(
         "api_columns",
         sa.Column("column_name", sa.String(50)),

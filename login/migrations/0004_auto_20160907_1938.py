@@ -6,7 +6,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("login", "0003_auto_20160805_1311")]
 
     operations = [migrations.RenameModel(old_name="OepUser", new_name="myuser")]

@@ -3,7 +3,6 @@ from django.http import HttpResponse
 
 class ModHttpResponse(HttpResponse):
     def __init__(self, dictonary):
-
         if dictonary is None:
             HttpResponse.__init__(self, status=500)
             return

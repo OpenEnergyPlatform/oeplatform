@@ -17,7 +17,7 @@ const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     [`& .${tooltipClasses.tooltip}, & .${tooltipClasses.tooltip} *`]: {
       fontSize: variables.fontSize.sm,
       lineHeight: theme.typography.body1.lineHeight
-    } 
+    }
 }));
 
 export default HtmlTooltip;

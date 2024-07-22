@@ -1,4 +1,4 @@
-FROM python:3.7.10
+FROM python:3.10.14
 
 RUN apt-get update \
     && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi-py3\
@@ -14,6 +14,7 @@ COPY ./docker/apache2.conf /etc/apache2/conf-enabled/oeplatform.conf
 COPY . /app
 COPY ./docker/docker-entrypoint.sh /app/docker-entrypoint.sh
 
+RUN mkdir /app/ontologies && cd /app/ontologies && wget https://github.com/OpenEnergyPlatform/ontology/releases/latest/download/oeo.zip && unzip oeo.zip && rm oeo.zip
 
 RUN cp /app/oeplatform/securitysettings.py.default /app/oeplatform/securitysettings.py && python manage.py collectstatic --noinput && rm /app/oeplatform/securitysettings.py
 

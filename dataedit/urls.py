@@ -4,7 +4,7 @@ from django.views.generic import RedirectView
 from dataedit import views
 
 pgsql_qualifier = r"[\w\d_]+"
-
+app_name = "dataedit"
 urlpatterns = [
     url(r"^schemas$", views.listschemas, name="index"),
     url(r"^$", RedirectView.as_view(url="/dataedit/schemas")),

@@ -4,29 +4,33 @@ import TextField from '@mui/material/TextField';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import { withStyles } from "@material-ui/core/styles";
+// import { withStyles } from "@material-ui/core/styles";
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import IconButton from '@mui/material/IconButton';
+// import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
-import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
-import { styled } from '@mui/material/styles';
+// import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
+// import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
+// import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import useMediaQuery from '@mui/material/useMediaQuery';
+// import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
-import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar';
-import EditIcon from '@mui/icons-material/Edit';
+// import Alert from '@mui/material/Alert';
+// import AlertTitle from '@mui/material/AlertTitle';
+// import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar';
+// import EditIcon from '@mui/icons-material/Edit';
 import uuid from "react-uuid";
 import { makeStyles } from '@material-ui/core/styles';
+
+
+import FactsheetMetadataList from './scenarioBundleUtilityComponents/factsheetMetadataList.js';
+import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.js';
 
 const filter = createFilterOptions();
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -51,7 +55,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
   });
   const theme = useTheme();
 
- 
+
   const onDelete = (name) => () => {
     const newValue = value.filter((v) => v.name !== name);
     setValue(newValue);
@@ -101,7 +105,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
   const handleUpdatedLabel = e => {
     setUpdatedLabel(e.target.value);
   };
-  
+
   const handleAddNew = e => {
     const updauedValue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
     const updatedDialogeValue = { "iri": uuid(), "id": dialogValue.id, "name": dialogValue.id };
@@ -112,7 +116,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
     handler(updauedValue);
   };
 
-  
+
   const handleEdit = e => {
     editHandler(editLabel, updatedLabel, editIRI);
     setUpdatedLabel('');
@@ -122,17 +126,18 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
     value[objIndex].name = updatedLabel;
   }
 
- 
+
+
 
   return (
     <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '0px' :'0px', marginBottom: '20px'}}>
       <Autocomplete
-        size="small" 
+        size="small"
         multiple
         id="checkboxes-tags-demo"
         options={parameters.optionsSet}
         disableCloseOnSelect
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={(option) => option.acronym}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
              {!option.inputValue &&<Checkbox
@@ -147,9 +152,11 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
             title={
               <React.Fragment>
               <Typography color="inherit" variant="caption">
-                Description of <b>{option.name}</b> : TDB ...
+                
+                <FactsheetMetadataList data={option} />
               <br />
-              <a href={2}>More info from Open Enrgy Knowledge Graph (OEKG)...</a>
+              <a href={option.url}>More info ...</a>
+              
               </Typography>
               </React.Fragment>
             }
@@ -164,7 +171,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined" 
+          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined"
           InputProps={{
             ...params.InputProps,
             classes: {
@@ -178,7 +185,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
           return filtered;
         }}
       />
-      
+
       <Dialog open={open} onClose={handleClose}  >
         <form onSubmit={handleSubmit}>
           <DialogContent>
@@ -288,10 +295,10 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         }}
       >
         {value.map((v) => (
-          <Chip size='small' key={v.id}  label={v.name} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }}/>
+          <Chip size='small' key={v.id}  label={v.acronym ? v.acronym : v.name} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)}/>
         ))}
       </Box>}
     </Box>
   );
-  
+
 }

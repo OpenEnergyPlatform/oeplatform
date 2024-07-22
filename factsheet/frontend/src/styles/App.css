@@ -7,44 +7,53 @@
 .bg_img {
   background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
   border: 1px solid rgba(0, 0, 0, 0.5);
-
 }
 
 .wizard {
-    background-color: rgb(255, 255, 255);
-    height: 100%;
-    overflow: auto;
+  background-color: rgb(255, 255, 255);
+  height: 100%;
+  overflow: auto;
 }
 
 .bgimg {
-  background: url('./OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg') no-repeat center /cover ;
+  background: url("./OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg")
+    no-repeat center / cover;
 }
 
-
 p {
-  font-size: 16px
+  font-size: 16px;
 }
 
 .custom-button {
   text-transform: none;
-  color: rgb(31, 18, 114); 
-  
- 
+  color: rgb(31, 18, 114);
 }
 
 .custom-button_2nd {
   height: 50px;
-  background-color: red; 
+  background-color: red;
 }
 
 .Button {
   color: rgb(4, 0, 255);
 }
 
-a:link { text-decoration: none; color: '#294456'; }
-a:visited { text-decoration: none; color: '#294456';}
-a:hover { text-decoration: none; color: '#294456';}
-a:active { text-decoration: none; color: '#294456';}
+a:link {
+  text-decoration: none;
+  color: "#294456";
+}
+a:visited {
+  text-decoration: none;
+  color: "#294456";
+}
+a:hover {
+  text-decoration: none;
+  color: "#294456";
+}
+a:active {
+  text-decoration: none;
+  color: "#294456";
+}
 
 .separator-dot {
   display: inline-block;

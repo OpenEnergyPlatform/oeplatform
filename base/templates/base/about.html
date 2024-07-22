@@ -151,9 +151,13 @@
             <img class="flex-item" src="{% static 'logos/partner/Logo_IER_UniStuttgart-1200x386.png' %}" alt="IER"
                 width="250px" />
         </a>
-        <a class="logo" href="https://www.fortiss.org/" target="_blank">
+        <!-- Adjusted margin for 2 logos in a row due to justify-content-between styling. -->
+        <a class="logo" style="margin-left: 150px;" href="https://www.fortiss.org/" target="_blank">
             <img class="flex-item" src="{% static 'logos/partner/partner_logo_fortiss.png' %}" alt="fortiss"
                 width="250px" />
+        </a>
+        <a class="logo" style="margin-right: 150px;" href="https://nfdi4energy.uol.de/" target="_blank">
+            <img class="flex-item" src="{% static 'logos/partner/partner_logo_nfdi4energy.png' %}" alt="nfdi4energy" width="250px" />
         </a>
     </div>
     {% endblock %}

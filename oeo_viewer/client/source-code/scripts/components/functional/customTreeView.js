@@ -19,7 +19,7 @@ class CustomTreeView extends Component {
     }
   }
 
-   componentDidUpdate(prevProps){
+  componentDidUpdate(prevProps){
      if (this.props.expanded !== prevProps.expanded) {
         this.setState({
           expanded: this.props.expanded,
@@ -37,7 +37,6 @@ class CustomTreeView extends Component {
     this.state.treeViewSelectHandler(event, nodeId);
   };
 
-
   render() {
     const renderTree = (nodes) => (
     <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}>
@@ -45,17 +44,15 @@ class CustomTreeView extends Component {
     </TreeItem>
     );
     return (
-        <div style={{ height: '75%', maxHeight: '700px' }}>
-          <TreeView
-            defaultCollapseIcon={<ExpandMoreIcon />}
-            defaultExpandIcon={<ChevronRightIcon />}
-            expanded={this.state.expanded}
-            onNodeToggle={this.handleToggle}
-            onNodeSelect={this.handleSelect}
-          >
-            {renderTree(this.state.treeViewData)}
-          </TreeView>
-       </div>
+      <TreeView
+        defaultCollapseIcon={<ExpandMoreIcon />}
+        defaultExpandIcon={<ChevronRightIcon />}
+        expanded={this.state.expanded}
+        onNodeToggle={this.handleToggle}
+        onNodeSelect={this.handleSelect}
+      >
+        {renderTree(this.state.treeViewData)}
+      </TreeView>
     );
   }
 }

@@ -627,34 +627,60 @@ var Wizard = function(config) {
   /**
      * create a new table
      */
-  function createTable() {
-    // check if validation errors
-    if ($("#wizard-columns .is-invalid").length > 0 || $("#wizard-tablename.is-invalid").length > 0) {
-      setStatusCreate("danger", false, "invalid definitions.");
-      return;
-    }
-
-    setStatusCreate("primary", true, "creating table...");
-    var colDefs = [];
-    var constraints = [];
-    $("#wizard-columns").find(".wizard-column").each(function(_i, e) {
-      var c = getColumnDefinition($(e));
-      colDefs.push(c);
-      if (c.is_pk) {
-        constraints.push({"constraint_type": "PRIMARY KEY", "constraint_parameter": c.name});
-      }
-    });
-    var tablename = $("#wizard-tablename").val();
-    var url = getApiTableUrl(tablename) + "/";
-    var urlSuccess = getWizardUrl(tablename);
-    var data = {query: {"columns": colDefs, "constraints": constraints}};
-    sendJson("PUT", url, JSON.stringify(data)).then(function() {
-      setStatusCreate("success", true, "ok, reloading page...");
-      window.location = urlSuccess;
-    }).catch(function(err) {
-      setStatusCreate("danger", false, getErrorMsg(err));
-    });
+function createTable() {
+  if ($("#wizard-columns .is-invalid").length > 0 || $("#wizard-tablename.is-invalid").length > 0) {
+    setStatusCreate("danger", false, "Invalid definitions.");
+    return;
   }
+
+  setStatusCreate("primary", true, "Creating table...");
+  var colDefs = [];
+  var constraints = [];
+  $("#wizard-columns").find(".wizard-column").each(function(_i, e) {
+    var c = getColumnDefinition($(e));
+    colDefs.push(c);
+    if (c.is_pk) {
+      constraints.push({"constraint_type": "PRIMARY KEY", "constraint_parameter": c.name});
+    }
+  });
+
+  var tablename = $("#wizard-tablename").val();
+  var embargoValue = $("#wizard-embargo").val();
+
+  var embargoData = calculateEmbargoPeriod(embargoValue);
+
+  var url = getApiTableUrl(tablename) + "/";
+  var urlSuccess = getWizardUrl(tablename);
+  var data = {
+    query: {
+      "columns": colDefs,
+      "constraints": constraints,
+      "embargo": embargoData
+    }
+  };
+
+  sendJson("PUT", url, JSON.stringify(data)).then(function() {
+    setStatusCreate("success", true, "Table created successfully, reloading page...");
+    window.location = urlSuccess;
+  }).catch(function(err) {
+    setStatusCreate("danger", false, "Failed to create table: " + getErrorMsg(err));
+  });
+}
+
+function calculateEmbargoPeriod(embargoValue) {
+  let endDate = new Date();
+  if (embargoValue === "6_months") {
+    endDate.setMonth(endDate.getMonth() + 6);
+  } else if (embargoValue === "1_year") {
+    endDate.setFullYear(endDate.getFullYear() + 1);
+  } else {
+    return {start: "", end: ""};
+  }
+  return {
+    start: new Date().toISOString().split('T')[0],
+    end: endDate.toISOString().split('T')[0]
+  };
+}
 
   /**
      * delete table

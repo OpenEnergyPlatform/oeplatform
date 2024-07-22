@@ -1,18 +1,18 @@
-const { createServer } = require("http");
-const { createProxyServer } = require("http-proxy");
+const {createServer} = require("http");
+const {createProxyServer} = require("http-proxy");
 const Path = require("path");
 const Bundler = require("parcel-bundler");
 
 const backEnd = {
   protocol: "http",
   host: "localhost",
-  port: 5000
+  port: 5000,
 };
 
 const parcelEnd = {
   protocol: "http",
   host: "localhost",
-  port: 1234
+  port: 1234,
 };
 
 // parcel options, such as publicUrl, watch, sourceMaps... none of which are needed for this proxy server configuration
@@ -36,13 +36,13 @@ const server = createServer((req, res) => {
       // back-end server, local tomcat or otherwise
       target: backEnd,
       changeOrigin: true,
-      autoRewrite: true
+      autoRewrite: true,
     });
   } else {
     // parcel's dev server
     proxy.web(req, res, {
       target: parcelEnd,
-      ws: true
+      ws: true,
     });
   }
 });

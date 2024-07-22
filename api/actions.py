@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
@@ -32,6 +32,8 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
+from dataedit.helper import get_readable_table_name
+from dataedit.models import Embargo, PeerReview
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
@@ -46,6 +48,8 @@ logger = logging.getLogger("oeplatform")
 __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
+
+ID_COLUMN_NAME = "id"
 
 
 MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
@@ -131,6 +135,16 @@ def assert_add_tag_permission(user, table, permission, schema):
         or user.get_table_permission_level(DBTable.load(schema, table)) < permission
     ):
         raise PermissionDenied
+
+
+def assert_has_metadata(table, schema):
+    table = DBTable.load(schema, table)
+    if table.oemetadata is None:
+        result = False
+    else:
+        result = True
+
+    return result
 
 
 def _translate_fetched_cell(cell):
@@ -490,9 +504,11 @@ def get_response_dict(
     """
     dict = {
         "success": success,
-        "error": str(reason).replace("\n", " ").replace("\r", " ")
-        if reason is not None
-        else None,
+        "error": (
+            str(reason).replace("\n", " ").replace("\r", " ")
+            if reason is not None
+            else None
+        ),
         "http_status": http_status_code,
         "exception": exception,
         "result": result,
@@ -1010,7 +1026,7 @@ def table_change_column(column_definition):
     return perform_sql(sql_string)
 
 
-def table_change_constraint(table, constraint_definition):
+def table_change_constraint(constraint_definition):
     """
     Changes constraint of table
     :param schema: schema
@@ -1098,9 +1114,9 @@ def _get_table(schema, table):
 
 
 def get_table_metadata(schema, table):
-    table_obj = _get_table(schema=schema, table=table)
-    comment = table_obj.comment
-    return json.loads(comment) if comment else {}
+    django_obj = DBTable.load(schema=schema, table=table)
+    oemetadata = django_obj.oemetadata
+    return oemetadata if oemetadata else {}
 
 
 def __internal_select(query, context):
@@ -1181,6 +1197,38 @@ def __change_rows(request, context, target_table, setter, fields=None):
     return {"rowcount": rows["rowcount"]}
 
 
+def drop_not_null_constraints_from_delete_meta_table(
+    meta_table_delete: str, meta_schema: str
+) -> None:
+    # https://github.com/OpenEnergyPlatform/oeplatform/issues/1548
+    # we only want id column (and meta colums, wich start with a "_")
+
+    engine = _get_engine()
+
+    # find not nullable columns in meta tables
+    query = f"""
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_name = '{meta_table_delete}'
+    AND table_schema = '{meta_schema}'
+    AND is_nullable = 'NO'
+    """
+    column_names = [x[0] for x in engine.execute(query).fetchall()]
+    # filter meta columns and id
+    column_names = [
+        c for c in column_names if c != ID_COLUMN_NAME and not c.startswith("_")
+    ]
+
+    if not column_names:
+        # nothing to do
+        return
+
+    # drop not null from these columns
+    col_drop = ", ".join(f'ALTER "{c}" DROP NOT NULL' for c in column_names)
+    query = f'ALTER TABLE "{meta_schema}"."{meta_table_delete}" {col_drop};'
+    engine.execute(query)
+
+
 def data_delete(request, context=None):
     orig_table = get_or_403(request, "table")
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
@@ -1197,6 +1245,10 @@ def data_delete(request, context=None):
     target_table = get_delete_table_name(orig_schema, orig_table)
     setter = []
     cursor = load_cursor_from_context(context)
+
+    meta_schema = get_meta_schema_name(schema)
+    drop_not_null_constraints_from_delete_meta_table(target_table, meta_schema)
+
     result = __change_rows(request, context, target_table, setter, ["id"])
     if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
@@ -1270,9 +1322,11 @@ def data_insert_check(schema, table, values, context):
                             {
                                 "operands": [
                                     {"type": "column", "column": c},
-                                    {"type": "value", "value": row[c]}
-                                    if c in row
-                                    else {"type": "value"},
+                                    (
+                                        {"type": "value", "value": row[c]}
+                                        if c in row
+                                        else {"type": "value"}
+                                    ),
                                 ],
                                 "operator": "=",
                                 "type": "operator",
@@ -1303,8 +1357,15 @@ def data_insert_check(schema, table, values, context):
                 val = row.get(column_name, None)
                 if val is None or (isinstance(val, str) and val.lower() == "null"):
                     if column_name in row or not column.get("column_default", None):
+                        # TODO: this error message is not clear to users. It is for
+                        # example shown if the user attempts to upload a csv data
+                        # and some id values from the csv are already available
+                        # in the table.
                         raise APIError(
-                            "Action violates not-null constraint on {col}. Failing row was {row}".format(  # noqa
+                            "Action violates not-null constraint on {col}. "
+                            "Failing row was {row}. Please check if there are "
+                            "id values in your upload data that are already "
+                            "exist in the table. Primary key's cant be duplicated".format(  # noqa
                                 col=column_name,
                                 row="("
                                 + (
@@ -1479,6 +1540,11 @@ def clear_dict(d):
 
 
 def move(from_schema, table, to_schema):
+    """
+    Implementation note:
+        Currently we implemented two versions of the move functionality
+        this will later be harmonized. See 'move_publish'.
+    """
     table = read_pgid(table)
     engine = _get_engine()
     Session = sessionmaker(engine)
@@ -1523,11 +1589,116 @@ def move(from_schema, table, to_schema):
         session.query(OEDBTableTags).filter(
             OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
         ).update({OEDBTableTags.schema_name: to_schema})
+
+        all_peer_reviews = PeerReview.objects.filter(table=table, schema=from_schema)
+
+        for peer_review in all_peer_reviews:
+            peer_review.update_all_table_peer_reviews_after_table_moved(
+                to_schema=to_schema
+            )
+
+        t.set_is_published(to_schema=to_schema)
         session.commit()
         t.save()
     except Exception:
         session.rollback()
         raise
+    finally:
+        session.close()
+
+
+def move_publish(from_schema, table_name, to_schema, embargo_period):
+    """
+    Implementation note:
+        Currently we implemented two versions of the move functionality
+        this will later be harmonized. See 'move'.
+    """
+    engine = _get_engine()
+    Session = sessionmaker(engine)
+    session = Session()
+
+    try:
+        t = DBTable.objects.get(name=table_name, schema__name=from_schema)
+        to_schema_reg = DBSchema.objects.get(name=to_schema)
+
+        if from_schema == to_schema:
+            raise APIError("Target schema same as current schema")
+
+        t.schema = to_schema_reg
+
+        meta_to_schema = get_meta_schema_name(to_schema)
+        meta_from_schema = get_meta_schema_name(from_schema)
+
+        movements = [
+            (from_schema, table_name, to_schema),
+            (
+                meta_from_schema,
+                get_edit_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+            (
+                meta_from_schema,
+                get_insert_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+            (
+                meta_from_schema,
+                get_delete_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+        ]
+
+        for fr, tab, to in movements:
+            session.execute(
+                "ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
+                    from_schema=fr, table=tab, to_schema=to
+                )
+            )
+
+        session.query(OEDBTableTags).filter(
+            OEDBTableTags.schema_name == from_schema,
+            OEDBTableTags.table_name == table_name,
+        ).update({OEDBTableTags.schema_name: to_schema})
+        if embargo_period in ["6_months", "1_year"]:
+            duration_in_weeks = 26 if embargo_period == "6_months" else 52
+            embargo, created = Embargo.objects.get_or_create(
+                table=t,
+                defaults={
+                    "duration": embargo_period,
+                    "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
+                },
+            )
+            if not created and embargo.date_started is not None:
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+                embargo.save()
+            elif not created:
+                embargo.date_started = datetime.now()
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+                embargo.save()
+
+        all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
+
+        for peer_review in all_peer_reviews:
+            peer_review.update_all_table_peer_reviews_after_table_moved(
+                to_schema=to_schema
+            )
+
+        t.set_is_published(to_schema=to_schema)
+        session.commit()
+
+    except DBTable.DoesNotExist:
+        session.rollback()
+        raise APIError("Table for schema movement not found")
+    except DBSchema.DoesNotExist:
+        session.rollback()
+        raise APIError("Target schema not found")
+    except Exception as e:
+        session.rollback()
+        raise e
     finally:
         session.close()
 
@@ -1740,9 +1911,11 @@ def get_columns(request, context=None):
 
     enums = dict(
         (
-            "%s.%s" % (rec["schema"], rec["name"])
-            if not rec["visible"]
-            else rec["name"],
+            (
+                "%s.%s" % (rec["schema"], rec["name"])
+                if not rec["visible"]
+                else rec["name"]
+            ),
             rec,
         )
         for rec in engine.dialect._load_enums(connection, schema="*")
@@ -2070,6 +2243,15 @@ def getValue(schema, table, column, id):
 
 
 def apply_changes(schema, table, cursor=None):
+    """Apply changes from the meta tables to the actual table.
+
+    Meta tables are :
+    * _<NAME>_insert
+    * _<NAME>_update
+    * _<NAME>_delete
+
+    """
+
     def add_type(d, type):
         d["_type"] = type
         return d
@@ -2297,6 +2479,16 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     django_table_obj = DBTable.load(table=table, schema=schema)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
+
+    # ---------------------------------------
+    # update the table human readable name after oemetadata is available
+    # ---------------------------------------
+
+    readable_table_name = get_readable_table_name(django_table_obj)
+    django_table_obj.set_human_readable_name(
+        current_name=django_table_obj.human_readable_name,
+        readable_table_name=readable_table_name,
+    )
 
     # ---------------------------------------
     # update the table comment in oedb table if sqlalchemy curser is provided

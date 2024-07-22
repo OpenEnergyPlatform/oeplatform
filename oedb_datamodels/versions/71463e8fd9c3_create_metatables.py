@@ -21,7 +21,6 @@ engine = _get_engine()
 
 
 def upgrade():
-
     Session = sessionmaker(bind=engine)
     sess = Session()
     try:

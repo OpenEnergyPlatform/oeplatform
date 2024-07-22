@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dataedit', '0026_alter_peerreviewmanager_is_open_since'),
+        ("dataedit", "0026_alter_peerreviewmanager_is_open_since"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='peerreviewmanager',
-            name='is_open_since',
+            model_name="peerreviewmanager",
+            name="is_open_since",
             field=models.CharField(max_length=10, null=True),
         ),
     ]

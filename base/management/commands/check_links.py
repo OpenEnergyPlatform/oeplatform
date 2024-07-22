@@ -27,7 +27,6 @@ cache = {}
 
 
 def iter_links(url, parent_url=None, root_url=None, no_external=False):
-
     res = requests.get(
         url, stream=True
     )  # stream because sometimes we dont actually load all the content
@@ -104,7 +103,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-
         loglevel = logging.INFO if options["show_all"] else logging.WARNING
 
         logging.basicConfig(

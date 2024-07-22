@@ -2,7 +2,7 @@
 version: "3.9"
 services:
   oeplatform:
-    image: "ghcr.io/openenergyplatform/oeplatform:0.9.2"
+    image: "ghcr.io/openenergyplatform/oeplatform:latest"
     stdin_open: true
     tty: true
     ports:
@@ -19,7 +19,7 @@ services:
     depends_on:
         - postgres
   postgres:
-    image: ghcr.io/openenergyplatform/oeplatform-postgres:0.3.0
+    image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
     ports:
         - "5432:5432"
     environment:

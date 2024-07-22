@@ -1,0 +1,232 @@
+{% load static %}
+{% load django_bootstrap5 %}
+{% load fontawesome_5 %}
+{% load compress %}
+
+<!-- The MIT License (MIT)
+
+Copyright (c) 2011-2024 The Bootstrap Authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block before-head %}{% endblock before-head %}
+
+    <!-- Meta Tags, which should be implemented -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title> OEP{% block title %}{% endblock %} </title>
+
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon"/>
+
+    {% fontawesome_5_static %}
+    {% compress css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"><!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}?md5=d4e024ac45daad057d0191a8f6266156">
+    {% endcompress %}
+    {% block after-head %}{% endblock after-head %}
+</head>
+
+<body class="d-flex flex-column h-100">
+{% block header %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/">
+                <img style="width:45px;height: 45px;" src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}"/>
+            </a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dataedit/schemas">Database</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFS" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Scenario Bundles
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownFS">
+                            <!-- <a class="dropdown-item" href="/factsheets/overview/">Overview</a> -->
+                            <a class="dropdown-item" href="/scenario-bundles/main">Scenario Bundle</a>
+                            <a class="dropdown-item" href="/factsheets/frameworks/">Framework Factsheet</a>
+                            <a class="dropdown-item" href="/factsheets/models/">Model Factsheet</a>
+                            <!-- <a class="dropdown-item" href="/factsheets/scenarios/">Scenario Factsheet</a> -->
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownOntology" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Ontology
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownOntology">
+                            <a class="dropdown-item" href="/ontology/">Overview</a>
+                            <a class="dropdown-item" href="/ontology/oeo/">OEO Modules</a>
+                            <a class="dropdown-item" href="/viewer/oeo/">OEO Viewer</a>
+                            <a class="dropdown-item" href="{% url 'oeo-s-c'%}">OEO Steering Committee</a>
+                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.tib_terminology_service }}" target="_blank" data-toggle="tooltip" data-placement="top" title="We want to combine our efforts in ontology development with the TIB as part of the NFDI4Energy project."><i class="fas fa-external-link-alt"></i> TIB Terminology Service</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ EXTERNAL_URLS.tutorials_index }}" target="_blank">Academy <i class="fas fa-external-link-alt"></i></a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAbout" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            About
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
+                            <a class="dropdown-item" href="/about/">Overview</a>
+                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.compendium }}" target="_blank"><i class="fas fa-external-link-alt"></i> Compendium</a>
+                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.mkdocs }}" target="_blank"><i class="fas fa-external-link-alt"></i> Developer Documentation</a>
+                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.readthedocs }}" target="_blank"><i class="fas fa-external-link-alt"></i> REST-API Documentation</a>
+                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.tutorials_faq }}" target="_blank"><i class="fas fa-external-link-alt"></i> FAQ</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
+
+                <div class="btn profile-bar">
+                    <a class="btn-profile" href="/user/profile/{{ user.pk }}/settings">{% fa5_icon 'user' 'fas' %} {{ user }}</a>
+                    <a class="btn-logout" href="/user/logout/?next=/">{% fa5_icon 'arrow-right' 'fas' %} Logout</a>
+                </div>
+
+            {% else %}
+                <a class="btn btn-info" style="float: right;margin:5px"
+                   href="/user/login/?next={{ request.get_full_path|urlencode }}">{% fa5_icon 'log-in' 'fas' %} Login</a>
+            {% endif %}
+
+        </div>
+    </nav>
+
+{% endblock header %}
+{% block main %}
+<main class="main">
+    {% block site-header %}
+    {% endblock site-header %}
+        <div class="content">
+            <div class="content__container">
+                {% block main-left-sidebar %}{% endblock main-left-sidebar %}
+                {% block main-content %}
+                    <section class="content__main" id="contentMain">
+                        {% block main-content-body %}{% endblock %}
+                    </section>
+                {% endblock main-content %}
+                {% block main-right-sidebar %}
+                    <section class="content__side" id="contentSide">
+                        <!-- {% block main-right-sidebar-disclaimer %}
+                        <div>
+                            <p>
+                                If you find bugs or if you have ideas to improve the Open Energy Platform, you are
+                                welcome to add your comments to the existing issues on <a
+                                    href="https://github.com/openego/oeplatform" target="_blank">GitHub</a>. <br>
+                                You can also fork the project and get involved.
+                            </p>
+                            <p>
+                                <b> Please note that the platform is still under construction and therefore the
+                                    design of this page is still highly volatile!</b>
+                            </p>
+                        </div>
+                        {% endblock main-right-sidebar-disclaimer %} -->
+                        <div>
+                            {% block main-right-sidebar-content %}
+                            {% endblock main-right-sidebar-content %}
+                        </div>
+                    </section>
+                {% endblock main-right-sidebar %}
+            </div>
+        </div>
+    </main>
+{% endblock main %}
+{% block footer %}
+    <footer class="footer mt-auto py-3 bg-secondary">
+        <nav class="navbar navbar-expand navbar-dark bg-secondary">
+            <div class="container-fluid justify-content-end">
+                <ul class="navbar-nav mr-auto">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact/">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/legal/privacy_policy/">Privacy Policy</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/legal/tou/">Terms of Use</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </footer>
+{% endblock footer %}
+
+<div id="uiWarnings"></div><!-- container for UI messages -->
+
+{% block body-bottom-js %}
+    {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
+    {% compress js %}
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script><!-- https://code.jquery.com/ui/1.12.1/jquery-ui.js -->
+    <script src="{% static 'js/jsi18n.js' %}"></script>
+    <script src="{% static 'js/oep-tags.js' %}"></script>
+    {% endcompress %}
+    <script>
+        const eyeHideIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"/><path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"/></svg>';
+        const eyeShowIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/></svg>';
+
+        toggleContentSideBtn.innerHTML = eyeHideIcon + "Hide options";
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const tableTabsContainer = document.getElementById("tableTabsContainer");
+            const contentMain = document.getElementById("contentMain");
+            const tableTabsContent = document.getElementById("tableTabsContent");
+            const contentSide = document.getElementById("contentSide");
+            const toggleContentSideBtn = document.getElementById("toggleContentSideBtn");
+
+            toggleContentSideBtn.addEventListener("click", function() {
+                if (contentMain.contains(tableTabsContent)) {
+                    if (contentSide.style.display === "none") {
+                        contentSide.style.display = "block";
+                        setTimeout(function() {
+                            contentSide.style.opacity = "1";
+                            tableTabsContainer.classList.remove("table-tabs__container--100w");
+                            contentMain.classList.remove("content__main--100w");
+                            tableTabsContent.classList.remove("tab-content--100w");
+                            toggleContentSideBtn.innerHTML = eyeHideIcon + "Hide options";
+                        }, 10);
+                    } else {
+                        contentSide.style.opacity = "0";
+                        setTimeout(function() {
+                            contentSide.style.display = "none";
+                            tableTabsContainer.classList.add("table-tabs__container--100w");
+                            contentMain.classList.add("content__main--100w");
+                            tableTabsContent.classList.add("tab-content--100w");
+                            toggleContentSideBtn.innerHTML = eyeShowIcon + "Show options";
+                        }, 500);
+                    }
+                }
+            });
+        });
+    </script>
+    {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
+{% endblock body-bottom-js %}
+
+</body>
+
+</html>

@@ -7,7 +7,7 @@
         No tags were added, yet.
     {% endif %}
     {% for t in selected %}
-        <a href="" class="btn tag" style="background:{{t.color}};color:{% readable_text_color t.color %}">{{ t.name }}</a>
+        <a href="/dataedit/view/{{ schema }}?query=&tags={{ t.id }}" class="btn tag" style="background:{{t.color}};color:{% readable_text_color t.color %}">{{ t.name }}</a>
     {% endfor %}
     <button data-bs-toggle="collapse"  data-bs-target="#tag_handler" class="btn btn-add btn-circle">
         {% fa5_icon 'plus' 'fas' %}

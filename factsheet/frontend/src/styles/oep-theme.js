@@ -2,18 +2,23 @@ import { createTheme } from '@mui/material/styles';
 import palette from './oep-theme/palette';
 import { buttonStyles, buttonGroupStyles } from './oep-theme/components/buttonStyles';
 import { tableContainerStyles, tableHeaderStyles, tableRowStyles, tableCellStyles } from './oep-theme/components/tableStyles';
+import toggleButtonGroupStyles from './oep-theme/components/toggleButtonGroupStyles';
 import toolbarStyles from './oep-theme/components/toolbarStyles';
-import { typographyStyles, inputLabelStyles, inputBaseStyles, textareaAutosizeStyles, formGroupStyles } from './oep-theme/components/typographyStyles';
-import variables from './oep-theme/variables';
+import { typographyVariants, typographyStyles, inputLabelStyles, inputBaseStyles, textareaAutosizeStyles, formGroupStyles } from './oep-theme/components/typographyStyles';
 
 const theme = createTheme({
-  palette: palette,
-  typography: {
-    small: {
-      fontSize: variables.fontSize.sm,
-      color: palette.text.primary,
-    },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1200,
+      lg2: 1360,
+      xl: 1536
+    }
   },
+  palette: palette,
+  typography: typographyVariants,
   components: {
     MuiTypography: typographyStyles,
     MuiInputLabel: inputLabelStyles,
@@ -22,6 +27,7 @@ const theme = createTheme({
     MuiFormGroup: formGroupStyles,
     MuiButton: buttonStyles,
     MuiButtonGroup: buttonGroupStyles,
+    MuiToggleButtonGroup: toggleButtonGroupStyles,
     MuiTableContainer: tableContainerStyles,
     MuiTableHead: tableHeaderStyles,
     MuiTableRow: tableRowStyles,

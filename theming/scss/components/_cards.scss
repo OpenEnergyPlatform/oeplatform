@@ -1,0 +1,254 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+@use '../components/tags' as *;
+
+@mixin cards-layout($apply-2-cols-x4l-screens: true) {
+    @extend .container-fluid;
+
+    &__row {
+        @extend .row;
+    }
+
+    &__col {
+        @extend .col-12;
+        @extend .px-0;
+        margin-bottom: 1.5rem;
+
+        @if $apply-2-cols-x4l-screens {
+            @extend .col-x4l-6;
+
+            &:nth-of-type(odd) {
+                @extend .pe-x4l-4;
+            }
+    
+            &:nth-of-type(even) {
+                @extend .ps-x4l-4;
+            }
+        }
+
+        &--4 {
+            @extend .col-lg-4;
+            @extend .px-lg-2;
+
+            &:first-of-type {
+                @extend .ps-0;
+            }
+
+            &:last-of-type {
+                @extend .pe-0;
+            }
+        }
+    }
+
+    @content;
+}
+
+@mixin card-container {
+    @extend .card;
+    @extend .h-100;
+
+    &__header {
+      @extend .card-header;
+      @extend .bg-light;
+    }
+
+    &__header-top {
+      @include flex-row;
+      @extend .justify-content-between;
+      @extend .align-items-end;
+      padding-bottom: 0.5rem;
+    }
+
+    &__title {
+        @extend .fs-7;
+        @extend .fw-semibold;
+
+        &-text {
+            @extend .me-1;
+        }
+
+        a {
+            @extend .text-decoration-none;
+        }
+
+        &-icon {
+            @extend .me-1;
+        }
+
+        &.topic-card__title--large {
+            @extend .fs-6;
+        }
+    }
+
+    &__top-end {
+        @extend .fs-8;
+        @extend .fw-semibold;
+    }
+
+    &__header-btm {
+        @extend .pb-1;
+    }
+
+    &__tag {
+        @include tag-mark;
+    }
+
+    &__body {
+        @extend .card-body;
+
+        &--large {
+            @include flex-row;
+            @extend .justify-content-between;
+
+            @include media-breakpoint-down(lg) {
+                flex-direction: column;
+            }
+        }
+    }
+
+    &__text {
+        @extend .card-text;
+        @extend .w-100;
+
+        &--large {
+            @extend .fs-6;
+        }
+    }
+
+    @content;
+}
+
+@mixin card-simple-container {
+    @extend .card;
+
+    &__content {
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .flex-wrap;
+        @extend .justify-content-between;
+        @extend .card-body;
+
+        &--left {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .justify-content-start;
+            @extend .align-items-center;
+        }
+
+        &--right {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .justify-content-end;
+            @extend .align-items-center;
+        }
+
+        &--title {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .justify-content-start;
+            @extend .w-100;
+        }
+
+        @include media-breakpoint-down(lg) {
+            flex-direction: column !important;
+
+            &--left {
+                padding-bottom: 1rem;
+            }
+        }
+    }
+
+    &__link {
+        @extend .pt-3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+
+        a {
+            @extend .text-decoration-none;
+            @extend .fw-bold;
+        }
+    }
+
+    &__badge {
+        @extend .me-3;
+    }
+
+    &__tag {
+        @include tag-mark;
+        @extend .ms-2;
+
+        &--no-margin {
+            @extend .ms-0;
+        }
+    }
+
+    &__content-secondary {
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .justify-content-end;
+        @extend .px-3;
+        @extend .pb-2;
+    }
+
+    &__embargo {
+        @extend .fw-bold;
+        @extend .fs-8;
+    }
+
+    &__content-danger {
+        @extend .position-relative;
+        @extend .background-danger;
+        @extend .border-start;
+        @extend .border-danger;
+        @extend .border-5;
+        @extend .px-3;
+        @extend .py-2;
+        @extend .text-danger;
+    }
+
+    &__content-danger-icon {
+        @extend .position-absolute;
+    }
+
+    &__content-danger-message {
+        @extend .ps-4;
+    }
+
+    &__content-danger-details {
+        @extend .ps-3;
+
+        p {
+            @extend .mb-1;
+        }
+
+        button {
+            @extend .btn;
+            @extend .btn-link;
+            @extend .btn-sm;
+            @extend .text-danger;
+
+            &:focus {
+                border-color: $danger;
+                box-shadow: 0 0 0 0.25rem rgba(225,83,97,.5);
+            }
+        }
+
+        p button {
+            @extend .fw-normal; // overwrite .fw-bold from .btn
+        }
+
+        svg {
+            @include translateY(-2px);
+        }
+
+        a {
+            @extend .ps-2;
+        }
+    }
+
+    @content;
+}

@@ -5,7 +5,10 @@ $C--padding-standard: 1.5rem; // = .p-4
 $C--padding-large: calc(#{$C--padding-standard} * 2);
 
 // Layout
-$C--container-width: 82rem;
+$C--container-width: 82rem; // container width between md and x3l
+$C--container-width-x3l: 108rem; // container from x3l
+$C--container-width-x4l: 132rem; // container from x4l
+$C--container-width-x5l: 160rem; // container from x5l
 
 // Data base
 $C--db-side-width: 21rem;
