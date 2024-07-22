@@ -339,6 +339,7 @@ def create_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         # TODO- set in settings
@@ -377,6 +378,7 @@ def create_factsheet(request, *args, **kwargs):
                         )
                         bundle.add((scenario_URI, OEO.RO_0002233, input_dataset_URI))
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         # TODO- set in settings
@@ -791,6 +793,7 @@ def update_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         input_dataset_URI = URIRef(
@@ -834,6 +837,7 @@ def update_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO.RO_0002233, input_dataset_URI)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         output_dataset_URI = URIRef(
