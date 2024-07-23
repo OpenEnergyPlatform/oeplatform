@@ -11,6 +11,7 @@
 - Fix issues related to [(#1768)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1768):
   - update functionality to select scenario input and output tables, to avoid duplicate selections within one category
   - listing tables as input / output tables on the tables detail page (to link table and scenario bundle)
+  - Additional: Remove duplicated publication dates from overview
 
 ## Features
 
