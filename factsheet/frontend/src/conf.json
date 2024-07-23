@@ -1,4 +1,4 @@
 {
-  "toep": "http://localhost:8000/",
-  "obdi": "http://localhost:8080/sparql"
+  "toep": "/",
+  "obdi": "http://oevkg:8080/sparql"
 }
