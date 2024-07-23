@@ -29,7 +29,7 @@
 
 </head>
 
-<body>
+<body class="h-100 d-flex flex-column">
 {% block header %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-target="#navbarSupportedContent"
@@ -106,7 +106,7 @@
     </nav>
 
 {% endblock header %}
-<main class="main">
+<main class="main" style="flex: 1">
     <div class="" style="padding:0">
         {% block site-header %}
         {% endblock site-header %}
