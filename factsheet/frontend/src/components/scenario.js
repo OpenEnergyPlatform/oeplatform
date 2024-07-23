@@ -127,14 +127,11 @@ export default function Scenario(props) {
 
 
   const updateInputDatasetName = (element, key, index) => {
-    console.log(element, key, index);
     const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj;
-    console.log(updateScenariosInputDatasetsObj);
     updateScenariosInputDatasetsObj[index].value.label = element.label;
     updateScenariosInputDatasetsObj[index].value.url = element.url;
     updateScenariosInputDatasetsObj[index].idx = index;
     updateScenariosInputDatasetsObj[index].key = key;
-    console.log(updateScenariosInputDatasetsObj);
     setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
     scenariosInputDatasetsHandler(updateScenariosInputDatasetsObj, data.id);
   };

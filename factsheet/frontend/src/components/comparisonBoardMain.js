@@ -142,9 +142,11 @@ const ComparisonBoardMain = (props) => {
     },
   };
 
-  const names = [
+  const category_labels = [
     'Transport',
     'Agriculture',
+    'total greenhouse gas emissions excluding LULUCF',
+    'total greenhouse gas emissions excluding LULUCF and excluding international aviation'
   ];
 
   const handleChange = (event: SelectChangeEvent<typeof category>) => {
@@ -362,6 +364,19 @@ const ComparisonBoardMain = (props) => {
                   </Select>
                 </FormControl>
                 <FormControl sx={{ m: 1, width: 300 }} size="small">
+                  <InputLabel id="demo-simple-select-label">Scenario</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={''}
+                    label="Scenario"
+                  >
+                    <MenuItem value={10}>WAM</MenuItem>
+                    <MenuItem value={20}>WEM</MenuItem>
+                    <MenuItem value={30}>WOM</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ m: 1, width: 300 }} size="small">
                   <InputLabel id="demo-multiple-checkbox-label">Category</InputLabel>
                   <Select
                     labelId="demo-select-small-label"
@@ -373,7 +388,7 @@ const ComparisonBoardMain = (props) => {
                     renderValue={(selected) => selected.join(', ')}
                     MenuProps={MenuProps}
                   >
-                    {names.map((name) => (
+                    {category_labels.map((name) => (
                       <MenuItem key={name} value={name}>
                         <Checkbox checked={category.indexOf(name) > -1} />
                         <ListItemText primary={name} />
