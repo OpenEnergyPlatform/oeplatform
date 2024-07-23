@@ -108,12 +108,15 @@ class Table(Tagable):
         self.save()
 
     # TODO: Use function when implementing the publish button
-    def set_is_published(self):
+    def set_is_published(self, to_schema):
         """
         Mark the table as published (ready for destination schema & public)
         and save the change to the database.
         """
-        self.is_publish = True
+        if to_schema != "model_draft":
+            self.is_publish = True
+        else:
+            self.is_publish = False
         self.save()
 
     # TODO: Use function when implementing the publish button. It should be

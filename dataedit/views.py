@@ -1846,7 +1846,7 @@ class MetaEditView(LoginRequiredMixin, View):
         )
 
 
-class StandaloneMetaEditView(LoginRequiredMixin, View):
+class StandaloneMetaEditView(View):
     def get(self, request):
         context_dict = {
             "config": json.dumps(
@@ -1968,7 +1968,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "temporal": [...],
                 "source": [...],
                 "license": [...],
-                "contributor": [...],
             }
 
         """
@@ -1979,7 +1978,6 @@ class PeerReviewView(LoginRequiredMixin, View):
         temporal_key_list = []
         source_key_list = []
         license_key_list = []
-        contributor_key_list = []
 
         for i in val:
             fieldKey = list(i.values())[0]
@@ -1991,8 +1989,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                 source_key_list.append(i)
             elif fieldKey.split(".")[0] == "licenses":
                 license_key_list.append(i)
-            elif fieldKey.split(".")[0] == "contributors":
-                contributor_key_list.append(i)
+
             elif (
                 fieldKey.split(".")[0] == "name"
                 or fieldKey.split(".")[0] == "title"
@@ -2012,7 +2009,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             "temporal": temporal_key_list,
             "source": source_key_list,
             "license": license_key_list,
-            "contributor": contributor_key_list,
         }
 
         return meta
@@ -2107,7 +2103,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "temporal",
                 "source",
                 "license",
-                "contributor",
             ]
             state_dict = process_review_data(
                 review_data=existing_review, metadata=metadata, categories=categories
@@ -2302,7 +2297,6 @@ class PeerRreviewContributorView(PeerReviewView):
             "temporal",
             "source",
             "license",
-            "contributor",
         ]
         state_dict = process_review_data(
             review_data=review_data, metadata=metadata, categories=categories

@@ -14,7 +14,9 @@ from factsheet.oekg.connection import oekg, oeo, oeo_owl, sparql
 from factsheet.oekg.filters import OekgQuery
 from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
+from factsheet.utils import serialize_publication_date
 from login import models as login_models
+from modelview.utils import get_framework_metadata_by_id, get_model_metadata_by_id
 
 from .models import OEKG_Modifications, ScenarioBundleAccessControl
 
@@ -167,7 +169,7 @@ def create_factsheet(request, *args, **kwargs):
     contact_person = request_body["contact_person"]
     sector_divisions = request_body["sector_divisions"]
     sectors = request_body["sectors"]
-    expanded_sectors = request_body["expanded_sectors"]  # noqa
+    # expanded_sectors = request_body["expanded_sectors"]  # noqa
     # energy_carriers = request_body['energy_carriers']
     # expanded_energy_carriers = request_body['expanded_energy_carriers']
     # energy_transformation_processes = request_body['energy_transformation_processes']
@@ -193,8 +195,6 @@ def create_factsheet(request, *args, **kwargs):
         patch_response_headers(response, cache_timeout=1)
         return response
     else:
-        # TODO- set in settings
-
         bundle = Graph()
 
         study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
@@ -437,7 +437,7 @@ def create_factsheet(request, *args, **kwargs):
             contact_person_URI = URIRef(
                 "http://openenergy-platform.org/ontology/oekg/" + item["iri"]
             )
-            bundle.add((study_URI, OEO.OEO_0000050, contact_person_URI))
+            bundle.add((study_URI, OEO.OEO_00000508, contact_person_URI))
 
         _sector_divisions = (
             json.loads(sector_divisions) if sector_divisions is not None else []
@@ -460,29 +460,74 @@ def create_factsheet(request, *args, **kwargs):
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
+            model_id = item.get("id")
+            if item.get("acronym"):
+                model_acronym = item.get("acronym")
+            else:
+                model_acronym = item.get("name")
+            model_url = item.get("url")
+
+            if not model_id or not model_acronym or not model_url:
+                continue  # Skip this item if any critical field is empty
+
             model_URI = URIRef(
-                "http://openenergy-platform.org/ontology/oekg/models/" + str(item["id"])
+                "http://openenergy-platform.org/ontology/oekg/models/" + str(model_id)
             )
             bundle.add((model_URI, RDF.type, OEO.OEO_00000277))
             bundle.add(
                 (
                     model_URI,
                     RDFS.label,
-                    Literal(item["name"]),
+                    Literal(model_acronym),
                 )
             )
             bundle.add(
                 (
                     model_URI,
                     OEO["has_iri"],
-                    Literal(item["url"]),
+                    Literal(model_url),
                 )
             )
             bundle.add((study_URI, OEO["has_model"], model_URI))
 
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
-            bundle.add((study_URI, OEO["has_framework"], Literal(item["name"])))
+            framework_id = item.get("id")
+            if item.get("acronym"):
+                framework_acronym = item.get("acronym")
+            else:
+                framework_acronym = item.get("name")
+            framework_url = item.get("url")
+
+            if not framework_id or not framework_acronym or not framework_url:
+                continue  # Skip this item if any critical field is empty
+
+            framework_URI = URIRef(
+                "http://openenergy-platform.org/ontology/oekg/frameworks/"
+                + str(framework_id)
+            )
+
+            bundle.add((framework_URI, RDF.type, OEO.OEO_00000172))
+
+            if framework_acronym:
+                bundle.add(
+                    (
+                        framework_URI,
+                        RDFS.label,
+                        Literal(framework_acronym),
+                    )
+                )
+
+            if framework_url:
+                bundle.add(
+                    (
+                        framework_URI,
+                        OEO["has_iri"],
+                        Literal(framework_url),
+                    )
+                )
+
+            bundle.add((study_URI, OEO["has_framework"], framework_URI))
 
         _study_keywords = (
             json.loads(study_keywords) if study_keywords is not None else []
@@ -620,7 +665,7 @@ def update_factsheet(request, *args, **kwargs):
                 new_bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
 
             if (
-                item["date_of_publication"] != "01-01-1900"
+                item["date_of_publication"] != "1900"
                 and item["date_of_publication"] != ""
             ):
                 new_bundle.add(
@@ -641,6 +686,13 @@ def update_factsheet(request, *args, **kwargs):
                 )
 
             new_bundle.add((study_URI, OEKG["has_publication"], publications_URI))
+
+            # remove old date in publication
+            # iterate to make sure it can only have unique publication date
+            for _s, _p, _o in oekg.triples(
+                (publications_URI, OEKG["date_of_publication"], None)
+            ):
+                oekg.remove((_s, _p, _o))
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
@@ -877,56 +929,97 @@ def update_factsheet(request, *args, **kwargs):
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
+            model_id = item.get("id")
+
+            if item.get("acronym"):
+                model_acronym = item.get("acronym")
+            else:
+                model_acronym = item.get("name")
+            model_url = item.get("url")
+
+            if not model_id or not model_acronym or not model_url:
+                continue  # Skip this item if any critical field is empty
+
             model_URI = URIRef(
-                "http://openenergy-platform.org/ontology/oekg/models/" + str(item["id"])
+                "http://openenergy-platform.org/ontology/oekg/models/" + str(model_id)
             )
             new_bundle.add((model_URI, RDF.type, OEO.OEO_00000277))
+
             new_bundle.add(
                 (
                     model_URI,
                     RDFS.label,
-                    Literal(item["name"]),
+                    Literal(model_acronym),
                 )
             )
+
             new_bundle.add(
                 (
                     model_URI,
                     OEO["has_iri"],
-                    Literal(item["url"]),
+                    Literal(model_url),
                 )
             )
+
             new_bundle.add((study_URI, OEO["has_model"], model_URI))
 
+            # remove old labels
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((model_URI, RDFS.label, None)):
+                oekg.remove((_s, _p, _o))
+
+            # remove old iri´s
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((model_URI, OEO["has_iri,"], None)):
+                oekg.remove((_s, _p, _o))
+
+        # TODO: Fix
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
-            print(item)
+            framework_id = item.get("id")
+            if item.get("acronym"):
+                framework_acronym = item.get("acronym")
+            else:
+                framework_acronym = item.get("name")
+            framework_url = item.get("url")
+
+            if not framework_id or not framework_url:
+                continue  # Skip this item if any critical field is empty
+
             framework_URI = URIRef(
                 "http://openenergy-platform.org/ontology/oekg/frameworks/"
-                + str(item["id"])
+                + str(framework_id)
             )
-            new_bundle.add((framework_URI, RDF.type, OEO.OEO_00000172))
-            new_bundle.add(
-                (
-                    framework_URI,
-                    RDFS.label,
-                    Literal(item["name"]),
-                )
-            )
-            new_bundle.add(
-                (
-                    framework_URI,
-                    OEO["has_iri"],
-                    Literal(item["url"]),
-                )
-            )
-            new_bundle.add((study_URI, OEO["has_framework"], Literal(item["name"])))
 
-        # _authors = json.loads(authors) if authors is not None else []
-        # for item in _authors:
-        #     author_URI = URIRef(
-        #         "http://openenergy-platform.org/ontology/oekg/" + item["iri"]
-        #     )
-        #     new_bundle.add((study_URI, OEO.OEO_00000506, author_URI))
+            new_bundle.add((framework_URI, RDF.type, OEO.OEO_00000172))
+            if framework_acronym:
+                new_bundle.add(
+                    (
+                        framework_URI,
+                        RDFS.label,
+                        Literal(framework_acronym),
+                    )
+                )
+            if framework_url:
+                new_bundle.add(
+                    (
+                        framework_URI,
+                        OEO["has_iri"],
+                        Literal(framework_url),
+                    )
+                )
+
+            new_bundle.add((study_URI, OEO["has_framework"], framework_URI))
+
+            # remove old labels
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((framework_URI, RDFS.label, None)):
+                oekg.remove((_s, _p, _o))
+
+            # remove old iri´s
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((framework_URI, OEO["has_iri,"], None)):
+                oekg.remove((_s, _p, _o))
 
         _study_keywords = (
             json.loads(study_keywords) if study_keywords is not None else []
@@ -1097,19 +1190,27 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["models"] = []
     factsheet["frameworks"] = []
 
-    for s, p, o in oekg.triples((study_URI, OEO["has_framework"], None)):
-        factsheet["frameworks"].append({"id": o, "name": o})
+    for _, _, o in oekg.triples((study_URI, OEO["has_framework"], None)):
+        for _, _, o1 in oekg.triples((o, OEO["has_iri"], None)):
+            framework_id = int(str(o).split("/")[-1])
+            framework_metadata = get_framework_metadata_by_id(
+                framework_id, "energyframework"
+            )
 
-    for s, p, o in oekg.triples((study_URI, OEO["has_model"], None)):
-        model = {}
-        model["id"] = str(o).split("/")[-1]
-        label = oekg.value(o, RDFS.label)
-        model["name"] = label
-        for s1, p1, o1 in oekg.triples((o, OEO["has_iri"], None)):
-            model["url"] = o1
+            if framework_metadata:
+                framework_metadata["url"] = str(o1)
+                factsheet["frameworks"].append(framework_metadata)
 
-        factsheet["models"].append(model)
+    for _, _, o in oekg.triples((study_URI, OEO["has_model"], None)):
+        for _, _, o1 in oekg.triples((o, OEO["has_iri"], None)):
+            model_id = int(str(o).split("/")[-1])
+            model_metadata = get_model_metadata_by_id(model_id, "energymodel")
 
+            if model_metadata:
+                model_metadata["url"] = str(o1)
+                factsheet["models"].append(model_metadata)
+
+    factsheet["collected_scenario_publication_dates"] = []
     factsheet["publications"] = []
     for s, p, o in oekg.triples((study_URI, OEKG["has_publication"], None)):
         publication = {}
@@ -1133,7 +1234,10 @@ def factsheet_by_id(request, *args, **kwargs):
 
         publication["date_of_publication"] = ""
         for s3, p3, o3 in oekg.triples((o, OEKG["date_of_publication"], None)):
-            publication["date_of_publication"] = o3
+            publication["date_of_publication"] = serialize_publication_date(str(o3))
+            factsheet["collected_scenario_publication_dates"].append(
+                serialize_publication_date(str(o3))
+            )
 
         publication["link_to_study_report"] = ""
         for s4, p4, o4 in oekg.triples((o, OEKG["link_to_study_report"], None)):
@@ -1546,24 +1650,36 @@ def get_all_factsheets(request, *args, **kwargs):
         element["models"] = []
         for s, p, o in oekg.triples((study_URI, OEO["has_model"], None)):
             if o != None:  # noqa
-                element["models"].append(o)
+                label = oekg.value(o, RDFS.label)
+                if label:
+                    element["models"].append(label)
 
         element["frameworks"] = []
         for s, p, o in oekg.triples((study_URI, OEO["has_framework"], None)):
             if o != None:  # noqa
-                element["frameworks"].append(o)
+                label = oekg.value(o, RDFS.label)
+                if label is not None:
+                    element["frameworks"].append(label)
+                else:
+                    pass
+
+        element["collected_scenario_publication_dates"] = []
+        for s, p, o in oekg.triples((s, OEKG["has_publication"], None)):
+            pubs_per_bundle = []
+            for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
+                if o1:
+                    pubs_per_bundle.append(serialize_publication_date(str(o1)))
+
+            if pubs_per_bundle:
+                element["collected_scenario_publication_dates"].append(pubs_per_bundle)
 
         element["scenarios"] = []
-
-        element["date_of_publication"] = oekg.value(
-            study_URI, OEKG["date_of_publication"]
-        )
-
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
             label = oekg.value(o, RDFS.label)
             abstract = oekg.value(o, DC.abstract)
             full_name = oekg.value(o, OEKG.has_full_name)
             uid = oekg.value(o, OEKG.scenario_uuid)
+
             if label != None:  # noqa
                 element["scenarios"].append(
                     {
@@ -1581,16 +1697,49 @@ def get_all_factsheets(request, *args, **kwargs):
     return response
 
 
+def search_scenario_type_iris_by_label(label, input):
+    for child in input:
+        result = None
+
+        if str(child["label"]) == label:
+            result = str(child["iri"])
+            return result
+
+        elif child.get("children"):
+            result = search_scenario_type_iris_by_label(label, child["children"])
+            if result:
+                return result
+    return result
+
+
+def get_scenario_type_iri(scenario_type_label: str):
+    scenario_class = oeo_owl.search_one(
+        iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
+    )
+    scenario_subclasses = get_all_sub_classes(scenario_class)
+
+    result = search_scenario_type_iris_by_label(
+        label=scenario_type_label, input=scenario_subclasses["children"]
+    )
+
+    return result
+
+
 def get_scenarios(request, *args, **kwargs):
     scenarios_uid = [
         i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_uid"))
     ]
+
     scenarios = []
+
+    # Create an instance of OekgQuery
+    oekg_query = OekgQuery()
 
     for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00000365)):
         scenario_uid = str(s).split("/")[-1]
         if str(scenario_uid) in scenarios_uid:
-            descriptors = []
+            study_descriptors = []
+            scenario_descriptors = []
             regions = []
             interacting_regions = []
             scenario_years = []
@@ -1602,7 +1751,12 @@ def get_scenarios(request, *args, **kwargs):
                 abstract = o
 
             for s1, p1, o1 in oekg.triples((s, OEO["has_scenario_descriptor"], None)):
-                descriptors.append(str(oeo.value(o1, RDFS.label)))
+                scenario_descriptors.append(
+                    (
+                        str(oeo.value(o1, RDFS.label)),
+                        get_scenario_type_iri(str(oeo.value(o1, RDFS.label))),
+                    )
+                )
 
             for s1, p1, o1 in oekg.triples((s, OEO.OEO_00020220, None)):
                 o1_label = oekg.value(o1, RDFS.label)
@@ -1623,12 +1777,20 @@ def get_scenarios(request, *args, **kwargs):
                 study_label = oekg.value(s1, OEKG["has_full_name"])
                 study_abstract = oekg.value(s1, DC.abstract)
 
+            # additionally get the study descriptors from the scenario bundle
+            study_descriptors = (
+                oekg_query.get_bundle_study_descriptors_where_scenario_is_part_of(
+                    scenario_uid=scenario_uid
+                )
+            )
+
             scenarios.append(
                 {
                     "acronym": oekg.value(s, RDFS.label),
                     "data": {
                         "uid": scenario_uid,
-                        "descriptors": descriptors,
+                        "study_descriptors": study_descriptors,
+                        "scenario_descriptors": scenario_descriptors,
                         "regions": regions,
                         "interacting_regions": interacting_regions,
                         "scenario_years": scenario_years,
@@ -1648,20 +1810,19 @@ def get_scenarios(request, *args, **kwargs):
 @login_required
 def get_all_factsheets_as_turtle(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="ttl")
-    response = JsonResponse(
-        all_factsheets_as_turtle, safe=False, content_type="application/json"
-    )
-    patch_response_headers(response, cache_timeout=1)
 
+    response = HttpResponse(all_factsheets_as_turtle, content_type="text/turtle")
+    response["Content-Disposition"] = 'attachment; filename="oekg.ttl"'
     return response
 
 
 def get_all_factsheets_as_json_ld(request, *args, **kwargs):
-    all_factsheets_as_turtle = oekg.serialize(format="json-ld")
-    response = JsonResponse(
-        all_factsheets_as_turtle, safe=False, content_type="application/json"
+    all_factsheets_as_json_ld = oekg.serialize(format="json-ld")
+
+    response = HttpResponse(
+        all_factsheets_as_json_ld, content_type="application/ld+json"
     )
-    patch_response_headers(response, cache_timeout=1)
+    response["Content-Disposition"] = 'attachment; filename="oekg.jsonld"'
 
     return response
 
@@ -1908,8 +2069,6 @@ def filter_scenario_bundles_view(request):
     html_content = render(
         request, "partials/related_oekg_scenarios.html", context
     ).content.decode("utf-8")
-    html_content = render(
-        request, "partials/related_oekg_scenarios.html", context
-    ).content.decode("utf-8")
+
     # Render the template with the context
     return HttpResponse(html_content)

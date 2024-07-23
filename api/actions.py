@@ -1026,7 +1026,7 @@ def table_change_column(column_definition):
     return perform_sql(sql_string)
 
 
-def table_change_constraint(table, constraint_definition):
+def table_change_constraint(constraint_definition):
     """
     Changes constraint of table
     :param schema: schema
@@ -1597,7 +1597,7 @@ def move(from_schema, table, to_schema):
                 to_schema=to_schema
             )
 
-        t.set_is_published()
+        t.set_is_published(to_schema=to_schema)
         session.commit()
         t.save()
     except Exception:
@@ -1687,7 +1687,7 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
                 to_schema=to_schema
             )
 
-        t.set_is_published()
+        t.set_is_published(to_schema=to_schema)
         session.commit()
 
     except DBTable.DoesNotExist:

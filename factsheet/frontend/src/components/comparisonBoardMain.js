@@ -1,14 +1,14 @@
 import React, { useState, useEffect, } from 'react';
 import ComparisonBoardItems from "./comparisonBoardItems";
-import { Box } from "@mui/system";
-import ComparisonControl from "./comparisonControl";
+// import { Box } from "@mui/system";
+// import ComparisonControl from "./comparisonControl";
 import Grid from '@mui/material/Grid';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Link } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import axios from 'axios';
 import conf from "../conf.json";
-import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+// import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import Container from '@mui/material/Container';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
@@ -18,14 +18,14 @@ import { Tooltip } from '@mui/material';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
 import OptionBox from '../styles/oep-theme/components/optionBox.js';
-import MultipleSelectChip from '../styles/oep-theme/components/multiselect.js';
+// import MultipleSelectChip from '../styles/oep-theme/components/multiselect.js';
 
 const ComparisonBoardMain = (props) => {
   const { params } = props;
   const [scenarios, setScenarios] = useState([]);
   const scenarios_uid = params.split('#');
   const scenarios_uid_json = JSON.stringify(scenarios_uid);
-  const [selectedCriteria, setselectedCriteria] = useState(['Descriptors', 'Study name']);
+  const [selectedCriteria, setselectedCriteria] = useState(['Study descriptors', 'Scenario types', 'Study name']);
 
   const getScenarios = async () => {
     const { data } = await axios.get(conf.toep + `scenario-bundles/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
@@ -43,7 +43,8 @@ const ComparisonBoardMain = (props) => {
     'Scenario abstract',
     'Study name',
     'Study abstract',
-    'Descriptors',
+    'Study descriptors',
+    'Scenario types',
     'Regions',
     'Interacting regions',
     'Scenario years',

@@ -21,7 +21,7 @@ from rest_framework.authtoken.models import Token
 import login.models as models
 from dataedit.models import PeerReviewManager
 from dataedit.views import schema_whitelist
-from login.utilities import (
+from login.utils import (
     get_badge_icon_path,
     get_review_badge_from_table_metadata,
     get_tables_if_group_assigned,
@@ -98,7 +98,7 @@ class TablesView(View):
                     draft_tables.append(table_data)
 
         # Pagination
-        ITEMS_PER_PAGE = 5
+        ITEMS_PER_PAGE = 8
 
         # Paginate tables
         published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)

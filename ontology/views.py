@@ -7,7 +7,7 @@ from django.shortcuts import HttpResponse, render
 from django.views import View
 
 from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME
-from ontology.utility import collect_modules, get_common_data, get_ontology_version
+from ontology.utils import collect_modules, get_common_data, get_ontology_version
 
 LOGGER = logging.getLogger("oeplatform")
 

@@ -2,27 +2,22 @@
 
 ## Changes
 
-- Update design sidebar on table detail page [(#1652)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1652)
+- All visitors can use metadata builder in standalone version [(#1746)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1746)
 
-- Update the code that loads the oeo-related files from local static files. All oeo data is not only loaded when the app is started. Starting the app now takes more time, but offers the advantage that the files do not have to be parsed again. This leads to a significantly faster page load of the ontology pages. [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
+- Scenario Bundle Comparison: Harmonize usage of scenario types & study descriptors on bundle & comparison pages. Additionally make all Chips clickable and provide link to oeo class description pages. [#1751](https://github.com/OpenEnergyPlatform/oeplatform/pull/1751)
+
+- The auto-select feature on the scenario bundle/scenario edit page now shows table resources from the scenario topic in the format of: "Metadata Table Title (table_name)" to harmonize the display of table resources also when displaying a bundle. Note: Existing resources must currently be updated manually. [(#1753)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1753)
 
 ## Features
 
-- Scenario bundle: . [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
-
-- Scenario bundle: [(#1704)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1704)
-
-  - It is now possible to add multiple publications to a scenario bundle
-  - The drop-down menu for selecting framework and model factsheets now shows all currently available factsheets instead of retrieving the values from a static list. The factsheets are listed by ‘model_name’ as this is a mandatory field that must be filled in when creating a factsheet
-
-- Add toggle functionality to topics table sidebar in order for the table to take 100% of the view width [(#1683)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1683)
-
-- Enhance the OpenPeerReview: New values within a review result (coming from accepted value suggestions) are now also written back to the table metadata. The review now effects the oemetadata for a specific table. [(#1368)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1368)
-
-- Add new embargo area feature: Users can set an embargo period once they create a table or once they publish a table. The embargo period restricts the data access for bot ui & api. [(#1534)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1534)
-
 ## Bugs
 
-- REST-API: Retrieve oemetadata from database instead of comment on table. [(#1703)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1703)
+- Open peer review: Fixed several bugs that hindered the user to submit a review, broke the indicators dots that show the review progress & showed badly formatted data on the summary tab [(#1762)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1762)
+
+- Fixed multiple scenario bundle bugs [(#1764)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1764)
+  - Fix incorrect rendering of multiple publication years and show None if no data available.
+  - Year of publication in scenario bundle detail view now renders only the year
+  - Model & framework factsheets are now rendered as clickable chip that links to the detail page of the factsheet. The chip now renders either the acronym or the
+    name of the factsheet.
 
 ## Documentation updates

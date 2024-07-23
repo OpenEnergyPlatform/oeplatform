@@ -98,6 +98,13 @@
             & > * {
                 @extend .ms-1;
             }
+
+            button {
+                @extend .btn;
+                @extend .btn-outline-primary;
+                @extend .btn-sm;
+                @extend .me-3;
+            }
         }
 
         .table-container {
@@ -107,6 +114,11 @@
 
     .opr {
         @include table-variant--rounded;
+
+        &__info {
+            @extend .pb-4;
+            max-width: 64rem;
+        }
 
         .table-container {
             @include table-container;

@@ -12,6 +12,7 @@
 
     &:last-of-type {
       @extend .border-0;
+      @extend .pb-0;
     }
   }
 
