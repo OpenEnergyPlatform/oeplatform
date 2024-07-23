@@ -35,6 +35,14 @@ import CSRFToken from './csrfToken.js';
 import CircularProgress from '@mui/material/CircularProgress';
 import SendIcon from '@mui/icons-material/Send';
 import LinearProgress from '@mui/material/LinearProgress';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemText from '@mui/material/ListItemText';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import AddIcon from '@mui/icons-material/Add';
 
 const ComparisonBoardMain = (props) => {
 
@@ -45,11 +53,13 @@ const ComparisonBoardMain = (props) => {
   const [selectedCriteria, setselectedCriteria] = useState(['Study descriptors', 'Scenario types', 'Study name']);
   const [alignment, setAlignment] = React.useState('Qualitative');
   const [sparqOutput, setSparqlOutput] = useState('');
-  const [scenarioYear, setScenarioYear] = React.useState('2020');
+  const [scenarioYear, setScenarioYear] = React.useState(['2020']);
   const [chartData, setChartData] = React.useState([]);
   const [chartLabels, setChartLabels] = React.useState([]);
-  const [loading, setLoading] = useState(false);
-  const [showChart, setShowChart] = useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [showChart, setShowChart] = React.useState(false);
+  const [category, setCategory] = React.useState([]);
+  const [visualizationRows, addVisualizationRows] = React.useState(0);
 
   
 
@@ -98,14 +108,52 @@ const ComparisonBoardMain = (props) => {
     }
   }
 
-  const handleYearChange = (event) => {
-    setScenarioYear(event.target.value);
-    const filtered_output = sparqOutput.filter(item => item.year.value == event.target.value)
+  const handleYearChange = (event, index) => {
+    console.log(index);
+    const newScenarioYear = scenarioYear;
+    newScenarioYear[index] = event.target.value;
+    setScenarioYear(newScenarioYear);
+
+    console.log(scenarioYear);
+
+    const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index])
+
     const country = filtered_output.map((obj) => obj.country_code.value.split('/').pop() );
     const value = filtered_output.map((obj) => obj.value.value );
-    setChartData(value);
-    setChartLabels(country);
-    
+
+    const newChartData = [...chartData];
+    newChartData[index] = value ;
+    setChartData(newChartData);
+
+    const newChartLabels = [...chartLabels];
+    newChartLabels[index] = country;
+    setChartLabels(newChartLabels);
+
+  };
+
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
+  const names = [
+    'Transport',
+    'Agriculture',
+  ];
+
+  const handleChange = (event: SelectChangeEvent<typeof category>) => {
+    const {
+      target: { value },
+    } = event;
+    setCategory(
+      typeof value === 'string' ? value.split(',') : value,
+    );
   };
 
   const [data, setData] = useState(null);
@@ -134,10 +182,11 @@ const ComparisonBoardMain = (props) => {
     FILTER(?year IN (${scenario_years}) && ?table_name IN (${data_tabels}) && ?category IN (${categories})) .
   } ORDER BY Asc(?year)`;
 
-  const sendQuery = async () => {
+  const sendQuery = async (index) => {
+    console.log(index);
     setLoading(true);
     const response = await axios.post(
-      'http://localhost:8080/sparql',  
+      conf.obdi, 
       query,
       {
         headers: {
@@ -149,18 +198,36 @@ const ComparisonBoardMain = (props) => {
     ).then(response => {
       const sparqOutput = response.data.results.bindings;
       setSparqlOutput(sparqOutput);
-      const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear)
+      const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index])
       const country = filtered_output.map((obj) => obj.country_code.value.split('/').pop() );
       const value = filtered_output.map((obj) => obj.value.value );
-      setChartData(value);
-      setChartLabels(country);
+
+      const newChartData = [...chartData];
+      newChartData[index] = value ;
+      setChartData(newChartData);
+
+      const newChartLabels = [...chartLabels];
+      newChartLabels[index] = country;
+      setChartLabels(newChartLabels);
+
+      const newScenarioYear = [...scenarioYear];
+      newScenarioYear[index] = '2020';
+      setScenarioYear(newScenarioYear);
+      
       setLoading(false);
       setShowChart(true);
+
+
     }).catch(error => {
         console.error('API Error:', error.message);
     }).finally(() => {
     });
   }
+
+  const addVisualization = uid => {
+    addVisualizationRows(visualizationRows + 1);
+  };
+
 
   const dataBar1 = {
     labels: chartLabels,
@@ -276,50 +343,115 @@ const ComparisonBoardMain = (props) => {
         </Grid>
         } 
         {alignment == "Quantitative" && 
-        <Grid container >
-          <Grid item xs={11}>
-            
-          </Grid>
-          <Grid item xs={1}>
-            <Button variant="outlined" endIcon={<SendIcon />} onClick={sendQuery} >Go</Button>
-          </Grid>
-          <Grid item xs={12}>
-            {loading == true && <Box sx={{ paddingTop: "10px" }}>
-              <LinearProgress />
-            </Box>}
-            {showChart == true && <Grid container>
-              <Grid item xs={12}>
-                <FormControl fullWidth margin="dense">
-                  <FormLabel ></FormLabel>
-                  <RadioGroup
-                    row
-                    name="row-radio-buttons-group"
-                    onChange={handleYearChange}
-                    defaultValue="2020"
+        <Grid container spacing={2}>
+          {Array.from({ length: visualizationRows }).map((_, index) => (
+           <Grid item xs={12}>
+            <Grid container spacing={2}>
+              <Grid item xs={11}>
+                <FormControl sx={{ m: 1, width: 300 }} size="small">
+                  <InputLabel id="demo-simple-select-label">Table</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={''}
+                    label="Table"
                   >
-                    <Box sx={{ 
-                      display: 'flex', 
-                      paddingLeft: '20px',
-                      paddingRight: '20px',
-                      justifyContent: 'space-between',
-                      width: '100%'
-                    }}>
-                      <FormControlLabel value="2020" control={<Radio />} label="2020" />
-                      <FormControlLabel value="2025" control={<Radio />} label="2025" />
-                      <FormControlLabel value="2030" control={<Radio />} label="2030" />
-                      <FormControlLabel value="2035" control={<Radio />} label="2035" />
-                      <FormControlLabel value="2040" control={<Radio />} label="2040" />
-                    </Box>
-                    </RadioGroup>
-                  </FormControl>
+                    <MenuItem value={10}>Table 1</MenuItem>
+                    <MenuItem value={20}>Table 2</MenuItem>
+                    <MenuItem value={30}>Table 3</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ m: 1, width: 300 }} size="small">
+                  <InputLabel id="demo-multiple-checkbox-label">Category</InputLabel>
+                  <Select
+                    labelId="demo-select-small-label"
+                    id="demo-select-small"
+                    multiple
+                    value={category}
+                    onChange={handleChange}
+                    input={<OutlinedInput label="Category" />}
+                    renderValue={(selected) => selected.join(', ')}
+                    MenuProps={MenuProps}
+                  >
+                    {names.map((name) => (
+                      <MenuItem key={name} value={name}>
+                        <Checkbox checked={category.indexOf(name) > -1} />
+                        <ListItemText primary={name} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={1}>
+                <Button size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Go</Button>
               </Grid>
               <Grid item xs={12}>
-                <Bar data={dataBar1} options={options} width={100} height={40} />
+                {showChart == true && <Grid container>
+                  <Grid item xs={12}>
+                    <FormControl fullWidth margin="dense">
+                      <FormLabel ></FormLabel>
+                      <RadioGroup
+                        row
+                        name="row-radio-buttons-group"
+                        onChange={(e) => handleYearChange(e, index)}
+                        defaultValue="2020"
+                      >
+                        <Box sx={{ 
+                          display: 'flex', 
+                          paddingLeft: '20px',
+                          paddingRight: '20px',
+                          justifyContent: 'space-between',
+                          width: '100%'
+                        }}>
+                          <FormControlLabel value="2020" control={<Radio />} label="2020" />
+                          <FormControlLabel value="2025" control={<Radio />} label="2025" />
+                          <FormControlLabel value="2030" control={<Radio />} label="2030" />
+                          <FormControlLabel value="2035" control={<Radio />} label="2035" />
+                          <FormControlLabel value="2040" control={<Radio />} label="2040" />
+                        </Box>
+                        </RadioGroup>
+                      </FormControl>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Bar data={{
+                              labels: chartLabels[index],
+                              datasets: [
+                                {
+                                  label: index,
+                                  backgroundColor: "lightblue",
+                                  borderColor: "rgba(120,99,132,1)",
+                                  borderWidth: 1,
+                                  hoverBackgroundColor: "rgba(255,99,132,0.4)",
+                                  hoverBorderColor: "rgba(255,99,132,1)",
+                                  data: chartData[index]
+                                }
+                              ]}} 
+                              options={options} width={100} height={40} />
+                  </Grid>
+                </Grid>}
+                </Grid>
               </Grid>
-            </Grid>}
+             
+              <Divider />
+            </Grid>
+            ))}
+            <Grid item xs={12} >
+              {loading == true && <Box sx={{ paddingTop: "10px" }}>
+                    <LinearProgress />
+                  </Box>}
+              <Box display="flex" justifyContent="flex-end">
+                
+                <IconButton
+                    color="primary"
+                    aria-label="add"
+                    onClick={() => addVisualization()}
+                  >
+                  <AddIcon />
+                </IconButton>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-        } 
+          } 
       </Container>
     </Grid>
   );
