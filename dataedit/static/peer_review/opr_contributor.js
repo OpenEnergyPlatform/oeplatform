@@ -184,6 +184,10 @@ function getFieldState(fieldKey) {
   return state_dict[fieldKey];
 }
 
+function isEmptyValue(value) {
+    return value === "" || value === "None" || value === "[]";
+}
+
 function click_field(fieldKey, fieldValue, category) {
   // Check if the category tab needs to be switched
   switchCategoryTab(category);
@@ -278,8 +282,6 @@ function getCategoryToTabIdMapping() {
     'temporal': 'spatiotemporal-tab',
     'source': 'source-tab',
     'license': 'license-tab',
-    'contributor': 'contributor-tab',
-    'resource': 'resource-tab',
   };
   return mapping;
 }
@@ -347,36 +349,38 @@ function renderSummaryPageFields() {
   const acceptedFields = [];
   const rejectedFields = [];
   const missingFields = [];
+  const emptyFields = [];
 
   if (state_dict && Object.keys(state_dict).length > 0) {
     const fields = document.querySelectorAll('.field');
     for (let field of fields) {
       let field_id = field.id.slice(6);
-      const fieldValue = $(field).text();
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
-      if (fieldState === 'ok') {
-        acceptedFields.push({field_id, fieldValue, fieldCategory});
+      const fieldName = field_id.split('.').pop();
+      if (isEmptyValue(fieldValue)) {
+        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
+      } else if (fieldState === 'ok') {
+        acceptedFields.push({ fieldName, fieldValue, fieldCategory });
       }
-      // TODO: The following line duplicates enties in the summary tab
-      // else if (fieldState === 'suggestion' || fieldState === 'rejected') {
-      // missingFields.push({ field_id, fieldValue, fieldCategory });
-      // }
     }
   }
 
   for (const review of current_review.reviews) {
     const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
-    const fieldValue = $(field_id).text();
+    const fieldValue = $(field_id).find('.value').text().replace(/\s+/g, ' ').trim();
     const isAccepted = review.fieldReview.some((fieldReview) => fieldReview.state === 'ok');
     const isRejected = review.fieldReview.some((fieldReview) => fieldReview.state === 'rejected');
-
     const fieldCategory = review.category;
+    const fieldName = review.key.split('.').pop();
 
-    if (isAccepted) {
-      acceptedFields.push({field_id, fieldValue, fieldCategory});
+    if (isEmptyValue(fieldValue)) {
+      emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
+    } else if (isAccepted) {
+      acceptedFields.push({ fieldName, fieldValue, fieldCategory });
     } else if (isRejected) {
-      rejectedFields.push({field_id, fieldValue, fieldCategory});
+      rejectedFields.push({ fieldName, fieldValue, fieldCategory });
     }
   }
 
@@ -391,19 +395,20 @@ function renderSummaryPageFields() {
     const category_fields = category.querySelectorAll(".field");
     for (field of category_fields) {
       const field_id = field.id.slice(6);
-      const fieldValue = $(field).text();
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const found = current_review.reviews.some((review) => review.key === field_id);
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
+      const fieldName = field_id.split('.').pop();
 
-      if (!found && fieldState !== 'ok') {
-        missingFields.push({field_id, fieldValue, fieldCategory});
+      if (isEmptyValue(fieldValue)) {
+        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
+      } else if (!found && fieldState !== 'ok') {
+        missingFields.push({ fieldName, fieldValue, fieldCategory });
       }
     }
   }
 
-
-  // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
 
   function clearSummaryTable() {
@@ -441,7 +446,7 @@ function renderSummaryPageFields() {
       row.appendChild(tdFieldCategory);
 
       let tdFieldId = document.createElement('td');
-      tdFieldId.textContent = item.field_id;
+      tdFieldId.textContent = item.fieldName;
       row.appendChild(tdFieldId);
 
       let tdFieldValue = document.createElement('td');
@@ -456,7 +461,6 @@ function renderSummaryPageFields() {
     return table;
   }
 
-
   function updateSummaryTable() {
     clearSummaryTable();
 
@@ -464,6 +468,7 @@ function renderSummaryPageFields() {
     allData.push(...missingFields.map((item) => ({...item, fieldStatus: 'Missing'})));
     allData.push(...acceptedFields.map((item) => ({...item, fieldStatus: 'Accepted'})));
     allData.push(...rejectedFields.map((item) => ({...item, fieldStatus: 'Rejected'})));
+    allData.push(...emptyFields.map((item) => ({...item, fieldStatus: 'Empty'})));
 
     let table = generateTable(allData);
     summaryContainer.appendChild(table);
@@ -472,6 +477,8 @@ function renderSummaryPageFields() {
   updateSummaryTable();
   updateTabProgressIndicatorClasses();
 }
+
+
 
 /**
  * Creates an HTML list of fields with their categories
@@ -624,17 +631,20 @@ function checkReviewComplete() {
   const fields = document.querySelectorAll('.field');
   for (let field of fields) {
     let fieldName = field.id.slice(6);
+    const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
     const fieldState = getFieldState(fieldName);
     let reviewed = current_review["reviews"].find((review) => review.key === fieldName);
 
-    if (!reviewed && fieldState !== 'ok') {
+    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
       $('#submit_summary').addClass('disabled');
       return;
     }
   }
   $('#submit_summary').removeClass('disabled');
-  showToast("Success", "You have reviewed all fields an can submit the review to get feedback!", 'success');
+  showToast("Success", "You have reviewed all fields and can submit the review to get feedback!", 'success');
 }
+
+
 
 
 /**
@@ -679,7 +689,7 @@ function updateSubmitButtonColor() {
 
 
 function updateTabProgressIndicatorClasses() {
-  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
 
   for (let i = 0; i < tabNames.length; i++) {
     let tabName = tabNames[i];
@@ -688,7 +698,10 @@ function updateTabProgressIndicatorClasses() {
 
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-    let allOk = fieldsInTab.every((field) => field.classList.contains('field-ok'));
+    let allOk = fieldsInTab.every((field) => {
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      return isEmptyValue(fieldValue) || field.classList.contains('field-ok');
+    });
 
     if (allOk) {
       tab.classList.add('status--done');
@@ -698,9 +711,8 @@ function updateTabProgressIndicatorClasses() {
   }
 }
 
-
 function updateTabClasses() {
-  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
   for (let i = 0; i < tabNames.length; i++) {
     let tabName = tabNames[i];
     let tab = document.getElementById(tabName + '-tab');
@@ -730,39 +742,52 @@ window.addEventListener('DOMContentLoaded', updateTabClasses);
 /**
  * Hide and show revier controles once the user clicks the summary tab
  */
-const summaryTab = document.getElementById('summary-tab');
-const otherTabs = [
-  document.getElementById('general-tab'),
-  document.getElementById('spatiotemporal-tab'),
-  document.getElementById('source-tab'),
-  document.getElementById('license-tab'),
-  document.getElementById('contributor-tab'),
-  document.getElementById('resource-tab'),
-];
-const reviewContent = document.querySelector(".review__content");
+console.log('Script is running...');
 
-// Event listener for clicking the "Summary" tab button
-summaryTab.addEventListener('click', function() {
-  toggleReviewControls(false);
-  reviewContent.classList.toggle("tab-pane--100");
-});
+document.addEventListener('DOMContentLoaded', function() {
+  // console.log('DOM fully loaded and parsed');
 
-// Event listener for clicking the other tabs
-otherTabs.forEach(function(tab) {
-  tab.addEventListener('click', function() {
-    toggleReviewControls(true);
-    reviewContent.classList.remove("tab-pane--100");
-  });
-});
+  const summaryTab = document.getElementById('summary-tab');
+  const otherTabs = [
+    document.getElementById('general-tab'),
+    document.getElementById('spatiotemporal-tab'),
+    document.getElementById('source-tab'),
+    document.getElementById('license-tab'),
+  ];
+  const reviewContent = document.querySelector(".review__content");
 
-/**
- * Function to toggle the review controls visibility
- */
-function toggleReviewControls(show) {
-  const reviewControls = document.querySelector('.review__controls');
-  if (reviewControls) {
-    reviewControls.style.display = show ? '' : 'none';
+  console.log('Summary Tab:', summaryTab);
+  console.log('Other Tabs:', otherTabs);
+  console.log('Review Content:', reviewContent);
+
+  if (summaryTab && reviewContent) {
+    summaryTab.addEventListener('click', function() {
+      toggleReviewControls(false);
+      reviewContent.classList.toggle("tab-pane--100");
+    });
+  } else {
+    console.error('Summary tab or review content not found');
   }
-}
+
+  otherTabs.forEach(function(tab, index) {
+    if (tab) {
+      tab.addEventListener('click', function() {
+        toggleReviewControls(true);
+        reviewContent.classList.remove("tab-pane--100");
+      });
+    } else {
+      console.error('Tab at index ' + index + ' not found');
+    }
+  });
+
+  function toggleReviewControls(show) {
+    const reviewControls = document.querySelector('.review__controls');
+    console.log('Review Controls:', reviewControls);
+    if (reviewControls) {
+      reviewControls.style.display = show ? '' : 'none';
+    }
+  }
+});
+
 
 peerReview(config);

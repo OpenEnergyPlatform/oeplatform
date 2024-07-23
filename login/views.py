@@ -21,7 +21,7 @@ from rest_framework.authtoken.models import Token
 import login.models as models
 from dataedit.models import PeerReviewManager
 from dataedit.views import schema_whitelist
-from login.utilities import (
+from login.utils import (
     get_badge_icon_path,
     get_review_badge_from_table_metadata,
     get_tables_if_group_assigned,
@@ -54,7 +54,6 @@ class TablesView(View):
         tables = get_user_tables(user_id)
         draft_tables = []
         published_tables = []
-        # published_but_license_issue = []
 
         for table in tables:
             permission_level = user.get_table_permission_level(table)
@@ -99,7 +98,7 @@ class TablesView(View):
                     draft_tables.append(table_data)
 
         # Pagination
-        ITEMS_PER_PAGE = 5
+        ITEMS_PER_PAGE = 8
 
         # Paginate tables
         published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)
@@ -126,9 +125,12 @@ class TablesView(View):
             "schema_whitelist": schema_whitelist,
         }
 
-        if request.is_ajax():
+        # TODO: Fix this is_ajax as it is outdated according to django documentation ...
+        # provide better api endpoint for http requests via HTMX
+        if "HX-Request" in request.headers:
+            return render(request, "login/partials/user_partial_tables.html", context)
+        else:
             return render(request, "login/user_tables.html", context)
-        return render(request, "login/user_tables.html", context)
 
 
 ##############################################################################

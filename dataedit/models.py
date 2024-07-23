@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime, timedelta
 from enum import Enum
 
 from django.contrib.postgres.search import SearchVectorField
@@ -107,12 +108,15 @@ class Table(Tagable):
         self.save()
 
     # TODO: Use function when implementing the publish button
-    def set_is_published(self):
+    def set_is_published(self, to_schema):
         """
         Mark the table as published (ready for destination schema & public)
         and save the change to the database.
         """
-        self.is_publish = True
+        if to_schema != "model_draft":
+            self.is_publish = True
+        else:
+            self.is_publish = False
         self.save()
 
     # TODO: Use function when implementing the publish button. It should be
@@ -144,6 +148,39 @@ class Table(Tagable):
 
     class Meta:
         unique_together = (("name",),)
+
+
+class Embargo(models.Model):
+    DURATION_CHOICES = [
+        ("6_months", "6 Months"),
+        ("1_year", "1 Year"),
+    ]
+
+    table = models.ForeignKey(Table, on_delete=models.CASCADE, related_name="embargoes")
+    date_started = models.DateTimeField(auto_now_add=True)
+    date_ended = models.DateTimeField()
+    duration = models.CharField(max_length=10, choices=DURATION_CHOICES)
+
+    def is_active(self):
+        return datetime.now() < self.date_ended
+
+    def remaining_days(self):
+        return (self.date_ended - datetime.now()).days if self.is_active() else 0
+
+    def __str__(self):
+        return f"Table {self.table} in embargo until {self.date_ended.strftime('%Y-%m-%d')}"  # noqa: E501
+
+    def save(self, *args, **kwargs):
+        if not self.date_started:
+            self.date_started = timezone.now()
+        if self.duration == "6_months":
+            self.date_ended = self.date_started + timedelta(weeks=26)
+        elif self.duration == "1_year":
+            self.date_ended = self.date_started + timedelta(weeks=52)
+        else:
+            self.date_ended = None
+
+        super().save(*args, **kwargs)
 
 
 class View(models.Model):

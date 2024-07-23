@@ -163,9 +163,6 @@ def load_metadata_from_db(schema, table):
 
     from dataedit.models import Table
 
-    # TODO maybe change this function to load metadata from Table.oemetadata
-    # (JSONB)field? or keep old functionality?
-    # metadata = actions.get_comment_table(schema, table)
     metadata = Table.load(schema=schema, table=table).oemetadata
 
     metadata = parse_meta_data(metadata, schema, table)

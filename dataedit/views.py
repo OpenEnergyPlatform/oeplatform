@@ -44,6 +44,7 @@ from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import merge_field_reviews, process_review_data, recursive_update
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import PeerReview, PeerReviewManager, Table
 from dataedit.models import View as DBView
@@ -920,22 +921,19 @@ class DataView(View):
         ) or schema.startswith("_"):
             raise Http404("Schema not accessible")
 
-        tags = []  # TODO: Unused - Remove
-
-        # db = sec.dbname
-
         engine = actions._get_engine()
 
         if not engine.dialect.has_table(engine, table, schema=schema):
-            raise Http404
+            raise Http404("Table does not exist in the database")
 
-        # create a table for the metadata linked to the given table
         actions.create_meta(schema, table)
-
-        # the metadata are stored in the table's comment
         metadata = load_metadata_from_db(schema, table)
+        table_obj = Table.load(schema, table)
+        if table_obj is None:
+            raise Http404("Table object could not be loaded")
 
-        # setup oemetadata string order according to oem v1.5.1
+        oemetadata = table_obj.oemetadata
+
         from dataedit.metadata import TEMPLATE_V1_5
 
         def iter_oem_key_order(metadata: dict):
@@ -944,21 +942,16 @@ class DataView(View):
                 yield key, metadata.get(key)
 
         ordered_oem_151 = {key: value for key, value in iter_oem_key_order(metadata)}
-
-        # the key order of the metadata matters
         meta_widget = MetaDataWidget(ordered_oem_151)
-
         revisions = []
 
-        # load the admin interface
         api_changes = change_requests(schema, table)
         data = api_changes.get("data")
         display_message = api_changes.get("display_message")
         display_items = api_changes.get("display_items")
 
         is_admin = False
-        can_add = False  # can upload data
-        table_obj = Table.load(schema, table)
+        can_add = False
         if request.user and not request.user.is_anonymous:
             is_admin = request.user.has_admin_permissions(schema, table)
             level = request.user.get_table_permission_level(table_obj)
@@ -967,10 +960,18 @@ class DataView(View):
         table_label = table_obj.human_readable_name
 
         table_views = DBView.objects.filter(table=table).filter(schema=schema)
-
         default = DBView(name="default", type="table", table=table, schema=schema)
-
         view_id = request.GET.get("view")
+
+        embargo = Embargo.objects.filter(table=table_obj).first()
+        if embargo:
+            now = timezone.now()
+            if embargo.date_ended > now:
+                embargo_time_left = embargo.date_ended - now
+            else:
+                embargo_time_left = "The embargo is over"
+        else:
+            embargo_time_left = "No embargo data available"
 
         if view_id == "default":
             current_view = default
@@ -995,21 +996,17 @@ class DataView(View):
         opr_manager = PeerReviewManager()
         reviews = opr_manager.filter_opr_by_table(schema=schema, table=table)
 
-        # Get contributions
-        contributor = PeerReviewManager.load_contributor(schema=schema, table=table)
-        if contributor is not None:
-            opr_context.update({"contributor": contributor})
-        else:
-            opr_context.update({"contributor": None})
+        opr_context = {
+            "contributor": PeerReviewManager.load_contributor(
+                schema=schema, table=table
+            ),
+            "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
+            "opr_enabled": oemetadata
+            is not None,  # check if the table has the metadata
+        }
 
-        # Get reviews
-        reviewer = PeerReviewManager.load_reviewer(schema=schema, table=table)
-        if contributor is not None:
-            opr_context.update({"reviewer": reviewer})
-        else:
-            opr_context.update({"reviewer": None})
-
-        if reviews.last() is not None:
+        opr_result_context = {}
+        if reviews.exists():
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
             current_reviewer = opr_manager.load(latest_review).current_reviewer
@@ -1021,11 +1018,6 @@ class DataView(View):
                 }
             )
 
-            # OPR result tab for latest review
-            # TODO: Update this as soon as more then one review can be done per table:
-            # ... check if last review is finished
-            # ... check if any finished review for this table exists
-            # ... get the latest finished review
             if latest_review.is_finished:
                 badge = latest_review.review.get("badge")
                 date_finished = latest_review.date_finished
@@ -1039,7 +1031,6 @@ class DataView(View):
                         "review_exists": True,
                     }
                 )
-
         else:
             opr_context.update({"opr_id": None, "opr_current_reviewer": None})
             opr_result_context.update({"review_exists": False, "finished": False})
@@ -1049,15 +1040,13 @@ class DataView(View):
         #########################################################
 
         context_dict = {
-            # Not in use?
-            # "comment_on_table": dict(metadata),
             "meta_widget": meta_widget.render(),
             "revisions": revisions,
             "kinds": ["table", "map", "graph"],
             "table": table,
             "schema": schema,
             "table_label": table_label,
-            "tags": tags,
+            # "tags": tags,
             "data": data,
             "display_message": display_message,
             "display_items": display_items,
@@ -1069,9 +1058,8 @@ class DataView(View):
             "host": request.get_host(),
             "opr": opr_context,
             "opr_result": opr_result_context,
+            "embargo_time_left": embargo_time_left,
         }
-
-        context_dict.update(current_view.options)
 
         return render(request, "dataedit/dataview.html", context=context_dict)
 
@@ -1563,6 +1551,7 @@ def update_table_tags(request):
     messasge = messages.success(
         request,
         'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
+        # noqa
     )
 
     return render(
@@ -1857,7 +1846,7 @@ class MetaEditView(LoginRequiredMixin, View):
         )
 
 
-class StandaloneMetaEditView(LoginRequiredMixin, View):
+class StandaloneMetaEditView(View):
     def get(self, request):
         context_dict = {
             "config": json.dumps(
@@ -1979,8 +1968,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "temporal": [...],
                 "source": [...],
                 "license": [...],
-                "contributor": [...],
-                "resource": [...]
             }
 
         """
@@ -1991,8 +1978,6 @@ class PeerReviewView(LoginRequiredMixin, View):
         temporal_key_list = []
         source_key_list = []
         license_key_list = []
-        contributor_key_list = []
-        resource_key_list = []
 
         for i in val:
             fieldKey = list(i.values())[0]
@@ -2004,10 +1989,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                 source_key_list.append(i)
             elif fieldKey.split(".")[0] == "licenses":
                 license_key_list.append(i)
-            elif fieldKey.split(".")[0] == "contributors":
-                contributor_key_list.append(i)
-            elif fieldKey.split(".")[0] == "resources":
-                resource_key_list.append(i)
+
             elif (
                 fieldKey.split(".")[0] == "name"
                 or fieldKey.split(".")[0] == "title"
@@ -2027,8 +2009,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             "temporal": temporal_key_list,
             "source": source_key_list,
             "license": license_key_list,
-            "contributor": contributor_key_list,
-            "resource": resource_key_list,
         }
 
         return meta
@@ -2106,8 +2086,9 @@ class PeerReviewView(LoginRequiredMixin, View):
             can_add = level >= login_models.WRITE_PERM
 
         oemetadata = self.load_json(schema, table, review_id)
-        metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)
-        # Generate URL for peer_review_reviewer
+        metadata = self.sort_in_category(
+            schema, table, oemetadata=oemetadata
+        )  # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
                 "dataedit:peer_review_reviewer",
@@ -2122,8 +2103,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "temporal",
                 "source",
                 "license",
-                "contributor",
-                "resource",
             ]
             state_dict = process_review_data(
                 review_data=existing_review, metadata=metadata, categories=categories
@@ -2199,12 +2178,18 @@ class PeerReviewView(LoginRequiredMixin, View):
             - After a review is finished, the table's metadata is updated, and the table
             can be moved to a different schema or topic (TODO).
         """
-        print(review_id)
         context = {}
         if request.method == "POST":
             # get the review data and additional application metadata
             # from user peer review submit/save
             review_data = json.loads(request.body)
+            if review_id:
+                contributor_review = PeerReview.objects.filter(id=review_id).first()
+                if contributor_review:
+                    contributor_review_data = contributor_review.review.get(
+                        "reviews", []
+                    )
+                    review_data["reviewData"]["reviews"].extend(contributor_review_data)
 
             # The type can be "save" or "submit" as this triggers different behavior
             review_post_type = review_data.get("reviewType")
@@ -2261,6 +2246,11 @@ class PeerReviewView(LoginRequiredMixin, View):
 
                 save_metadata_to_db(schema, table, metadata)
 
+                if active_peer_review:
+                    # Update the oemetadata in the active PeerReview
+                    active_peer_review.oemetadata = metadata
+                    active_peer_review.save()
+
                 # TODO: also update reviewFinished in review datamodel json
                 # logging.INFO(f"Table {table.name} is now reviewed and can be moved
                 # to the destination schema.")
@@ -2307,8 +2297,6 @@ class PeerRreviewContributorView(PeerReviewView):
             "temporal",
             "source",
             "license",
-            "contributor",
-            "resource",
         ]
         state_dict = process_review_data(
             review_data=review_data, metadata=metadata, categories=categories

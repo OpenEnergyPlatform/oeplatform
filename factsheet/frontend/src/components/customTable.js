@@ -18,12 +18,12 @@ import { styled } from '@mui/material/styles';
 import { tableCellClasses } from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
 import { Route, Routes, Link } from 'react-router-dom';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ViewComfyAltIcon from '@mui/icons-material/ViewComfyAlt';
+// import VisibilityIcon from '@mui/icons-material/Visibility';
+// import ViewComfyAltIcon from '@mui/icons-material/ViewComfyAlt';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import ReplayIcon from '@mui/icons-material/Replay';
 import Chip from '@mui/material/Chip';
-import ReadMoreIcon from '@mui/icons-material/ReadMore';
+// import ReadMoreIcon from '@mui/icons-material/ReadMore';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -66,6 +66,7 @@ import '../styles/App.css';
 import variables from '../styles/oep-theme/variables.js';
 import palette from '../styles/oep-theme/palette.js';
 import CSRFToken from './csrfToken';
+import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -160,7 +161,7 @@ const headCells = [
     id: 'Date of publication',
     numeric: true,
     disablePadding: false,
-    label: 'Date of publication',
+    label: 'Year of publication',
     align: 'left'
   },
   {
@@ -229,7 +230,7 @@ EnhancedTableHead.propTypes = {
 
 function EnhancedTableToolbar(props) {
   const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected, logged_in } = props;
-
+  const [isDisabled, setIsDisabled] = useState(true); 
   return (
     <div>
       <Grid
@@ -264,7 +265,7 @@ function EnhancedTableToolbar(props) {
             {/* <Tooltip title="Show all">
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
             </Tooltip> */}
-            <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
+            <Button   disabled={isDisabled} variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
             <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px' }} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
             <Tooltip title="Compare">
 
@@ -353,8 +354,8 @@ export default function CustomTable(props) {
   const [authors, setAuthors] = useState([]);
   const [fundingSources, setFundingSources] = useState([]);
   const [selectedFundingSource, setSelectedFundingSource] = useState([]);
-  const [startDateOfPublication, setStartDateOfPublication] = useState('01-01-1900');
-  const [endDateOfPublication, setEndDateOfPublication] = useState('01-01-1900');
+  const [startDateOfPublication, setStartDateOfPublication] = useState('2000');
+  const [endDateOfPublication, setEndDateOfPublication] = useState('2020');
   const [selectedStudyKewords, setSelectedStudyKewords] = useState([]);
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
   const [selectedAspects, setSelectedAspects] = useState([]);
@@ -591,22 +592,6 @@ export default function CustomTable(props) {
     [order, orderBy, page, rowsPerPage],
   );
 
-  const StudyKeywords = [
-    'resilience',
-    'life cycle analysis',
-    'CO2 emissions',
-    'Greenhouse gas emissions',
-    'Reallabor',
-    '100% renewables',
-    'acceptance',
-    'sufficiency',
-    '(changes in) demand',
-    'degree of electrifiaction',
-    'regionalisation',
-    'total gross electricity generation',
-    'total net electricity generation',
-    'peak electricity generation'
-  ];
 
   const scenarioAspects = [
     "Descriptors",
@@ -667,8 +652,16 @@ export default function CustomTable(props) {
               </TableCell>
 
               <TableCell style={{ width: '100px' }}>
-                <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null ? String(row.date_of_publication).substring(0, 10) : ""}</Typography>
-              </TableCell >
+                {row.collected_scenario_publication_dates.length === 0 ? (
+                  <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>None</Typography>
+                ) : (
+                  row.collected_scenario_publication_dates.map((date_of_publication) => (
+                    <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>
+                      {date_of_publication !== null ? String(date_of_publication).substring(0, 4) : "None"}
+                    </Typography>
+                  ))
+                )}
+              </TableCell>
 
               <TableCell style={{ width: '40px' }}>
                 <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
@@ -769,10 +762,12 @@ export default function CustomTable(props) {
                   </Link>
                 }
               />
-              {row.date_of_publication !== null &&
+              {row.collected_scenario_publication_dates !== null &&
                 <CardRow
-                  rowKey='Date of publication'
-                  rowValue={row.date_of_publication}
+                  rowKey='Year of publication'
+                  rowValue={row.collected_scenario_publication_dates
+                    .map(date_of_publication => date_of_publication)
+                    .join(' • ')}
                 />
               }
               <CardRow
@@ -917,7 +912,7 @@ export default function CustomTable(props) {
                       value={startDateOfPublication}
                       renderInput={(params) => <TextField {...params} />}
                       onChange={(newValue) => {
-                        setStartDateOfPublication(newValue.toISOString().substring(0, 10));
+                        setStartDateOfPublication(newValue.toISOString().substring(0, 4));
                       }}
                     />
                   </Stack>
@@ -941,7 +936,9 @@ export default function CustomTable(props) {
                 <FormGroup>
                   <div >
                     {
-                      StudyKeywords.map((item) => <FormControlLabel control={<Checkbox size="small" color="default" />} checked={selectedStudyKewords.includes(item)} onChange={handleStudyKeywords} label={item} name={item} />)
+                      StudyKeywords.map((item) => <FormControlLabel control={
+                        <Checkbox size="small" color="default" />
+                      } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]} />)
                     }
                   </div>
                 </FormGroup>
