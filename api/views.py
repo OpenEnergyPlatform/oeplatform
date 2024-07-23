@@ -1317,6 +1317,8 @@ def oeo_search(request):
 def oevkg_search(request):
     # get query from user request # TODO validate input to prevent sneaky stuff
     query = request.GET["query"]
+    print(query)
+    logging.info(query)
     headers = {
         "Accept": "application/sparql-results+json",
         "Content-Type": "application/sparql-query",
