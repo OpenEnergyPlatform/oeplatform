@@ -1214,7 +1214,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 model_metadata["url"] = str(o1)
                 factsheet["models"].append(model_metadata)
 
-    factsheet["collected_scenario_publication_dates"] = []
+    temp = set()
     factsheet["publications"] = []
     for s, p, o in oekg.triples((study_URI, OEKG["has_publication"], None)):
         publication = {}
@@ -1239,9 +1239,10 @@ def factsheet_by_id(request, *args, **kwargs):
         publication["date_of_publication"] = ""
         for s3, p3, o3 in oekg.triples((o, OEKG["date_of_publication"], None)):
             publication["date_of_publication"] = serialize_publication_date(str(o3))
-            factsheet["collected_scenario_publication_dates"].append(
-                serialize_publication_date(str(o3))
-            )
+            temp.update(serialize_publication_date(str(o3)))
+
+        # Convert set to list before creating the JSON response
+        factsheet["collected_scenario_publication_dates"] = list(temp)
 
         publication["link_to_study_report"] = ""
         for s4, p4, o4 in oekg.triples((o, OEKG["link_to_study_report"], None)):
@@ -1667,7 +1668,7 @@ def get_all_factsheets(request, *args, **kwargs):
                 else:
                     pass
 
-        element["collected_scenario_publication_dates"] = []
+        temp = set()
         for s, p, o in oekg.triples((s, OEKG["has_publication"], None)):
             pubs_per_bundle = []
             for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
@@ -1675,7 +1676,10 @@ def get_all_factsheets(request, *args, **kwargs):
                     pubs_per_bundle.append(serialize_publication_date(str(o1)))
 
             if pubs_per_bundle:
-                element["collected_scenario_publication_dates"].append(pubs_per_bundle)
+                temp.update(pubs_per_bundle)
+
+        # Convert set to list before creating the JSON response
+        element["collected_scenario_publication_dates"] = list(temp)
 
         element["scenarios"] = []
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
