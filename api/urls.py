@@ -188,7 +188,7 @@ urlpatterns = [
     url(r"usrprop/", views.get_users),
     url(r"grpprop/", views.get_groups),
     url("oeo-search", views.oeo_search),
-    url("oevkg-query", views.oeo_search),
+    url("oevkg-query", views.oevkg_search),
     url(
         r"^v0/factsheet/frameworks/?$",
         views.EnergyframeworkFactsheetListAPIView.as_view(),
