@@ -2,7 +2,7 @@
 
 ## Why does it matter?
 
-By making the Open Energy platform more accessible, we want to support open science and open data, ensuring that research and data are available to all, including individuals with disabilities. This will help not only to broaden the reach of our work but also to give the energy system research community a new range of different perspectives.
+About [16 % of the world population](https://www.who.int/news-room/fact-sheets/detail/disability-and-health#:~:text=Key%20facts,1%20in%206%20of%20us.) experience some kind of disability. By making the Open Energy platform more accessible, we want to support open science and open data, ensuring that research and data are available to all, including individuals with disabilities. This will help not only to broaden the reach of our work but also to give the energy system research community a new range of different perspectives.
 
 While the primary responsibility for accessibility lies with the design team, it is important that all members try to integrate accessibility into their workflow.
 
