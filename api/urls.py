@@ -13,11 +13,11 @@ urlpatterns = [
         name="api_table",
     ),
     url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/sequences/(?P<sequence>[\w\d_\s]+)/$", # noqa
+        r"^v0/schema/(?P<schema>[\w\d_\s]+)/sequences/(?P<sequence>[\w\d_\s]+)/$",  # noqa
         views.Sequence.as_view(),
     ),
     url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/meta/$", # noqa
+        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/meta/$",  # noqa
         views.Metadata.as_view(),
         name="api_table_meta",
     ),
@@ -29,7 +29,7 @@ urlpatterns = [
         name="move",
     ),
     path(
-        "v0/schema/<str:schema>/tables/<str:table>/move_publish/<str:to_schema>/", # noqa
+        "v0/schema/<str:schema>/tables/<str:table>/move_publish/<str:to_schema>/",  # noqa
         views.MovePublish.as_view(),
         name="move_publish",
     ),
@@ -51,7 +51,7 @@ urlpatterns = [
         name="api_rows",
     ),
     url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$", # noqa
+        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$",  # noqa
         views.Rows.as_view(),
         {"action": "new"},
         name="api_rows_new",
@@ -76,9 +76,13 @@ urlpatterns = [
         views.create_ajax_handler(actions.data_update, requires_cursor=True),
     ),
     url(r"^v0/advanced/info", views.create_ajax_handler(actions.data_info)),
-    url(r"^v0/advanced/has_schema", views.create_ajax_handler(actions.has_schema)), # noqa
+    url(
+        r"^v0/advanced/has_schema", views.create_ajax_handler(actions.has_schema)
+    ),  # noqa
     url(r"^v0/advanced/has_table", views.create_ajax_handler(actions.has_table)),
-    url(r"^v0/advanced/has_sequence", views.create_ajax_handler(actions.has_sequence)), # noqa
+    url(
+        r"^v0/advanced/has_sequence", views.create_ajax_handler(actions.has_sequence)
+    ),  # noqa
     url(r"^v0/advanced/has_type", views.create_ajax_handler(actions.has_type)),
     url(
         r"^v0/advanced/get_schema_names",
@@ -96,7 +100,9 @@ urlpatterns = [
         r"^v0/advanced/get_view_definition",
         views.create_ajax_handler(actions.get_view_definition),
     ),
-    url(r"^v0/advanced/get_columns", views.create_ajax_handler(actions.get_columns)), # noqa
+    url(
+        r"^v0/advanced/get_columns", views.create_ajax_handler(actions.get_columns)
+    ),  # noqa
     url(
         r"^v0/advanced/get_pk_constraint",
         views.create_ajax_handler(actions.get_pk_constraint),
@@ -105,7 +111,9 @@ urlpatterns = [
         r"^v0/advanced/get_foreign_keys",
         views.create_ajax_handler(actions.get_foreign_keys),
     ),
-    url(r"^v0/advanced/get_indexes", views.create_ajax_handler(actions.get_indexes)), # noqa
+    url(
+        r"^v0/advanced/get_indexes", views.create_ajax_handler(actions.get_indexes)
+    ),  # noqa
     url(
         r"^v0/advanced/get_unique_constraints",
         views.create_ajax_handler(actions.get_unique_constraints),
@@ -130,9 +138,15 @@ urlpatterns = [
         views.create_ajax_handler(actions.rollback_raw_connection),
     ),
     url(r"^v0/advanced/connection/close_all", views.CloseAll.as_view()),
-    url(r"^v0/advanced/cursor/open", views.create_ajax_handler(actions.open_cursor)), # noqa
-    url(r"^v0/advanced/cursor/close", views.create_ajax_handler(actions.close_cursor)), # noqa
-    url(r"^v0/advanced/cursor/fetch_one", views.create_ajax_handler(actions.fetchone)), # noqa
+    url(
+        r"^v0/advanced/cursor/open", views.create_ajax_handler(actions.open_cursor)
+    ),  # noqa
+    url(
+        r"^v0/advanced/cursor/close", views.create_ajax_handler(actions.close_cursor)
+    ),  # noqa
+    url(
+        r"^v0/advanced/cursor/fetch_one", views.create_ajax_handler(actions.fetchone)
+    ),  # noqa
     url(
         r"^v0/advanced/cursor/fetch_many",
         views.FetchView.as_view(),
@@ -174,6 +188,7 @@ urlpatterns = [
     url(r"usrprop/", views.get_users),
     url(r"grpprop/", views.get_groups),
     url("oeo-search", views.oeo_search),
+    url("oevkg-query", views.oeo_search),
     url(
         r"^v0/factsheet/frameworks/?$",
         views.EnergyframeworkFactsheetListAPIView.as_view(),

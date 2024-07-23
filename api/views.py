@@ -1314,6 +1314,22 @@ def oeo_search(request):
     return JsonResponse(res, safe=False)
 
 
+def oevkg_search(request):
+    # get query from user request # TODO validate input to prevent sneaky stuff
+    query = request.GET["query"]
+    headers = {
+        "Accept": "application/sparql-results+json",
+        "Content-Type": "application/sparql-query",
+    }
+    # call local search service
+    # TODO: this url should not be hardcoded here - get it from oeplatform/settings.py
+    url = f"http://oevkg:8080/sparql?query={query}"
+    res = requests.get(url, headers=headers).json()
+    # res: something like [{"label": "testlabel", "resource": "testresource"}]
+    # send back to client
+    return JsonResponse(res, safe=False)
+
+
 # Energyframework, Energymodel
 class EnergyframeworkFactsheetListAPIView(generics.ListAPIView):
     """

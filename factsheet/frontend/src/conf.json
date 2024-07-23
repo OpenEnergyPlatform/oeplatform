@@ -1,4 +1,4 @@
 {
   "toep": "/",
-  "obdi": "http://oevkg:8080/sparql"
+  "obdi": "http://toep.iks.cs.ovgu.de/api/v0/oevkg-query"
 }
