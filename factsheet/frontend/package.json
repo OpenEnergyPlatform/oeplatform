@@ -25,6 +25,7 @@
     "apollo-boost": "^0.4.9",
     "axios": "^1.6.0",
     "chart.js": "^4.4.3",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.7",
     "font-awesome": "^4.7.0",
