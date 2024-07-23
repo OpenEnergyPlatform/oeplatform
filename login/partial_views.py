@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render
 
 from dataedit.models import Table
-from login.utilities import get_badge_icon_path, get_review_badge_from_table_metadata
+from login.utils import get_badge_icon_path, get_review_badge_from_table_metadata
 
 
 def metadata_review_badge_indicator_icon_file(request, user_id, table_name):

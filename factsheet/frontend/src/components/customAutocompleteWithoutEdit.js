@@ -295,7 +295,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         }}
       >
         {value.map((v) => (
-          <Chip size='small' key={v.id}  label={v.acronym} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)}/>
+          <Chip size='small' key={v.id}  label={v.acronym ? v.acronym : v.name} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)}/>
         ))}
       </Box>}
     </Box>
