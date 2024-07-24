@@ -161,7 +161,7 @@ const ComparisonBoardMain = (props) => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  const data_tabels = `"scenario_eu_leg_data_2021"`;
+  const data_tabels = `"eu_leg_data_2016_eea", "eu_leg_data_2016_eio_ir_article23_t1"`;
   const scenario_years =  `"2020", "2025", "2030", "2035", "2040"`;
   const categories =  `"1.A.3 Transport"`;
 
