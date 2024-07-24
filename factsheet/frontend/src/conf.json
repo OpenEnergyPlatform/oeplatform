@@ -1,4 +1,4 @@
 {
   "toep": "/",
-  "obdi": "http://toep.iks.cs.ovgu.de/api/v0/oevkg-query"
+  "obdi": "/api/v0/oevkg-query"
 }
