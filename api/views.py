@@ -1316,43 +1316,56 @@ def get_groups(request):
 
 
 def oeo_search(request):
-    # get query from user request # TODO validate input to prevent sneaky stuff
-    query = request.GET["query"]
-    # call local search service
-    # "http://loep/lookup-application/api/search?query={query}"
-    url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL}{query}"
-    res = requests.get(url).json()
-    # res: something like [{"label": "testlabel", "resource": "testresource"}]
-    # send back to client
+    if USE_LOEP:
+        # get query from user request # TODO validate input to prevent sneaky stuff
+        query = request.GET["query"]
+        # call local search service
+        # "http://loep/lookup-application/api/search?query={query}"
+        url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL}{query}"
+        res = requests.get(url).json()
+        # res: something like [{"label": "testlabel", "resource": "testresource"}]
+        # send back to client
+    else:
+        return HttpResponseServerError(
+            "The endpoint for LOEP is not setup. Please contact a server admin."
+        )
     return JsonResponse(res, safe=False)
 
 
 def oevkg_search(request):
-    # get query from user request # TODO validate input to prevent sneaky stuff
-    try:
-        query = request.body.decode("utf-8")
-    except UnicodeDecodeError:
-        return HttpResponseBadRequest(
-            "Invalid request body encoding. Please use 'utf-8'."
+    if USE_ONTOP:
+        # get query from user request # TODO validate input to prevent sneaky stuff
+        try:
+            query = request.body.decode("utf-8")
+        except UnicodeDecodeError:
+            return HttpResponseBadRequest(
+                "Invalid request body encoding. Please use 'utf-8'."
+            )
+        headers = {
+            "Accept": "application/sparql-results+json",
+            "Content-Type": "application/sparql-query",
+        }
+        # call local search service
+        try:
+            response = requests.post(
+                ONTOP_SPARQL_ENDPOINT_URL, data=query, headers=headers
+            )
+            response.raise_for_status()
+        except requests.RequestException as e:
+            return HttpResponseServerError(
+                f"Error contacting SPARQL endpoint: {str(e)}"
+            )
+
+        # res: something like [{"label": "testlabel", "resource": "testresource"}]
+        # Maybe validate using shacl or other data model descriptor file
+        try:
+            res = response.json()
+        except json.JSONDecodeError:
+            return HttpResponseServerError("Error decoding SPARQL endpoint response.")
+    else:
+        return HttpResponseServerError(
+            "The SPARQL endpoint for OEVKG is not setup. Please contact your server admin."  # noqa
         )
-    headers = {
-        "Accept": "application/sparql-results+json",
-        "Content-Type": "application/sparql-query",
-    }
-    # call local search service
-    try:
-        response = requests.post(ONTOP_SPARQL_ENDPOINT_URL, data=query, headers=headers)
-        response.raise_for_status()
-    except requests.RequestException as e:
-        return HttpResponseServerError(f"Error contacting SPARQL endpoint: {str(e)}")
-
-    # res: something like [{"label": "testlabel", "resource": "testresource"}]
-    # Maybe validate using shacl or other data model descriptor file
-    try:
-        res = response.json()
-    except json.JSONDecodeError:
-        return HttpResponseServerError("Error decoding SPARQL endpoint response.")
-
     # send back to client
     return JsonResponse(res, safe=False)
 
