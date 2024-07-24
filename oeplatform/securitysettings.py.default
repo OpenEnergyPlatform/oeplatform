@@ -67,18 +67,42 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ONTOLOGY_FOLDER = '/ontologies'
 ONTOLOGY_ROOT = Path(BASE_DIR, 'ontologies')
 
-# Connect to RDF database like jenna
+# Connect to RDF database like jenna https://jena.apache.org/
+# In OEP this is used to store and read triple data on the OEKG
+# For example scenario bundle data is stored there
 RDF_DATABASES = {
     'knowledge': {
         'host': 'host',
         'port': 'port',
         'name': 'your_rdf_dataset'
-    },
-    'factsheet': {
-        'dbuser': 'user',
-        'dbpasswd': 'pw'
     }
 }
+
+# The RDF database brings a server that provides a web api.
+# This service is part of the internal network.
+if RDF_DATABASES:
+    OEKG_SPARQL_ENDPOINT_URL = "http://localhost:3030/ds/sparql"
+
+# The ontop-vkg is used to translate sparql to sql queries
+# https://ontop-vkg.org/guide/cli.html#ontop-endpoint
+# This service is part of the internal network.
+# It depends on a mapping that maps concepts to the relational data structure
+# We use it to implement quantitative scenario comparison
+USE_ONTOP = True
+if USE_ONTOP:
+    ONTOP_SPARQL_ENDPOINT_URL = "http://localhost:8080/sparql"
+
+# The LOEP provides lookup (autocomplete search) functionality implemented
+# using Apache Lucene.
+# https://github.com/dbpedia/dbpedia-lookup/tree/legacy
+# This service is part of the internal network.
+# It can find classes from the OEO and return similar concepts based on
+# the text an user inputs to a search field
+USE_LOEP = True
+if USE_LOEP:
+        DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL = (
+        "http://loep/lookup-application/api/search?query="
+    )
 
 if not DEBUG:
     AUTHENTICATION_BACKENDS = ['login.models.UserBackend', 'axes.backends.AxesBackend']
