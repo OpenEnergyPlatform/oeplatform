@@ -61,6 +61,7 @@ const ComparisonBoardMain = (props) => {
   const [category, setCategory] = React.useState([]);
   const [visualizationRows, addVisualizationRows] = React.useState(0);
 
+  
 
   const getScenarios = async () => {
     const { data } = await axios.get(conf.toep + `scenario-bundles/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
@@ -108,9 +109,12 @@ const ComparisonBoardMain = (props) => {
   }
 
   const handleYearChange = (event, index) => {
+    console.log(index);
     const newScenarioYear = scenarioYear;
     newScenarioYear[index] = event.target.value;
     setScenarioYear(newScenarioYear);
+
+    console.log(scenarioYear);
 
     const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index])
 
@@ -157,9 +161,9 @@ const ComparisonBoardMain = (props) => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  const data_tabels = `"eu_leg_data_2016_eea", "eu_leg_data_2016_eio_ir_article23_t1`;
+  const data_tabels = `"scenario_eu_leg_data_2021"`;
   const scenario_years =  `"2020", "2025", "2030", "2035", "2040"`;
-  // const categories =  `"1.A.3 Transport"`;
+  const categories =  `"1.A.3 Transport"`;
 
   const query = `PREFIX obo: <http://purl.obolibrary.org/obo/>
   PREFIX ou: <http://opendata.unex.es/def/ontouniversidad#>
@@ -168,15 +172,16 @@ const ComparisonBoardMain = (props) => {
   PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
   PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
   
-  SELECT DISTINCT ?table_name ?value ?country_code ?year ?category WHERE {
+  SELECT DISTINCT ?table_name ?value ?unit ?country_code ?year ?category WHERE {
     ?s oeo:OEO_00000504 ?table_name .
+    ?s oeo:OEO_00040010 ?unit .
     ?s oeo:IAO_0000136 oeo:OEO_00000025.
     ?s oeo:OEO_00020226 oeo:OEO_00020310 .
     ?s oeo:has_sector_division ?category .
     ?s oeo:OEO_00140178 ?value .
     ?s oeo:OEO_00010378 ?country_code .
     ?s oeo:OEO_00020224 ?year .
-    FILTER(?year IN (${scenario_years}) && ?table_name IN (${data_tabels}) ) .
+    FILTER(?year IN (${scenario_years}) && ?table_name IN (${data_tabels}) && ?category IN (${categories})) .
   } ORDER BY Asc(?year)`;
 
   const sendQuery = async (index) => {

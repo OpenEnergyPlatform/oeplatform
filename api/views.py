@@ -1316,8 +1316,7 @@ def oeo_search(request):
 
 def oevkg_search(request):
     # get query from user request # TODO validate input to prevent sneaky stuff
-    query = request.GET["query"]
-    print(query)
+    query = request.body.decode("utf-8")  # request.GET["query"]
     logging.info(query)
     headers = {
         "Accept": "application/sparql-results+json",
@@ -1325,8 +1324,8 @@ def oevkg_search(request):
     }
     # call local search service
     # TODO: this url should not be hardcoded here - get it from oeplatform/settings.py
-    url = f"http://oevkg:8080/sparql?query={query}"
-    res = requests.get(url, headers=headers).json()
+    url = f"http://localhost:8080/sparql"
+    res = requests.post(url, data=query, headers=headers).json()
     # res: something like [{"label": "testlabel", "resource": "testresource"}]
     # send back to client
     return JsonResponse(res, safe=False)
