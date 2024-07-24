@@ -170,13 +170,14 @@ const ComparisonBoardMain = (props) => {
 
   SELECT DISTINCT ?table_name ?category ?value ?country_code ?year WHERE {
     ?s oeo:OEO_00000504 ?table_name .
-    ?s oeo:OEO_00020226 oeo:OEO_00020310 .
+    ?s oeo:OEO_00020226 oeo:OEO_00020311 .
+    ?s oeo:OEO_00010121 oeo:Total_ESD_GHGs .
     ?s oeo:has_sector_division ?category .
     ?s oeo:OEO_00020221 ?country_code .
     ?s oeo:OEO_00020224 ?year .
     ?s oeo:OEO_00140178 ?value .
-    FILTER(?year IN (2020, 2025, 2030, 2035) && ?table_name IN ("eu_leg_data_2016_eea", "eu_leg_data_2016_eio_ir_article23_t1")) .
-  }`;
+    FILTER(?year IN (2020, 2025, 2030, 2035) && ?table_name IN ("eu_leg_data_2016_eea") && ?category IN (oeo:OEO_00010038) ) .
+}`;
 
   const sendQuery = async (index) => {
     console.log(index);
