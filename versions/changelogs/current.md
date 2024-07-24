@@ -14,4 +14,10 @@
 
 - Open peer review: Fixed several bugs that hindered the user to submit a review, broke the indicators dots that show the review progress & showed badly formatted data on the summary tab [(#1762)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1762)
 
+- Fixed multiple scenario bundle bugs [(#1764)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1764)
+  - Fix incorrect rendering of multiple publication years and show None if no data available.
+  - Year of publication in scenario bundle detail view now renders only the year
+  - Model & framework factsheets are now rendered as clickable chip that links to the detail page of the factsheet. The chip now renders either the acronym or the
+    name of the factsheet.
+
 ## Documentation updates

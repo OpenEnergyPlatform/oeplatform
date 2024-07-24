@@ -99,7 +99,7 @@ An example of input parameters
     "peak electricity generation"
   ],
   "report_title": "Example report title",
-  "date_of_publication": " 2021/1/14",
+  "date_of_publication": " 2021",
   "report_doi": "5345-43-5634-6-346-46-43",
   "place_of_publication": "",
   "link_to_study": " https://openenergy-platform.org/",
@@ -397,7 +397,7 @@ The `uid` should belong to an existing bundle in OEKG. The remaining fields are 
     "peak electricity generation"
   ],
   "report_title": "Example report title",
-  "date_of_publication": " 2021/1/14",
+  "date_of_publication": " 2021",
   "report_doi": "5345-43-5634-6-346-46-43",
   "place_of_publication": "",
   "link_to_study": " https://openenergy-platform.org/",
