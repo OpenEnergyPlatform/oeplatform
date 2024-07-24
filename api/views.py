@@ -16,7 +16,14 @@ from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q
 from django.db.utils import IntegrityError
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseServerError,
+    JsonResponse,
+    StreamingHttpResponse,
+)
 from django.utils import timezone
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
@@ -39,7 +46,13 @@ from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from modelview.models import Energyframework, Energymodel
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
+
+if USE_LOEP:
+    from oeplatform.settings import DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
+
+if USE_ONTOP:
+    from oeplatform.settings import ONTOP_SPARQL_ENDPOINT_URL
 
 logger = logging.getLogger("oeplatform")
 
@@ -1306,8 +1319,8 @@ def oeo_search(request):
     # get query from user request # TODO validate input to prevent sneaky stuff
     query = request.GET["query"]
     # call local search service
-    # TODO: this url should not be hardcoded here - get it from oeplatform/settings.py
-    url = f"http://loep/lookup-application/api/search?query={query}"
+    # "http://loep/lookup-application/api/search?query={query}"
+    url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL}{query}"
     res = requests.get(url).json()
     # res: something like [{"label": "testlabel", "resource": "testresource"}]
     # send back to client
@@ -1316,17 +1329,30 @@ def oeo_search(request):
 
 def oevkg_search(request):
     # get query from user request # TODO validate input to prevent sneaky stuff
-    query = request.body.decode("utf-8")  # request.GET["query"]
-    logging.info(query)
+    try:
+        query = request.body.decode("utf-8")
+    except UnicodeDecodeError:
+        return HttpResponseBadRequest(
+            "Invalid request body encoding. Please use 'utf-8'."
+        )
     headers = {
         "Accept": "application/sparql-results+json",
         "Content-Type": "application/sparql-query",
     }
     # call local search service
-    # TODO: this url should not be hardcoded here - get it from oeplatform/settings.py
-    url = f"http://localhost:8080/sparql"
-    res = requests.post(url, data=query, headers=headers).json()
+    try:
+        response = requests.post(ONTOP_SPARQL_ENDPOINT_URL, data=query, headers=headers)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        return HttpResponseServerError(f"Error contacting SPARQL endpoint: {str(e)}")
+
     # res: something like [{"label": "testlabel", "resource": "testresource"}]
+    # Maybe validate using shacl or other data model descriptor file
+    try:
+        res = response.json()
+    except json.JSONDecodeError:
+        return HttpResponseServerError("Error decoding SPARQL endpoint response.")
+
     # send back to client
     return JsonResponse(res, safe=False)
 
