@@ -181,7 +181,7 @@ const ComparisonBoardMain = (props) => {
     ?s oeo:OEO_00140178 ?value .
     ?s oeo:OEO_00010378 ?country_code .
     ?s oeo:OEO_00020224 ?year .
-    FILTER(?year IN (${scenario_years}) && ?table_name IN (${data_tabels}) && ?category IN (${categories})) .
+    FILTER(?year IN (${scenario_years}) && ?table_name IN (${data_tabels})) .
   } ORDER BY Asc(?year)`;
 
   const sendQuery = async (index) => {
