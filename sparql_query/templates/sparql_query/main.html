@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block after-head %}
-<link rel="stylesheet" href="//cdn.jsdelivr.net/yasgui/2.5.0/yasgui.min.css">
+<link rel="stylesheet" href="{% static 'sparql_ui/vendor/yasgui-2.5.0/css/yasgui.min.css' %}">
 {% endblock after-head %}
 
 {% block site-header %}
@@ -32,7 +32,7 @@
 {% endblock main-content-body %}
 
 {% block after-body-bottom-js %}
-<script src="//cdn.jsdelivr.net/yasgui/2.5.0/yasgui.min.js"></script>
+<script src="{% static 'sparql_ui/vendor/yasgui-2.5.0/js/yasgui.min.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
     const referrer = document.referrer;
