@@ -339,6 +339,7 @@ def create_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         # TODO- set in settings
@@ -377,6 +378,7 @@ def create_factsheet(request, *args, **kwargs):
                         )
                         bundle.add((scenario_URI, OEO.RO_0002233, input_dataset_URI))
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         # TODO- set in settings
@@ -791,6 +793,7 @@ def update_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         input_dataset_URI = URIRef(
@@ -834,6 +837,7 @@ def update_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO.RO_0002233, input_dataset_URI)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         output_dataset_URI = URIRef(
@@ -1210,7 +1214,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 model_metadata["url"] = str(o1)
                 factsheet["models"].append(model_metadata)
 
-    factsheet["collected_scenario_publication_dates"] = []
+    temp = set()
     factsheet["publications"] = []
     for s, p, o in oekg.triples((study_URI, OEKG["has_publication"], None)):
         publication = {}
@@ -1235,9 +1239,10 @@ def factsheet_by_id(request, *args, **kwargs):
         publication["date_of_publication"] = ""
         for s3, p3, o3 in oekg.triples((o, OEKG["date_of_publication"], None)):
             publication["date_of_publication"] = serialize_publication_date(str(o3))
-            factsheet["collected_scenario_publication_dates"].append(
-                serialize_publication_date(str(o3))
-            )
+            temp.update(serialize_publication_date(str(o3)))
+
+        # Convert set to list before creating the JSON response
+        factsheet["collected_scenario_publication_dates"] = list(temp)
 
         publication["link_to_study_report"] = ""
         for s4, p4, o4 in oekg.triples((o, OEKG["link_to_study_report"], None)):
@@ -1663,7 +1668,7 @@ def get_all_factsheets(request, *args, **kwargs):
                 else:
                     pass
 
-        element["collected_scenario_publication_dates"] = []
+        temp = set()
         for s, p, o in oekg.triples((s, OEKG["has_publication"], None)):
             pubs_per_bundle = []
             for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
@@ -1671,7 +1676,10 @@ def get_all_factsheets(request, *args, **kwargs):
                     pubs_per_bundle.append(serialize_publication_date(str(o1)))
 
             if pubs_per_bundle:
-                element["collected_scenario_publication_dates"].append(pubs_per_bundle)
+                temp.update(pubs_per_bundle)
+
+        # Convert set to list before creating the JSON response
+        element["collected_scenario_publication_dates"] = list(temp)
 
         element["scenarios"] = []
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
@@ -1769,9 +1777,26 @@ def get_scenarios(request, *args, **kwargs):
             for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020224, None)):
                 scenario_years.append(o4)
             for s5, p5, o5 in oekg.triples((s, OEO.RO_0002233, None)):
-                input_datasets.append(oekg.value(o5, RDFS.label))
+                oekg_value = oekg.value(o5, OEO["has_iri"])
+                comparable = str(oekg_value).split("scenario/")
+                input_datasets.append(
+                    (
+                        oekg.value(o5, RDFS.label),
+                        oekg.value(o5, OEO["has_iri"]),
+                        comparable[1],
+                    )
+                )
             for s6, p6, o6 in oekg.triples((s, OEO.RO_0002234, None)):
-                output_datasets.append(oekg.value(o6, RDFS.label))
+                oekg_value = oekg.value(o6, OEO["has_iri"])
+                comparable = str(oekg_value).split("scenario/")
+
+                output_datasets.append(
+                    (
+                        oekg.value(o6, RDFS.label),
+                        oekg.value(o6, OEO["has_iri"]),
+                        comparable[1],
+                    )
+                )
 
             for s1, p1, o1 in oekg.triples((None, OEKG["has_scenario"], s)):
                 study_label = oekg.value(s1, OEKG["has_full_name"])
