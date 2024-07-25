@@ -6,6 +6,7 @@ from django.core import serializers
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils.cache import patch_response_headers
+from django.views.decorators.cache import never_cache
 from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.compare import graph_diff, to_isomorphic
 from SPARQLWrapper import JSON
@@ -2051,6 +2052,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
     return response
 
 
+@never_cache
 def filter_scenario_bundles_view(request):
     # Get the table IRI from the request or any other source
     table_iri = request.GET.get("table_iri", "")
