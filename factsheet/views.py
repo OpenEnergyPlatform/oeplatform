@@ -1777,9 +1777,26 @@ def get_scenarios(request, *args, **kwargs):
             for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020224, None)):
                 scenario_years.append(o4)
             for s5, p5, o5 in oekg.triples((s, OEO.RO_0002233, None)):
-                input_datasets.append(oekg.value(o5, RDFS.label))
+                oekg_value = oekg.value(o5, OEO["has_iri"])
+                comparable = str(oekg_value).split("scenario/")
+                input_datasets.append(
+                    (
+                        oekg.value(o5, RDFS.label),
+                        oekg.value(o5, OEO["has_iri"]),
+                        comparable[1],
+                    )
+                )
             for s6, p6, o6 in oekg.triples((s, OEO.RO_0002234, None)):
-                output_datasets.append(oekg.value(o6, RDFS.label))
+                oekg_value = oekg.value(o6, OEO["has_iri"])
+                comparable = str(oekg_value).split("scenario/")
+
+                output_datasets.append(
+                    (
+                        oekg.value(o6, RDFS.label),
+                        oekg.value(o6, OEO["has_iri"]),
+                        comparable[1],
+                    )
+                )
 
             for s1, p1, o1 in oekg.triples((None, OEKG["has_scenario"], s)):
                 study_label = oekg.value(s1, OEKG["has_full_name"])
