@@ -15,6 +15,8 @@
 
 ## Features
 
+- Add new sparql query endpoint and GUI (using YASGUI) to query the OEKG. This feature is linked via the scenario bundle overview page [#1758](https://github.com/OpenEnergyPlatform/oeplatform/pull/1758)
+
 ## Bugs
 
 - Open peer review: Fixed several bugs that hindered the user to submit a review, broke the indicators dots that show the review progress & showed badly formatted data on the summary tab [(#1762)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1762)

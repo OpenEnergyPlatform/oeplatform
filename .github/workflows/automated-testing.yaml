@@ -40,6 +40,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      fuseki:
+        image: stain/jena-fuseki
+        ports:
+          - 3030:3030
+        options: >-
+          --name fuseki
+          -e FUSEKI_DATASET_1=ds
+          -e FUSEKI_MEM_1=true
 
     strategy:
       matrix:
@@ -52,6 +60,21 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y postgresql-client
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      - name: Wait for Fuseki to start
+        run: |
+          for i in {1..30}; do
+            if nc -z localhost 3030; then
+              echo "Fuseki is up!"
+              break
+            fi
+            echo "Waiting for Fuseki..."
+            sleep 2
+          done
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
