@@ -1,0 +1,72 @@
+{% extends "base/base-wide-react.html" %}
+{% load static %}
+
+{% block after-head %}
+<link rel="stylesheet" href="{% static 'sparql_ui/vendor/yasgui-2.5.0/css/yasgui.min.css' %}">
+{% endblock after-head %}
+
+{% block site-header %}
+<div class="main-header">
+    <h1 class="main-header__title">
+        <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg" width="16" height="16" alt="OEO">
+        OEKG Sparql Query
+
+    </h1>
+
+</div>
+
+{% endblock site-header %}
+
+{% block main-content-body %}
+<div class="container" id="yasgui"></div>
+
+</div>
+<style>
+    .yasgui .autocompleteWrapper {
+      display: none !important;
+    }
+    .yasgui .controlBar {
+            display: none !important;
+    }
+</style>
+{% endblock main-content-body %}
+
+{% block after-body-bottom-js %}
+<script src="{% static 'sparql_ui/vendor/yasgui-2.5.0/js/yasgui.min.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const referrer = document.referrer;
+    console.log(referrer)
+    const yasgui = YASGUI(document.getElementById('yasgui'), {
+        requestConfig: {
+            endpoint: "{% url 'sparql_endpoint' %}",
+            method: 'GET',
+        },
+        copyEndpointOnNewTab: false,
+        // Disabling the endpoint selector and the ability to add new tabs
+        multipleEndpoints: false,
+        tabConfig: {
+            readOnly: true // Prevent adding/removing tabs
+        },
+        // Configuring which endpoints appear in the endpoint catalogue list
+        endpointCatalogueOptions: {
+            getData: () => {
+                return [
+                    // List of objects should contain the endpoint field
+                    // Feel free to include any other fields (e.g. a description or icon
+                    // that you'd like to use when rendering)
+                    {
+                        endpoint: referrer + "{% url 'main' %}"
+                    }
+                ];
+            }
+        },
+        // Hiding the control bar
+        hideControlBar: true
+    });
+    YASGUI.defaults.catalogueEndpoints = null
+});
+
+
+</script>
+{% endblock after-body-bottom-js %}

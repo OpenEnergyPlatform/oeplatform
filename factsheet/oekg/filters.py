@@ -1,4 +1,4 @@
-from rdflib import RDF, Literal, URIRef
+from rdflib import RDF, URIRef
 
 from factsheet.oekg import namespaces
 from factsheet.oekg.connection import oekg
@@ -56,7 +56,7 @@ class OekgQuery:
                         ):
                             if (
                                 self.serialize_table_iri(str(o3_input_ds_iri))
-                                == table_iri
+                                in table_iri
                             ):
                                 related_scenarios.add(s2)
 
@@ -76,6 +76,7 @@ class OekgQuery:
                             IRI Like 'dataedit/view/scenario/abbb_emob'
         """
         related_scenarios = set()
+        table_iri = self.serialize_table_iri(table_iri)
 
         # Find all scenario bundles
         for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
@@ -87,14 +88,18 @@ class OekgQuery:
                     (o1, namespaces.OEO.RO_0002234, None)
                 ):
                     if o2_output_ds_uid is not None:
-                        for s3, p3, o3_input_ds_iri in oekg.triples(
+                        for s3, p3, o3_output_ds_iri in oekg.triples(
                             (
                                 o2_output_ds_uid,
                                 namespaces.OEO["has_iri"],
-                                Literal(table_iri),
+                                None,
                             )
                         ):
-                            related_scenarios.add(s2)
+                            if (
+                                self.serialize_table_iri(str(o3_output_ds_iri))
+                                in table_iri
+                            ):
+                                related_scenarios.add(s2)
 
         return related_scenarios
 
