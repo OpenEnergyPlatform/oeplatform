@@ -25,7 +25,7 @@ const ComparisonBoardMain = (props) => {
   const [scenarios, setScenarios] = useState([]);
   const scenarios_uid = params.split('#');
   const scenarios_uid_json = JSON.stringify(scenarios_uid);
-  const [selectedCriteria, setselectedCriteria] = useState(['Study descriptors', 'Scenario descriptors', 'Study name']);
+  const [selectedCriteria, setselectedCriteria] = useState(['Study descriptors', 'Scenario types', 'Study name']);
 
   const getScenarios = async () => {
     const { data } = await axios.get(conf.toep + `scenario-bundles/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
@@ -44,7 +44,7 @@ const ComparisonBoardMain = (props) => {
     'Study name',
     'Study abstract',
     'Study descriptors',
-    'Scenario descriptors',
+    'Scenario types',
     'Regions',
     'Interacting regions',
     'Scenario years',
