@@ -50,7 +50,7 @@ class Command(BaseCommand):
 
                         oekg.remove((s, p, o))
                         print(
-                            f"In bundle {s} updated framework {str(o)} with {model_URI}"  # noqa
+                            f"In bundle {s} updated framework {str(o)} with {framework_URI}"  # noqa
                         )
 
             for s, p, o in oekg.triples((s, OEO["has_model"], None)):
