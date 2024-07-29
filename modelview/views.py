@@ -34,16 +34,18 @@ def getClasses(sheettype):
     """
     Returns the model and form class w.r.t sheettype.
     """
+    allowed_sheet_types = ["model", "framework"]
     c = None
     f = None
 
     if isinstance(sheettype, str):
-        if sheettype == "model":
-            c = Energymodel
-            f = EnergymodelForm
-        elif sheettype == "framework":
-            c = Energyframework
-            f = EnergyframeworkForm
+        if sheettype in allowed_sheet_types:
+            if sheettype == "model":
+                c = Energymodel
+                f = EnergymodelForm
+            elif sheettype == "framework":
+                c = Energyframework
+                f = EnergyframeworkForm
 
     return c, f
 
