@@ -36,12 +36,15 @@ def getClasses(sheettype):
     """
     c = None
     f = None
-    if sheettype == "model":
-        c = Energymodel
-        f = EnergymodelForm
-    elif sheettype == "framework":
-        c = Energyframework
-        f = EnergyframeworkForm
+
+    if isinstance(sheettype, str):
+        if sheettype == "model":
+            c = Energymodel
+            f = EnergymodelForm
+        elif sheettype == "framework":
+            c = Energyframework
+            f = EnergyframeworkForm
+
     return c, f
 
 
