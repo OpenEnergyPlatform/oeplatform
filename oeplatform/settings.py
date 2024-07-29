@@ -62,6 +62,7 @@ INSTALLED_APPS = (
     "corsheaders",
     "owlready2",
     "compressor",
+    "sparql_query",
 )
 
 MIDDLEWARE = (

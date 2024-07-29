@@ -34,14 +34,19 @@ def getClasses(sheettype):
     """
     Returns the model and form class w.r.t sheettype.
     """
+    allowed_sheet_types = ["model", "framework"]
     c = None
     f = None
-    if sheettype == "model":
-        c = Energymodel
-        f = EnergymodelForm
-    elif sheettype == "framework":
-        c = Energyframework
-        f = EnergyframeworkForm
+
+    if isinstance(sheettype, str):
+        if sheettype in allowed_sheet_types:
+            if sheettype == "model":
+                c = Energymodel
+                f = EnergymodelForm
+            elif sheettype == "framework":
+                c = Energyframework
+                f = EnergyframeworkForm
+
     return c, f
 
 
@@ -187,6 +192,12 @@ def model_to_csv(request, sheettype):
             match = re.match(r"^select_(?P<tid>\d+)$", label)
             tags.append(int(match.group("tid")))
     c, f = getClasses(sheettype)
+
+    if not c:
+        raise Http404(
+            "We dropped the scenario factsheets in favor of scenario bundles."
+        )
+
     header = list(
         field.attname
         for field in c._meta.get_fields()
@@ -203,6 +214,7 @@ def model_to_csv(request, sheettype):
     for model in c.objects.all().order_by("id"):
         if all(tid in model.tags for tid in tags):
             writer.writerow([printable(model, col) for col in header])
+
     return response
 
 

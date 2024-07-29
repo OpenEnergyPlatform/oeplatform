@@ -255,6 +255,9 @@ function EnhancedTableToolbar(props) {
           <Typography variant="body2">
             In a nutshell: A scenario bundle provides you with all relevant information to understand a scenario's context and to ease a potential re-use of quantitative data for your own purposes.
           </Typography>
+          <Typography variant="body2">
+            The scenario bundles are stored in the Open Energy Knowledge Graph (OEKG). The OEKG can be queried using the SPARQL language. We provide a <a href="/sparql_query/gui/">User Interface</a> to simplify this rather technical task.
+          </Typography>
         </Grid>
       </Grid>
       <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
