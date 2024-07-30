@@ -1,0 +1,50 @@
+{% load static %}
+<!-- unit_element.html -->
+<div class="unit-element mb-3">
+    <div class="mb-2">
+        <label for="unitName" class="form-label">Unit Name:</label>
+        <input type="text" name="query" class="form-control unitName"
+               hx-get="/api/v0/oeo-search"
+               hx-headers='{"Access-Control-Allow-Origin": "*"}'
+               hx-vals="{ query: this.value }"  
+               hx-trigger="keyup changed delay:500ms" 
+               autocomplete="on">
+        <!-- <select name="unitName" class="form-select unitName selectpicker" data-live-search="true">
+               
+        </select> -->
+    </div>
+    
+    <div class="mb-2">
+        <label for="unitType" class="form-label">Unit Type:</label>
+        <select name="unitType" class="form-select unitType">
+            <option value="linear">Linear</option>
+            <option value="squared">Squared</option>
+            <option value="cubed">Cubed</option>
+        </select>
+    </div>
+
+    <div class="mb-2">
+        <label for="description" class="form-label">Description:</label>
+        <textarea name="description" class="form-control"></textarea>
+    </div>
+    
+    <button type="button" class="btn btn-danger remove-element mt-2">Remove</button>
+</div>
+
+<link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet" ><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+<script src="{% static 'js/bootstrap-select.min.js' %}"></script><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+
+<script>
+    // document.addEventListener('htmx:load', function () {
+    //     select.addEventListener('shown.bs.select', function () {
+    //         const query = this.value;
+    //         if (query) {
+    //             fetch(`/search-oeo-unit/?query=${query}`)
+    //             .then(response => response.json())
+    //             .then(data => {
+    //                 $(this).html(data.html).selectpicker('refresh');
+    //             });
+    //         }
+    //     });
+    // });
+</script>
