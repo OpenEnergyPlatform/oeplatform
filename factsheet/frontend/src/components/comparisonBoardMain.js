@@ -59,7 +59,9 @@ const ComparisonBoardMain = (props) => {
   const [loading, setLoading] = React.useState(false);
   const [showChart, setShowChart] = React.useState(false);
   const [categoryNames, setCategoryNames] = React.useState([]);
+  const [gasesNames, setGasesNames] = React.useState([]);
   const [selectedCategories, setSelectedCategories] = React.useState([]);
+  const [selectedGas, setSelectedGas] = React.useState([]);
   const [selectedScenarios, setSelectedScenarios] = React.useState([]);
   const [visualizationRows, addVisualizationRows] = React.useState(0);
   const [inputTableNames, setInputTableNames] = React.useState([]);
@@ -229,7 +231,15 @@ const ComparisonBoardMain = (props) => {
     );
   };
 
-
+  const handleGasChange = (event: SelectChangeEvent<typeof category>) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedGas(
+      typeof value === 'string' ? value.split(',') : value,
+    );
+  };
+  
   const get_scenarios_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
               SELECT DISTINCT ?scenario WHERE {
               ?s oeo:OEO_00020226 ?scenario .
@@ -269,35 +279,68 @@ const ComparisonBoardMain = (props) => {
       ?s oeo:has_sector_division ?category .
     }`
 
-    const sendGetCategoriesQuery = async () => {
-      setLoading(true);
-      const response = await axios.post(
-        conf.obdi, 
-        get_categories_query,
-        {
-          headers: {
-            'X-CSRFToken': CSRFToken(),
-            'Accept': 'application/sparql-results+json',
-            'Content-Type': 'application/sparql-query',
-          },
-        }
-      ).then(response => {
-  
-        const categoriesObj = response.data.results.bindings;
-        const categories = categoriesObj.map((obj) => obj.category.value.split('/').pop() );
-        const catNames = categories.filter(elem => elem in category_disctionary ).map(el => category_disctionary[el] );
-        setCategoryNames(catNames);
-        
-        setLoading(false);
+  const sendGetCategoriesQuery = async () => {
+    setLoading(true);
+    const response = await axios.post(
+      conf.obdi, 
+      get_categories_query,
+      {
+        headers: {
+          'X-CSRFToken': CSRFToken(),
+          'Accept': 'application/sparql-results+json',
+          'Content-Type': 'application/sparql-query',
+        },
+      }
+    ).then(response => {
 
-        const selectedCategorieIDs = Object.keys(category_disctionary).filter(k => category_disctionary[k] in selectedCategories);
-  
-  
-      }).catch(error => {
-          console.error('API Error:', error.message);
-      }).finally(() => {
-      });
-    }
+      const categoriesObj = response.data.results.bindings;
+      const categories = categoriesObj.map((obj) => obj.category.value.split('/').pop() );
+      const catNames = categories.filter(elem => elem in category_disctionary ).map(el => category_disctionary[el] );
+      setCategoryNames(catNames);
+      
+      setLoading(false);
+
+      const selectedCategorieIDs = Object.keys(category_disctionary).filter(k => category_disctionary[k] in selectedCategories);
+
+
+    }).catch(error => {
+        console.error('API Error:', error.message);
+    }).finally(() => {
+    });
+  }
+
+  const get_gas_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+  SELECT DISTINCT ?gas WHERE {
+    ?s oeo:OEO_00010121 ?gas .
+  }`
+
+  const sendGetGasQuery = async () => {
+    setLoading(true);
+    const response = await axios.post(
+      conf.obdi, 
+      get_gas_query,
+      {
+        headers: {
+          'X-CSRFToken': CSRFToken(),
+          'Accept': 'application/sparql-results+json',
+          'Content-Type': 'application/sparql-query',
+        },
+      }
+    ).then(response => {
+
+      const gasesObj = response.data.results.bindings;
+      const gases = gasesObj.map((obj) => obj.gas.value );
+      console.log(gases);
+
+      setGasesNames(gases);
+      
+      setLoading(false);
+
+    }).catch(error => {
+        console.error('API Error:', error.message);
+    }).finally(() => {
+    });
+  }
 
   const handleInputDatasetsChange = (event: SelectChangeEvent<typeof selectedInputDatasets>) => {
     const {
@@ -309,6 +352,7 @@ const ComparisonBoardMain = (props) => {
 
     sendGetScenariosQuery();
     sendGetCategoriesQuery();
+    sendGetGasQuery();
 
       
     const addVisualization = uid => {
@@ -327,6 +371,7 @@ const ComparisonBoardMain = (props) => {
 
     sendGetScenariosQuery();
     sendGetCategoriesQuery();
+    sendGetGasQuery();
 
     const addVisualization = uid => {
       addVisualizationRows(visualizationRows + 1);
@@ -338,7 +383,7 @@ const ComparisonBoardMain = (props) => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   
-  const data_tabels = [];
+  const data_tabels = [`"eu_leg_data_2023_eea"`];
 
   selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
   selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -366,14 +411,15 @@ const ComparisonBoardMain = (props) => {
   PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
   PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
 
-  SELECT DISTINCT  ?value ?country_code ?year ?category  WHERE {
+  SELECT DISTINCT  ?value ?country_code ?year ?category ?gas WHERE {
     ?s oeo:OEO_00020221 ?country_code .
     ?s oeo:OEO_00020224 ?year .
     ?s oeo:OEO_00140178 ?value .
     ?s oeo:OEO_00000504 ?table_name .
     ?s oeo:has_sector_division ?category .
     ?s oeo:OEO_00020226 ?scenario .
-    FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories}) ) .
+    ?s oeo:OEO_00010121 ?gas
+    FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories})  && ?gas IN (${selectedGas.map(e => '"' + e + '"').toString()}) ) .
   }`;
 
 
@@ -408,6 +454,7 @@ const sendQuery = async (index) => {
       const newChartLabels = [...chartLabels];
       newChartLabels[index] = country;
       setChartLabels(newChartLabels);
+      console.log(newChartLabels);
 
       const newScenarioYear = [...scenarioYear];
       newScenarioYear[index] = '2020';
@@ -631,6 +678,26 @@ const sendQuery = async (index) => {
                     {categoryNames.map((name) => (
                       <MenuItem key={name} value={name}>
                         <Checkbox checked={selectedCategories.indexOf(name) > -1} />
+                        <ListItemText primary={name} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ m: 1, width: '48%' }} size="small">
+                  <InputLabel id="demo-multiple-checkbox-label">Gas</InputLabel>
+                  <Select
+                    labelId="demo-select-small-label"
+                    id="demo-select-small"
+                    multiple
+                    value={selectedGas}
+                    onChange={handleGasChange}
+                    input={<OutlinedInput label="Category" />}
+                    renderValue={(selected) => selected.join(', ')}
+                    MenuProps={MenuProps}
+                  >
+                    {gasesNames.map((name) => (
+                      <MenuItem key={name} value={name}>
+                        <Checkbox checked={selectedGas.indexOf(name) > -1} />
                         <ListItemText primary={name} />
                       </MenuItem>
                     ))}
