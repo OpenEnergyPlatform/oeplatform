@@ -58,10 +58,23 @@ const ComparisonBoardMain = (props) => {
   const [chartLabels, setChartLabels] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [showChart, setShowChart] = React.useState(false);
-  const [category, setCategory] = React.useState([]);
+  const [categoryNames, setCategoryNames] = React.useState([]);
+  const [selectedCategories, setSelectedCategories] = React.useState([]);
+  const [selectedScenarios, setSelectedScenarios] = React.useState([]);
   const [visualizationRows, addVisualizationRows] = React.useState(0);
+  const [inputTableNames, setInputTableNames] = React.useState([]);
+  const [outputTableNames, setoutputTableNames] = React.useState([]);
+  const [selectedInputDatasets, setSelectedInputDatasets] = React.useState([]);
+  const [selectedOutputDatasets, setSelectedOutputDatasets] = React.useState([]);
+  const [scenariosNamesInTables, setScenariosNamesInTables] = React.useState([]);
+  const [scenariosInTables, setScenariosInTables] = React.useState([]);
 
 
+  const scenarios_disctionary = {
+    "OEO_00020310" : "without measures scenario (WOM)",
+    "OEO_00020311" : "with existing measures scenario (WEM)",
+    "OEO_00020312" : "with additional measures scenario (WAM)"
+  }
   const getScenarios = async () => {
     const { data } = await axios.get(conf.toep + `scenario-bundles/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
     return data;
@@ -70,6 +83,18 @@ const ComparisonBoardMain = (props) => {
   useEffect(() => {
     getScenarios().then((data) => {
       setScenarios(data);
+      const ScenariosInputTableNames = data.map(obj => obj.data.input_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
+      const allInputDatasets =  Array.from(new Set(ScenariosInputTableNames.flat()));
+
+
+      console.log(allInputDatasets);
+      setInputTableNames(allInputDatasets);
+      
+
+      const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
+      const allOutputDatasets = [].concat(...ScenariosOutputTableNames);
+      setoutputTableNames(allOutputDatasets);
+
     });
   }, []);
 
@@ -79,7 +104,6 @@ const ComparisonBoardMain = (props) => {
   ) => {
     newAlignment !== null && setAlignment(newAlignment);
   };
-
   
   // 'http://oevkg:8080/sparql'
 
@@ -138,53 +162,84 @@ const ComparisonBoardMain = (props) => {
     },
   };
 
-  const category_labels = [
-    'Transport',
-    'Agriculture',
-    'total greenhouse gas emissions excluding LULUCF',
-    'total greenhouse gas emissions excluding LULUCF and excluding international aviation'
-  ];
+  const category_disctionary = {
+    "OEO_00010038" : "1 Energy",
+    "OEO_00010039" : "1.A Fuel combustion",
+    "OEO_00010040" : "1.A.1 Energy industries",
+    "OEO_00010158" : "1.A.1.a Public electricity and heat production",
+    "OEO_00010159" : "1.A.1.b Petroleum refining",
+    "OEO_00010160" : "1.A.1.c Manufacture of solid fuels and other energy industries",
+    "OEO_00010041" : "1.A.2 Manufacturing industries and construction",
+    "OEO_00010042" : "1.A.3 Transport",
+    "OEO_00010059" : "1.A.3.a Domestic aviation",
+    "OEO_00010060" : "1.A.3.b Road transportation",
+    "OEO_00010061" : "1.A.3.c Railways",
+    "OEO_00010062" : "1.A.3.d Domestic navigation",
+    "OEO_00010063" : "1.A.3.e Other transportation",
+    "OEO_00010043" : "1.A.4 Other sectors",
+    "OEO_00010052" : "1.A.4.a Commercial/Institutional",
+    "OEO_00010053" : "1.A.4.b Residential",
+    "OEO_00010054" : "1.A.4.c Agriculture/Forestry/Fishing",
+    "OEO_00010044" : "1.A.5 Other",
+    "OEO_00010057" : "1.B Fugitive emissions from fuels",
+    "OEO_00010161" : "1.B.1 Solid fuels",
+    "OEO_00010162" : "1.B.2 Oil and natural gas and other emissions from energy production",
+    "OEO_00010058" : "1.C CO2 transport and storage",
+    "OEO_00010046" : "2 Industrial processes",
+    "OEO_00010164" : "2.A Mineral Industry",
+    "OEO_00010165" : "2.A.1 Cement production",
+    "OEO_00010166" : "2.B Chemical industry",
+    "OEO_00010167" : "2.C Metal industry",
+    "OEO_00010168" : "2.C.1 Iron and steel production",
+    "OEO_00010169" : "2.D Non-energy products from fuels and solvent use",
+    "OEO_00010170" : "2.E Electronics industry",
+    "OEO_00010171" : "2.F Product uses as substitutes for ODS",
+    "OEO_00010172" : "2.G Other product manufacture and use",
+    "OEO_00010173" : "2.H Other",
+    "OEO_00010047" : "3 Agriculture",
+    "OEO_00010179" : "3.A Enteric fermentation",
+    "OEO_00010180" : "3.B Manure management",
+    "OEO_00010181" : "3.C Rice cultivation",
+    "OEO_00010182" : "3.D Agricultural soils",
+    "OEO_00010183" : "3.E Prescribed burning of savannahs",
+    "OEO_00010184" : "3.F Field burning of agricultural residues",
+    "OEO_00010185" : "3.G Liming",
+    "OEO_00010186" : "3.H Urea application",
+    "OEO_00010187" : "3.I Other carbon-containing fertilizers",
+    "OEO_00010188" : "3.J Other",
+    "OEO_00010048" : "4 Land Use, Land-Use Change and Forestry",
+    "OEO_00010189" : "4.A Forest land",
+  };
 
-  const handleChange = (event: SelectChangeEvent<typeof category>) => {
+  const handleScenariosChange = (event: SelectChangeEvent<typeof category>) => {
     const {
       target: { value },
     } = event;
-    setCategory(
+    setSelectedScenarios(
       typeof value === 'string' ? value.split(',') : value,
     );
   };
 
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
+  const handleCategoriesChange = (event: SelectChangeEvent<typeof category>) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedCategories(
+      typeof value === 'string' ? value.split(',') : value,
+    );
+  };
 
-  const data_tabels = `"eu_leg_data_2016_eea", "eu_leg_data_2016_eio_ir_article23_t1"`;
-  const scenario_years =  `"2020", "2025", "2030", "2035", "2040"`;
-  // const categories =  `"1.A.3 Transport"`;
 
-  const query = `PREFIX obo: <http://purl.obolibrary.org/obo/>
-  PREFIX ou: <http://opendata.unex.es/def/ontouniversidad#>
-  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-  PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
-  PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
+  const get_scenarios_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+              SELECT DISTINCT ?scenario WHERE {
+              ?s oeo:OEO_00020226 ?scenario .
+  }`  
 
-  SELECT DISTINCT ?table_name ?category ?value ?country_code ?year WHERE {
-    ?s oeo:OEO_00000504 ?table_name .
-    ?s oeo:OEO_00020226 oeo:OEO_00020311 .
-    ?s oeo:OEO_00010121 oeo:Total_ESD_GHGs .
-    ?s oeo:has_sector_division ?category .
-    ?s oeo:OEO_00020221 ?country_code .
-    ?s oeo:OEO_00020224 ?year .
-    ?s oeo:OEO_00140178 ?value .
-    FILTER(?year IN (2020, 2025, 2030, 2035) && ?table_name IN ("eu_leg_data_2016_eea") && ?category IN (oeo:OEO_00010038) ) .
-}`;
-
-  const sendQuery = async (index) => {
-    console.log(index);
+  const sendGetScenariosQuery = async () => {
     setLoading(true);
     const response = await axios.post(
       conf.obdi, 
-      query,
+      get_scenarios_query,
       {
         headers: {
           'X-CSRFToken': CSRFToken(),
@@ -193,7 +248,146 @@ const ComparisonBoardMain = (props) => {
         },
       }
     ).then(response => {
+
+      const scenariosObj = response.data.results.bindings;
+
+      const scenarios = scenariosObj.map((obj) => obj.scenario.value.split('/').pop() );
+      const scenarioNames = scenarios.map((elem) => scenarios_disctionary[elem]); 
+      setScenariosInTables(scenarioNames);
+      
+      setLoading(false);
+
+
+    }).catch(error => {
+        console.error('API Error:', error.message);
+    }).finally(() => {
+    });
+  }
+
+  const get_categories_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    SELECT DISTINCT ?category WHERE {
+      ?s oeo:has_sector_division ?category .
+    }`
+
+    const sendGetCategoriesQuery = async () => {
+      setLoading(true);
+      const response = await axios.post(
+        conf.obdi, 
+        get_categories_query,
+        {
+          headers: {
+            'X-CSRFToken': CSRFToken(),
+            'Accept': 'application/sparql-results+json',
+            'Content-Type': 'application/sparql-query',
+          },
+        }
+      ).then(response => {
+  
+        const categoriesObj = response.data.results.bindings;
+        const categories = categoriesObj.map((obj) => obj.category.value.split('/').pop() );
+        const catNames = categories.filter(elem => elem in category_disctionary ).map(el => category_disctionary[el] );
+        setCategoryNames(catNames);
+        
+        setLoading(false);
+
+        const selectedCategorieIDs = Object.keys(category_disctionary).filter(k => category_disctionary[k] in selectedCategories);
+  
+  
+      }).catch(error => {
+          console.error('API Error:', error.message);
+      }).finally(() => {
+      });
+    }
+
+  const handleInputDatasetsChange = (event: SelectChangeEvent<typeof selectedInputDatasets>) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedInputDatasets(
+      typeof value === 'string' ? value.split(',') : value,
+    );
+
+    sendGetScenariosQuery();
+    sendGetCategoriesQuery();
+
+      
+    const addVisualization = uid => {
+      addVisualizationRows(visualizationRows + 1);
+    };
+    
+  };
+
+  const handleOutputDatasetsChange = (event: SelectChangeEvent<typeof selectedOutputDatasets>) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedOutputDatasets(
+      typeof value === 'string' ? value.split(',') : value,
+    );
+  };
+  
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  
+  const data_tabels = [];
+  data_tabels.push('"' + "eu_leg_data_2023_eea" + '"');
+
+  selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
+  selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
+
+  const scenario_years =  `"2020", "2025", "2030", "2035", "2040"`;
+  
+  const categories = [];
+  for (let key in category_disctionary) {
+      if (selectedCategories.includes(category_disctionary[key])) {
+        categories.push('oeo:' + key);
+      }
+  }
+
+  const scenariosFilter = [];
+  for (let key in scenarios_disctionary) {
+      if (selectedScenarios.includes(scenarios_disctionary[key])) {
+        scenariosFilter.push('oeo:' + key);
+      }
+  }
+
+  const main_query = `PREFIX obo: <http://purl.obolibrary.org/obo/>
+  PREFIX ou: <http://opendata.unex.es/def/ontouniversidad#>
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+  PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
+
+  SELECT DISTINCT  ?value ?country_code ?year ?category  WHERE {
+    ?s oeo:OEO_00010378 ?country_code .
+    ?s oeo:OEO_00020224 ?year .
+    ?s oeo:OEO_00140178 ?value .
+    ?s oeo:OEO_00000504 ?table_name .
+    ?s oeo:has_sector_division ?category .
+    ?s oeo:OEO_00020226 ?scenario .
+    FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories}) ) .
+  }`;
+
+
+const sendQuery = async (index) => {
+    console.log(main_query);
+    setLoading(true);
+    const response = await axios.post(
+      conf.obdi, 
+      main_query,
+      {
+        headers: {
+          'X-CSRFToken': CSRFToken(),
+          'Accept': 'application/sparql-results+json',
+          'Content-Type': 'application/sparql-query',
+        },
+      }
+    ).then(response => {
+
       const sparqOutput = response.data.results.bindings;
+
+      console.log(sparqOutput);
+
       setSparqlOutput(sparqOutput);
       const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index])
       const country = filtered_output.map((obj) => obj.country_code.value.split('/').pop() );
@@ -213,7 +407,6 @@ const ComparisonBoardMain = (props) => {
       
       setLoading(false);
       setShowChart(true);
-
 
     }).catch(error => {
         console.error('API Error:', error.message);
@@ -344,56 +537,98 @@ const ComparisonBoardMain = (props) => {
           {Array.from({ length: visualizationRows }).map((_, index) => (
            <Grid item xs={12}>
             <Grid container spacing={2}>
-              <Grid item xs={11}>
-                <FormControl sx={{ m: 1, width: 300 }} size="small">
-                  <InputLabel id="demo-simple-select-label">Table</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={''}
-                    label="Table"
-                  >
-                    <MenuItem value={10}>Table 1</MenuItem>
-                    <MenuItem value={20}>Table 2</MenuItem>
-                    <MenuItem value={30}>Table 3</MenuItem>
-                  </Select>
-                </FormControl>
-                <FormControl sx={{ m: 1, width: 300 }} size="small">
+              <Grid item xs={12}>
+                <Tooltip title={selectedOutputDatasets.length !== 0 ? "Comparison between input datasets and output datasets is not possible. Please make sure there is no selected output datsets" : ""}>
+                  <FormControl sx={{ m: 1, width: '48%' }} size="small">
+                    <InputLabel id="demo-simple-select-label">Input table(s)</InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      multiple
+                      value={selectedInputDatasets}
+                      label="Input table(s)"
+                      onChange={handleInputDatasetsChange}
+                      input={<OutlinedInput label="Input table(s)" />}
+                      renderValue={(selected) => selected.join(', ')}
+                      MenuProps={MenuProps}
+                      disabled={selectedOutputDatasets.length !== 0}
+                    >
+                      {inputTableNames.map((name, index) => (
+                        <MenuItem key={name+index} value={name}>
+                          <Checkbox checked={selectedInputDatasets.indexOf(name) > -1} />
+                          <ListItemText primary={name} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Tooltip>
+                <Tooltip title={selectedInputDatasets.length !== 0 ? "Comparison between input datasets and output datasets is not possible. Please make sure there is no selected input datsets" : ""}>
+                  <FormControl sx={{ m: 1, width: '48%' }} size="small">
+                    <InputLabel id="demo-simple-select-label">Output table(s)</InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      multiple
+                      value={selectedOutputDatasets}
+                      label="Output table(s)"
+                      onChange={handleOutputDatasetsChange}
+                      input={<OutlinedInput label="Output table(s)" />}
+                      renderValue={(selected) => selected.join(', ')}
+                      MenuProps={MenuProps}
+                      disabled={selectedInputDatasets.length !== 0}
+                    >
+                      {outputTableNames.map((name, index) => (
+                        <MenuItem key={name+index} value={name}>
+                          <Checkbox checked={selectedOutputDatasets.indexOf(name) > -1} />
+                          <ListItemText primary={name} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Tooltip>
+                <FormControl sx={{ m: 1, width: '48%' }} size="small">
                   <InputLabel id="demo-simple-select-label">Scenario</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
                     value={''}
                     label="Scenario"
-                  >
-                    <MenuItem value={10}>WAM</MenuItem>
-                    <MenuItem value={20}>WEM</MenuItem>
-                    <MenuItem value={30}>WOM</MenuItem>
-                  </Select>
-                </FormControl>
-                <FormControl sx={{ m: 1, width: 300 }} size="small">
-                  <InputLabel id="demo-multiple-checkbox-label">Category</InputLabel>
-                  <Select
-                    labelId="demo-select-small-label"
-                    id="demo-select-small"
                     multiple
-                    value={category}
-                    onChange={handleChange}
-                    input={<OutlinedInput label="Category" />}
+                    value={selectedScenarios}
+                    onChange={handleScenariosChange}
+                    input={<OutlinedInput label="Scenario" />}
                     renderValue={(selected) => selected.join(', ')}
                     MenuProps={MenuProps}
-                  >
-                    {category_labels.map((name) => (
+                  > 
+                    {scenariosInTables.map((name) => (
                       <MenuItem key={name} value={name}>
-                        <Checkbox checked={category.indexOf(name) > -1} />
+                        <Checkbox checked={selectedScenarios.indexOf(name) > -1} />
                         <ListItemText primary={name} />
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
-              </Grid>
-              <Grid item xs={1}>
-                <Button size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Go</Button>
+                <FormControl sx={{ m: 1, width: '48%' }} size="small">
+                  <InputLabel id="demo-multiple-checkbox-label">Category</InputLabel>
+                  <Select
+                    labelId="demo-select-small-label"
+                    id="demo-select-small"
+                    multiple
+                    value={selectedCategories}
+                    onChange={handleCategoriesChange}
+                    input={<OutlinedInput label="Category" />}
+                    renderValue={(selected) => selected.join(', ')}
+                    MenuProps={MenuProps}
+                  >
+                    {categoryNames.map((name) => (
+                      <MenuItem key={name} value={name}>
+                        <Checkbox checked={selectedCategories.indexOf(name) > -1} />
+                        <ListItemText primary={name} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Button sx={{ m: 1, width: 70 }} size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Go</Button>
               </Grid>
               <Grid item xs={12}>
                 {showChart == true && <Grid container>

@@ -219,8 +219,8 @@ export default function  ComparisonBoardItems (props) {
                           <StudyChip
                             key={input_dataset}
                             index={index}
-                            label={input_dataset}
-                            included={state.items[0].data.input_datasets.includes(input_dataset)}
+                            label={input_dataset[0]}
+                            included={state.items[0].data.input_datasets.includes(input_dataset[0])}
                           />
                         ))}
                       </div>}
@@ -233,8 +233,8 @@ export default function  ComparisonBoardItems (props) {
                           <StudyChip
                             key={output_dataset}
                             index={index}
-                            label={output_dataset}
-                            included={state.items[0].data.output_datasets.includes(output_dataset)}
+                            label={output_dataset[0]}
+                            included={state.items[0].data.output_datasets.includes(output_dataset[0])}
                           />
                         ))}
                       </div>}
