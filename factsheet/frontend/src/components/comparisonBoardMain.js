@@ -330,7 +330,6 @@ const ComparisonBoardMain = (props) => {
   const [error, setError] = useState(null);
   
   const data_tabels = [];
-  data_tabels.push('"' + "eu_leg_data_2023_eea" + '"');
 
   selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
   selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -359,7 +358,7 @@ const ComparisonBoardMain = (props) => {
   PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
 
   SELECT DISTINCT  ?value ?country_code ?year ?category  WHERE {
-    ?s oeo:OEO_00010378 ?country_code .
+    ?s oeo:OEO_00020221 ?country_code .
     ?s oeo:OEO_00020224 ?year .
     ?s oeo:OEO_00140178 ?value .
     ?s oeo:OEO_00000504 ?table_name .
