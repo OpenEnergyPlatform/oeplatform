@@ -324,6 +324,15 @@ const ComparisonBoardMain = (props) => {
     setSelectedOutputDatasets(
       typeof value === 'string' ? value.split(',') : value,
     );
+
+    sendGetScenariosQuery();
+    sendGetCategoriesQuery();
+
+    const addVisualization = uid => {
+      addVisualizationRows(visualizationRows + 1);
+    };
+    
+
   };
   
   const [data, setData] = useState(null);
