@@ -33,4 +33,5 @@ urlpatterns = [
     url(r"^viewer/oeo/", include("oeo_viewer.urls")),
     url(r"^scenario-bundles/", include("factsheet.urls")),
     url(r"^tutorials/.*", redirect_tutorial),
+    url(r"^sparql_query/", include("sparql_query.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

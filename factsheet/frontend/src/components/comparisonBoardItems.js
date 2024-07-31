@@ -7,6 +7,7 @@ import palette from '../styles/oep-theme/palette';
 import variables from '../styles/oep-theme/variables';
 import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.js';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
@@ -216,12 +217,31 @@ export default function  ComparisonBoardItems (props) {
                           <b>Input datasets:</b>
                         </Typography>
                         {item.data.input_datasets.map((input_dataset) => (
-                          <StudyChip
-                            key={input_dataset}
-                            index={index}
-                            label={input_dataset[0]}
-                            included={state.items[0].data.input_datasets.includes(input_dataset[0])}
-                          />
+                          <HtmlTooltip
+                           key={input_dataset[0]}
+                           style={{ marginLeft: '10px' }}
+                           placement="top"
+                           title={
+                             <React.Fragment>
+                               <div>
+                                 {input_dataset[0]}
+                                 {/* Add any other dataset information here if needed */}
+                               </div>
+                             </React.Fragment>
+                           }
+                          >
+                            <div>
+                              <StudyChip
+                                key={input_dataset[0]}
+                                index={index}
+                                label={input_dataset[0]}
+                                included={state.items[0].data.input_datasets.some(ds => ds[2] === input_dataset[2])}
+                                onClick={() => {
+                                  handleOpenURL(input_dataset[1]);
+                                }}
+                              />
+                            </div>
+                          </HtmlTooltip>
                         ))}
                       </div>}
 
@@ -230,12 +250,31 @@ export default function  ComparisonBoardItems (props) {
                           <b>Output datasets:</b>
                         </Typography>
                         {item.data.output_datasets.map((output_dataset) => (
-                          <StudyChip
-                            key={output_dataset}
-                            index={index}
-                            label={output_dataset[0]}
-                            included={state.items[0].data.output_datasets.includes(output_dataset[0])}
-                          />
+                          <HtmlTooltip
+                            key={output_dataset[0]}
+                            style={{ marginLeft: '10px' }}
+                            placement="top"
+                            title={
+                              <React.Fragment>
+                                <div>
+                                  {output_dataset[0]}
+                                  {/* Add any other dataset information here if needed */}
+                                </div>
+                              </React.Fragment>
+                            }
+                          >
+                            <div>
+                              <StudyChip
+                                key={output_dataset[0]}
+                                index={index}
+                                label={output_dataset[0]}
+                                included={state.items[0].data.output_datasets.some(ds => ds[2] === output_dataset[2])}
+                                onClick={() => {
+                                  handleOpenURL(output_dataset[1]);
+                                }}
+                              />
+                            </div>
+                          </HtmlTooltip>
                         ))}
                       </div>}
 

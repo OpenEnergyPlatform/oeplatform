@@ -86,8 +86,6 @@ export default function Scenario(props) {
     scenarioDescriptorHandler
   } = props;
 
-  console.log(scenarioYears);
-
   const [scenariosInputDatasetsObj, setScenariosInputDatasetsObj] = useState(data.input_datasets);
   const [scenariosOutputDatasetsObj, setScenariosOutputDatasetsObj] = useState(data.output_datasets);
 
@@ -127,15 +125,28 @@ export default function Scenario(props) {
 
 
   const updateInputDatasetName = (element, key, index) => {
-    const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj;
+    const updateScenariosInputDatasetsObj = [...scenariosInputDatasetsObj]; // Create a copy to avoid mutating state directly
+  
+    // Check if the dataset is already present
+    const isDuplicate = updateScenariosInputDatasetsObj.some((dataset, idx) => {
+      return (dataset.value.label === element.label || dataset.value.url === element.url) && idx !== index;
+    });
+  
+    if (isDuplicate) {
+      console.warn("Duplicate dataset detected. Update aborted.");
+      return; // Exit the function to prevent updating with duplicate data
+    }
+  
+    // Proceed with the update
     updateScenariosInputDatasetsObj[index].value.label = element.label;
     updateScenariosInputDatasetsObj[index].value.url = element.url;
     updateScenariosInputDatasetsObj[index].idx = index;
     updateScenariosInputDatasetsObj[index].key = key;
+  
     setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
     scenariosInputDatasetsHandler(updateScenariosInputDatasetsObj, data.id);
   };
-
+  
   const removeInputDataset = (uid, idx) => {
     const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj.filter(e => e.key != uid);
     setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
@@ -148,7 +159,19 @@ export default function Scenario(props) {
 
 
   const updateOutputDatasetName = (value, key, index) => {
-    const updateScenariosOutputDatasetsObj = scenariosOutputDatasetsObj;
+    const updateScenariosOutputDatasetsObj = [...scenariosOutputDatasetsObj]; // Create a copy to avoid mutating state directly
+  
+    // Check if the dataset is already present
+    const isDuplicate = updateScenariosOutputDatasetsObj.some((dataset, idx) => {
+      return (dataset.value.label === value.label || dataset.value.url === value.url) && idx !== index;
+    });
+  
+    if (isDuplicate) {
+      console.warn("Duplicate dataset detected. Update aborted.");
+      return; // Exit the function to prevent updating with duplicate data
+    }
+  
+    // Proceed with the update
     updateScenariosOutputDatasetsObj[index].value.label = value.label;
     updateScenariosOutputDatasetsObj[index].value.url = value.url;
     updateScenariosOutputDatasetsObj[index].idx = index;

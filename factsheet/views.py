@@ -6,6 +6,7 @@ from django.core import serializers
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils.cache import patch_response_headers
+from django.views.decorators.cache import never_cache
 from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.compare import graph_diff, to_isomorphic
 from SPARQLWrapper import JSON
@@ -14,6 +15,7 @@ from factsheet.oekg.connection import oekg, oeo, oeo_owl, sparql
 from factsheet.oekg.filters import OekgQuery
 from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
+from factsheet.utils import serialize_publication_date
 from login import models as login_models
 from modelview.utils import get_framework_metadata_by_id, get_model_metadata_by_id
 
@@ -338,6 +340,7 @@ def create_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         # TODO- set in settings
@@ -376,6 +379,7 @@ def create_factsheet(request, *args, **kwargs):
                         )
                         bundle.add((scenario_URI, OEO.RO_0002233, input_dataset_URI))
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         # TODO- set in settings
@@ -460,7 +464,10 @@ def create_factsheet(request, *args, **kwargs):
         _models = json.loads(models) if models is not None else []
         for item in _models:
             model_id = item.get("id")
-            model_acronym = item.get("acronym")
+            if item.get("acronym"):
+                model_acronym = item.get("acronym")
+            else:
+                model_acronym = item.get("name")
             model_url = item.get("url")
 
             if not model_id or not model_acronym or not model_url:
@@ -489,7 +496,10 @@ def create_factsheet(request, *args, **kwargs):
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
             framework_id = item.get("id")
-            framework_acronym = item.get("acronym")
+            if item.get("acronym"):
+                framework_acronym = item.get("acronym")
+            else:
+                framework_acronym = item.get("name")
             framework_url = item.get("url")
 
             if not framework_id or not framework_acronym or not framework_url:
@@ -658,7 +668,7 @@ def update_factsheet(request, *args, **kwargs):
                 new_bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
 
             if (
-                item["date_of_publication"] != "01-01-1900"
+                item["date_of_publication"] != "1900"
                 and item["date_of_publication"] != ""
             ):
                 new_bundle.add(
@@ -679,6 +689,13 @@ def update_factsheet(request, *args, **kwargs):
                 )
 
             new_bundle.add((study_URI, OEKG["has_publication"], publications_URI))
+
+            # remove old date in publication
+            # iterate to make sure it can only have unique publication date
+            for _s, _p, _o in oekg.triples(
+                (publications_URI, OEKG["date_of_publication"], None)
+            ):
+                oekg.remove((_s, _p, _o))
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
@@ -777,6 +794,7 @@ def update_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         input_dataset_URI = URIRef(
@@ -820,6 +838,7 @@ def update_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO.RO_0002233, input_dataset_URI)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         output_dataset_URI = URIRef(
@@ -916,7 +935,11 @@ def update_factsheet(request, *args, **kwargs):
         _models = json.loads(models) if models is not None else []
         for item in _models:
             model_id = item.get("id")
-            model_acronym = item.get("acronym")
+
+            if item.get("acronym"):
+                model_acronym = item.get("acronym")
+            else:
+                model_acronym = item.get("name")
             model_url = item.get("url")
 
             if not model_id or not model_acronym or not model_url:
@@ -945,12 +968,24 @@ def update_factsheet(request, *args, **kwargs):
 
             new_bundle.add((study_URI, OEO["has_model"], model_URI))
 
+            # remove old labels
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((model_URI, RDFS.label, None)):
+                oekg.remove((_s, _p, _o))
+
+            # remove old iri´s
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((model_URI, OEO["has_iri,"], None)):
+                oekg.remove((_s, _p, _o))
+
         # TODO: Fix
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
             framework_id = item.get("id")
-            # framework_name = item.get("name")
-            framework_acronym = item.get("acronym")
+            if item.get("acronym"):
+                framework_acronym = item.get("acronym")
+            else:
+                framework_acronym = item.get("name")
             framework_url = item.get("url")
 
             if not framework_id or not framework_url:
@@ -980,6 +1015,16 @@ def update_factsheet(request, *args, **kwargs):
                 )
 
             new_bundle.add((study_URI, OEO["has_framework"], framework_URI))
+
+            # remove old labels
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((framework_URI, RDFS.label, None)):
+                oekg.remove((_s, _p, _o))
+
+            # remove old iri´s
+            # iterate to make sure only current selection is available
+            for _s, _p, _o in oekg.triples((framework_URI, OEO["has_iri,"], None)):
+                oekg.remove((_s, _p, _o))
 
         _study_keywords = (
             json.loads(study_keywords) if study_keywords is not None else []
@@ -1160,7 +1205,6 @@ def factsheet_by_id(request, *args, **kwargs):
             if framework_metadata:
                 framework_metadata["url"] = str(o1)
                 factsheet["frameworks"].append(framework_metadata)
-                print(factsheet["frameworks"])
 
     for _, _, o in oekg.triples((study_URI, OEO["has_model"], None)):
         for _, _, o1 in oekg.triples((o, OEO["has_iri"], None)):
@@ -1170,8 +1214,8 @@ def factsheet_by_id(request, *args, **kwargs):
             if model_metadata:
                 model_metadata["url"] = str(o1)
                 factsheet["models"].append(model_metadata)
-                print(factsheet["models"])
 
+    temp = set()
     factsheet["publications"] = []
     for s, p, o in oekg.triples((study_URI, OEKG["has_publication"], None)):
         publication = {}
@@ -1195,7 +1239,11 @@ def factsheet_by_id(request, *args, **kwargs):
 
         publication["date_of_publication"] = ""
         for s3, p3, o3 in oekg.triples((o, OEKG["date_of_publication"], None)):
-            publication["date_of_publication"] = o3
+            publication["date_of_publication"] = serialize_publication_date(str(o3))
+            temp.update(serialize_publication_date(str(o3)))
+
+        # Convert set to list before creating the JSON response
+        factsheet["collected_scenario_publication_dates"] = list(temp)
 
         publication["link_to_study_report"] = ""
         for s4, p4, o4 in oekg.triples((o, OEKG["link_to_study_report"], None)):
@@ -1608,24 +1656,39 @@ def get_all_factsheets(request, *args, **kwargs):
         element["models"] = []
         for s, p, o in oekg.triples((study_URI, OEO["has_model"], None)):
             if o != None:  # noqa
-                element["models"].append(o)
+                label = oekg.value(o, RDFS.label)
+                if label:
+                    element["models"].append(label)
 
         element["frameworks"] = []
         for s, p, o in oekg.triples((study_URI, OEO["has_framework"], None)):
             if o != None:  # noqa
-                element["frameworks"].append(o)
+                label = oekg.value(o, RDFS.label)
+                if label is not None:
+                    element["frameworks"].append(label)
+                else:
+                    pass
+
+        temp = set()
+        for s, p, o in oekg.triples((s, OEKG["has_publication"], None)):
+            pubs_per_bundle = []
+            for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
+                if o1:
+                    pubs_per_bundle.append(serialize_publication_date(str(o1)))
+
+            if pubs_per_bundle:
+                temp.update(pubs_per_bundle)
+
+        # Convert set to list before creating the JSON response
+        element["collected_scenario_publication_dates"] = list(temp)
 
         element["scenarios"] = []
-
-        element["date_of_publication"] = oekg.value(
-            study_URI, OEKG["date_of_publication"]
-        )
-
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
             label = oekg.value(o, RDFS.label)
             abstract = oekg.value(o, DC.abstract)
             full_name = oekg.value(o, OEKG.has_full_name)
             uid = oekg.value(o, OEKG.scenario_uuid)
+
             if label != None:  # noqa
                 element["scenarios"].append(
                     {
@@ -1715,15 +1778,26 @@ def get_scenarios(request, *args, **kwargs):
             for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020224, None)):
                 scenario_years.append(o4)
             for s5, p5, o5 in oekg.triples((s, OEO.RO_0002233, None)):
-                input_datasets.append([
-                    oekg.value(o5, RDFS.label),
-                    oekg.value(o5, OEO["has_iri"])
-                    ])
+                oekg_value = oekg.value(o5, OEO["has_iri"])
+                comparable = str(oekg_value).split("scenario/")
+                input_datasets.append(
+                    (
+                        oekg.value(o5, RDFS.label),
+                        oekg.value(o5, OEO["has_iri"]),
+                        comparable[1],
+                    )
+                )
             for s6, p6, o6 in oekg.triples((s, OEO.RO_0002234, None)):
-                output_datasets.append([
-                    oekg.value(o6, RDFS.label),
-                    oekg.value(o6, OEO["has_iri"])
-                    ])
+                oekg_value = oekg.value(o6, OEO["has_iri"])
+                comparable = str(oekg_value).split("scenario/")
+
+                output_datasets.append(
+                    (
+                        oekg.value(o6, RDFS.label),
+                        oekg.value(o6, OEO["has_iri"]),
+                        comparable[1],
+                    )
+                )
 
             for s1, p1, o1 in oekg.triples((None, OEKG["has_scenario"], s)):
                 study_label = oekg.value(s1, OEKG["has_full_name"])
@@ -1754,7 +1828,6 @@ def get_scenarios(request, *args, **kwargs):
                     },
                 }
             )
-            # print(scenarios)
 
     response = JsonResponse(scenarios, safe=False, content_type="application/json")
     return response
@@ -1979,6 +2052,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
     return response
 
 
+@never_cache
 def filter_scenario_bundles_view(request):
     # Get the table IRI from the request or any other source
     table_iri = request.GET.get("table_iri", "")
