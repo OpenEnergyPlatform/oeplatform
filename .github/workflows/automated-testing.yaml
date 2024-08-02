@@ -104,7 +104,7 @@ jobs:
           mkdir -p ontologies/oeo/1/modules
           wget https://openenergy-platform.org/ontology/oeo/releases/oeo-full.owl -P ontologies/oeo/1/
 
-          mkdir -p ontologies/oeo-ext/
+          mkdir -p ontologies/oeo_ext/
           touch ontologies/oeo_ext/oeo_ext.owl
       - name: Collectstatic files & compress
         run: |
