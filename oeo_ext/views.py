@@ -6,11 +6,9 @@ from django.views.generic import View
 from owlready2 import get_ontology
 from rdflib import Graph
 
-from oeplatform.settings import ONTOLOGY_ROOT
-
 from oeo_ext.oekb.connection import oeo_owl
 from oeo_ext.utils import get_class_data, get_new_iri
-
+from oeplatform.settings import ONTOLOGY_ROOT
 
 OEO_EXT_PATH = ONTOLOGY_ROOT / "oeo_ext/oeo_ext.owl"
 
@@ -19,17 +17,20 @@ oeo = oeo_owl
 
 oeo_ext = Graph()
 oeo_ext.parse(OEO_EXT_PATH.as_uri())
+oeo_ext_owl = get_ontology(OEO_EXT_PATH.as_posix()).load()
+
+# oeo_ext.base_iri = "http://openenergy-platform.org/ontology/oeo/oeo_ext/oeo_ext.owl#"
 
 # Static parts, object properties:
 has_linear_unit_numerator = oeo.search_one(label="has unit numerator")
-has_squared_unit_numerator = onto.search_one(label='has squared unit numerator')
-has_cubed_unit_numerator = onto.search_one(label='has cubed unit numerator')
+has_squared_unit_numerator = oeo.search_one(label="has squared unit numerator")
+has_cubed_unit_numerator = oeo.search_one(label="has cubed unit numerator")
 has_linear_unit_denominator = oeo.search_one(label="has linear unit denominator")
 has_squared_unit_denominator = oeo.search_one(label="has squared unit denominator")
-has_cubed_unit_denominator = onto.search_one(label='has cubed unit denominator')
-
+has_cubed_unit_denominator = oeo.search_one(label="has cubed unit denominator")
 unit = oeo.search_one(label="unit")
 
+UNITS = oeo.search(label="unit")
 
 
 # Suggested views maybe you will use other ones @adel
@@ -37,77 +38,45 @@ class OeoExtPluginView(View, LoginRequiredMixin):
     """
     Some text Some textSome textSome textSome textSome textSome textSome
     """
-    
-    def get_class_data():
-        units_used = []
-        D = { 'linear_unit_numerators': [], 
-        'squared_unit_numerators' : [],
-        'cubed_unit_numerators' : [],
-        'linear_unit_denominators' : [],
-        'squared_unit_denominators' : [],
-        'cubed_unit_denominators' : [] }
-        label = str(input("Enter new units name : "))
-        n = int(input("Enter number of existing units needed : "))
-        for i in range(0, n):
-            this_unit = str(input("Enter " + str(i+1) + ". unit: "))
-            n_or_d = str(input("Is " + this_unit + " used as a numerator or denominator? [n/d]"))
-            while not(n_or_d == "n" or n_or_d == "d"):
-                print("Faulty Input! Please input 'n' for numerator or 'd' for denominator!")
-                n_or_d = str(input("Is " + this_unit + " used as a numerator or denominator? [n/d]"))
-            l_or_s = str(input("Is " + this_unit + " used linear, squared or cubed? [l/s/c]"))
-            while not(l_or_s == "l" or l_or_s == "s" or l_or_s == "c"):
-                print("Faulty Input! Please input 'l' for linear, 's' for squared or 'c' for cubed!")
-                l_or_s = str(input("Is " + u + " used linear, squared or cubed? [l/s/c]"))
-            if (n_or_d == "n"):
-                if (l_or_s == "l"):
-                    D['linear_unit_numerators'].append(this_unit)
-                elif (l_or_s == "s"):
-                    D['squared_unit_numerators'].append(this_unit)
-                elif (l_or_s == "c"):
-                    D['cubed_unit_numerators'].append(this_unit)
-            elif (n_or_d == "d"):
-                if (l_or_s == "l"):
-                    D['linear_unit_denominators'].append(this_unit)
-                elif (l_or_s == "s"):
-                    D['squared_unit_denominators'].append(this_unit)
-                elif (l_or_s == "c"):
-                    D['cubed_unit_denominators'].append(this_unit)
-        return label, D
-    
-    def get_new_iri():
-        for annot_prop in ontox.metadata:
-            for i in range(len(annot_prop[ontox.metadata])):
-                if ("0000Counter = " in annot_prop[ontox.metadata][i]):
-                    newNr = annot_prop[ontox.metadata][i][len("0000Counter = "):]
-                    counter = int(newNr) +1
-                    annot_prop[ontox.metadata][i] = "0000Counter = " + str(counter)
-            ontox.save()
-        new_class_iri = "http://purl.obolibrary.org/obo/ext/OEO_0000" + f"{str(counter):0>4}"
-        return new_class_iri
 
     def get(self, request):
         print(request)
-        new_class_iri = get_new_iri()
-        label_of_unit, classesUsed = get_class_data()
-        lists = list(classesUsed.keys())
-        class_definition = "( "
-        for i in range(0, len(lists)):
-            for units_used in classesUsed[lists[i]]:
-                locals()[units_used] = onto.search_one(label=units_used)
-                class_definition += "has_" + str(lists[i])[:-1] + ".some(" + units_used + ") &"
-        class_definition = class_definition[:-1]
-        class_definition += " )"
-        import types
-        with ontox:
-            NewClass = types.new_class(new_class_iri, (unit,))
-            NewClass.label=str(label_of_unit)
-            NewClass.equivalent_to = [
-              eval(class_definition)
-            ]
-        oeo_ext.save(file= OEO_EXT_PATH, format="rdfxml")
 
         return render(request, "oeo_ext/partials/oeo-ext-plugin-ui.html")
 
     def post(self, request):
         print("post")
+
+        new_class_iri = get_new_iri(ontox=oeo_ext_owl)
+        label_of_unit, classesUsed = get_class_data()
+        lists = list(classesUsed.keys())
+        class_definition = "( "
+        for i in range(0, len(lists)):
+            for units_used in classesUsed[lists[i]]:
+                locals()[units_used] = oeo.search_one(label=units_used)
+                class_definition += (
+                    "has_" + str(lists[i])[:-1] + ".some(" + units_used + ") &"
+                )
+        class_definition = class_definition[:-1]
+        class_definition += " )"
+
+        with oeo_ext_owl:
+            NewClass = types.new_class(new_class_iri, (UNITS,))
+            NewClass.label = str(label_of_unit)
+            NewClass.equivalent_to = [eval(class_definition)]
+        oeo_ext_owl.save(file=OEO_EXT_PATH, format="rdfxml")
+
         return render(request, "oeo_ext/partials/oeo-ext-plugin-ui.html")
+
+
+def add_unit_element(request):
+    return render(request, "oeo_ext/partials/unit_element.html")
+
+
+# def search_units(request):
+#     query = request.GET.get("query", "")
+#     results = []
+#     if query:
+#         results = ["search_ontology(query)"]
+
+#     return JsonResponse({"data": results})
