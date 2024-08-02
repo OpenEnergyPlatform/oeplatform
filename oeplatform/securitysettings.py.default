@@ -74,10 +74,7 @@ RDF_DATABASES = {
         'port': 'port',
         'name': 'your_rdf_dataset'
     },
-    'factsheet': {
-        'dbuser': 'user',
-        'dbpasswd': 'pw'
-    }
+    "oeo_ext": {"host": "localhost", "port": "3030", "name": "oeo_ext"}
 }
 
 if not DEBUG:
