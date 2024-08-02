@@ -134,15 +134,31 @@ GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
+# from security settings
 try:
     ONTOLOGY_FOLDER  # noqa F405
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
-OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
-OPEN_ENERGY_ONTOLOGY_FOLDER = Path(
-    ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME  # noqa:F405
-)
+# from security settings
+try:
+    BASE_DIR  # noqa F405
+except NameError:
+    BASE_DIR = ""
+
+if BASE_DIR:
+    ONTOLOGY_ROOT = Path(BASE_DIR, ONTOLOGY_FOLDER)
+
+if ONTOLOGY_FOLDER:
+    OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
+    OPEN_ENERGY_ONTOLOGY_FOLDER = Path(
+        ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME  # noqa:F405
+    )
+    OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME = "oeo-full.owl"
+
+    OEO_EXT_PATH = Path(ONTOLOGY_ROOT, "oeo_ext")
+    OEO_EXT_OWL_NAME = "oeo_ext.owl"
+    OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -189,7 +205,7 @@ STATICFILES_FINDERS = {
 
 
 # https://django-compressor.readthedocs.io/en/stable/settings.html
-COMPRESS_ENABLED = True
+COMPRESS_ENABLED = False
 COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
