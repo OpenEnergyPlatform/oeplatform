@@ -146,10 +146,13 @@ try:
 except NameError:
     BASE_DIR = ""
 
-if BASE_DIR:
-    ONTOLOGY_ROOT = Path(BASE_DIR, ONTOLOGY_FOLDER)
+try:
+    ONTOLOGY_ROOT  # noqa F405
+except NameError:
+    if BASE_DIR:
+        ONTOLOGY_ROOT = Path(BASE_DIR, ONTOLOGY_FOLDER)
 
-if ONTOLOGY_FOLDER:
+if ONTOLOGY_ROOT:
     OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
     OPEN_ENERGY_ONTOLOGY_FOLDER = Path(
         ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME  # noqa:F405
@@ -205,7 +208,7 @@ STATICFILES_FINDERS = {
 
 
 # https://django-compressor.readthedocs.io/en/stable/settings.html
-COMPRESS_ENABLED = False
+COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
