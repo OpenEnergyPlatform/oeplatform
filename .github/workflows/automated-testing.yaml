@@ -90,7 +90,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip 'setuptools<72.0.0' wheel
           pip install -r requirements.txt
-          pip install tox
+          pip install tox-uv
       - name: Add schemas for testing
         env:
           PGPASSWORD: postgres
