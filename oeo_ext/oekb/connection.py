@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 from owlready2 import get_ontology
@@ -10,37 +9,67 @@ from rdflib.plugins.stores import sparqlstore
 from SPARQLWrapper import SPARQLWrapper
 
 from oeo_ext.oekb.namespaces import bind_all_namespaces
-from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME, RDF_DATABASES
+from oeplatform.settings import (
+    OEO_EXT_OWL_PATH,
+    ONTOLOGY_ROOT,
+    OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME,
+    OPEN_ENERGY_ONTOLOGY_NAME,
+    RDF_DATABASES,
+)
+from ontology.utils import get_ontology_version
 
-versions = os.listdir(
-    Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
-)  # TODO bad - windows dev will get path error
-# Bryans custom hack!! print(versions.remove(".DS_Store"))
-version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
-onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
-path = onto_base_path / version  # TODO bad - windows dev will get path error
-# file = "reasoned-oeo-full.owl" # TODO- set in settings
-file = "oeo-full.owl"  # TODO- set in settings
+OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
+OEO_PATH = OEO_BASE_PATH / OEO_VERSION  # TODO bad - windows dev will get path error
 
-Ontology_URI = path / file
+########################################################
+#                           oeo                     ####
+########################################################
+Ontology_URI = OEO_PATH / OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME
 Ontology_URI_STR = Ontology_URI.as_posix()
-
-# sys.path.append(path)
 
 oeo = Graph()
 oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
+########################################################
+#                 oeo extended                      ####
+########################################################
+
+oeo_ext = Graph()
+oeo_ext.parse(OEO_EXT_OWL_PATH.as_uri())
+oeo_ext_owl = get_ontology(OEO_EXT_OWL_PATH.as_posix()).load()
+
+
+########################################################
+#           oeo/oeo_ext SPARQL endpoints               #
+########################################################
+
 rdfdb = RDF_DATABASES["knowledge"]
-query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
-update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
+oeo_query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
+oeo_update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
 
-sparql = SPARQLWrapper(query_endpoint)
+oeo_sparql = SPARQLWrapper(oeo_query_endpoint)
 
-store = sparqlstore.SPARQLUpdateStore()
+oeo_store = sparqlstore.SPARQLUpdateStore()
 
-store.open((query_endpoint, update_endpoint))
-oekb_oeo_ext = Graph(store, identifier=default)
+oeo_store.open((oeo_query_endpoint, oeo_update_endpoint))
+oekb_oeo = Graph(oeo_store, identifier=default)
 
+# ---- import this in other modules
+oekb_with_namespaces = bind_all_namespaces(oekb_oeo)
+
+rdfdb = RDF_DATABASES["oeo_ext"]
+oeo_ext_query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
+oeo_ext_update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
+
+sparql = SPARQLWrapper(oeo_ext_query_endpoint)
+
+oeo_ext_store = sparqlstore.SPARQLUpdateStore()
+
+oeo_ext_store.open((oeo_ext_query_endpoint, oeo_ext_update_endpoint))
+oekb_oeo_ext = Graph(oeo_ext_store, identifier=default)
+
+# ---- import this in other modules
 oekb_with_namespaces = bind_all_namespaces(oekb_oeo_ext)
