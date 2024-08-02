@@ -1,36 +1,104 @@
-<!--
-    This partial template is a plug able ui to create a new oeo ext term on the fly.
-    This can be used in any html of the oepatform, currently it is planned ot add it
-    to the oemetabuilder feature to extend the annotation functionality for example
-    when annotation units.
--->
 {% load django_bootstrap5 %}
 
-<!-- @adel: htmxComponent should be the hx-target -->
 <div class="htmxComponent">
-    <!-- @adel: This form is only a suggestion -->
-    <form id="oeo-ext-form" hx-post="{% url 'oeo_ext:oeo-ext-plugin-ui-create' %}" hx-target=".htmxComponent" hx-swap="outerHTML">
+    <form id="oeo-ext-form" hx-post="{% url 'oeo_ext:oeo-ext-plugin-ui-create' %}" hx-target=".htmxComponent" hx-swap="outerHTML" class="needs-validation" novalidate>
         {% csrf_token %}
+        
+        <div class="nominator-section mb-4">
+            <h3>Nominator</h3>
+            <div id="nominator-elements" class="mb-3">
+                <!-- Elements will be added here -->
+            </div>
+            <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#nominator-elements" hx-swap="beforeend">Add Nominator Unit</button>
+        </div>
 
-        <!-- Input field 1 with autocomplete -->
-        <label for="inputField1">Input Field 1:</label>
-        <input type="text" id="inputField1" name="inputField1"
-                hx-get="/autocomplete-data1" hx-trigger="keyup changed delay:500ms" autocomplete="off">
+        <div class="denominator-section mb-4">
+            <h3>Denominator</h3>
+            <div id="denominator-elements" class="mb-3">
+                <!-- Elements will be added here -->
+            </div>
+            <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#denominator-elements" hx-swap="beforeend">Add Denominator Unit</button>
+        </div>
 
-        <!-- Selection field -->
-        <label for="selectionField">Selection Field:</label>
-        <select id="selectionField" name="selectionField" hx-get="/selection-options" hx-trigger="load">
-            <option value="equals">Equals</option>
-            <!-- Add more options as needed -->
-        </select>
-
-        <!-- Input field 2 with autocomplete -->
-        <label for="inputField2">Input Field 2:</label>
-        <input type="text" id="inputField2" name="inputField2"
-                hx-get="/autocomplete-data2" hx-trigger="keyup changed delay:500ms" autocomplete="off">
-
-        <!-- Description text field -->
-        <label for="descriptionField">Description:</label>
-        <textarea id="descriptionField" name="descriptionField"></textarea>
+        <div class="mb-2">
+            <label for="description" class="form-label">Definition:</label>
+            <textarea name="description" class="form-control"></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-success">Save</button>
     </form>
+
+    <div class="result-section mt-4">
+        <h3>Result</h3>
+        <div id="result-expression">
+            <!-- Result expression will be displayed here -->
+        </div>
+    </div>
 </div>
+
+<script>
+function updateResultExpression() {
+    let nominatorElements = document.querySelectorAll('#nominator-elements .unit-element');
+    let denominatorElements = document.querySelectorAll('#denominator-elements .unit-element');
+
+    let nominatorText = Array.from(nominatorElements).map(element => {
+        let name = element.querySelector('.unitName').value;
+        let type = element.querySelector('.unitType').value;
+        return `${name} (${type})`;
+    }).join(' + ');
+
+    let denominatorText = Array.from(denominatorElements).map(element => {
+        let name = element.querySelector('.unitName').value;
+        let type = element.querySelector('.unitType').value;
+        return `${name} (${type})`;
+    }).join(' + ');
+
+    let resultExpression = `
+        <div class="fraction">
+            <div class="nominator">${nominatorText}</div>
+            <div class="denominator">${denominatorText}</div>
+        </div>
+    `;
+
+    document.getElementById('result-expression').innerHTML = resultExpression;
+}
+
+document.addEventListener('htmx:afterSwap', (e) => {
+    if (e.detail.target.id === 'nominator-elements' || e.detail.target.id === 'denominator-elements') {
+        initializeUnitElement(e.detail.target);
+    }
+});
+
+function initializeUnitElement(parent) {
+    parent.querySelectorAll('.remove-element').forEach(button => {
+        button.addEventListener('click', function () {
+            this.closest('.unit-element').remove();
+            updateResultExpression();
+        });
+    });
+
+    parent.querySelectorAll('.unitName, .unitType').forEach(input => {
+        input.addEventListener('input', updateResultExpression);
+    });
+}
+
+initializeUnitElement(document); // Initialize existing elements
+</script>
+
+<style>
+.fraction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.fraction .nominator,
+.fraction .denominator {
+    text-align: center;
+}
+
+.fraction .denominator {
+    border-top: 1px solid black;
+    width: 100%;
+}
+</style>
