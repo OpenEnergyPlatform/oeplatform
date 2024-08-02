@@ -291,7 +291,6 @@ var MetaEdit = function(config) {
           iconlib: 'fontawesome5',
           mode: 'form',
           compact: true,
-          remove_button_labels: true,
           disable_collapse: true,
           prompt_before_delete: false,
           object_layout: "normal",
@@ -331,18 +330,14 @@ var MetaEdit = function(config) {
 
         // TODO catch init error
 
-
         window.JSONEditor.defaults.callbacks = {
           "autocomplete": {
             "search_name": function search(jseditor_editor, input) {
-              var url = "/api/v0/oeo-search?query=" + input;
+              var url = "https://openenergyplatform.org/api/v0/oeo-search?query=" + input;
 
               return new Promise(function(resolve) {
                 fetch(url, {
                   mode: 'cors',
-                  headers: {
-                    'Access-Control-Allow-Origin': '*',
-                  },
                 }).then(function(response) {
                   return response.json();
                 }).then(function(data) {
@@ -365,6 +360,18 @@ var MetaEdit = function(config) {
               return selected_value;
             },
           },
+          "button": {
+            "openModalAction": function openOeoExtPlugin(jseditor, e) {
+              // Perform the HTMX request or any other desired action
+             
+              htmx.ajax('GET', createUrl, {
+                target: '.modal-body',
+                swap: 'innerHTML',
+                trigger: 'click'
+              });
+              $('#formModal').modal('show');
+            }
+          }
         };
       });
     } else {
@@ -379,7 +386,7 @@ var MetaEdit = function(config) {
           iconlib: 'fontawesome5',
           mode: 'form',
           compact: true,
-          remove_button_labels: true,
+          // remove_button_labels: true,
           disable_collapse: true,
           prompt_before_delete: false,
           object_layout: "normal",
@@ -420,14 +427,11 @@ var MetaEdit = function(config) {
         window.JSONEditor.defaults.callbacks = {
           "autocomplete": {
             "search_name": function search(jseditor_editor, input) {
-              var url = "/api/v0/oeo-search?query=" + input;
+              var url = "https://openenergyplatform.org/api/v0/oeo-search?query=" + input;
 
               return new Promise(function(resolve) {
                 fetch(url, {
                   mode: 'cors',
-                  headers: {
-                    'Access-Control-Allow-Origin': '*',
-                  },
                 }).then(function(response) {
                   return response.json();
                 }).then(function(data) {
@@ -450,6 +454,18 @@ var MetaEdit = function(config) {
               return selected_value;
             },
           },
+          "button": {
+            "openModalAction": function openOeoExtPlugin(jseditor, e) {
+              // Perform the HTMX request or any other desired action
+              console.log("hi")
+              htmx.ajax('GET', '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}', {
+                target: '.modal-body',
+                swap: 'innerHTML',
+                trigger: 'click'
+              });
+              $('#formModal').modal('show');
+            }
+          }
         };
       });
     }
