@@ -63,6 +63,17 @@
             "badge": "Platinum",
             "title": "Path",
             "format": "uri"
+          },
+          "openModalButton": {
+            "description": "Button to open a modal for HTMX request",
+            "format": "button",
+            "options": {
+              "button": {
+                "text": "Open OEO-EXT",
+                "icon": "external-link-alt",
+                "action": "openModalAction"
+              }
+            }
           }
         },
         "badge": "Platinum",
