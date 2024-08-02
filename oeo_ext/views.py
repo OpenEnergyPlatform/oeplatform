@@ -1,26 +1,24 @@
 import types
-import uuid
-from pathlib import Path
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render  # noqa:F401
 from django.views.generic import View
-from owlready2 import *
+from owlready2 import get_ontology
+from rdflib import Graph
 
-from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME
-from ontology.utility import get_ontology_version
+from oeplatform.settings import ONTOLOGY_ROOT
 
-OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
-OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
-OEO_PATH = str(OEO_BASE_PATH) + "/" + str(OEO_VERSION) + "/oeo-full.owl"
-OEO_EXT_PATH = str(Path(ONTOLOGY_ROOT)) + "/oeo_ext/oeo_ext.owl"
+from oeo_ext.oekb.connection import oeo_owl
+from oeo_ext.utils import get_class_data, get_new_iri
 
-oeo = get_ontology(OEO_PATH)
-oeo.load()
 
-oeo_ext = get_ontology(OEO_EXT_PATH)
-oeo_ext.load()
-#oeo_ext.base_iri = "http://openenergy-platform.org/ontology/oeo/oeo_ext/oeo_ext.owl#"
+OEO_EXT_PATH = ONTOLOGY_ROOT / "oeo_ext/oeo_ext.owl"
+
+# load oeo via common interface
+oeo = oeo_owl
+
+oeo_ext = Graph()
+oeo_ext.parse(OEO_EXT_PATH.as_uri())
 
 # Static parts, object properties:
 has_linear_unit_numerator = oeo.search_one(label="has unit numerator")
