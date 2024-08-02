@@ -88,11 +88,8 @@ const ComparisonBoardMain = (props) => {
       const ScenariosInputTableNames = data.map(obj => obj.data.input_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
       const allInputDatasets =  Array.from(new Set(ScenariosInputTableNames.flat()));
 
-
-      console.log(allInputDatasets);
       setInputTableNames(allInputDatasets);
       
-
       const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
       const allOutputDatasets = [].concat(...ScenariosOutputTableNames);
       setoutputTableNames(allOutputDatasets);
@@ -143,12 +140,37 @@ const ComparisonBoardMain = (props) => {
     const country = filtered_output.map((obj) => obj.country_code.value.split('/').pop() );
     const value = filtered_output.map((obj) => obj.value.value );
 
+    const categorieIDs = [];
+    for (let key in category_disctionary) {
+        if (selectedCategories.includes(category_disctionary[key])) {
+          categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
+        }
+    }
+    const colors = ['#caf270', '#45c490', '#008d93']
+
+    const country_labels = [];
+    const chart_data_category = categorieIDs.map((cat, idx) => {
+      const categorized =  {}
+      categorized['label'] = selectedCategories[idx];
+      categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
+      categorized['backgroundColor'] = colors[idx];
+
+      country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop() );
+      return categorized
+    });
+    
+
+
     const newChartData = [...chartData];
-    newChartData[index] = value ;
+    //newChartData[index] = value ;
+    newChartData[index] = chart_data_category ;
     setChartData(newChartData);
 
+    console.log(newChartData);
+
     const newChartLabels = [...chartLabels];
-    newChartLabels[index] = country;
+    //newChartLabels[index] = country;
+    newChartLabels[index] = country_labels[index];
     setChartLabels(newChartLabels);
 
   };
@@ -330,7 +352,6 @@ const ComparisonBoardMain = (props) => {
 
       const gasesObj = response.data.results.bindings;
       const gases = gasesObj.map((obj) => obj.gas.value );
-      console.log(gases);
 
       setGasesNames(gases);
       
@@ -440,21 +461,37 @@ const sendQuery = async (index) => {
 
       const sparqOutput = response.data.results.bindings;
 
-      console.log(sparqOutput);
-
       setSparqlOutput(sparqOutput);
+      
       const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index])
       const country = filtered_output.map((obj) => obj.country_code.value.split('/').pop() );
+
+      const categorieIDs = [];
+      for (let key in category_disctionary) {
+          if (selectedCategories.includes(category_disctionary[key])) {
+            categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
+          }
+      }
+      const colors = ['#caf270', '#45c490', '#008d93']
+      const chart_data_category = categorieIDs.map((cat, index) => {
+        const categorized =  {}
+        categorized['label'] = selectedCategories[index];
+        categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
+        categorized['backgroundColor'] = colors[index];
+        return categorized
+      });
+      console.log(chart_data_category);
       const value = filtered_output.map((obj) => obj.value.value );
 
       const newChartData = [...chartData];
-      newChartData[index] = value ;
+      //newChartData[index] = value ;
+      newChartData[index] = chart_data_category ;
       setChartData(newChartData);
+      console.log(chartData);
 
       const newChartLabels = [...chartLabels];
       newChartLabels[index] = country;
       setChartLabels(newChartLabels);
-      console.log(newChartLabels);
 
       const newScenarioYear = [...scenarioYear];
       newScenarioYear[index] = '2020';
@@ -489,7 +526,40 @@ const sendQuery = async (index) => {
     ]
   };
 
+  /* const options = {
+    plugins: {
+      datalabels: {
+        display: true,
+        color: "black",
+        formatter: Math.round,
+        font: {
+          weight: 'bold'
+        },
+        align: "top",
+        anchor: "end"
+      },
+      legend: {
+        display: false
+      },
+      tooltips: {
+        callbacks: {
+           label: function(tooltipItem) {
+                  return tooltipItem.yLabel;
+           }
+        }
+      }
+    },
+  }; */
+
   const options = {
+    scales: {
+      x: {
+        stacked: true
+      },
+      y: {
+        stacked: true
+      }
+    },
     plugins: {
       datalabels: {
         display: true,
@@ -735,17 +805,8 @@ const sendQuery = async (index) => {
                   <Grid item xs={12}>
                     <Bar data={{
                               labels: chartLabels[index],
-                              datasets: [
-                                {
-                                  label: index,
-                                  backgroundColor: "lightblue",
-                                  borderColor: "rgba(120,99,132,1)",
-                                  borderWidth: 1,
-                                  hoverBackgroundColor: "rgba(255,99,132,0.4)",
-                                  hoverBorderColor: "rgba(255,99,132,1)",
-                                  data: chartData[index]
-                                }
-                              ]}} 
+                              datasets: chartData[index]
+                            }} 
                               options={options} width={100} height={40} />
                   </Grid>
                 </Grid>}
