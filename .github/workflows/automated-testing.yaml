@@ -97,12 +97,15 @@ jobs:
         run: |
           psql -h localhost -p 5432 -U postgres -c "CREATE SCHEMA IF NOT EXISTS sandbox" oedb
           psql -h localhost -p 5432 -U postgres -c "CREATE SCHEMA IF NOT EXISTS _sandbox" oedb
-      - name: OEO-Integration & Test data
+      - name: oeo & oeo-ext integration
         run: |
           mkdir -p ontologies/oeo/1/
           mkdir -p ontologies/oeo/1/imports
           mkdir -p ontologies/oeo/1/modules
           wget https://openenergy-platform.org/ontology/oeo/releases/oeo-full.owl -P ontologies/oeo/1/
+
+          mkdir -p ontologies/oeo-ext/
+          touch ontologies/oeo-ext/oeo_ext.owl
       - name: Collectstatic files & compress
         run: |
           cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
