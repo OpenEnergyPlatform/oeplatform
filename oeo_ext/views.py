@@ -7,7 +7,7 @@ from owlready2 import get_ontology
 from rdflib import Graph
 
 from oeo_ext.oekb.connection import oeo_owl
-from oeo_ext.utils import get_class_data, get_new_iri
+from oeo_ext.utils import get_new_iri
 from oeplatform.settings import ONTOLOGY_ROOT
 
 OEO_EXT_PATH = ONTOLOGY_ROOT / "oeo_ext/oeo_ext.owl"
@@ -48,7 +48,7 @@ class OeoExtPluginView(View, LoginRequiredMixin):
         print("post")
 
         new_class_iri = get_new_iri(ontox=oeo_ext_owl)
-        label_of_unit, classesUsed = get_class_data()
+        label_of_unit, classesUsed = None, {}
         lists = list(classesUsed.keys())
         class_definition = "( "
         for i in range(0, len(lists)):
@@ -66,7 +66,7 @@ class OeoExtPluginView(View, LoginRequiredMixin):
             NewClass.equivalent_to = [eval(class_definition)]
         oeo_ext_owl.save(file=OEO_EXT_PATH, format="rdfxml")
 
-        return render(request, "oeo_ext/partials/oeo-ext-plugin-ui.html")
+        return None
 
 
 def add_unit_element(request):
