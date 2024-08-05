@@ -70,7 +70,17 @@ class OeoExtPluginView(View, LoginRequiredMixin):
 
 
 def add_unit_element(request):
-    return render(request, "oeo_ext/partials/unit_element.html")
+    # unit_id = randint(0, 1000000)
+    unit_id = None
+    unit_id = request.session.get("unit_id_counter", 0)
+    # Increment the counter
+    unit_id += 1
+    # Save the new counter value back to the session
+    request.session["unit_id_counter"] = unit_id
+
+    return render(
+        request, "oeo_ext/partials/unit_element.html", context={"unit_id": str(unit_id)}
+    )
 
 
 # def search_units(request):
