@@ -41,52 +41,99 @@
 </div>
 
 <script>
-function updateResultExpression() {
-    let nominatorElements = document.querySelectorAll('#nominator-elements .unit-element');
-    let denominatorElements = document.querySelectorAll('#denominator-elements .unit-element');
+    document.addEventListener('htmx:configRequest', (event) => {
+        if (event.detail.elt.id === 'oeo-ext-form') {
+            handleFormData(event.detail);
+        }
+    });
 
-    let nominatorText = Array.from(nominatorElements).map(element => {
-        let name = element.querySelector('.unitName').value;
-        let type = element.querySelector('.unitType').value;
-        return `${name} (${type})`;
-    }).join(' + ');
+    function handleFormData(detail) {
+        const form = detail.elt;
+        const formData = new FormData(form);
+        const data = {
+            nominator: [],
+            denominator: [],
+            definition: formData.get('description')
+        };
 
-    let denominatorText = Array.from(denominatorElements).map(element => {
-        let name = element.querySelector('.unitName').value;
-        let type = element.querySelector('.unitType').value;
-        return `${name} (${type})`;
-    }).join(' + ');
-
-    let resultExpression = `
-        <div class="fraction">
-            <div class="nominator">${nominatorText}</div>
-            <div class="denominator">${denominatorText}</div>
-        </div>
-    `;
-
-    document.getElementById('result-expression').innerHTML = resultExpression;
-}
-
-document.addEventListener('htmx:afterSwap', (e) => {
-    if (e.detail.target.id === 'nominator-elements' || e.detail.target.id === 'denominator-elements') {
-        initializeUnitElement(e.detail.target);
-    }
-});
-
-function initializeUnitElement(parent) {
-    parent.querySelectorAll('.remove-element').forEach(button => {
-        button.addEventListener('click', function () {
-            this.closest('.unit-element').remove();
-            updateResultExpression();
+        document.querySelectorAll('#nominator-elements .unit-element').forEach((element, index) => {
+            data.nominator.push({
+                position: index + 1,
+                unitName: element.querySelector('.unitName').value,
+                unitType: element.querySelector('.unitType').value
+            });
         });
+
+        document.querySelectorAll('#denominator-elements .unit-element').forEach((element, index) => {
+            data.denominator.push({
+                position: index + 1,
+                unitName: element.querySelector('.unitName').value,
+                unitType: element.querySelector('.unitType').value
+            });
+        });
+
+        // Update request detail with the structured data
+        detail.parameters = {
+            csrfmiddlewaretoken: formData.get('csrfmiddlewaretoken'),
+            data: JSON.stringify(data)
+        };
+    }
+
+    function updateResultExpression() {
+        let nominatorElements = document.querySelectorAll('#nominator-elements .unit-element');
+        let denominatorElements = document.querySelectorAll('#denominator-elements .unit-element');
+
+        let nominatorText = Array.from(nominatorElements).map(element => {
+            let name = element.querySelector('.unitName').value;
+            let type = element.querySelector('.unitType').value;
+            return `${name} (${type})`;
+        }).join(' + ');
+
+        let denominatorText = Array.from(denominatorElements).map(element => {
+            let name = element.querySelector('.unitName').value;
+            let type = element.querySelector('.unitType').value;
+            return `${name} (${type})`;
+        }).join(' + ');
+
+        let resultExpression = `
+            <div class="fraction">
+                <div class="nominator">${nominatorText}</div>
+                <div class="denominator">${denominatorText}</div>
+            </div>
+        `;
+
+        document.getElementById('result-expression').innerHTML = resultExpression;
+    }
+
+    document.addEventListener('htmx:afterSwap', (e) => {
+        if (e.detail.target.id === 'nominator-elements' || e.detail.target.id === 'denominator-elements') {
+            initializeUnitElement(e.detail.target);
+        }
     });
 
-    parent.querySelectorAll('.unitName, .unitType').forEach(input => {
-        input.addEventListener('input', updateResultExpression);
-    });
-}
+    function initializeUnitElement(parent) {
+        parent.querySelectorAll('.remove-element').forEach(button => {
+            button.addEventListener('click', function () {
+                this.closest('.unit-element').remove();
+                updateResultExpression();
+            });
+        });
 
-initializeUnitElement(document); // Initialize existing elements
+        parent.querySelectorAll('.unitName, .unitType').forEach(input => {
+            input.addEventListener('input', updateResultExpression);
+        });
+    }
+
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     let nominatorIndex = 0;
+    //     let denominatorIndex = 0;
+    //     document.querySelector('#oeo-ext-form').addEventListener('submit', (event) => {
+    //         event.preventDefault();
+    //         handleSubmit(event.target);
+    //     });
+    // });
+
+    initializeUnitElement(document); // Initialize existing elements
 </script>
 
 <style>
