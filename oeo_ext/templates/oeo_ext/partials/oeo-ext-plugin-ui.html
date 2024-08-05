@@ -1,9 +1,25 @@
 {% load django_bootstrap5 %}
 
 <div class="htmxComponent">
-    <form id="oeo-ext-form" hx-post="{% url 'oeo_ext:oeo-ext-plugin-ui-create' %}" hx-target=".htmxComponent" hx-swap="outerHTML" class="needs-validation" novalidate>
+    <div class="result-section mt-4">
+        <h3>Result</h3>
+        <div id="result-expression">
+            <!-- Result expression will be displayed here -->
+        </div>
+    </div>
+    <hr>
+    <form class="htmxFormComponent" id="oeo-ext-form" hx-post="{% url 'oeo_ext:oeo-ext-plugin-ui-create' %}" hx-target=".htmxComponent" hx-swap="outerHTML" class="needs-validation" novalidate>
         {% csrf_token %}
-        
+        <div class="mb-2">
+            <label for="new_label" class="form-label">New Unit Label:</label>
+            <input name="new_label" class="form-control"></input>
+        </div>
+
+        <div class="mb-2">
+            <label for="description" class="form-label">Definition:</label>
+            <textarea name="description" class="form-control"></textarea>
+        </div>
+
         <div class="nominator-section mb-4">
             <h3>Nominator</h3>
             <div id="nominator-elements" class="mb-3">
@@ -19,21 +35,9 @@
             </div>
             <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#denominator-elements" hx-swap="beforeend">Add Denominator Unit</button>
         </div>
-
-        <div class="mb-2">
-            <label for="description" class="form-label">Definition:</label>
-            <textarea name="description" class="form-control"></textarea>
-        </div>
         
-        <button type="submit" class="btn btn-success">Save</button>
+        <button type="submit-form" class="btn btn-success">Save</button>
     </form>
-
-    <div class="result-section mt-4">
-        <h3>Result</h3>
-        <div id="result-expression">
-            <!-- Result expression will be displayed here -->
-        </div>
-    </div>
 </div>
 
 <script>
