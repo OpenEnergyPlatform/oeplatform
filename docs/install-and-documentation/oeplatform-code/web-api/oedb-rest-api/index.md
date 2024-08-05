@@ -4,7 +4,7 @@
 If you are looking for our former ReadTheDocs based documentation: We do not support it anymore and added a redirect to this page here.
 Migrating the outdated documentation and updating the content will take some time. Please revisit this page later again.
 
-    In the meantime we suggest you to have a look at our Courses & Tutorials available in the [Academy](https://openenergyplatform.github.io/academy/tutorials/).
+In the meantime we suggest you to have a look at our Courses & Tutorials available in the [Academy](https://openenergyplatform.github.io/academy/tutorials/).
 
 ## What the Rest-API offers
 

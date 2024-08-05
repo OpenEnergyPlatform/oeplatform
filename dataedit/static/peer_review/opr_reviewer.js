@@ -903,15 +903,13 @@ function updateTabClasses() {
 
     let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-    let allOk = true;
-    for (let j = 0; j < fields.length; j++) {
-      let fieldState = getFieldState(fields[j].id.replace('field_', ''));
-      if (fieldState !== 'ok') {
-        allOk = false;
-        break;
-      }
-    }
-    if (allOk) {
+    let allOkOrEmpty = fields.every(field => {
+      let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      let fieldState = getFieldState(field.id.replace('field_', ''));
+      return isEmptyValue(fieldValue) || fieldState === 'ok';
+    });
+
+    if (allOkOrEmpty) {
       tab.classList.add('status');
       tab.classList.add('status--done');
     } else {
@@ -919,6 +917,8 @@ function updateTabClasses() {
     }
   }
 }
+
+
 window.addEventListener('DOMContentLoaded', function() {
     updateTabClasses();
     updatePercentageDisplay() ;
@@ -967,12 +967,13 @@ function updateTabProgressIndicatorClasses() {
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
     let values = getAllFieldsAndValues();
 
-    let allOk = fieldsInTab.every((field, index) => {
-        let currentValue = values[index].fieldValue;
-        return isEmptyValue(currentValue) || field.classList.contains('field-ok');
+    let allOkOrEmpty = fieldsInTab.every((field, index) => {
+      let currentValue = values[index].fieldValue;
+      let fieldState = getFieldState(field.id.replace('field_', ''));
+      return isEmptyValue(currentValue) || fieldState === 'ok';
     });
 
-    if (allOk) {
+    if (allOkOrEmpty) {
       tab.classList.add('status--done');
     } else {
       tab.classList.add('status');
