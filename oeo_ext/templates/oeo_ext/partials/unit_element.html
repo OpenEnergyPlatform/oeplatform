@@ -5,7 +5,7 @@
     <div class="mb-2">
         <label for="unitName" class="form-label">Unit Name:</label>
         <div class="dropdown">
-            <input type="text" id="autocomplete" class="form-input unitName" autocomplete="off">
+            <input type="text" name="unitName-{{unit_id}}" id="autocomplete-{{unit_id}}" class="form-control unitName" autocomplete="off">
             <div id="dropdown-content" class="dropdown-content"></div>
         </div>
     </div>
@@ -22,61 +22,78 @@
     <button type="button" class="btn btn-danger remove-element mt-2">Remove</button>
 </div>
 
-<script src="{% static 'js/bootstrap-select.min.js' %}"></script>
 
 <script>
-document.addEventListener('htmx:load', function () {
-    document.querySelectorAll('.remove-element').forEach(button => {
-        button.addEventListener('click', function () {
-            this.closest('.unit-element').remove();
-            updateResultExpression();
+    // Function to initialize autocomplete and other dynamic elements
+    function initializeDynamicElements() {
+        document.querySelectorAll('.remove-element').forEach(button => {
+            button.addEventListener('click', function () {
+                this.closest('.unit-element').remove();
+                // available because this component is meant to be used together with
+                // the listing module oeo-ext-plugin-ui.html
+                updateResultExpression();
+            });
         });
+
+        document.querySelectorAll('.unitName, .unitType').forEach(input => {
+            input.addEventListener('input', updateResultExpression);
+        });
+
+        document.querySelectorAll('.unitName').forEach(input => {
+            input.addEventListener('keyup', function() {
+                const query = this.value;
+                if (query.length > 0) {
+                    // use static path here to always use the open (data seeded) endpoint for 
+                    // all (local, deployed) client executions
+                    fetch(`https://openenergyplatform.org/api/v0/oeo-search?query=${query}`, {
+                        mode: 'cors',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const dropdownContent = this.nextElementSibling;
+                        dropdownContent.innerHTML = '';
+                        data.docs.forEach(item => {
+                            const link = document.createElement('a');
+                            link.href = '#';
+                            link.textContent = String(item.label[0]).replaceAll("<B>", "").replaceAll("</B>", "");
+                            link.addEventListener('click', function(event) {
+                                event.preventDefault(); // Prevent the default action of the anchor tag
+                                input.value = this.textContent;
+                                dropdownContent.classList.remove('show');
+                                input.focus({ preventScroll: true }); // Focus without scrolling
+                                const inputEvent = new Event('input', { bubbles: true });
+                                input.dispatchEvent(inputEvent); // Trigger the input event
+                            });
+                            dropdownContent.appendChild(link);
+                        });
+                        dropdownContent.classList.add('show');
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+                } else {
+                    this.nextElementSibling.classList.remove('show');
+                }
+            });
+        });
+
+        document.addEventListener('click', function(event) {
+            const dropdowns = document.querySelectorAll('.dropdown-content');
+            dropdowns.forEach(dropdown => {
+                if (!event.target.closest('.dropdown')) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        });
+    }
+
+    // Event listener for initial HTMX load
+    document.addEventListener('htmx:load', function () {
+        initializeDynamicElements();
     });
 
-    document.querySelectorAll('.unitName, .unitType').forEach(input => {
-        input.addEventListener('input', updateResultExpression);
+    // Event listener for HTMX afterSwap
+    document.addEventListener('htmx:afterSwap', function (event) {
+        initializeDynamicElements();
     });
-
-    document.getElementById('autocomplete').addEventListener('keyup', function() {
-        const query = this.value;
-        if (query.length > 0) {
-            fetch(`https://openenergyplatform.org/api/v0/oeo-search?query=${query}`, {
-                mode: 'cors',
-            })
-            .then(response => response.json())
-            .then(data => {
-                const dropdownContent = document.getElementById('dropdown-content');
-                dropdownContent.innerHTML = '';
-                data.docs.forEach(item => {
-                    const link = document.createElement('a');
-                    link.href = '#';
-                    link.textContent = String(item.label[0]).replaceAll("<B>", "").replaceAll("</B>", "");
-                    link.addEventListener('click', function(event) {
-                        event.preventDefault(); // Prevent the default action of the anchor tag
-                        const input = document.getElementById('autocomplete');
-                        input.value = this.textContent;
-                        dropdownContent.classList.remove('show');
-                        input.focus({ preventScroll: true }); // Focus without scrolling
-                        const inputEvent = new Event('input', { bubbles: true });
-                        input.dispatchEvent(inputEvent); // Trigger the input event
-                    });
-                    dropdownContent.appendChild(link);
-                });
-                dropdownContent.classList.add('show');
-            })
-            .catch(error => console.error('Error fetching data:', error));
-        } else {
-            document.getElementById('dropdown-content').classList.remove('show');
-        }
-    });
-
-    document.addEventListener('click', function(event) {
-        const dropdownContent = document.getElementById('dropdown-content');
-        if (!event.target.closest('.dropdown')) {
-            dropdownContent.classList.remove('show');
-        }
-    });
-});
 </script>
 
 <style>
