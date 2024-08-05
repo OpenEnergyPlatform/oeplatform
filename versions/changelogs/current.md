@@ -8,6 +8,8 @@
 
 - The auto-select feature on the scenario bundle/scenario edit page now shows table resources from the scenario topic in the format of: "Metadata Table Title (table_name)" to harmonize the display of table resources also when displaying a bundle. Note: Existing resources must currently be updated manually. [(#1753)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1753)
 
+- Reviewer&Contributor page: calculation of percentage of progress of reviewed fields takes into account empty fields [(#1386)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1386)
+
 ## Features
 
 ## Bugs
