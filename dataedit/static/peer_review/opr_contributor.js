@@ -760,17 +760,21 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 function calculateOkPercentage(stateDict) {
-  let totalCount = Object.keys(stateDict).length;
+  let totalCount = 0;
   let okCount = 0;
 
   for (let key in stateDict) {
-    if (stateDict[key] === "ok") {
-      okCount++;
+    let fieldValue = $(document.getElementById(`field_${key}`)).find('.value').text().replace(/\s+/g, ' ').trim();
+    if (!isEmptyValue(fieldValue)) {
+      totalCount++;
+      if (stateDict[key] === "ok") {
+        okCount++;
+      }
     }
   }
-  return (okCount / totalCount) * 100;
-}
 
+  return totalCount === 0 ? 0 : (okCount / totalCount) * 100;
+}
 
 function updatePercentageDisplay() {
   const percentage = calculateOkPercentage(state_dict);

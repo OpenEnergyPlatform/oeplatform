@@ -933,18 +933,21 @@ function getTotalFieldCount() {
   return allFields.length;
 }
 
-
 function calculateOkPercentage(stateDict) {
-  let totalCount = getTotalFieldCount();
+  let totalCount = 0;
   let okCount = 0;
 
   for (let key in stateDict) {
-    if (stateDict[key] === "ok") {
-      okCount++;
+    let fieldValue = $(document.getElementById(`field_${key}`)).find('.value').text().replace(/\s+/g, ' ').trim();
+    if (!isEmptyValue(fieldValue)) {
+      totalCount++;
+      if (stateDict[key] === "ok") {
+        okCount++;
+      }
     }
   }
 
-  let percentage = (okCount / totalCount) * 100;
+  let percentage = totalCount === 0 ? 0 : (okCount / totalCount) * 100;
   return percentage.toFixed(2);
 }
 
