@@ -8,7 +8,7 @@ from rdflib.plugins.stores import sparqlstore
 # from datetime import date
 from SPARQLWrapper import SPARQLWrapper
 
-from oeo_ext.oekb.namespaces import bind_all_namespaces
+from oeo_ext.oeo_extended_store.namespaces import bind_all_namespaces
 from oeplatform.settings import (
     OEO_EXT_OWL_PATH,
     ONTOLOGY_ROOT,
@@ -36,10 +36,12 @@ oeo_owl = get_ontology(Ontology_URI_STR).load()
 ########################################################
 #                 oeo extended                      ####
 ########################################################
+oeo_ext_URI = OEO_EXT_OWL_PATH
+oeo_ext_URI_STR = oeo_ext_URI.as_posix()
 
 oeo_ext = Graph()
 oeo_ext.parse(OEO_EXT_OWL_PATH.as_uri())
-oeo_ext_owl = get_ontology(OEO_EXT_OWL_PATH.as_posix()).load()
+oeo_ext_owl = get_ontology(oeo_ext_URI_STR).load()
 
 
 ########################################################
