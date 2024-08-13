@@ -43,6 +43,9 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
+import { useRef } from 'react';
+import Tabs, { tabsClasses } from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 
 const ComparisonBoardMain = (props) => {
 
@@ -53,7 +56,8 @@ const ComparisonBoardMain = (props) => {
   const [selectedCriteria, setselectedCriteria] = useState(['Study descriptors', 'Scenario types', 'Study name']);
   const [alignment, setAlignment] = React.useState('Qualitative');
   const [sparqOutput, setSparqlOutput] = useState('');
-  const [scenarioYear, setScenarioYear] = React.useState(['2020']);
+  const [scenarioYear, setScenarioYear] = React.useState([]);
+  const [scenarioYears, setScenarioYears] = React.useState([]);
   const [chartData, setChartData] = React.useState([]);
   const [chartLabels, setChartLabels] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
@@ -70,121 +74,9 @@ const ComparisonBoardMain = (props) => {
   const [selectedOutputDatasets, setSelectedOutputDatasets] = React.useState([]);
   const [scenariosNamesInTables, setScenariosNamesInTables] = React.useState([]);
   const [scenariosInTables, setScenariosInTables] = React.useState([]);
+  const [barColors, setBarColors] = React.useState([]);
+  const chartRef = useRef(null);
 
-
-  const scenarios_disctionary = {
-    "OEO_00020310" : "without measures scenario (WOM)",
-    "OEO_00020311" : "with existing measures scenario (WEM)",
-    "OEO_00020312" : "with additional measures scenario (WAM)"
-  }
-  const getScenarios = async () => {
-    const { data } = await axios.get(conf.toep + `scenario-bundles/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
-    return data;
-  };
-
-  useEffect(() => {
-    getScenarios().then((data) => {
-      setScenarios(data);
-      const ScenariosInputTableNames = data.map(obj => obj.data.input_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
-      const allInputDatasets =  Array.from(new Set(ScenariosInputTableNames.flat()));
-
-      setInputTableNames(allInputDatasets);
-      
-      const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
-      const allOutputDatasets = [].concat(...ScenariosOutputTableNames);
-      setoutputTableNames(allOutputDatasets);
-
-    });
-  }, []);
-
-  const handleChangeView = (
-    event: React.MouseEvent<HTMLElement>,
-    newAlignment: string,
-  ) => {
-    newAlignment !== null && setAlignment(newAlignment);
-  };
-  
-  // 'http://oevkg:8080/sparql'
-
-  const Criteria = [
-    'Scenario abstract',
-    'Study name',
-    'Study abstract',
-    'Study descriptors',
-    'Scenario types',
-    'Regions',
-    'Interacting regions',
-    'Scenario years',
-    'Input datasets',
-    'Output datasets',
-  ];
-
-  const handleCriteria = (event) => {
-    if (event.target.checked) {
-      if (!selectedCriteria.includes(event.target.name)) {
-        setselectedCriteria([...selectedCriteria, event.target.name]);
-      }
-    } else {
-      const filteredCriteria = selectedCriteria.filter(i => i !== event.target.name);
-      setselectedCriteria(filteredCriteria);
-    }
-  }
-
-  const handleYearChange = (event, index) => {
-    const newScenarioYear = scenarioYear;
-    newScenarioYear[index] = event.target.value;
-    setScenarioYear(newScenarioYear);
-
-    const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index])
-
-    const country = filtered_output.map((obj) => obj.country_code.value.split('/').pop() );
-    const value = filtered_output.map((obj) => obj.value.value );
-
-    const categorieIDs = [];
-    for (let key in category_disctionary) {
-        if (selectedCategories.includes(category_disctionary[key])) {
-          categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
-        }
-    }
-    const colors = ['#caf270', '#45c490', '#008d93']
-
-    const country_labels = [];
-    const chart_data_category = categorieIDs.map((cat, idx) => {
-      const categorized =  {}
-      categorized['label'] = selectedCategories[idx];
-      categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
-      categorized['backgroundColor'] = colors[idx];
-
-      country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop() );
-      return categorized
-    });
-    
-
-
-    const newChartData = [...chartData];
-    //newChartData[index] = value ;
-    newChartData[index] = chart_data_category ;
-    setChartData(newChartData);
-
-    console.log(newChartData);
-
-    const newChartLabels = [...chartLabels];
-    //newChartLabels[index] = country;
-    newChartLabels[index] = country_labels[index];
-    setChartLabels(newChartLabels);
-
-  };
-
-  const ITEM_HEIGHT = 48;
-  const ITEM_PADDING_TOP = 8;
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        width: 250,
-      },
-    },
-  };
 
   const category_disctionary = {
     "OEO_00010038" : "1 Energy",
@@ -234,6 +126,121 @@ const ComparisonBoardMain = (props) => {
     "OEO_00010048" : "4 Land Use, Land-Use Change and Forestry",
     "OEO_00010189" : "4.A Forest land",
   };
+
+  const generateRandomColor = () => {
+    return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+  };
+  const randomColors = Array.from({ length: Object.keys(category_disctionary).length }, generateRandomColor);
+
+  const scenarios_disctionary = {
+    "OEO_00020310" : "without measures scenario (WOM)",
+    "OEO_00020311" : "with existing measures scenario (WEM)",
+    "OEO_00020312" : "with additional measures scenario (WAM)"
+  }
+  const getScenarios = async () => {
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
+    return data;
+  };
+
+  useEffect(() => {
+    getScenarios().then((data) => {
+      setScenarios(data);
+      const ScenariosInputTableNames = data.map(obj => obj.data.input_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
+      const allInputDatasets =  Array.from(new Set(ScenariosInputTableNames.flat()));
+
+      setInputTableNames(allInputDatasets);
+      
+      const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
+      const allOutputDatasets = [].concat(...ScenariosOutputTableNames);
+      setoutputTableNames(allOutputDatasets);
+
+      setBarColors(randomColors);
+
+    });
+  }, []);
+
+  const handleChangeView = (
+    event: React.MouseEvent<HTMLElement>,
+    newAlignment: string,
+  ) => {
+    newAlignment !== null && setAlignment(newAlignment);
+  };
+  
+  // 'http://oevkg:8080/sparql'
+
+  const Criteria = [
+    'Scenario abstract',
+    'Study name',
+    'Study abstract',
+    'Study descriptors',
+    'Scenario types',
+    'Regions',
+    'Interacting regions',
+    'Scenario years',
+    'Input datasets',
+    'Output datasets',
+  ];
+
+  const handleCriteria = (event) => {
+    if (event.target.checked) {
+      if (!selectedCriteria.includes(event.target.name)) {
+        setselectedCriteria([...selectedCriteria, event.target.name]);
+      }
+    } else {
+      const filteredCriteria = selectedCriteria.filter(i => i !== event.target.name);
+      setselectedCriteria(filteredCriteria);
+    }
+  }
+
+  const handleYearChange = (event: React.SyntheticEvent, newValue: number, index) => {
+
+    const newScenarioYear = scenarioYear;
+    newScenarioYear[index] = newValue;
+    setScenarioYear(newScenarioYear);
+
+    console.log(scenarioYear);
+
+    const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index])
+
+    const categorieIDs = [];
+    for (let key in category_disctionary) {
+        if (selectedCategories.includes(category_disctionary[key])) {
+          categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
+        }
+    }
+    const country_labels = [];
+    const chart_data_category = categorieIDs.map((cat, idx) => {
+      const categorized =  {}
+      categorized['label'] = selectedCategories[idx];
+      categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
+      categorized['backgroundColor'] = barColors[idx];
+
+      country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop()).sort();
+      return categorized
+    });
+    
+
+    const newChartData = [...chartData];
+    newChartData[index] = chart_data_category ;
+    setChartData(newChartData);
+
+    const newChartLabels = [...chartLabels];
+    newChartLabels[index] = country_labels[index];
+    setChartLabels(newChartLabels);
+
+  };
+
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
 
   const handleScenariosChange = (event: SelectChangeEvent<typeof category>) => {
     const {
@@ -400,53 +407,50 @@ const ComparisonBoardMain = (props) => {
     
 
   };
-  
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-  
-  const data_tabels = [`"eu_leg_data_2023_eea"`];
+    
 
-  selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
-  selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
-
-  const scenario_years =  `"2020", "2025", "2030", "2035", "2040"`;
-  
-  const categories = [];
-  for (let key in category_disctionary) {
-      if (selectedCategories.includes(category_disctionary[key])) {
-        categories.push('oeo:' + key);
-      }
-  }
-
-  const scenariosFilter = [];
-  for (let key in scenarios_disctionary) {
-      if (selectedScenarios.includes(scenarios_disctionary[key])) {
-        scenariosFilter.push('oeo:' + key);
-      }
-  }
-
-  const main_query = `PREFIX obo: <http://purl.obolibrary.org/obo/>
-  PREFIX ou: <http://opendata.unex.es/def/ontouniversidad#>
-  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-  PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
-  PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
-
-  SELECT DISTINCT  ?value ?country_code ?year ?category ?gas WHERE {
-    ?s oeo:OEO_00020221 ?country_code .
-    ?s oeo:OEO_00020224 ?year .
-    ?s oeo:OEO_00140178 ?value .
-    ?s oeo:OEO_00000504 ?table_name .
-    ?s oeo:has_sector_division ?category .
-    ?s oeo:OEO_00020226 ?scenario .
-    ?s oeo:OEO_00010121 ?gas
-    FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories})  && ?gas IN (${selectedGas.map(e => '"' + e + '"').toString()}) ) .
-  }`;
 
 
 const sendQuery = async (index) => {
-    console.log(main_query);
     setLoading(true);
+
+    const data_tabels = [`"eu_leg_data_2023_eea"`];
+
+    selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
+    selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
+    
+    const categories = [];
+    for (let key in category_disctionary) {
+        if (selectedCategories.includes(category_disctionary[key])) {
+          categories.push('oeo:' + key);
+        }
+    }
+  
+    const scenariosFilter = [];
+    for (let key in scenarios_disctionary) {
+        if (selectedScenarios.includes(scenarios_disctionary[key])) {
+          scenariosFilter.push('oeo:' + key);
+        }
+    }
+  
+    const main_query = `PREFIX obo: <http://purl.obolibrary.org/obo/>
+    PREFIX ou: <http://opendata.unex.es/def/ontouniversidad#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
+  
+    SELECT DISTINCT  ?value ?country_code ?year ?category ?gas WHERE {
+      ?s oeo:OEO_00020221 ?country_code .
+      ?s oeo:OEO_00020224 ?year .
+      ?s oeo:OEO_00140178 ?value .
+      ?s oeo:OEO_00000504 ?table_name .
+      ?s oeo:has_sector_division ?category .
+      ?s oeo:OEO_00020226 ?scenario .
+      ?s oeo:OEO_00010121 ?gas
+      FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories})  && ?gas IN (${selectedGas.map(e => '"' + e + '"').toString()}) ) .
+    }`;
+
     const response = await axios.post(
       conf.obdi, 
       main_query,
@@ -461,9 +465,32 @@ const sendQuery = async (index) => {
 
       const sparqOutput = response.data.results.bindings;
 
+
+      const distinctYears = [];
+      sparqOutput.map((obj) => {
+        if (!distinctYears.includes(obj.year.value)) {
+          distinctYears.push(obj.year.value)
+        }
+      } );
+
+
+      const newScenarioYears = scenarioYears;
+      newScenarioYears[index] = distinctYears.sort();
+      setScenarioYears(newScenarioYears);
+
+
       setSparqlOutput(sparqOutput);
+
+
+      const newScenarioYear = scenarioYear;
+      newScenarioYear[index] = scenarioYears[index][0].toString();
+      setScenarioYear(newScenarioYear);
+
+      console.log(scenarioYear[index]);
       
-      const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index])
+      const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
+      console.log(filtered_output);
+
       const country = filtered_output.map((obj) => obj.country_code.value.split('/').pop() );
 
       const categorieIDs = [];
@@ -472,37 +499,46 @@ const sendQuery = async (index) => {
             categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
           }
       }
-      const colors = ['#caf270', '#45c490', '#008d93']
+
+      const country_labels = [];
       const chart_data_category = categorieIDs.map((cat, index) => {
         const categorized =  {}
         categorized['label'] = selectedCategories[index];
         categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
-        categorized['backgroundColor'] = colors[index];
+        categorized['backgroundColor'] = barColors[index];
+
+        country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop()).sort();
         return categorized
       });
-      console.log(chart_data_category);
-      const value = filtered_output.map((obj) => obj.value.value );
 
-      const newChartData = [...chartData];
-      //newChartData[index] = value ;
+      console.log(country_labels);
+
+      const newChartData = chartData;
       newChartData[index] = chart_data_category ;
       setChartData(newChartData);
-      console.log(chartData);
 
-      const newChartLabels = [...chartLabels];
-      newChartLabels[index] = country;
+      const newChartLabels = chartLabels;
+      newChartLabels[index] = country_labels[index];
       setChartLabels(newChartLabels);
 
-      const newScenarioYear = [...scenarioYear];
-      newScenarioYear[index] = '2020';
-      setScenarioYear(newScenarioYear);
+     
+
       
       setLoading(false);
       setShowChart(true);
 
+      console.log(scenarioYear, chartData, chartLabels);
+
+      if (chartRef.current) {
+        chartRef.current.update(); 
+      }
+
     }).catch(error => {
         console.error('API Error:', error.message);
     }).finally(() => {
+      if (chartRef.current) {
+        chartRef.current.update(); 
+      }
     });
   }
 
@@ -773,41 +809,41 @@ const sendQuery = async (index) => {
                     ))}
                   </Select>
                 </FormControl>
-                <Button sx={{ m: 1, width: 70 }} size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Go</Button>
+                <Button sx={{ m: 1, width: 70 }} size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Submit</Button>
               </Grid>
               <Grid item xs={12}>
                 {showChart == true && <Grid container>
                   <Grid item xs={12}>
-                    <FormControl fullWidth margin="dense">
-                      <FormLabel ></FormLabel>
-                      <RadioGroup
-                        row
-                        name="row-radio-buttons-group"
-                        onChange={(e) => handleYearChange(e, index)}
-                        defaultValue="2020"
-                      >
-                        <Box sx={{ 
-                          display: 'flex', 
-                          paddingLeft: '20px',
-                          paddingRight: '20px',
-                          justifyContent: 'space-between',
-                          width: '100%'
-                        }}>
-                          <FormControlLabel value="2020" control={<Radio />} label="2020" />
-                          <FormControlLabel value="2025" control={<Radio />} label="2025" />
-                          <FormControlLabel value="2030" control={<Radio />} label="2030" />
-                          <FormControlLabel value="2035" control={<Radio />} label="2035" />
-                          <FormControlLabel value="2040" control={<Radio />} label="2040" />
-                        </Box>
-                        </RadioGroup>
-                      </FormControl>
+                      <Box sx={{ bgcolor: 'background.paper' }}>
+                        <Tabs
+                          onChange={(e, number) => handleYearChange(e, number, index)}
+                          value={scenarioYear[index]}
+                          variant="scrollable"
+                          scrollButtons
+                          aria-label="Scenario years"
+                          sx={{
+                            [`& .${tabsClasses.scrollButtons}`]: {
+                              '&.Mui-disabled': { opacity: 0.3 },
+                            },
+                          }}
+                        >
+                          {
+                            scenarioYears[index].map((year, idx)  => (
+                              <Tab label={year} key={year} value={scenarioYears[index][idx]}/>
+                            ) )
+                          }
+    
+                        </Tabs>
+                      </Box>
                   </Grid>
                   <Grid item xs={12}>
                     <Bar data={{
                               labels: chartLabels[index],
                               datasets: chartData[index]
                             }} 
-                              options={options} width={100} height={40} />
+                        options={options} width={100} height={40} 
+                        ref={chartRef}
+                        />
                   </Grid>
                 </Grid>}
                 </Grid>
