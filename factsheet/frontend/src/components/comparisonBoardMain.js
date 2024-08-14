@@ -193,14 +193,19 @@ const ComparisonBoardMain = (props) => {
   }
 
   const handleYearChange = (event: React.SyntheticEvent, newValue: number, index) => {
+    setLoading(true);
 
-    const newScenarioYear = scenarioYear;
-    newScenarioYear[index] = newValue;
-    setScenarioYear(newScenarioYear);
+   
 
-    console.log(scenarioYear);
+    const distinctTables = [];
+      sparqOutput.map((obj) => {
+        if (!distinctTables.includes(obj.table_name.value)) {
+          distinctTables.push(obj.table_name.value)
+        }
+      } );
 
-    const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index])
+    console.log(distinctTables);
+    console.log(distinctTables.length === 1);
 
     const categorieIDs = [];
     for (let key in category_disctionary) {
@@ -208,27 +213,162 @@ const ComparisonBoardMain = (props) => {
           categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
         }
     }
-    const country_labels = [];
-    const chart_data_category = categorieIDs.map((cat, idx) => {
-      const categorized =  {}
-      categorized['label'] = selectedCategories[idx];
-      categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
-      categorized['backgroundColor'] = barColors[idx];
 
-      country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop());
-      return categorized
-    });
+    if (distinctTables.length === 1) {
+        console.log('only one table selected!');
+
+        const distinctYears = [];
+        sparqOutput.map((obj) => {
+          if (!distinctYears.includes(obj.year.value)) {
+            distinctYears.push(obj.year.value)
+          }
+        } );
     
+        const newScenarioYears = scenarioYears;
+        newScenarioYears[index] = distinctYears.sort();
+        setScenarioYears(newScenarioYears);
+  
+  
+        const newScenarioYear = scenarioYear;
+        newScenarioYear[index] = scenarioYears[index][0].toString();
+        setScenarioYear(newScenarioYear);
 
-    const newChartData = [...chartData];
-    newChartData[index] = chart_data_category ;
-    setChartData(newChartData);
+        const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
 
-    const newChartLabels = [...chartLabels];
-    newChartLabels[index] = country_labels[index];
-    setChartLabels(newChartLabels);
+        const country_labels = [];
+        const chart_data_category = categorieIDs.map((cat, index) => {
+          const categorized =  {}
+          categorized['label'] = selectedCategories[index];
+          categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
+          categorized['backgroundColor'] = barColors[index];
 
+          country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop());
+          return categorized
+        });
+
+        const newChartData = [...chartData];
+        newChartData[index] = chart_data_category ;
+        setChartData(newChartData);
+
+        const newChartLabels = [...chartLabels];
+        newChartLabels[index] = country_labels[index];
+        setChartLabels(newChartLabels);
+    }
+    else if (distinctTables.length > 1) {
+      console.log('two or more tables for comparisons');
+
+      const distinctYears = [];
+      sparqOutput.map((obj) => {
+        if (!distinctYears.includes(obj.year.value)) {
+          distinctYears.push(obj.year.value)
+        }
+      } );
+  
+      const newScenarioYears = scenarioYears;
+      newScenarioYears[index] = distinctYears.sort();
+      setScenarioYears(newScenarioYears);
+
+
+      const newScenarioYear = scenarioYear;
+      newScenarioYear[index] = scenarioYears[index][0].toString();
+      setScenarioYear(newScenarioYear);
+
+      const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
+
+      const groupedItems = divideByTableNameValue(filtered_output);
+      console.log(groupedItems);
+
+
+      const transformGroupedItems = (groupedItems) => {
+        const result = {};
+        let mainIndex = 0;
+      
+        for (let group in groupedItems) {
+          const filtered_output = groupedItems[group].sort((a, b) => {
+            const countryA = a.country_code.value.split('/').pop();
+            const countryB = b.country_code.value.split('/').pop();
+            
+            return countryA.localeCompare(countryB);
+          });
+
+          console.log(filtered_output);
+          const country_labels = [];
+          
+          const chart_data_category = categorieIDs.map((cat, idx) => {
+            const categorized = {};
+            categorized['label'] = selectedCategories[index];
+            categorized['data'] = filtered_output
+              .filter((obj) => obj.category.value === cat)
+              .map(el => el.value.value);
+            categorized['backgroundColor'] = barColors[mainIndex];
+            categorized['stack'] = mainIndex;
+            
+            country_labels[index] = filtered_output
+              .filter((obj) => obj.category.value === cat)
+              .map(el => el.country_code.value.split('/').pop());
+              
+            return categorized;
+          });
+          
+          result[group] = {
+            chart_data_category: chart_data_category,
+            country_labels: country_labels,
+          };
+
+          mainIndex++;
+        }
+      
+        return result;
+      };
+
+      const transformedGroupedItems = transformGroupedItems(groupedItems);
+      console.log(transformedGroupedItems); 
+
+      const datasets = [];
+      const labels = [];
+
+      for (let group in transformedGroupedItems) {
+        
+        const { chart_data_category, country_labels } = transformedGroupedItems[group];
+
+        chart_data_category.forEach((categoryData, catIndex) => {
+          const dataset = {};
+          dataset['label'] = group ;
+          dataset['data'] = categoryData.data;
+          dataset['backgroundColor'] = categoryData.backgroundColor;
+          dataset['stack'] = categoryData.stack;
+          datasets.push(dataset);
+          labels.push(country_labels[catIndex]);
+        });
+      }
+      
+      console.log(datasets);
+      console.log(labels);
+
+
+      const newChartData = [...chartData];
+      newChartData[index] = datasets ;
+      setChartData(newChartData);
+  
+      const newChartLabels = [...chartLabels];
+      newChartLabels[index] = labels[0];
+      setChartLabels(newChartLabels);
+
+    }
+      
+    const newScenarioYear = scenarioYear;
+    newScenarioYear[index] = newValue;
+    setScenarioYear(newScenarioYear);
+
+    console.log(scenarioYear);
+    console.log(scenarioYears);
+
+    setLoading(false);
+    setShowChart(true);
+
+   
   };
+
 
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -468,6 +608,8 @@ const sendQuery = async (index) => {
     ).then(response => {
 
       const sparqOutput = response.data.results.bindings;
+      setSparqlOutput(sparqOutput);
+
 
       const distinctTables = [];
       sparqOutput.map((obj) => {
@@ -475,9 +617,6 @@ const sendQuery = async (index) => {
           distinctTables.push(obj.table_name.value)
         }
       } );
-
-      
-      console.log(distinctTables.length === 1);
 
       const categorieIDs = [];
       for (let key in category_disctionary) {
@@ -499,16 +638,14 @@ const sendQuery = async (index) => {
           const newScenarioYears = scenarioYears;
           newScenarioYears[index] = distinctYears.sort();
           setScenarioYears(newScenarioYears);
+          console.log('-----+++++++++++', scenarioYears);
     
-          setSparqlOutput(sparqOutput);
     
           const newScenarioYear = scenarioYear;
           newScenarioYear[index] = scenarioYears[index][0].toString();
           setScenarioYear(newScenarioYear);
 
           const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
-
-         
 
           const country_labels = [];
           const chart_data_category = categorieIDs.map((cat, index) => {
@@ -521,12 +658,11 @@ const sendQuery = async (index) => {
             return categorized
           });
 
-          const newChartData = chartData;
+          const newChartData = [...chartData];
           newChartData[index] = chart_data_category ;
           setChartData(newChartData);
-          console.log(chartData);
 
-          const newChartLabels = chartLabels;
+          const newChartLabels = [...chartLabels];
           newChartLabels[index] = country_labels[index];
           setChartLabels(newChartLabels);
       }
@@ -543,6 +679,7 @@ const sendQuery = async (index) => {
         const newScenarioYears = scenarioYears;
         newScenarioYears[index] = distinctYears.sort();
         setScenarioYears(newScenarioYears);
+        console.log('-----+++++++++++', scenarioYears);
   
         setSparqlOutput(sparqOutput);
   
@@ -551,10 +688,8 @@ const sendQuery = async (index) => {
         setScenarioYear(newScenarioYear);
 
         const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
-        console.log(filtered_output);
 
         const groupedItems = divideByTableNameValue(filtered_output);
-        console.log(groupedItems);
 
 
         const transformGroupedItems = (groupedItems) => {
@@ -569,7 +704,6 @@ const sendQuery = async (index) => {
               return countryA.localeCompare(countryB);
             });
 
-            console.log(filtered_output);
             const country_labels = [];
             
             const chart_data_category = categorieIDs.map((cat, idx) => {
@@ -600,7 +734,6 @@ const sendQuery = async (index) => {
         };
 
         const transformedGroupedItems = transformGroupedItems(groupedItems);
-        console.log(transformedGroupedItems); 
 
         const datasets = [];
         const labels = [];
@@ -623,14 +756,14 @@ const sendQuery = async (index) => {
         console.log(datasets);
         console.log(labels);
 
-        const newChartData = chartData;
+        const newChartData = [...chartData];
         newChartData[index] = datasets ;
         setChartData(newChartData);
-        console.log(chartData);
-
-        const newChartLabels = chartLabels;
+    
+        const newChartLabels = [...chartLabels];
         newChartLabels[index] = labels[0];
         setChartLabels(newChartLabels);
+
       }
       
 
