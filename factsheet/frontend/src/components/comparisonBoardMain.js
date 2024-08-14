@@ -382,11 +382,7 @@ const ComparisonBoardMain = (props) => {
     sendGetCategoriesQuery();
     sendGetGasQuery();
 
-      
-    const addVisualization = uid => {
-      addVisualizationRows(visualizationRows + 1);
-    };
-    
+
   };
 
   const handleOutputDatasetsChange = (event: SelectChangeEvent<typeof selectedOutputDatasets>) => {
@@ -400,21 +396,27 @@ const ComparisonBoardMain = (props) => {
     sendGetScenariosQuery();
     sendGetCategoriesQuery();
     sendGetGasQuery();
-
-    const addVisualization = uid => {
-      addVisualizationRows(visualizationRows + 1);
-    };
-    
-
   };
     
 
 
+  function divideByTableNameValue(items) {
+    return items.reduce((acc, obj) => {
+      const tableNameValue = obj.table_name.value;
+      
+      if (!acc[tableNameValue]) {
+        acc[tableNameValue] = [];
+      }
+  
+      acc[tableNameValue].push(obj);
+      return acc;
+    }, {});
+  }
 
 const sendQuery = async (index) => {
     setLoading(true);
 
-    const data_tabels = [`"eu_leg_data_2023_eea"`];
+    const data_tabels = [`"eu_leg_data_2023_eea"`, `"dupe_eu_leg_data_2023_eea"`];
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -440,7 +442,7 @@ const sendQuery = async (index) => {
     PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
     PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
   
-    SELECT DISTINCT  ?value ?country_code ?year ?category ?gas WHERE {
+    SELECT DISTINCT ?s ?value ?country_code ?year ?category ?gas ?table_name WHERE {
       ?s oeo:OEO_00020221 ?country_code .
       ?s oeo:OEO_00020224 ?year .
       ?s oeo:OEO_00140178 ?value .
@@ -450,6 +452,8 @@ const sendQuery = async (index) => {
       ?s oeo:OEO_00010121 ?gas
       FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories})  && ?gas IN (${selectedGas.map(e => '"' + e + '"').toString()}) ) .
     }`;
+
+    console.log(main_query);
 
     const response = await axios.post(
       conf.obdi, 
@@ -465,33 +469,15 @@ const sendQuery = async (index) => {
 
       const sparqOutput = response.data.results.bindings;
 
-
-      const distinctYears = [];
+      const distinctTables = [];
       sparqOutput.map((obj) => {
-        if (!distinctYears.includes(obj.year.value)) {
-          distinctYears.push(obj.year.value)
+        if (!distinctTables.includes(obj.table_name.value)) {
+          distinctTables.push(obj.table_name.value)
         }
       } );
 
-
-      const newScenarioYears = scenarioYears;
-      newScenarioYears[index] = distinctYears.sort();
-      setScenarioYears(newScenarioYears);
-
-
-      setSparqlOutput(sparqOutput);
-
-
-      const newScenarioYear = scenarioYear;
-      newScenarioYear[index] = scenarioYears[index][0].toString();
-      setScenarioYear(newScenarioYear);
-
-      console.log(scenarioYear[index]);
       
-      const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
-      console.log(filtered_output);
-
-      const country = filtered_output.map((obj) => obj.country_code.value.split('/').pop() );
+      console.log(distinctTables.length === 1);
 
       const categorieIDs = [];
       for (let key in category_disctionary) {
@@ -500,49 +486,158 @@ const sendQuery = async (index) => {
           }
       }
 
-      const country_labels = [];
-      const chart_data_category = categorieIDs.map((cat, index) => {
-        const categorized =  {}
-        categorized['label'] = selectedCategories[index];
-        categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
-        categorized['backgroundColor'] = barColors[index];
+      if (distinctTables.length === 1) {
+          console.log('only one table selected!');
 
-        country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop()).sort();
-        return categorized
-      });
-
-      console.log(country_labels);
-
-      const newChartData = chartData;
-      newChartData[index] = chart_data_category ;
-      setChartData(newChartData);
-
-      const newChartLabels = chartLabels;
-      newChartLabels[index] = country_labels[index];
-      setChartLabels(newChartLabels);
-
+          const distinctYears = [];
+          sparqOutput.map((obj) => {
+            if (!distinctYears.includes(obj.year.value)) {
+              distinctYears.push(obj.year.value)
+            }
+          } );
      
+          const newScenarioYears = scenarioYears;
+          newScenarioYears[index] = distinctYears.sort();
+          setScenarioYears(newScenarioYears);
+    
+          setSparqlOutput(sparqOutput);
+    
+          const newScenarioYear = scenarioYear;
+          newScenarioYear[index] = scenarioYears[index][0].toString();
+          setScenarioYear(newScenarioYear);
 
+          const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
+
+         
+
+          const country_labels = [];
+          const chart_data_category = categorieIDs.map((cat, index) => {
+            const categorized =  {}
+            categorized['label'] = selectedCategories[index];
+            categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
+            categorized['backgroundColor'] = barColors[index];
+
+            country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop()).sort();
+            return categorized
+          });
+
+          const newChartData = chartData;
+          newChartData[index] = chart_data_category ;
+          setChartData(newChartData);
+          console.log(chartData);
+
+          const newChartLabels = chartLabels;
+          newChartLabels[index] = country_labels[index];
+          setChartLabels(newChartLabels);
+      }
+      else if (distinctTables.length > 1) {
+        console.log('two or more tables for comparisons');
+
+        const distinctYears = [];
+        sparqOutput.map((obj) => {
+          if (!distinctYears.includes(obj.year.value)) {
+            distinctYears.push(obj.year.value)
+          }
+        } );
+    
+        const newScenarioYears = scenarioYears;
+        newScenarioYears[index] = distinctYears.sort();
+        setScenarioYears(newScenarioYears);
+  
+        setSparqlOutput(sparqOutput);
+  
+        const newScenarioYear = scenarioYear;
+        newScenarioYear[index] = scenarioYears[index][0].toString();
+        setScenarioYear(newScenarioYear);
+
+        const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
+        console.log(filtered_output);
+
+        const groupedItems = divideByTableNameValue(filtered_output);
+        console.log(groupedItems);
+
+
+        const transformGroupedItems = (groupedItems) => {
+          const result = {};
+          let mainIndex = 0;
+        
+          for (let group in groupedItems) {
+            const filtered_output = groupedItems[group];
+            const country_labels = [];
+            
+            const chart_data_category = categorieIDs.map((cat, idx) => {
+              const categorized = {};
+              categorized['label'] = selectedCategories[index];
+              categorized['data'] = filtered_output
+                .filter((obj) => obj.category.value === cat)
+                .map(el => el.value.value);
+              categorized['backgroundColor'] = barColors[mainIndex];
+              categorized['stack'] = mainIndex;
+              
+              country_labels[index] = filtered_output
+                .filter((obj) => obj.category.value === cat)
+                .map(el => el.country_code.value.split('/').pop())
+                .sort();
+                
+              return categorized;
+            });
+            
+            result[group] = {
+              chart_data_category: chart_data_category,
+              country_labels: country_labels,
+            };
+
+            mainIndex++;
+          }
+        
+          return result;
+        };
+
+        const transformedGroupedItems = transformGroupedItems(groupedItems);
+        console.log(transformedGroupedItems); 
+
+        const datasets = [];
+        const labels = [];
+
+        for (let group in transformedGroupedItems) {
+          
+          const { chart_data_category, country_labels } = transformedGroupedItems[group];
+  
+          chart_data_category.forEach((categoryData, catIndex) => {
+            const dataset = {};
+            dataset['label'] = group ;
+            dataset['data'] = categoryData.data;
+            dataset['backgroundColor'] = categoryData.backgroundColor;
+            dataset['stack'] = categoryData.stack;
+            datasets.push(dataset);
+            labels.push(country_labels[catIndex]);
+          });
+        }
+        
+        console.log(datasets);
+
+        const newChartData = chartData;
+        newChartData[index] = datasets ;
+        setChartData(newChartData);
+        console.log(chartData);
+
+        const newChartLabels = chartLabels;
+        newChartLabels[index] = labels[0];
+        setChartLabels(newChartLabels);
+      }
       
+
       setLoading(false);
       setShowChart(true);
-
-      console.log(scenarioYear, chartData, chartLabels);
-
-      if (chartRef.current) {
-        chartRef.current.update(); 
-      }
 
     }).catch(error => {
         console.error('API Error:', error.message);
     }).finally(() => {
-      if (chartRef.current) {
-        chartRef.current.update(); 
-      }
+      
     });
   }
 
-  const addVisualization = uid => {
+  const addVisualization = (index) => {
     addVisualizationRows(visualizationRows + 1);
   };
 
@@ -699,7 +794,7 @@ const sendQuery = async (index) => {
            <Grid item xs={12}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Tooltip title={selectedOutputDatasets.length !== 0 ? "Comparison between input datasets and output datasets is not possible. Please make sure there is no selected output datsets" : ""}>
+                <Tooltip title={selectedOutputDatasets.length !== 0 ? "Comparison between input datasets and output datasets is not possible. Please make sure there is no selected output datasets" : ""}>
                   <FormControl sx={{ m: 1, width: '48%' }} size="small">
                     <InputLabel id="demo-simple-select-label">Input table(s)</InputLabel>
                     <Select
@@ -723,7 +818,7 @@ const sendQuery = async (index) => {
                     </Select>
                   </FormControl>
                 </Tooltip>
-                <Tooltip title={selectedInputDatasets.length !== 0 ? "Comparison between input datasets and output datasets is not possible. Please make sure there is no selected input datsets" : ""}>
+                <Tooltip title={selectedInputDatasets.length !== 0 ? "Comparison between input datasets and output datasets is not possible. Please make sure there is no selected input datasets" : ""}>
                   <FormControl sx={{ m: 1, width: '48%' }} size="small">
                     <InputLabel id="demo-simple-select-label">Output table(s)</InputLabel>
                     <Select
@@ -861,7 +956,7 @@ const sendQuery = async (index) => {
                 <IconButton
                     color="primary"
                     aria-label="add"
-                    onClick={() => addVisualization()}
+                    onClick={(index) => addVisualization(index)}
                   >
                   <AddIcon />
                 </IconButton>
