@@ -215,7 +215,7 @@ const ComparisonBoardMain = (props) => {
       categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
       categorized['backgroundColor'] = barColors[idx];
 
-      country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop()).sort();
+      country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop());
       return categorized
     });
     
@@ -517,7 +517,7 @@ const sendQuery = async (index) => {
             categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
             categorized['backgroundColor'] = barColors[index];
 
-            country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop()).sort();
+            country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop());
             return categorized
           });
 
@@ -562,7 +562,14 @@ const sendQuery = async (index) => {
           let mainIndex = 0;
         
           for (let group in groupedItems) {
-            const filtered_output = groupedItems[group];
+            const filtered_output = groupedItems[group].sort((a, b) => {
+              const countryA = a.country_code.value.split('/').pop();
+              const countryB = b.country_code.value.split('/').pop();
+              
+              return countryA.localeCompare(countryB);
+            });
+
+            console.log(filtered_output);
             const country_labels = [];
             
             const chart_data_category = categorieIDs.map((cat, idx) => {
@@ -576,8 +583,7 @@ const sendQuery = async (index) => {
               
               country_labels[index] = filtered_output
                 .filter((obj) => obj.category.value === cat)
-                .map(el => el.country_code.value.split('/').pop())
-                .sort();
+                .map(el => el.country_code.value.split('/').pop());
                 
               return categorized;
             });
@@ -615,6 +621,7 @@ const sendQuery = async (index) => {
         }
         
         console.log(datasets);
+        console.log(labels);
 
         const newChartData = chartData;
         newChartData[index] = datasets ;
