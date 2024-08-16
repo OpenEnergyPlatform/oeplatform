@@ -1,4 +1,4 @@
-FROM python:3.10.14
+FROM python:3.11.9
 
 RUN apt-get update \
     && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi-py3\
