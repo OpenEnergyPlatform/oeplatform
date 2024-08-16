@@ -11,7 +11,7 @@ This is a short introduction into the usage of Docker with Open Energy Platform 
 
 > Use this, if you want to use Open Energy Platform.
 
-This can be used, if you just want to host your own OEP installation or test API scipts or something similar, that should not be done with the public instance. We use `docker compose` to deploy more than one container.
+This can be used, if you just want to host your own OEP installation or test API scripts or something similar, that should not be done with the public instance. We use `docker compose` to deploy more than one container.
 
 Docker Compose is a tool for defining and running multi-container Docker applications. Our application consists of two different containers, a database container and an application container. We need both containers to get a fully working oeplatform deployment. `docker-compose.yaml` contains a definition for an isolated environment to run both containers.
 
