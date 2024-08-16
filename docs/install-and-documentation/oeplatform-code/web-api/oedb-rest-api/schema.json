@@ -1,9 +1,58 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "title": "Your Project API",
-    "version": "1.0.0"
+    "title": "OpenEnergy Platform API",
+    "version": "0.1.0",
+    "description": "The API of the OpenEnergy Platform to use/modify your data on the platform.\n"
   },
+  "servers": [
+    {
+      "url": "https://openenergyplatform.org",
+      "description": "Official open energy platform"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Your local instance of the oeplatform (if running)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "factsheet",
+      "description": "All endpoints to get factsheet data."
+    },
+    {
+      "name": "datasets",
+      "description": "Get all datasets."
+    },
+    {
+      "name": "schema-meta",
+      "description": "Endpoints in regard to the meta data of the schema"
+    },
+    {
+      "name": "schema-sequences",
+      "description": "Endpoints in regard to sequences in schemas."
+    },
+    {
+      "name": "schema-table",
+      "description": "All endpoints regarding the table in the scenario."
+    },
+    {
+      "name": "advanced",
+      "description": "Endpoints for ajax functions (?)"
+    },
+    {
+      "name": "advanced-twophase",
+      "description": "t.b.a."
+    },
+    {
+      "name": "advanced-connection",
+      "description": "t.b.a."
+    },
+    {
+      "name": "advanced-cursor",
+      "description": "t.b.a."
+    }
+  ],
   "paths": {
     "/api/v0/schema/{schema}/tables/{table}/": {
       "get": {
@@ -39,7 +88,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "post": {
         "operationId": "createTable",
@@ -87,7 +138,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "put": {
         "operationId": "updateTable",
@@ -135,7 +188,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "delete": {
         "operationId": "destroyTable",
@@ -165,7 +220,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/meta/": {
@@ -205,7 +262,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-meta"
+        ]
       },
       "post": {
         "operationId": "createMetadata",
@@ -253,7 +312,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-meta"
+        ]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/columns/{column}": {
@@ -299,7 +360,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "post": {
         "operationId": "createColumn",
@@ -356,7 +419,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "put": {
         "operationId": "updateColumn",
@@ -413,7 +478,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/id/{id}/column/{column}/": {
@@ -468,7 +535,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "post": {
         "operationId": "createFields",
@@ -534,7 +603,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "put": {
         "operationId": "updateFields",
@@ -600,7 +671,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/indexes/{index}": {
@@ -646,7 +719,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "post": {
         "operationId": "createIndex",
@@ -703,7 +778,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "put": {
         "operationId": "updateIndex",
@@ -760,7 +837,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/rows/{row_id}": {
@@ -806,7 +885,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "post": {
         "operationId": "createRows",
@@ -863,7 +944,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "put": {
         "operationId": "updateRows",
@@ -920,7 +1003,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "delete": {
         "operationId": "destroyRows",
@@ -959,7 +1044,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/rows/new": {
@@ -999,10 +1086,12 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "post": {
-        "operationId": "createRows",
+        "operationId": "createRow",
         "description": "",
         "parameters": [
           {
@@ -1047,10 +1136,12 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "put": {
-        "operationId": "updateRows",
+        "operationId": "updateRow",
         "description": "",
         "parameters": [
           {
@@ -1095,10 +1186,12 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       },
       "delete": {
-        "operationId": "destroyRows",
+        "operationId": "destroyRow",
         "description": "",
         "parameters": [
           {
@@ -1125,12 +1218,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-table"
+        ]
       }
     },
     "/api/v0/advanced/connection/close_all": {
       "get": {
-        "operationId": "listCloseAlls",
+        "operationId": "connection.closeAll",
         "description": "",
         "parameters": [],
         "responses": {
@@ -1146,7 +1241,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-connection"
+        ]
       }
     },
     "/api/v0/factsheet/frameworks/": {
@@ -1169,7 +1266,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "factsheet"
+        ]
       }
     },
     "/api/v0/factsheet/models/": {
@@ -1192,7 +1291,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "factsheet"
+        ]
       }
     },
     "/api/v0/datasets/list_all/scenario/": {
@@ -1215,7 +1316,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "datasets"
+        ]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/move/{to_schema}/": {
@@ -1274,12 +1377,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-meta"
+        ]
       }
     },
     "/api/v0/advanced/search": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXSearch",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1305,12 +1410,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/insert": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXInsert",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1336,12 +1443,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/delete": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXDelete",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1367,12 +1476,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/update": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXUpdate",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1398,12 +1509,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/info": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXInfo",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1429,12 +1542,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/has_schema": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "hasSchema",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1460,12 +1575,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/has_table": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "hasTable",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1491,12 +1608,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/has_sequence": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXCheckSequence",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1522,12 +1641,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/has_type": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXHasType",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1553,12 +1674,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/get_schema_names": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXSchemaNames",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1584,12 +1707,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/get_table_names": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXTableNames",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1615,12 +1740,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/get_view_names": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXViewNames",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1646,12 +1773,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/get_view_definition": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXViewDefinition",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1677,12 +1806,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/get_columns": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "getColumns",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1708,12 +1839,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/get_pk_constraint": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXGetPKConstraint",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1739,12 +1872,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/get_foreign_keys": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXGetForeignKeys",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1770,12 +1905,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/get_indexes": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXGetIndexes",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1801,12 +1938,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/get_unique_constraints": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "createAJAXGetUniqueConstraint",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1832,12 +1971,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/connection/open": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "connection.open",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1863,12 +2004,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-connection"
+        ]
       }
     },
     "/api/v0/advanced/connection/close": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "connection.close",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1894,12 +2037,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-connection"
+        ]
       }
     },
     "/api/v0/advanced/connection/commit": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "connection.commit",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1925,12 +2070,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-connection"
+        ]
       }
     },
     "/api/v0/advanced/connection/rollback": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "connection.rollback",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1956,12 +2103,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-connection"
+        ]
       }
     },
     "/api/v0/advanced/cursor/open": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "cursor.open",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1987,12 +2136,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-cursor"
+        ]
       }
     },
     "/api/v0/advanced/cursor/close": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "cursor.close",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2018,12 +2169,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-cursor"
+        ]
       }
     },
     "/api/v0/advanced/cursor/fetch_one": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "cursor.fetchOne",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2049,12 +2202,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-cursor"
+        ]
       }
     },
     "/api/v0/advanced/cursor/fetch_many": {
       "post": {
-        "operationId": "createFetch",
+        "operationId": "cursor.fetchMany",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2080,12 +2235,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-cursor"
+        ]
       }
     },
     "/api/v0/advanced/cursor/fetch_all": {
       "post": {
-        "operationId": "createFetch",
+        "operationId": "cursor.fetchAll",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2111,12 +2268,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-cursor"
+        ]
       }
     },
     "/api/v0/advanced/set_isolation_level": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "setIsolationLevel",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2142,12 +2301,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/get_isolation_level": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "getIsolationLevel",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2173,12 +2334,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced"
+        ]
       }
     },
     "/api/v0/advanced/do_begin_twophase": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "doBeginTwophase",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2204,12 +2367,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-twophase"
+        ]
       }
     },
     "/api/v0/advanced/do_prepare_twophase": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "doPrepareTwophase",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2235,12 +2400,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-twophase"
+        ]
       }
     },
     "/api/v0/advanced/do_rollback_twophase": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "doRollbackTwophase",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2266,12 +2433,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-twophase"
+        ]
       }
     },
     "/api/v0/advanced/do_commit_twophase": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "doCommitTwophase",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2297,12 +2466,14 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-twophase"
+        ]
       }
     },
     "/api/v0/advanced/do_recover_twophase": {
       "post": {
-        "operationId": "createAJAX_",
+        "operationId": "doRecoverTwophase",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -2328,7 +2499,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "advanced-twophase"
+        ]
       }
     },
     "/api/v0/schema/{schema}/sequences/{sequence}/": {
@@ -2378,7 +2551,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-sequences"
+        ]
       },
       "delete": {
         "operationId": "destroySequence",
@@ -2408,7 +2583,9 @@
             "description": ""
           }
         },
-        "tags": ["api"]
+        "tags": [
+          "schema-sequences"
+        ]
       }
     }
   },
@@ -2437,7 +2614,9 @@
             "readOnly": true
           }
         },
-        "required": ["model_name"]
+        "required": [
+          "model_name"
+        ]
       },
       "Energymodel": {
         "type": "object",
@@ -2462,7 +2641,9 @@
             "readOnly": true
           }
         },
-        "required": ["model_name"]
+        "required": [
+          "model_name"
+        ]
       },
       "ScenarioDataTables": {
         "type": "object",
@@ -2480,7 +2661,9 @@
             "readOnly": true
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       }
     }
   }
