@@ -1,5 +1,4 @@
 
-version: "3.9"
 services:
   oeplatform:
     image: "ghcr.io/openenergyplatform/oeplatform:latest"
