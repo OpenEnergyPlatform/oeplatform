@@ -116,7 +116,7 @@ If you followed this documentation, you can skip the entire `Setup Your Database
 If you want to build the oeplatform docker image yourself, e.g. after you've changed the code, you can do this by running the following command in the main directory of this repository.
 
 ```shell
-docker build -t oeplatform -f docker/Dockerfile .
+docker build -t ghcr.io/openenergyplatform/oeplatform -f docker/Dockerfile .
 ```
 
 ## Further Information
