@@ -524,7 +524,7 @@ function renderSummaryPageFields() {
       row.appendChild(tdFieldCategory);
 
       let tdFieldId = document.createElement('td');
-      tdFieldId.textContent = item.field_id;
+      tdFieldId.textContent = item.fieldName;
       row.appendChild(tdFieldId);
 
       let tdFieldValue = document.createElement('td');
