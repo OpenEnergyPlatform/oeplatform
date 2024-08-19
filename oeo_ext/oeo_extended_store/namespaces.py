@@ -1,4 +1,4 @@
-from rdflib.namespace import Namespace
+from rdflib.namespace import OWL, RDF, XSD, Namespace
 
 # TODO- Alot of hardcoded URL, transfer to settings or other config
 OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
@@ -10,6 +10,9 @@ NPG = Namespace("http://ns.nature.com/terms/")
 SCHEMA = Namespace("https://schema.org/")
 OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
 DBO = Namespace("http://dbpedia.org/ontology/")
+RDF = RDF
+OWL = OWL
+XSD = XSD
 
 
 def bind_all_namespaces(graph):
