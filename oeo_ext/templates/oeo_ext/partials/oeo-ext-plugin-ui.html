@@ -10,20 +10,12 @@
     <hr>
     <form class="htmxFormComponent" id="oeo-ext-form" hx-post="{% url 'oeo_ext:oeo-ext-plugin-ui-create' %}" hx-target=".htmxComponent" hx-swap="outerHTML" class="needs-validation" novalidate>
         {% csrf_token %}
-        <div class="mb-2">
-            <label for="new_label" class="form-label">New Unit Label:</label>
-            <input name="new_label" class="form-control"></input>
-        </div>
-
-        <div class="mb-2">
-            <label for="description" class="form-label">Definition:</label>
-            <textarea name="description" class="form-control"></textarea>
-        </div>
 
         <div class="nominator-section mb-4">
-            <h3>Nominator</h3>
+            <h3>Numerator</h3>
             <div id="nominator-elements" class="mb-3">
                 <!-- Elements will be added here -->
+                
             </div>
             <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#nominator-elements" hx-swap="beforeend">Add Nominator Unit</button>
         </div>
@@ -32,11 +24,24 @@
             <h3>Denominator</h3>
             <div id="denominator-elements" class="mb-3">
                 <!-- Elements will be added here -->
+
             </div>
             <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#denominator-elements" hx-swap="beforeend">Add Denominator Unit</button>
         </div>
+
+        <div class="mb-2">
+            <label for="unitLabel" class="form-label">Optional - Unit Label:</label>
+            {{ form.unitLabel }}
+            <div class="invalid-feedback">{{ form.unitLabel.errors }}</div>
+        </div>
+
+        <div class="mb-2">
+            <label for="definition" class="form-label">Optional - Definition:</label>
+            {{ form.definition }}
+            <div class="invalid-feedback">{{ form.definition.errors }}</div>
+        </div>
         
-        <button type="submit-form" class="btn btn-success">Save</button>
+        <button type="submit" class="btn btn-success">Save</button>
     </form>
 </div>
 
@@ -53,7 +58,8 @@
         const data = {
             nominator: [],
             denominator: [],
-            definition: formData.get('description')
+            definition: formData.get('description'),
+            unitLabel: formData.get('new_label')
         };
 
         document.querySelectorAll('#nominator-elements .unit-element').forEach((element, index) => {
@@ -131,6 +137,36 @@
     //         event.preventDefault();
     //         handleSubmit(event.target);
     //     });
+    // });
+
+    // document.addEventListener('htmx:afterRequest', function (event) {
+    //     if (event.detail.xhr.status === 400) {
+    //         let response = JSON.parse(event.detail.xhr.responseText);
+    //         if (!response.success) {
+    //             for (const [field, message] of Object.entries(response.errors)) {
+    //                 let errorDiv = document.getElementById(`${field}_error`);
+    //                 if (errorDiv) {
+    //                     errorDiv.innerText = message;
+    //                     errorDiv.style.display = 'block';
+    //                 }
+    //                 let inputField = document.getElementById(field);
+    //                 if (inputField) {
+    //                     inputField.classList.add('is-invalid');
+    //                 }
+    //             }
+    //         }
+    //     } else {
+    //         // Clear previous errors if any
+    //         let errorFields = document.querySelectorAll('.invalid-feedback');
+    //         errorFields.forEach(function (field) {
+    //             field.style.display = 'none';
+    //             field.innerText = '';
+    //         });
+    //         let inputFields = document.querySelectorAll('.form-control');
+    //         inputFields.forEach(function (field) {
+    //             field.classList.remove('is-invalid');
+    //         });
+    //     }
     // });
 
     initializeUnitElement(document); // Initialize existing elements
