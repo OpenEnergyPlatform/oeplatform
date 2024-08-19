@@ -424,6 +424,8 @@ function renderSummaryPageFields() {
   const missingFields = [];
   const emptyFields = [];
 
+  const processedFields = new Set();
+
   if (state_dict && Object.keys(state_dict).length > 0) {
     const fields = document.querySelectorAll('.field');
     for (let field of fields) {
@@ -432,15 +434,16 @@ function renderSummaryPageFields() {
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
       const fieldName = field_id.split('.').pop();
+      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
       if (isEmptyValue(fieldValue)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
       } else if (fieldState === 'ok') {
         acceptedFields.push({ fieldName, fieldValue, fieldCategory });
-      } else if (fieldState === 'suggestion') {
-        suggestingFields.push({ fieldName, fieldValue, fieldCategory });
-      } else if (fieldState === 'rejected') {
-        rejectedFields.push({ fieldName, fieldValue, fieldCategory });
+        processedFields.add(uniqueFieldIdentifier);
+      } else {
+        missingFields.push({ fieldName, fieldValue, fieldCategory });
+        processedFields.add(uniqueFieldIdentifier);
       }
     }
   }
@@ -451,7 +454,11 @@ function renderSummaryPageFields() {
     const fieldState = review.fieldReview.state;
     const fieldCategory = review.category;
     const fieldName = review.key.split('.').pop();
+    const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
+    if (processedFields.has(uniqueFieldIdentifier)) {
+      continue; // Skipp fields that have already been processed from state_dict
+    }
 
     if (isEmptyValue(fieldValue)) {
       emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
@@ -480,12 +487,14 @@ function renderSummaryPageFields() {
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
       const fieldName = field_id.split('.').pop();
-      if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
+      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
+
+      if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
         missingFields.push({ fieldName, fieldValue, fieldCategory });
+        processedFields.add(uniqueFieldIdentifier);
       }
     }
   }
-
 
   // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
@@ -495,6 +504,7 @@ function renderSummaryPageFields() {
       summaryContainer.firstChild.remove();
     }
   }
+
   function generateTable(data) {
     let table = document.createElement('table');
     table.className = 'table review-summary';
@@ -539,15 +549,14 @@ function renderSummaryPageFields() {
     return table;
   }
 
-
-    function updateSummaryTable() {
+  function updateSummaryTable() {
     clearSummaryTable();
     let allData = [];
-    allData.push(...missingFields.map((item) => ({...item, fieldStatus: 'Missing'})));
-    allData.push(...acceptedFields.map((item) => ({...item, fieldStatus: 'Accepted'})));
-    allData.push(...suggestingFields.map((item) => ({...item, fieldStatus: 'Suggested'})));
-    allData.push(...rejectedFields.map((item) => ({...item, fieldStatus: 'Rejected'})));
-    allData.push(...emptyFields.map((item) => ({...item, fieldStatus: 'Empty'})));
+    allData.push(...missingFields.map((item) => ({ ...item, fieldStatus: 'Missing' })));
+    allData.push(...acceptedFields.map((item) => ({ ...item, fieldStatus: 'Accepted' })));
+    allData.push(...suggestingFields.map((item) => ({ ...item, fieldStatus: 'Suggested' })));
+    allData.push(...rejectedFields.map((item) => ({ ...item, fieldStatus: 'Rejected' })));
+    allData.push(...emptyFields.map((item) => ({ ...item, fieldStatus: 'Empty' })));
 
     let table = generateTable(allData);
     summaryContainer.appendChild(table);
@@ -556,6 +565,7 @@ function renderSummaryPageFields() {
   updateSummaryTable();
   updateTabProgressIndicatorClasses();
 }
+
 
 /**
  * Creates an HTML list of fields with their categories

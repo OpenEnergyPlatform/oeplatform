@@ -351,6 +351,8 @@ function renderSummaryPageFields() {
   const missingFields = [];
   const emptyFields = [];
 
+  const processedFields = new Set();
+
   if (state_dict && Object.keys(state_dict).length > 0) {
     const fields = document.querySelectorAll('.field');
     for (let field of fields) {
@@ -359,10 +361,13 @@ function renderSummaryPageFields() {
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
       const fieldName = field_id.split('.').pop();
+      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
       if (isEmptyValue(fieldValue)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
+        processedFields.add(uniqueFieldIdentifier);
       } else if (fieldState === 'ok') {
         acceptedFields.push({ fieldName, fieldValue, fieldCategory });
+        processedFields.add(uniqueFieldIdentifier);
       }
     }
   }
@@ -374,6 +379,12 @@ function renderSummaryPageFields() {
     const isRejected = review.fieldReview.some((fieldReview) => fieldReview.state === 'rejected');
     const fieldCategory = review.category;
     const fieldName = review.key.split('.').pop();
+    const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
+
+    if (processedFields.has(uniqueFieldIdentifier)) {
+      continue; // Skipp fields that have already been processed from state_dict
+    }
+
 
     if (isEmptyValue(fieldValue)) {
       emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
@@ -400,11 +411,13 @@ function renderSummaryPageFields() {
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
       const fieldName = field_id.split('.').pop();
+      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
-      if (isEmptyValue(fieldValue)) {
+      if (isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
       } else if (!found && fieldState !== 'ok') {
         missingFields.push({ fieldName, fieldValue, fieldCategory });
+        processedFields.add(uniqueFieldIdentifier);
       }
     }
   }
@@ -742,8 +755,6 @@ window.addEventListener('DOMContentLoaded', updateTabClasses);
 /**
  * Hide and show revier controles once the user clicks the summary tab
  */
-console.log('Script is running...');
-
 document.addEventListener('DOMContentLoaded', function() {
   // console.log('DOM fully loaded and parsed');
 
@@ -756,9 +767,6 @@ document.addEventListener('DOMContentLoaded', function() {
   ];
   const reviewContent = document.querySelector(".review__content");
 
-  console.log('Summary Tab:', summaryTab);
-  console.log('Other Tabs:', otherTabs);
-  console.log('Review Content:', reviewContent);
 
   if (summaryTab && reviewContent) {
     summaryTab.addEventListener('click', function() {
