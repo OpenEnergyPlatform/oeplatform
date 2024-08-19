@@ -43,9 +43,8 @@ oeo_ext = Graph()
 oeo_ext.parse(OEO_EXT_OWL_PATH.as_uri())
 oeo_ext_owl = get_ontology(oeo_ext_URI_STR).load()
 
-
 ########################################################
-#           oeo/oeo_ext SPARQL endpoints               #
+#                   oeo SPARQL endpoints               #
 ########################################################
 
 rdfdb = RDF_DATABASES["knowledge"]
@@ -62,6 +61,13 @@ oekb_oeo = Graph(oeo_store, identifier=default)
 # ---- import this in other modules
 oekb_with_namespaces = bind_all_namespaces(oekb_oeo)
 
+########################################################
+#               oeo_ext SPARQL endpoints               #
+########################################################
+# Note: This is not used for now ... updating the search
+# index of LEOP is more performant of done form triple store
+# reading from owl file can get time consuming
+
 rdfdb = RDF_DATABASES["oeo_ext"]
 oeo_ext_query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
 oeo_ext_update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
@@ -74,4 +80,4 @@ oeo_ext_store.open((oeo_ext_query_endpoint, oeo_ext_update_endpoint))
 oekb_oeo_ext = Graph(oeo_ext_store, identifier=default)
 
 # ---- import this in other modules
-oekb_with_namespaces = bind_all_namespaces(oekb_oeo_ext)
+oeo_ext_with_namespaces = bind_all_namespaces(oekb_oeo_ext)
