@@ -1634,8 +1634,8 @@ def get_all_factsheets(request, *args, **kwargs):
     for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
         uid = str(s).split("/")[-1]
         element = {}
-        acronym = oekg.value(s, DC.acronym)
-        study_name = oekg.value(s, OEKG["has_full_name"])
+        acronym = remove_non_printable(oekg.value(s, DC.acronym))
+        study_name = remove_non_printable(oekg.value(s, OEKG["has_full_name"]))
         abstract = oekg.value(s, DC.abstract)
         element["uid"] = uid
         element["acronym"] = remove_non_printable(acronym) if acronym != None else ""  # noqa
