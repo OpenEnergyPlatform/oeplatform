@@ -6,7 +6,7 @@ from ontology import views
 
 urlpatterns = [
     # oeo-extended
-    path("oeo-extended/", views.OeoExtendedFileServe.as_view()),
+    path("oeox/", views.OeoExtendedFileServe.as_view()),
     url(r"^$", views.OntologyVersion.as_view()),
     url(
         "partial/page-content/",
