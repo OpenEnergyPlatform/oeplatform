@@ -683,19 +683,20 @@ const sendQuery = async (index) => {
           setScenarioYear(newScenarioYear);
 
           const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
-
           const groupedItems = divideByTableNameValue(filtered_output);
 
 
           const transformGroupedItems = (groupedItems) => {
+            const total_num_of_colors =  Object.keys(groupedItems).length + categorieIDs.length
+            const groupedRandomColors = Array.from({ length: total_num_of_colors }, generateRandomColor);
             const result = {};
             let mainIndex = 0;
+            let colorIndex = 0;
           
             for (let group in groupedItems) {
               const filtered_output = groupedItems[group].sort((a, b) => {
                 const countryA = a.country_code.value.split('/').pop();
                 const countryB = b.country_code.value.split('/').pop();
-                
                 return countryA.localeCompare(countryB);
               });
 
@@ -707,13 +708,15 @@ const sendQuery = async (index) => {
                 categorized['data'] = filtered_output
                   .filter((obj) => obj.category.value === cat)
                   .map(el => el.value.value);
-                categorized['backgroundColor'] = barColors[mainIndex];
+                console.log(colorIndex);
+                categorized['backgroundColor'] = groupedRandomColors[colorIndex];
                 categorized['stack'] = mainIndex;
                 
                 country_labels[index] = filtered_output
                   .filter((obj) => obj.category.value === cat)
                   .map(el => el.country_code.value.split('/').pop());
                   
+                colorIndex++;
                 return categorized;
               });
               
