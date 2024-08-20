@@ -1,14 +1,17 @@
 FROM python:3.10.14
 
 RUN apt-get update \
-    && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi-py3\
+    && apt-get install -y apache2 apache2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-
 COPY requirements.txt /app/requirements.txt
+
 RUN pip install -r requirements.txt
+
+RUN pip install mod_wsgi
+RUN mod_wsgi-express module-config >> /etc/apache2/apache2.conf
 
 COPY ./docker/apache2.conf /etc/apache2/conf-enabled/oeplatform.conf
 COPY . /app
