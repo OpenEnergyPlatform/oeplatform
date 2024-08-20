@@ -17,15 +17,15 @@
   ],
   "tags": [
     {
-      "name": "factsheet",
+      "name": "Factsheet",
       "description": "All endpoints to get factsheet data."
     },
     {
-      "name": "datasets",
+      "name": "Datasets",
       "description": "Get all datasets."
     },
     {
-      "name": "schema-meta",
+      "name": "Schema: meta",
       "description": "Endpoints in regard to the meta data of the schema"
     },
     {
@@ -33,23 +33,23 @@
       "description": "Endpoints in regard to sequences in schemas."
     },
     {
-      "name": "schema-table",
+      "name": "Schema: table",
       "description": "All endpoints regarding the table in the scenario."
     },
     {
-      "name": "advanced",
+      "name": "Advanced",
       "description": "Endpoints for ajax functions (?)"
     },
     {
-      "name": "advanced-twophase",
+      "name": "Advanced: Two phase",
       "description": "t.b.a."
     },
     {
-      "name": "advanced-connection",
+      "name": "Advanced: Connection",
       "description": "t.b.a."
     },
     {
-      "name": "advanced-cursor",
+      "name": "Advanced: Cursor",
       "description": "t.b.a."
     }
   ],
@@ -89,7 +89,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "post": {
@@ -139,7 +139,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "put": {
@@ -189,7 +189,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "delete": {
@@ -221,7 +221,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       }
     },
@@ -263,7 +263,7 @@
           }
         },
         "tags": [
-          "schema-meta"
+          "Schema: meta"
         ]
       },
       "post": {
@@ -313,7 +313,7 @@
           }
         },
         "tags": [
-          "schema-meta"
+          "Schema: meta"
         ]
       }
     },
@@ -361,7 +361,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "post": {
@@ -420,7 +420,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "put": {
@@ -479,7 +479,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       }
     },
@@ -536,7 +536,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "post": {
@@ -604,7 +604,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "put": {
@@ -672,7 +672,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       }
     },
@@ -720,7 +720,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "post": {
@@ -779,7 +779,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "put": {
@@ -838,7 +838,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       }
     },
@@ -886,7 +886,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "post": {
@@ -945,7 +945,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "put": {
@@ -1004,7 +1004,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "delete": {
@@ -1045,7 +1045,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       }
     },
@@ -1087,7 +1087,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "post": {
@@ -1137,7 +1137,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "put": {
@@ -1187,7 +1187,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       },
       "delete": {
@@ -1219,7 +1219,7 @@
           }
         },
         "tags": [
-          "schema-table"
+          "Schema: table"
         ]
       }
     },
@@ -1242,7 +1242,7 @@
           }
         },
         "tags": [
-          "advanced-connection"
+          "Advanced: Connection"
         ]
       }
     },
@@ -1267,7 +1267,7 @@
           }
         },
         "tags": [
-          "factsheet"
+          "Factsheet"
         ]
       }
     },
@@ -1292,7 +1292,7 @@
           }
         },
         "tags": [
-          "factsheet"
+          "Factsheet"
         ]
       }
     },
@@ -1317,7 +1317,7 @@
           }
         },
         "tags": [
-          "datasets"
+          "Datasets"
         ]
       }
     },
@@ -1378,7 +1378,7 @@
           }
         },
         "tags": [
-          "schema-meta"
+          "Schema: meta"
         ]
       }
     },
@@ -1411,7 +1411,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1444,7 +1444,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1477,7 +1477,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1510,7 +1510,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1543,7 +1543,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1576,7 +1576,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1609,7 +1609,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1642,7 +1642,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1675,7 +1675,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1708,7 +1708,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1741,7 +1741,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1774,7 +1774,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1807,7 +1807,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1840,7 +1840,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1873,7 +1873,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1906,7 +1906,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1939,7 +1939,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -1972,7 +1972,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -2005,7 +2005,7 @@
           }
         },
         "tags": [
-          "advanced-connection"
+          "Advanced: Connection"
         ]
       }
     },
@@ -2038,7 +2038,7 @@
           }
         },
         "tags": [
-          "advanced-connection"
+          "Advanced: Connection"
         ]
       }
     },
@@ -2071,7 +2071,7 @@
           }
         },
         "tags": [
-          "advanced-connection"
+          "Advanced: Connection"
         ]
       }
     },
@@ -2104,7 +2104,7 @@
           }
         },
         "tags": [
-          "advanced-connection"
+          "Advanced: Connection"
         ]
       }
     },
@@ -2137,7 +2137,7 @@
           }
         },
         "tags": [
-          "advanced-cursor"
+          "Advanced: Cursor"
         ]
       }
     },
@@ -2170,7 +2170,7 @@
           }
         },
         "tags": [
-          "advanced-cursor"
+          "Advanced: Cursor"
         ]
       }
     },
@@ -2203,7 +2203,7 @@
           }
         },
         "tags": [
-          "advanced-cursor"
+          "Advanced: Cursor"
         ]
       }
     },
@@ -2236,7 +2236,7 @@
           }
         },
         "tags": [
-          "advanced-cursor"
+          "Advanced: Cursor"
         ]
       }
     },
@@ -2269,7 +2269,7 @@
           }
         },
         "tags": [
-          "advanced-cursor"
+          "Advanced: Cursor"
         ]
       }
     },
@@ -2302,7 +2302,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -2335,7 +2335,7 @@
           }
         },
         "tags": [
-          "advanced"
+          "Advanced"
         ]
       }
     },
@@ -2368,7 +2368,7 @@
           }
         },
         "tags": [
-          "advanced-twophase"
+          "Advanced: Two phase"
         ]
       }
     },
@@ -2401,7 +2401,7 @@
           }
         },
         "tags": [
-          "advanced-twophase"
+          "Advanced: Two phase"
         ]
       }
     },
@@ -2434,7 +2434,7 @@
           }
         },
         "tags": [
-          "advanced-twophase"
+          "Advanced: Two phase"
         ]
       }
     },
@@ -2467,7 +2467,7 @@
           }
         },
         "tags": [
-          "advanced-twophase"
+          "Advanced: Two phase"
         ]
       }
     },
@@ -2500,7 +2500,7 @@
           }
         },
         "tags": [
-          "advanced-twophase"
+          "Advanced: Two phase"
         ]
       }
     },
