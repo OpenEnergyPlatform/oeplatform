@@ -415,7 +415,7 @@ function renderSummaryPageFields() {
 
       if (isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
-      } else if (!found && fieldState !== 'ok') {
+      } else if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue) && !processedFields.add(uniqueFieldIdentifier)) {
         missingFields.push({ fieldName, fieldValue, fieldCategory });
         processedFields.add(uniqueFieldIdentifier);
       }
