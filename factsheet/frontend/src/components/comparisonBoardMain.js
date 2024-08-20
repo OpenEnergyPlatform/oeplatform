@@ -46,6 +46,9 @@ import AddIcon from '@mui/icons-material/Add';
 import { useRef } from 'react';
 import Tabs, { tabsClasses } from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 
 const ComparisonBoardMain = (props) => {
 
@@ -76,6 +79,7 @@ const ComparisonBoardMain = (props) => {
   const [scenariosInTables, setScenariosInTables] = React.useState([]);
   const [barColors, setBarColors] = React.useState([]);
   const chartRef = useRef(null);
+  const [openEmptyResultDialog, setOpenEmptyResultDialog] = React.useState(false);
 
 
   const category_disctionary = {
@@ -204,8 +208,6 @@ const ComparisonBoardMain = (props) => {
         }
       } );
 
-    console.log(distinctTables);
-    console.log(distinctTables.length === 1);
 
     const categorieIDs = [];
     for (let key in category_disctionary) {
@@ -215,7 +217,6 @@ const ComparisonBoardMain = (props) => {
     }
 
     if (distinctTables.length === 1) {
-        console.log('only one table selected!');
 
         const distinctYears = [];
         sparqOutput.map((obj) => {
@@ -255,7 +256,6 @@ const ComparisonBoardMain = (props) => {
         setChartLabels(newChartLabels);
     }
     else if (distinctTables.length > 1) {
-      console.log('two or more tables for comparisons');
 
       const distinctYears = [];
       sparqOutput.map((obj) => {
@@ -291,7 +291,6 @@ const ComparisonBoardMain = (props) => {
             return countryA.localeCompare(countryB);
           });
 
-          console.log(filtered_output);
           const country_labels = [];
           
           const chart_data_category = categorieIDs.map((cat, idx) => {
@@ -322,7 +321,6 @@ const ComparisonBoardMain = (props) => {
       };
 
       const transformedGroupedItems = transformGroupedItems(groupedItems);
-      console.log(transformedGroupedItems); 
 
       const datasets = [];
       const labels = [];
@@ -359,9 +357,6 @@ const ComparisonBoardMain = (props) => {
     const newScenarioYear = scenarioYear;
     newScenarioYear[index] = newValue;
     setScenarioYear(newScenarioYear);
-
-    console.log(scenarioYear);
-    console.log(scenarioYears);
 
     setLoading(false);
     setShowChart(true);
@@ -538,7 +533,12 @@ const ComparisonBoardMain = (props) => {
     sendGetGasQuery();
   };
     
-
+  const handleEmptyResultMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenEmptyResultDialog(false);
+  };
 
   function divideByTableNameValue(items) {
     return items.reduce((acc, obj) => {
@@ -556,7 +556,7 @@ const ComparisonBoardMain = (props) => {
 const sendQuery = async (index) => {
     setLoading(true);
 
-    const data_tabels = [];
+    const data_tabels = [`"eu_leg_data_2023_eea"`];
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -610,36 +610,73 @@ const sendQuery = async (index) => {
       const sparqOutput = response.data.results.bindings;
       setSparqlOutput(sparqOutput);
 
+      if (sparqOutput.length !== 0) {
 
-      const distinctTables = [];
-      sparqOutput.map((obj) => {
-        if (!distinctTables.includes(obj.table_name.value)) {
-          distinctTables.push(obj.table_name.value)
-        }
-      } );
-
-      const categorieIDs = [];
-      for (let key in category_disctionary) {
-          if (selectedCategories.includes(category_disctionary[key])) {
-            categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
+        const distinctTables = [];
+        sparqOutput.map((obj) => {
+          if (!distinctTables.includes(obj.table_name.value)) {
+            distinctTables.push(obj.table_name.value)
           }
-      }
+        } );
 
-      if (distinctTables.length === 1) {
-          console.log('only one table selected!');
+        const categorieIDs = [];
+        for (let key in category_disctionary) {
+            if (selectedCategories.includes(category_disctionary[key])) {
+              categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
+            }
+        }
 
+        if (distinctTables.length === 1) {
+            const distinctYears = [];
+            sparqOutput.map((obj) => {
+              if (!distinctYears.includes(obj.year.value)) {
+                distinctYears.push(obj.year.value)
+              }
+            } );
+      
+            const newScenarioYears = scenarioYears;
+            newScenarioYears[index] = distinctYears.sort();
+            setScenarioYears(newScenarioYears);
+      
+      
+            const newScenarioYear = scenarioYear;
+            newScenarioYear[index] = scenarioYears[index][0].toString();
+            setScenarioYear(newScenarioYear);
+
+            const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
+
+            const country_labels = [];
+            const chart_data_category = categorieIDs.map((cat, index) => {
+              const categorized =  {}
+              categorized['label'] = selectedCategories[index];
+              categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
+              categorized['backgroundColor'] = barColors[index];
+
+              country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop());
+              return categorized
+            });
+
+            const newChartData = [...chartData];
+            newChartData[index] = chart_data_category ;
+            setChartData(newChartData);
+
+            const newChartLabels = [...chartLabels];
+            newChartLabels[index] = country_labels[index];
+            setChartLabels(newChartLabels);
+        }
+        else if (distinctTables.length > 1) {
           const distinctYears = [];
           sparqOutput.map((obj) => {
             if (!distinctYears.includes(obj.year.value)) {
               distinctYears.push(obj.year.value)
             }
           } );
-     
+      
           const newScenarioYears = scenarioYears;
           newScenarioYears[index] = distinctYears.sort();
           setScenarioYears(newScenarioYears);
-          console.log('-----+++++++++++', scenarioYears);
     
+          setSparqlOutput(sparqOutput);
     
           const newScenarioYear = scenarioYear;
           newScenarioYear[index] = scenarioYears[index][0].toString();
@@ -647,128 +684,90 @@ const sendQuery = async (index) => {
 
           const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
 
-          const country_labels = [];
-          const chart_data_category = categorieIDs.map((cat, index) => {
-            const categorized =  {}
-            categorized['label'] = selectedCategories[index];
-            categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
-            categorized['backgroundColor'] = barColors[index];
-
-            country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop());
-            return categorized
-          });
-
-          const newChartData = [...chartData];
-          newChartData[index] = chart_data_category ;
-          setChartData(newChartData);
-
-          const newChartLabels = [...chartLabels];
-          newChartLabels[index] = country_labels[index];
-          setChartLabels(newChartLabels);
-      }
-      else if (distinctTables.length > 1) {
-        console.log('two or more tables for comparisons');
-
-        const distinctYears = [];
-        sparqOutput.map((obj) => {
-          if (!distinctYears.includes(obj.year.value)) {
-            distinctYears.push(obj.year.value)
-          }
-        } );
-    
-        const newScenarioYears = scenarioYears;
-        newScenarioYears[index] = distinctYears.sort();
-        setScenarioYears(newScenarioYears);
-        console.log('-----+++++++++++', scenarioYears);
-  
-        setSparqlOutput(sparqOutput);
-  
-        const newScenarioYear = scenarioYear;
-        newScenarioYear[index] = scenarioYears[index][0].toString();
-        setScenarioYear(newScenarioYear);
-
-        const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
-
-        const groupedItems = divideByTableNameValue(filtered_output);
+          const groupedItems = divideByTableNameValue(filtered_output);
 
 
-        const transformGroupedItems = (groupedItems) => {
-          const result = {};
-          let mainIndex = 0;
-        
-          for (let group in groupedItems) {
-            const filtered_output = groupedItems[group].sort((a, b) => {
-              const countryA = a.country_code.value.split('/').pop();
-              const countryB = b.country_code.value.split('/').pop();
-              
-              return countryA.localeCompare(countryB);
-            });
-
-            const country_labels = [];
-            
-            const chart_data_category = categorieIDs.map((cat, idx) => {
-              const categorized = {};
-              categorized['label'] = selectedCategories[index];
-              categorized['data'] = filtered_output
-                .filter((obj) => obj.category.value === cat)
-                .map(el => el.value.value);
-              categorized['backgroundColor'] = barColors[mainIndex];
-              categorized['stack'] = mainIndex;
-              
-              country_labels[index] = filtered_output
-                .filter((obj) => obj.category.value === cat)
-                .map(el => el.country_code.value.split('/').pop());
-                
-              return categorized;
-            });
-            
-            result[group] = {
-              chart_data_category: chart_data_category,
-              country_labels: country_labels,
-            };
-
-            mainIndex++;
-          }
-        
-          return result;
-        };
-
-        const transformedGroupedItems = transformGroupedItems(groupedItems);
-
-        const datasets = [];
-        const labels = [];
-
-        for (let group in transformedGroupedItems) {
+          const transformGroupedItems = (groupedItems) => {
+            const result = {};
+            let mainIndex = 0;
           
-          const { chart_data_category, country_labels } = transformedGroupedItems[group];
-  
-          chart_data_category.forEach((categoryData, catIndex) => {
-            const dataset = {};
-            dataset['label'] = group ;
-            dataset['data'] = categoryData.data;
-            dataset['backgroundColor'] = categoryData.backgroundColor;
-            dataset['stack'] = categoryData.stack;
-            datasets.push(dataset);
-            labels.push(country_labels[catIndex]);
-          });
+            for (let group in groupedItems) {
+              const filtered_output = groupedItems[group].sort((a, b) => {
+                const countryA = a.country_code.value.split('/').pop();
+                const countryB = b.country_code.value.split('/').pop();
+                
+                return countryA.localeCompare(countryB);
+              });
+
+              const country_labels = [];
+              
+              const chart_data_category = categorieIDs.map((cat, idx) => {
+                const categorized = {};
+                categorized['label'] = selectedCategories[index];
+                categorized['data'] = filtered_output
+                  .filter((obj) => obj.category.value === cat)
+                  .map(el => el.value.value);
+                categorized['backgroundColor'] = barColors[mainIndex];
+                categorized['stack'] = mainIndex;
+                
+                country_labels[index] = filtered_output
+                  .filter((obj) => obj.category.value === cat)
+                  .map(el => el.country_code.value.split('/').pop());
+                  
+                return categorized;
+              });
+              
+              result[group] = {
+                chart_data_category: chart_data_category,
+                country_labels: country_labels,
+              };
+
+              mainIndex++;
+            }
+          
+            return result;
+          };
+
+          const transformedGroupedItems = transformGroupedItems(groupedItems);
+
+          const datasets = [];
+          const labels = [];
+
+          for (let group in transformedGroupedItems) {
+            
+            const { chart_data_category, country_labels } = transformedGroupedItems[group];
+    
+            chart_data_category.forEach((categoryData, catIndex) => {
+              const dataset = {};
+              dataset['label'] = group ;
+              dataset['data'] = categoryData.data;
+              dataset['backgroundColor'] = categoryData.backgroundColor;
+              dataset['stack'] = categoryData.stack;
+              datasets.push(dataset);
+              labels.push(country_labels[catIndex]);
+            });
+          }
+          
+          const newChartData = [...chartData];
+          newChartData[index] = datasets ;
+          setChartData(newChartData);
+      
+          const newChartLabels = [...chartLabels];
+          newChartLabels[index] = labels[0];
+          setChartLabels(newChartLabels);
+
         }
         
-        console.log(datasets);
-        console.log(labels);
 
-        const newChartData = [...chartData];
-        newChartData[index] = datasets ;
-        setChartData(newChartData);
-    
-        const newChartLabels = [...chartLabels];
-        newChartLabels[index] = labels[0];
-        setChartLabels(newChartLabels);
+        setLoading(false);
+        setShowChart(true);
 
+      } else {
+        setLoading(false);
+        setShowChart(false);
+        setOpenEmptyResultDialog(true);
+        console.log('There is still no data for the selected filters. Please consider providing annotations for the selected tables!');
       }
-      
-
-      setLoading(false);
-      setShowChart(true);
 
     }).catch(error => {
         console.error('API Error:', error.message);
@@ -1102,6 +1101,20 @@ const sendQuery = async (index) => {
                 </IconButton>
               </Box>
             </Grid>
+            <Grid item xs={12} >
+              <Snackbar
+              open={openEmptyResultDialog}
+              autoHideDuration={6000}
+              onClose={handleEmptyResultMessageClose}
+              >
+              <Alert variant="filled" onClose={handleEmptyResultMessageClose} severity="success" sx={{ width: '100%' }}>
+                <div>There is still <strong>no data</strong> for the selected filters. Please consider the following: </div>
+                <div>(1) Changing the filters. </div>
+                <div>(2) Checking the data tables. </div>
+                <div>(3) Providing annotations for the selected tables.</div>
+              </Alert>
+              </Snackbar>
+          </Grid>
           </Grid>
           } 
       </Container>
