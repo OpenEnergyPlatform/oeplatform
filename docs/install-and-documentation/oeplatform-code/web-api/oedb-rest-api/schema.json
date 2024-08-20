@@ -227,7 +227,7 @@
     },
     "/api/v0/schema/{schema}/tables/{table}/meta/": {
       "get": {
-        "operationId": "listMetadatas",
+        "operationId": "listMetadata",
         "description": "",
         "parameters": [
           {
@@ -1248,7 +1248,7 @@
     },
     "/api/v0/factsheet/frameworks/": {
       "get": {
-        "operationId": "listEnergyframeworks",
+        "operationId": "listEnergyFrameworks",
         "description": "Used for the scenario bundles react app to be able to select a existing\nframework or model factsheet.",
         "parameters": [],
         "responses": {
@@ -1384,7 +1384,7 @@
     },
     "/api/v0/advanced/search": {
       "post": {
-        "operationId": "createAJAXSearch",
+        "operationId": "search",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1417,7 +1417,7 @@
     },
     "/api/v0/advanced/insert": {
       "post": {
-        "operationId": "createAJAXInsert",
+        "operationId": "insert",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1450,7 +1450,7 @@
     },
     "/api/v0/advanced/delete": {
       "post": {
-        "operationId": "createAJAXDelete",
+        "operationId": "delete",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1483,7 +1483,7 @@
     },
     "/api/v0/advanced/update": {
       "post": {
-        "operationId": "createAJAXUpdate",
+        "operationId": "update",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1516,7 +1516,7 @@
     },
     "/api/v0/advanced/info": {
       "post": {
-        "operationId": "createAJAXInfo",
+        "operationId": "info",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1615,7 +1615,7 @@
     },
     "/api/v0/advanced/has_sequence": {
       "post": {
-        "operationId": "createAJAXCheckSequence",
+        "operationId": "hasSequence",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1648,7 +1648,7 @@
     },
     "/api/v0/advanced/has_type": {
       "post": {
-        "operationId": "createAJAXHasType",
+        "operationId": "hasType",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1681,7 +1681,7 @@
     },
     "/api/v0/advanced/get_schema_names": {
       "post": {
-        "operationId": "createAJAXSchemaNames",
+        "operationId": "getSchemaNames",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1714,7 +1714,7 @@
     },
     "/api/v0/advanced/get_table_names": {
       "post": {
-        "operationId": "createAJAXTableNames",
+        "operationId": "getTableNames",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1747,7 +1747,7 @@
     },
     "/api/v0/advanced/get_view_names": {
       "post": {
-        "operationId": "createAJAXViewNames",
+        "operationId": "getViewNames",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1780,7 +1780,7 @@
     },
     "/api/v0/advanced/get_view_definition": {
       "post": {
-        "operationId": "createAJAXViewDefinition",
+        "operationId": "getViewDefinition",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1846,7 +1846,7 @@
     },
     "/api/v0/advanced/get_pk_constraint": {
       "post": {
-        "operationId": "createAJAXGetPKConstraint",
+        "operationId": "getPKConstraint",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1879,7 +1879,7 @@
     },
     "/api/v0/advanced/get_foreign_keys": {
       "post": {
-        "operationId": "createAJAXGetForeignKeys",
+        "operationId": "getForeignKeys",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1912,7 +1912,7 @@
     },
     "/api/v0/advanced/get_indexes": {
       "post": {
-        "operationId": "createAJAXGetIndexes",
+        "operationId": "getIndexes",
         "description": "",
         "parameters": [],
         "requestBody": {
@@ -1945,7 +1945,7 @@
     },
     "/api/v0/advanced/get_unique_constraints": {
       "post": {
-        "operationId": "createAJAXGetUniqueConstraint",
+        "operationId": "getUniqueConstraint",
         "description": "",
         "parameters": [],
         "requestBody": {
