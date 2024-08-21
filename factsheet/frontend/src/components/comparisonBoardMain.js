@@ -83,6 +83,8 @@ const ComparisonBoardMain = (props) => {
   const [legendForGroupedStackedBarCharts, setLegendForGroupedStackedBarCharts] = React.useState([]);
   const [legendForStackedBarCharts, setLegendForStackedBarCharts] = React.useState([]);
   const [chartType, setChartType] = React.useState("");
+  const [groupedBarChartsRandomColors, setGroupedBarChartsRandomColors] = React.useState([]);
+  
   
   const category_disctionary = {
     "OEO_00010038" : "1 Energy",
@@ -200,26 +202,69 @@ const ComparisonBoardMain = (props) => {
 
   const handleYearChange = (event: React.SyntheticEvent, newValue: number, index) => {
     setLoading(true);
-
    
+    if (sparqOutput.length !== 0) {
 
-    const distinctTables = [];
-      sparqOutput.map((obj) => {
-        if (!distinctTables.includes(obj.table_name.value)) {
-          distinctTables.push(obj.table_name.value)
-        }
-      } );
+      const distinctTables = [];
+        sparqOutput.map((obj) => {
+          if (!distinctTables.includes(obj.table_name.value)) {
+            distinctTables.push(obj.table_name.value)
+          }
+        } );
 
 
-    const categorieIDs = [];
-    for (let key in category_disctionary) {
-        if (selectedCategories.includes(category_disctionary[key])) {
-          categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
-        }
-    }
+      const categorieIDs = [];
+      for (let key in category_disctionary) {
+          if (selectedCategories.includes(category_disctionary[key])) {
+            categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
+          }
+      }
 
-    if (distinctTables.length === 1) {
+      if (distinctTables.length === 1) {
+          setChartType("SingleDataTable");
+          const distinctYears = [];
+          sparqOutput.map((obj) => {
+            if (!distinctYears.includes(obj.year.value)) {
+              distinctYears.push(obj.year.value)
+            }
+          } );
+      
+          const newScenarioYears = scenarioYears;
+          newScenarioYears[index] = distinctYears.sort();
+          setScenarioYears(newScenarioYears);
+    
+    
+          const newScenarioYear = scenarioYear;
+          newScenarioYear[index] = scenarioYears[index][0].toString();
+          setScenarioYear(newScenarioYear);
 
+          const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
+
+          const StackedBarChartsLegend = [];
+          const country_labels = [];
+          const chart_data_category = categorieIDs.map((cat, index) => {
+            const categorized =  {}
+            categorized['label'] = selectedCategories[index];
+            categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
+            categorized['backgroundColor'] = barColors[index];
+
+            country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop());
+            StackedBarChartsLegend.push([selectedCategories[index], barColors[index]]);
+            return categorized
+          });
+
+          const newChartData = [...chartData];
+          newChartData[index] = chart_data_category ;
+          setChartData(newChartData);
+
+          const newChartLabels = [...chartLabels];
+          newChartLabels[index] = country_labels[index];
+          setChartLabels(newChartLabels);
+
+          setLegendForStackedBarCharts(StackedBarChartsLegend);
+      }
+      else if (distinctTables.length > 1) {
+        setChartType("MultipleDataTable");
         const distinctYears = [];
         sparqOutput.map((obj) => {
           if (!distinctYears.includes(obj.year.value)) {
@@ -230,142 +275,101 @@ const ComparisonBoardMain = (props) => {
         const newScenarioYears = scenarioYears;
         newScenarioYears[index] = distinctYears.sort();
         setScenarioYears(newScenarioYears);
-  
-  
+
         const newScenarioYear = scenarioYear;
         newScenarioYear[index] = scenarioYears[index][0].toString();
         setScenarioYear(newScenarioYear);
 
         const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
+        const groupedItems = divideByTableNameValue(filtered_output);
 
-        const country_labels = [];
-        const chart_data_category = categorieIDs.map((cat, index) => {
-          const categorized =  {}
-          categorized['label'] = selectedCategories[index];
-          categorized['data'] = filtered_output.filter((obj) => obj.category.value === cat ).map(el => el.value.value );
-          categorized['backgroundColor'] = barColors[index];
 
-          country_labels[index] = filtered_output.filter((obj) => obj.category.value === cat ).map(el =>  el.country_code.value.split('/').pop());
-          return categorized
-        });
+        const transformGroupedItems = (groupedItems) => {
+          const result = {};
+          let mainIndex = 0;
+          let colorIndex = 0;
 
-        const newChartData = [...chartData];
-        newChartData[index] = chart_data_category ;
-        setChartData(newChartData);
+          for (let group in groupedItems) {
+            const filtered_output = groupedItems[group].sort((a, b) => {
+              const countryA = a.country_code.value.split('/').pop();
+              const countryB = b.country_code.value.split('/').pop();
+              return countryA.localeCompare(countryB);
+            });
 
-        const newChartLabels = [...chartLabels];
-        newChartLabels[index] = country_labels[index];
-        setChartLabels(newChartLabels);
-    }
-    else if (distinctTables.length > 1) {
+            const country_labels = [];
+            
+            const chart_data_category = categorieIDs.map((cat, idx) => {
+              const categorized = {};
+              categorized['label'] = selectedCategories[index];
+              categorized['data'] = filtered_output
+                .filter((obj) => obj.category.value === cat)
+                .map(el => el.value.value);
+              categorized['backgroundColor'] = groupedBarChartsRandomColors[colorIndex];
+              categorized['stack'] = mainIndex;
+              
+              country_labels[index] = filtered_output
+                .filter((obj) => obj.category.value === cat)
+                .map(el => el.country_code.value.split('/').pop());
+              
+              colorIndex++;
+              return categorized;
+            });
+            
+            result[group] = {
+              chart_data_category: chart_data_category,
+              country_labels: country_labels,
+            };
 
-      const distinctYears = [];
-      sparqOutput.map((obj) => {
-        if (!distinctYears.includes(obj.year.value)) {
-          distinctYears.push(obj.year.value)
+            mainIndex++;
+          }
+        
+          return result;
+        };
+
+
+        const transformedGroupedItems = transformGroupedItems(groupedItems);
+
+        const datasets = [];
+        const labels = [];
+
+        for (let group in transformedGroupedItems) {
+          
+          const { chart_data_category, country_labels } = transformedGroupedItems[group];
+
+          chart_data_category.forEach((categoryData, catIndex) => {
+            const dataset = {};
+            dataset['label'] = group ;
+            dataset['data'] = categoryData.data;
+            dataset['backgroundColor'] = categoryData.backgroundColor;
+            dataset['stack'] = categoryData.stack;
+            datasets.push(dataset);
+            labels.push(country_labels[catIndex]);
+          });
         }
-      } );
-  
-      const newScenarioYears = scenarioYears;
-      newScenarioYears[index] = distinctYears.sort();
-      setScenarioYears(newScenarioYears);
+        
+        const newChartData = [...chartData];
+        newChartData[index] = datasets ;
+        setChartData(newChartData);
+    
+        const newChartLabels = [...chartLabels];
+        newChartLabels[index] = labels[0];
+        setChartLabels(newChartLabels);
 
-
+      }
+        
       const newScenarioYear = scenarioYear;
-      newScenarioYear[index] = scenarioYears[index][0].toString();
+      newScenarioYear[index] = newValue;
       setScenarioYear(newScenarioYear);
 
-      const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
-
-      const groupedItems = divideByTableNameValue(filtered_output);
-      console.log(groupedItems);
-
-
-      const transformGroupedItems = (groupedItems) => {
-        const result = {};
-        let mainIndex = 0;
-      
-        for (let group in groupedItems) {
-          const filtered_output = groupedItems[group].sort((a, b) => {
-            const countryA = a.country_code.value.split('/').pop();
-            const countryB = b.country_code.value.split('/').pop();
-            
-            return countryA.localeCompare(countryB);
-          });
-
-          const country_labels = [];
-          
-          const chart_data_category = categorieIDs.map((cat, idx) => {
-            const categorized = {};
-            categorized['label'] = selectedCategories[index];
-            categorized['data'] = filtered_output
-              .filter((obj) => obj.category.value === cat)
-              .map(el => el.value.value);
-            categorized['backgroundColor'] = barColors[mainIndex];
-            categorized['stack'] = mainIndex;
-            
-            country_labels[index] = filtered_output
-              .filter((obj) => obj.category.value === cat)
-              .map(el => el.country_code.value.split('/').pop());
-              
-            return categorized;
-          });
-          
-          result[group] = {
-            chart_data_category: chart_data_category,
-            country_labels: country_labels,
-          };
-
-          mainIndex++;
-        }
-      
-        return result;
-      };
-
-      const transformedGroupedItems = transformGroupedItems(groupedItems);
-
-      const datasets = [];
-      const labels = [];
-
-      for (let group in transformedGroupedItems) {
-        
-        const { chart_data_category, country_labels } = transformedGroupedItems[group];
-
-        chart_data_category.forEach((categoryData, catIndex) => {
-          const dataset = {};
-          dataset['label'] = group ;
-          dataset['data'] = categoryData.data;
-          dataset['backgroundColor'] = categoryData.backgroundColor;
-          dataset['stack'] = categoryData.stack;
-          datasets.push(dataset);
-          labels.push(country_labels[catIndex]);
-        });
-      }
-      
-      console.log(datasets);
-      console.log(labels);
-
-
-      const newChartData = [...chartData];
-      newChartData[index] = datasets ;
-      setChartData(newChartData);
-  
-      const newChartLabels = [...chartLabels];
-      newChartLabels[index] = labels[0];
-      setChartLabels(newChartLabels);
-
+      setLoading(false);
+      setShowChart(true);
+    } else {
+      setLoading(false);
+      setShowChart(false);
+      setOpenEmptyResultDialog(true);
     }
-      
-    const newScenarioYear = scenarioYear;
-    newScenarioYear[index] = newValue;
-    setScenarioYear(newScenarioYear);
-
-    setLoading(false);
-    setShowChart(true);
-
    
   };
-
 
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -558,9 +562,9 @@ const ComparisonBoardMain = (props) => {
 const sendQuery = async (index) => {
     setLoading(true);
 
-    //const data_tabels = [`"eu_leg_data_2023_eea"`, `"dupe_eu_leg_data_2023_eea"`];
-    // const data_tabels = [`"eu_leg_data_2023_eea"`];
-    const data_tabels = [];
+    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"dupe_eu_leg_data_2023_eea"`];
+    const data_tabels = [`"eu_leg_data_2023_eea"`];
+    // const data_tabels = [];
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -672,7 +676,6 @@ const sendQuery = async (index) => {
             newChartLabels[index] = country_labels[index];
             setChartLabels(newChartLabels);
 
-
             setLegendForStackedBarCharts(StackedBarChartsLegend);
         }
         else if (distinctTables.length > 1) {
@@ -702,6 +705,9 @@ const sendQuery = async (index) => {
           const transformGroupedItems = (groupedItems) => {
             const total_num_of_colors =  Object.keys(groupedItems).length + categorieIDs.length
             const groupedRandomColors = Array.from({ length: total_num_of_colors }, generateRandomColor);
+            setGroupedBarChartsRandomColors(groupedRandomColors);
+            
+
             const result = {};
             let mainIndex = 0;
             let colorIndex = 0;
@@ -743,10 +749,7 @@ const sendQuery = async (index) => {
             return result;
           };
 
-
-
           setLegendForGroupedStackedBarCharts(groupedStackedBarChartsLegend);
-          console.log(groupedStackedBarChartsLegend);
 
           const transformedGroupedItems = transformGroupedItems(groupedItems);
 
@@ -778,7 +781,6 @@ const sendQuery = async (index) => {
 
         }
         
-
         setLoading(false);
         setShowChart(true);
 
@@ -1110,14 +1112,14 @@ const sendQuery = async (index) => {
               <div display="flex" justifyContent="space-between" flexWrap="wrap" alignItems="center">
                 {chartType === "MultipleDataTable" && legendForGroupedStackedBarCharts.map((category, idx)  => (
                               <span style={{ marginRight:"20px" }}>
-                                <span style={{ width:"20px", height:"20px", display: "inline-block",  borderRadius: "4px", backgroundColor: category[3] }}> </span>
-                                <span style={{ paddingLeft:"10", fontSize: "12px" }}> {category[0]}:<b>{category[1]}</b> </span>
+                                <span style={{ width:"20px", height:"20px", display: "inline-block",  borderRadius: "4px", backgroundColor: category[3], verticalAlign:'top' }}> </span>
+                                <span style={{ paddingLeft:"10", display: "inline-block", fontSize: "12px", verticalAlign:'initial', marginLeft:'4px' }}> {category[0]}:<b>{category[1]}</b> </span>
                               </span>
                             ) )}
                 {chartType === "SingleDataTable" && legendForStackedBarCharts.map((category, idx)  => (
                     <span style={{ marginRight:"20px" }}>
-                      <span style={{ width:"20px", height:"20px", display: "inline-block",  borderRadius: "4px", backgroundColor: category[1] }}> </span>
-                      <span style={{ paddingLeft:"10", fontSize: "12px" }}> <b>{category[0]}</b> </span>
+                      <span style={{ width:"20px", height:"20px", display: "inline-block",  borderRadius: "4px", backgroundColor: category[1], verticalAlign:'top' }}> </span>
+                      <span style={{ paddingLeft:"10", display: "inline-block", fontSize: "12px", verticalAlign:'initial', marginLeft:'4px' }}> <b>{category[0]}</b> </span>
                     </span>
                   ) )}
               </div>
