@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xml:base="http://openenergy-platform.org/ontology/oeox"
+         xmlns="http://openenergy-platform.org/ontology/oeox#">
+
+<owl:Ontology rdf:about="http://openenergy-platform.org/ontology/oeox"/>
+
+
+<owl:Class rdf:about="#http://openenergy-platform.org/ontology/oeox/composedUnit/OEOX_2">
+  <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UO_0000000"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <owl:Restriction>
+          <owl:onProperty rdf:resource="http://openenergy-platform.org/ontology/oeo/OEO_00010472"/>
+          <owl:someValuesFrom>
+            <owl:Class>
+              <owl:intersectionOf rdf:parseType="Collection">
+                <rdf:Description rdf:about="http://purl.obolibrary.org/obo/UO_0000223"/>
+                <owl:Restriction>
+                  <owl:onProperty rdf:resource="http://openenergy-platform.org/ontology/oeo/OEO_00020404"/>
+                  <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/UO_0000293"/>
+                </owl:Restriction>
+              </owl:intersectionOf>
+            </owl:Class>
+          </owl:someValuesFrom>
+        </owl:Restriction>
+        <owl:Restriction>
+          <owl:onProperty rdf:resource="http://openenergy-platform.org/ontology/oeo/OEO_00010478"/>
+          <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/UO_0000008"/>
+        </owl:Restriction>
+        <owl:Restriction>
+          <owl:onProperty rdf:resource="http://openenergy-platform.org/ontology/oeo/OEO_00010477"/>
+          <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/UO_0000036"/>
+        </owl:Restriction>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">mega watt-hour per meter squared and year</rdfs:label>
+</owl:Class>
+
+</rdf:RDF>
