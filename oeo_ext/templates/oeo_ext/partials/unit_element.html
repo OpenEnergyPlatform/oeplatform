@@ -20,40 +20,35 @@
         </select>
         <div class="invalid-feedback" id="unitType-{{ type }}-{{ unit_id }}_error"></div>
     </div>
+
+    <div class="mb-2">
+        <label for="unitPrefix" class="form-label">Unit Prefix:</label>
+        <input type="text" name="unitPrefix-{{unit_id}}" id="autocomplete-{{unit_id}}" class="form-control unitPrefix" autocomplete="off">
+        <div id="dropdown-content" class="dropdown-content"></div>
+        <div class="invalid-feedback" id="unitPrefix-{{ type }}-{{ unit_id }}_error"></div>
+    </div>
+
     <button type="button" class="btn btn-danger remove-element mt-2">Remove</button>
 </div>
 
 
 <script>
-    // Function to initialize autocomplete and other dynamic elements
-    function initializeDynamicElements() {
-        document.querySelectorAll('.remove-element').forEach(button => {
-            button.addEventListener('click', function () {
-                this.closest('.unit-element').remove();
-                // available because this component is meant to be used together with
-                // the listing module oeo-ext-plugin-ui.html
-                updateResultExpression();
-            });
-        });
-
-        document.querySelectorAll('.unitName, .unitType').forEach(input => {
-            input.addEventListener('input', updateResultExpression);
-        });
-
-        document.querySelectorAll('.unitName').forEach(input => {
-            input.addEventListener('keyup', function() {
-                const query = this.value;
-                if (query.length > 0) {
-                    // use static path here to always use the open (data seeded) endpoint for 
-                    // all (local, deployed) client executions
-                    fetch(`https://openenergyplatform.org/api/v0/oeo-search?query=${query}`, {
-                        mode: 'cors',
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        const dropdownContent = this.nextElementSibling;
-                        dropdownContent.innerHTML = '';
-                        data.docs.forEach(item => {
+    // Function to handle the fetching and dropdown population
+    function handleInput(input) {
+        input.addEventListener('keyup', function() {
+            const query = this.value;
+            if (query.length > 0) {
+                // use static path here to always use the open (data seeded) endpoint for 
+                // all (local, deployed) client executions
+                fetch(`https://openenergyplatform.org/api/v0/oeo-search?query=${query}`, {
+                    mode: 'cors',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const dropdownContent = this.nextElementSibling;
+                    dropdownContent.innerHTML = '';
+                    data.docs.forEach(item => {
+                        if (item.label && item.label.length > 0) { // Check if label exists and is not empty
                             const link = document.createElement('a');
                             link.href = '#';
                             link.textContent = String(item.label[0]).replaceAll("<B>", "").replaceAll("</B>", "");
@@ -66,14 +61,43 @@
                                 input.dispatchEvent(inputEvent); // Trigger the input event
                             });
                             dropdownContent.appendChild(link);
-                        });
-                        dropdownContent.classList.add('show');
-                    })
-                    .catch(error => console.error('Error fetching data:', error));
-                } else {
-                    this.nextElementSibling.classList.remove('show');
-                }
+                        } else {
+                            console.error('Invalid item label:', item);
+                        }
+                    });
+                    dropdownContent.classList.add('show');
+                })
+                .catch(error => console.error('Error fetching data:', error));
+            } else {
+                this.nextElementSibling.classList.remove('show');
+            }
+        });
+    }
+
+    // Function to initialize autocomplete and other dynamic elements
+    function initializeDynamicElements() {
+        document.querySelectorAll('.remove-element').forEach(button => {
+            button.addEventListener('click', function () {
+                this.closest('.unit-element').remove();
+                // available because this component is meant to be used together with
+                // the listing module oeo-ext-plugin-ui.html
+                updateResultExpression();
             });
+        });
+    
+
+        document.querySelectorAll('.unitName, .unitType').forEach(input => {
+            input.addEventListener('input', updateResultExpression);
+        });
+
+        // Apply the function to elements with the .unitName class
+        document.querySelectorAll('.unitName').forEach(input => {
+            handleInput(input);
+        });
+
+        // Apply the function to elements with the .unitPrefix class
+        document.querySelectorAll('.unitPrefix').forEach(input => {
+            handleInput(input);
         });
 
         document.addEventListener('click', function(event) {
