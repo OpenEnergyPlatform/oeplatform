@@ -562,8 +562,8 @@ const ComparisonBoardMain = (props) => {
 const sendQuery = async (index) => {
     setLoading(true);
 
-    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"dupe_eu_leg_data_2023_eea"`];
-    const data_tabels = [`"eu_leg_data_2023_eea"`];
+    const data_tabels = [`"eu_leg_data_2023_eea"`, `"dupe_eu_leg_data_2023_eea"`];
+    // const data_tabels = [`"eu_leg_data_2023_eea"`];
     // const data_tabels = [];
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
