@@ -1,6 +1,6 @@
 import types
 
-from owlready2 import And, Ontology
+from owlready2 import And, Ontology, Restriction, ThingClass
 from rdflib import URIRef
 
 from oeo_ext.oeo_extended_store.connection import OEO_EXT_OWL_PATH, oeo_ext_owl, oeo_owl
@@ -20,8 +20,70 @@ UNIT = oeo_owl.search_one(label="unit")
 # UNITS = oeo.search(label="unit")
 
 
-def automated_label_generator():
-    return NotImplementedError
+def automated_label_generator(new_unit_class: type):
+    label_parts = []
+    numerators = []
+    denominators = []
+
+    # Access the equivalent class definition
+    if new_unit_class.equivalent_to:
+        for eq_class in new_unit_class.equivalent_to:
+            if isinstance(eq_class, And):
+                for restriction in eq_class.Classes:
+                    if isinstance(restriction, Restriction):
+                        prop = restriction.property
+                        target_class = restriction.value
+
+                        # Handle cases where target_class is
+                        # an And object (combination of unit and prefix)
+                        if isinstance(target_class, And):
+                            # Extract the unit label from the And object
+                            unit_label = None
+                            prefix_label = None
+                            for sub_class in target_class.Classes:
+                                if isinstance(sub_class, ThingClass):  # The unit part
+                                    unit_label = sub_class.label[0]
+                                elif (
+                                    isinstance(sub_class, Restriction)
+                                    and sub_class.property == has_unit_prefix
+                                ):
+                                    prefix_label = sub_class.value.label[0]
+                            # Combine the prefix and unit if both are present
+                            if prefix_label:
+                                target_label = f"{prefix_label} {unit_label}"
+                            else:
+                                target_label = unit_label
+                        else:
+                            # If it's not an And object, just use the label directly
+                            target_label = target_class.label[0]
+
+                        # Check if the property corresponds to a numerator
+                        if prop == has_linear_unit_numerator:
+                            numerators.append(target_label)
+                        elif prop == has_squared_unit_numerator:
+                            numerators.append(f"squared {target_label}")
+                        elif prop == has_cubed_unit_numerator:
+                            numerators.append(f"cubic {target_label}")
+                        # Check if the property corresponds to a denominator
+                        elif prop == has_linear_unit_denominator:
+                            denominators.append(target_label)
+                        elif prop == has_squared_unit_denominator:
+                            denominators.append(f"{target_label} squared")
+                        elif prop == has_cubed_unit_denominator:
+                            denominators.append(f"{target_label} cubic")
+
+    # Combine the numerators
+    if numerators:
+        label_parts.append(" and ".join(numerators))
+
+    # Add 'per' and combine the denominators if they exist
+    if denominators:
+        label_parts.append("per")
+        label_parts.append(" and ".join(denominators))
+
+    # Combine the label parts into the final label
+    generated_label = " ".join(label_parts)
+    return generated_label
 
 
 # def get_new_iri(ontox: Ontology, concept_type: OeoxTypes, base=OEOX) -> URIRef:
@@ -41,7 +103,8 @@ def get_new_iri(
     ontox: Ontology, concept_type: OeoxTypes, base=OEOX, id_prefix="OEOX_"
 ) -> URIRef:
     """
-    Generates a new IRI for a composed unit based on the number of existing elements.
+    Generates a new IRI for a composed unit based on the number of
+    existing elements.
 
     Args:
         ontox (Ontology): The ontology in which to count existing elements.
@@ -159,6 +222,8 @@ def create_new_unit(
     with oeo_ext_owl:
         NewClass = types.new_class(uriref, (unit,))
         NewClass.equivalent_to = [intersection]
+
+        NewClass.label = automated_label_generator(NewClass)
 
     # Save the updated ontology
     oeo_ext_owl.save(file=str(OEO_EXT_OWL_PATH), format="rdfxml")
