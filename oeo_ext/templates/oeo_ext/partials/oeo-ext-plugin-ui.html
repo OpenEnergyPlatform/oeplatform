@@ -17,7 +17,7 @@
                 <!-- Elements will be added here -->
                 
             </div>
-            <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#nominator-elements" hx-swap="beforeend">Add Nominator Unit</button>
+            <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#nominator-elements" hx-swap="beforeend">Add Numerator oeo-Unit</button>
         </div>
 
         <div class="denominator-section mb-4">
@@ -26,20 +26,24 @@
                 <!-- Elements will be added here -->
 
             </div>
-            <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#denominator-elements" hx-swap="beforeend">Add Denominator Unit</button>
+            <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#denominator-elements" hx-swap="beforeend">Add Denominator oeo-Unit</button>
         </div>
 
-        <div class="mb-2">
-            <label for="unitLabel" class="form-label">Optional - Unit Label:</label>
-            {{ form.unitLabel }}
-            <div class="invalid-feedback">{{ form.unitLabel.errors }}</div>
-        </div>
+        {% if form.unitLabel.value %}
+            <div class="mb-2">
+                <label for="unitLabel" class="form-label">Optional - Unit Label:</label>
+                {{ form.unitLabel }}
+                <div class="invalid-feedback">{{ form.unitLabel.errors }}</div>
+            </div>
+        {% endif %}
 
-        <div class="mb-2">
-            <label for="definition" class="form-label">Optional - Definition:</label>
-            {{ form.definition }}
-            <div class="invalid-feedback">{{ form.definition.errors }}</div>
-        </div>
+        {% if form.definition.value %}
+            <div class="mb-2">
+                <label for="definition" class="form-label">Optional - Definition:</label>
+                {{ form.definition }}
+                <div class="invalid-feedback">{{ form.definition.errors }}</div>
+            </div>
+        {% endif %}
         
         <button type="submit" class="btn btn-success">Save</button>
     </form>
@@ -66,7 +70,8 @@
             data.nominator.push({
                 position: index + 1,
                 unitName: element.querySelector('.unitName').value,
-                unitType: element.querySelector('.unitType').value
+                unitType: element.querySelector('.unitType').value,
+                unitPrefix: element.querySelector('.unitPrefix').value
             });
         });
 
@@ -74,7 +79,8 @@
             data.denominator.push({
                 position: index + 1,
                 unitName: element.querySelector('.unitName').value,
-                unitType: element.querySelector('.unitType').value
+                unitType: element.querySelector('.unitType').value,
+                unitPrefix: element.querySelector('.unitPrefix').value
             });
         });
 
@@ -92,13 +98,15 @@
         let nominatorText = Array.from(nominatorElements).map(element => {
             let name = element.querySelector('.unitName').value;
             let type = element.querySelector('.unitType').value;
-            return `${name} (${type})`;
+            let prefix = element.querySelector('.unitPrefix').value;
+            return `${prefix} ${name} (${type})`;
         }).join(' + ');
 
         let denominatorText = Array.from(denominatorElements).map(element => {
             let name = element.querySelector('.unitName').value;
             let type = element.querySelector('.unitType').value;
-            return `${name} (${type})`;
+            let prefix = element.querySelector('.unitPrefix').value;
+            return `${prefix} ${name} (${type})`;
         }).join(' + ');
 
         let resultExpression = `
