@@ -29,10 +29,10 @@ class UnitEntryForm(forms.Form):
     unitType = forms.CharField(
         max_length=255, error_messages={"required": "This field cannot be empty"}
     )
+    unitPrefix = forms.CharField(max_length=255, required=False)
 
 
 class ComposedUnitFormWrapper(forms.Form):
-    definition = forms.CharField(
-        widget=forms.Textarea(), required=False, max_length=255
-    )
-    unitLabel = forms.CharField(required=False, max_length=255)
+    # Hidden fields to be populated programmatically
+    unitLabel = forms.CharField(widget=forms.HiddenInput(), required=False)
+    definition = forms.CharField(widget=forms.HiddenInput(), required=False)
