@@ -1,6 +1,6 @@
 import types
 
-from owlready2 import Ontology
+from owlready2 import And, Ontology
 from rdflib import URIRef
 
 from oeo_ext.oeo_extended_store.connection import OEO_EXT_OWL_PATH, oeo_ext_owl, oeo_owl
@@ -14,6 +14,7 @@ has_cubed_unit_numerator = oeo_owl.search_one(label="has cubed unit numerator")
 has_linear_unit_denominator = oeo_owl.search_one(label="has linear unit denominator")
 has_squared_unit_denominator = oeo_owl.search_one(label="has squared unit denominator")
 has_cubed_unit_denominator = oeo_owl.search_one(label="has cubed unit denominator")
+has_unit_prefix = oeo_owl.search_one(label="has prefix")
 UNIT = oeo_owl.search_one(label="unit")
 
 # UNITS = oeo.search(label="unit")
@@ -86,49 +87,62 @@ def create_new_unit(
     if not numerator:
         return None, {"error": "The numerator can't be empty!"}
 
-    for elem in numerator:
-        # n_pos: int = elem.get("position")
-        n_unitName = elem.get("unitName")
-        n_unitType = elem.get("unitType")
-
-        unit_class = oeo_owl.search_one(label=n_unitName)
-        print(unit_class)
-        print(unit_class.name)
+    def build_combined_restriction(unitName, unitType, unitPrefix, numerator=True):
+        """Helper function to build combined restrictions."""
+        unit_class = oeo_owl.search_one(label=unitName)
 
         if not unit_class:
-            raise ValueError(f"Unit '{n_unitName}' not found in the ontology.")
+            raise ValueError(f"Unit '{unitName}' not found in the ontology.")
 
-        if n_unitType == "linear":
-            restriction = has_linear_unit_numerator.some(unit_class)
-        elif n_unitType == "squared":
-            restriction = has_squared_unit_numerator.some(unit_class)
-        elif n_unitType == "cubed":
-            restriction = has_cubed_unit_numerator.some(unit_class)
+        # If a prefix is provided, combine it with the unit
+        if unitPrefix:
+            prefix_class = oeo_owl.search_one(label=unitPrefix)
+            if not prefix_class:
+                raise ValueError(f"Prefix '{unitPrefix}' not found in the ontology.")
+            # Combine the unit with prefix
+            combined_unit = And([unit_class, has_unit_prefix.some(prefix_class)])
         else:
-            raise ValueError(f"Unknown numerator type: {n_unitType}")
+            combined_unit = unit_class
 
+        # Determine the appropriate restriction based on the unit type
+        if numerator:
+            if unitType == "linear":
+                return has_linear_unit_numerator.some(combined_unit)
+            elif unitType == "squared":
+                return has_squared_unit_numerator.some(combined_unit)
+            elif unitType == "cubed":
+                return has_cubed_unit_numerator.some(combined_unit)
+            else:
+                raise ValueError(f"Unknown numerator type: {unitType}")
+        else:
+            if unitType == "linear":
+                return has_linear_unit_denominator.some(combined_unit)
+            elif unitType == "squared":
+                return has_squared_unit_denominator.some(combined_unit)
+            elif unitType == "cubed":
+                return has_cubed_unit_denominator.some(combined_unit)
+            else:
+                raise ValueError(f"Unknown denominator type: {unitType}")
+
+    # Process numerators
+    for elem in numerator:
+        restriction = build_combined_restriction(
+            elem.get("unitName"),
+            elem.get("unitType"),
+            elem.get("unitPrefix"),
+            numerator=True,
+        )
         equivalent_classes.append(restriction)
 
+    # Process denominators
     if denominator:
         for elem in denominator:
-            # d_pos: int = elem.get("position")
-            d_unitName = elem.get("unitName")
-            d_unitType = elem.get("unitType")
-
-            unit_class = oeo_owl.search_one(label=n_unitName)
-            print(unit_class)
-            if not unit_class:
-                raise ValueError(f"Unit '{d_unitName}' not found in the ontology.")
-
-            if d_unitType == "linear":
-                restriction = has_linear_unit_denominator.some(unit_class)
-            elif d_unitType == "squared":
-                restriction = has_squared_unit_denominator.some(unit_class)
-            elif d_unitType == "cubed":
-                restriction = has_cubed_unit_denominator.some(unit_class)
-            else:
-                raise ValueError(f"Unknown numerator type: {n_unitType}")
-
+            restriction = build_combined_restriction(
+                elem.get("unitName"),
+                elem.get("unitType"),
+                elem.get("unitPrefix"),
+                numerator=False,
+            )
             equivalent_classes.append(restriction)
 
     # Combine the restrictions into an intersection using the & operator
@@ -144,10 +158,6 @@ def create_new_unit(
     # Create the new OWL class with the constructed equivalent class
     with oeo_ext_owl:
         NewClass = types.new_class(uriref, (unit,))
-        # if label:
-        #     NewClass.label = str(label)
-        # if definition:
-        #     NewClass.comment = definition
         NewClass.equivalent_to = [intersection]
 
     # Save the updated ontology
