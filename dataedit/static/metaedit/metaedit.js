@@ -457,8 +457,8 @@ var MetaEdit = function(config) {
           "button": {
             "openModalAction": function openOeoExtPlugin(jseditor, e) {
               // Perform the HTMX request or any other desired action
-              console.log("hi")
-              htmx.ajax('GET', '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}', {
+
+              htmx.ajax('GET', createUrl, {
                 target: '.modal-body',
                 swap: 'innerHTML',
                 trigger: 'click'
