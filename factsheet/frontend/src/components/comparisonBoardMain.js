@@ -58,7 +58,7 @@ const ComparisonBoardMain = (props) => {
   const scenarios_uid_json = JSON.stringify(scenarios_uid);
   const [selectedCriteria, setselectedCriteria] = useState(['Study descriptors', 'Scenario types', 'Study name']);
   const [alignment, setAlignment] = React.useState('Qualitative');
-  const [sparqOutput, setSparqlOutput] = useState('');
+  const [sparqOutput, setSparqlOutput] = useState([]);
   const [scenarioYear, setScenarioYear] = React.useState([]);
   const [scenarioYears, setScenarioYears] = React.useState([]);
   const [chartData, setChartData] = React.useState([]);
@@ -560,10 +560,11 @@ const ComparisonBoardMain = (props) => {
   }
 
 const sendQuery = async (index) => {
+    setSparqlOutput([]);
     setLoading(true);
 
-    const data_tabels = [`"eu_leg_data_2023_eea"`, `"dupe_eu_leg_data_2023_eea"`];
-    // const data_tabels = [`"eu_leg_data_2023_eea"`];
+    //const data_tabels = [`"eu_leg_data_2023_eea"`, `"dupe_eu_leg_data_2023_eea"`];
+    //  const data_tabels = [`"eu_leg_data_2023_eea"`];
     // const data_tabels = [];
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -600,8 +601,6 @@ const sendQuery = async (index) => {
       ?s oeo:OEO_00010121 ?gas
       FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories})  && ?gas IN (${selectedGas.map(e => '"' + e + '"').toString()}) ) .
     }`;
-
-    console.log(main_query);
 
     const response = await axios.post(
       conf.obdi, 
@@ -690,8 +689,6 @@ const sendQuery = async (index) => {
           const newScenarioYears = scenarioYears;
           newScenarioYears[index] = distinctYears.sort();
           setScenarioYears(newScenarioYears);
-    
-          setSparqlOutput(sparqOutput);
     
           const newScenarioYear = scenarioYear;
           newScenarioYear[index] = scenarioYears[index][0].toString();
