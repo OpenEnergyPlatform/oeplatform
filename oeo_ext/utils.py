@@ -61,16 +61,34 @@ def automated_label_generator(new_unit_class: type):
                         if prop == has_linear_unit_numerator:
                             numerators.append(target_label)
                         elif prop == has_squared_unit_numerator:
-                            numerators.append(f"squared {target_label}")
+                            if (
+                                "square" in target_label.__str__()
+                                or "squared" in target_label.__str__()
+                            ):
+                                numerators.append(f"{target_label}")
+                            else:
+                                numerators.append(f"squared {target_label}")
                         elif prop == has_cubed_unit_numerator:
-                            numerators.append(f"cubic {target_label}")
+                            if "cubic" in target_label.__str__():
+                                numerators.append(f"{target_label}")
+                            else:
+                                numerators.append(f"cubic {target_label}")
                         # Check if the property corresponds to a denominator
                         elif prop == has_linear_unit_denominator:
                             denominators.append(target_label)
                         elif prop == has_squared_unit_denominator:
-                            denominators.append(f"{target_label} squared")
+                            if (
+                                "square" in target_label.__str__()
+                                or "squared" in target_label.__str__()
+                            ):
+                                denominators.append(f"{target_label}")
+                            else:
+                                denominators.append(f"square {target_label}")
                         elif prop == has_cubed_unit_denominator:
-                            denominators.append(f"{target_label} cubic")
+                            if "cubic" in target_label.__str__():
+                                denominators.append(f"{target_label}")
+                            else:
+                                denominators.append(f"cubic {target_label}")
 
     # Combine the numerators
     if numerators:
@@ -84,19 +102,6 @@ def automated_label_generator(new_unit_class: type):
     # Combine the label parts into the final label
     generated_label = " ".join(label_parts)
     return generated_label
-
-
-# def get_new_iri(ontox: Ontology, concept_type: OeoxTypes, base=OEOX) -> URIRef:
-#     new_uri: URIRef
-#     for annot_prop in ontox.metadata:
-#         for i in range(len(annot_prop[ontox.metadata])):
-#             if "0000Counter = " in annot_prop[ontox.metadata][i]:
-#                 newNr = annot_prop[ontox.metadata][i][len("0000Counter = ") :]
-#                 counter = int(newNr) + 1
-#                 annot_prop[ontox.metadata][i] = "0000Counter = " + str(counter)
-#                 new_uri = URIRef(base=OEOX, value=str(counter))
-
-#     return new_uri
 
 
 def get_new_iri(
