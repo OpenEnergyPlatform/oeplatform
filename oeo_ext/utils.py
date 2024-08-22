@@ -129,16 +129,13 @@ def get_new_iri(
     return new_uri
 
 
-def build_composed_unit():
-    raise NotImplementedError
-
-
 def create_new_unit(
     numerator: list,
     denominator: list,
-    oeo_ext_owl: Ontology = oeo_ext_owl,
+    oeo_ext: Ontology = oeo_ext_owl,
     uriref=None,
     unit=UNIT,
+    result_file=OEO_EXT_OWL_PATH,
 ):
     """
     return
@@ -147,7 +144,7 @@ def create_new_unit(
     """
     type = OeoxTypes.composedUnit
     if not uriref:
-        uriref = get_new_iri(oeo_ext_owl, type)
+        uriref = get_new_iri(oeo_ext, type)
 
     # Create the list to store the equivalent class restrictions
     equivalent_classes = []
@@ -224,13 +221,13 @@ def create_new_unit(
         }
 
     # Create the new OWL class with the constructed equivalent class
-    with oeo_ext_owl:
+    with oeo_ext:
         NewClass = types.new_class(uriref, (unit,))
         NewClass.equivalent_to = [intersection]
 
         new_label = automated_label_generator(NewClass)
 
-        if not oeo_ext_owl.search_one(label=new_label):
+        if not oeo_ext.search_one(label=new_label):
             NewClass.label = new_label
         else:
             return None, {
@@ -238,6 +235,6 @@ def create_new_unit(
             }
 
     # Save the updated ontology
-    oeo_ext_owl.save(file=str(OEO_EXT_OWL_PATH), format="rdfxml")
+    oeo_ext.save(file=str(result_file), format="rdfxml")
 
     return uriref, None  # Return the IRI of the newly created class
