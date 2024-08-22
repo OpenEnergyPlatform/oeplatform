@@ -223,7 +223,14 @@ def create_new_unit(
         NewClass = types.new_class(uriref, (unit,))
         NewClass.equivalent_to = [intersection]
 
-        NewClass.label = automated_label_generator(NewClass)
+        new_label = automated_label_generator(NewClass)
+
+        if not oeo_ext_owl.search_one(label=new_label):
+            NewClass.label = new_label
+        else:
+            return None, {
+                "error": f"This composedUnit: '{new_label}' already exists in the oeox"
+            }
 
     # Save the updated ontology
     oeo_ext_owl.save(file=str(OEO_EXT_OWL_PATH), format="rdfxml")
