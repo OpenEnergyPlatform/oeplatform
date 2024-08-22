@@ -51,14 +51,18 @@ class OeoExtPluginView(View, LoginRequiredMixin):
                         "nominator": [f.cleaned_data for f in nominator_forms],
                         "denominator": [f.cleaned_data for f in denominator_forms],
                     },
+                    "newComposedUnitURI": None,
                 }
                 n = data.get("data", {})["nominator"]
                 d = data.get("data", {})["denominator"]
                 # new_unit_uir is either URIRef type or None
                 # error is either dict with key:value or None
                 new_unit, error = create_new_unit(numerator=n, denominator=d)
-
-                response_data = data
+                if error:
+                    response_data = error
+                else:
+                    data["newComposedUnitURI"] = new_unit
+                    response_data = data
                 return JsonResponse(response_data, status=200)
             else:
                 errors = {
