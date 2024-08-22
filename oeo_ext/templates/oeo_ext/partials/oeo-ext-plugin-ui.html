@@ -100,14 +100,14 @@
             let type = element.querySelector('.unitType').value;
             let prefix = element.querySelector('.unitPrefix').value;
             return `${prefix} ${name} (${type})`;
-        }).join(' + ');
+        }).join(' * ');
 
         let denominatorText = Array.from(denominatorElements).map(element => {
             let name = element.querySelector('.unitName').value;
             let type = element.querySelector('.unitType').value;
             let prefix = element.querySelector('.unitPrefix').value;
             return `${prefix} ${name} (${type})`;
-        }).join(' + ');
+        }).join(' * ');
 
         let resultExpression = `
             <div class="fraction">
