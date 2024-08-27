@@ -3,7 +3,7 @@ import itertools
 import json
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
@@ -495,7 +495,7 @@ class Table(APIView):
                 table_object = DBTable.objects.create(name=table, schema=schema_object)
             except IntegrityError:
                 raise APIError("Table already exists")
-            
+
             actions.table_create(
                 schema,
                 table,
@@ -511,51 +511,81 @@ class Table(APIView):
                 )
 
         if embargo_data:
-            start_date = embargo_data.get("start")
-            end_date = embargo_data.get("end")
-            if start_date and end_date:
+            # start_date = embargo_data.get("start")
+            # end_date = embargo_data.get("end")
+            # if start_date and end_date:
+            #     try:
+            #         date_started = datetime.strptime(start_date, "%Y-%m-%d").date()
+            #         date_ended = datetime.strptime(end_date, "%Y-%m-%d").date()
+            #         duration_days = (date_ended - date_started).days
+            #         if duration_days <= 182:
+            #             duration = "6_months"
+            #         elif duration_days <= 365:
+            #             duration = "1_year"
+            #         else:
+            #             duration = None
+            #         if date_started <= timezone.now().date() <= date_ended:
+
+            # Embargo.objects.create(
+            #     table=table_object,
+            #     date_started=date_started,
+            #     date_ended=date_ended,
+            #     duration=duration,
+            # )
+
+            embargo_period = embargo_data.get("duration")
+            if embargo_period in ["6_months", "1_year"]:
                 try:
-                    date_started = datetime.strptime(start_date, "%Y-%m-%d").date()
-                    date_ended = datetime.strptime(end_date, "%Y-%m-%d").date()
-                    duration_days = (date_ended - date_started).days
-                    if duration_days <= 182:
-                        duration = "6_months"
-                    elif duration_days <= 365:
-                        duration = "1_year"
-                    else:
-                        duration = None
-                    if date_started <= timezone.now().date() <= date_ended:
+                    table_object = DBTable.objects.create(
+                        name=table, schema=schema_object
+                    )
+                except IntegrityError:
+                    raise APIError("Table already exists")
 
-                        try:
-                            table_object = DBTable.objects.create(name=table, schema=schema_object)
-                        except IntegrityError:
-                            raise APIError("Table already exists")
+                actions.table_create(
+                    schema,
+                    table,
+                    column_definitions,
+                    constraint_definitions,
+                )
 
-                        actions.table_create(
-                            schema,
-                            table,
-                            column_definitions,
-                            constraint_definitions,
-                        )
+                table_object.save()
 
-                        table_object.save()
+                if metadata:
+                    actions.set_table_metadata(
+                        table=table,
+                        schema=schema,
+                        metadata=metadata,
+                        cursor=cursor,
+                    )
 
-                        if metadata:
-                            actions.set_table_metadata(
-                                table=table, schema=schema, metadata=metadata, cursor=cursor
-                            )
-
-                        Embargo.objects.create(
-                            table=table_object,
-                            date_started=date_started,
-                            date_ended=date_ended,
-                            duration=duration,
-                        )
-                except ValueError as e:
-                    raise actions.APIError(f"Could not parse the date Format. The embargo start: {start_date}" 
-                             f" end-date: {end_date} must follow the ISO-8601 (YYYY-MM-DD) format."
-                             f"Error: {e}")
-                
+                duration_in_weeks = 26 if embargo_period == "6_months" else 52
+                embargo, created = Embargo.objects.get_or_create(
+                    table=table_object,
+                    defaults={
+                        "duration": embargo_period,
+                        "date_ended": datetime.now()
+                        + timedelta(weeks=duration_in_weeks),
+                    },
+                )
+                if not created and embargo.date_started is not None:
+                    embargo.date_ended = embargo.date_started + timedelta(
+                        weeks=duration_in_weeks
+                    )
+                    embargo.save()
+                elif not created:
+                    embargo.date_started = datetime.now()
+                    embargo.date_ended = embargo.date_started + timedelta(
+                        weeks=duration_in_weeks
+                    )
+                    embargo.save()
+            elif embargo_period == "none":
+                pass
+            else:
+                raise actions.APIError(
+                    f"Could not parse the embargo period format: {embargo_period}."
+                    "Please use either '6_months' or '1_year'"
+                )
 
     @api_exception
     @require_delete_permission
