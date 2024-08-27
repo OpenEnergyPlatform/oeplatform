@@ -3,7 +3,11 @@ import types
 from owlready2 import And, Ontology, Restriction, ThingClass
 from rdflib import URIRef
 
-from oeo_ext.oeo_extended_store.connection import OEO_EXT_OWL_PATH, oeo_ext_owl, oeo_owl
+from oeo_ext.oeo_extended_store.connection import (
+    OEO_EXT_OWL_PATH,
+    _internal_oeo_owl,
+    oeo_owl,
+)
 from oeo_ext.oeo_extended_store.namespaces import OEOX
 from oeo_ext.oeo_extended_store.oeox_types import OeoxTypes
 
@@ -132,7 +136,7 @@ def get_new_iri(
 def create_new_unit(
     numerator: list,
     denominator: list,
-    oeo_ext: Ontology = oeo_ext_owl,
+    oeo_ext: Ontology = _internal_oeo_owl,
     uriref=None,
     unit=UNIT,
     result_file=OEO_EXT_OWL_PATH,
@@ -142,9 +146,10 @@ def create_new_unit(
         uriref is either URIRef type or None
         error is either dict with key:value or None
     """
+
     type = OeoxTypes.composedUnit
     if not uriref:
-        uriref = get_new_iri(oeo_ext, type)
+        uriref = get_new_iri(ontox=oeo_ext, concept_type=type)
 
     # Create the list to store the equivalent class restrictions
     equivalent_classes = []
@@ -226,8 +231,8 @@ def create_new_unit(
         NewClass.equivalent_to = [intersection]
 
         new_label = automated_label_generator(NewClass)
-
-        if not oeo_ext.search_one(label=new_label):
+        check_duplicate = oeo_ext.search_one(label=new_label)
+        if check_duplicate is None:
             NewClass.label = new_label
         else:
             return None, {
