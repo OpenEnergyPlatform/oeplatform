@@ -6,10 +6,9 @@
          xml:base="http://openenergy-platform.org/ontology/oeox"
          xmlns="http://openenergy-platform.org/ontology/oeox#">
 
-<owl:Ontology rdf:about="http://openenergy-platform.org/ontology/oeox"/>
+<owl:Ontology rdf:about="http://openenergy-platform.org/ontology/oeoxTest"/>
 
-
-<owl:Class rdf:about="#http://openenergy-platform.org/ontology/oeox/composedUnit/OEOX_2">
+<owl:Class rdf:about="#http://openenergy-platform.org/ontology/oeoxTest/composedUnit/OEOX_1">
   <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UO_0000000"/>
   <owl:equivalentClass>
     <owl:Class>
@@ -39,7 +38,7 @@
       </owl:intersectionOf>
     </owl:Class>
   </owl:equivalentClass>
-  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">mega watt-hour per meter squared and year</rdfs:label>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Test mega watt-hour per meter squared and year</rdfs:label>
 </owl:Class>
 
 </rdf:RDF>
