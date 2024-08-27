@@ -3,25 +3,19 @@ import types
 from owlready2 import And, Ontology, Restriction, ThingClass
 from rdflib import URIRef
 
-from oeo_ext.oeo_extended_store.connection import (
-    OEO_EXT_OWL_PATH,
-    _internal_oeo_owl,
-    oeo_owl,
-)
+from oeo_ext.oeo_extended_store.connection import OEO_EXT_OWL_PATH, oeo_ext_owl, oeo_owl
 from oeo_ext.oeo_extended_store.namespaces import OEOX
 from oeo_ext.oeo_extended_store.oeox_types import OeoxTypes
-
-# Static parts, object properties:
-has_linear_unit_numerator = oeo_owl.search_one(label="has unit numerator")
-has_squared_unit_numerator = oeo_owl.search_one(label="has squared unit numerator")
-has_cubed_unit_numerator = oeo_owl.search_one(label="has cubed unit numerator")
-has_linear_unit_denominator = oeo_owl.search_one(label="has linear unit denominator")
-has_squared_unit_denominator = oeo_owl.search_one(label="has squared unit denominator")
-has_cubed_unit_denominator = oeo_owl.search_one(label="has cubed unit denominator")
-has_unit_prefix = oeo_owl.search_one(label="has prefix")
-UNIT = oeo_owl.search_one(label="unit")
-
-# UNITS = oeo.search(label="unit")
+from oeo_ext.oeo_extended_store.properties import (
+    UNIT,
+    has_cubed_unit_denominator,
+    has_cubed_unit_numerator,
+    has_linear_unit_denominator,
+    has_linear_unit_numerator,
+    has_squared_unit_denominator,
+    has_squared_unit_numerator,
+    has_unit_prefix,
+)
 
 
 def automated_label_generator(new_unit_class: type):
@@ -136,7 +130,7 @@ def get_new_iri(
 def create_new_unit(
     numerator: list,
     denominator: list,
-    oeo_ext: Ontology = _internal_oeo_owl,
+    oeo_ext: Ontology = oeo_ext_owl,
     uriref=None,
     unit=UNIT,
     result_file=OEO_EXT_OWL_PATH,
