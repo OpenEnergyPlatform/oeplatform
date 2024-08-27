@@ -1679,6 +1679,14 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
                     weeks=duration_in_weeks
                 )
                 embargo.save()
+        elif embargo_period == "none":
+            if Embargo.objects.filter(table=t).exists():
+                reset_embargo = Embargo.objects.get(table=t)
+                reset_embargo.delete()
+        # Activate to delete the embargo once table is unpublised
+        # else:
+        #     reset_embargo = Embargo.objects.get(table=t)
+        #     reset_embargo.delete()
 
         all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
 
