@@ -38,7 +38,7 @@
       </owl:intersectionOf>
     </owl:Class>
   </owl:equivalentClass>
-  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Test mega watt-hour per meter squared and year</rdfs:label>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">mega watt-hour per meter squared and year</rdfs:label>
 </owl:Class>
 
 </rdf:RDF>
