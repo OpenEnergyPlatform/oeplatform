@@ -41,7 +41,7 @@ oeo_ext_URI_STR = oeo_ext_URI.as_posix()
 
 oeo_ext = Graph()
 oeo_ext.parse(OEO_EXT_OWL_PATH.as_uri())
-_internal_oeo_owl = get_ontology(oeo_ext_URI_STR).load()
+oeo_ext_owl = get_ontology(oeo_ext_URI_STR).load()
 
 
 ########################################################
