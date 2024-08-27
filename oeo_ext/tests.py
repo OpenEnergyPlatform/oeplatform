@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 from django.test import TestCase  # noqa:F401
@@ -6,6 +5,7 @@ from owlready2 import get_ontology
 from rdflib import URIRef
 
 from oeo_ext.utils import create_new_unit
+from oeplatform.settings import BASE_DIR
 
 # from rdflib.compare import graph_diff, to_isomorphic
 
@@ -13,10 +13,10 @@ from oeo_ext.utils import create_new_unit
 # Create your tests here.
 
 EXPECTED_OEOX_OWL = Path(
-    "/home/jh/github/oeplatform/oeo_ext/oeo_extended_store/test/data/expected_composedUnit.owl"  # noqa
+    BASE_DIR, "oeo_ext/oeo_extended_store/test/data/expected_composedUnit.owl"  # noqa
 )
 TEMP_RESULT_OEO_OWL = "temp_oeox.owl"
-TEMP_RESULT_OEO_OWL_PATH = Path(os.getcwd(), TEMP_RESULT_OEO_OWL)
+TEMP_RESULT_OEO_OWL_PATH = Path(BASE_DIR, TEMP_RESULT_OEO_OWL)
 RESULT_URI = URIRef(
     "http://openenergy-platform.org/ontology/oeoxTest/composedUnit/OEOX_2"
 )
