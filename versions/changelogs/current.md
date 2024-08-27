@@ -2,7 +2,7 @@
 
 ## Changes
 
-- Enhance embargo area feature (UI & API) [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+- Enhance embargo area feature (UI & API) [(#1804)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1804)
   - The REST API raises an error when creating a table with embargo period but false date time for start/end data
   - Update the table creation http "put" endpoint to handle embargo periods
 
