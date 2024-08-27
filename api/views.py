@@ -483,48 +483,79 @@ class Table(APIView):
         self.validate_column_names(column_definitions)
 
         schema_object, _ = DBSchema.objects.get_or_create(name=schema)
-        try:
-            table_object = DBTable.objects.create(name=table, schema=schema_object)
-        except IntegrityError:
-            raise APIError("Table aready exists")
 
         context = {
             "connection_id": actions.get_or_403(request.data, "connection_id"),
             "cursor_id": actions.get_or_403(request.data, "cursor_id"),
         }
         cursor = sessions.load_cursor_from_context(context)
-        actions.table_create(
-            schema,
-            table,
-            column_definitions,
-            constraint_definitions,
-        )
-        table_object.save()
 
-        if metadata:
-            actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=cursor
+        if not embargo_data:
+            try:
+                table_object = DBTable.objects.create(name=table, schema=schema_object)
+            except IntegrityError:
+                raise APIError("Table already exists")
+            
+            actions.table_create(
+                schema,
+                table,
+                column_definitions,
+                constraint_definitions,
             )
+
+            table_object.save()
+
+            if metadata:
+                actions.set_table_metadata(
+                    table=table, schema=schema, metadata=metadata, cursor=cursor
+                )
+
         if embargo_data:
             start_date = embargo_data.get("start")
             end_date = embargo_data.get("end")
             if start_date and end_date:
-                date_started = datetime.strptime(start_date, "%Y-%m-%d").date()
-                date_ended = datetime.strptime(end_date, "%Y-%m-%d").date()
-                duration_days = (date_ended - date_started).days
-                if duration_days <= 182:
-                    duration = "6_months"
-                elif duration_days <= 365:
-                    duration = "1_year"
-                else:
-                    duration = None
-                if date_started <= timezone.now().date() <= date_ended:
-                    Embargo.objects.create(
-                        table=table_object,
-                        date_started=date_started,
-                        date_ended=date_ended,
-                        duration=duration,
-                    )
+                try:
+                    date_started = datetime.strptime(start_date, "%Y-%m-%d").date()
+                    date_ended = datetime.strptime(end_date, "%Y-%m-%d").date()
+                    duration_days = (date_ended - date_started).days
+                    if duration_days <= 182:
+                        duration = "6_months"
+                    elif duration_days <= 365:
+                        duration = "1_year"
+                    else:
+                        duration = None
+                    if date_started <= timezone.now().date() <= date_ended:
+
+                        try:
+                            table_object = DBTable.objects.create(name=table, schema=schema_object)
+                        except IntegrityError:
+                            raise APIError("Table already exists")
+
+                        actions.table_create(
+                            schema,
+                            table,
+                            column_definitions,
+                            constraint_definitions,
+                        )
+
+                        table_object.save()
+
+                        if metadata:
+                            actions.set_table_metadata(
+                                table=table, schema=schema, metadata=metadata, cursor=cursor
+                            )
+
+                        Embargo.objects.create(
+                            table=table_object,
+                            date_started=date_started,
+                            date_ended=date_ended,
+                            duration=duration,
+                        )
+                except ValueError as e:
+                    raise actions.APIError(f"Could not parse the date Format. The embargo start: {start_date}" 
+                             f" end-date: {end_date} must follow the ISO-8601 (YYYY-MM-DD) format."
+                             f"Error: {e}")
+                
 
     @api_exception
     @require_delete_permission
