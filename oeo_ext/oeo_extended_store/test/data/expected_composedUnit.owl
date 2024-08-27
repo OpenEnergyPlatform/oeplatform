@@ -6,9 +6,9 @@
          xml:base="http://openenergy-platform.org/ontology/oeox"
          xmlns="http://openenergy-platform.org/ontology/oeox#">
 
-<owl:Ontology rdf:about="http://openenergy-platform.org/ontology/oeoxTest"/>
+<owl:Ontology rdf:about="http://openenergy-platform.org/ontology/oeox"/>
 
-<owl:Class rdf:about="#http://openenergy-platform.org/ontology/oeoxTest/composedUnit/OEOX_1">
+<owl:Class rdf:about="#http://openenergy-platform.org/ontology/oeox/composedUnit/OEOX_1">
   <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UO_0000000"/>
   <owl:equivalentClass>
     <owl:Class>
