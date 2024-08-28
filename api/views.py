@@ -689,7 +689,11 @@ class MovePublish(APIView):
     def post(self, request, schema, table, to_schema):
         if schema not in schema_whitelist or to_schema not in schema_whitelist:
             raise APIError("Invalid origin or target schema")
-        embargo_period = request.data.get("embargo", {}).get("duration", None)
+        # Make payload more friendly as users tend to use the query wrapper in payload
+        json_data = request.data.get("query", {})
+        embargo_period = request.data.get("embargo", {}).get(
+            "duration", None
+        ) or json_data.get("embargo", {}).get("duration", None)
         actions.move_publish(schema, table, to_schema, embargo_period)
 
         # tables = Table.objects.all()
