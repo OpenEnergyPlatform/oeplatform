@@ -1659,6 +1659,7 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
             OEDBTableTags.schema_name == from_schema,
             OEDBTableTags.table_name == table_name,
         ).update({OEDBTableTags.schema_name: to_schema})
+
         if embargo_period in ["6_months", "1_year"]:
             duration_in_weeks = 26 if embargo_period == "6_months" else 52
             embargo, created = Embargo.objects.get_or_create(
@@ -1668,25 +1669,23 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
                     "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
                 },
             )
-            if not created and embargo.date_started is not None:
-                embargo.date_ended = embargo.date_started + timedelta(
-                    weeks=duration_in_weeks
-                )
-                embargo.save()
-            elif not created:
-                embargo.date_started = datetime.now()
-                embargo.date_ended = embargo.date_started + timedelta(
-                    weeks=duration_in_weeks
-                )
+            if not created:
+                if embargo.date_started:
+                    embargo.duration = embargo_period
+                    embargo.date_ended = embargo.date_started + timedelta(
+                        weeks=duration_in_weeks
+                    )
+                else:
+                    embargo.duration = embargo_period
+                    embargo.date_started = datetime.now()
+                    embargo.date_ended = embargo.date_started + timedelta(
+                        weeks=duration_in_weeks
+                    )
                 embargo.save()
         elif embargo_period == "none":
             if Embargo.objects.filter(table=t).exists():
                 reset_embargo = Embargo.objects.get(table=t)
                 reset_embargo.delete()
-        # Activate to delete the embargo once table is unpublised
-        # else:
-        #     reset_embargo = Embargo.objects.get(table=t)
-        #     reset_embargo.delete()
 
         all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
 
