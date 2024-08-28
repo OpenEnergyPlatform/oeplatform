@@ -549,7 +549,8 @@ class Table(APIView):
         else:
             error = actions.APIError(
                 f"Could not parse the embargo period format: {embargo_period}. "
-                "Please use either 'duration':'6_months' or '1_year'."
+                "Please use {'embargo': {'duration':'6_months'} } or '1_year' to "
+                "set the embargo or use 'none' to remove the embargo."
             )
             return error, False
 
