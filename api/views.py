@@ -495,30 +495,35 @@ class Table(APIView):
                 schema, table, column_definitions, constraint_definitions
             )
 
-            if metadata:
-                actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata, cursor=cursor
-                )
-            try:
-                self._apply_embargo(table_object, embargo_data)
-            finally:
-                # Ensure the user is assigned as the table holder
-                self._assign_table_holder(request.user, schema, table)
-                raise APIError(
-                    "Table was created without embargo due to an unexpected "
-                    "error during embargo setup."
-                )
-        else:
-            table_object = self._create_table_object(schema_object, table)
-            actions.table_create(
-                schema, table, column_definitions, constraint_definitions
-            )
+            self._apply_embargo(table_object, embargo_data)
 
             if metadata:
                 actions.set_table_metadata(
                     table=table, schema=schema, metadata=metadata, cursor=cursor
                 )
+
+            try:
+                self._assign_table_holder(request.user, schema, table)
+            except ValueError as e:
+                # Ensure the user is assigned as the table holder
+                self._assign_table_holder(request.user, schema, table)
+                raise APIError(
+                    "Table was created without embargo due to an unexpected "
+                    "error during embargo setup."
+                    f"{e}"
+                )
+
+        else:
+            table_object = self._create_table_object(schema_object, table)
+            actions.table_create(
+                schema, table, column_definitions, constraint_definitions
+            )
             self._assign_table_holder(request.user, schema, table)
+
+            if metadata:
+                actions.set_table_metadata(
+                    table=table, schema=schema, metadata=metadata, cursor=cursor
+                )
 
     def _create_table_object(self, schema_object, table):
         try:
@@ -549,11 +554,12 @@ class Table(APIView):
             return error, False
 
     def _apply_embargo(self, table_object, embargo_period):
-        duration_in_weeks = 26 if embargo_period == "6_months" else 52
+        unpack_embargo_period = embargo_period.get("duration")
+        duration_in_weeks = 26 if unpack_embargo_period == "6_months" else 52
         embargo, created = Embargo.objects.get_or_create(
             table=table_object,
             defaults={
-                "duration": embargo_period,
+                "duration": unpack_embargo_period,
                 "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
             },
         )
