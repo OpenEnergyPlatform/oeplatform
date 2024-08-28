@@ -38,7 +38,8 @@ from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from login.utils import validate_open_data_license
+from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -1609,9 +1610,26 @@ def move(from_schema, table, to_schema):
 
 def move_publish(from_schema, table_name, to_schema, embargo_period):
     """
+    The issue about publishing datatables  in the context of the OEP
+    is that tables must be moved physically in the postgreSQL database.
+    We need to  move the table in the OEDB to update the data & we need
+    to update the table registry in the OEP django database to keep the
+    display information up to date.
+    This function tackales this issue. It implements a procedure in witch
+    the order of execturion matter as for example before updating the
+    schema / datatopic it shall be published in we need to check if the
+    table is already in that schema & if the table holds and open data
+    license in its metadata.
+
+
     Implementation note:
         Currently we implemented two versions of the move functionality
         this will later be harmonized. See 'move'.
+
+    Args:
+
+    Returns:
+
     """
     engine = _get_engine()
     Session = sessionmaker(engine)
@@ -1623,6 +1641,14 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
 
         if from_schema == to_schema:
             raise APIError("Target schema same as current schema")
+
+        license_check, license_error = validate_open_data_license(t)
+
+        if not license_check and to_schema != "model_draft":
+            raise APIError(
+                "A issue with the license from the metadata was found: "
+                f"{license_error}"
+            )
 
         t.schema = to_schema_reg
 
