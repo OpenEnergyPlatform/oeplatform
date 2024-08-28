@@ -504,6 +504,55 @@ class Table(APIView):
                     table=table, schema=schema, metadata=metadata, cursor=cursor
                 )
 
+    def _create_table_object(self, schema_object, table):
+        try:
+            table_object = DBTable.objects.create(name=table, schema=schema_object)
+        except IntegrityError:
+            raise APIError("Table already exists")
+        return table_object
+
+    def _check_embargo_payload_valid(self, embargo_data):
+        if not embargo_data:
+            return None, False
+
+        if not isinstance(embargo_data, dict):
+            error = APIError("The embargo payload must be a dict")
+            return error, False
+
+        embargo_period = embargo_data.get("duration")
+        if embargo_period in ["6_months", "1_year"]:
+            # self._apply_embargo(table_object, embargo_period)
+            return None, True
+        elif embargo_period == "none":
+            return None, False
+        else:
+            error = actions.APIError(
+                f"Could not parse the embargo period format: {embargo_period}. "
+                "Please use either 'duration':'6_months' or '1_year'."
+            )
+            return error, False
+
+    def _apply_embargo(self, table_object, embargo_period):
+        duration_in_weeks = 26 if embargo_period == "6_months" else 52
+        embargo, created = Embargo.objects.get_or_create(
+            table=table_object,
+            defaults={
+                "duration": embargo_period,
+                "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
+            },
+        )
+        if not created:
+            if embargo.date_started:
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+            else:
+                embargo.date_started = datetime.now()
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+            embargo.save()
+
     def _assign_table_holder(self, user, schema, table):
         table_object = DBTable.load(schema, table)
         perm, _ = login_models.UserPermission.objects.get_or_create(
