@@ -477,32 +477,48 @@ class Table(APIView):
         self.validate_column_names(column_definitions)
 
         schema_object, _ = DBSchema.objects.get_or_create(name=schema)
-
         context = {
             "connection_id": actions.get_or_403(request.data, "connection_id"),
             "cursor_id": actions.get_or_403(request.data, "cursor_id"),
         }
         cursor = sessions.load_cursor_from_context(context)
 
-        if not embargo_data:
-            try:
-                table_object = DBTable.objects.create(name=table, schema=schema_object)
-            except IntegrityError:
-                raise APIError("Table already exists")
+        embargo_error, embargo_payload_check = self._check_embargo_payload_valid(
+            embargo_data
+        )
+        if embargo_error:
+            raise embargo_error
 
+        if embargo_payload_check:
+            table_object = self._create_table_object(schema_object, table)
             actions.table_create(
-                schema,
-                table,
-                column_definitions,
-                constraint_definitions,
+                schema, table, column_definitions, constraint_definitions
             )
-
-            table_object.save()
 
             if metadata:
                 actions.set_table_metadata(
                     table=table, schema=schema, metadata=metadata, cursor=cursor
                 )
+            try:
+                self._apply_embargo(table_object, embargo_data)
+            finally:
+                # Ensure the user is assigned as the table holder
+                self._assign_table_holder(request.user, schema, table)
+                raise APIError(
+                    "Table was created without embargo due to an unexpected "
+                    "error during embargo setup."
+                )
+        else:
+            table_object = self._create_table_object(schema_object, table)
+            actions.table_create(
+                schema, table, column_definitions, constraint_definitions
+            )
+
+            if metadata:
+                actions.set_table_metadata(
+                    table=table, schema=schema, metadata=metadata, cursor=cursor
+                )
+            self._assign_table_holder(request.user, schema, table)
 
     def _create_table_object(self, schema_object, table):
         try:
