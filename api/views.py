@@ -3,7 +3,7 @@ import itertools
 import json
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta  # noqa
 from decimal import Decimal
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
@@ -437,12 +437,6 @@ class Table(APIView):
             embargo_data=embargo_data,
         )
 
-        perm, _ = login_models.UserPermission.objects.get_or_create(
-            table=DBTable.load(schema, table), holder=request.user
-        )
-        perm.level = login_models.ADMIN_PERM
-        perm.save()
-        request.user.save()
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
     def validate_column_names(self, column_definitions):
@@ -510,82 +504,14 @@ class Table(APIView):
                     table=table, schema=schema, metadata=metadata, cursor=cursor
                 )
 
-        if embargo_data:
-            # start_date = embargo_data.get("start")
-            # end_date = embargo_data.get("end")
-            # if start_date and end_date:
-            #     try:
-            #         date_started = datetime.strptime(start_date, "%Y-%m-%d").date()
-            #         date_ended = datetime.strptime(end_date, "%Y-%m-%d").date()
-            #         duration_days = (date_ended - date_started).days
-            #         if duration_days <= 182:
-            #             duration = "6_months"
-            #         elif duration_days <= 365:
-            #             duration = "1_year"
-            #         else:
-            #             duration = None
-            #         if date_started <= timezone.now().date() <= date_ended:
-
-            # Embargo.objects.create(
-            #     table=table_object,
-            #     date_started=date_started,
-            #     date_ended=date_ended,
-            #     duration=duration,
-            # )
-
-            embargo_period = embargo_data.get("duration")
-            if embargo_period in ["6_months", "1_year"]:
-                try:
-                    table_object = DBTable.objects.create(
-                        name=table, schema=schema_object
-                    )
-                except IntegrityError:
-                    raise APIError("Table already exists")
-
-                actions.table_create(
-                    schema,
-                    table,
-                    column_definitions,
-                    constraint_definitions,
-                )
-
-                table_object.save()
-
-                if metadata:
-                    actions.set_table_metadata(
-                        table=table,
-                        schema=schema,
-                        metadata=metadata,
-                        cursor=cursor,
-                    )
-
-                duration_in_weeks = 26 if embargo_period == "6_months" else 52
-                embargo, created = Embargo.objects.get_or_create(
-                    table=table_object,
-                    defaults={
-                        "duration": embargo_period,
-                        "date_ended": datetime.now()
-                        + timedelta(weeks=duration_in_weeks),
-                    },
-                )
-                if not created and embargo.date_started is not None:
-                    embargo.date_ended = embargo.date_started + timedelta(
-                        weeks=duration_in_weeks
-                    )
-                    embargo.save()
-                elif not created:
-                    embargo.date_started = datetime.now()
-                    embargo.date_ended = embargo.date_started + timedelta(
-                        weeks=duration_in_weeks
-                    )
-                    embargo.save()
-            elif embargo_period == "none":
-                pass
-            else:
-                raise actions.APIError(
-                    f"Could not parse the embargo period format: {embargo_period}."
-                    "Please use either '6_months' or '1_year'"
-                )
+    def _assign_table_holder(self, user, schema, table):
+        table_object = DBTable.load(schema, table)
+        perm, _ = login_models.UserPermission.objects.get_or_create(
+            table=table_object, holder=user
+        )
+        perm.level = login_models.ADMIN_PERM
+        perm.save()
+        user.save()
 
     @api_exception
     @require_delete_permission
