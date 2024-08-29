@@ -51,5 +51,6 @@ urlpatterns = [
     url(
         r"^(?P<ontology>[\w_-]+)?/$",
         views.OntologyOverview.as_view(),
+        name="oeo-initializer",
     ),
 ]
