@@ -1,4 +1,24 @@
 <div class="container">
+    
+        <div class="row">
+            <h3>Ontologies</h3>
+        </div>
+        <div class="row">
+            <table class="table">
+                <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                </tr>
+                <tr>
+                    <td><a href="/ontology/oeo/">Open Energy Ontology (OEO)</a></td>
+                    <td>{{ version }}</td>
+                </tr>
+            </table>
+        </div>
+       
+        <hr>
+    
+    {% comment %}
     <div class="row">
         <h3>View the oeo version {{version}}</h3>
     </div>
@@ -8,16 +28,121 @@
                 <a class="btn btn-primary" href="/ontology/{{ontology}}/BFO_0000001/">
                     Browse oeo classes
                 </a>
-                <a class="btn btn-primary" href="/viewer/oeo/">
-                    Graphical oeo viewer
-                </a>
             </div>
+        </div>
+        <div class="col">
+            <a class="btn btn-primary" href="/viewer/oeo/">
+                Graphical oeo viewer
+            </a>
         </div>
     </div>
     <hr>
+    {% endcomment %}
     <div class="row">
-        <h3>Download the oeo</h3>
+        <h3>Get the latest OEO release</h3>
     </div>
+    <div class="row">
+        <p>See our <a class=" " href="/ontology/{{ontology}}/releases/glossary/oeo-glossary.csv">Glossary</a> 
+            to get an overview of the OEO contents. </p>
+    </div>
+    <p>Download the latest oeo version {{version}} in OWL format: </p>
+    <div class="row">
+        <div class="col">
+            <a class="btn btn-primary" id="popoverTrigger" 
+               href="/ontology/{{ontology}}/releases/oeo-full.owl" 
+               data-bs-toggle="popover"
+               data-bs-trigger="hover"
+               title="full-oeo-owl"
+               data-bs-content="This file contains the complete version of the Open Energy Ontology (OEO) as an OWL file in XML/RDF format. It encompasses all classes, properties, and relationships defined within the OEO framework.">
+                Download full-oeo
+            </a>
+            <!-- Info button to trigger the modal -->
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#oeoFullInfoModal">
+                <i class="fas fa-info-circle"></i>
+            </button>
+        </div>        
+    </div>
+    <div class="row">
+        <!-- Modal for oeo-full-info -->
+        <div class="modal fade" id="oeoFullInfoModal" tabindex="-1" aria-labelledby="oeoFullInfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="oeoFullInfoModalLabel">Full OEO Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="oeo-full-info">
+                <p>This file contains the complete version of the Open Energy Ontology (OEO) as an OWL file in XML/RDF format. It encompasses all classes, properties, and relationships defined within the OEO framework.</p>
+                <p>You can download the full ontology using the following URLs:</p>
+                <ul>
+                    <li><a href="http://127.0.0.1:8000/ontology/oeo/" target="_blank">http://127.0.0.1:8000/ontology/oeo/</a></li>
+                    <li><a href="http://127.0.0.1:8000/ontology/oeo/releases/oeo-full.owl" target="_blank">http://127.0.0.1:8000/ontology/oeo/releases/oeo-full.owl</a></li>
+                </ul>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col">
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <a class="btn btn-primary" id="popoverTrigger" 
+                   href="/ontology/{{ontology}}/releases/oeo-closure.owl" 
+                   data-bs-toggle="popover"
+                   data-bs-trigger="hover focus" 
+                   title="closure"
+                   data-bs-content="This file represents the Open Energy Ontology (OEO) with the logical closure of all axioms included. It is provided as an OWL file in XML/RDF format, ensuring that all inferred relationships and properties are fully realized.">
+                    Download closure
+                </a>
+            </div>
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#closureInfoModal">
+                <i class="fas fa-info-circle"></i>
+            </button>
+        </div>
+        
+    </div>
+    <div class="row">
+        <!-- Modal for closure-info -->
+        <div class="modal fade" id="closureInfoModal" tabindex="-1" aria-labelledby="closureInfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="closureInfoModalLabel">Closure OEO Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="closure-info">
+                <p>This file represents the Open Energy Ontology (OEO) with the logical closure of all axioms included. It is provided as an OWL file in XML/RDF format, ensuring that all inferred relationships and properties are fully realized.</p>
+                <p>You can download the closure file using the following URL:</p>
+                <ul>
+                    <li><a href="http://127.0.0.1:8000/ontology/oeo/releases/oeo-closure.owl" target="_blank">http://127.0.0.1:8000/ontology/oeo/releases/oeo-closure.owl</a></li>
+                </ul>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+        
+    <hr>
+    <div class="row">
+        <h3>The OEO on GitHub</h3>
+    </div>
+    <div class="row">
+        <div class="col">
+            On GitHub you can find previous releases.
+
+            If you are interested in the latest developments then have a look at the develop branch.
+        </div>
+        
+
+    </div>
+    <br>
     <div class="row">
         <div class="col">
             <a class="btn btn-primary" href="https://github.com/OpenEnergyPlatform/ontology/releases" target="_blank">
@@ -32,24 +157,7 @@
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
-    <p>Download the full owl file for oeo version {{version}} and more ... </p>
-    <div class="row">
-        <div class="col">
-            <a class="btn btn-primary" href="/ontology/{{ontology}}/releases/oeo-full.owl">
-                full-oeo-owl
-            </a>
-            <div class="btn-group float-end" role="group" aria-label="Basic example">
-                {% for ex in main_module.extensions %}
-                <a class="btn btn-primary" href="/ontology/{{ontology}}/releases/{{main_module.name}}.{{ex}}">
-                    {{ex}}
-                </a>
-                {% endfor %}
-                <a class="btn btn-primary" href="/ontology/{{ontology}}/releases/oeo-closure.owl">
-                    closure
-                </a>
-            </div>
-        </div>
-    </div>
+   
     <!-- <div class="row">
         <h1>Welcome to Your SPA</h1>
         <div id="updateable-content"> -->
@@ -58,5 +166,40 @@
         <button hx-get="{% url 'partial-page-content' %}" hx-swap="outerHTML" hx-target="#content" id="content">Update Content</button> -->
         <!-- Add other htmx-enabled elements as needed -->
     <!-- </div> -->
-    <hr>
+
 </div>
+<script>
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    //     var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+    //         return new bootstrap.Popover(popoverTriggerEl, {
+    //             trigger: 'hover',  // Change trigger to hover
+    //             placement: 'right', // Adjust placement as needed
+    //             html: true, // Allows HTML in the popover content
+    //         });
+    //     });
+    // });
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     // Initialize the popover
+    //     var popoverTriggerEl = document.getElementById('popoverTrigger');
+    //     var popover = new bootstrap.Popover(popoverTriggerEl, {
+    //         trigger: 'hover',  // Manually control when to show/hide the popover
+    //         placement: 'right',
+    //         html: true
+    //     });
+
+    //     // Add event listeners for hover
+    //     popoverTriggerEl.addEventListener('mouseenter', function () {
+    //         popover.show();
+    //     });
+
+    //     popoverTriggerEl.addEventListener('mouseleave', function () {
+    //         popover.hide();
+    //     });
+    // });
+
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+    return new bootstrap.Popover(popoverTriggerEl)
+    })
+</script>
