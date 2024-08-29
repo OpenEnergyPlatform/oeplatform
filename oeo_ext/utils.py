@@ -102,6 +102,31 @@ def automated_label_generator(new_unit_class: type):
     return generated_label
 
 
+def generate_id(existing_count: int) -> str:
+    """
+    Generates an ID in the format 012345AA where the digits increment
+    and the letters change.
+
+    Args:
+        existing_count (int): The current count of elements to determine the next ID.
+
+    Returns:
+        str: A new ID in the format 012345AA.
+    """
+    # Generate a 6-digit number, zero-padded
+    num_part = f"{existing_count:06d}"
+
+    # Generate a two-letter code
+    # Example: 0 -> AA, 1 -> AB, 26 -> BA, ..., 675 -> ZZ
+    letter_part = ""
+    count = existing_count
+    for _ in range(2):
+        letter_part = chr(ord("A") + count % 26) + letter_part
+        count //= 26
+
+    return f"{num_part}{letter_part}"
+
+
 def get_new_iri(
     ontox: Ontology, concept_type: OeoxTypes, base=OEOX, id_prefix="OEOX_"
 ) -> URIRef:
@@ -120,7 +145,7 @@ def get_new_iri(
     existing_count = len(list(ontox.classes()))
 
     # Generate the new IRI using the count + 1
-    new_counter = existing_count + 1
+    new_counter = generate_id(existing_count + 1)
     # Build URI of pattern: oeox-base:ConceptLike<ComposedUnit>#ConceptID
     new_uri = URIRef(f"{base}{concept_type.value}/{id_prefix}{new_counter}")
 
