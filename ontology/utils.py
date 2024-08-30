@@ -149,13 +149,13 @@ def read_oeo_context_information(path, file):
     return result
 
 
-def get_common_data(ontology, version=None, path=None):
+def get_common_data(ontology, file="oeo-full.owl", version=None, path=None):
     onto_base_path = Path(ONTOLOGY_ROOT, ontology)
 
     version = get_ontology_version(onto_base_path, version=version)
-    file = "oeo-full.owl"
 
-    path = onto_base_path / version
+    if not path:
+        path = onto_base_path / version
     oeo_context_data = read_oeo_context_information(path=path, file=file)
 
     return {
