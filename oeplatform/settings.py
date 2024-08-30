@@ -58,6 +58,7 @@ INSTALLED_APPS = (
     "django_better_admin_arrayfield",
     "oeo_viewer",
     "factsheet",
+    "oeo_ext",
     "corsheaders",
     "owlready2",
     "compressor",
@@ -96,7 +97,7 @@ EXTERNAL_URLS = {
 # Kept this separate for now to avoid messing with the other list ...
 # TODO move to EXTERNAL_URLS if possible
 DOCUMENTATION_LINKS = {
-    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#4-setup-the-openenergyontology-integation"  # noqa
+    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#4-setup-the-openenergyontology-integation"  # noqa:E501
 }
 
 
@@ -133,13 +134,34 @@ GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
+# from security settings
 try:
     ONTOLOGY_FOLDER  # noqa F405
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
-OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
-OPEN_ENERGY_ONTOLOGY_FOLDER = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)  # noqa
+# from security settings
+try:
+    BASE_DIR  # noqa F405
+except NameError:
+    BASE_DIR = ""
+
+try:
+    ONTOLOGY_ROOT  # noqa F405
+except NameError:
+    if BASE_DIR:
+        ONTOLOGY_ROOT = Path(BASE_DIR, ONTOLOGY_FOLDER)
+
+if ONTOLOGY_ROOT:
+    OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
+    OPEN_ENERGY_ONTOLOGY_FOLDER = Path(
+        ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME  # noqa:F405
+    )
+    OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME = "oeo-full.owl"
+
+    OEO_EXT_PATH = Path(ONTOLOGY_ROOT, "oeo_ext")
+    OEO_EXT_OWL_NAME = "oeo_ext.owl"
+    OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

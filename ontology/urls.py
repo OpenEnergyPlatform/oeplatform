@@ -1,10 +1,13 @@
 from django.conf.urls import url
+from django.urls import path
 from django.views.generic import TemplateView
 
 from ontology import views
 
 urlpatterns = [
+    # oeo-extended
     url(r"^$", views.OntologyAbout.as_view()),
+    path("oeox/", views.OeoExtendedFileServe.as_view()),
     url(
         "partial/page-content/",
         views.PartialOntologyAboutContent.as_view(),

@@ -8,7 +8,9 @@ from django.http import Http404
 from django.shortcuts import HttpResponse, render
 from django.views import View
 
-from oeplatform.settings import (  # OPEN_ENERGY_ONTOLOGY_EXTENDED_NAME,
+from oeplatform.settings import (
+    OEO_EXT_OWL_NAME,
+    OEO_EXT_OWL_PATH,
     ONTOLOGY_ROOT,
     OPEN_ENERGY_ONTOLOGY_NAME,
 )
@@ -364,3 +366,31 @@ class OntologyStatics(View):
                     "Content-Disposition"
                 ] = f'attachment; filename="{file}.{extension}"'
                 return response
+
+
+class OeoExtendedFileServe(View):
+    def __init__(self) -> None:
+        self.oeo_ext_static = self.read_owl_file()
+        self.file_extension = "owl"
+        self.file_name = OEO_EXT_OWL_NAME
+
+    @staticmethod
+    def read_owl_file():
+        if os.path.exists(OEO_EXT_OWL_PATH):
+            with open(OEO_EXT_OWL_PATH, "br") as f:
+                return f.read()
+        else:
+            return None
+
+    def get(self, request):
+        if self.oeo_ext_static:
+            response = HttpResponse(
+                self.oeo_ext_static, content_type="application/rdf+xml; charset=utf-8"
+            )
+            response[
+                "Content-Disposition"
+            ] = f'attachment; filename="{self.file_name}.{self.file_extension}"'
+        else:
+            response = HttpResponse("File not found!", status_code=404)
+
+        return response
