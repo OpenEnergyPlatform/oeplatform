@@ -64,7 +64,7 @@ urlpatterns = [
     #     {"imports": True},
     # ),
     url(
-        r"^(?P<ontology>[\w_-]+)(?P<module_or_id>[\w\d_-]+)?/$",
+        r"^(?P<ontology>[\w_-]+)?/(?P<module_or_id>[\w\d_-]+)?/$",
         views.OntologyViewClasses.as_view(),
         name="oeo-classes",
     ),

@@ -149,8 +149,6 @@ class OntologyViewClasses(View):
             ontology_data = OEO_COMMON_DATA
         elif ontology in [OEO_EXT_NAME]:
             ontology_data = OEOX_COMMON_DATA
-        else:
-            raise Http404
 
         sub_classes = []
         super_classes = []
