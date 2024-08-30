@@ -1,5 +1,7 @@
 import logging
 import os
+import tempfile
+import zipfile
 from pathlib import Path
 
 from django.http import Http404
@@ -7,8 +9,10 @@ from django.shortcuts import HttpResponse, render
 from django.views import View
 
 from oeplatform.settings import (
+    OEO_EXT_NAME,
     OEO_EXT_OWL_NAME,
     OEO_EXT_OWL_PATH,
+    OEO_EXT_PATH,
     ONTOLOGY_ROOT,
     OPEN_ENERGY_ONTOLOGY_NAME,
 )
@@ -20,16 +24,22 @@ LOGGER.info("Start loading the oeo from local static files.")
 OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
 OEO_PATH = OEO_BASE_PATH / OEO_VERSION
+# OEO_GLOSSARY_PATH = OEO_PATH / "glossary"
+# OEO_GLOSSARY_FILE_CSV = OEO_GLOSSARY_PATH / "glossary.csv"
+# OEO_GLOSSARY_FILE_MD = OEO_GLOSSARY_PATH / "glossary.md"
 OEO_MODULES_MAIN = collect_modules(OEO_PATH)
 OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
 OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
 OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
+OEOX_COMMON_DATA = get_common_data(
+    OEO_EXT_NAME, file=OEO_EXT_OWL_NAME, path=OEO_EXT_PATH
+)
 LOGGER.info(
     "Loading completed! The content form the oeo files is parse into python data types."
 )
 
 
-class OntologyVersion(View):
+class OntologyAbout(View):
     def get(self, request, ontology="oeo", version=None):
         onto_base_path = Path(ONTOLOGY_ROOT, ontology)
 
@@ -50,7 +60,7 @@ class OntologyVersion(View):
         )
 
 
-class PartialOntologyOverviewContent(View):
+class PartialOntologyAboutContent(View):
     def get(self, request):
         if request.headers.get("HX-Request") == "true":
             if request.method == "GET":
@@ -86,7 +96,7 @@ class PartialOntologyOverviewContent(View):
                 return HttpResponse(partial)
 
 
-class PartialOntologyOverviewSidebarContent(View):
+class PartialOntologyAboutSidebarContent(View):
     def get(self, request):
         version = OEO_VERSION
         main_module = OEO_MODULES_MAIN
@@ -120,42 +130,6 @@ def initial_for_pageload(request):
             return render(request, "ontology/initial_response_htmx.html")
 
 
-class OntologyOverview(View):
-    def get(
-        self,
-        request,
-        ontology=OPEN_ENERGY_ONTOLOGY_NAME,
-        module_or_id=None,
-        version=None,
-        imports=False,
-    ):
-        onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
-
-        if not onto_base_path.exists():
-            raise Http404
-        versions = os.listdir(onto_base_path)
-        if not version:
-            version = max(
-                (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
-            )
-        if "text/html" in request.headers.get("accept", "").split(","):
-            if module_or_id and "oeo" in module_or_id:
-                # Possibly handle specific module or ID-based logic here
-                pass
-            else:
-                return render(
-                    request,
-                    "ontology/oeo.html",
-                    {"ontology": OPEN_ENERGY_ONTOLOGY_NAME, "version": version},
-                )
-        else:
-            # Handling other types of requests or default case
-            return HttpResponse("Unsupported media type", status=415)
-
-        # If none of the above conditions are met
-        return HttpResponse("Invalid request parameters", status=400)
-
-
 class OntologyViewClasses(View):
     def get(
         self,
@@ -165,7 +139,19 @@ class OntologyViewClasses(View):
         version=None,
         imports=False,
     ):
-        ontology_data = OEO_COMMON_DATA
+        if ontology not in [
+            OPEN_ENERGY_ONTOLOGY_NAME,
+            OEO_EXT_NAME,
+        ]:
+            raise Http404
+
+        if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
+            ontology_data = OEO_COMMON_DATA
+        elif ontology in [OEO_EXT_NAME]:
+            ontology_data = OEOX_COMMON_DATA
+        else:
+            raise Http404
+
         sub_classes = []
         super_classes = []
         if module_or_id:
@@ -248,6 +234,8 @@ class OntologyViewClasses(View):
         class_name = ""
         if module_or_id in ontology_data["oeo_context_data"]["classes_name"].keys():
             class_name = ontology_data["oeo_context_data"]["classes_name"][module_or_id]
+        else:
+            raise Http404
 
         class_definitions = ""
         if (
@@ -279,10 +267,23 @@ class OntologyViewClasses(View):
 
 
 class OntologyStatics(View):
-    def get(self, request, ontology, file, version=None, extension=None, imports=False):
+    def get(
+        self,
+        request,
+        ontology,
+        file=None,
+        version=None,
+        extension=None,
+        imports=False,
+        glossary=False,
+        full=False,
+    ):
         """
         Returns the requested file `{file}.{extension}` of version `version`
         of ontology `ontology`
+
+        Note: This function is used in multiple places and therefore quite fragile.
+        Due to limited time i will not refactor it but use multiple returns.
 
         :param version: default: highest version in folder
         :param extension: default: `.owl`
@@ -300,6 +301,58 @@ class OntologyStatics(View):
             )
         if imports:
             file_path = onto_base_path / version / "imports" / f"{file}.{extension}"
+        elif glossary:
+            file = "glossary"
+            extension = "csv"
+            file_path = onto_base_path / version / "glossary" / f"{file}.{extension}"
+            if os.path.exists(file_path):
+                with open(file_path, "br") as f:
+                    response = HttpResponse(
+                        f, content_type="application/csv; charset=utf-8"
+                    )
+                    response[
+                        "Content-Disposition"
+                    ] = f'attachment; filename="{file}.{extension}"'
+                    return response
+            else:
+                raise Http404
+        elif full:
+            result_file = f"{ontology}-{version}"
+            extension = "zip"
+            file_path = onto_base_path / version
+
+            if not os.path.exists(file_path):
+                return HttpResponse("Directory not found.", status=404)
+
+            # Create a temporary file to store the zip
+            temp_zip = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
+            zip_file_path = temp_zip.name
+
+            try:
+                # Create a zip file from the directory
+                with zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+                    for root, dirs, files in os.walk(file_path):
+                        for file in files:
+                            _file_path = os.path.join(root, file)
+                            arcname = os.path.relpath(_file_path, file_path)
+                            zipf.write(_file_path, arcname)
+
+                # Prepare the response
+                with open(zip_file_path, "rb") as zip_file:
+                    response = HttpResponse(
+                        zip_file.read(), content_type="application/zip"
+                    )
+                    response[
+                        "Content-Disposition"
+                    ] = f'attachment; filename="{result_file}.{extension}"'
+                    response["Content-Length"] = os.path.getsize(zip_file_path)
+
+                    return response
+
+            finally:
+                # Clean up the temporary file
+                os.remove(zip_file_path)
+
         else:
             file_path = onto_base_path / version / f"{file}.{extension}"
 

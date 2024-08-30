@@ -1,5 +1,6 @@
 {% extends "base/base.html" %}
 {% load static %}
+{% load compress %}
 
 {% block site-header %}
     <div class="main-header">
@@ -15,22 +16,25 @@
 {% endblock site-header %}
 
 {% block main-right-sidebar-content %}
+
+
 <div class="container">
+
     <div class="row">
-        <h3>Ontologies</h3>
+        <div hx-get="{% url 'partial-page-sidebar-content' %}" hx-swap="outerHTML" hx-target="#content-sidebar" hx-trigger="load" id="content-sidebar">
     </div>
-    <div class="row">
-        <table class="table">
-            <tr>
-                <th>Name</th>
-                <th>Version</th>
-            </tr>
-            <tr>
-                <td><a href="/ontology/oeo/">Open Energy Ontology (OEO)</a></td>
-                <td>{{ version }}</td>
-            </tr>
-        </table>
-    </div>
+</div>   
+
+</div>
+<div id="loading-spinner-sidebar" class=" btn btn-primary disabled placeholder" role="status" style="display: none;">
+    <p class="card-text placeholder-glow">
+        <span class="placeholder col-7"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-6"></span>
+        <span class="placeholder col-8"></span>
+      </p>
+    <span class="visually-hidden">Loading...</span>
 </div>
 
 {% endblock main-right-sidebar-content %}
@@ -39,70 +43,119 @@
 {% block main-content-body %}
 
 <h3>Open Energy Ontology</h3>
-<p>The Open Energy Ontology (OEO) is created as a domain ontology within the
-  field of energy system modelling. It is growing constantly and under a regular
-  release cycle. The latest OEO version is {{ version }} and its files can be accessed <a href="https://openenergy-platform.org/ontology/oeo/">here</a>.</p>
+<p>The Open Energy Ontology (OEO) is a dynamic domain ontology for energy system modeling, 
+    updated regularly following a release cycle. Access the latest version {{version}} <a href="https://openenergyplatform.org/ontology/oeo/">here</a>.</p>
+
 <h3 id="domain-ontology-what-is-that">Domain ontology: What is that?</h3>
-<p>An ontology is a formal collection of terms and relationships between those
-    terms, with clear definitions and a logical interpretation. An ontology
-    can help to provide a clear understanding of a
-    domain of discourse. For the Open Energy Platform, this domain of discourse is
-    energy system modelling, and with the Open Energy Ontology (OEO) we aim to
-    develop a language that works across disciplines. </p>
+<p>An ontology is a structured collection of terms and their relationships, providing clear definitions and logical interpretation. 
+    The OEO aims to create a common language for energy system modeling, bridging various disciplines.</p>
+
 <h3 id="what-is-it-good-for">What is it good for?</h3>
-<p>Ontologies can be used for multiple different purposes, which is why they
-    are already used and developed in many scientific fields. Applications
-    include:</p>
+<p><strong>Ontologies have diverse applications:</strong></p>
 <ul>
-    <li><strong>Standardising terminology in a domain:</strong> An ontology provides
-        a controlled vocabulary, with clear definitions that
-        indicate how terminology is to be used. A collection of synonyms is
-        created to indicate the breadth of actual language usage in the domain.
-        Thus, it becomes possible to identify, clarify and diambiguate ambiguous vocabulary.
-    </li>
-    <li><strong>Data annotation and integration:</strong> Applying an ontology
-        to data annotation in databases allows flexible, content-oriented data
-        integration and aggregation. It adds the possibility of enhanced
-        searching functions and logical querying across datasets.
-    </li>
-    <li><strong>Templates for data capture:</strong> The ontology can provide a
-        structure which is used to make reporting more uniform and detailed.
-    </li>
-    <li><strong>Visualisation:</strong> Knowledge encoded in the ontology can be
-        visualized in various ways to make it more comprehensible.
-    </li>
-    <li><strong>Text and Data mining:</strong> The ontology can be used to
-        automatically search across text and data resources to e.g. suggest
-        associations (mentions) of ontology entities. Automatic assosiations of
-        ontology entities to large corpora can be used to gain an overview of
-        the literature or data across a domain. It can be used for discovery and
-        for automated data or research synthesis and meta-analysis.
-    </li>
+    <li><strong>Standardising Terminology:</strong> Provides a controlled vocabulary with clear definitions, disambiguating terms.</li>
+    <li><strong>Data Annotation and Integration:</strong> Enhances data integration, aggregation, and search functions.</li>
+    <li><strong>Templates for Data Capture:</strong> Ensures uniform and detailed reporting structures.</li>
+    <li><strong>Visualisation:</strong> Makes complex knowledge comprehensible through various visual formats.</li>
+    <li><strong>Text and Data Mining:</strong> Automates searches across resources, aiding discovery, data synthesis, and meta-analysis.</li>
 </ul>
-<h3 id="usage-beyond-the-open-energy-familiy-tools">Usage beyond the Open Energy
-    Familiy tools</h3>
-<p>The OEO is developed within the scope of the Open Energy Family.
-    Nevertheless, it is developed as an ontology for the whole energy system
-    modelling area. We explicitly want it to be used in other contextes and use
-    cases as well.</p>
+
+<h3 id="oeo-modules">Modules</h3>
+
+<div hx-get="{% url 'partial-page-content' %}" hx-swap="outerHTML" hx-target="#content" hx-trigger="load" id="content">
+
+
+</div>
+
+
+<div id="loading-spinner" class="text-primary" role="status" style="display: none;" aria-hidden="true">
+    <p class="card-text placeholder-glow">
+        <span class="placeholder col-7"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-6"></span>
+        <span class="placeholder col-8"></span>
+    </p>
+
+    <div class="card" aria-hidden="true">
+        <div class="card-body">
+            <h5 class="card-title placeholder-glow">
+            <span class="placeholder col-6"></span>
+            </h5>
+            <p class="card-text placeholder-glow">
+            <span class="placeholder col-7"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-6"></span>
+            <span class="placeholder col-8"></span>
+            <span class="placeholder col-7"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-6"></span>
+            <span class="placeholder col-8"></span>
+            <span class="placeholder col-7"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-6"></span>
+            <span class="placeholder col-8"></span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<h3>OEO Extended (OEOX)</h3>
+<p>To increase the usability of OEO and react to user requirements, we introduced a post-coordination extension to
+    OEO, the Open Energy Ontology Extended (OEOX). We created OEOX as an ontology for specific energy-
+    related terms with a high complexity that go beyond the level of detail of the standard OEO class hierarchy.
+    For further information you can have a look at the <a href="https://github.com/OpenEnergyPlatform/oeo-extended">GitHub page</a>.</p>
+
+<h3 id="usage-beyond-the-open-energy-family-tools">Usage beyond the Open Energy Family tools</h3>
+<p>The OEO is developed within the scope of the Open Energy Family but aims to serve the entire energy system modeling community. 
+    We encourage its use in various contexts and use cases beyond its initial scope.</p>
+
 <h3 id="where-and-how-can-i-contribute">Where and how can I contribute?</h3>
-<p>Anyone is invited to contribute to OEO development as this is a community-driven process.
-OEO development takes place on <a href="https://github.com/OpenEnergyPlatform/ontology">GitHub</a>.
-We have some <a href="https://github.com/OpenEnergyPlatform/ontology/blob/dev/CONTRIBUTING.md">helpful guidelines</a>
-on the workflow and a <a href="https://github.com/OpenEnergyPlatform/ontology/wiki">wiki</a> providing detailed information.
-<a href="https://github.com/OpenEnergyPlatform/ontology/wiki/Welcome!-How-to-participate">Welcome! We invite you to participate</a>.
-If you have questions, please reach out via the OEP <a href="https://openenergy-platform.org/contact/">contact form</a>.
-We can then facilitate someone who can follow up on your question.
+<p>We welcome everyone to contribute to OEO development, a community-driven project hosted on 
+    <a href="https://github.com/OpenEnergyPlatform/ontology">GitHub</a>. 
+    Explore our <a href="https://openenergyplatform.github.io/academy/courses/05_ontology/">ontology course</a> and have a look at our
+    <a href="https://github.com/OpenEnergyPlatform/ontology/blob/dev/CONTRIBUTING.md">contribution guidelines</a> 
 
-<h5 id="where-and-how-can-i-contribute">Further information</h5>
-<p>The OEO development was initiated in the project <a href="https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201180818/1%22">"SzenarienDB”</a> and is
-    augmented in the projects <a href="https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201186899/1%22">“LOD_GEOSS”</a> and
-    <a href="https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201227101/1%22">"SIROP"</a>. The development is community based and
-    <a href="https://github.com/OpenEnergyPlatform/ontology">takes place on GitHub</a>.
-    The OEO is also described in a peer reviewed paper, published in Energy & AI, see <a href="https://doi.org/10.1016/j.egyai.2021.100074">Here</a>.
-</p>
+    If you have questions, reach out via the OEP <a href="https://openenergyplatform.org/contact/">contact form</a>, 
+    and we'll connect you with the right person.</p>
 
+<h5 id="further-information">Further information</h5>
+<p>OEO development began with the <a href="https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201180818/1%22">"SzenarienDB"</a> 
+    project and is enhanced by <a href="https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201186899/1%22">"LOD_GEOSS"</a>, 
+    <a href="https://www.enargus.de/pub/bscw.cgi/26?op=enargus.eps2&m=0&v=10&p=0&s=0&q=SEDOS">"SEDOS"</a>,
+    <a href="https://www.enargus.de/pub/bscw.cgi/26?op=enargus.eps2&m=0&v=10&p=0&s=0&q=03EI1051C">"Stadt-Land-Energie"</a> and 
+    <a href="https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201227101/1%22">"SIROP"</a>. 
+    The OEO was introduced in an open-access peer-reviewed paper: <a href="https://doi.org/10.1016/j.egyai.2021.100074">Introducing the 
+    Open Energy Ontology: Enhancing data interpretation and interfacing in energy systems analysis</a>.</p>
 
-<p>A  <a href={% url 'oeo-s-c'%}>OEO steering committee</a> was created in autumn 2019.</p>
+<p>The <a href="{% url 'oeo-s-c' %}">OEO steering committee</a> was established in autumn 2019.</p>
+
+{% compress js %}
+<script src="{% static 'ontology/htmx.js' %}"></script>
+{% endcompress %}
+
+<script>
+    document.addEventListener('htmx:beforeRequest', function (event) {
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('loading-spinner-sidebar').style.display = 'block';
+    });
+
+    document.addEventListener('htmx:afterSwap', function (event) {
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('loading-spinner-sidebar').style.display = 'none';
+    });
+
+    // Optionally, you can use this event to handle errors
+    document.addEventListener('htmx:afterRequest', function (event) {
+        if (event.detail.xhr.status >= 400) {
+            console.error('Request failed:', event.detail.xhr);
+        }
+    });
+</script>
+
 
 {% endblock %}
+

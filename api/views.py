@@ -39,7 +39,11 @@ from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from modelview.models import Energyframework, Energymodel
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from oeplatform.settings import (
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL,
+    PLAYGROUNDS,
+    UNVERSIONED_SCHEMAS,
+)
 
 logger = logging.getLogger("oeplatform")
 
@@ -1372,7 +1376,7 @@ def oeo_search(request):
     query = request.GET["query"]
     # call local search service
     # TODO: this url should not be hardcoded here - get it from oeplatform/settings.py
-    url = f"http://loep/lookup-application/api/search?query={query}"
+    url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL}{query}"
     res = requests.get(url).json()
     # res: something like [{"label": "testlabel", "resource": "testresource"}]
     # send back to client
