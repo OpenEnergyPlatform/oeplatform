@@ -160,6 +160,7 @@ if ONTOLOGY_ROOT:
     OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME = "oeo-full.owl"
 
     OEO_EXT_PATH = Path(ONTOLOGY_ROOT, "oeo_ext")
+    OEO_EXT_NAME = "oeox"
     OEO_EXT_OWL_NAME = "oeo_ext.owl"
     OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
 
