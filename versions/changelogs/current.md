@@ -2,9 +2,16 @@
 
 ## Changes
 
+
+- Enhance embargo area feature (UI & API) [(#1804)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1804)
+  - Refactor code
+  - The REST API raises an error when creating a table with embargo period but false date time for start/end data
+  - Update the table creation http "put" endpoint to handle embargo periods
+
 - Enhances UX by adding a site heading and improve visibility of form controls in the oemetaBuilder tool. [(#1680)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1680)
 
 - Enhance the ontology pages, remove the modules page and fully rework the about page and oeo download capabilities. Additionally add the oeox and make its URIs available, also add more cases where a Http404 is raised to make [1807](https://github.com/OpenEnergyPlatform/oeplatform/pull/1807)
+
 
 ## Features
 
