@@ -32,7 +32,7 @@ LOGGER.info(
 )
 
 
-class OntologyVersion(View):
+class OntologyAbout(View):
     def get(self, request, ontology="oeo", version=None):
         onto_base_path = Path(ONTOLOGY_ROOT, ontology)
 
@@ -53,7 +53,7 @@ class OntologyVersion(View):
         )
 
 
-class PartialOntologyOverviewContent(View):
+class PartialOntologyAboutContent(View):
     def get(self, request):
         if request.headers.get("HX-Request") == "true":
             if request.method == "GET":
@@ -89,7 +89,7 @@ class PartialOntologyOverviewContent(View):
                 return HttpResponse(partial)
 
 
-class PartialOntologyOverviewSidebarContent(View):
+class PartialOntologyAboutSidebarContent(View):
     def get(self, request):
         version = OEO_VERSION
         main_module = OEO_MODULES_MAIN
@@ -123,42 +123,6 @@ def initial_for_pageload(request):
             return render(request, "ontology/initial_response_htmx.html")
 
 
-class OntologyOverview(View):
-    def get(
-        self,
-        request,
-        ontology=OPEN_ENERGY_ONTOLOGY_NAME,
-        module_or_id=None,
-        version=None,
-        imports=False,
-    ):
-        onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
-
-        if not onto_base_path.exists():
-            raise Http404
-        versions = os.listdir(onto_base_path)
-        if not version:
-            version = max(
-                (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
-            )
-        if "text/html" in request.headers.get("accept", "").split(","):
-            if module_or_id and "oeo" in module_or_id:
-                # Possibly handle specific module or ID-based logic here
-                pass
-            else:
-                return render(
-                    request,
-                    "ontology/oeo.html",
-                    {"ontology": OPEN_ENERGY_ONTOLOGY_NAME, "version": version},
-                )
-        else:
-            # Handling other types of requests or default case
-            return HttpResponse("Unsupported media type", status=415)
-
-        # If none of the above conditions are met
-        return HttpResponse("Invalid request parameters", status=400)
-
-
 class OntologyViewClasses(View):
     def get(
         self,
@@ -168,6 +132,12 @@ class OntologyViewClasses(View):
         version=None,
         imports=False,
     ):
+        if ontology not in [
+            OPEN_ENERGY_ONTOLOGY_NAME,
+            # OPEN_ENERGY_ONTOLOGY_EXTENDED_NAME,
+        ]:
+            raise Http404
+
         ontology_data = OEO_COMMON_DATA
         sub_classes = []
         super_classes = []
@@ -251,6 +221,8 @@ class OntologyViewClasses(View):
         class_name = ""
         if module_or_id in ontology_data["oeo_context_data"]["classes_name"].keys():
             class_name = ontology_data["oeo_context_data"]["classes_name"][module_or_id]
+        else:
+            raise Http404
 
         class_definitions = ""
         if (
