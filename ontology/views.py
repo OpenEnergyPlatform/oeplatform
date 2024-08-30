@@ -9,8 +9,10 @@ from django.shortcuts import HttpResponse, render
 from django.views import View
 
 from oeplatform.settings import (
+    OEO_EXT_NAME,
     OEO_EXT_OWL_NAME,
     OEO_EXT_OWL_PATH,
+    OEO_EXT_PATH,
     ONTOLOGY_ROOT,
     OPEN_ENERGY_ONTOLOGY_NAME,
 )
@@ -29,6 +31,9 @@ OEO_MODULES_MAIN = collect_modules(OEO_PATH)
 OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
 OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
 OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
+OEOX_COMMON_DATA = get_common_data(
+    OEO_EXT_NAME, file=OEO_EXT_OWL_NAME, path=OEO_EXT_PATH
+)
 LOGGER.info(
     "Loading completed! The content form the oeo files is parse into python data types."
 )
@@ -136,11 +141,17 @@ class OntologyViewClasses(View):
     ):
         if ontology not in [
             OPEN_ENERGY_ONTOLOGY_NAME,
-            # OPEN_ENERGY_ONTOLOGY_EXTENDED_NAME,
+            OEO_EXT_NAME,
         ]:
             raise Http404
 
-        ontology_data = OEO_COMMON_DATA
+        if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
+            ontology_data = OEO_COMMON_DATA
+        elif ontology in [OEO_EXT_NAME]:
+            ontology_data = OEOX_COMMON_DATA
+        else:
+            raise Http404
+
         sub_classes = []
         super_classes = []
         if module_or_id:
