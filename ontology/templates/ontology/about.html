@@ -106,7 +106,8 @@
 <h3>OEO Extended (OEOX)</h3>
 <p>To increase the usability of OEO and react to user requirements, we introduced a post-coordination extension to
     OEO, the Open Energy Ontology Extended (OEOX). We created OEOX as an ontology for specific energy-
-    related terms with a high complexity that go beyond the level of detail of the standard OEO class hierarchy.</p>
+    related terms with a high complexity that go beyond the level of detail of the standard OEO class hierarchy.
+    For further information you can have a look at the <a href="https://github.com/OpenEnergyPlatform/oeo-extended">GitHub page</a>.</p>
 
 <h3 id="usage-beyond-the-open-energy-family-tools">Usage beyond the Open Energy Family tools</h3>
 <p>The OEO is developed within the scope of the Open Energy Family but aims to serve the entire energy system modeling community. 
@@ -135,6 +136,26 @@
 {% compress js %}
 <script src="{% static 'ontology/htmx.js' %}"></script>
 {% endcompress %}
+
+<script>
+    document.addEventListener('htmx:beforeRequest', function (event) {
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('loading-spinner-sidebar').style.display = 'block';
+    });
+
+    document.addEventListener('htmx:afterSwap', function (event) {
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('loading-spinner-sidebar').style.display = 'none';
+    });
+
+    // Optionally, you can use this event to handle errors
+    document.addEventListener('htmx:afterRequest', function (event) {
+        if (event.detail.xhr.status >= 400) {
+            console.error('Request failed:', event.detail.xhr);
+        }
+    });
+</script>
+
 
 {% endblock %}
 
