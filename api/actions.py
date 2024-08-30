@@ -1556,7 +1556,7 @@ def move(from_schema, table, to_schema):
         except DBTable.DoesNotExist:
             raise APIError("Table for schema movement not found")
         try:
-            to_schema_reg = DBSchema.objects.get(name=to_schema)
+            to_schema_reg, _ = DBSchema.objects.get_or_create(name=to_schema)
         except DBSchema.DoesNotExist:
             raise APIError("Target schema not found")
         if from_schema == to_schema:
@@ -1637,7 +1637,7 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
 
     try:
         t = DBTable.objects.get(name=table_name, schema__name=from_schema)
-        to_schema_reg = DBSchema.objects.get(name=to_schema)
+        to_schema_reg, _ = DBSchema.objects.get_or_create(name=to_schema)
 
         if from_schema == to_schema:
             raise APIError("Target schema same as current schema")

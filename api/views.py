@@ -190,6 +190,8 @@ def api_exception(f):
             return JsonResponse({"reason": e.message}, status=e.status)
         except KeyError as e:
             return JsonResponse({"reason": e}, status=400)
+        except DBTable.DoesNotExist:
+            return JsonResponse({"reason": "table does not exist"}, status=404)
 
     return wrapper
 
