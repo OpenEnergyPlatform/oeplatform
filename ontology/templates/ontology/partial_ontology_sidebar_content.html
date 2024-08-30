@@ -10,13 +10,17 @@
                     <th>Version</th>
                 </tr>
                 <tr>
-                    <td><a href="/ontology/oeo/">Open Energy Ontology (OEO)</a></td>
+                    <td><a href="/viewer/oeo/">Open Energy Ontology (OEO)</a></td>
                     <td>{{ version }}</td>
+                </tr>
+                <tr>
+                    <td><a href="/ontology/oeox/">Open Energy Ontology Extended  (OEOX)</a></td>
+                    <td>1.0.0</td>
                 </tr>
             </table>
         </div>
        
-        <hr>
+
     
     {% comment %}
     <div class="row">
@@ -42,9 +46,23 @@
         <h3>Get the latest OEO release</h3>
     </div>
     <div class="row">
-        <p>See our <a class=" " href="/ontology/{{ontology}}/releases/glossary/oeo-glossary.csv">Glossary</a> 
+        <p>Get the <a class=" " href="{% url 'oeo-latest-glossary' ontology='oeo' %}">Glossary</a> 
             to get an overview of the OEO contents. </p>
     </div>
+    
+    <div class="row">
+        <div class="col">
+            <a class="btn btn-primary" id="popoverTrigger" 
+               href="{% url 'oeo-latest-full-zip' ontology='oeo' %}" 
+               data-bs-toggle="popover"
+               data-bs-trigger="hover"
+               title="oeo release"
+               data-bs-content="Download the latest release oeo-{{version}} as zip archive.">
+               Download latest release {{version}}
+            </a>
+        </div>        
+    </div>
+    <br>
     <p>Download the latest oeo version {{version}} in OWL format: </p>
     <div class="row">
         <div class="col">
@@ -72,11 +90,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="oeo-full-info">
-                <p>This file contains the complete version of the Open Energy Ontology (OEO) as an OWL file in XML/RDF format. It encompasses all classes, properties, and relationships defined within the OEO framework.</p>
+                <p>The open energy platform currently only provides the latest version for download.
+                    Please find previous versions on GitHub.</p>
                 <p>You can download the full ontology using the following URLs:</p>
                 <ul>
-                    <li><a href="http://127.0.0.1:8000/ontology/oeo/" target="_blank">http://127.0.0.1:8000/ontology/oeo/</a></li>
-                    <li><a href="http://127.0.0.1:8000/ontology/oeo/releases/oeo-full.owl" target="_blank">http://127.0.0.1:8000/ontology/oeo/releases/oeo-full.owl</a></li>
+                    <li><a href="/ontology/oeo/" target="_blank">https://openenergyplatform.org/ontology/oeo/</a></li>
+                    <li><a href="/ontology/oeo/releases/oeo-full.owl" target="_blank">https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl</a></li>
                 </ul>
                 </div>
                 <div class="modal-footer">
@@ -115,10 +134,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="closure-info">
-                <p>This file represents the Open Energy Ontology (OEO) with the logical closure of all axioms included. It is provided as an OWL file in XML/RDF format, ensuring that all inferred relationships and properties are fully realized.</p>
+                    The open energy platform currently only provides the latest version for download.
+                    Please find previous versions on GitHub.
                 <p>You can download the closure file using the following URL:</p>
                 <ul>
-                    <li><a href="http://127.0.0.1:8000/ontology/oeo/releases/oeo-closure.owl" target="_blank">http://127.0.0.1:8000/ontology/oeo/releases/oeo-closure.owl</a></li>
+                    <li><a href="/ontology/oeo/releases/oeo-closure.owl" target="_blank">https://openenergyplatform.org/ontology/oeo/releases/oeo-closure.owl</a></li>
                 </ul>
                 </div>
                 <div class="modal-footer">
