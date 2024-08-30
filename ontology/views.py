@@ -14,6 +14,7 @@ from oeplatform.settings import (
     OEO_EXT_OWL_PATH,
     OEO_EXT_PATH,
     ONTOLOGY_ROOT,
+    OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME,
     OPEN_ENERGY_ONTOLOGY_NAME,
 )
 from ontology.utils import collect_modules, get_common_data, get_ontology_version
@@ -352,7 +353,7 @@ class OntologyStatics(View):
                 os.remove(zip_file_path)
 
         else:
-            file_path = onto_base_path / version / f"{file}.{extension}"
+            file_path = onto_base_path / version / OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME
 
         if os.path.exists(file_path):
             with open(file_path, "br") as f:
