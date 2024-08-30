@@ -8,6 +8,7 @@ urlpatterns = [
     # oeo-extended
     url(r"^$", views.OntologyAbout.as_view()),
     path("oeox/", views.OeoExtendedFileServe.as_view()),
+    path("releases/oeox/", views.OeoExtendedFileServe.as_view()),
     url(
         "partial/page-content/",
         views.PartialOntologyAboutContent.as_view(),
@@ -63,7 +64,7 @@ urlpatterns = [
     #     {"imports": True},
     # ),
     url(
-        r"^(?P<ontology>[\w_-]+)?/(?P<module_or_id>[\w\d_-]+)?/$",
+        r"^(?P<ontology>[\w_-]+)(?P<module_or_id>[\w\d_-]+)?/$",
         views.OntologyViewClasses.as_view(),
         name="oeo-classes",
     ),
