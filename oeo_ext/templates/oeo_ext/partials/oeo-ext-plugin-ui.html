@@ -8,7 +8,7 @@
         </div>
     </div>
     <hr>
-    <form class="htmxFormComponent" id="oeo-ext-form" hx-post="{% url 'oeo_ext:oeo-ext-plugin-ui-create' %}" hx-target=".htmxComponent" hx-swap="outerHTML" class="needs-validation" novalidate>
+    <form class="htmxFormComponent" id="oeo-ext-form" hx-post="{% url 'oeo_ext:oeo-ext-plugin-ui-create' %}" hx-target=".htmxFormComponent" hx-swap="outerHTML" class="needs-validation" novalidate>
         {% csrf_token %}
 
         <div class="nominator-section mb-4">
@@ -46,6 +46,7 @@
         
         <button type="submit" class="btn btn-success">Save</button>
     </form>
+
 </div>
 
 <script>
