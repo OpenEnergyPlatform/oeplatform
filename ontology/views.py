@@ -149,7 +149,10 @@ class OntologyViewClasses(View):
         if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
             ontology_data = OEO_COMMON_DATA
         elif ontology in [OEO_EXT_NAME]:
-            ontology_data = OEOX_COMMON_DATA
+            # ontology_data = OEOX_COMMON_DATA
+            ontology_data = get_common_data(
+                OEO_EXT_NAME, file=OEO_EXT_OWL_NAME, path=OEO_EXT_PATH
+            )
 
         sub_classes = []
         super_classes = []
