@@ -66,7 +66,6 @@ class OeoExtPluginView(View, LoginRequiredMixin):
                 return JsonResponse(response_data, status=200)
             else:
                 errors = {
-                    # "form": form,
                     "form_errors": form.errors,
                     "nominator_errors": [f.errors for f in nominator_forms],
                     "denominator_errors": [f.errors for f in denominator_forms],
