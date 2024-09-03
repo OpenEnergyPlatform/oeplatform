@@ -16,7 +16,7 @@
 
 - Add the OEP-extended (oeo-ext) feature. It enables users to create new composed units (ontology classes) that extent the units available in the OEO. The feature is implemented as a plugin html form, it can be easily added to any Webpage of the oeplatform. [(#1680)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1680)
 
-- Add error message display to oeox-plugin view. [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+- Add error message display to oeox-plugin view. [(#1812)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1812)
 
 ## Bugs
 
