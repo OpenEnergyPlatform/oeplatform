@@ -5,12 +5,12 @@
          xmlns:owl="http://www.w3.org/2002/07/owl#"
          xml:base="http://openenergy-platform.org/ontology/oeox"
          xmlns="http://openenergy-platform.org/ontology/oeox#"
-         xmlns:x_1.1="http://purl.org/dc/elements/1.1/"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
          xmlns:term="http://purl.org/dc/terms/">
 
 <owl:Ontology rdf:about="http://openenergy-platform.org/ontology/oeox">
   <owl:imports rdf:resource="http://openenergy-platform.org/ontology/oeo/releases/2.4.0/oeo-full.owl"/>
-  <x_1.1:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The Open Energy Ontology Extended (OEOX) extends the Open Energy Ontology. It contains compositions of terms that are too specific for the OEO.</x_1.1:description>
+  <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The Open Energy Ontology Extended (OEOX) extends the Open Energy Ontology. It contains compositions of terms that are too specific for the OEO.</dc:description>
   <term:license rdf:datatype="http://www.w3.org/2001/XMLSchema#string">http://creativecommons.org/publicdomain/zero/1.0/</term:license>
   <term:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Open Energy Ontology Extended (OEOX)</term:title>
 </owl:Ontology>

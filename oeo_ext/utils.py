@@ -146,8 +146,8 @@ def get_new_iri(
 
     # Generate the new IRI using the count + 1
     new_counter = generate_id(existing_count + 1)
-    # Build URI of pattern: oeox-base:ConceptLike<ComposedUnit>#ConceptID
-    new_uri = URIRef(f"{base}{concept_type.value}/{id_prefix}{new_counter}")
+    # Build URI of pattern: oeox-base/ConceptID
+    new_uri = URIRef(f"{base}{id_prefix}{new_counter}")
 
     return new_uri
 

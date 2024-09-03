@@ -59,14 +59,23 @@ class OeoExtPluginView(View, LoginRequiredMixin):
                 # error is either dict with key:value or None
                 new_unit, error = create_new_unit(numerator=n, denominator=d)
                 if error:
-                    response_data = error
+                    # response_data = error
+                    response_data = {
+                        "success": False,
+                        "message": "Form data is not valid!",
+                        "errors": error,
+                    }
                 else:
                     data["newComposedUnitURI"] = new_unit
                     response_data = data
-                return JsonResponse(response_data, status=200)
+                return render(
+                    request,
+                    "oeo_ext/partials/success.html",
+                    {"response_data": response_data},
+                )
+                # return JsonResponse(response_data, status=200)
             else:
                 errors = {
-                    # "form": form,
                     "form_errors": form.errors,
                     "nominator_errors": [f.errors for f in nominator_forms],
                     "denominator_errors": [f.errors for f in denominator_forms],
