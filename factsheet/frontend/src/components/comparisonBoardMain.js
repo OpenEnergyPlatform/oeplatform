@@ -205,6 +205,7 @@ const ComparisonBoardMain = (props) => {
    
     if (sparqOutput.length !== 0) {
 
+
       const distinctTables = [];
         sparqOutput.map((obj) => {
           if (!distinctTables.includes(obj.table_name.value)) {
@@ -283,7 +284,6 @@ const ComparisonBoardMain = (props) => {
         const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
         const groupedItems = divideByTableNameValue(filtered_output);
 
-        console.log(groupedItems);
 
         const groupedStackedBarChartsLegend = [];
 
@@ -293,6 +293,7 @@ const ComparisonBoardMain = (props) => {
           let colorIndex = 0;
 
           for (let group in groupedItems) {
+
             const filtered_output = groupedItems[group].sort((a, b) => {
               const countryA = a.country_code.value.split('/').pop();
               const countryB = b.country_code.value.split('/').pop();
@@ -319,6 +320,8 @@ const ComparisonBoardMain = (props) => {
               return categorized;
             });
             
+            console.log(country_labels);
+
             result[group] = {
               chart_data_category: chart_data_category,
               country_labels: country_labels,
@@ -448,13 +451,26 @@ const ComparisonBoardMain = (props) => {
     });
   }
 
-  const get_categories_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
-    SELECT DISTINCT ?category WHERE {
-      ?s oeo:has_sector_division ?category .
-    }`
+
 
   const sendGetCategoriesQuery = async () => {
     setLoading(true);
+
+    //const data_tabels = [];
+    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    const data_tabels = [`"eu_leg_data_2023_eea"`] ;
+
+    selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
+
+    const get_categories_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    SELECT DISTINCT ?category ?table_name WHERE {
+      ?s oeo:has_sector_division ?category .
+      ?s oeo:OEO_00000504 ?table_name .
+      FILTER(?table_name IN ( ${data_tabels} ) ).
+    }`
+
+    console.log(get_categories_query);
+
     const response = await axios.post(
       conf.obdi, 
       get_categories_query,
@@ -468,8 +484,33 @@ const ComparisonBoardMain = (props) => {
     ).then(response => {
 
       const categoriesObj = response.data.results.bindings;
-      const categories = categoriesObj.map((obj) => obj.category.value.split('/').pop() );
+
+      const categoriesByTable = categoriesObj.reduce((acc, obj) => {
+        const category = obj.category.value;
+        const tableName = obj.table_name.value;
+      
+        if (!acc[tableName]) {
+          acc[tableName] = new Set();
+        }
+      
+        acc[tableName].add(category);
+      
+        return acc;
+      }, {});
+      
+      const allTableNames = Object.values(categoriesByTable);
+      const commonCategories = allTableNames.reduce((acc, categoriesSet) => {
+        return new Set([...acc].filter(category => categoriesSet.has(category)));
+      }, allTableNames[0]);
+      
+      const filteredObjects = categoriesObj.filter(obj => commonCategories.has(obj.category.value));
+
+
+      const categories = filteredObjects.map((obj) => obj.category.value.split('/').pop() );
       const catNames = categories.filter(elem => elem in category_disctionary ).map(el => category_disctionary[el] );
+
+      console.log(catNames);
+
       setCategoryNames(catNames);
       
       setLoading(false);
@@ -483,13 +524,24 @@ const ComparisonBoardMain = (props) => {
     });
   }
 
-  const get_gas_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
-  SELECT DISTINCT ?gas WHERE {
-    ?s oeo:OEO_00010121 ?gas .
-  }`
-
   const sendGetGasQuery = async () => {
     setLoading(true);
+
+   
+
+    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+
+    selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
+
+    const get_gas_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    SELECT DISTINCT ?gas ?table_name WHERE {
+      ?s oeo:OEO_00010121 ?gas .
+      ?s oeo:OEO_00000504 ?table_name .
+      FILTER(?table_name IN ( ${data_tabels} ) ).
+    }`
+
+    console.log(get_gas_query);
+
     const response = await axios.post(
       conf.obdi, 
       get_gas_query,
@@ -503,9 +555,40 @@ const ComparisonBoardMain = (props) => {
     ).then(response => {
 
       const gasesObj = response.data.results.bindings;
-      const gases = gasesObj.map((obj) => obj.gas.value );
+      console.log(gasesObj);
 
-      setGasesNames(gases);
+      const gasesByTable = gasesObj.reduce((acc, obj) => {
+        const gas = obj.gas.value;
+        const tableName = obj.table_name.value;
+      
+        if (!acc[tableName]) {
+          acc[tableName] = new Set();
+        }
+      
+        acc[tableName].add(gas);
+      
+        return acc;
+      }, {});
+      
+      const allTableNames = Object.values(gasesByTable);
+      console.log(allTableNames);
+
+      const commonGases = allTableNames.reduce((acc, gasesSet) => {
+        return new Set([...acc].filter(gas => gasesSet.has(gas)));
+      }, allTableNames[0]);
+      
+      console.log('commonGases', commonGases);
+      const filteredObjects = gasesObj.filter(obj => commonGases.has(obj.gas.value));
+
+
+      // const gases = filteredObjects.map((obj) => obj.gas.value.split('/').pop() );
+      // console.log(gases);
+      //const gasNames = gases.filter(elem => elem in category_disctionary ).map(el => category_disctionary[el] );
+
+
+      //const gases = gasesObj.map((obj) => obj.gas.value );
+
+      setGasesNames(Array.from(commonGases));
       
       setLoading(false);
 
@@ -564,12 +647,18 @@ const ComparisonBoardMain = (props) => {
   }
 
 const sendQuery = async (index) => {
+    setShowChart(false);
     setSparqlOutput([]);
+    setLegendForGroupedStackedBarCharts([]);
+    setLegendForStackedBarCharts([]);
+    setScenarioYears([]);
+    setChartData([]);
+    console.log(chartData);
     setLoading(true);
 
-    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
     //  const data_tabels = [`"eu_leg_data_2023_eea"`];
-    const data_tabels = [];
+    // const data_tabels = [];
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -620,7 +709,6 @@ const sendQuery = async (index) => {
 
       const sparqOutput = response.data.results.bindings;
       setSparqlOutput(sparqOutput);
-      console.log(main_query);
 
       if (sparqOutput.length !== 0) {
 
