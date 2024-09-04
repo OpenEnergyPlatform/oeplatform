@@ -283,6 +283,9 @@ const ComparisonBoardMain = (props) => {
         const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
         const groupedItems = divideByTableNameValue(filtered_output);
 
+        console.log(groupedItems);
+
+        const groupedStackedBarChartsLegend = [];
 
         const transformGroupedItems = (groupedItems) => {
           const result = {};
@@ -311,6 +314,7 @@ const ComparisonBoardMain = (props) => {
                 .filter((obj) => obj.category.value === cat)
                 .map(el => el.country_code.value.split('/').pop());
               
+              groupedStackedBarChartsLegend.push([group, category_disctionary[cat.split("/").pop()], cat,  groupedBarChartsRandomColors[colorIndex]]);
               colorIndex++;
               return categorized;
             });
@@ -325,7 +329,7 @@ const ComparisonBoardMain = (props) => {
         
           return result;
         };
-
+        setLegendForGroupedStackedBarCharts(groupedStackedBarChartsLegend);
 
         const transformedGroupedItems = transformGroupedItems(groupedItems);
 
@@ -563,7 +567,7 @@ const sendQuery = async (index) => {
     setSparqlOutput([]);
     setLoading(true);
 
-    //const data_tabels = [`"eu_leg_data_2023_eea"`, `"dupe_eu_leg_data_2023_eea"`];
+    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
     //  const data_tabels = [`"eu_leg_data_2023_eea"`];
     const data_tabels = [];
 
@@ -616,6 +620,7 @@ const sendQuery = async (index) => {
 
       const sparqOutput = response.data.results.bindings;
       setSparqlOutput(sparqOutput);
+      console.log(main_query);
 
       if (sparqOutput.length !== 0) {
 
@@ -696,6 +701,8 @@ const sendQuery = async (index) => {
 
           const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
           const groupedItems = divideByTableNameValue(filtered_output);
+
+          console.log(groupedItems);
 
           const groupedStackedBarChartsLegend = [];
 
