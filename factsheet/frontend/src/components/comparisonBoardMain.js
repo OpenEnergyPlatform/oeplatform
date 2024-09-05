@@ -135,6 +135,20 @@ const ComparisonBoardMain = (props) => {
     "OEO_00010189" : "4.A Forest land",
   };
 
+  const gas_dictionary = {
+    "OEO_00000025" : "Methane (CH4)",
+    "OEO_00000027" : "Nitrous_oxide (N2O2)",
+    "OEO_00000026" : "Nitrogen Trifluoride (NF3)",
+    "OEO_00000219" : "Hydrofluorocarbon (HFC)",
+    "OEO_00000006"  : "Carbon dioxide (CO2)",
+    "OEO_00000322"  : "Perfluorocarbon (PFC)",
+    "OEO_00000038"  : "Sulphur hexafluoride (SF6)",
+    "Total_GHGs"  : "Total GHGs",
+    "Total_ESD_GHGs" : "Total ESD GHGs",
+    "Total_ETS_GHGs"  : "Total ETS GHGs",
+    "Total_ESR_GHGs" :"Total ESR GHGs"
+  }
+
   const generateRandomColor = () => {
     return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
   };
@@ -417,13 +431,15 @@ const ComparisonBoardMain = (props) => {
     );
   };
   
-  const get_scenarios_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
-              SELECT DISTINCT ?scenario WHERE {
-              ?s oeo:OEO_00020226 ?scenario .
-  }`  
 
   const sendGetScenariosQuery = async () => {
     setLoading(true);
+
+    const get_scenarios_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+              SELECT DISTINCT ?scenario WHERE {
+              ?s oeo:OEO_00020226 ?scenario .
+    }`  
+
     const response = await axios.post(
       conf.obdi, 
       get_scenarios_query,
@@ -526,10 +542,8 @@ const ComparisonBoardMain = (props) => {
 
   const sendGetGasQuery = async () => {
     setLoading(true);
-
-   
-
-    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    //const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    const data_tabels = [ `"scenario_eu_leg_data_2021"`] ;
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
 
@@ -578,7 +592,9 @@ const ComparisonBoardMain = (props) => {
       }, allTableNames[0]);
       
       console.log('commonGases', commonGases);
-      const filteredObjects = gasesObj.filter(obj => commonGases.has(obj.gas.value));
+
+      const gases = Array.from(commonGases).map((obj) => obj.split('/').pop() );
+      const gasNames = gases.filter(elem => elem in gas_dictionary ).map(el => gas_dictionary[el] );
 
 
       // const gases = filteredObjects.map((obj) => obj.gas.value.split('/').pop() );
@@ -588,7 +604,7 @@ const ComparisonBoardMain = (props) => {
 
       //const gases = gasesObj.map((obj) => obj.gas.value );
 
-      setGasesNames(Array.from(commonGases));
+      setGasesNames(gasNames);
       
       setLoading(false);
 
@@ -656,8 +672,8 @@ const sendQuery = async (index) => {
     console.log(chartData);
     setLoading(true);
 
-    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
-    //  const data_tabels = [`"eu_leg_data_2023_eea"`];
+    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    const data_tabels = [ `"scenario_eu_leg_data_2021"`] ;
     // const data_tabels = [];
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -670,6 +686,13 @@ const sendQuery = async (index) => {
         }
     }
   
+    const gases = [];
+    for (let key in gas_dictionary) {
+        if (selectedGas.includes(gas_dictionary[key])) {
+          gases.push('oeo:' + key);
+        }
+    }
+
     const scenariosFilter = [];
     for (let key in scenarios_disctionary) {
         if (selectedScenarios.includes(scenarios_disctionary[key])) {
@@ -692,7 +715,7 @@ const sendQuery = async (index) => {
       ?s oeo:has_sector_division ?category .
       ?s oeo:OEO_00020226 ?scenario .
       ?s oeo:OEO_00010121 ?gas
-      FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories})  && ?gas IN (${selectedGas.map(e => '"' + e + '"').toString()}) ) .
+      FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories})  && ?gas IN (${gases}) ) .
     }`;
 
     const response = await axios.post(
@@ -1102,7 +1125,6 @@ const sendQuery = async (index) => {
                     id="demo-simple-select"
                     value={''}
                     label="Scenario"
-                    multiple
                     value={selectedScenarios}
                     onChange={handleScenariosChange}
                     input={<OutlinedInput label="Scenario" />}
@@ -1111,21 +1133,20 @@ const sendQuery = async (index) => {
                   > 
                     {scenariosInTables.map((name) => (
                       <MenuItem key={name} value={name}>
-                        <Checkbox checked={selectedScenarios.indexOf(name) > -1} />
                         <ListItemText primary={name} />
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
                 <FormControl sx={{ m: 1, width: '48%' }} size="small">
-                  <InputLabel id="demo-multiple-checkbox-label">Category</InputLabel>
+                  <InputLabel id="demo-multiple-checkbox-label">Sector(s)</InputLabel>
                   <Select
                     labelId="demo-select-small-label"
                     id="demo-select-small"
                     multiple
                     value={selectedCategories}
                     onChange={handleCategoriesChange}
-                    input={<OutlinedInput label="Category" />}
+                    input={<OutlinedInput label="Sector(s)" />}
                     renderValue={(selected) => selected.join(', ')}
                     MenuProps={MenuProps}
                   >
@@ -1138,14 +1159,14 @@ const sendQuery = async (index) => {
                   </Select>
                 </FormControl>
                 <FormControl sx={{ m: 1, width: '48%' }} size="small">
-                  <InputLabel id="demo-multiple-checkbox-label">Gas</InputLabel>
+                  <InputLabel id="demo-multiple-checkbox-label">Gas(es)</InputLabel>
                   <Select
                     labelId="demo-select-small-label"
                     id="demo-select-small"
                     multiple
                     value={selectedGas}
                     onChange={handleGasChange}
-                    input={<OutlinedInput label="Category" />}
+                    input={<OutlinedInput label="Gas(es)" />}
                     renderValue={(selected) => selected.join(', ')}
                     MenuProps={MenuProps}
                   >
