@@ -1070,7 +1070,7 @@ const sendQuery = async (index) => {
            <Grid item xs={12}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Tooltip title={selectedOutputDatasets.length !== 0 ? "Comparison between input datasets and output datasets is not possible. Please make sure there is no selected output datasets" : ""}>
+               {/*  <Tooltip title={selectedOutputDatasets.length !== 0 ? "Comparison between input datasets and output datasets is not possible. Please make sure there is no selected output datasets" : ""}>
                   <FormControl sx={{ m: 1, width: '48%' }} size="small">
                     <InputLabel id="demo-simple-select-label">Input table(s)</InputLabel>
                     <Select
@@ -1093,7 +1093,7 @@ const sendQuery = async (index) => {
                       ))}
                     </Select>
                   </FormControl>
-                </Tooltip>
+                </Tooltip> */}
                 <Tooltip title={selectedInputDatasets.length !== 0 ? "Comparison between input datasets and output datasets is not possible. Please make sure there is no selected input datasets" : ""}>
                   <FormControl sx={{ m: 1, width: '48%' }} size="small">
                     <InputLabel id="demo-simple-select-label">Output table(s)</InputLabel>
