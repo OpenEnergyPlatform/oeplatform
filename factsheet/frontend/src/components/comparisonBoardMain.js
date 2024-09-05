@@ -84,6 +84,8 @@ const ComparisonBoardMain = (props) => {
   const [legendForStackedBarCharts, setLegendForStackedBarCharts] = React.useState([]);
   const [chartType, setChartType] = React.useState("");
   const [groupedBarChartsRandomColors, setGroupedBarChartsRandomColors] = React.useState([]);
+  const [showTitle, setShowTitle] = React.useState(false);
+  
   
   
   const category_disctionary = {
@@ -411,6 +413,8 @@ const ComparisonBoardMain = (props) => {
     setSelectedScenarios(
       typeof value === 'string' ? value.split(',') : value,
     );
+    setShowTitle(false);
+
   };
 
   const handleCategoriesChange = (event: SelectChangeEvent<typeof category>) => {
@@ -420,6 +424,8 @@ const ComparisonBoardMain = (props) => {
     setSelectedCategories(
       typeof value === 'string' ? value.split(',') : value,
     );
+    setShowTitle(false);
+
   };
 
   const handleGasChange = (event: SelectChangeEvent<typeof category>) => {
@@ -429,6 +435,8 @@ const ComparisonBoardMain = (props) => {
     setSelectedGas(
       typeof value === 'string' ? value.split(',') : value,
     );
+    setShowTitle(false);
+
   };
   
 
@@ -605,7 +613,6 @@ const ComparisonBoardMain = (props) => {
       //const gases = gasesObj.map((obj) => obj.gas.value );
 
       setGasesNames(gasNames);
-      
       setLoading(false);
 
     }).catch(error => {
@@ -637,6 +644,7 @@ const ComparisonBoardMain = (props) => {
       typeof value === 'string' ? value.split(',') : value,
     );
 
+    setShowTitle(false);
     sendGetScenariosQuery();
     sendGetCategoriesQuery();
     sendGetGasQuery();
@@ -898,6 +906,7 @@ const sendQuery = async (index) => {
         
         setLoading(false);
         setShowChart(true);
+        setShowTitle(true);
 
 
       } else {
@@ -1178,7 +1187,17 @@ const sendQuery = async (index) => {
                     ))}
                   </Select>
                 </FormControl>
-                <Button sx={{ m: 1, width: 70 }} size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Submit</Button>
+              </Grid>
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button sx={{ m: 1, width: 70, marginRight: "30px"}} size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Submit</Button>
+              </Grid>
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+
+              {showTitle === true && <Typography variant="h6" gutterBottom>
+                {selectedGas.map((i, index) => index === selectedGas.length - 1 ? i + ', ': i + ' and ')} <b>from</b> {selectedCategories.map((i, index) => index === selectedGas.length - 1 ? i + ', ': i + ' and ')} <b>in</b> {selectedScenarios.map(i => i)} 
+              </Typography>}
+
+              
               </Grid>
               <Grid item xs={12}>
                 {showChart == true && <Grid container>
