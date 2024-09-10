@@ -20,6 +20,9 @@
 
 ## Bugs
 
+- Added missing setting for Authorization of users in API requests [(#1830)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1830)
+
 ## Documentation updates
 
 - Improved OpenAPI documentation of oeplatform REST-API [(#1793)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1793)
+- Updated documentation for docker to include how to restart oeplatform [(#1830)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1830)
