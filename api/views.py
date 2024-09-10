@@ -312,7 +312,7 @@ class Metadata(APIView):
 
 class Table(APIView):
     """
-    Handels the creation of tables and serves information on existing tables
+    Handles the creation of tables and serves information on existing tables
     """
 
     objects = None
