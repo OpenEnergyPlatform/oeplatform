@@ -40,7 +40,6 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemText from '@mui/material/ListItemText';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import { useRef } from 'react';
@@ -85,8 +84,8 @@ const ComparisonBoardMain = (props) => {
   const [chartType, setChartType] = React.useState("");
   const [groupedBarChartsRandomColors, setGroupedBarChartsRandomColors] = React.useState([]);
   const [showTitle, setShowTitle] = React.useState(false);
-  
-  
+  const [disableAddVisualization, setDisableAddVisualization] = React.useState(false);
+  const [units, SetUnits] = React.useState([]);
   
   const category_disctionary = {
     "OEO_00010038" : "1 Energy",
@@ -481,8 +480,8 @@ const ComparisonBoardMain = (props) => {
     setLoading(true);
 
     //const data_tabels = [];
-    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
-    const data_tabels = [`"eu_leg_data_2023_eea"`] ;
+    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    // const data_tabels = [`"eu_leg_data_2023_eea"`] ;
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
 
@@ -550,8 +549,8 @@ const ComparisonBoardMain = (props) => {
 
   const sendGetGasQuery = async () => {
     setLoading(true);
-    //const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
-    const data_tabels = [ `"scenario_eu_leg_data_2021"`] ;
+    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    // const data_tabels = [ `"scenario_eu_leg_data_2021"`] ;
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
 
@@ -680,8 +679,8 @@ const sendQuery = async (index) => {
     console.log(chartData);
     setLoading(true);
 
-    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
-    const data_tabels = [ `"scenario_eu_leg_data_2021"`] ;
+    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    // const data_tabels = [ `"scenario_eu_leg_data_2021"`] ;
     // const data_tabels = [];
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -715,16 +714,19 @@ const sendQuery = async (index) => {
     PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
     PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
   
-    SELECT DISTINCT ?s ?value ?country_code ?year ?category ?gas ?table_name WHERE {
+    SELECT DISTINCT ?s ?value ?country_code ?year ?category ?gas ?table_name ?unit WHERE {
       ?s oeo:OEO_00020221 ?country_code .
       ?s oeo:OEO_00020224 ?year .
       ?s oeo:OEO_00140178 ?value .
       ?s oeo:OEO_00000504 ?table_name .
       ?s oeo:has_sector_division ?category .
       ?s oeo:OEO_00020226 ?scenario .
-      ?s oeo:OEO_00010121 ?gas
+      ?s oeo:OEO_00010121 ?gas .
+      ?s oeo:OEO_00040010 ?unit .
       FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories})  && ?gas IN (${gases}) ) .
     }`;
+
+    console.log(main_query);
 
     const response = await axios.post(
       conf.obdi, 
@@ -742,6 +744,17 @@ const sendQuery = async (index) => {
       setSparqlOutput(sparqOutput);
 
       if (sparqOutput.length !== 0) {
+
+        const distinctUnits = [];
+        sparqOutput.map((obj) => {
+          if (!distinctUnits.includes(obj.unit.value)) {
+            distinctUnits.push(obj.unit.value)
+          }
+        } );
+
+        SetUnits(distinctUnits);
+
+        console.log(distinctUnits);
 
         const distinctTables = [];
         sparqOutput.map((obj) => {
@@ -827,7 +840,7 @@ const sendQuery = async (index) => {
 
           const transformGroupedItems = (groupedItems) => {
             const total_num_of_colors =  Object.keys(groupedItems).length + categorieIDs.length
-            const groupedRandomColors = Array.from({ length: total_num_of_colors }, generateRandomColor);
+            const groupedRandomColors = Array.from({ length: total_num_of_colors + 1 }, generateRandomColor);
             setGroupedBarChartsRandomColors(groupedRandomColors);
             
 
@@ -858,6 +871,7 @@ const sendQuery = async (index) => {
                   .map(el => el.country_code.value.split('/').pop());
                   
                 groupedStackedBarChartsLegend.push([group, category_disctionary[cat.split("/").pop()], cat,  groupedRandomColors[colorIndex]]);
+                console.log(colorIndex, groupedRandomColors[colorIndex], groupedStackedBarChartsLegend);
                 colorIndex++;
                 return categorized;
               });
@@ -909,6 +923,7 @@ const sendQuery = async (index) => {
         setShowTitle(true);
 
 
+
       } else {
         setLoading(false);
         setShowChart(false);
@@ -923,7 +938,10 @@ const sendQuery = async (index) => {
   }
 
   const addVisualization = (index) => {
+    setDisableAddVisualization(true);
+
     addVisualizationRows(visualizationRows + 1);
+
   };
 
 
@@ -1191,17 +1209,20 @@ const sendQuery = async (index) => {
               <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Button sx={{ m: 1, width: 70, marginRight: "30px"}} size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Submit</Button>
               </Grid>
-              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-
-              {showTitle === true && <Typography variant="h6" gutterBottom>
-                {selectedGas.map((i, index) => index === selectedGas.length - 1 ? i + ', ': i + ' and ')} <b>from</b> {selectedCategories.map((i, index) => index === selectedGas.length - 1 ? i + ', ': i + ' and ')} <b>in</b> {selectedScenarios.map(i => i)} 
+              <Grid item xs={1} >
+              </Grid>
+              <Grid item xs={10} sx={{ display: 'flex', justifyContent: 'center' }}>
+              {showTitle === true && <Typography variant="body1" gutterBottom>
+                {selectedGas.map((i, index) => index === selectedGas.length - 1 ? i + ', ': i + ' and ')} <b>from</b> {selectedCategories.map((i, index) => index === selectedCategories.length - 1 ? i + ', ': i + ' and ')}  {selectedScenarios.map(i => i)} 
               </Typography>}
-
               
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={1} >
+              </Grid>
                 {showChart == true && <Grid container>
-                  <Grid item xs={12}>
+                  <Grid item xs={1} >
+                  </Grid>
+                  <Grid item xs={11}>
                       <Box sx={{ bgcolor: 'background.paper' }}>
                         <Tabs
                           onChange={(e, number) => handleYearChange(e, number, index)}
@@ -1224,7 +1245,17 @@ const sendQuery = async (index) => {
                         </Tabs>
                       </Box>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={1} style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    transform: 'rotate(270deg)',
+                  }} >
+                    <Typography variant="body1" component="div">
+                      {units[0].replace(/\r/g, ' ')}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={11}>
                     <Bar data={{
                               labels: chartLabels[index],
                               datasets: chartData[index]
@@ -1235,12 +1266,12 @@ const sendQuery = async (index) => {
                   </Grid>
                 </Grid>}
                 </Grid>
-              </Grid>
-             
-              <Divider />
             </Grid>
             ))}
-            <Grid item xs={12} >
+            <Grid item xs={1} >
+            </Grid>
+            <Grid item xs={11} >
+              {console.log(legendForGroupedStackedBarCharts)}
               <div display="flex" justifyContent="space-between" flexWrap="wrap" alignItems="center">
                 {chartType === "MultipleDataTable" && legendForGroupedStackedBarCharts.map((category, idx)  => (
                               <span style={{ marginRight:"20px" }}>
@@ -1261,11 +1292,11 @@ const sendQuery = async (index) => {
                     <LinearProgress />
                   </Box>}
               <Box display="flex" justifyContent="flex-end">
-                
                 <IconButton
                     color="primary"
                     aria-label="add"
                     onClick={(index) => addVisualization(index)}
+                    disabled={disableAddVisualization === true}
                   >
                   <AddIcon />
                 </IconButton>
