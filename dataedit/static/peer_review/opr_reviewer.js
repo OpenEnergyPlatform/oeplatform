@@ -54,7 +54,6 @@ $('.nav-link').click(clearInputFields);
 /**
  * Returns name from cookies
  * @param {string} name Key to look up in cookie
- * @returns {value} Cookie value
  */
 function getCookie(name) {
   var cookieValue = null;
@@ -175,7 +174,6 @@ function submitPeerReview() {
     alert(getErrorMsg(err));
   });
 }
-
 /**
  * Finish peer review and save to backend
  */
@@ -304,7 +302,6 @@ function click_field(fieldKey, fieldValue, category) {
 function switchCategoryTab(category) {
   const currentTab = document.querySelector('.tab-pane.active'); // Get the currently active tab
   const tabIdForCategory = getCategoryToTabIdMapping()[category];
-  console.log("tabID", tabIdForCategory);
   if (currentTab.getAttribute('id') !== tabIdForCategory) {
     // The clicked field does not belong to the current tab, switch to the next tab
     const targetTab = document.getElementById(tabIdForCategory);
@@ -726,7 +723,6 @@ function saveEntrances() {
       commentElement.innerText = document.getElementById("commentarea").value;
     }
   }
-
   // Color ok/suggestion/rejected
   updateFieldColor();
   checkReviewComplete();
@@ -779,7 +775,7 @@ function checkReviewComplete() {
     const fieldState = getFieldState(field.fieldName);
     const reviewed = current_review["reviews"].find((review) => review.key === field.fieldName);
 
-    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(field.fieldValue)) {
+    if (!reviewed && fieldState !== 'ok' && fieldState !== 'rejected' && !isEmptyValue(field.fieldValue)) {
       $('#submit_summary').addClass('disabled');
       return;
     }
@@ -790,14 +786,13 @@ function checkReviewComplete() {
   }
 }
 
-
 function checkFieldStates() {
   const fieldList = getAllFieldsAndValues();
 
   for (const { fieldName, fieldValue } of fieldList) {
     if (!isEmptyValue(fieldValue)) {
       const fieldState = state_dict[fieldName];
-      if (fieldState !== 'ok') {
+      if (fieldState !== 'ok' && fieldState !== 'rejected') {
         return false;
       }
     }
