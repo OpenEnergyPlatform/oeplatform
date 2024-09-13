@@ -75,9 +75,10 @@ nav:
       - Users: dev/personas.md
     - Best Practices:
       - dev/best-practice.md
-      - Design System:
-        - dev/design-system/design-system.md
-        - Accessibility: dev/design-system/accessibility.md
+      - Frontend and UI:
+        - Workflow: dev/frontend/workflow.md
+        - Design System: dev/frontend/design-system.md
+        - Accessibility: dev/frontend/accessibility.md
     - Collaboration:
       - Community: dev/community.md
       - Git & GitHub: dev/git-github.md
