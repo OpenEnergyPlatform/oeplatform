@@ -41,7 +41,7 @@ from django.contrib import messages
 from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
-from dataedit.helper import merge_field_reviews, process_review_data, recursive_update
+from dataedit.helper import merge_field_reviews, process_review_data, recursive_update, remove_rejected_fields
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
@@ -2241,14 +2241,20 @@ class PeerReviewView(LoginRequiredMixin, View):
                 review_table = Table.load(schema=schema, table=table)
                 review_table.set_is_reviewed()
                 metadata = self.load_json(schema, table, review_id=review_id)
+                updated_metadata = remove_rejected_fields(metadata, review_data)
+                recursive_update(updated_metadata, review_data)
 
-                recursive_update(metadata, review_data)
-
-                save_metadata_to_db(schema, table, metadata)
+                save_metadata_to_db(schema, table, updated_metadata)
+                active_peer_review = PeerReview.load(schema=schema, table=table)
 
                 if active_peer_review:
-                    # Update the oemetadata in the active PeerReview
-                    active_peer_review.oemetadata = metadata
+                    # check oemetadata
+
+                    # remove rejected fields
+                    updated_peer_review_metadata = remove_rejected_fields(active_peer_review.oemetadata, review_data)
+
+                    # Update and save PeerReview object
+                    active_peer_review.oemetadata = updated_peer_review_metadata
                     active_peer_review.save()
 
                 # TODO: also update reviewFinished in review datamodel json
