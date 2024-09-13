@@ -611,7 +611,7 @@ function showToast(title, message, type) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-  if (selectedState != "ok") {
+  if (selectedState !== "ok" && selectedState !== "rejected") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
 
@@ -662,7 +662,7 @@ function saveEntrances() {
                   "role": "reviewer",
                   "contributorValue": selectedFieldValue,
                   "newValue": initialReviewerSuggestions[selectedField],
-                  "comment": "",
+                  "comment": document.getElementById("commentarea").value,
                   "reviewerSuggestion": "",
                   "state": selectedState,
                 },
