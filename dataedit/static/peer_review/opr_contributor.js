@@ -415,7 +415,7 @@ function renderSummaryPageFields() {
 
       if (isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
-      } else if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue) && !processedFields.add(uniqueFieldIdentifier)) {
+      } else if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
         missingFields.push({ fieldName, fieldValue, fieldCategory });
         processedFields.add(uniqueFieldIdentifier);
       }
@@ -478,9 +478,10 @@ function renderSummaryPageFields() {
     clearSummaryTable();
 
     let allData = [];
-    allData.push(...missingFields.map((item) => ({...item, fieldStatus: 'Missing'})));
-    allData.push(...acceptedFields.map((item) => ({...item, fieldStatus: 'Accepted'})));
+    allData.push(...missingFields.map((item) => ({...item, fieldStatus: 'Pending'})));
     allData.push(...rejectedFields.map((item) => ({...item, fieldStatus: 'Rejected'})));
+    allData.push(...acceptedFields.map((item) => ({...item, fieldStatus: 'Accepted'})));
+
     allData.push(...emptyFields.map((item) => ({...item, fieldStatus: 'Empty'})));
 
     let table = generateTable(allData);
