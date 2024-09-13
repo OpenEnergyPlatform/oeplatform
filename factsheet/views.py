@@ -286,7 +286,7 @@ def create_factsheet(request, *args, **kwargs):
                         )
                         bundle.add((scenario_region, RDF.type, OEO.OEO_00020032))
                         bundle.add(
-                            (scenario_region, RDFS.label, Literal(remove_non_printable(region["name"])))
+                            (scenario_region, RDFS.label, Literal(region["name"]))
                         )
                         bundle.add((scenario_region, OEKG["reference"], region_URI))
                         bundle.add((scenario_URI, OEO.OEO_00020220, scenario_region))
@@ -306,7 +306,7 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 scenario_interacting_region,
                                 RDFS.label,
-                                Literal(remove_non_printable(interacting_region["name"])),
+                                Literal(interacting_region["name"]),
                             )
                         )
                         bundle.add(
@@ -759,7 +759,7 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 scenario_interacting_region,
                                 RDFS.label,
-                                Literal(remove_non_printable(interacting_region["name"])),
+                                Literal(interacting_region["name"]),
                             )
                         )
                         new_bundle.add(
@@ -1031,7 +1031,7 @@ def update_factsheet(request, *args, **kwargs):
             json.loads(study_keywords) if study_keywords is not None else []
         )
         for keyword in _study_keywords:
-            new_bundle.add((study_URI, OEO["has_study_keyword"], Literal(remove_non_printable(keyword))))
+            new_bundle.add((study_URI, OEO["has_study_keyword"], Literal(keyword)))
 
         iso_old_bundle = to_isomorphic(old_bundle)
         iso_new_bundle = to_isomorphic(new_bundle)
