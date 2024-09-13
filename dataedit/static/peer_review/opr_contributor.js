@@ -223,10 +223,10 @@ function click_field(fieldKey, fieldValue, category) {
     fieldDescriptionsElement.textContent = "No description found";
   }
   const fieldState = getFieldState(fieldKey);
-  if (fieldState === 'ok' || !fieldState) {
+  if (fieldState === 'ok' || !fieldState || fieldState === 'rejected') {
     document.getElementById("ok-button").disabled = true;
     document.getElementById("rejected-button").disabled = true;
-  } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+  } else if (fieldState === 'suggestion') {
     document.getElementById("ok-button").disabled = false;
     document.getElementById("rejected-button").disabled = false;
   } else {
@@ -365,7 +365,7 @@ function renderSummaryPageFields() {
       if (isEmptyValue(fieldValue)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
         processedFields.add(uniqueFieldIdentifier);
-      } else if (fieldState === 'ok') {
+      } else if (fieldState === 'ok' || fieldState === 'rejected') {
         acceptedFields.push({ fieldName, fieldValue, fieldCategory });
         processedFields.add(uniqueFieldIdentifier);
       }
@@ -415,7 +415,7 @@ function renderSummaryPageFields() {
 
       if (isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
-      } else if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
+      } else if (!found && fieldState !== 'ok' && fieldState === 'rejected' && !isEmptyValue(fieldValue)) {
         missingFields.push({ fieldName, fieldValue, fieldCategory });
         processedFields.add(uniqueFieldIdentifier);
       }
@@ -539,7 +539,7 @@ function showToast(title, message, type) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-  if (selectedState !== "ok") {
+  if (selectedState !== "ok" && selectedState !== "rejected") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
 
@@ -649,7 +649,7 @@ function checkReviewComplete() {
     const fieldState = getFieldState(fieldName);
     let reviewed = current_review["reviews"].find((review) => review.key === fieldName);
 
-    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
+    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(fieldValue) && fieldState !== "rejected") {
       $('#submit_summary').addClass('disabled');
       return;
     }
@@ -791,7 +791,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function toggleReviewControls(show) {
     const reviewControls = document.querySelector('.review__controls');
-    console.log('Review Controls:', reviewControls);
     if (reviewControls) {
       reviewControls.style.display = show ? '' : 'none';
     }
