@@ -1820,6 +1820,8 @@ class MetaEditView(LoginRequiredMixin, View):
         )
 
         context_dict = {
+            "schema": schema,
+            "table": table,
             "config": json.dumps(
                 {
                     "schema": schema,

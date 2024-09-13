@@ -1,5 +1,5 @@
 import re
-
+import string
 
 def serialize_publication_date(triple_object_pub_year: str):
     """
@@ -33,3 +33,9 @@ def serialize_publication_date(triple_object_pub_year: str):
 
     # If none of the patterns match, return "None" for invalid date formats
     return "None"
+
+def remove_non_printable(text):
+    if text is not None:
+        printable = set(string.printable)
+        return ''.join(filter(lambda x: x in printable, text))
+    return None

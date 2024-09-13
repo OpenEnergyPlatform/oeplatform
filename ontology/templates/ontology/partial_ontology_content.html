@@ -3,10 +3,9 @@
         {{ ontology_description }}
     <!-- </div> -->
 </div>
-
 <br>
-<h3>Modules</h3><br>
 
+{% comment %}
 <div id="accordion">
     {% for module, about in submodules %}
     <div class="card">
@@ -26,6 +25,7 @@
 </div>
 
 <hr>
+
 <h3>Imports</h3><br>
 
 <div id="imports_accordion">
@@ -46,3 +46,4 @@
     {% endfor %}
 </div>
 </div>
+{% endcomment %}

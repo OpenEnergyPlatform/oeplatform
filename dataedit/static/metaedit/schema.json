@@ -2,7 +2,7 @@
   "title": "oemetaBuilder - Create & edit oemetadata json files using OEMetadata v1.6",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/master/oemetadata/latest/schema.json",
-  "description": "Create & edit oemetadata json files using the OEMetadata v1.6 schema. See the Open Energy Platform metadata standard: https://github.com/OpenEnergyPlatform/oemetadata",
+  "description": "Application to create oemetadata in JSON format and download the JSON file to use it later or edit metadata on existing data tables. The builder currently uses the OEMetadata v1.6 schema. See the Open Energy Platform metadata standard: https://github.com/OpenEnergyPlatform/oemetadata",
   "type": "object",
   "properties": {
     "name": {
@@ -63,6 +63,17 @@
             "badge": "Platinum",
             "title": "Path",
             "format": "uri"
+          },
+          "openModalButton": {
+            "description": "Button to open a modal for HTMX request",
+            "format": "button",
+            "options": {
+              "button": {
+                "text": "Open OEO-EXT",
+                "icon": "external-link-alt",
+                "action": "openModalAction"
+              }
+            }
           }
         },
         "badge": "Platinum",
@@ -580,6 +591,17 @@
                             "badge": "Platinum",
                             "title": "Path",
                             "format": "uri"
+                          },
+                          "openModalButton": {
+                            "description": "Button to open a modal for HTMX request",
+                            "format": "button",
+                            "options": {
+                              "button": {
+                                "text": "Open OEO-EXT",
+                                "icon": "external-link-alt",
+                                "action": "openModalAction"
+                              }
+                            }
                           }
                         },
                         "badge": "Platinum",
@@ -625,6 +647,17 @@
                             "badge": "Platinum",
                             "title": "Path",
                             "format": "uri"
+                          },
+                          "openModalButton": {
+                            "description": "Button to open a modal for HTMX request",
+                            "format": "button",
+                            "options": {
+                              "button": {
+                                "text": "Open OEO-EXT",
+                                "icon": "external-link-alt",
+                                "action": "openModalAction"
+                              }
+                            }
                           }
                         },
                         "badge": "Platinum",

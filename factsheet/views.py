@@ -6,6 +6,7 @@ from django.core import serializers
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils.cache import patch_response_headers
+from django.views.decorators.cache import never_cache
 from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.compare import graph_diff, to_isomorphic
 from SPARQLWrapper import JSON
@@ -15,6 +16,7 @@ from factsheet.oekg.filters import OekgQuery
 from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 from factsheet.utils import serialize_publication_date
+from factsheet.utils import remove_non_printable
 from login import models as login_models
 from modelview.utils import get_framework_metadata_by_id, get_model_metadata_by_id
 
@@ -161,7 +163,7 @@ def create_factsheet(request, *args, **kwargs):
     request_body = json.loads(request.body)
     name = request_body["name"]  # noqa
     uid = request_body["uid"]
-    acronym = request_body["acronym"]
+    acronym = (request_body["acronym"])
     study_name = request_body["study_name"]
     abstract = request_body["abstract"]
     institution = request_body["institution"]
@@ -201,11 +203,11 @@ def create_factsheet(request, *args, **kwargs):
         bundle.add((study_URI, RDF.type, OEO.OEO_00010252))
 
         if acronym != "":
-            bundle.add((study_URI, DC.acronym, Literal(acronym)))
+            bundle.add((study_URI, DC.acronym, Literal(remove_non_printable(acronym))))
         if study_name != "":
-            bundle.add((study_URI, OEKG["has_full_name"], Literal(study_name)))
+            bundle.add((study_URI, OEKG["has_full_name"], Literal(remove_non_printable(study_name))))
         if abstract != "":
-            bundle.add((study_URI, DC.abstract, Literal(abstract)))
+            bundle.add((study_URI, DC.abstract, Literal(remove_non_printable(abstract))))
 
         _publications = json.loads(publications) if publications is not None else []
         for item in _publications:
@@ -213,13 +215,13 @@ def create_factsheet(request, *args, **kwargs):
                 "http://openenergy-platform.org/ontology/oekg/publication/" + item["id"]
             )
             bundle.add(
-                (publications_URI, OEKG["publication_uuid"], Literal(item["id"]))
+                (publications_URI, OEKG["publication_uuid"], Literal(remove_non_printable(item["id"])))
             )
 
             bundle.add((study_URI, OEKG["has_publication"], publications_URI))
             if item["report_title"] != "":
                 bundle.add(
-                    (publications_URI, RDFS.label, Literal(item["report_title"]))
+                    (publications_URI, RDFS.label, Literal(remove_non_printable(item["report_title"])))
                 )
 
             _authors = item["authors"]
@@ -230,7 +232,7 @@ def create_factsheet(request, *args, **kwargs):
                 bundle.add((publications_URI, OEO.OEO_00000506, author_URI))
 
             if item["doi"] != "":
-                bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
+                bundle.add((publications_URI, OEKG["doi"], Literal(remove_non_printable(item["doi"]))))
 
             if (
                 item["date_of_publication"] != "01-01-1900"
@@ -240,7 +242,7 @@ def create_factsheet(request, *args, **kwargs):
                     (
                         publications_URI,
                         OEKG["date_of_publication"],
-                        Literal(item["date_of_publication"]),
+                        Literal(remove_non_printable(item["date_of_publication"])),
                     )
                 )
 
@@ -249,7 +251,7 @@ def create_factsheet(request, *args, **kwargs):
                     (
                         publications_URI,
                         OEKG["link_to_study_report"],
-                        Literal(item["link_to_study_report"]),
+                        Literal(remove_non_printable(item["link_to_study_report"])),
                     )
                 )
 
@@ -264,16 +266,16 @@ def create_factsheet(request, *args, **kwargs):
                     + item["id"]
                 )
                 bundle.add((study_URI, OEKG["has_scenario"], scenario_URI))
-                bundle.add((scenario_URI, RDFS.label, Literal(item["acronym"])))
+                bundle.add((scenario_URI, RDFS.label, Literal(remove_non_printable(item["acronym"]))))
                 if item["name"] != "":
                     bundle.add(
-                        (scenario_URI, OEKG["has_full_name"], Literal(item["name"]))
+                        (scenario_URI, OEKG["has_full_name"], Literal(remove_non_printable(item["name"])))
                     )
                     bundle.add((scenario_URI, RDF.type, OEO.OEO_00000365))
                 if item["abstract"] != "":
-                    bundle.add((scenario_URI, DC.abstract, Literal(item["abstract"])))
+                    bundle.add((scenario_URI, DC.abstract, Literal(remove_non_printable(item["abstract"]))))
 
-                bundle.add((scenario_URI, OEKG["scenario_uuid"], Literal(item["id"])))
+                bundle.add((scenario_URI, OEKG["scenario_uuid"], Literal(remove_non_printable(item["id"]))))
 
                 if "regions" in item:
                     for region in item["regions"]:
@@ -284,7 +286,7 @@ def create_factsheet(request, *args, **kwargs):
                         )
                         bundle.add((scenario_region, RDF.type, OEO.OEO_00020032))
                         bundle.add(
-                            (scenario_region, RDFS.label, Literal(region["name"]))
+                            (scenario_region, RDFS.label, Literal(remove_non_printable(region["name"])))
                         )
                         bundle.add((scenario_region, OEKG["reference"], region_URI))
                         bundle.add((scenario_URI, OEO.OEO_00020220, scenario_region))
@@ -304,7 +306,7 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 scenario_interacting_region,
                                 RDFS.label,
-                                Literal(interacting_region["name"]),
+                                Literal(remove_non_printable(interacting_region["name"])),
                             )
                         )
                         bundle.add(
@@ -328,7 +330,7 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 scenario_URI,
                                 OEO.OEO_00020224,
-                                Literal(scenario_year["name"]),
+                                Literal(remove_non_printable(scenario_year["name"])),
                             )
                         )
 
@@ -339,6 +341,7 @@ def create_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         # TODO- set in settings
@@ -351,32 +354,33 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 input_dataset_URI,
                                 RDFS.label,
-                                Literal(input_dataset["value"]["label"]),
+                                Literal(remove_non_printable(input_dataset["value"]["label"])),
                             )
                         )
                         bundle.add(
                             (
                                 input_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(input_dataset["value"]["url"]),
+                                Literal(remove_non_printable(input_dataset["value"]["url"])),
                             )
                         )
                         bundle.add(
                             (
                                 input_dataset_URI,
                                 OEO["has_id"],
-                                Literal(input_dataset["idx"]),
+                                Literal(remove_non_printable(input_dataset["idx"])),
                             )
                         )
                         bundle.add(
                             (
                                 input_dataset_URI,
                                 OEO["has_key"],
-                                Literal(input_dataset["key"]),
+                                Literal(remove_non_printable(input_dataset["key"])),
                             )
                         )
                         bundle.add((scenario_URI, OEO.RO_0002233, input_dataset_URI))
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         # TODO- set in settings
@@ -389,28 +393,28 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 output_dataset_URI,
                                 RDFS.label,
-                                Literal(output_dataset["value"]["label"]),
+                                Literal(remove_non_printable(output_dataset["value"]["label"])),
                             )
                         )
                         bundle.add(
                             (
                                 output_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(output_dataset["value"]["url"]),
+                                Literal(remove_non_printable(output_dataset["value"]["url"])),
                             )
                         )
                         bundle.add(
                             (
                                 output_dataset_URI,
                                 OEO["has_id"],
-                                Literal(output_dataset["idx"]),
+                                Literal(remove_non_printable(output_dataset["idx"])),
                             )
                         )
                         bundle.add(
                             (
                                 output_dataset_URI,
                                 OEO["has_key"],
-                                Literal(output_dataset["key"]),
+                                Literal(remove_non_printable(output_dataset["key"])),
                             )
                         )
                         bundle.add((scenario_URI, OEO.RO_0002234, output_dataset_URI))
@@ -478,14 +482,14 @@ def create_factsheet(request, *args, **kwargs):
                 (
                     model_URI,
                     RDFS.label,
-                    Literal(model_acronym),
+                    Literal(remove_non_printable(model_acronym)),
                 )
             )
             bundle.add(
                 (
                     model_URI,
                     OEO["has_iri"],
-                    Literal(model_url),
+                    Literal(remove_non_printable(model_url)),
                 )
             )
             bundle.add((study_URI, OEO["has_model"], model_URI))
@@ -514,7 +518,7 @@ def create_factsheet(request, *args, **kwargs):
                     (
                         framework_URI,
                         RDFS.label,
-                        Literal(framework_acronym),
+                        Literal(remove_non_printable(framework_acronym)),
                     )
                 )
 
@@ -523,7 +527,7 @@ def create_factsheet(request, *args, **kwargs):
                     (
                         framework_URI,
                         OEO["has_iri"],
-                        Literal(framework_url),
+                        Literal(remove_non_printable(framework_url)),
                     )
                 )
 
@@ -639,12 +643,12 @@ def update_factsheet(request, *args, **kwargs):
                 "http://openenergy-platform.org/ontology/oekg/publication/" + item["id"]
             )
             new_bundle.add(
-                (publications_URI, OEKG["publication_uuid"], Literal(item["id"]))
+                (publications_URI, OEKG["publication_uuid"], Literal(remove_non_printable(item["id"])))
             )
             new_bundle.add((study_URI, OEKG["has_publication"], publications_URI))
             if item["report_title"] != "":
                 new_bundle.add(
-                    (publications_URI, RDFS.label, Literal(item["report_title"]))
+                    (publications_URI, RDFS.label, Literal(remove_non_printable(item["report_title"])))
                 )
 
             _authors = item["authors"]
@@ -662,7 +666,7 @@ def update_factsheet(request, *args, **kwargs):
                         new_bundle.add((publications_URI, OEO.OEO_00000506, author_URI))
 
             if item["doi"] != "":
-                new_bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
+                new_bundle.add((publications_URI, OEKG["doi"], Literal(remove_non_printable(item["doi"]))))
 
             if (
                 item["date_of_publication"] != "1900"
@@ -672,7 +676,7 @@ def update_factsheet(request, *args, **kwargs):
                     (
                         publications_URI,
                         OEKG["date_of_publication"],
-                        Literal(item["date_of_publication"]),
+                        Literal(remove_non_printable(item["date_of_publication"])),
                     )
                 )
 
@@ -681,7 +685,7 @@ def update_factsheet(request, *args, **kwargs):
                     (
                         publications_URI,
                         OEKG["link_to_study_report"],
-                        Literal(item["link_to_study_report"]),
+                        Literal(remove_non_printable(item["link_to_study_report"])),
                     )
                 )
 
@@ -706,17 +710,17 @@ def update_factsheet(request, *args, **kwargs):
                     oekg.remove((o, p, o))
 
                 new_bundle.add(
-                    (scenario_URI, OEKG["scenario_uuid"], Literal(item["id"]))
+                    (scenario_URI, OEKG["scenario_uuid"], Literal(remove_non_printable(item["id"])))
                 )
                 new_bundle.add((scenario_URI, RDF.type, OEO.OEO_00000365))
-                new_bundle.add((scenario_URI, RDFS.label, Literal(item["acronym"])))
+                new_bundle.add((scenario_URI, RDFS.label, Literal((item["acronym"]))))
                 if item["name"] != "":
                     new_bundle.add(
-                        (scenario_URI, OEKG["has_full_name"], Literal(item["name"]))
+                        (scenario_URI, OEKG["has_full_name"], Literal(remove_non_printable(item["name"])))
                     )
                 if item["abstract"] != "" and item["abstract"] != None:  # noqa
                     new_bundle.add(
-                        (scenario_URI, DC.abstract, Literal(item["abstract"]))
+                        (scenario_URI, DC.abstract, Literal(remove_non_printable(item["abstract"])))
                     )
                 if "regions" in item:
                     for region in item["regions"]:
@@ -727,7 +731,7 @@ def update_factsheet(request, *args, **kwargs):
                         )
                         new_bundle.add((scenario_region, RDF.type, OEO.OEO_00020032))
                         new_bundle.add(
-                            (scenario_region, RDFS.label, Literal(region["name"]))
+                            (scenario_region, RDFS.label, Literal(remove_non_printable(region["name"])))
                         )
                         new_bundle.add(
                             (
@@ -755,7 +759,7 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 scenario_interacting_region,
                                 RDFS.label,
-                                Literal(interacting_region["name"]),
+                                Literal(remove_non_printable(interacting_region["name"])),
                             )
                         )
                         new_bundle.add(
@@ -780,7 +784,7 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 scenario_URI,
                                 OEO.OEO_00020224,
-                                Literal(scenario_year["name"]),
+                                Literal(remove_non_printable(scenario_year["name"])),
                             )
                         )
 
@@ -791,6 +795,7 @@ def update_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         input_dataset_URI = URIRef(
@@ -806,34 +811,35 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 input_dataset_URI,
                                 RDFS.label,
-                                Literal(input_dataset["value"]["label"]),
+                                Literal(remove_non_printable(input_dataset["value"]["label"])),
                             )
                         )
                         new_bundle.add(
                             (
                                 input_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(input_dataset["value"]["url"]),
+                                Literal(remove_non_printable(input_dataset["value"]["url"])),
                             )
                         )
                         new_bundle.add(
                             (
                                 input_dataset_URI,
                                 OEO["has_id"],
-                                Literal(input_dataset["idx"]),
+                                Literal(remove_non_printable(input_dataset["idx"])),
                             )
                         )
                         new_bundle.add(
                             (
                                 input_dataset_URI,
                                 OEO["has_key"],
-                                Literal(input_dataset["key"]),
+                                Literal(remove_non_printable(input_dataset["key"])),
                             )
                         )
                         new_bundle.add(
                             (scenario_URI, OEO.RO_0002233, input_dataset_URI)
                         )
 
+                # TODO: jh-RLI: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         output_dataset_URI = URIRef(
@@ -845,28 +851,28 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 output_dataset_URI,
                                 RDFS.label,
-                                Literal(output_dataset["value"]["label"]),
+                                Literal(remove_non_printable(output_dataset["value"]["label"])),
                             )
                         )
                         new_bundle.add(
                             (
                                 output_dataset_URI,
                                 OEO["has_iri"],
-                                Literal(output_dataset["value"]["url"]),
+                                Literal(remove_non_printable(output_dataset["value"]["url"])),
                             )
                         )
                         new_bundle.add(
                             (
                                 output_dataset_URI,
                                 OEO["has_id"],
-                                Literal(output_dataset["idx"]),
+                                Literal(remove_non_printable(output_dataset["idx"])),
                             )
                         )
                         new_bundle.add(
                             (
                                 output_dataset_URI,
                                 OEO["has_key"],
-                                Literal(output_dataset["key"]),
+                                Literal(remove_non_printable(output_dataset["key"])),
                             )
                         )
                         new_bundle.add(
@@ -876,9 +882,9 @@ def update_factsheet(request, *args, **kwargs):
                 new_bundle.add((study_URI, OEKG["has_scenario"], scenario_URI))
 
         if acronym != "":
-            new_bundle.add((study_URI, DC.acronym, Literal(acronym)))
+            new_bundle.add((study_URI, DC.acronym, Literal(remove_non_printable(acronym))))
 
-        new_bundle.add((study_URI, OEKG["has_full_name"], Literal(studyName)))
+        new_bundle.add((study_URI, OEKG["has_full_name"], Literal(remove_non_printable(studyName))))
 
         institutions = json.loads(institution) if institution is not None else []
         for item in institutions:
@@ -897,7 +903,7 @@ def update_factsheet(request, *args, **kwargs):
             new_bundle.add((study_URI, OEO.OEO_00000509, funding_source_URI))
 
         if abstract != "":
-            new_bundle.add((study_URI, DC.abstract, Literal(abstract)))
+            new_bundle.add((study_URI, DC.abstract, Literal(remove_non_printable(abstract))))
 
         contact_persons = (
             json.loads(contact_person) if contact_person is not None else []
@@ -949,7 +955,7 @@ def update_factsheet(request, *args, **kwargs):
                 (
                     model_URI,
                     RDFS.label,
-                    Literal(model_acronym),
+                    Literal(remove_non_printable(model_acronym)),
                 )
             )
 
@@ -957,7 +963,7 @@ def update_factsheet(request, *args, **kwargs):
                 (
                     model_URI,
                     OEO["has_iri"],
-                    Literal(model_url),
+                    Literal(remove_non_printable(model_url)),
                 )
             )
 
@@ -997,7 +1003,7 @@ def update_factsheet(request, *args, **kwargs):
                     (
                         framework_URI,
                         RDFS.label,
-                        Literal(framework_acronym),
+                        Literal(remove_non_printable(framework_acronym)),
                     )
                 )
             if framework_url:
@@ -1005,7 +1011,7 @@ def update_factsheet(request, *args, **kwargs):
                     (
                         framework_URI,
                         OEO["has_iri"],
-                        Literal(framework_url),
+                        Literal(remove_non_printable(framework_url)),
                     )
                 )
 
@@ -1025,7 +1031,7 @@ def update_factsheet(request, *args, **kwargs):
             json.loads(study_keywords) if study_keywords is not None else []
         )
         for keyword in _study_keywords:
-            new_bundle.add((study_URI, OEO["has_study_keyword"], Literal(keyword)))
+            new_bundle.add((study_URI, OEO["has_study_keyword"], Literal(remove_non_printable(keyword))))
 
         iso_old_bundle = to_isomorphic(old_bundle)
         iso_new_bundle = to_isomorphic(new_bundle)
@@ -1210,7 +1216,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 model_metadata["url"] = str(o1)
                 factsheet["models"].append(model_metadata)
 
-    factsheet["collected_scenario_publication_dates"] = []
+    temp = set()
     factsheet["publications"] = []
     for s, p, o in oekg.triples((study_URI, OEKG["has_publication"], None)):
         publication = {}
@@ -1235,9 +1241,10 @@ def factsheet_by_id(request, *args, **kwargs):
         publication["date_of_publication"] = ""
         for s3, p3, o3 in oekg.triples((o, OEKG["date_of_publication"], None)):
             publication["date_of_publication"] = serialize_publication_date(str(o3))
-            factsheet["collected_scenario_publication_dates"].append(
-                serialize_publication_date(str(o3))
-            )
+            temp.update(serialize_publication_date(str(o3)))
+
+        # Convert set to list before creating the JSON response
+        factsheet["collected_scenario_publication_dates"] = list(temp)
 
         publication["link_to_study_report"] = ""
         for s4, p4, o4 in oekg.triples((o, OEKG["link_to_study_report"], None)):
@@ -1627,51 +1634,54 @@ def get_all_factsheets(request, *args, **kwargs):
     for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
         uid = str(s).split("/")[-1]
         element = {}
-        acronym = oekg.value(s, DC.acronym)
-        study_name = oekg.value(s, OEKG["has_full_name"])
+        acronym = remove_non_printable(oekg.value(s, DC.acronym))
+        study_name = remove_non_printable(oekg.value(s, OEKG["has_full_name"]))
         abstract = oekg.value(s, DC.abstract)
         element["uid"] = uid
-        element["acronym"] = acronym if acronym != None else ""  # noqa
-        element["study_name"] = study_name if study_name != None else ""  # noqa
-        element["abstract"] = abstract if abstract != None else ""  # noqa
+        element["acronym"] = remove_non_printable(acronym) if acronym != None else ""  # noqa
+        element["study_name"] = remove_non_printable(study_name) if study_name != None else ""  # noqa
+        element["abstract"] = remove_non_printable(abstract) if abstract != None else ""  # noqa
         study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
         element["institutions"] = []
         for s, p, o in oekg.triples((study_URI, OEO.OEO_00000510, None)):
             label = oekg.value(o, RDFS.label)
             if label != None:  # noqa
-                element["institutions"].append(label)
+                element["institutions"].append(remove_non_printable(label))
 
         element["funding_sources"] = []
         for s, p, o in oekg.triples((study_URI, OEO.OEO_00000509, None)):
             label = oekg.value(o, RDFS.label)
             if label != None:  # noqa
-                element["funding_sources"].append(label)
+                element["funding_sources"].append(remove_non_printable(label))
 
         element["models"] = []
         for s, p, o in oekg.triples((study_URI, OEO["has_model"], None)):
             if o != None:  # noqa
                 label = oekg.value(o, RDFS.label)
                 if label:
-                    element["models"].append(label)
+                    element["models"].append(remove_non_printable(label))
 
         element["frameworks"] = []
         for s, p, o in oekg.triples((study_URI, OEO["has_framework"], None)):
             if o != None:  # noqa
                 label = oekg.value(o, RDFS.label)
                 if label is not None:
-                    element["frameworks"].append(label)
+                    element["frameworks"].append(remove_non_printable(label))
                 else:
                     pass
 
-        element["collected_scenario_publication_dates"] = []
+        temp = set()
         for s, p, o in oekg.triples((s, OEKG["has_publication"], None)):
             pubs_per_bundle = []
             for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
                 if o1:
-                    pubs_per_bundle.append(serialize_publication_date(str(o1)))
+                    pubs_per_bundle.append(serialize_publication_date(str(remove_non_printable(o1))))
 
             if pubs_per_bundle:
-                element["collected_scenario_publication_dates"].append(pubs_per_bundle)
+                temp.update(pubs_per_bundle)
+
+        # Convert set to list before creating the JSON response
+        element["collected_scenario_publication_dates"] = list(temp)
 
         element["scenarios"] = []
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
@@ -1683,9 +1693,9 @@ def get_all_factsheets(request, *args, **kwargs):
             if label != None:  # noqa
                 element["scenarios"].append(
                     {
-                        "label": label,
-                        "abstract": abstract,
-                        "full_name": full_name,
+                        "label": remove_non_printable(label),
+                        "abstract": remove_non_printable(abstract),
+                        "full_name": remove_non_printable(full_name),
                         "uid": uid,
                     }
                 )
@@ -1769,9 +1779,26 @@ def get_scenarios(request, *args, **kwargs):
             for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020224, None)):
                 scenario_years.append(o4)
             for s5, p5, o5 in oekg.triples((s, OEO.RO_0002233, None)):
-                input_datasets.append(oekg.value(o5, RDFS.label))
+                oekg_value = oekg.value(o5, OEO["has_iri"])
+                comparable = str(oekg_value).split("scenario/")
+                input_datasets.append(
+                    (
+                        oekg.value(o5, RDFS.label),
+                        oekg.value(o5, OEO["has_iri"]),
+                        comparable[1],
+                    )
+                )
             for s6, p6, o6 in oekg.triples((s, OEO.RO_0002234, None)):
-                output_datasets.append(oekg.value(o6, RDFS.label))
+                oekg_value = oekg.value(o6, OEO["has_iri"])
+                comparable = str(oekg_value).split("scenario/")
+
+                output_datasets.append(
+                    (
+                        oekg.value(o6, RDFS.label),
+                        oekg.value(o6, OEO["has_iri"]),
+                        comparable[1],
+                    )
+                )
 
             for s1, p1, o1 in oekg.triples((None, OEKG["has_scenario"], s)):
                 study_label = oekg.value(s1, OEKG["has_full_name"])
@@ -2026,6 +2053,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
     return response
 
 
+@never_cache
 def filter_scenario_bundles_view(request):
     # Get the table IRI from the request or any other source
     table_iri = request.GET.get("table_iri", "")
