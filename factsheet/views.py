@@ -1339,7 +1339,7 @@ def factsheet_by_id(request, *args, **kwargs):
     return response
 
 
-@login_required
+#@login_required
 def query_oekg(request, *args, **kwargs):
     """
     This function takes filter objects provided by the user and utilises
@@ -1375,15 +1375,12 @@ def query_oekg(request, *args, **kwargs):
 
         SELECT DISTINCT ?study_acronym
         WHERE
-        SELECT DISTINCT ?study_acronym
-        WHERE
         {{
-        ?s OEO:OEO_00000510 ?institutes ;
+        ?s  DC:acronym ?study_acronym ;
             {authors_exp}
-            {funding_source_exp}
-            OEKG:date_of_publication ?publication_date ;
-            OEO:has_study_keyword ?study_keywords ;;
-            DC:acronym ?study_acronym .
+            {funding_sources_exp}
+            {study_descriptors_exp}
+            {institutes_exp}
 
         FILTER ((?institutes IN ({institutes}) )
         || (?authors IN ({authors}) )
@@ -1392,6 +1389,11 @@ def query_oekg(request, *args, **kwargs):
         || (?study_keywords IN ({study_keywords}) ) )
 
         }}"""  # noqa: E501
+    
+    authors_exp = 'OEO:OEO_00000506 ?authors ;' if authors_list != [] else ''
+    funding_sources_exp = 'OEO:OEO_00000509 ?funding_sources ;' if funding_sources_list != [] else ''
+    study_descriptors_exp = 'OEO:has_study_keyword ?study_keywords ;' if study_keywords_list != [] else ''
+    institutes_exp = 'OEO:OEO_00000510 ?institutes .' if institutes_list != [] else ''
 
     final_query = query_structure.format(
         institutes=str(institutes_list)
@@ -1408,12 +1410,13 @@ def query_oekg(request, *args, **kwargs):
         study_keywords=str(study_keywords_list).replace("[", "").replace("]", ""),
         scenario_year_start=scenario_year_start_value,
         scenario_year_end=scenario_year_end_value,
-        funding_source_exp=(
-            "OEO:OEO_00000509 ?funding_sources ;" if funding_sources_list != [] else ""
-        ),
-        authors_exp="OEO:OEO_00000506 ?authors ;" if authors_list != [] else "",
+        funding_sources_exp= funding_sources_exp,
+        study_descriptors_exp=study_descriptors_exp,
+        institutes_exp=institutes_exp,
+        authors_exp=authors_exp,
     )
 
+    print(final_query)
     sparql.setReturnFormat(JSON)
     sparql.setQuery(final_query)
     results = sparql.query().convert()

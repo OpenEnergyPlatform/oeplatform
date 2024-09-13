@@ -268,7 +268,7 @@ function EnhancedTableToolbar(props) {
             {/* <Tooltip title="Show all">
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
             </Tooltip> */}
-            <Button   disabled={isDisabled} variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
+            <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
             <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px' }} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
             <Tooltip title="Compare">
 
@@ -543,6 +543,8 @@ export default function CustomTable(props) {
   const handleConfirmQuery = (event) => {
     setOpenQuery(false);
     setOpenBackDrop(true);
+    console.log(CSRFToken());
+    
     const criteria = {
       'institutions': selectedInstitution.map(i => 'OEKG:' + i.iri),
       'authors': selectedAuthors.map(i => 'OEKG:' + i.iri),
@@ -552,6 +554,8 @@ export default function CustomTable(props) {
       'studyKewords': selectedStudyKewords,
       'scenarioYearValue': scenarioYearValue,
     }
+    console.log(criteria);
+
     axios.post(conf.toep + 'scenario-bundles/query/',
       {
         'criteria': criteria,

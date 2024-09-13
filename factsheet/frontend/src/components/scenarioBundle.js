@@ -104,6 +104,8 @@ function Factsheet(props) {
 
   const { id, fsData } = props;
 
+  console.log(CSRFToken());
+
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
