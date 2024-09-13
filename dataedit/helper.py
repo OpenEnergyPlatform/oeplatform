@@ -254,3 +254,62 @@ def process_review_data(review_data, metadata, categories):
         state_dict[field_key] = state
 
     return state_dict
+
+
+def remove_rejected_fields(metadata, review_data):
+    """
+    Removes fields and objects with the 'rejected' status from the metadata.
+
+    Args:
+    metadata (dict): The original metadata.
+    review_data (dict): The review data containing the field information.
+
+    Returns:
+    dict: The updated metadata without the fields and objects with the 'rejected' status.
+    """
+
+    def delete_nested_field(data, keys):
+        """
+        Removes a nested field or object by keys. If it is a list item, the entire object is removed if a nested field
+        is specified.
+        """
+        # Go through the keys to the penultimate element to get the parent object
+        for key in keys[:-1]:
+            if isinstance(data, list):
+                key = int(key)  # Convert list index to int
+            if key not in data and not isinstance(data, list):
+                return  # Stop execution if key is not found
+            data = data[key]  # Move on to the next level
+
+        last_key = keys[-1]
+
+        # If it is a list, delete the entire object by index
+        if isinstance(data, list) and last_key.isdigit():
+            index = int(last_key)
+            if 0 <= index < len(data):
+                data.pop(index)
+
+        # If this is a dictionary, remove the nested field
+        elif isinstance(data, dict) and last_key in data:
+            del data[last_key]
+
+    # Checking for reviews in review_data
+    reviews = review_data.get("reviewData", {}).get("reviews", [])
+    if not reviews:
+        return metadata
+
+    # go through all reviews and delete fields and objects with the status 'rejected'
+    for review in reviews:
+        state = review.get("fieldReview", {}).get("state")
+        if state == "rejected":
+            # Split the key into parts to find nested structures
+            keys = review["key"].split(".")
+            delete_nested_field(metadata, keys)
+
+    return metadata
+
+
+
+
+
+
