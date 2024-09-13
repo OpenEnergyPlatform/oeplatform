@@ -448,7 +448,7 @@ function renderSummaryPageFields() {
       let th = document.createElement('th');
       th.scope = "row";
       th.className = "status";
-      if (item.fieldStatus === "Missing") {
+      if (item.fieldStatus === "Pending") {
         th.className = "status missing";
       }
       th.textContent = item.fieldStatus;
