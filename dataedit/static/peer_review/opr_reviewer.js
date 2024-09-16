@@ -627,134 +627,143 @@ function showToast(title, message, type) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-  if (selectedState !== "ok" && selectedState !== "rejected") {
-    // Get the valuearea element
-    const valuearea = document.getElementById('valuearea');
+    // If the field state is neither "ok" nor "rejected", user input should be checked for suggestions
+    if (selectedState !== "ok" && selectedState !== "rejected") {
+        const valuearea = document.getElementById('valuearea');
 
-    // const validityState = valuearea.validity;
-
-    // Validate the valuearea before proceeding
-    if (valuearea.value.trim() === '') {
-      valuearea.setCustomValidity('Value suggestion is required');
-      showToast("Error", "The value suggestion text field is required to save the field review!", "error");
-      return; // Stop execution if validation fails
-    } else {
-      valuearea.setCustomValidity('');
-    }
-
-    valuearea.reportValidity();
-  } else if (initialReviewerSuggestions[selectedField]) { // Check if the state is "ok" and if there's a valid suggestion
-    var fieldElement = document.getElementById("field_" + selectedField);
-    if (fieldElement) {
-      var valueElement = fieldElement.querySelector('.value');
-      if (valueElement) {
-        valueElement.innerText = initialReviewerSuggestions[selectedField];
-      }
-    }
-  }
-
-  // Create list for review fields if it doesn't exist yet
-  if (Object.keys(current_review["reviews"]).length === 0 &&
-    current_review["reviews"].constructor === Object) {
-    current_review["reviews"] = [];
-  }
-  if (selectedField) {
-    var unique_entry = true;
-    var dummy_review = current_review;
-    dummy_review["reviews"].forEach(function(value, idx) {
-      // if field is present already, update field
-      if (value["key"] === selectedField) {
-        unique_entry = false;
-        var element = document.querySelector('[aria-selected="true"]');
-        var category = (element.getAttribute("data-bs-target"));
-        if (selectedState === "ok") {
-          Object.assign(current_review["reviews"][idx],
-              {
-                "category": selectedCategory,
-                "key": selectedField,
-                "fieldReview": {
-                  "timestamp": Date.now(),
-                  "user": "oep_reviewer", // TODO put actual username
-                  "role": "reviewer",
-                  "contributorValue": selectedFieldValue,
-                  "newValue": initialReviewerSuggestions[selectedField],
-                  "comment": document.getElementById("commentarea").value,
-                  "reviewerSuggestion": "",
-                  "state": selectedState,
-                },
-              },
-          );
+        if (valuearea.value.trim() === '') {
+            valuearea.setCustomValidity('Value suggestion is required');
+            showToast("Error", "The value suggestion text field is required to save the field review!", "error");
+            return;
         } else {
-          Object.assign(current_review["reviews"][idx],
-              {
+            valuearea.setCustomValidity('');
+        }
+
+        valuearea.reportValidity();
+    } else if (selectedState === "ok") {
+        var fieldElement = document.getElementById("field_" + selectedField);
+        if (fieldElement) {
+            var valueElement = fieldElement.querySelector('.value');
+            if (valueElement) {
+                // Check if the suggested value was present before the page loaded
+                if (initialReviewerSuggestions[selectedField] && initialReviewerSuggestions[selectedField].trim() !== '') {
+                    // If the proposed value was previous, then we overwrite the original value with this proposal.
+                    valueElement.innerText = initialReviewerSuggestions[selectedField];
+                } else {
+                    // Otherwise, set the original value
+                    valueElement.innerText = selectedFieldValue;
+                }
+            }
+
+            document.getElementById('valuearea').value = '';
+            document.getElementById('commentarea').value = '';
+
+            var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+            if (suggestionElement) {
+                suggestionElement.innerText = ''; // Clearing the proposed value
+            }
+
+            if (initialReviewerSuggestions[selectedField]) {
+                initialReviewerSuggestions[selectedField] = ''; // Resetting a previously saved proposal
+            }
+        }
+    }
+
+    if (selectedField) {
+        var fieldExists = false;
+
+        current_review["reviews"].forEach(function(review, idx) {
+            if (review["key"] === selectedField) {
+                fieldExists = true;
+
+                if (selectedState === "ok") {
+                    Object.assign(current_review["reviews"][idx], {
+                        "category": selectedCategory,
+                        "key": selectedField,
+                        "fieldReview": {
+                            "timestamp": Date.now(),
+                            "user": "oep_reviewer",
+                            "role": "reviewer",
+                            "contributorValue": selectedFieldValue,
+                            // If there was a suggested value before loading, save it as the new value
+                            "newValue": initialReviewerSuggestions[selectedField] ? initialReviewerSuggestions[selectedField] : "",
+                            "comment": document.getElementById("commentarea").value,
+                            "reviewerSuggestion": "",
+                            "state": selectedState,
+                        },
+                    });
+                } else {
+                    Object.assign(current_review["reviews"][idx], {
+                        "category": selectedCategory,
+                        "key": selectedField,
+                        "fieldReview": {
+                            "timestamp": Date.now(),
+                            "user": "oep_reviewer",
+                            "role": "reviewer",
+                            "contributorValue": selectedFieldValue,
+                            "newValue": document.getElementById("valuearea").value,
+                            "comment": document.getElementById("commentarea").value,
+                            "reviewerSuggestion": document.getElementById("valuearea").value,
+                            "state": selectedState,
+                        },
+                    });
+
+                    var fieldElement = document.getElementById("field_" + selectedField);
+                    if (fieldElement) {
+                        var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+                        if (suggestionElement) {
+                            suggestionElement.innerText = document.getElementById("valuearea").value;
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!fieldExists) {
+            current_review["reviews"].push({
                 "category": selectedCategory,
                 "key": selectedField,
                 "fieldReview": {
-                  "timestamp": Date.now(),
-                  "user": "oep_reviewer", // TODO put actual username
-                  "role": "reviewer",
-                  "contributorValue": selectedFieldValue,
-                  "newValue": "",
-                  "comment": document.getElementById("commentarea").value,
-                  "reviewerSuggestion": document.getElementById("valuearea").value,
-                  "state": selectedState,
+                    "timestamp": Date.now(),
+                    "user": "oep_reviewer",
+                    "role": "reviewer",
+                    "contributorValue": selectedFieldValue,
+                    "newValue": selectedState === "ok" ? (initialReviewerSuggestions[selectedField] || "") : document.getElementById("valuearea").value,
+                    "comment": document.getElementById("commentarea").value,
+                    "reviewerSuggestion": selectedState === "ok" ? "" : document.getElementById("valuearea").value,
+                    "state": selectedState,
                 },
-              },
-          );
-          // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
-          var fieldElement = document.getElementById("field_" + selectedField);
-          var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
-          var commentElement = fieldElement.querySelector('.suggestion--comment');
-          suggestionElement.innerText = document.getElementById("valuearea").value;
-          commentElement.innerText = document.getElementById("commentarea").value;
+            });
+
+            var fieldElement = document.getElementById("field_" + selectedField);
+            if (fieldElement) {
+                var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+                if (suggestionElement) {
+                    suggestionElement.innerText = document.getElementById("valuearea").value;
+                }
+            }
         }
-      }
-    });
-    var element = document.querySelector('[aria-selected="true"]');
-    var category = (element.getAttribute("data-bs-target"));
-    // if field hasn't been written before, add it
-
-    if (unique_entry) {
-      current_review["reviews"].push(
-          {
-            "category": selectedCategory,
-            "key": selectedField,
-            "fieldReview": {
-              "timestamp": Date.now(), // TODO put actual timestamp
-              "user": "oep_reviewer", // TODO put actual username
-              "role": "reviewer",
-              "contributorValue": selectedFieldValue,
-              "newValue": selectedState === "ok" ? initialReviewerSuggestions[selectedField] : "",
-              "comment": document.getElementById("commentarea").value,
-              "reviewerSuggestion": document.getElementById("valuearea").value,
-              "state": selectedState,
-            },
-          },
-      );
-      // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
-      var fieldElement = document.getElementById("field_" + selectedField);
-      var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
-      var commentElement = fieldElement.querySelector('.suggestion--comment');
-      suggestionElement.innerText = document.getElementById("valuearea").value;
-      commentElement.innerText = document.getElementById("commentarea").value;
     }
-  }
-  // Color ok/suggestion/rejected
-  updateFieldColor();
-  checkReviewComplete();
-  selectNextField();
 
+    updateFieldColor();
 
-  renderSummaryPageFields();
-  updateTabProgressIndicatorClasses();
-  // updatePercentageDisplay();
+    if (selectedState === "ok") {
+        document.getElementById("valuearea").value = "";
+        document.getElementById("commentarea").value = "";
+    }
+
+    checkReviewComplete();
+    selectNextField();
+    renderSummaryPageFields();
+    updateTabProgressIndicatorClasses();
 }
+
 function getFieldState(fieldKey) {
   if (state_dict && state_dict[fieldKey] !== undefined) {
     return state_dict[fieldKey];
   } else {
-    // I dont like that this shows as a error in the console
-    // console.log(`Cannot get state for fieldKey "${fieldKey}" because it is not found in stateDict or stateDict itself is null.`);
+    // I don't like that this shows as an error in the console.log(`Cannot get state for fieldKey "${fieldKey}"
+    // because it is not found in stateDict or stateDict itself is null.`);
     return null;
   }
 }
