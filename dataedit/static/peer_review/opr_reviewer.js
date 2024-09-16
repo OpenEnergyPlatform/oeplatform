@@ -213,6 +213,8 @@ function isEmptyValue(value) {
     return value === "" || value === "None" || value === "[]";
 }
 
+var fieldEvaluations = {}; // Object for tracking evaluated fields
+
 function click_field(fieldKey, fieldValue, category) {
     var isEmpty = isEmptyValue(fieldValue);
 
@@ -230,7 +232,6 @@ function click_field(fieldKey, fieldValue, category) {
 
     let selectedDivId = 'field_' + fieldKey;
     let selectedDiv = document.getElementById(selectedDivId);
-
 
     if (fieldDescriptionsData[cleanedFieldKey]) {
         let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
@@ -252,14 +253,16 @@ function click_field(fieldKey, fieldValue, category) {
     } else {
         fieldDescriptionsElement.textContent = "No description found";
     }
+
     const fieldState = getFieldState(fieldKey);
+    const fieldWasEvaluated = fieldEvaluations[fieldKey]; // Check if the field has been evaluated
 
     if (fieldState) {
-        if (fieldState === 'ok') {
+        if (fieldState === 'ok' && !fieldWasEvaluated) {
             document.getElementById("ok-button").disabled = true;
             document.getElementById("rejected-button").disabled = true;
             document.getElementById("suggestion-button").disabled = true;
-        } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+        } else if (fieldState === 'suggestion' || fieldState === 'rejected' || fieldWasEvaluated) {
             document.getElementById("ok-button").disabled = false;
             document.getElementById("rejected-button").disabled = false;
             document.getElementById("suggestion-button").disabled = false;
@@ -268,7 +271,7 @@ function click_field(fieldKey, fieldValue, category) {
         document.getElementById("ok-button").disabled = isEmpty;
         document.getElementById("rejected-button").disabled = isEmpty;
         document.getElementById("suggestion-button").disabled = isEmpty;
-        const explanationContainer = document.getElementById("explanation-container"); // Получаем новый контейнер
+        const explanationContainer = document.getElementById("explanation-container");
         const existingExplanation = explanationContainer.querySelector('.explanation');
 
         if (isEmpty && !existingExplanation) {
@@ -281,7 +284,18 @@ function click_field(fieldKey, fieldValue, category) {
         }
     }
 
-    // Set selected / not selected style on metadata fields
+    // Save state if field is evaluated
+    document.getElementById("ok-button").addEventListener('click', function() {
+        fieldEvaluations[fieldKey] = 'ok';
+    });
+    document.getElementById("rejected-button").addEventListener('click', function() {
+        fieldEvaluations[fieldKey] = 'rejected';
+    });
+    document.getElementById("suggestion-button").addEventListener('click', function() {
+        fieldEvaluations[fieldKey] = 'suggestion';
+    });
+
+
     reviewItem.forEach(function(div) {
         div.style.backgroundColor = '';
     });
@@ -291,6 +305,8 @@ function click_field(fieldKey, fieldValue, category) {
     clearInputFields();
     hideReviewerOptions();
 }
+
+
 
 // Initialize the review buttons state on page load
 
