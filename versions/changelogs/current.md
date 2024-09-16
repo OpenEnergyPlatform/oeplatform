@@ -22,6 +22,8 @@
 
 ## Bugs
 
+- Added check to ensure table name is valid before creation in API [(#1834)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1834)
+
 ## Documentation updates
 
 - Improved OpenAPI documentation of oeplatform REST-API [(#1793)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1793)

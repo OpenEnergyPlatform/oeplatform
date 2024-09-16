@@ -831,7 +831,7 @@ def assert_valid_identifier_name(identifier):
             "Table names must consist of lowercase alpha-numeric words or underscores "
             "and start with a letter "
             f"and must not exceed {MAX_IDENTIFIER_LENGTH} characters "
-            "(current table name length: {len(identifier)})."
+            f"(current table name length: {len(identifier)})."
         )
 
 
