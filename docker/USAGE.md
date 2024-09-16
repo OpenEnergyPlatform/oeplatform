@@ -111,6 +111,20 @@ If you followed this documentation, you can skip the entire `Setup Your Database
   - Database will recreate all needed tables
   - You need to reapply the migrations
 
+#### Restart oeplatform
+- Open a bash in the oeplatform container and run ``apache2ctl restart``.
+```sh
+# Find name of oeplatform container
+$ me@local:~$ sudo docker ps --format '{{.Names}}'
+docker-oeplatform-1
+f7ed30b9c934_docker-postgres-1
+# open bash in that container
+me@local:~$ docker exec -ti docker-oeplatform-1 bash
+root@27...7:/app#  apache2ctl restart
+root@27...7:/app#
+```
+
+
 ##### Build the oeplatform image
 
 If you want to build the oeplatform docker image yourself, e.g. after you've changed the code, you can do this by running the following command in the main directory of this repository.

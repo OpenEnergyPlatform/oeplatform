@@ -22,8 +22,11 @@
 
 ## Bugs
 
+- Added missing setting for Authorization of users in API requests [(#1830)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1830)
+
 - Added check to ensure table name is valid before creation in API [(#1834)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1834)
 
 ## Documentation updates
 
 - Improved OpenAPI documentation of oeplatform REST-API [(#1793)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1793)
+- Updated documentation for docker to include how to restart oeplatform [(#1830)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1830)
