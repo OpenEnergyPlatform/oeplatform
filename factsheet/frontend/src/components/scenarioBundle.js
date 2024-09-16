@@ -909,7 +909,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewFundingSource = (newElement) => {
-    axios.post(conf.toep + 'scenario-bundlesrio-bundles/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
       {
         entity_type: 'OEO.OEO_00090001',
         entity_label: newElement.name,
@@ -1097,7 +1097,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewInteractingRegion = (newElement) => {
-    axios.post(conf.toep + 'scenario-bundlesrio-bundles/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
       {
         entity_type: 'OEO.OEO_00020036',
         entity_label: newElement.name,
@@ -2332,7 +2332,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    <span> <span> {v.date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                    <span> <span> {v.date_of_publication.split('/')[0]} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
                   </ContentTableCell>
                 </TableRow>
 

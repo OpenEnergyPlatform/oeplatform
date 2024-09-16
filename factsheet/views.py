@@ -1376,24 +1376,29 @@ def query_oekg(request, *args, **kwargs):
         SELECT DISTINCT ?study_acronym
         WHERE
         {{
-        ?s  DC:acronym ?study_acronym ;
-            {authors_exp}
-            {funding_sources_exp}
-            {study_descriptors_exp}
-            {institutes_exp}
+        ?s  DC:acronym ?study_acronym .
+        
+        {funding_sources_exp}
+        {study_descriptors_exp}
+        {institutes_exp}
+
+        ?s OEKG:has_publication ?publication .
+        ?publication OEKG:date_of_publication ?publication_date .
+
+        {authors_exp}
 
         FILTER ((?institutes IN ({institutes}) )
         || (?authors IN ({authors}) )
         || (?funding_sources IN ({funding_sources}) )
-        || (?publication_date >= "{publication_date_start}"^^xsd:date && ?publication_date <= "{publication_date_end}"^^xsd:date)
+        || (?publication_date >= "{publication_date_start}" && ?publication_date <= "{publication_date_end}")
         || (?study_keywords IN ({study_keywords}) ) )
 
         }}"""  # noqa: E501
     
-    authors_exp = 'OEO:OEO_00000506 ?authors ;' if authors_list != [] else ''
-    funding_sources_exp = 'OEO:OEO_00000509 ?funding_sources ;' if funding_sources_list != [] else ''
-    study_descriptors_exp = 'OEO:has_study_keyword ?study_keywords ;' if study_keywords_list != [] else ''
-    institutes_exp = 'OEO:OEO_00000510 ?institutes .' if institutes_list != [] else ''
+    authors_exp = '?publication OEO:OEO_00000506 ?authors .' if authors_list != [] else ''
+    funding_sources_exp = '?s OEO:OEO_00000509 ?funding_sources .' if funding_sources_list != [] else ''
+    study_descriptors_exp = '?s OEO:has_study_keyword ?study_keywords .' if study_keywords_list != [] else ''
+    institutes_exp = '?s OEO:OEO_00000510 ?institutes .' if institutes_list != [] else ''
 
     final_query = query_structure.format(
         institutes=str(institutes_list)

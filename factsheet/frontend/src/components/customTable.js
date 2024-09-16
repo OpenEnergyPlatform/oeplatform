@@ -269,7 +269,7 @@ function EnhancedTableToolbar(props) {
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
             </Tooltip> */}
             <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
-            <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px' }} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
+            <Button disabled={true}size="small" key="resetFilterButton" sx={{ marginLeft: '8px' }} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
             <Tooltip title="Compare">
 
               {numSelected > 1 ? <Link to={`scenario-bundles/compare/${[...selected].join('#')}`} onClick={() => this.forceUpdate} style={{ color: 'white' }}>
@@ -358,7 +358,7 @@ export default function CustomTable(props) {
   const [fundingSources, setFundingSources] = useState([]);
   const [selectedFundingSource, setSelectedFundingSource] = useState([]);
   const [startDateOfPublication, setStartDateOfPublication] = useState('2000');
-  const [endDateOfPublication, setEndDateOfPublication] = useState('2020');
+  const [endDateOfPublication, setEndDateOfPublication] = useState('2050');
   const [selectedStudyKewords, setSelectedStudyKewords] = useState([]);
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
   const [selectedAspects, setSelectedAspects] = useState([]);
@@ -456,6 +456,7 @@ export default function CustomTable(props) {
 
   const handleShowAll = (event) => {
     setRows(factsheets);
+    console.log(rows);
   };
 
   const handleCloseQuery = (event) => {
@@ -543,8 +544,6 @@ export default function CustomTable(props) {
   const handleConfirmQuery = (event) => {
     setOpenQuery(false);
     setOpenBackDrop(true);
-    console.log(CSRFToken());
-    
     const criteria = {
       'institutions': selectedInstitution.map(i => 'OEKG:' + i.iri),
       'authors': selectedAuthors.map(i => 'OEKG:' + i.iri),
@@ -554,8 +553,6 @@ export default function CustomTable(props) {
       'studyKewords': selectedStudyKewords,
       'scenarioYearValue': scenarioYearValue,
     }
-    console.log(criteria);
-
     axios.post(conf.toep + 'scenario-bundles/query/',
       {
         'criteria': criteria,
@@ -906,20 +903,22 @@ export default function CustomTable(props) {
         <DialogContent>
           <DialogContentText>
             <div>
-              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="institution" showSelectedElements={true} manyItems optionsSet={institutions} kind='Which institutions are you interested in?' handler={institutionHandler} selectedElements={selectedInstitution} />
+               <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="institution" showSelectedElements={true} manyItems optionsSet={institutions} kind='Which institutions are you interested in?' handler={institutionHandler} selectedElements={selectedInstitution} />
               <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="author" showSelectedElements={true} manyItems optionsSet={authors} kind='Which authors are you interested in?' handler={authorsHandler} selectedElements={selectedAuthors} />
-              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="Funding source" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Which funding sources are you interested in?' handler={fundingSourceHandler} selectedElements={selectedFundingSource} />
+              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="Funding source" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Which funding sources are you interested in?' handler={fundingSourceHandler} selectedElements={selectedFundingSource} /> 
               <div>Date of publication:</div>
               <div style={{ display: 'flex', marginTop: "10px" }}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Stack spacing={3} style={{ width: '90%' }}>
                     <DesktopDatePicker
                       label='Start'
-                      inputFormat="MM/DD/YYYY"
-                      value={startDateOfPublication}
+                      views={['year']}
+                      value={startDateOfPublication.split('-')[0]}
                       renderInput={(params) => <TextField {...params} />}
                       onChange={(newValue) => {
-                        setStartDateOfPublication(newValue.toISOString().substring(0, 4));
+                        const dateObj = new Date(newValue);
+                        const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate())
+                        setStartDateOfPublication(dateString.split('-')[0]);
                       }}
                     />
                   </Stack>
@@ -928,11 +927,13 @@ export default function CustomTable(props) {
                   <Stack spacing={3} style={{ width: '90%', marginLeft: '10px' }}>
                     <DesktopDatePicker
                       label='End'
-                      inputFormat="MM/DD/YYYY"
-                      value={endDateOfPublication}
+                      views={['year']}
+                      value={endDateOfPublication.split('-')[0]}
                       renderInput={(params) => <TextField {...params} />}
                       onChange={(newValue) => {
-                        setEndDateOfPublication(newValue.toISOString().substring(0, 10));
+                        const dateObj = new Date(newValue);
+                        const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate())
+                        setEndDateOfPublication(dateString.split('-')[0]);
                       }}
                     />
                   </Stack>
@@ -994,7 +995,7 @@ export default function CustomTable(props) {
           </Table>
         </TableContainer>}
         {alignment == "list" && <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[15, 25, 50]}
           component="div"
           count={rows.length}
           rowsPerPage={rowsPerPage}
