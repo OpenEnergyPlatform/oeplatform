@@ -26,6 +26,7 @@ from rest_framework.views import APIView
 import api.parser
 import login.models as login_models
 from api import actions, parser, sessions
+from api.actions import assert_valid_identifier_name
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
@@ -311,7 +312,7 @@ class Metadata(APIView):
 
 class Table(APIView):
     """
-    Handels the creation of tables and serves information on existing tables
+    Handles the creation of tables and serves information on existing tables
     """
 
     objects = None
@@ -480,6 +481,7 @@ class Table(APIView):
         metadata=None,
         embargo_data=None,
     ):
+        assert_valid_identifier_name(table)
         self.validate_column_names(column_definitions)
 
         schema_object, _ = DBSchema.objects.get_or_create(name=schema)

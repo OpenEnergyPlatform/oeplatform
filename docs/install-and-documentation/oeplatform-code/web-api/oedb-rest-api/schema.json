@@ -57,7 +57,7 @@
     "/api/v0/schema/{schema}/tables/{table}/": {
       "get": {
         "operationId": "retrieveTable",
-        "description": "Handels the creation of tables and serves information on existing tables",
+        "description": "Handles the creation of tables and serves information on existing tables",
         "parameters": [
           {
             "name": "schema",
@@ -94,7 +94,7 @@
       },
       "post": {
         "operationId": "createTable",
-        "description": "Handels the creation of tables and serves information on existing tables",
+        "description": "Handles the creation of tables and serves information on existing tables",
         "parameters": [
           {
             "name": "schema",
@@ -144,7 +144,7 @@
       },
       "put": {
         "operationId": "updateTable",
-        "description": "Handels the creation of tables and serves information on existing tables",
+        "description": "Handles the creation of tables and serves information on existing tables",
         "parameters": [
           {
             "name": "schema",
@@ -194,7 +194,7 @@
       },
       "delete": {
         "operationId": "destroyTable",
-        "description": "Handels the creation of tables and serves information on existing tables",
+        "description": "Handles the creation of tables and serves information on existing tables",
         "parameters": [
           {
             "name": "schema",
