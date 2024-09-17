@@ -620,6 +620,13 @@ const ComparisonBoardMain = (props) => {
     });
   }
 
+  useEffect(() => {
+    setShowTitle(false);
+    sendGetScenariosQuery();
+    sendGetCategoriesQuery();
+    sendGetGasQuery();
+  }, [selectedOutputDatasets]); 
+  
   const handleInputDatasetsChange = (event: SelectChangeEvent<typeof selectedInputDatasets>) => {
     const {
       target: { value },
@@ -643,10 +650,7 @@ const ComparisonBoardMain = (props) => {
       typeof value === 'string' ? value.split(',') : value,
     );
 
-    setShowTitle(false);
-    sendGetScenariosQuery();
-    sendGetCategoriesQuery();
-    sendGetGasQuery();
+
   };
     
   const handleEmptyResultMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
