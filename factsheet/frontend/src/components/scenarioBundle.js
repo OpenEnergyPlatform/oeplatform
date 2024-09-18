@@ -238,7 +238,7 @@ function Factsheet(props) {
 
   const [technologies, setTechnologies] = React.useState([]);
   const [selectedTechnologies, setSelectedTechnologies] = useState(id !== 'new' ? fsData.technologies : []);
-  const [selectedTechnologiesTree, setSelectedTechnologiesTree] = useState([]);
+  const [selectedTechnologiesTree, setSelectedTechnologiesTree] = useState(id !== 'new' ? fsData.technologies : []);
   const [allNodeIds, setAllNodeIds] = useState([]);
   
   const [expandedTechnologyList, setExpandedTechnologyList] = useState([]);
@@ -306,6 +306,32 @@ function Factsheet(props) {
     return ids;
   };
 
+  let idCounter = 1;
+  function generateUniqueId() {
+    return idCounter++;
+  }
+
+  function filterByValue(referenceList, obj) {
+    const referenceSet = new Set(referenceList.map(item => item.value));
+  
+    function recursiveFilter(node) {
+      const uniqueId = generateUniqueId();
+  
+      if (Array.isArray(node.children)) {
+        node.children = node.children.map(recursiveFilter).filter(child => child !== null);
+      }
+  
+      if (referenceSet.has(node.value) || (node.children && node.children.length > 0)) {
+        return { ...node, id: uniqueId };
+      }
+  
+      return null;
+    }
+  
+    return obj.map(recursiveFilter).filter(node => node !== null);
+  }
+
+
   useEffect(() => {
     populateFactsheetElements().then((data) => {
 
@@ -339,53 +365,6 @@ function Factsheet(props) {
 
       const all_technologies = parse(data.technologies['children']);
       setTechnologies(all_technologies);
-
-      let idCounter = 1;
-      function generateUniqueId() {
-        return idCounter++;
-      }
-
-      function filterByValue(referenceList, obj) {
-        const referenceSet = new Set(referenceList.map(item => item.value));
-      
-        function recursiveFilter(node) {
-          const uniqueId = generateUniqueId();
-      
-          if (Array.isArray(node.children)) {
-            node.children = node.children.map(recursiveFilter).filter(child => child !== null);
-          }
-      
-          if (referenceSet.has(node.value) || (node.children && node.children.length > 0)) {
-            return { ...node, id: uniqueId };
-          }
-      
-          return null;
-        }
-      
-        return obj.map(recursiveFilter).filter(node => node !== null);
-      }
-    
-      const filteredResult = filterByValue(selectedTechnologies, all_technologies);
-      console.log(selectedTechnologies);
-      console.log(all_technologies);
-      setSelectedTechnologiesTree(filteredResult[0]["children"]);
-      console.log(filteredResult[0]["children"]);
-
-      function getAllNodeIds(nodes) {
-        let ids = [];
-        nodes.forEach(node => {
-          ids.push(node.id);
-          if (node.children) {
-            ids = ids.concat(getAllNodeIds(node.children));
-          }
-        });
-        return ids;
-      }
-
-      const allIds = getAllNodeIds(filteredResult[0]["children"]);
-      setAllNodeIds(allIds);
-      console.log(allIds);
-
 
       // setTechnologies(data.technologies['children']);
       
@@ -428,9 +407,34 @@ function Factsheet(props) {
         children: []
       }
       setSunburstData(sampleData);
-    });
+
+
+      const filteredResult = filterByValue(selectedTechnologies, technologies);
+      console.log(selectedTechnologies, technologies, filteredResult);
+      setSelectedTechnologiesTree(filteredResult[0]["children"]);
+      console.log(filteredResult[0]["children"]);
+
+      function getAllNodeIds(nodes) {
+        let ids = [];
+        nodes.forEach(node => {
+          ids.push(node.id);
+          if (node.children) {
+            ids = ids.concat(getAllNodeIds(node.children));
+          }
+        });
+        return ids;
+      }
+
+      const allIds = getAllNodeIds(filteredResult[0]["children"]);
+      setAllNodeIds(allIds);
 
   }, []);
+
+
+    
+
+
+  }, [selectedTechnologies, technologies]);
 
   const handleSaveFactsheet = () => {
     setOpenBackDrop(true);
