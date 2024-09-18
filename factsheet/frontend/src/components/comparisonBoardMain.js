@@ -369,13 +369,29 @@ const ComparisonBoardMain = (props) => {
             labels.push(country_labels[catIndex]);
           });
         }
-        
+
+        const combinedLabels = [...new Set(labels.flat())];
+
+        const alignedDatasets = datasets.map((dataset, index) => {
+          const datasetLabels = labels[index];  
+
+          const alignedData = combinedLabels.map(label => {
+            const labelIndex = datasetLabels.indexOf(label);
+            return labelIndex !== -1 ? dataset.data[labelIndex] : null;  
+          });
+
+          return {
+            ...dataset,  
+            data: alignedData 
+          };
+        });
+      
         const newChartData = [...chartData];
-        newChartData[index] = datasets ;
+        newChartData[index] = alignedDatasets ;
         setChartData(newChartData);
     
         const newChartLabels = [...chartLabels];
-        newChartLabels[index] = labels[0];
+        newChartLabels[index] = combinedLabels;
         setChartLabels(newChartLabels);
 
       }
@@ -475,11 +491,13 @@ const ComparisonBoardMain = (props) => {
     });
   }
 
+
+
   const sendGetCategoriesQuery = async () => {
     setLoading(true);
 
-    const data_tabels = [];
-    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    // const data_tabels = [];
+    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
     // const data_tabels = [`"eu_leg_data_2023_eea"`] ;
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -543,8 +561,8 @@ const ComparisonBoardMain = (props) => {
 
   const sendGetGasQuery = async () => {
     setLoading(true);
-    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
-    const data_tabels = [] ;
+    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    // const data_tabels = [] ;
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
 
@@ -592,6 +610,7 @@ const ComparisonBoardMain = (props) => {
         return new Set([...acc].filter(gas => gasesSet.has(gas)));
       }, allTableNames[0]);
       
+
       const gases = Array.from(commonGases).map((obj) => obj.split('/').pop() );
       const gasNames = gases.filter(elem => elem in gas_dictionary ).map(el => gas_dictionary[el] );
 
@@ -670,9 +689,9 @@ const sendQuery = async (index) => {
     setChartData([]);
     setLoading(true);
 
-    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
     // const data_tabels = [ `"scenario_eu_leg_data_2021"`] ;
-    const data_tabels = [];
+    // const data_tabels = [];
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -827,6 +846,7 @@ const sendQuery = async (index) => {
     
           const filtered_output = sparqOutput.filter(item => item.year.value == sharedYears[0]);
           const groupedItems = divideByTableNameValue(filtered_output);
+          console.log(groupedItems);
           const groupedStackedBarChartsLegend = [];
 
           const transformGroupedItems = (groupedItems) => {
@@ -872,6 +892,8 @@ const sendQuery = async (index) => {
 
               mainIndex++;
             }
+
+            console.log(result);
             return result;
           };
 
@@ -897,12 +919,28 @@ const sendQuery = async (index) => {
             });
           }
           
+          const combinedLabels = [...new Set(labels.flat())];
+
+          const alignedDatasets = datasets.map((dataset, index) => {
+            const datasetLabels = labels[index];  
+
+            const alignedData = combinedLabels.map(label => {
+              const labelIndex = datasetLabels.indexOf(label);
+              return labelIndex !== -1 ? dataset.data[labelIndex] : null;  
+            });
+
+            return {
+              ...dataset,  
+              data: alignedData 
+            };
+          });
+
           const newChartData = [...chartData];
-          newChartData[index] = datasets ;
+          newChartData[index] = alignedDatasets ;
           setChartData(newChartData);
       
           const newChartLabels = [...chartLabels];
-          newChartLabels[index] = labels[0];
+          newChartLabels[index] = combinedLabels;
           setChartLabels(newChartLabels);
 
         }
