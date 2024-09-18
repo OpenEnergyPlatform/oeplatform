@@ -215,6 +215,19 @@ const ComparisonBoardMain = (props) => {
     }
   }
 
+  function divideByTableNameValue(items) {
+    return items.reduce((acc, obj) => {
+      const tableNameValue = obj.table_name.value;
+      
+      if (!acc[tableNameValue]) {
+        acc[tableNameValue] = [];
+      }
+  
+      acc[tableNameValue].push(obj);
+      return acc;
+    }, {});
+  }
+
   const handleYearChange = (event: React.SyntheticEvent, newValue: number, index) => {
     setLoading(true);
    
@@ -254,7 +267,7 @@ const ComparisonBoardMain = (props) => {
           newScenarioYear[index] = scenarioYears[index][0].toString();
           setScenarioYear(newScenarioYear);
 
-          const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
+          const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[newValue]);
 
           const StackedBarChartsLegend = [];
           const country_labels = [];
@@ -281,25 +294,12 @@ const ComparisonBoardMain = (props) => {
       }
       else if (distinctTables.length > 1) {
         setChartType("MultipleDataTable");
-        const distinctYears = [];
-        sparqOutput.map((obj) => {
-          if (!distinctYears.includes(obj.year.value)) {
-            distinctYears.push(obj.year.value)
-          }
-        } );
-    
-        const newScenarioYears = scenarioYears;
-        newScenarioYears[index] = distinctYears.sort();
-        setScenarioYears(newScenarioYears);
 
-        const newScenarioYear = scenarioYear;
-        newScenarioYear[index] = scenarioYears[index][0].toString();
-        setScenarioYear(newScenarioYear);
 
         const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
         const groupedItems = divideByTableNameValue(filtered_output);
 
-
+        console.log('######', groupedItems, distinctTables);
         const groupedStackedBarChartsLegend = [];
 
         const transformGroupedItems = (groupedItems) => {
@@ -336,6 +336,7 @@ const ComparisonBoardMain = (props) => {
             });
             
             console.log(country_labels);
+            console.log(chart_data_category);
 
             result[group] = {
               chart_data_category: chart_data_category,
@@ -474,8 +475,6 @@ const ComparisonBoardMain = (props) => {
     });
   }
 
-
-
   const sendGetCategoriesQuery = async () => {
     setLoading(true);
 
@@ -491,8 +490,6 @@ const ComparisonBoardMain = (props) => {
       ?s oeo:OEO_00000504 ?table_name .
       FILTER(?table_name IN ( ${data_tabels} ) ).
     }`
-
-    console.log(get_categories_query);
 
     const response = await axios.post(
       conf.obdi, 
@@ -532,10 +529,7 @@ const ComparisonBoardMain = (props) => {
       const categories = filteredObjects.map((obj) => obj.category.value.split('/').pop() );
       const catNames = categories.filter(elem => elem in category_disctionary ).map(el => category_disctionary[el] );
 
-      console.log(catNames);
-
       setCategoryNames(catNames);
-      
       setLoading(false);
 
       const selectedCategorieIDs = Object.keys(category_disctionary).filter(k => category_disctionary[k] in selectedCategories);
@@ -598,8 +592,6 @@ const ComparisonBoardMain = (props) => {
         return new Set([...acc].filter(gas => gasesSet.has(gas)));
       }, allTableNames[0]);
       
-      console.log('commonGases', commonGases);
-
       const gases = Array.from(commonGases).map((obj) => obj.split('/').pop() );
       const gasNames = gases.filter(elem => elem in gas_dictionary ).map(el => gas_dictionary[el] );
 
@@ -660,18 +652,14 @@ const ComparisonBoardMain = (props) => {
     setOpenEmptyResultDialog(false);
   };
 
-  function divideByTableNameValue(items) {
-    return items.reduce((acc, obj) => {
-      const tableNameValue = obj.table_name.value;
-      
-      if (!acc[tableNameValue]) {
-        acc[tableNameValue] = [];
-      }
-  
-      acc[tableNameValue].push(obj);
-      return acc;
-    }, {});
-  }
+
+
+function findSharedElements(lists) {
+  return lists.reduce((shared, currentList) => {
+      return shared.filter(value => currentList.includes(value));
+  });
+}
+
 
 const sendQuery = async (index) => {
     setShowChart(false);
@@ -680,7 +668,6 @@ const sendQuery = async (index) => {
     setLegendForStackedBarCharts([]);
     setScenarioYears([]);
     setChartData([]);
-    console.log(chartData);
     setLoading(true);
 
     // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
@@ -730,8 +717,6 @@ const sendQuery = async (index) => {
       FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories})  && ?gas IN (${gases}) ) .
     }`;
 
-    console.log(main_query);
-
     const response = await axios.post(
       conf.obdi, 
       main_query,
@@ -758,14 +743,14 @@ const sendQuery = async (index) => {
 
         SetUnits(distinctUnits);
 
-        console.log(distinctUnits);
-
         const distinctTables = [];
         sparqOutput.map((obj) => {
           if (!distinctTables.includes(obj.table_name.value)) {
             distinctTables.push(obj.table_name.value)
           }
         } );
+
+        console.log(distinctTables);
 
         const categorieIDs = [];
         for (let key in category_disctionary) {
@@ -787,10 +772,9 @@ const sendQuery = async (index) => {
             newScenarioYears[index] = distinctYears.sort();
             setScenarioYears(newScenarioYears);
       
-      
-            const newScenarioYear = scenarioYear;
+/*             const newScenarioYear = scenarioYear;
             newScenarioYear[index] = scenarioYears[index][0].toString();
-            setScenarioYear(newScenarioYear);
+            setScenarioYear(newScenarioYear); */
 
             const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
 
@@ -820,26 +804,29 @@ const sendQuery = async (index) => {
         }
         else if (distinctTables.length > 1) {
           setChartType("MultipleDataTable");
-          const distinctYears = [];
-          sparqOutput.map((obj) => {
-            if (!distinctYears.includes(obj.year.value)) {
-              distinctYears.push(obj.year.value)
-            }
-          } );
+
+          let distinctYears = [];
+          for (let i = 0; i < distinctTables.length; i++) {
+            distinctYears.push([]);  
+          }
+
+          distinctTables.map((tbl, idx) => 
+              sparqOutput.filter(el => el.table_name.value === tbl).map((obj) => {
+                if (!distinctYears[idx].includes(obj.year.value)) {
+                  distinctYears[idx].push(obj.year.value)
+                }
+              }
+            )
+             );
+
+          const sharedYears = findSharedElements(distinctYears).sort();
       
           const newScenarioYears = scenarioYears;
-          newScenarioYears[index] = distinctYears.sort();
+          newScenarioYears[index] = sharedYears;
           setScenarioYears(newScenarioYears);
     
-          const newScenarioYear = scenarioYear;
-          newScenarioYear[index] = scenarioYears[index][0].toString();
-          setScenarioYear(newScenarioYear);
-
-          const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
+          const filtered_output = sparqOutput.filter(item => item.year.value == sharedYears[0]);
           const groupedItems = divideByTableNameValue(filtered_output);
-
-          console.log(groupedItems);
-
           const groupedStackedBarChartsLegend = [];
 
           const transformGroupedItems = (groupedItems) => {
@@ -847,7 +834,6 @@ const sendQuery = async (index) => {
             const groupedRandomColors = Array.from({ length: total_num_of_colors + 1 }, generateRandomColor);
             setGroupedBarChartsRandomColors(groupedRandomColors);
             
-
             const result = {};
             let mainIndex = 0;
             let colorIndex = 0;
@@ -875,7 +861,6 @@ const sendQuery = async (index) => {
                   .map(el => el.country_code.value.split('/').pop());
                   
                 groupedStackedBarChartsLegend.push([group, category_disctionary[cat.split("/").pop()], cat,  groupedRandomColors[colorIndex]]);
-                console.log(colorIndex, groupedRandomColors[colorIndex], groupedStackedBarChartsLegend);
                 colorIndex++;
                 return categorized;
               });
@@ -925,8 +910,6 @@ const sendQuery = async (index) => {
         setLoading(false);
         setShowChart(true);
         setShowTitle(true);
-
-
 
       } else {
         setLoading(false);
@@ -1275,7 +1258,6 @@ const sendQuery = async (index) => {
             <Grid item xs={1} >
             </Grid>
             <Grid item xs={11} >
-              {console.log(legendForGroupedStackedBarCharts)}
               <div display="flex" justifyContent="space-between" flexWrap="wrap" alignItems="center">
                 {chartType === "MultipleDataTable" && legendForGroupedStackedBarCharts.map((category, idx)  => (
                               <span style={{ marginRight:"20px" }}>
