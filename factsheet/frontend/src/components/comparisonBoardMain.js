@@ -150,9 +150,21 @@ const ComparisonBoardMain = (props) => {
     "Total_ESR_GHGs" :"Total ESR GHGs"
   }
 
+  
+  // const generateRandomColor = () => {
+  //   return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+  // };
+
   const generateRandomColor = () => {
-    return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+    let color;
+    
+    do {
+      color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+    } while (color === "#000000" || parseInt(color.slice(1), 16) <= 0x222222); 
+  
+    return color;
   };
+
   const randomColors = Array.from({ length: Object.keys(category_disctionary).length }, generateRandomColor);
 
   const scenarios_disctionary = {
@@ -349,15 +361,10 @@ const ComparisonBoardMain = (props) => {
           return result;
         };
         setLegendForGroupedStackedBarCharts(groupedStackedBarChartsLegend);
-
-        console.log(groupedStackedBarChartsLegend);
-
         const transformedGroupedItems = transformGroupedItems(groupedItems);
-        console.log(transformedGroupedItems);
 
         const datasets = [];
         const labels = [];
-        console.log(labels);
 
 
 /*         for (let group in transformedGroupedItems) {
