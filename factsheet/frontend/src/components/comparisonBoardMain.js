@@ -610,9 +610,9 @@ const ComparisonBoardMain = (props) => {
 
 
       const categories = filteredObjects.map((obj) => obj.category.value.split('/').pop() );
-      const catNames = categories.filter(elem => elem in category_disctionary ).map(el => category_disctionary[el] );
-
-      setCategoryNames(catNames);
+      const catNames = categories.filter(elem => elem in category_disctionary ).map(el => category_disctionary[el] ).sort();
+      const uniqueSectorNames = [...new Set(catNames)];
+      setCategoryNames(uniqueSectorNames);
       setLoading(false);
 
       const selectedCategorieIDs = Object.keys(category_disctionary).filter(k => category_disctionary[k] in selectedCategories);
