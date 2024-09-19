@@ -278,7 +278,7 @@ const ComparisonBoardMain = (props) => {
           newScenarioYear[index] = scenarioYears[index][0].toString();
           setScenarioYear(newScenarioYear);
 
-          const filtered_output = sparqOutput.filter(item => item.year.value == newScenarioYear[index]);
+          const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
 
           const StackedBarChartsLegend = [];
           const country_labels = [];
@@ -625,6 +625,7 @@ const ComparisonBoardMain = (props) => {
   const sendGetGasQuery = async () => {
     setLoading(true);
     // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    // const data_tabels = [`"eu_leg_data_2023_eea"`] ;
     const data_tabels = [] ;
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -848,10 +849,10 @@ const sendQuery = async (index) => {
             setScenarioYears(newScenarioYears);
 
             const newScenarioYear = scenarioYear;
-            newScenarioYear[index] = scenarioYears[index][0].toString();
+            newScenarioYear[index] = scenarioYears[index].includes("2025") ? "2025" : scenarioYears[index][0].toString();
             setScenarioYear(newScenarioYear);
 
-            const filtered_output = sparqOutput.filter(item => item.year.value === scenarioYear.toString());
+            const filtered_output = sparqOutput.filter(item => item.year.value === scenarioYear[index].toString());
 
             const StackedBarChartsLegend = [];
             const country_labels = [];
@@ -907,7 +908,7 @@ const sendQuery = async (index) => {
           newScenarioYear[index] = scenarioYears[index][0].toString();
           setScenarioYear(newScenarioYear);
     
-          const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
+          const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index].toString());
 
           const groupedItems = divideByTableNameValue(filtered_output);
           const groupedStackedBarChartsLegend = [];
