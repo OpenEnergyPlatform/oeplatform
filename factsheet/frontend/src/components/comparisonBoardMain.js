@@ -253,14 +253,12 @@ const ComparisonBoardMain = (props) => {
           }
         } );
 
-
       const categorieIDs = [];
       for (let key in category_disctionary) {
           if (selectedCategories.includes(category_disctionary[key])) {
             categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
           }
       }
-      console.log(categorieIDs);
 
       if (distinctTables.length === 1) {
           setChartType("SingleDataTable");
@@ -280,7 +278,7 @@ const ComparisonBoardMain = (props) => {
           newScenarioYear[index] = scenarioYears[index][0].toString();
           setScenarioYear(newScenarioYear);
 
-          const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[newValue]);
+          const filtered_output = sparqOutput.filter(item => item.year.value == newScenarioYear[index]);
 
           const StackedBarChartsLegend = [];
           const country_labels = [];
@@ -367,7 +365,7 @@ const ComparisonBoardMain = (props) => {
         const labels = [];
 
 
-/*         for (let group in transformedGroupedItems) {
+/*      for (let group in transformedGroupedItems) {
           
           const { chart_data_category, country_labels } = transformedGroupedItems[group];
 
@@ -414,10 +412,10 @@ const ComparisonBoardMain = (props) => {
           });
       }
       
-
+   
         const combinedLabels = [...new Set(labels.flat())];
 
-        /* const alignedDatasets = datasets.map((dataset, index) => {
+         const alignedDatasets = datasets.map((dataset, index) => {
           const datasetLabels = labels[index];  
 
           const alignedData = combinedLabels.map(label => {
@@ -429,35 +427,28 @@ const ComparisonBoardMain = (props) => {
             ...dataset,  
             data: alignedData 
           };
-        }); */
-
-        const alignedDatasets = [];
-
-          for (let group in transformedGroupedItems) {
-              const { chart_data_category, country_labels } = transformedGroupedItems[group];
-
-              chart_data_category.forEach((categoryData, catIndex) => {
-                  const categoryDataList = Array.isArray(categoryData) ? categoryData : [categoryData];
-
-                  categoryDataList.forEach((categoryDataItem, categoryIndex) => {
-                      const dataset = {};
-                      dataset['label'] = categoryDataList.length > 1 ? `${group} - Category ${categoryIndex + 1}` : group;
-                      dataset['data'] = categoryDataItem.data;
-                      dataset['backgroundColor'] = categoryDataItem.backgroundColor;
-                      dataset['stack'] = categoryDataItem.stack;
-
-                      alignedDatasets.push(dataset);
-                  });
-
-                  if (!labels.includes(country_labels[catIndex])) {
-                      labels.push(country_labels[catIndex]);
-                  }
-              });
-          }
-
-        console.log(combinedLabels);
-        console.log(alignedDatasets);
+        });
+        
+        
       
+
+        /* const combinedLabels = [...new Set(labels.flat())] 
+
+          const alignedDatasets = datasets.map((dataset, index) => {
+            const datasetLabels = labels[index]; 
+
+            const alignedData = combinedLabels.map(label => {
+              const labelIndex = datasetLabels.indexOf(label);  
+              return labelIndex !== -1 ? dataset.data[labelIndex] : null; 
+            });
+
+            return {
+              ...dataset,   
+              data: alignedData  
+            };
+          });
+          */
+
         const newChartData = [...chartData];
         newChartData[index] = alignedDatasets ;
         setChartData(newChartData);
@@ -918,8 +909,6 @@ const sendQuery = async (index) => {
     
           const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index]);
 
-          console.log(filtered_output);
-
           const groupedItems = divideByTableNameValue(filtered_output);
           const groupedStackedBarChartsLegend = [];
 
@@ -972,26 +961,8 @@ const sendQuery = async (index) => {
 
           const transformedGroupedItems = transformGroupedItems(groupedItems);
 
-          console.log(groupedStackedBarChartsLegend);
-          console.log(transformedGroupedItems);
-
           const datasets = [];
           const labels = [];
-
-          /* for (let group in transformedGroupedItems) {
-            
-            const { chart_data_category, country_labels } = transformedGroupedItems[group];
-    
-            chart_data_category.forEach((categoryData, catIndex) => {
-              const dataset = {};
-              dataset['label'] = group ;
-              dataset['data'] = categoryData.data;
-              dataset['backgroundColor'] = categoryData.backgroundColor;
-              dataset['stack'] = categoryData.stack;
-              datasets.push(dataset);
-              labels.push(country_labels[catIndex]);
-            });
-          } */
 
           for (let group in transformedGroupedItems) {
     
@@ -1023,18 +994,14 @@ const sendQuery = async (index) => {
                     labels.push(country_labels[catIndex]);
                 }
             });
-        }
+          }
         
         
           
           const combinedLabels = [...new Set(labels.flat())];
 
-          /* console.log(datasets);
-          console.log(labels);
-
           const alignedDatasets = datasets.map((dataset, index) => {
             const datasetLabels = labels[index]; 
-            console.log(datasetLabels); 
 
             const alignedData = combinedLabels.map(label => {
               const labelIndex = datasetLabels.indexOf(label);
@@ -1046,35 +1013,7 @@ const sendQuery = async (index) => {
               data: alignedData 
             };
           });
-          */
-
-          const alignedDatasets = [];
-
-          for (let group in transformedGroupedItems) {
-              const { chart_data_category, country_labels } = transformedGroupedItems[group];
-
-              chart_data_category.forEach((categoryData, catIndex) => {
-                  const categoryDataList = Array.isArray(categoryData) ? categoryData : [categoryData];
-
-                  categoryDataList.forEach((categoryDataItem, categoryIndex) => {
-                      const dataset = {};
-                      dataset['label'] = categoryDataList.length > 1 ? `${group} - Category ${categoryIndex + 1}` : group;
-                      dataset['data'] = categoryDataItem.data;
-                      dataset['backgroundColor'] = categoryDataItem.backgroundColor;
-                      dataset['stack'] = categoryDataItem.stack;
-
-                      alignedDatasets.push(dataset);
-                  });
-
-                  if (!labels.includes(country_labels[catIndex])) {
-                      labels.push(country_labels[catIndex]);
-                  }
-              });
-          }
-
-
-          console.log(alignedDatasets);
-
+         
 
           const newChartData = [...chartData];
           newChartData[index] = alignedDatasets ;
