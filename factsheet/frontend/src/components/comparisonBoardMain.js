@@ -905,7 +905,7 @@ const sendQuery = async (index) => {
           setScenarioYears(newScenarioYears);
 
           const newScenarioYear = scenarioYear;
-          newScenarioYear[index] = scenarioYears[index][0].toString();
+          newScenarioYear[index] =  scenarioYears[index].includes("2025") ? "2025" : scenarioYears[index][0].toString(); 
           setScenarioYear(newScenarioYear);
     
           const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index].toString());
