@@ -248,6 +248,7 @@ const ComparisonBoardMain = (props) => {
             categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
           }
       }
+      console.log(categorieIDs);
 
       if (distinctTables.length === 1) {
           setChartType("SingleDataTable");
@@ -297,9 +298,9 @@ const ComparisonBoardMain = (props) => {
 
 
         const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
+        
         const groupedItems = divideByTableNameValue(filtered_output);
 
-        console.log('######', groupedItems, distinctTables);
         const groupedStackedBarChartsLegend = [];
 
         const transformGroupedItems = (groupedItems) => {
@@ -316,8 +317,9 @@ const ComparisonBoardMain = (props) => {
             });
 
             const country_labels = [];
-            
+            console.log(categorieIDs);
             const chart_data_category = categorieIDs.map((cat, idx) => {
+              console.log(cat);
               const categorized = {};
               categorized['label'] = selectedCategories[index];
               categorized['data'] = filtered_output
@@ -334,10 +336,9 @@ const ComparisonBoardMain = (props) => {
               colorIndex++;
               return categorized;
             });
-            
-            console.log(country_labels);
-            console.log(chart_data_category);
 
+            console.log(chart_data_category);
+            
             result[group] = {
               chart_data_category: chart_data_category,
               country_labels: country_labels,
@@ -345,19 +346,21 @@ const ComparisonBoardMain = (props) => {
 
             mainIndex++;
           }
-        
           return result;
         };
         setLegendForGroupedStackedBarCharts(groupedStackedBarChartsLegend);
 
+        console.log(groupedStackedBarChartsLegend);
+
         const transformedGroupedItems = transformGroupedItems(groupedItems);
+        console.log(transformedGroupedItems);
 
         const datasets = [];
         const labels = [];
         console.log(labels);
 
 
-        for (let group in transformedGroupedItems) {
+/*         for (let group in transformedGroupedItems) {
           
           const { chart_data_category, country_labels } = transformedGroupedItems[group];
 
@@ -370,11 +373,44 @@ const ComparisonBoardMain = (props) => {
             datasets.push(dataset);
             labels.push(country_labels[catIndex]);
           });
-        }
+        } */
+
+        for (let group in transformedGroupedItems) {
+    
+          const { chart_data_category, country_labels } = transformedGroupedItems[group];
+      
+          chart_data_category.forEach((categoryData, catIndex) => {
+              const categoryDataList = Array.isArray(categoryData) ? categoryData : [categoryData];
+      
+              if (categoryDataList.length === 1) {
+                  const singleCategoryData = categoryDataList[0];
+                  const dataset = {};
+                  dataset['label'] = group;   
+                  dataset['data'] = singleCategoryData.data;
+                  dataset['backgroundColor'] = singleCategoryData.backgroundColor;
+                  dataset['stack'] = singleCategoryData.stack;
+                  datasets.push(dataset);
+              } else {
+                  categoryDataList.forEach((categoryDataItem, categoryIndex) => {
+                      const dataset = {};
+                      dataset['label'] = `${group} - Category ${categoryIndex + 1}`;  
+                      dataset['data'] = categoryDataItem.data;
+                      dataset['backgroundColor'] = categoryDataItem.backgroundColor;
+                      dataset['stack'] = categoryDataItem.stack;
+                      datasets.push(dataset);
+                  });
+              }
+              
+              if (!labels.includes(country_labels[catIndex])) {
+                  labels.push(country_labels[catIndex]);
+              }
+          });
+      }
+      
 
         const combinedLabels = [...new Set(labels.flat())];
 
-        const alignedDatasets = datasets.map((dataset, index) => {
+        /* const alignedDatasets = datasets.map((dataset, index) => {
           const datasetLabels = labels[index];  
 
           const alignedData = combinedLabels.map(label => {
@@ -386,7 +422,34 @@ const ComparisonBoardMain = (props) => {
             ...dataset,  
             data: alignedData 
           };
-        });
+        }); */
+
+        const alignedDatasets = [];
+
+          for (let group in transformedGroupedItems) {
+              const { chart_data_category, country_labels } = transformedGroupedItems[group];
+
+              chart_data_category.forEach((categoryData, catIndex) => {
+                  const categoryDataList = Array.isArray(categoryData) ? categoryData : [categoryData];
+
+                  categoryDataList.forEach((categoryDataItem, categoryIndex) => {
+                      const dataset = {};
+                      dataset['label'] = categoryDataList.length > 1 ? `${group} - Category ${categoryIndex + 1}` : group;
+                      dataset['data'] = categoryDataItem.data;
+                      dataset['backgroundColor'] = categoryDataItem.backgroundColor;
+                      dataset['stack'] = categoryDataItem.stack;
+
+                      alignedDatasets.push(dataset);
+                  });
+
+                  if (!labels.includes(country_labels[catIndex])) {
+                      labels.push(country_labels[catIndex]);
+                  }
+              });
+          }
+
+        console.log(combinedLabels);
+        console.log(alignedDatasets);
       
         const newChartData = [...chartData];
         newChartData[index] = alignedDatasets ;
