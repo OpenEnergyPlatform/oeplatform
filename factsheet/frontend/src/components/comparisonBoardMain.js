@@ -568,8 +568,8 @@ const ComparisonBoardMain = (props) => {
   const sendGetCategoriesQuery = async () => {
     setLoading(true);
 
-    // const data_tabels = [];
-    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    const data_tabels = [];
+    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
     // const data_tabels = [`"eu_leg_data_2023_eea"`] ;
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
@@ -633,8 +633,8 @@ const ComparisonBoardMain = (props) => {
 
   const sendGetGasQuery = async () => {
     setLoading(true);
-    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
-    // const data_tabels = [] ;
+    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    const data_tabels = [] ;
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
 
@@ -756,9 +756,9 @@ const sendQuery = async (index) => {
     setChartData([]);
     setLoading(true);
 
-    const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
+    // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
     // const data_tabels = [ `"scenario_eu_leg_data_2021"`] ;
-    // const data_tabels = [];
+    const data_tabels = [];
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem.split(":")[1] + '"'));
