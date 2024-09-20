@@ -118,7 +118,52 @@ def get_oekg_modifications(request, *args, **kwargs):
     response = JsonResponse(histroy_json, safe=False, content_type="application/json")
     patch_response_headers(response, cache_timeout=1)
     return response
+    
 
+def filter_oekg_modifications(request,*args,**kwargs):
+    field_name = input("Input the Field you want to filter by: ")
+    field_value = input("Input the field value: ")
+    if (str(field_name) in ("bundle_id","id","timestamp","user","user_id")):
+         kwargs = {field_name:field_value}
+         histroy = OEKG_Modifications.objects.all().filter(**kwargs)
+    else: #search jsons
+         matching_entries = []
+         i = 0
+         for entry in OEKG_Modifications.objects.all():
+              if filter_by(i, field_name, field_value):
+                   matching_entries.append(entry.id)
+              i += 1
+         history = OEKG_Modifications.objects.filter(id__in=matching_entries)
+    histroy_json = serializers.serialize("json", OEKG_Modifications.objects.filter(id__in=matching_entries))
+    response = JsonResponse(histroy_json, safe=False, content_type="application/json")
+    patch_response_headers(response, cache_timeout=1)
+    
+    
+def filter_state(d, filter_field, filter_val):
+    if not d:
+         return False
+    elif not filter_field in d[0]:
+         return False
+    else:
+         if isinstance(d[0][filter_field], list):   #if the value is a list     #add for loop to interate over d[0][filter_field][i]
+              for i in range (len(d[0][filter_field])):
+                    if filter_val in (d[0][filter_field][i]).values():
+                        return True
+              return False
+         else:
+              if d[0][filter_field] == filter_val:
+                   return True
+              return False
+              
+def filter_by(nmbr, filter_field, filter_val):
+    old_state = json.loads((OEKG_Modifications.objects.values('old_state')[nmbr]).get("old_state", "not found"))
+    new_state = json.loads((OEKG_Modifications.objects.values('new_state')[nmbr]).get("new_state", "not found"))
+    if filter_state(old_state, filter_field, filter_val):
+         return True
+    if filter_state(new_state, filter_field, filter_val):
+         return True
+    return False
+    
 
 # @login_required
 def create_factsheet(request, *args, **kwargs):
