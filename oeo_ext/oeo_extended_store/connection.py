@@ -69,7 +69,7 @@ oekb_with_namespaces = bind_all_namespaces(oekb_oeo)
 # index of LEOP is more performant of done form triple store
 # reading from owl file can get time consuming
 
-rdfdb = RDF_DATABASES["oeo_ext"]
+rdfdb = RDF_DATABASES["knowledge"]
 oeo_ext_query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
 oeo_ext_update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
 
