@@ -15,7 +15,7 @@
 - Update the OpenEnergyFamily group picture on the about page [(#1816)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1816)
 - Update existing ontology layout [(#1850)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1850)
 
-- Add the page header bar (name of feature and on page navigation below nav bar) to data upload wizard & oeo-viewer pages [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/).
+- Add the page header bar (name of feature and on page navigation below nav bar) to data upload wizard & oeo-viewer pages [(#1860)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1860).
 
 ## Features
 
