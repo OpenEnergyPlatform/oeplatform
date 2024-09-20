@@ -15,7 +15,7 @@
 - Update the OpenEnergyFamily group picture on the about page [(#1816)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1816)
 - Update existing ontology layout [(#1850)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1850)
 
-- Enhance the OEP-about page content and layout [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/).
+- Enhance the OEP-about page content and layout [(#1859)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1859).
 
 ## Features
 
