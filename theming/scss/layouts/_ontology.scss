@@ -1,0 +1,113 @@
+@use '../base/' as *;
+
+.main .content .ontology {
+  width: 100%;
+  max-width: 53.75rem;
+  @extend .pb-5;
+
+  &__heading {
+    @extend .fs-1;
+    @extend .fw-semibold;
+
+    @include media-breakpoint-down(md) {
+      padding-top: 1rem !important;
+    }
+  }
+
+  &__intro {
+    @extend .fs-4;
+
+    &--secondary {
+      @extend .fs-7;
+      @extend .pb-4;
+    }
+  }
+
+  &__subheading {
+    @extend .fs-6;
+    @extend .text-dark;
+
+    &--secondary {
+      @extend .fs-6;
+      @extend .text-center;
+      @extend .text-muted;
+    }
+  }
+
+  &__paragraph {
+    @extend .fs-6;
+    @extend .pb-4;
+  }
+
+  .ontology__paragraph--secondary {
+    @extend .pb-2;
+  }
+
+  &__features {
+    @extend .container;
+    @extend .px-4;
+    @extend .pt-5;
+    @extend .pb-2;
+    @extend .mb-5;
+    @extend .bg-light;
+
+    @include media-breakpoint-down(md) {
+      padding-top: 2rem !important;
+    }
+
+    &-row {
+      @extend .row;
+    }
+  }
+
+  &__feature {
+    @extend .col-lg-4;
+    @extend .pb-4;
+
+    &-title {
+      @extend .fs-6;
+      @extend .fw-semibold;
+    }
+
+    span {
+      @extend .fs-7;
+    }
+  }
+
+  &__box {
+    @extend .border;
+    @extend .p-3;
+
+    p {
+      @extend .fs-7;
+      @extend .text-muted;
+    }
+  }
+
+  &__links {
+    @extend .d-flex;
+    @extend .flex-column;
+    @extend .justify-content-center;
+    @extend .mb-5;
+
+    @include media-breakpoint-up(md) {
+      flex-direction: row !important;
+    }
+
+    a {
+      @extend .btn;
+      @extend .btn-link;
+    }
+  }
+
+  i {
+    @extend .me-1;
+  }
+
+  // Target HTMX elemtents
+  #oeo-modules + div,
+  #usage-beyond-the-open-energy-family-tools + p {
+    @extend .fs-6;
+    @extend .pb-4;
+  }
+}
