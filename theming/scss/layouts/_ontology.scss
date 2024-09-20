@@ -1,5 +1,10 @@
 @use '../base/' as *;
 
+.main .content .content__container:has(.ontology) {
+  max-width: $C--container-width;
+  @extend .justify-content-center;
+}
+
 .main .content .ontology {
   width: 100%;
   max-width: 53.75rem;
@@ -46,14 +51,9 @@
   &__features {
     @extend .container;
     @extend .px-4;
-    @extend .pt-5;
-    @extend .pb-2;
+    @extend .pt-4;
     @extend .mb-5;
     @extend .bg-light;
-
-    @include media-breakpoint-down(md) {
-      padding-top: 2rem !important;
-    }
 
     &-row {
       @extend .row;
@@ -118,8 +118,11 @@
   @extend .border;
   @extend .rounded;
   margin-top: 6rem !important;
-  width: 20rem;
   background-color: #FFF;
+
+  @include media-breakpoint-down(md) {
+    margin-top: 2rem !important;
+  }
 
   &__section {
     @extend .pt-2;
