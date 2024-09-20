@@ -69,16 +69,16 @@ oekb_with_namespaces = bind_all_namespaces(oekb_oeo)
 # index of LEOP is more performant of done form triple store
 # reading from owl file can get time consuming
 
-rdfdb = RDF_DATABASES["knowledge"]
-oeo_ext_query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
-oeo_ext_update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
+# rdfdb = RDF_DATABASES["knowledge"]
+# oeo_ext_query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
+# oeo_ext_update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
 
-sparql = SPARQLWrapper(oeo_ext_query_endpoint)
+# sparql = SPARQLWrapper(oeo_ext_query_endpoint)
 
-oeo_ext_store = sparqlstore.SPARQLUpdateStore()
+# oeo_ext_store = sparqlstore.SPARQLUpdateStore()
 
-oeo_ext_store.open((oeo_ext_query_endpoint, oeo_ext_update_endpoint))
-oekb_oeo_ext = Graph(oeo_ext_store, identifier=default)
+# oeo_ext_store.open((oeo_ext_query_endpoint, oeo_ext_update_endpoint))
+# oekb_oeo_ext = Graph(oeo_ext_store, identifier=default)
 
-# ---- import this in other modules
-oeo_ext_with_namespaces = bind_all_namespaces(oekb_oeo_ext)
+# # ---- import this in other modules
+# oeo_ext_with_namespaces = bind_all_namespaces(oekb_oeo_ext)
