@@ -1245,7 +1245,6 @@ const sendQuery = async (index) => {
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
-                    value={''}
                     label="Scenario"
                     value={selectedScenarios}
                     onChange={handleScenariosChange}
@@ -1285,7 +1284,6 @@ const sendQuery = async (index) => {
                   <Select
                     labelId="demo-select-small-label"
                     id="demo-select-small"
-                    multiple
                     value={selectedGas}
                     onChange={handleGasChange}
                     input={<OutlinedInput label="Gas(es)" />}
@@ -1307,7 +1305,7 @@ const sendQuery = async (index) => {
               </Grid>
               <Grid item xs={10} sx={{ display: 'flex', justifyContent: 'center' }}>
               {showTitle === true && <Typography variant="body1" gutterBottom>
-                {selectedGas.map((i, index) => index === selectedGas.length - 1 ? i + ', ': i + ' and ')} <b>from</b> {selectedCategories.map((i, index) => index === selectedCategories.length - 1 ? i + ', ': i + ' and ')}  {selectedScenarios.map(i => i)} 
+                {selectedGas.map((i, index) => index === selectedGas.length - 1 ? i + ', ': i + ' and ')} from {selectedCategories.map((i, index) => index === selectedCategories.length - 1 ? i + ', ': i + ' and ')}  {selectedScenarios.map(i => i)} 
               </Typography>}
               
               </Grid>
