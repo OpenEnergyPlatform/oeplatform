@@ -187,9 +187,9 @@ const ComparisonBoardMain = (props) => {
       
       // const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
       const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => elem[1].split('/').pop()));
-      const uniqueScenariosOutputTableNames = [...new Set(ScenariosOutputTableNames)];
-      const allOutputDatasets = [].concat(...uniqueScenariosOutputTableNames);
+      const allOutputDatasets = Array.from(new Set(ScenariosOutputTableNames.flat())); //[].concat(...uniqueScenariosOutputTableNames);
       setoutputTableNames(allOutputDatasets);
+      console.log(allOutputDatasets);
 
       setBarColors(randomColors);
 
@@ -561,9 +561,10 @@ const ComparisonBoardMain = (props) => {
   const sendGetCategoriesQuery = async () => {
     setLoading(true);
 
-    const data_tabels = [];
     // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
     // const data_tabels = [`"eu_leg_data_2023_eea"`] ;
+    const data_tabels = [];
+
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
 

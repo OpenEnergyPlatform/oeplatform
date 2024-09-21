@@ -410,9 +410,7 @@ function Factsheet(props) {
 
 
       const filteredResult = filterByValue(selectedTechnologies, technologies);
-      console.log(selectedTechnologies, technologies, filteredResult);
       setSelectedTechnologiesTree(filteredResult[0]["children"]);
-      console.log(filteredResult[0]["children"]);
 
       function getAllNodeIds(nodes) {
         let ids = [];
