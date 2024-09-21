@@ -674,7 +674,8 @@ const ComparisonBoardMain = (props) => {
       
 
       const gases = Array.from(commonGases).map((obj) => obj.split('/').pop() );
-      const gasNames = gases.filter(elem => elem in gas_dictionary ).map(el => gas_dictionary[el] );
+      const gasNames = gases.filter(elem => elem in gas_dictionary ).map(el => gas_dictionary[el] ).sort();
+      const uniqueGasNames = [...new Set(gasNames)];
 
 
       // const gases = filteredObjects.map((obj) => obj.gas.value.split('/').pop() );
@@ -684,7 +685,7 @@ const ComparisonBoardMain = (props) => {
 
       //const gases = gasesObj.map((obj) => obj.gas.value );
 
-      setGasesNames(gasNames);
+      setGasesNames(uniqueGasNames);
       setLoading(false);
 
     }).catch(error => {
