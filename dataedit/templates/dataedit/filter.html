@@ -64,8 +64,13 @@
     <div class="controls-container__btns">
         <div>
             <a class="btn btn-primary" href="{% url 'dataedit:oemetabuilder' %}">OEMetaBuilder</a>
-            <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank">
-                <i class="fas fa-info-circle" title="Klick to open the OEMetadata - Key Description."></i>
+            <a href="{{doc_oem_builder_link}}" 
+            target="_blank"
+            data-bs-toggle="popover"
+            data-bs-trigger="hover"
+            title="OEMetaBuilder"
+            data-bs-content="Click to open the documentation for the OEMetaBuilder.">
+                <i class="fas fa-info-circle" ></i>
             </a>
         </div>
         {% if user.is_authenticated %}
@@ -88,6 +93,7 @@
 {% block after-body-bottom-js %}
 <!-- Latest compiled and minified JavaScript -->
 <script src="{% static 'js/bootstrap-select.min.js' %}"></script><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+<script src="{% static 'js/activate-bootstrap-popover.js' %}"></script>
 <script>
     function reset_filter(){
         location.href = "{{ request.path }}"
@@ -97,13 +103,6 @@
     function open_wizzard(){
         location.href = "{% url 'dataedit:wizard_create' %}"
     }
-
-    $(function () {
-        $('[data-bs-toggle="popover"]').popover()
-        $('.popover-dismiss').popover({
-            trigger: 'focus'
-        })
-    } )
 
     /* update filter when changing selection */
     /*

@@ -15,6 +15,10 @@
 - Update the OpenEnergyFamily group picture on the about page [(#1816)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1816)
 - Update existing ontology layout [(#1850)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1850)
 
+- Add the page header bar (name of feature and on page navigation below nav bar) to data upload wizard & oeo-viewer pages including links to external sources and academy tutorials [(#1860)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1860).
+
+- Remove "Create Table" card from wizard feature if the table exists and the user want to upload CSV data. (Note: Later on it should be possible to edit the table structure and possibly rename the table) [(#1860)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1860).
+
 - Enhance the OEP-about page content and layout [(#1859)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1859).
 
 ## Features
