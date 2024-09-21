@@ -152,6 +152,12 @@ try:
 except NameError:
     BASE_DIR = ""
 
+# from security settings
+try:
+    MEDIA_ROOT  # noqa F405
+except NameError:
+    MEDIA_ROOT = "/media"
+
 try:
     ONTOLOGY_ROOT  # noqa F405
 except NameError:
@@ -165,7 +171,8 @@ if ONTOLOGY_ROOT:
     )
     OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME = "oeo-full.owl"
 
-    OEO_EXT_PATH = Path(ONTOLOGY_ROOT, "oeo_ext")
+if MEDIA_ROOT:
+    OEO_EXT_PATH = Path(MEDIA_ROOT, "oeo_ext")
     OEO_EXT_NAME = "oeox"
     OEO_EXT_OWL_NAME = "oeo_ext.owl"
     OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
