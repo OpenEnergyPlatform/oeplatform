@@ -6,7 +6,7 @@ from dataedit import views
 pgsql_qualifier = r"[\w\d_]+"
 app_name = "dataedit"
 urlpatterns = [
-    url(r"^schemas$", views.listschemas, name="index"),
+    url(r"^schemas$", views.listschemas, name="topic-list"),
     url(r"^$", RedirectView.as_view(url="/dataedit/schemas")),
     # url(r'^admin/$', views.admin, name='index'),
     url(r"^admin/columns/", views.admin_columns, name="input"),
