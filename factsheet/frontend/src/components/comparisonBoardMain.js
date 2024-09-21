@@ -697,6 +697,9 @@ const ComparisonBoardMain = (props) => {
     sendGetScenariosQuery();
     sendGetCategoriesQuery();
     sendGetGasQuery();
+    setSelectedCategories([]);
+    setSelectedScenarios([]);
+    setSelectedGas([]);
   }, [selectedOutputDatasets]); 
   
   const handleInputDatasetsChange = (event: SelectChangeEvent<typeof selectedInputDatasets>) => {
@@ -721,8 +724,6 @@ const ComparisonBoardMain = (props) => {
     setSelectedOutputDatasets(
       typeof value === 'string' ? value.split(',') : value,
     );
-
-
   };
     
   const handleEmptyResultMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
@@ -1050,22 +1051,6 @@ const sendQuery = async (index) => {
 
     addVisualizationRows(visualizationRows + 1);
 
-  };
-
-
-  const dataBar1 = {
-    labels: chartLabels,
-    datasets: [
-      {
-        label: "eu_leg_data_2016_eea",
-        backgroundColor: "lightblue",
-        borderColor: "rgba(120,99,132,1)",
-        borderWidth: 1,
-        hoverBackgroundColor: "rgba(255,99,132,0.4)",
-        hoverBorderColor: "rgba(255,99,132,1)",
-        data: chartData
-      }
-    ]
   };
 
   /* const options = {
