@@ -1852,6 +1852,7 @@ class MetaEditView(LoginRequiredMixin, View):
             "can_add": can_add,
             "doc_links": DOCUMENTATION_LINKS,
             "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
+            "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
         }
 
         return render(
@@ -1868,6 +1869,7 @@ class StandaloneMetaEditView(View):
                 {"cancle_url": get_cancle_state(self.request), "standalone": True}
             ),
             "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
+            "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
         }
         return render(
             request,
