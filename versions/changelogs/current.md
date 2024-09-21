@@ -16,7 +16,7 @@
 
 - Update existing ontology layout [(#1850)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1850)
 
-- Add the Early access indicator to oeox plugin view buttons & The oeox owl file is now stored in the media directory to avoid writing to insecure directory. [](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+- Add the Early access indicator to oeox plugin view buttons & The oeox owl file is now stored in the media directory to avoid writing to insecure directory. [(#1857)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1857)
 
 ## Features
 
