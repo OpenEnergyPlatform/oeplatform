@@ -189,7 +189,6 @@ const ComparisonBoardMain = (props) => {
       const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => elem[1].split('/').pop()));
       const uniqueScenariosOutputTableNames = [...new Set(ScenariosOutputTableNames)];
       const allOutputDatasets = [].concat(...uniqueScenariosOutputTableNames);
-      console.log(allOutputDatasets);
       setoutputTableNames(allOutputDatasets);
 
       setBarColors(randomColors);
@@ -566,7 +565,7 @@ const ComparisonBoardMain = (props) => {
     // const data_tabels = [`"eu_leg_data_2023_eea"`, `"scenario_eu_leg_data_2021"`] ;
     // const data_tabels = [`"eu_leg_data_2023_eea"`] ;
 
-    selectedOutputDatasets.map(elem  => data_tabels.push(elem));
+    selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
 
     const get_categories_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
     SELECT DISTINCT ?category ?table_name WHERE {
@@ -631,7 +630,7 @@ const ComparisonBoardMain = (props) => {
     // const data_tabels = [`"eu_leg_data_2023_eea"`] ;
     const data_tabels = [] ;
 
-    selectedOutputDatasets.map(elem  => data_tabels.push(elem));
+    selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
 
     const get_gas_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
     SELECT DISTINCT ?gas ?table_name WHERE {
@@ -756,8 +755,8 @@ const sendQuery = async (index) => {
     // const data_tabels = [ `"scenario_eu_leg_data_2021"`] ;
     const data_tabels = [];
 
-    selectedInputDatasets.map(elem  => data_tabels.push(elem));
-    selectedOutputDatasets.map(elem  => data_tabels.push(elem));
+    selectedInputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
+    selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
     
     const categories = [];
     for (let key in category_disctionary) {
