@@ -17,6 +17,8 @@
 
 - Add the page header bar (name of feature and on page navigation below nav bar) to data upload wizard & oeo-viewer pages [(#1860)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1860).
 
+- Remove "Create Table" card from wizard feature if the table exists and the user want to upload CSV data. (Note: Later on it should be possible to edit the table structure and possibly rename the table) [(#1860)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1860).
+
 ## Features
 
 - Add the OEP-extended (oeo-ext) feature. It enables users to create new composed units (ontology classes) that extent the units available in the OEO. The feature is implemented as a plugin html form, it can be easily added to any Webpage of the oeplatform. [(#1680)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1680)
