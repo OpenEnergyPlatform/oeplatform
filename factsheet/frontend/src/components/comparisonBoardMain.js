@@ -1292,7 +1292,6 @@ const sendQuery = async (index) => {
                   >
                     {gasesNames.map((name) => (
                       <MenuItem key={name} value={name}>
-                        <Checkbox checked={selectedGas.indexOf(name) > -1} />
                         <ListItemText primary={name} />
                       </MenuItem>
                     ))}
