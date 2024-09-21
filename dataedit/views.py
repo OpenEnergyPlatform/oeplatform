@@ -1801,6 +1801,7 @@ class WizardView(LoginRequiredMixin, View):
             "schema": schema,
             "table": table,
             "can_add": can_add,
+            "wizard_academy_link": EXTERNAL_URLS["tutorials_wizard"],
         }
 
         return render(request, "dataedit/wizard.html", context=context)
