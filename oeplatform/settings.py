@@ -87,6 +87,7 @@ EXTERNAL_URLS = {
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
     "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
+    "tutorials_wizard": "https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/",  # noqa E501
     "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
     "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
