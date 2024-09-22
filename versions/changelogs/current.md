@@ -39,4 +39,7 @@
 ## Documentation updates
 
 - Improved OpenAPI documentation of oeplatform REST-API [(#1793)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1793)
+
 - Updated documentation for docker to include how to restart oeplatform [(#1830)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1830)
+
+- Enhance installation instruction with information on how to setup the OEO-extended feature [(#1857)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1857).
