@@ -21,6 +21,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
 import OptionBox from '../styles/oep-theme/components/optionBox.js';
 // import MultipleSelectChip from '../styles/oep-theme/components/multiselect.js';
+import Chip from '@mui/material/Chip';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
@@ -48,6 +49,7 @@ import Tab from '@mui/material/Tab';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import variables from '../styles/oep-theme/variables.js';
 
 const ComparisonBoardMain = (props) => {
 
@@ -1155,8 +1157,13 @@ const sendQuery = async (index) => {
                     aria-label="Platform"
                     size="large"
                   >
-                    <ToggleButton style={{ width:'250px' }} value="Qualitative"><ManageSearchIcon />Qualitative</ToggleButton>
-                    <ToggleButton style={{ width:'250px' }} value="Quantitative"><EqualizerIcon />Quantitative</ToggleButton>
+                    <ToggleButton style={{ width:'250px' }} value="Qualitative"><ManageSearchIcon />
+                    Qualitative
+                    </ToggleButton>
+                    <ToggleButton style={{ width:'250px' }} value="Quantitative"><EqualizerIcon />
+                    Quantitative
+                    
+                    </ToggleButton>
               </ToggleButtonGroup>
             </Grid>
             <Grid item xs={2}>
@@ -1186,8 +1193,36 @@ const sendQuery = async (index) => {
           <ComparisonBoardItems elements={scenarios} c_aspects={selectedCriteria} />
         </Grid>
         } 
-        {alignment == "Quantitative" && 
+        {alignment == "Quantitative" &&
+
         <Grid container spacing={2}>
+          <Grid item lg={6} sx={{ borderLeft: variables.border.light, px: 2 }}>
+            <Chip label="Early Access" color="error" />
+            <Alert severity="warning">
+              <p>
+                The quantitative scenario projection comparison below is an early access research prototype and serves illustration purposes:
+                It shows for selected <a href="https://openenergyplatform.org/scenario-bundles/id/6ddf7ede-c3a5-93c8-4385-b975c628d610" target="_blank" rel="noopener noreferrer">case study tables</a> 
+                how projection data can in principle be automatically compared on the Open Energy Platform. It is a proof of concept.
+              </p>
+            </Alert>
+          </Grid>
+          <Grid item lg={6} sx={{ borderLeft: variables.border.light, px: 2 }}>
+            <Alert severity="info">
+              <p>
+                The <a href="https://github.com/OpenEnergyPlatform/oekg" target="_blank" rel="noopener noreferrer">Open Energy Knowledge Graph </a> 
+                enables this comparison, based on the <a href="https://github.com/OpenEnergyPlatform/ontology" target="_blank" rel="noopener noreferrer">
+                ontological annotation</a> of the <a href="https://github.com/OpenEnergyPlatform/oemetadata" target="_blank" rel="noopener noreferrer">
+                OEMetadata</a> of the datasets that are part of the scenarios you selected initially to start this comparison.
+              </p>
+              <p>
+                The dropdown fields below are populated with data from the datasets. These values will change depending on the previous 
+                scenario selection. To create a visualization you must select at lest one option for all fields. You can select multiple 
+                Output datasets for comparison but if you do you should not select multiple Sectors. If you only select one dataset
+                you can also select multiple sectors, in this case the plot will change to a stacked bar chart style.
+              </p>
+            </Alert>
+          </Grid>
+
           {Array.from({ length: visualizationRows }).map((_, index) => (
            <Grid item xs={12}>
             <Grid container spacing={2}>
@@ -1299,7 +1334,10 @@ const sendQuery = async (index) => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button sx={{ m: 1, width: 70, marginRight: "30px"}} size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Submit</Button>
+                  <Button sx={{ m: 1, width: 70, marginRight: "30px"}} size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Submit</Button>
+              </Grid>
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Alert severity="warning">This resulting visualization is still in beta stage and may contain errors.</Alert>
               </Grid>
               <Grid item xs={1} >
               </Grid>
