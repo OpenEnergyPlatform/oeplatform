@@ -275,7 +275,7 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 
 After these steps, a `static` folder inside `oep-website/oeplatform/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
 
-## 6.2 Setup the OEO-extended app
+### 6.2 Setup the OEO-extended app
 
 The OEO-extended ([oeo_ext](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/oeo_ext)) app is implemented as a plugin view that can quickly be added to any page of the OEP-website. Currently it is implemented in the OEMetaBuilder to add new composed units that can be annotated in the oemetadata. The OEO-extended itself is a ontology that extends the OEO and it is stored as OWL file format inside the media directory of the oeplatform. As the app itself will write to the files once the user submits a new unit via the interface you must grant access permissions on that directory to the user that runs the oeplatform code on your specific server.
 
