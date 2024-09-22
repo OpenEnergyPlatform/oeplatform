@@ -36,6 +36,6 @@ def serialize_publication_date(triple_object_pub_year: str):
 
 def remove_non_printable(text):
     if text is not None:
-        printable = set(string.printable)
-        return ''.join(filter(lambda x: x in printable, text))
+        allowed_chars = re.compile(r'[a-zA-Z0-9äöüÄÖÜß.,;:!?\'"()\-\s]')
+        return ''.join(char if allowed_chars.match(char) else '' for char in text)
     return None
