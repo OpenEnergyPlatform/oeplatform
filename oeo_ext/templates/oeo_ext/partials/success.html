@@ -1,0 +1,11 @@
+<div id="success-message">
+    {% if response_data.success %}
+    <h2>{{ response_data.message }}</h2>
+    <p>Your new unit has been created successfully.</p>
+    <p><strong>New Composed Unit URI:</strong></p>
+    <p>{{ response_data.newComposedUnitURI }}</p>
+    {% else %}
+        <h2>{{ response_data.message }}</h2>
+        <p>{{ response_data.errors.error }}</p>
+    {% endif %}
+</div>

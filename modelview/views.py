@@ -1,26 +1,30 @@
 import csv
-import datetime
-import json
-import os
+
+# import datetime
+# import json
+# import os
 import re
 from collections import OrderedDict
 
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy
+# import matplotlib
+# import matplotlib.pyplot as plt
+# import numpy
 import urllib3
-from django.conf import settings as djangoSettings
+
+# from django.conf import settings as djangoSettings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
-from django.contrib.staticfiles import finders
+
+# from django.contrib.staticfiles import finders
 from django.http import Http404, HttpResponse  # noqa
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 from django.views.generic import View
-from scipy import stats
+
+# from scipy import stats
 from sqlalchemy.orm import sessionmaker
 
 from api.actions import _get_engine
@@ -351,91 +355,91 @@ def fs_delete(request, sheettype, pk):
     return response
 
 
-def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
-    """
-    This function returns the url of an image of recent GitHub contributions
-    If the image is not present or outdated it will be reconstructed
+# def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
+#     """
+#     This function returns the url of an image of recent GitHub contributions
+#     If the image is not present or outdated it will be reconstructed
 
-    Note:
-        Keep in mind that a external (GitHub) API is called and your server
-        needs to allow such connections.
-    """
-    path = "GitHub_{0}_{1}_Contribution.png".format(org, repo)
-    full_path = os.path.join(djangoSettings.MEDIA_ROOT, path)
+#     Note:
+#         Keep in mind that a external (GitHub) API is called and your server
+#         needs to allow such connections.
+#     """
+#     path = "GitHub_{0}_{1}_Contribution.png".format(org, repo)
+#     full_path = os.path.join(djangoSettings.MEDIA_ROOT, path)
 
-    # We have to replot the image
-    # Set plot font
-    font = {"family": "normal"}
-    matplotlib.rc("font", **font)
+#     # We have to replot the image
+#     # Set plot font
+#     font = {"family": "normal"}
+#     matplotlib.rc("font", **font)
 
-    # Query GitHub API for contributions
-    user_agent = {"user-agent": "oeplatform"}
-    http = urllib3.PoolManager(headers=user_agent)
-    try:
-        reply = http.request(
-            "GET",
-            "https://api.github.com/repos/{0}/{1}/stats/commit_activity".format(  # noqa
-                org, repo
-            ),
-        ).data.decode("utf8")
-    except Exception:
-        pass
+#     # Query GitHub API for contributions
+#     user_agent = {"user-agent": "oeplatform"}
+#     http = urllib3.PoolManager(headers=user_agent)
+#     try:
+#         reply = http.request(
+#             "GET",
+#             "https://api.github.com/repos/{0}/{1}/stats/commit_activity".format(  # noqa
+#                 org, repo
+#             ),
+#         ).data.decode("utf8")
+#     except Exception:
+#         pass
 
-    reply = json.loads(reply)
+#     reply = json.loads(reply)
 
-    if not reply:
-        return None
+#     if not reply:
+#         return None
 
-    # If there are more weeks than necessary, truncate
-    if weeks_back < len(reply):
-        reply = reply[-weeks_back:]
+#     # If there are more weeks than necessary, truncate
+#     if weeks_back < len(reply):
+#         reply = reply[-weeks_back:]
 
-    # GitHub API returns a JSON dict with w: weeks, c: contributions
-    (times, commits) = zip(
-        *[
-            (
-                datetime.datetime.fromtimestamp(int(week["week"])).strftime(
-                    "%m-%d"
-                ),  # noqa
-                sum(map(int, week["days"])),
-            )
-            for week in reply
-        ]
-    )
-    max_c = max(commits)
+#     # GitHub API returns a JSON dict with w: weeks, c: contributions
+#     (times, commits) = zip(
+#         *[
+#             (
+#                 datetime.datetime.fromtimestamp(int(week["week"])).strftime(
+#                     "%m-%d"
+#                 ),  # noqa
+#                 sum(map(int, week["days"])),
+#             )
+#             for week in reply
+#         ]
+#     )
+#     max_c = max(commits)
 
-    # generate a distribution wrt. to the commit numbers
-    commits_ids = [i for i in range(len(commits)) for _ in range(commits[i])]
+#     # generate a distribution wrt. to the commit numbers
+#     commits_ids = [i for i in range(len(commits)) for _ in range(commits[i])]
 
-    # transform the contribution distribution into a density function
-    # using a gaussian kernel estimator
-    if commits_ids:
-        density = stats.kde.gaussian_kde(commits_ids, bw_method=0.2)
-    else:
-        # if there are no commits the density is a constant 0
-        def density(x):
-            return 0
+#     # transform the contribution distribution into a density function
+#     # using a gaussian kernel estimator
+#     if commits_ids:
+#         density = stats.kde.gaussian_kde(commits_ids, bw_method=0.2)
+#     else:
+#         # if there are no commits the density is a constant 0
+#         def density(x):
+#             return 0
 
-    # plot this distribution
-    x = numpy.arange(0.0, len(commits), 0.01)
-    c_real_max = max(density(xv) for xv in x)
-    plt.figure(figsize=(4, 2))  # facecolor='white',
+#     # plot this distribution
+#     x = numpy.arange(0.0, len(commits), 0.01)
+#     c_real_max = max(density(xv) for xv in x)
+#     plt.figure(figsize=(4, 2))  # facecolor='white',
 
-    # replace labels by dates and numbers of commits
-    ax1 = plt.axes(frameon=False)
-    plt.fill_between(x, density(x), 0)
-    ax1.set_frame_on(False)
-    ax1.axes.get_xaxis().tick_bottom()
-    ax1.axes.get_yaxis().tick_left()
-    plt.yticks(
-        numpy.arange(c_real_max - 0.001, c_real_max), [max_c], size="small"
-    )  # noqa
-    plt.xticks(numpy.arange(0.0, len(times)), times, size="small", rotation=45)
+#     # replace labels by dates and numbers of commits
+#     ax1 = plt.axes(frameon=False)
+#     plt.fill_between(x, density(x), 0)
+#     ax1.set_frame_on(False)
+#     ax1.axes.get_xaxis().tick_bottom()
+#     ax1.axes.get_yaxis().tick_left()
+#     plt.yticks(
+#         numpy.arange(c_real_max - 0.001, c_real_max), [max_c], size="small"
+#     )  # noqa
+#     plt.xticks(numpy.arange(0.0, len(times)), times, size="small", rotation=45)
 
-    # save the figure
-    plt.savefig(full_path, transparent=True, bbox_inches="tight")
-    url = finders.find(path)
-    return url
+#     # save the figure
+#     plt.savefig(full_path, transparent=True, bbox_inches="tight")
+#     url = finders.find(path)
+#     return url
 
 
 BASE_VIEW_PROPS = OrderedDict(
