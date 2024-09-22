@@ -30,6 +30,8 @@
 
 - Add error message display to oeox-plugin view. [(#1812)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1812)
 
+- Add the quantitative scenario projection comparison feature that enable users to compare datasets that are part of a scenario bundles scenario definition with datasets from other scenario bundles if they have the same scenario. This implements the same-same comparison style where scenario can be compared that share the same characteristics. We described the various comparison styles in the typology paper on [zenodo](https://zenodo.org/records/7456286). This feature extends the scenario bundles and is still an early access research prototype implemented for demonstration purposes. [(#1766)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1766)
+
 ## Bugs
 
 - Added missing setting for Authorization of users in API requests [(#1830)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1830)
