@@ -13,7 +13,10 @@
 - Enhance the ontology pages, remove the modules page and fully rework the about page and oeo download capabilities. Additionally add the oeox and make its URIs available, also add more cases where a Http404 is raised to make [(#1807)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1807)
 
 - Update the OpenEnergyFamily group picture on the about page [(#1816)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1816)
+
 - Update existing ontology layout [(#1850)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1850)
+
+- Add the Early access indicator to oeox plugin view buttons & The oeox owl file is now stored in the media directory to avoid writing to insecure directory. [(#1857)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1857)
 
 - Add the page header bar (name of feature and on page navigation below nav bar) to data upload wizard & oeo-viewer pages including links to external sources and academy tutorials [(#1860)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1860).
 
@@ -36,4 +39,7 @@
 ## Documentation updates
 
 - Improved OpenAPI documentation of oeplatform REST-API [(#1793)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1793)
+
 - Updated documentation for docker to include how to restart oeplatform [(#1830)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1830)
+
+- Enhance installation instruction with information on how to setup the OEO-extended feature [(#1857)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1857).

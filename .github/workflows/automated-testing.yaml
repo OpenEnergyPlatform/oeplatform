@@ -104,8 +104,8 @@ jobs:
           mkdir -p ontologies/oeo/1/modules
           wget https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl -P ontologies/oeo/1/
 
-          mkdir -p ontologies/oeo_ext/
-          cp oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl  ontologies/oeo_ext/oeo_ext.owl
+          mkdir -p media/oeo_ext/
+          cp oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl  media/oeo_ext/oeo_ext.owl
       - name: Collectstatic files & compress
         run: |
           cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py

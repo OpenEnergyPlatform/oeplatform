@@ -69,7 +69,7 @@
             "format": "button",
             "options": {
               "button": {
-                "text": "Open OEO-EXT",
+                "text": "Open OEO-extended",
                 "icon": "external-link-alt",
                 "action": "openModalAction"
               }
@@ -597,7 +597,7 @@
                             "format": "button",
                             "options": {
                               "button": {
-                                "text": "Open OEO-EXT",
+                                "text": "Open OEO-extended",
                                 "icon": "external-link-alt",
                                 "action": "openModalAction"
                               }
@@ -653,7 +653,7 @@
                             "format": "button",
                             "options": {
                               "button": {
-                                "text": "Open OEO-EXT",
+                                "text": "Open OEO-extended",
                                 "icon": "external-link-alt",
                                 "action": "openModalAction"
                               }
