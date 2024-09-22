@@ -38,7 +38,7 @@
     "react-force-graph": "^1.41.7",
     "react-force-graph-2d": "^1.23.8",
     "react-force-graph-3d": "^1.21.10",
-    "react-router-dom": "^5.2.0",
+    "react-router-dom": "^6.26.2",
     "react-spring": "^9.2.4",
     "react-swipeable-views": "^0.13.9",
     "semantic-ui-css": "^2.4.1",

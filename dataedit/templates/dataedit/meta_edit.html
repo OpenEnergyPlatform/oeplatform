@@ -19,13 +19,18 @@
       <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i> Edit Metadata
   </h1>
   <div class="main-header__wizard">
-    {% if table %}{{ schema }} / {% if table_label %}  <a href="/dataedit/view/{{ schema }}/{{ table }}">{{ table_label }}</a> {% else %} <a href="/dataedit/view/{{ schema }}/{{ table }}">{{ table }}</a> {% endif %} / {% else %} Standalone (no data table attached) {% endif %} OEMetaBuilder
+    {% if table %}{{ schema }} / {% if table_label %}  <a href="/dataedit/view/{{ schema }}/{{ table }}">{{ table_label }}</a> {% else %} <a href="/dataedit/view/{{ schema }}/{{ table }}">{{ table }}</a> {% endif %} / {% else %} <a href="{% url 'dataedit:topic-list' %}">Topics</a> / Standalone (no data table attached) {% endif %} OEMetaBuilder
     <!-- Indicate weather the user got permissions fot this table -->
     {% if can_add %}
       <span class="success-badge">
         You can edit the metadata.
       </span>
     {% endif %}
+  </div>
+  <br>
+  <div>
+    Find a detailed description for all fields of the OEMetaData visible on <a href="{{oem_key_desc}}" target="_blank">GitHub</a>.
+    For a brief introduction on how to work with the oemetadata and the OEMetaBuilder tool find our <a href="{{oemetadata_tutorial}}" target="_blank">tutorial</a> in the academy.
   </div>
 </div>
 <div class=" d-flex justify-content-center">

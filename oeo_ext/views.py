@@ -7,6 +7,7 @@ from django.views.generic import View
 
 from oeo_ext.forms import ComposedUnitFormWrapper, UnitEntryForm
 from oeo_ext.utils import create_new_unit
+from oeplatform.settings import EXTERNAL_URLS
 
 
 # Suggested views maybe you will use other ones @adel
@@ -21,6 +22,7 @@ class OeoExtPluginView(View, LoginRequiredMixin):
             "form": form,
             "nominator_forms": [],
             "denominator_forms": [],
+            "oeox_github_link": EXTERNAL_URLS["oeo_extended_github"],
         }
         return render(request, "oeo_ext/partials/oeo-ext-plugin-ui.html", context)
 
@@ -59,14 +61,23 @@ class OeoExtPluginView(View, LoginRequiredMixin):
                 # error is either dict with key:value or None
                 new_unit, error = create_new_unit(numerator=n, denominator=d)
                 if error:
-                    response_data = error
+                    # response_data = error
+                    response_data = {
+                        "success": False,
+                        "message": "Form data is not valid!",
+                        "errors": error,
+                    }
                 else:
                     data["newComposedUnitURI"] = new_unit
                     response_data = data
-                return JsonResponse(response_data, status=200)
+                return render(
+                    request,
+                    "oeo_ext/partials/success.html",
+                    {"response_data": response_data},
+                )
+                # return JsonResponse(response_data, status=200)
             else:
                 errors = {
-                    # "form": form,
                     "form_errors": form.errors,
                     "nominator_errors": [f.errors for f in nominator_forms],
                     "denominator_errors": [f.errors for f in denominator_forms],
