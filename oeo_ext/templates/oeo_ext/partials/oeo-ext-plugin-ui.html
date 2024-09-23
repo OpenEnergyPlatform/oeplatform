@@ -1,6 +1,25 @@
 {% load django_bootstrap5 %}
 
 <div class="htmxComponent">
+    <div>
+        With the extended OEO functionality, you can expand the terms found in the OEO.     
+        Currently we only offer the possibility to create additional units. As it is possible 
+        to create any combination of existing terms using the form below, the OEO extended module 
+        will be stored on the OEP but also made available on <a href="{{oeox_github_link}}" target="_blank">GitHub</a>. 
+        Before each release, we will review the content of the OEO extended with all newly composed entities 
+        contributed by the Open Energy Family community.<br>
+        We are about to publish an paper describing the approach used here and will provide the link shortly.
+    </div>
+    <br>
+    <span class="early-access">
+        Early Access
+    </span>
+    <div>
+        This feature is still a research prototype and offers only a minimal user experience. 
+        After you successfully create a new composed unit, you need to copy the URL, which then becomes
+        visible. You can access the URL in your browser and copy the name and URL into the oemetadata fields 
+        for "Name" and "Path" as soon as you close this overlay. 
+    </div>
     <div class="result-section mt-4">
         <h3>Result</h3>
         <div id="result-expression">

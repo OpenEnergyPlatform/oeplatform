@@ -35,7 +35,7 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
 ![git branching model](https://nvie.com/img/git-model@2x.png)
 
 1. Merge all feature and hotfix branches into `develop`
-1. Starting out in the `develop` branch, make a release candidate branch (e.g., `release/vx.x.x`)
+1. Starting out in the `develop` branch, make a release candidate branch (e.g., `release-vx.x.x`)
 1. Update the oeplatform/versions/changelogs/ [`current.md`](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md) (see the examples of previous releases)
    - Change filename to release version (x_x_x.md)
    - Copy template to `current.md`

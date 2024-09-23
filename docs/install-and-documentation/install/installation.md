@@ -275,6 +275,22 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 
 After these steps, a `static` folder inside `oep-website/oeplatform/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
 
+### 6.2 Setup the OEO-extended app
+
+The OEO-extended ([oeo_ext](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/oeo_ext)) app is implemented as a plugin view that can quickly be added to any page of the OEP-website. Currently it is implemented in the OEMetaBuilder to add new composed units that can be annotated in the oemetadata. The OEO-extended itself is a ontology that extends the OEO and it is stored as OWL file format inside the media directory of the oeplatform. As the app itself will write to the files once the user submits a new unit via the interface you must grant access permissions on that directory to the user that runs the oeplatform code on your specific server.
+
+Setup a new folder in the `MEDIA_ROOT` directory specified in the `securitysettings.py`. By default this directory is called `media/`. You must create the sub directory specified in the setting `OEO_EXT_PATH` and add the OEO-extended files with the name specified in the `OEO_EXT_OWL_NAME` setting from `settings.py`.
+
+To get started you can copy the template OEO-extended owl file form [`oeplatform/oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl`](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/oeo_ext/oeo_extended_store/oeox_template).
+
+Below you can find the desired structure using the default setting values:
+
+    ```bash
+    media/
+    └── oeo_ext
+        └── oeo_ext.owl
+    ```
+
 ## 7 Setup the Scenario-Bundles app
 
 !!! note "Optional Step"
