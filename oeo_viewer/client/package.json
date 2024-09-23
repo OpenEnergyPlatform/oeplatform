@@ -6,7 +6,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "node dev-server.js",
-    "build": "cd .. && rm -r static && mkdir static && cd static && mkdir oeo_viewer && cd ../client && npx --no-install parcel build source-code/index.html --out-dir ../static/oeo_viewer"
+    "update": "npm install --legacy-peer-deps --no-save --omit=optional && npm prune --legacy-peer-deps --omit=optional",
+    "clean": "npx --no-install shx mkdir -p ../static/oeo_viewer && npx --no-install shx rm -r ../static/oeo_viewer && npx --no-install shx mkdir -p ../static/oeo_viewer",
+    "build": "npm run clean && npx --no-install parcel build source-code/index.html --out-dir ../static/oeo_viewer"
   },
   "keywords": [
     "Graph"
@@ -19,7 +21,8 @@
     "@babel/preset-react": "^7.14.5",
     "caniuse-lite": "^1.0.30001663",
     "parcel-bundler": "^1.12.5",
-    "sass": "^1.37.0"
+    "sass": "^1.37.0",
+    "shx": "^0.3.4"
   },
   "dependencies": {
     "@material-ui/core": "^4.12.3",
