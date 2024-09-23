@@ -1,3 +1,4 @@
 {
-  "toep": "/"
+  "toep": "/",
+  "obdi": "/api/v0/oevkg-query"
 }
