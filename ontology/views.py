@@ -363,9 +363,10 @@ class OntologyStatics(View):
                 response = HttpResponse(
                     f, content_type="application/rdf+xml; charset=utf-8"
                 )
-                response[
-                    "Content-Disposition"
-                ] = f'attachment; filename="{file}.{extension}"'
+
+                if not file:
+                    file = "oeo-full"
+
                 return response
         else:
             file_path = onto_base_path / version / "modules" / f"{file}.{extension}"
