@@ -1344,6 +1344,9 @@ const sendQuery = async (index) => {
               <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Button sx={{ m: 1, width: 70, marginRight: "30px"}} size="medium" variant="outlined" endIcon={<SendIcon />} onClick={(event, value) => sendQuery(index)} >Submit</Button>
               </Grid>
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Alert severity="warning">This resulting visualization is still in beta stage and may contain errors.</Alert>
+              </Grid>
               <Grid item xs={1} >
               </Grid>
               <Grid item xs={10} sx={{ display: 'flex', justifyContent: 'center' }}>
