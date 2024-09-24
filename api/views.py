@@ -25,6 +25,7 @@ from django.http import (
     StreamingHttpResponse,
 )
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import generics, status
@@ -276,6 +277,7 @@ class Sequence(APIView):
 
 class Metadata(APIView):
     @api_exception
+    @never_cache
     def get(self, request, schema, table):
         metadata = actions.get_table_metadata(schema, table)
         return JsonResponse(metadata)
