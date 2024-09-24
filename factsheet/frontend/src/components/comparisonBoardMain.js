@@ -1222,10 +1222,10 @@ const sendQuery = async (index) => {
 
               </p>
               <p>
-              The dropdown fields below are populated with data from the selected datasets and will update based on your previous scenario choice. 
-              To generate a visualization, please select at least one option for each field. You can choose multiple output datasets for comparison, 
-              but if you do, selecting multiple sectors is not allowed. However, if you select only one dataset, you may choose multiple sectors, 
-              and the plot will automatically switch to a stacked bar chart format. 
+              The dropdown fields below are populated with data from the datasets. These values will change depending on the previous 
+              scenario selection. To generate a visualization, please select at least one option for each field. You can choose multiple output datasets for comparison, 
+              but if you do, selecting multiple sectors is not allowed. However, if you select only one dataset, you can also choose multiple sectors, 
+              and the plot will change to a stacked bar chart style.
              
               </p>
             </Alert>
@@ -1323,7 +1323,7 @@ const sendQuery = async (index) => {
                   </Select>
                 </FormControl>
                 <FormControl sx={{ m: 1, width: '48%' }} size="small">
-                  <InputLabel id="demo-multiple-checkbox-label">Gas(es)</InputLabel>
+                  <InputLabel id="demo-multiple-checkbox-label">Gas</InputLabel>
                   <Select
                     labelId="demo-select-small-label"
                     id="demo-select-small"
