@@ -656,6 +656,7 @@ class Index(APIView):
 
 class Column(APIView):
     @api_exception
+    @never_cache
     def get(self, request, schema, table, column=None):
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         response = actions.describe_columns(schema, table)
