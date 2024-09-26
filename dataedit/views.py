@@ -2259,14 +2259,13 @@ class PeerReviewView(LoginRequiredMixin, View):
                 review_table = Table.load(schema=schema, table=table)
                 review_table.set_is_reviewed()
                 metadata = self.load_json(schema, table, review_id=review_id)
-
-                recursive_update(metadata, review_data)
-
-                save_metadata_to_db(schema, table, metadata)
+                updated_metadata = recursive_update(metadata, review_data)
+                save_metadata_to_db(schema, table, updated_metadata)
+                active_peer_review = PeerReview.load(schema=schema, table=table)
 
                 if active_peer_review:
-                    # Update the oemetadata in the active PeerReview
-                    active_peer_review.oemetadata = metadata
+                    updated_oemetadata = recursive_update(active_peer_review.oemetadata, review_data)
+                    active_peer_review.oemetadata = updated_oemetadata
                     active_peer_review.save()
 
                 # TODO: also update reviewFinished in review datamodel json

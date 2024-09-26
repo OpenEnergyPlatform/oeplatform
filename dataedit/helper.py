@@ -134,30 +134,73 @@ def get_review_for_key(key, review_data):
 
 def recursive_update(metadata, review_data):
     """
-    Recursively update the metadata with new values from the review data.
+    Recursively updates metadata with new values from review_data, skipping or removing fields with status 'rejected'.
 
     Args:
-        metadata (dict): The original metadata dictionary to be updated.
-        review_data (dict): The review data containing new values for various keys.
+    metadata (dict): The original metadata dictionary to update.
+    review_data (dict): The review data containing the new values for various keys.
 
     Note:
-        The function traverses the review data, and for each key, it updates the
-        corresponding value in the metadata if a new value is present and is not
-        an empty string.
-    """
+    The function iterates through the review data and for each key updates the corresponding value in metadata if the
+    new value is present and is not an empty string, and if the field status is not 'rejected'.
+        """
+
+    def delete_nested_field(data, keys):
+        """
+        Removes a nested field from a dictionary based on a list of keys.
+
+        Args:
+            data (dict or list): The dictionary or list from which to remove the field.
+            keys (list): A list of keys pointing to the field to remove.
+        """
+        for key in keys[:-1]:
+            if isinstance(data, list):
+                key = int(key)
+            data = data.get(key) if isinstance(data, dict) else data[key]
+
+        last_key = keys[-1]
+        if isinstance(data, list) and last_key.isdigit():
+            index = int(last_key)
+            if 0 <= index < len(data):
+                data.pop(index)
+        elif isinstance(data, dict):
+            data.pop(last_key, None)
 
     for review_key in review_data["reviewData"]["reviews"]:
         keys = review_key["key"].split(".")
 
-        if isinstance(review_key["fieldReview"], list):
-            for field_review in review_key["fieldReview"]:
-                new_value = field_review.get("newValue", None)
+        field_review = review_key.get("fieldReview")
+        if isinstance(field_review, list):
+            field_rejected = False
+            for fr in field_review:
+                state = fr.get("state")
+                if state == "rejected":
+                    # If a field is rejected, delete it and move on to the next one.
+                    delete_nested_field(metadata, keys)
+                    field_rejected = True
+                    break
+            if field_rejected:
+                continue
+
+            # If the field is not rejected, apply the new value
+            for fr in field_review:
+                new_value = fr.get("newValue", None)
                 if new_value is not None and new_value != "":
                     set_nested_value(metadata, keys, new_value)
-        else:
-            new_value = review_key["fieldReview"].get("newValue", None)
+
+        elif isinstance(field_review, dict):
+            state = field_review.get("state")
+            if state == "rejected":
+                # If a field is rejected, delete it and move on to the next one.
+                delete_nested_field(metadata, keys)
+                continue
+
+            # If the field is not rejected, apply the new value
+            new_value = field_review.get("newValue", None)
             if new_value is not None and new_value != "":
                 set_nested_value(metadata, keys, new_value)
+
+    return metadata
 
 
 def set_nested_value(metadata, keys, value):
@@ -254,3 +297,14 @@ def process_review_data(review_data, metadata, categories):
         state_dict[field_key] = state
 
     return state_dict
+
+
+
+
+
+
+
+
+
+
+
