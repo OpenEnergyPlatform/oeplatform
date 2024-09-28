@@ -1,6 +1,7 @@
 {% extends "dataedit/base.html" %} 
 {% load static %} 
 {% load django_bootstrap5 %} 
+{% load compress %}
 
 {% block after-head %}
     <link href="/static/wizard/wizard.css" rel="stylesheet"> 
@@ -334,14 +335,7 @@
 </div>
 
 <script src="/static/wizard/vendor/papaparse-5.0.2/papaparse.min.js"></script>
-<script src="/static/wizard/wizard.js"></script>
-<script>
-    var config = JSON.parse("{{ config|escapejs }}");
-    var wizard = Wizard(config);
 
-    $(function () {
-        $('[data-bs-toggle="tooltip"]').tooltip()
-    })
-</script>
+<script src="/static/wizard/wizard.js" defer></script>
 
 {% endblock after-body-bottom-js %}

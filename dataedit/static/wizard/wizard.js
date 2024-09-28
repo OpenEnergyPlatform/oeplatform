@@ -980,3 +980,11 @@ var Wizard = function (config) {
     $("#wizard-loading").hide();
   })();
 };
+
+/* main */
+var config = JSON.parse("{{ config|escapejs }}");
+var wizard = Wizard(config);
+
+$(function () {
+  $('[data-bs-toggle="tooltip"]').tooltip();
+});
