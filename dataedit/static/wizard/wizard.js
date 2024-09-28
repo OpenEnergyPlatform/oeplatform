@@ -751,18 +751,11 @@ var Wizard = function (config) {
 
     setStatusCreate("primary", true, "Creating table...");
     var colDefs = [];
-    var constraints = [];
     $("#wizard-columns")
       .find(".wizard-column")
       .each(function (_i, e) {
         var c = getColumnDefinition($(e));
         colDefs.push(c);
-        if (c.is_pk) {
-          constraints.push({
-            constraint_type: "PRIMARY KEY",
-            constraint_parameter: c.name,
-          });
-        }
       });
 
     var tablename = $("#wizard-tablename").val();
@@ -774,7 +767,6 @@ var Wizard = function (config) {
     var data = {
       query: {
         columns: colDefs,
-        constraints: constraints,
         embargo: embargoValue === "none" ? null : { duration: embargoValue }, // Conditional check
         // "embargo": embargoData
       },
