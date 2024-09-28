@@ -327,9 +327,9 @@
 
 <script src="/static/wizard/vendor/papaparse-5.0.2/papaparse.min.js"></script>
 
-<!-- compress js -->
-<script src="/static/wizard/wizard.js"></script>
-<!-- endcompress -->
+{% compress js %}
+<script src="/static/wizard/wizard.js?v=latest"></script>
+{% endcompress %}
 
 
 <script>

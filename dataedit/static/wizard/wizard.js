@@ -17,7 +17,8 @@ window.Wizard = function (config) {
     previewRows: null,
     csvParser: null,
     csvColumns: null,
-    rowMapper: null,
+    rowMapperPreview: null,
+    rowMapperUpload: null,
     skippedHeader: null,
     uploadProgressBytes: null,
     fileSizeBytes: null,
@@ -341,8 +342,14 @@ window.Wizard = function (config) {
           })();
         }
       });
-    // row mapper: converts input row from csv into upload row, applies column mapping and conversions
-    state.rowMapper = function (row) {
+
+    /* row mapper for preview: 
+    converts input row from csv into preview table row, 
+    applies column mapping and conversions
+
+    returns array
+    */
+    state.rowMapperPreview = function (row) {
       return state.columns.map(function (colDB) {
         var v;
         if (colDB.idxCsv !== undefined) {
@@ -355,6 +362,25 @@ window.Wizard = function (config) {
         return v;
       });
     };
+
+    /* row mapper for preview: 
+    converts input row from csv into upload table row (object), 
+    applies column mapping and conversions, drops null / unmapped columns
+
+    returns object
+    */
+    state.rowMapperUpload = function (row) {
+      var resultRow = {};
+      for (var colDB of state.columns) {
+        if (colDB.idxCsv !== undefined) {
+          var v = row[colDB.idxCsv];
+          v = colDB.parse(v);
+          resultRow[colDB.name] = v;
+        }
+      }
+      return resultRow;
+    };
+
     updatePreview();
   }
 
@@ -366,7 +392,7 @@ window.Wizard = function (config) {
     var tbody = $("#wizard-csv-preview").find("tbody");
     tbody.empty();
     var rows = state.previewRows.length
-      ? state.previewRows.map(state.rowMapper)
+      ? state.previewRows.map(state.rowMapperPreview)
       : [];
     rows.map(function (row) {
       var tr = $("<tr>").appendTo(tbody);
@@ -523,11 +549,6 @@ window.Wizard = function (config) {
       var query = {
         schema: state.schema,
         table: state.table,
-        fields: state.columns
-          ? state.columns.map(function (e) {
-              return e.name;
-            })
-          : undefined,
         values: insertValues,
       };
       c = c + ', "query": ' + JSON.stringify(query);
@@ -650,7 +671,10 @@ window.Wizard = function (config) {
                 // pause the csv parser
                 state.csvParser.pause();
                 // convert data
-                var insertData = data.data.map(state.rowMapper);
+                console.error(data.data);
+                console.error(state.columns);
+                var insertData = data.data.map(state.rowMapperUpload);
+                console.error(insertData);
                 // start insert
                 sendJson(
                   "POST",
