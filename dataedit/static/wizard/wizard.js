@@ -1,4 +1,4 @@
-var Wizard = function (config) {
+window.Wizard = function (config) {
   var state = {
     schema: "model_draft",
     apiVersion: "v0",
@@ -167,22 +167,8 @@ var Wizard = function (config) {
     column
       .find(".wizard-column-nullable")
       .prop("checked", columnDef.is_nullable);
-    column.find(".wizard-column-pk").prop("checked", columnDef.is_pk);
     column.find(".wizard-column-drop").bind("click", function (evnt) {
       evnt.currentTarget.closest(".wizard-column").remove();
-    });
-    column.find(".wizard-column-pk").bind("change", function (evnt) {
-      var tgt = $(evnt.currentTarget);
-      if (tgt.prop("checked")) {
-        $("#wizard-columns")
-          .find(".wizard-column-nullable")
-          .attr("disabled", false); // re-enable checkboxes
-        tgt
-          .closest(".wizard-column")
-          .find(".wizard-column-nullable")
-          .prop("checked", false)
-          .attr("disabled", true);
-      }
     });
     if (columnDef.name) {
       $("#wizard-csv-preview")
@@ -230,7 +216,6 @@ var Wizard = function (config) {
       name: colElement.find(".wizard-column-name").val(),
       data_type: colElement.find(".wizard-column-type").val(),
       is_nullable: colElement.find(".wizard-column-nullable").prop("checked"),
-      is_pk: colElement.find(".wizard-column-pk").prop("checked"),
     };
   }
 
@@ -838,9 +823,8 @@ var Wizard = function (config) {
     // create default id column
     addColumn({
       name: "id",
-      data_type: "bigint",
+      data_type: "bigserial",
       is_nullable: false,
-      is_pk: true,
     });
     $("#wizard-container-upload").collapse("hide");
     $("#wizard-container-create").collapse("show");
@@ -972,11 +956,3 @@ var Wizard = function (config) {
     $("#wizard-loading").hide();
   })();
 };
-
-/* main */
-var config = JSON.parse("{{ config|escapejs }}");
-var wizard = Wizard(config);
-
-$(function () {
-  $('[data-bs-toggle="tooltip"]').tooltip();
-});
