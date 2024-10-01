@@ -32,8 +32,8 @@ class OntologyConfig(AppConfig):
     def check_file(self, file_to_check, file_label, documentation_key):
         # Check if the file exists during app startup
         if not os.path.exists(file_to_check):
-            msg = f"The {file_label} files in '{file_to_check}' are missing! "
-            "The app can`t start. Please refer to the documentation: "
+            msg = f"The {file_label} files in '{file_to_check}' are missing! " \
+            "The app can`t start. Please refer to the documentation: " \
             f"{DOCUMENTATION_LINKS.get(documentation_key)}"
 
             self.logger.error(msg)
