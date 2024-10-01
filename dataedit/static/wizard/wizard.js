@@ -715,8 +715,8 @@ function calculateEmbargoPeriod(embargoValue) {
   function showCreate() {
     // create default id column
     addColumn({"name": "id", "data_type": "bigint", "is_nullable": false, "is_pk": true});
-    $("#wizard-container-upload").collapse("hide");
-    $("#wizard-container-create").collapse("show");
+    new bootstrap.Collapse('#wizard-container-create', {'toggle': false}).show();
+    new bootstrap.Collapse('#wizard-container-upload', {'toggle': false}).hide();
     $("#wizard-table-delete").hide();
     $("#wizard-container-upload").find(".btn").hide();
     $("#wizard-container-upload").find("input").prop("readonly", true);
@@ -724,10 +724,11 @@ function calculateEmbargoPeriod(embargoValue) {
 
 
   function showUpload() {
-    $("#wizard-container-create").collapse("hide");
-    $("#wizard-container-upload").collapse("show");
-    $("#wizard-container-create").find(".btn").hide();
+    new bootstrap.Collapse('#wizard-container-create', {'toggle': false}).hide();
+    new bootstrap.Collapse('#wizard-container-upload', {'toggle': false}).show();
     $("#wizard-table-delete").show();
+
+    $("#wizard-container-create").find(".btn").hide();
     $("#wizard-container-create").find("input").prop("readonly", true);
     $("#wizard-container-create").find("input,select,.combobox-container").not("[type=text]").prop("disabled", true);
     if (!state.canAdd) {
@@ -830,7 +831,6 @@ function calculateEmbargoPeriod(embargoValue) {
         $('#wizard-confirm-delete').modal('hide');
       });
       $("#wizard-confirm-delete-delete").bind("click", deleteTable);
-
 
       showUpload();
     } else {
