@@ -267,7 +267,7 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 2. Get the ontology files (see [Section 3](#3-setup-the-openenergyontology-integration))
 
 3. Build the oeo-viewer:
-    ```
+    ```bash
     cd oep-website/oeplatform/oeo_viewer/client
     npm install
     npm run build
@@ -285,11 +285,11 @@ To get started you can copy the template OEO-extended owl file form [`oeplatform
 
 Below you can find the desired structure using the default setting values:
 
-    ```bash
-    media/
-    └── oeo_ext
-        └── oeo_ext.owl
-    ```
+```bash
+media/
+└── oeo_ext
+    └── oeo_ext.owl
+```
 
 ## 7 Setup the Scenario-Bundles app
 
