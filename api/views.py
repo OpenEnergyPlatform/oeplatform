@@ -510,10 +510,14 @@ class Table(APIView):
             raise embargo_error
 
         if embargo_payload_check:
-            table_object = self._create_table_object(schema_object, table)
+            # First attempt to create the OEDB table to check
+            # if creation will succeed - action includes checks
+            # and will raise api errors
             actions.table_create(
                 schema, table, column_definitions, constraint_definitions
             )
+            # Then create the table object in the django database
+            table_object = self._create_table_object(schema_object, table)
 
             self._apply_embargo(table_object, embargo_data)
 
@@ -534,10 +538,10 @@ class Table(APIView):
                 )
 
         else:
-            table_object = self._create_table_object(schema_object, table)
             actions.table_create(
                 schema, table, column_definitions, constraint_definitions
             )
+            table_object = self._create_table_object(schema_object, table)
             self._assign_table_holder(request.user, schema, table)
 
             if metadata:
