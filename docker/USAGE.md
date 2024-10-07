@@ -11,13 +11,13 @@ This is a short introduction into the usage of Docker with Open Energy Platform 
 
 > Use this, if you want to use Open Energy Platform.
 
-This can be used, if you just want to host your own OEP installation or test API scipts or something similar, that should not be done with the public instance. We use `docker-compose` to deploy more than one container.
+This can be used, if you just want to host your own OEP installation or test API scripts or something similar, that should not be done with the public instance. We use `docker compose` to deploy more than one container.
 
 Docker Compose is a tool for defining and running multi-container Docker applications. Our application consists of two different containers, a database container and an application container. We need both containers to get a fully working oeplatform deployment. `docker-compose.yaml` contains a definition for an isolated environment to run both containers.
 
 Starting a oeplatform installation with Docker is easy, since it is zero configuration and zero dependencies. Our deployment will create persistent files in your current work directory which needs to be reused across restart. Make sure, you use the same working directory each time, e.g. repository root.
 
-`docker-compose up` will start the deployment, and you should be able to access a fresh installation via `http://localhost:8000`. Ctrl + C will stop the entire deployment. If it is restarted in the same working directory, it will keep state.
+`docker compose up` will start the deployment, and you should be able to access a fresh installation via `http://localhost:8000`. Ctrl + C will stop the entire deployment. If it is restarted in the same working directory, it will keep state.
 
 #### Tasks
 
@@ -25,15 +25,15 @@ We assume, that you choose the repository root as your working directory. If you
 
 ##### Start Deployment
 
-- `docker-compose -f ./docker/docker-compose.yaml up `
+- `docker compose -f ./docker/docker-compose.yaml up `
 
 ##### Start Deployment In Background
 
-- `docker-compose -f ./docker/docker-compose.yaml up -d`
+- `docker compose -f ./docker/docker-compose.yaml up -d`
 
 ##### Stop Deployment In Background
 
-- `docker-compose -f ./docker/docker-compose.yaml down`
+- `docker compose -f ./docker/docker-compose.yaml down`
 
 ##### Reset Database
 
@@ -111,12 +111,26 @@ If you followed this documentation, you can skip the entire `Setup Your Database
   - Database will recreate all needed tables
   - You need to reapply the migrations
 
+#### Restart oeplatform
+- Open a bash in the oeplatform container and run ``apache2ctl restart``.
+```sh
+# Find name of oeplatform container
+$ me@local:~$ sudo docker ps --format '{{.Names}}'
+docker-oeplatform-1
+f7ed30b9c934_docker-postgres-1
+# open bash in that container
+me@local:~$ docker exec -ti docker-oeplatform-1 bash
+root@27...7:/app#  apache2ctl restart
+root@27...7:/app#
+```
+
+
 ##### Build the oeplatform image
 
 If you want to build the oeplatform docker image yourself, e.g. after you've changed the code, you can do this by running the following command in the main directory of this repository.
 
 ```shell
-docker build -t oeplatform -f docker/Dockerfile .
+docker build -t ghcr.io/openenergyplatform/oeplatform -f docker/Dockerfile .
 ```
 
 ## Further Information

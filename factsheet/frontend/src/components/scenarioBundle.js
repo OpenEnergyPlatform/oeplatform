@@ -75,7 +75,7 @@ import variables from '../styles/oep-theme/variables.js';
 
 import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.js';
-
+import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -238,6 +238,9 @@ function Factsheet(props) {
 
   const [technologies, setTechnologies] = React.useState([]);
   const [selectedTechnologies, setSelectedTechnologies] = useState(id !== 'new' ? fsData.technologies : []);
+  const [selectedTechnologiesTree, setSelectedTechnologiesTree] = useState(id !== 'new' ? fsData.technologies : []);
+  const [allNodeIds, setAllNodeIds] = useState([]);
+  
   const [expandedTechnologyList, setExpandedTechnologyList] = useState([]);
 
   const [scenarioDescriptors, setScenarioTypes] = React.useState([]);
@@ -279,6 +282,7 @@ function Factsheet(props) {
   }, []);
 
 
+
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
   }
@@ -301,6 +305,32 @@ function Factsheet(props) {
     });
     return ids;
   };
+
+  let idCounter = 1;
+  function generateUniqueId() {
+    return idCounter++;
+  }
+
+  function filterByValue(referenceList, obj) {
+    const referenceSet = new Set(referenceList.map(item => item.value));
+  
+    function recursiveFilter(node) {
+      const uniqueId = generateUniqueId();
+  
+      if (Array.isArray(node.children)) {
+        node.children = node.children.map(recursiveFilter).filter(child => child !== null);
+      }
+  
+      if (referenceSet.has(node.value) || (node.children && node.children.length > 0)) {
+        return { ...node, id: uniqueId };
+      }
+  
+      return null;
+    }
+  
+    return obj.map(recursiveFilter).filter(node => node !== null);
+  }
+
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
@@ -335,7 +365,6 @@ function Factsheet(props) {
 
       const all_technologies = parse(data.technologies['children']);
       setTechnologies(all_technologies);
-
 
       // setTechnologies(data.technologies['children']);
       
@@ -378,9 +407,32 @@ function Factsheet(props) {
         children: []
       }
       setSunburstData(sampleData);
-    });
+
+
+      const filteredResult = filterByValue(selectedTechnologies, technologies);
+      setSelectedTechnologiesTree(filteredResult[0]["children"]);
+
+      function getAllNodeIds(nodes) {
+        let ids = [];
+        nodes.forEach(node => {
+          ids.push(node.id);
+          if (node.children) {
+            ids = ids.concat(getAllNodeIds(node.children));
+          }
+        });
+        return ids;
+      }
+
+      const allIds = getAllNodeIds(filteredResult[0]["children"]);
+      setAllNodeIds(allIds);
 
   }, []);
+
+
+    
+
+
+  }, [selectedTechnologies, technologies]);
 
   const handleSaveFactsheet = () => {
     setOpenBackDrop(true);
@@ -859,7 +911,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewFundingSource = (newElement) => {
-    axios.post(conf.toep + 'scenario-bundlesrio-bundles/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
       {
         entity_type: 'OEO.OEO_00090001',
         entity_label: newElement.name,
@@ -1047,7 +1099,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewInteractingRegion = (newElement) => {
-    axios.post(conf.toep + 'scenario-bundlesrio-bundles/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
       {
         entity_type: 'OEO.OEO_00020036',
         entity_label: newElement.name,
@@ -2282,7 +2334,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    <span> <span> {v.date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                    <span> <span> {v.date_of_publication.split('/')[0]} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
                   </ContentTableCell>
                 </TableRow>
 
@@ -2419,9 +2471,10 @@ function Factsheet(props) {
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedTechnologies.map((v, i) => (
+             {/*  {selectedTechnologies.map((v, i) => (
                 <span> <span> <Chip label={v.value} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-              ))}
+              ))} */}
+              <RichTreeView items={selectedTechnologiesTree} expandedItems={allNodeIds} />
             </ContentTableCell>
           </TableRow>
         </TableBody>
@@ -2500,6 +2553,8 @@ function Factsheet(props) {
       </Table>
     </TableContainer>
   )
+
+  
 
   const overview_items = {
     titles: [scenario_count, 'Publications', 'Sectors and technology', 'Models and frameworks'],
