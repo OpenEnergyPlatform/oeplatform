@@ -358,14 +358,22 @@ class OntologyStatics(View):
         else:
             file_path = onto_base_path / version / OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME
 
+            if file in ["oeo-closure"]:
+                file_path = onto_base_path / version / f"{file}.{extension}"
+
         if os.path.exists(file_path):
             with open(file_path, "br") as f:
                 response = HttpResponse(
                     f, content_type="application/rdf+xml; charset=utf-8"
                 )
+
+                if not file:
+                    file = "oeo-full"
+
                 response[
                     "Content-Disposition"
                 ] = f'attachment; filename="{file}.{extension}"'
+
                 return response
         else:
             file_path = onto_base_path / version / "modules" / f"{file}.{extension}"

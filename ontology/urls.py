@@ -29,13 +29,13 @@ urlpatterns = [
         TemplateView.as_view(template_name="ontology/oeo-steering-committee.html"),
     ),
     url(
-        r"^(?P<ontology>[\w_-]+)\/releases/latest?$",
+        r"^(?P<ontology>[\w_-]+)\/releases/latest$",
         views.OntologyStatics.as_view(),
         {"full": True},
         name="oeo-latest-full-zip",
     ),
     url(
-        r"^(?P<ontology>[\w_-]+)\/releases/latest/glossary?$",
+        r"^(?P<ontology>[\w_-]+)\/releases/latest/glossary$",
         views.OntologyStatics.as_view(),
         {"glossary": True},
         name="oeo-latest-glossary",

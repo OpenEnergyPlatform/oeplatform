@@ -103,7 +103,8 @@ EXTERNAL_URLS = {
 # Kept this separate for now to avoid messing with the other list ...
 # TODO move to EXTERNAL_URLS if possible
 DOCUMENTATION_LINKS = {
-    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#4-setup-the-openenergyontology-integation",  # noqa:E501
+    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#3-setup-the-openenergyontology-integration",  # noqa:E501
+    "oeo_ext_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#62-setup-the-oeo-extended-app",  # noqa:E501
     "oemetabuilder": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/oeplatform-code/features/metaBuilder/",  # noqa:E501
 }
 
