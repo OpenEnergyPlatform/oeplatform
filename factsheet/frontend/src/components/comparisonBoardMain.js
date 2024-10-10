@@ -71,7 +71,7 @@ const ComparisonBoardMain = (props) => {
   const [selectedCategories, setSelectedCategories] = React.useState([]);
   const [selectedGas, setSelectedGas] = React.useState([]);
   const [selectedScenarios, setSelectedScenarios] = React.useState([]);
-  const [visualizationRows, addVisualizationRows] = React.useState(0);
+  const [visualizationRows, addVisualizationRows] = React.useState(1);
   const [inputTableNames, setInputTableNames] = React.useState([]);
   const [outputTableNames, setoutputTableNames] = React.useState([]);
   const [selectedInputDatasets, setSelectedInputDatasets] = React.useState([]);
@@ -1197,12 +1197,17 @@ const sendQuery = async (index) => {
 
         <Grid container spacing={2}>
           <Grid item lg={6} sx={{ borderLeft: variables.border.light, px: 2 }}>
-            <Chip label="Early Access" color="error" />
+            
             <Alert severity="warning">
+            <Chip label="Early Access" color="error" />
               <p>
                 The quantitative scenario projection comparison below is an early access research prototype and serves illustration purposes:
-                It shows for selected <a href="https://openenergyplatform.org/scenario-bundles/id/6ddf7ede-c3a5-93c8-4385-b975c628d610" target="_blank" rel="noopener noreferrer">case study tables</a> 
-                how projection data can in principle be automatically compared on the Open Energy Platform. It is a proof of concept.
+                It shows for selected <a href="https://openenergyplatform.org/scenario-bundles/id/6ddf7ede-c3a5-93c8-4385-b975c628d610" target="_blank" rel="noopener noreferrer">
+                case study tables</a> how projection data can in principle be automatically compared on the Open Energy Platform. It is a proof of concept.
+              </p>
+              <p>
+                Please keep in mind that the resulting visualization is still in a beta phase and may contain some minor errors. However, we are 
+                working actively to improve it. We aim to make it more robust in the near future.
               </p>
             </Alert>
           </Grid>
@@ -1213,12 +1218,15 @@ const sendQuery = async (index) => {
                 enables this comparison, based on the <a href="https://github.com/OpenEnergyPlatform/ontology" target="_blank" rel="noopener noreferrer">
                 ontological annotation</a> of the <a href="https://github.com/OpenEnergyPlatform/oemetadata" target="_blank" rel="noopener noreferrer">
                 OEMetadata</a> of the datasets that are part of the scenarios you selected initially to start this comparison.
+                
+
               </p>
               <p>
-                The dropdown fields below are populated with data from the datasets. These values will change depending on the previous 
-                scenario selection. To create a visualization you must select at lest one option for all fields. You can select multiple 
-                Output datasets for comparison but if you do you should not select multiple Sectors. If you only select one dataset
-                you can also select multiple sectors, in this case the plot will change to a stacked bar chart style.
+              The dropdown fields below are populated with data from the datasets. These values will change depending on the previous 
+              scenario selection. To generate a visualization, please select at least one option for each field. You can choose multiple output datasets for comparison, 
+              but if you do, selecting multiple sectors is not allowed. However, if you select only one dataset, you can also choose multiple sectors, 
+              and the plot will change to a stacked bar chart style.
+             
               </p>
             </Alert>
           </Grid>
@@ -1315,7 +1323,7 @@ const sendQuery = async (index) => {
                   </Select>
                 </FormControl>
                 <FormControl sx={{ m: 1, width: '48%' }} size="small">
-                  <InputLabel id="demo-multiple-checkbox-label">Gas(es)</InputLabel>
+                  <InputLabel id="demo-multiple-checkbox-label">Gas</InputLabel>
                   <Select
                     labelId="demo-select-small-label"
                     id="demo-select-small"
@@ -1420,7 +1428,7 @@ const sendQuery = async (index) => {
               {loading == true && <Box sx={{ paddingTop: "10px" }}>
                     <LinearProgress />
                   </Box>}
-              <Box display="flex" justifyContent="flex-end">
+              {/* <Box display="flex" justifyContent="flex-end">
                 <IconButton
                     color="primary"
                     aria-label="add"
@@ -1429,7 +1437,7 @@ const sendQuery = async (index) => {
                   >
                   <AddIcon />
                 </IconButton>
-              </Box>
+              </Box> */}
             </Grid>
             <Grid item xs={12} >
               <Snackbar
