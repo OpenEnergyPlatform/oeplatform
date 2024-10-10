@@ -191,7 +191,7 @@
           Metadata specification
         </a>
       </span>
-      <button onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format">Download JSON</button>
+      <a href="{% url 'dataedit:metadata' schema=schema table=table %}" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Download metadata in JSON format">Download JSON</a>
       <span {% if not can_add or opr.opr_id and not opr.is_finished %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata or your review is in progress, data can't be changed" {% endif %}>
     <a href="{{table}}/meta_edit" type="button" class="btn btn-primary btn-sm {% if not can_add or opr.opr_id and not opr.is_finished %} disabled {% endif %}">
       Edit
@@ -506,29 +506,6 @@ for row in result.json():
     options: JSON5.parse("{{ current_view.options | escapejs }}")
   };
   load_view(schema, table, csrftoken, view);
-
-  var downloadMetadata = function () {
-    var metaUrl = "/api/v0/schema/{{ schema }}/tables/{{ table }}/meta";
-    $.get(metaUrl).then(function (json) {
-      console.log(json);
-      // create data url
-      var json = JSON.stringify(json, null, 1);
-      console.log(json);
-      blob = new Blob([json], { type: "application/json" }),
-        dataUrl = URL.createObjectURL(blob);
-      // create link
-      var a = document.createElement("a");
-      document.body.appendChild(a);
-      // assign url and click
-      a.style = "display: none";
-      a.href = dataUrl;
-      a.download = '{{ table }}.metadata.json';
-      a.click();
-      // cleanup
-      URL.revokeObjectURL(dataUrl);
-      a.parentNode.removeChild(a);
-    })
-  };
 
   DataEdit(table=table, schema=schema);
 

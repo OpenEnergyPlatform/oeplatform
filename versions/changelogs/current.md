@@ -2,6 +2,8 @@
 
 ## Changes
 
+- fixed metadata order when downloading metadata from data view  [(#1748)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1748)
+
 - Updated oeo in docker image to version 2.5 [(#1878)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1878)
 
 - Fix typo and font-size after tag assignment update [(#1880)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1880)
