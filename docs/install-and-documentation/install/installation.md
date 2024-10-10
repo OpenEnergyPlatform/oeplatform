@@ -8,7 +8,7 @@ The installation steps have been proofed on linux and windows for python 3.10.
 
     We provide 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database). The images are updated & published with each release. They can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
 
-    [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+    [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/README.md)
 
 !!! danger
     Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features. 
@@ -220,7 +220,7 @@ You have two options to install the database:
    * Using this option you will install the jenna-fuseki & postgresql databases on your local system. You need to start both databases manually before you can start using them for development.
 
 #### b) Use our docker image
-   * You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system. [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+   * You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system. [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/README.md)
    * The jenna-fuseki triple store is not part of the docker image so far. You would either have to setup the public docker image here and adjust the credentials in the `securitysettings.py` or you can perform the steps explained in [Section 1.2 of the manual database setup](./manual-db-setup.md#12-install-apache-jena-fuseki) to install the jenna-fuseki database on your system. You will have to start the service manually afterwards.
 
 ### 5.2 Create the database table structures
@@ -267,13 +267,29 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 2. Get the ontology files (see [Section 3](#3-setup-the-openenergyontology-integration))
 
 3. Build the oeo-viewer:
-    ```
+    ```bash
     cd oep-website/oeplatform/oeo_viewer/client
     npm install
     npm run build
     ```
 
 After these steps, a `static` folder inside `oep-website/oeplatform/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
+
+### 6.2 Setup the OEO-extended app
+
+The OEO-extended ([oeo_ext](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/oeo_ext)) app is implemented as a plugin view that can quickly be added to any page of the OEP-website. Currently it is implemented in the OEMetaBuilder to add new composed units that can be annotated in the oemetadata. The OEO-extended itself is a ontology that extends the OEO and it is stored as OWL file format inside the media directory of the oeplatform. As the app itself will write to the files once the user submits a new unit via the interface you must grant access permissions on that directory to the user that runs the oeplatform code on your specific server.
+
+Setup a new folder in the `MEDIA_ROOT` directory specified in the `securitysettings.py`. By default this directory is called `media/`. You must create the sub directory specified in the setting `OEO_EXT_PATH` and add the OEO-extended files with the name specified in the `OEO_EXT_OWL_NAME` setting from `settings.py`.
+
+To get started you can copy the template OEO-extended owl file form [`oeplatform/oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl`](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/oeo_ext/oeo_extended_store/oeox_template).
+
+Below you can find the desired structure using the default setting values:
+
+```bash
+media/
+└── oeo_ext
+    └── oeo_ext.owl
+```
 
 ## 7 Setup the Scenario-Bundles app
 

@@ -7,6 +7,7 @@ from django.views.generic import View
 
 from oeo_ext.forms import ComposedUnitFormWrapper, UnitEntryForm
 from oeo_ext.utils import create_new_unit
+from oeplatform.settings import EXTERNAL_URLS
 
 
 # Suggested views maybe you will use other ones @adel
@@ -21,6 +22,7 @@ class OeoExtPluginView(View, LoginRequiredMixin):
             "form": form,
             "nominator_forms": [],
             "denominator_forms": [],
+            "oeox_github_link": EXTERNAL_URLS["oeo_extended_github"],
         }
         return render(request, "oeo_ext/partials/oeo-ext-plugin-ui.html", context)
 
