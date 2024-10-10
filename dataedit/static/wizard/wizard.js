@@ -850,18 +850,19 @@ window.Wizard = function (config) {
       data_type: "bigserial",
       is_nullable: false,
     });
-    $("#wizard-container-upload").collapse("hide");
-    $("#wizard-container-create").collapse("show");
+    new bootstrap.Collapse('#wizard-container-create', {'toggle': false}).show();
+    new bootstrap.Collapse('#wizard-container-upload', {'toggle': false}).hide();
     $("#wizard-table-delete").hide();
     $("#wizard-container-upload").find(".btn").hide();
     $("#wizard-container-upload").find("input").prop("readonly", true);
   }
 
   function showUpload() {
-    $("#wizard-container-create").collapse("hide");
-    $("#wizard-container-upload").collapse("show");
-    $("#wizard-container-create").find(".btn").hide();
+    new bootstrap.Collapse('#wizard-container-create', {'toggle': false}).hide();
+    new bootstrap.Collapse('#wizard-container-upload', {'toggle': false}).show();
     $("#wizard-table-delete").show();
+
+    $("#wizard-container-create").find(".btn").hide();
     $("#wizard-container-create").find("input").prop("readonly", true);
     $("#wizard-container-create")
       .find("input,select,.combobox-container")
