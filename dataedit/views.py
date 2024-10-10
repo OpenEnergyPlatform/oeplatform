@@ -37,6 +37,7 @@ except Exception:
     logging.error("No securitysettings found. Triggerd in dataedit/views.py")
 
 from django.contrib import messages
+from django.utils.decorators import method_decorator
 
 from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
@@ -909,7 +910,7 @@ class DataView(View):
     """
 
     # TODO Check if this hits bad in performance
-    @never_cache
+    @method_decorator(never_cache)
     def get(self, request, schema, table):
         """
         Collects the following information on the specified table:
@@ -982,12 +983,14 @@ class DataView(View):
 
         if view_id == "default":
             current_view = default
+            current_view.save()
         else:
             try:
                 # at first, try to use the view, that is passed as get argument
                 current_view = table_views.get(id=view_id)
             except ObjectDoesNotExist:
                 current_view = default
+                current_view.save()
 
         table_views = list(chain((default,), table_views))
 

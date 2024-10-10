@@ -25,6 +25,7 @@ from django.http import (
     StreamingHttpResponse,
 )
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
@@ -277,7 +278,7 @@ class Sequence(APIView):
 
 class Metadata(APIView):
     @api_exception
-    @never_cache
+    @method_decorator(never_cache)
     def get(self, request, schema, table):
         metadata = actions.get_table_metadata(schema, table)
         return JsonResponse(metadata)
@@ -330,6 +331,7 @@ class Table(APIView):
     objects = None
 
     @api_exception
+    @method_decorator(never_cache)
     def get(self, request, schema, table):
         """
         Returns a dictionary that describes the DDL-make-up of this table.
@@ -656,7 +658,7 @@ class Index(APIView):
 
 class Column(APIView):
     @api_exception
-    @never_cache
+    @method_decorator(never_cache)
     def get(self, request, schema, table, column=None):
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         response = actions.describe_columns(schema, table)
@@ -687,6 +689,7 @@ class Column(APIView):
 
 
 class Fields(APIView):
+    @method_decorator(never_cache)
     def get(self, request, schema, table, id, column=None):
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         if (
@@ -758,6 +761,7 @@ def check_embargo(schema, table):
 
 class Rows(APIView):
     @api_exception
+    @method_decorator(never_cache)
     def get(self, request, schema, table, row_id=None):
         if check_embargo(schema, table):
             return JsonResponse(
