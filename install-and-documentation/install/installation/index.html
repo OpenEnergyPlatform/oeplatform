@@ -1,0 +1,2472 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The Open Energy Platform is the Frontend of the Open Energy Family and specifically provides a Webapplication which is documented using mkdocs.">
+      
+      
+      
+      
+        <link rel="prev" href="../../">
+      
+      
+        <link rel="next" href="../manual-db-setup/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.40">
+    
+    
+      
+        <title>Installation Guide - Open Energy Platform Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../css/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#install-and-setup-the-openenergyplatform-application" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Open Energy Platform Documentation" class="md-header__button md-logo" aria-label="Open Energy Platform Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Open Energy Platform Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Installation Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenEnergyPlatform/oeplatform" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    OpenEnergyFamily/oeplatform
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../dev/" class="md-tabs__link">
+          
+  
+    
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+    
+  
+  Installation & Code Documentation
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Open Energy Platform Documentation" class="md-nav__button md-logo" aria-label="Open Energy Platform Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Open Energy Platform Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenEnergyPlatform/oeplatform" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    OpenEnergyFamily/oeplatform
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../dev/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Development
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Context
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Context
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/use-case/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use Cases
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/personas/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Users
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Best Practices
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Best Practices
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/best-practice/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Best practice
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Collaboration
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Collaboration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/community/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Community
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/git-github/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git & GitHub
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/collaboration/planning-communication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Planning & Communication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/collaboration/code-of-conduct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Code of Conduct
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/collaboration/license-and-citation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    License and Citation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Installation & Code Documentation
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Installation & Code Documentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Installation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Installation Guide
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Installation Guide
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-prequisit" class="md-nav__link">
+    <span class="md-ellipsis">
+      0 Prequisit
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0 Prequisit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notes-for-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes for deployment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-setup-the-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      1 Setup the repository
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-setup-virtual-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      2 Setup virtual environment
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2 Setup virtual environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conda-on-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conda (on Windows)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#venv-on-linux-mac" class="md-nav__link">
+    <span class="md-ellipsis">
+      venv (on Linux / Mac)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install requirements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-setup-the-openenergyontology-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      3 Setup the OpenEnergyOntology integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3 Setup the OpenEnergyOntology integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-include-the-full-oeo" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1 Include the full oeo
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-loading-and-compressing-static-assets-from-the-oeplattform-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      4 Loading and compressing static assets from the Oeplattform applications
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-databases-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      5 Databases setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5 Databases setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-how-to-install-the-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.1 How to install the databases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.1 How to install the databases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-install-the-database-manually" class="md-nav__link">
+    <span class="md-ellipsis">
+      a) Install the database manually
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-use-our-docker-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      b) Use our docker image
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-create-the-database-table-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2 Create the database table structures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#521-django-setup-oep_django" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2.1 Django setup - oep_django
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#522-alembic-setup-oedb" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2.2 Alembic setup - oedb
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-install-the-openenergyontology-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      6 Install the OpenEnergyOntology tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6 Install the OpenEnergyOntology tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-setup-the-oeo-viewer-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.1 Setup the OEO-viewer app
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-setup-the-oeo-extended-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.2 Setup the OEO-extended app
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-setup-the-scenario-bundles-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      7 Setup the Scenario-Bundles app
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual-db-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manual database setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Development setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Documentation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Documentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_1" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../oeplatform-code/architecture/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_3_1" id="__nav_3_3_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../oeplatform-code/architecture/infrastructure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Infrastructure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../oeplatform-code/architecture/project-structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Software Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../oeplatform-code/architecture/modules/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    oeplatform Modules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_2" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../oeplatform-code/web-api/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Web-API's
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_3_2" id="__nav_3_3_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Web-API's
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_2_2" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../oeplatform-code/web-api/oedb-rest-api/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    OEDB REST-API
+  </span>
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_3_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            OEDB REST-API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_2_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../oeplatform-code/web-api/oekg-api/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    OEKG API
+  </span>
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_3_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            OEKG API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+          
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../oeplatform-code/features/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_3_3" id="__nav_3_3_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Features
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../oeplatform-code/features/metaBuilder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    metaBuilder Metadata creation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_3_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../oeplatform-code/features/open-peer-review-process/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Open Peer Review Process
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_3_3_3" id="__nav_3_3_3_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_3_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Open Peer Review Process
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../oeplatform-code/features/open-peer-review-process/technical-docs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Technical docs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../oeplatform-code/features/scenario-bundles/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scenario Bundles
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-prequisit" class="md-nav__link">
+    <span class="md-ellipsis">
+      0 Prequisit
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0 Prequisit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notes-for-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes for deployment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-setup-the-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      1 Setup the repository
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-setup-virtual-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      2 Setup virtual environment
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2 Setup virtual environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conda-on-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conda (on Windows)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#venv-on-linux-mac" class="md-nav__link">
+    <span class="md-ellipsis">
+      venv (on Linux / Mac)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install requirements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-setup-the-openenergyontology-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      3 Setup the OpenEnergyOntology integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3 Setup the OpenEnergyOntology integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-include-the-full-oeo" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1 Include the full oeo
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-loading-and-compressing-static-assets-from-the-oeplattform-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      4 Loading and compressing static assets from the Oeplattform applications
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-databases-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      5 Databases setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5 Databases setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-how-to-install-the-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.1 How to install the databases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.1 How to install the databases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-install-the-database-manually" class="md-nav__link">
+    <span class="md-ellipsis">
+      a) Install the database manually
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-use-our-docker-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      b) Use our docker image
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-create-the-database-table-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2 Create the database table structures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#521-django-setup-oep_django" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2.1 Django setup - oep_django
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#522-alembic-setup-oedb" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2.2 Alembic setup - oedb
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-install-the-openenergyontology-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      6 Install the OpenEnergyOntology tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6 Install the OpenEnergyOntology tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-setup-the-oeo-viewer-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.1 Setup the OEO-viewer app
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-setup-the-oeo-extended-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.2 Setup the OEO-extended app
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-setup-the-scenario-bundles-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      7 Setup the Scenario-Bundles app
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="install-and-setup-the-openenergyplatform-application">Install and setup the OpenEnergyPlatform Application<a class="headerlink" href="#install-and-setup-the-openenergyplatform-application" title="Permanent link">#</a></h1>
+<p>Below we describe the manual installation of the oeplatform code and infrastructure.
+The installation steps have been proofed on linux and windows for python 3.10.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>We also offer the possibility to use <a href="https://www.docker.com/">docker</a>, to install the oeplatform and additional databases. As the hole setup is pre-configured docker can be used to automatically install the hole infrastructure.</p>
+<p>We provide 2 <a href="https://docs.docker.com/get-started/#what-is-a-container-image">docker container images</a> (OEP-website and OEP-database). The images are updated &amp; published with each release. They can be pulled from <a href="https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform">GitHub packages</a>.</p>
+<p><a href="https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/README.md">Here you can find instructions on how to install the docker images.</a></p>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>Currently the docker based installation does not cover the installation of the additional database <code>jenna-fuseki</code> a triple store that stores graph data used in some of our features. 
+It is not mandatory to run the core functionality of the oeplatform. You need to install it manually as described in the installation guide.</p>
+</div>
+<!-- !!! tip
+    Use our Make script to automate most of the installation and setup process and get started in a simple and reusable way. Don't forget to familiarize yourself with the structure of the oeplattform architecture and know the credentials for each component (e.g. the user information of the databases).
+
+    <div class="highlight"><pre><span></span><code><span class="w">    </span>make<span class="w"> </span>-f<span class="w"> </span>script/setup_and_migrate_db<span class="w"> </span>all
+</code></pre></div>
+
+    !!! info "Only proven on Linux based systems." -->
+
+<details class="info">
+<summary>All steps &amp; commands in one list</summary>
+<p>This list of commands will only work on systems where the core system dependencies
+already exists. Please use the full installation guide in case you encounter errors.</p>
+<ol>
+<li>
+<p>Get code &amp; install dependencies.</p>
+<ul>
+<li><code>git clone https://github.com/OpenEnergyPlatform/oeplatform.git</code></li>
+<li><code>cd oeplatform</code></li>
+<li><code>python -m venv env</code></li>
+<li><code>source env/bin/activate</code></li>
+<li><code>pip install -r requirements.txt</code></li>
+</ul>
+</li>
+<li>
+<p>Setup the OEO integration</p>
+<ul>
+<li>Instructions on <a href="#41-include-the-full-oeo">Section 4</a></li>
+<li>Automatically added in docker container</li>
+</ul>
+</li>
+<li>
+<p>Loading and compressing static assets</p>
+<ul>
+<li>Create your <code>securitysettings.py</code> config file from our default settings: Copy &amp; rename <code>oeplatform/securitysettings.py.default</code> &gt;  <code>securitysettings.py</code></li>
+<li><code>python manage.py collectstatic</code></li>
+<li><code>python manage.py compress</code></li>
+<li>These steps are automatically added in the docker container</li>
+</ul>
+</li>
+<li>
+<p>Install databases &amp; setup connection</p>
+<ul>
+<li>Chose option 1 to use docker to install PostgreSQL and most of the setup automatically. You need to install jenna-fuseki additionally as it is not part of the docker container.</li>
+<li>Chose 2 to install everything on your directly on your system.</li>
+</ul>
+<details class="info">
+<summary>Option 1: Use docker</summary>
+<ul>
+<li><a href="https://docs.docker.com/get-docker/">Install docker</a></li>
+<li>while in oeplatform directory <code>cd docker</code></li>
+<li><code>docker compose -f docker-compose.yaml</code></li>
+<li>start docker container</li>
+<li>Additionally install and start jenna-fuseki db as docker or install it locally.</li>
+</ul>
+</details>
+<details class="info">
+<summary>Option 2: Manual database setup</summary>
+<ul>
+<li><a href="../manual-db-setup/">install manually</a></li>
+</ul>
+</details>
+<p>Summary:</p>
+<ul>
+<li>Setup databases PostgreSQL, Jenna-Fuseki</li>
+<li>Install &amp; start Jenna-Fuseki and create datastore <code>OEKG_DS</code> via the web interface: http://127.0.0.1:3030/</li>
+<li>Install PostgreSQL</li>
+<li>Use db user <code>postgres</code> with password <code>postgres</code>:</li>
+<li>Create databases: <code>oep_django</code>, <code>oedb</code>: <code>sudo -u postgres psql</code></li>
+<li>Install postgresql extensions <code>hstore</code>, <code>postgis</code>, <code>postgis_topology</code>, <code>pg_trgm</code></li>
+<li>Setup the connection to the database server to the Django project by adding the credentials in the <code>oeplatoform/securitysettings.py</code></li>
+</ul>
+</li>
+<li>
+<p>Run management commands to complete the database setup</p>
+<ul>
+<li><code>python manage.py migrate</code></li>
+<li><code>python manage.py alembic upgrade head</code></li>
+</ul>
+<details class="info">
+<summary>Sept 3.1: Management commands:</summary>
+<p>These commands are most likely not relevant if you are setting up oeplatform for the first time. Use the following command to show a list of all available management commands.</p>
+<ul>
+<li><code>python manage.py -h</code></li>
+</ul>
+</details>
+</li>
+<li>
+<p>Install react app</p>
+<ul>
+<li>Install node oder nvm on your system</li>
+<li>navigate into <code>factsheet/frontend</code> to install the scenario bundles</li>
+<li>navigate into the <code>oeo_viewer/client</code> to install the oeo viewer</li>
+<li>Run <code>npm install</code></li>
+<li>Navigate back <code>cd ../..</code> to oeplatform root</li>
+<li>Make sure the jenna-fuseki database is up and running locally</li>
+<li>Run management commands to install bot react apps<ul>
+<li><code>python manage.py build_factsheet_app</code></li>
+<li><code>python manage.py build_oeo_viewer</code></li>
+</ul>
+</li>
+<li>Update the served javaScript bundle files in templates:<ul>
+<li><code>factsheet/static/js/main###.js</code> -&gt; <code>factsheet/template/index.html</code></li>
+<li><code>oeo_viewer/static/js/main###.js</code> -&gt; <code>oeo_viewer/template/index.html</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Deploy locally</p>
+<ul>
+<li>
+<p>Check if the all connected database servers are running.</p>
+<ul>
+<li>sudo service postgresql start</li>
+<li>in the directory where you installed</li>
+</ul>
+</li>
+<li>
+<p><code>python manage.py runserver</code></p>
+</li>
+<li>
+<p>Open Browser URL: 127.0.0.1:8000</p>
+</li>
+<li>
+<p><a href="../development-setup/#user-management-setup-a-test-user">create a test user.</a></p>
+</li>
+</ul>
+</li>
+</ol>
+</details>
+<h2 id="0-prequisit">0 Prequisit<a class="headerlink" href="#0-prequisit" title="Permanent link">#</a></h2>
+<p>The installation instructions mainly refer to the creation of a local instance of the oeplatform with a focus on the development or contribution to the software development on github. Before you start the installation look at <a href="../development-setup/#choose-your-development-environment-and-tools">this section</a> and think about which operating system you want to use.</p>
+<p>Deploying the software on a server to make it publicly accessible via the Internet is a further step.</p>
+<h3 id="notes-for-deployment">Notes for deployment<a class="headerlink" href="#notes-for-deployment" title="Permanent link">#</a></h3>
+<p>We do not currently provide instructions for deployment. It also depends heavily on the server environment. In general, a web server (e.g. <a href="https://httpd.apache.org/">Apache</a>) and a <a href="https://peps.python.org/pep-3333/">web server gateway for Python</a> (e.g. <a href="https://modwsgi.readthedocs.io/en/master/">mod_wsgi</a>) are required to make the software available on the internet.</p>
+<h2 id="1-setup-the-repository">1 Setup the repository<a class="headerlink" href="#1-setup-the-repository" title="Permanent link">#</a></h2>
+<p>Recommended: Create a directory to store the oeplatform code and additional resources.</p>
+<div class="highlight"><pre><span></span><code>mkdir oep-website
+cd oep-website
+</code></pre></div>
+<p>Clone the repository locally</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/OpenEnergyPlatform/oeplatform.git
+</code></pre></div>
+<h2 id="2-setup-virtual-environment">2 Setup virtual environment<a class="headerlink" href="#2-setup-virtual-environment" title="Permanent link">#</a></h2>
+<p>Navigate to the oeplatform directory you just cloned</p>
+<div class="highlight"><pre><span></span><code>cd oeplatform
+</code></pre></div>
+<p>Below we explain two methods to install the virtual environment for python.</p>
+<h3 id="conda-on-windows">Conda (on Windows)<a class="headerlink" href="#conda-on-windows" title="Permanent link">#</a></h3>
+<p>If you are a Windows user, we recommend you use conda because of the dependency on the <code>shapely</code> package. It was causing installation issues that potentially have resolved. Don't forget to activate the environment after the setup is done.</p>
+<div class="highlight"><pre><span></span><code>conda env create -f environment.yml
+conda activate env
+</code></pre></div>
+<h3 id="venv-on-linux-mac">venv (on Linux / Mac)<a class="headerlink" href="#venv-on-linux-mac" title="Permanent link">#</a></h3>
+<p>If you are not using windows or don't want to use conda, <a href="https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/">here</a> you can find instructions for setting up virtual environment. In short: You can also use Python to create the environment. Make sure you install the venv package for your python version. Don't forget to activate the environment.</p>
+<p>On linux you can use:</p>
+<div class="highlight"><pre><span></span><code>sudo apt install python3.xx-venv # change xx to your exact version
+python3 -m venv env
+source env/bin/activate
+</code></pre></div>
+<h3 id="install-requirements">Install requirements<a class="headerlink" href="#install-requirements" title="Permanent link">#</a></h3>
+<p>After you have activated your virtual environment, install the required python libraries</p>
+<div class="highlight"><pre><span></span><code>pip install -r requirements.txt
+</code></pre></div>
+<h2 id="3-setup-the-openenergyontology-integration">3 Setup the OpenEnergyOntology integration<a class="headerlink" href="#3-setup-the-openenergyontology-integration" title="Permanent link">#</a></h2>
+<h3 id="31-include-the-full-oeo">3.1 Include the full oeo<a class="headerlink" href="#31-include-the-full-oeo" title="Permanent link">#</a></h3>
+<p>It is necessary to include the source files of the OpenEnergyOntology (OEO) in this project.
+The goal is to have a new directory like you see below inside the oeplatform directory. The new folder should be stored alongside the django apps and other code related files.</p>
+<div class="highlight"><pre><span></span><code>```bash
+ontologies/
+└── oeo
+    └── 1.0.0 # in production this will be the version of a specific OEO release
+        ├── imports
+        ├── modules
+        └── oeo-full.owl
+```
+</code></pre></div>
+<p>The directory where all ontologies are stored is called "ontologies". If you want to change the name of the directory you have to update the settings.py file for the oeplatform also. The following variables are relevant for the configuration of the ontology integration. In most cases, you can use the default settings.</p>
+<div class="highlight"><pre><span></span><code><span class="n">ONTOLOGY_FOLDER</span> <span class="c1"># Name of the folder for all ontologies</span>
+<span class="n">ONTOLOGY_ROOT</span>   <span class="c1"># constructed Path for all ontologies</span>
+<span class="n">OPEN_ENERGY_ONTOLOGY_NAME</span>   <span class="c1"># Name of the oeo</span>
+<span class="n">OPEN_ENERGY_ONTOLOGY_FOLDER</span> <span class="c1"># constructed Path for the oeo directory</span>
+</code></pre></div>
+<p>If you use the default naming "ontologies" you should create this directory. Then you can download the <a href="https://github.com/OpenEnergyPlatform/ontology/releases">full oeo release from GitHub</a> and unzip them into the new directory. To validate you can check whether you can find the file "oeo-full.owl". Please ensure, that you get the structure shown above.</p>
+<h2 id="4-loading-and-compressing-static-assets-from-the-oeplattform-applications">4 Loading and compressing static assets from the Oeplattform applications<a class="headerlink" href="#4-loading-and-compressing-static-assets-from-the-oeplattform-applications" title="Permanent link">#</a></h2>
+<p>Static data is often stored in the django apps and various additional scripts are loaded, e.g. in HTML files. To enable django to access these resources more efficiently, various management commands are used to collect and partially compress the relevant files.</p>
+<p>To be able to run the commands below we first need to Setup the security settings file for local development. This file is specific to your local settings. In production environment it is used to store / retrieve critical information that must not be pushed to any publicly available source control system like GitHub.</p>
+<ul>
+<li>Navigate to <code>oeplatform/oeplatform</code></li>
+<li>copy the file <code>securitysettings.py.default</code> and rename it to <code>securitysettings.py</code></li>
+</ul>
+<details class="note">
+<summary>How to configure securitysettings.py</summary>
+<p>The security settings provide information to django to connect to your databases, relevant for step 5, below. You can provide the access credentials directly in the script or import them using environment variables. For detailed instructions see section <a href="../manual-db-setup/#3-connect-database-to-the-django-project">3. of the manual database setup guide</a>.</p>
+</details>
+<p>After the above setup is done make sure the python environment is activated and then run:</p>
+<div class="highlight"><pre><span></span><code>python manage.py collectstatic
+python manage.py compress
+</code></pre></div>
+<h2 id="5-databases-setup">5 Databases setup<a class="headerlink" href="#5-databases-setup" title="Permanent link">#</a></h2>
+<p>We use two relational databases to store the oeplatform data:</p>
+<ul>
+<li>The oep-django database is our internal database. It is used to store the django application related data. This includes things like user information, reviews, table names, ...</li>
+<li>Our primary database is the OEDB (Open Energy Database). It is used to store all data the user uploaded. In production it stores multiple terabyte of data.</li>
+</ul>
+<p>Additional we use a triple store database:</p>
+<ul>
+<li>Store the open energy ontologies and open energy knowledge graph</li>
+<li>For now this is not part of the installation guide as it is not mandatory to run the oeplatform and can be added later.</li>
+</ul>
+<h3 id="51-how-to-install-the-databases">5.1 How to install the databases<a class="headerlink" href="#51-how-to-install-the-databases" title="Permanent link">#</a></h3>
+<p>You have two options to install the database:</p>
+<h4 id="a-install-the-database-manually">a) Install the database manually<a class="headerlink" href="#a-install-the-database-manually" title="Permanent link">#</a></h4>
+<ul>
+<li>You chose to install the databases manually by installing PostgreSQL &amp; jenna-fuseki and complete the setup. In this case you can follow our <a href="../manual-db-setup/">manual database setup guide</a>.</li>
+<li>Using this option you will install the jenna-fuseki &amp; postgresql databases on your local system. You need to start both databases manually before you can start using them for development.</li>
+</ul>
+<h4 id="b-use-our-docker-image">b) Use our docker image<a class="headerlink" href="#b-use-our-docker-image" title="Permanent link">#</a></h4>
+<ul>
+<li>You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system. <a href="https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/README.md">Here you can find instructions on how to install the docker images.</a></li>
+<li>The jenna-fuseki triple store is not part of the docker image so far. You would either have to setup the public docker image here and adjust the credentials in the <code>securitysettings.py</code> or you can perform the steps explained in <a href="../manual-db-setup/#12-install-apache-jena-fuseki">Section 1.2 of the manual database setup</a> to install the jenna-fuseki database on your system. You will have to start the service manually afterwards.</li>
+</ul>
+<h3 id="52-create-the-database-table-structures">5.2 Create the database table structures<a class="headerlink" href="#52-create-the-database-table-structures" title="Permanent link">#</a></h3>
+<p>Before you can start development, you need to setup tables in the two PostgreSQL databases. To do this, you can run two management commands. The django command will set up all structures required by the oep system in the oep_django database and the alembic command will create all the structures in the OEDB. These structures define how large amounts of uploaded user data is stored in the database. On a high level this is similar to partitions on you personal computer. This structure help's the developers and the system to find the data and group data together.</p>
+<p>First verify that your database service is running. In case you are using docker start the container. If you installed postgresql locally start the service. On Linux you can use the following command in the terminal:</p>
+<div class="highlight"><pre><span></span><code>sudo service postgresql start
+</code></pre></div>
+<h3 id="521-django-setup-oep_django">5.2.1 Django setup - oep_django<a class="headerlink" href="#521-django-setup-oep_django" title="Permanent link">#</a></h3>
+<p>In order to run the OEP website, the django database needs some extra management tables.
+We use the django specific migrations. Each django app defines it own migrations that keep track of all changes made to any app related tabes. The table structure itself is defined as an abstraction in the models.py for each django app.</p>
+<div class="highlight"><pre><span></span><code>python manage.py migrate
+</code></pre></div>
+<h3 id="522-alembic-setup-oedb">5.2.2 Alembic setup - oedb<a class="headerlink" href="#522-alembic-setup-oedb" title="Permanent link">#</a></h3>
+<p>In order to run the OEP website, the primary database needs some extra management tables.
+We use <code>alembic</code> to keep track of changes to the general structure of the primary database and its initial state e.g. what tables should be there and more. To create all tables that are needed, simply type:</p>
+<div class="highlight"><pre><span></span><code>python manage.py alembic upgrade head
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you encounter errors in this step verify that your database service is available, the databases <code>oep_django</code> and <code>oedb</code> exist and your <code>securitysettings.py</code> provide the correct access credentials.</p>
+</div>
+<h2 id="6-install-the-openenergyontology-tools">6 Install the OpenEnergyOntology tools<a class="headerlink" href="#6-install-the-openenergyontology-tools" title="Permanent link">#</a></h2>
+<p>Only start the following steps if you have completed step 3 above.</p>
+<h3 id="61-setup-the-oeo-viewer-app">6.1 Setup the OEO-viewer app<a class="headerlink" href="#61-setup-the-oeo-viewer-app" title="Permanent link">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Optional Step</p>
+<p>This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website including most ontology pages except for the oeo-viewer.</p>
+</div>
+<p>The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see and use the oeo-viewer as part of the oep-website, follow the steps below:</p>
+<ol>
+<li>Install npm:<br />
+   To install npm it is suggested to use the node version manager.<ul>
+<li>On Linux &amp; Mac:  <a href="https://github.com/nvm-sh/nvm">Node Version Manager (nvm)</a></li>
+<li>On Windows: <a href="https://github.com/coreybutler/nvm-windows">NVM for Windows</a>.</li>
+<li>Install node version 18</li>
+</ul>
+</li>
+<li>
+<p>Get the ontology files (see <a href="#3-setup-the-openenergyontology-integration">Section 3</a>)</p>
+</li>
+<li>
+<p>Build the oeo-viewer:
+    <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>oep-website/oeplatform/oeo_viewer/client
+npm<span class="w"> </span>install
+npm<span class="w"> </span>run<span class="w"> </span>build
+</code></pre></div></p>
+</li>
+</ol>
+<p>After these steps, a <code>static</code> folder inside <code>oep-website/oeplatform/oeo_viewer/</code> will be created which includes the results of the <code>npm run build</code> command. These files are necessary for the oeo-viewer.</p>
+<h3 id="62-setup-the-oeo-extended-app">6.2 Setup the OEO-extended app<a class="headerlink" href="#62-setup-the-oeo-extended-app" title="Permanent link">#</a></h3>
+<p>The OEO-extended (<a href="https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/oeo_ext">oeo_ext</a>) app is implemented as a plugin view that can quickly be added to any page of the OEP-website. Currently it is implemented in the OEMetaBuilder to add new composed units that can be annotated in the oemetadata. The OEO-extended itself is a ontology that extends the OEO and it is stored as OWL file format inside the media directory of the oeplatform. As the app itself will write to the files once the user submits a new unit via the interface you must grant access permissions on that directory to the user that runs the oeplatform code on your specific server.</p>
+<p>Setup a new folder in the <code>MEDIA_ROOT</code> directory specified in the <code>securitysettings.py</code>. By default this directory is called <code>media/</code>. You must create the sub directory specified in the setting <code>OEO_EXT_PATH</code> and add the OEO-extended files with the name specified in the <code>OEO_EXT_OWL_NAME</code> setting from <code>settings.py</code>.</p>
+<p>To get started you can copy the template OEO-extended owl file form <a href="https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/oeo_ext/oeo_extended_store/oeox_template"><code>oeplatform/oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl</code></a>.</p>
+<p>Below you can find the desired structure using the default setting values:</p>
+<div class="highlight"><pre><span></span><code>media/
+└──<span class="w"> </span>oeo_ext
+<span class="w">    </span>└──<span class="w"> </span>oeo_ext.owl
+</code></pre></div>
+<h2 id="7-setup-the-scenario-bundles-app">7 Setup the Scenario-Bundles app<a class="headerlink" href="#7-setup-the-scenario-bundles-app" title="Permanent link">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Optional Step</p>
+<p>This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website except scenario-bundle pages including the scenario-comparison React modules.</p>
+</div>
+<p>In the django app directory <code>oeplatform/factsheet</code> we provide a Web-API to access the OEKG and the Scenario-Bundle feature. Similar to the oeo-viewer we need to use npm to install &amp; build the Scenario-Bundle app and integrate the build in the django app.</p>
+<ol>
+<li>Make sure npm is installed.</li>
+<li>
+<p>Start the jenna-fuseki database (see <a href="../manual-db-setup/#12-install-apache-jena-fuseki">instructions</a> from the installation).<br />
+   The connection to the database API is setup in the factsheet/views.py you have to make sure that you provide the correct URL to you database instance. In development mode it should be something like:
+   <div class="highlight"><pre><span></span><code><span class="n">query_endpoint</span> <span class="o">=</span> <span class="s1">&#39;http://localhost:3030/ds/query&#39;</span>
+<span class="n">update_endpoint</span> <span class="o">=</span> <span class="s1">&#39;http://localhost:3030/ds/update&#39;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Configure the React app</p>
+<p>To be able to construct the API URLS that are necessary for communication between the react frontend and the django backend in the react code we have to configure the URL where our django application is available. In development mode this should be http://127.0.0.1:8000/, so add the line <code>"toep": "http://127.0.0.1:8000/"</code> to <code>factsheet/frontend/src/conf.json</code>.</p>
+</li>
+<li>
+<p>Build the scenario bundle app:
+      <div class="highlight"><pre><span></span><code>cd factsheet/frontend
+npm install
+cd ../..
+# Use the django management command
+python manage.py build_factsheet_app
+</code></pre></div></p>
+</li>
+<li>
+<p>Serve the React build on a django website  </p>
+<p>To serve the React build on a website that is provided by django you have to include the build files from the <code>factsheet/static</code> directory in the django template in <code>factsheet/templates/index.html</code>. In the HTML-template you must make sure that the JavaScript bundle file is imported. The name of the file changes after each new build and it should read like <code>main.5654a0e0.js</code>.</p>
+<p>The template should then include this line:</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{% static &#39;factsheet/js/main.55586e26.js&#39; %}&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+</li>
+</ol>
+<h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">#</a></h2>
+<p>Have a look at the steps described in the <a href="../development-setup/">Development &amp; Collaboration</a> section.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.path", "navigation.tracking", "navigation.top", "toc.follow", "search.suggest", "search.share", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+    
+  </body>
+</html>
