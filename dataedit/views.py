@@ -1546,7 +1546,7 @@ def update_table_tags(request):
                 table=table, schema=schema, metadata=metadata, cursor=con
             )
 
-    messasge = messages.success(
+    message = messages.success(
         request,
         'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
         # noqa
@@ -1555,7 +1555,7 @@ def update_table_tags(request):
     return render(
         request,
         "dataedit/dataview.html",
-        {"messages": messasge, "table": table, "schema": schema},
+        {"messages": message, "table": table, "schema": schema},
     )
 
 
