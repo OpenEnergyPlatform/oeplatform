@@ -4,14 +4,16 @@ Below we describe the manual installation of the oeplatform code and infrastruct
 The installation steps have been proofed on linux and windows for python 3.10.
 
 !!! tip
-We also offer the possibility to use [docker](https://www.docker.com/), to install the oeplatform and additional databases. As the hole setup is pre-configured docker can be used to automatically install the hole infrastructure.
+    We also offer the possibility to use [docker](https://www.docker.com/), to install the oeplatform and additional databases. As the hole setup is pre-configured docker can be used to automatically install the hole infrastructure.
 
     We provide 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database). The images are updated & published with each release. They can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
 
     [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
 
-    !!! Danger
-        Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features. It is not mandatory to run the core functionality of the oeplatform. You need to install it manually as described in the installation guide.
+!!! danger
+    Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features. 
+    It is not mandatory to run the core functionality of the oeplatform. You need to install it manually as described in the installation guide.
+
 
 <!-- !!! tip
     Use our Make script to automate most of the installation and setup process and get started in a simple and reusable way. Don't forget to familiarize yourself with the structure of the oeplattform architecture and know the credentials for each component (e.g. the user information of the databases).
@@ -110,7 +112,7 @@ Deploying the software on a server to make it publicly accessible via the Intern
 
 ### Notes for deployment
 
-We do not currently provide instructions for deployment. It also depends heavily on the server environment. In general, a web server (e.g. [Appache](https://httpd.apache.org/)) and a [web server gateway for Python](https://peps.python.org/pep-3333/) (e.g. [mod_wsgi](https://modwsgi.readthedocs.io/en/master/)) are required to make the software available on the internet.
+We do not currently provide instructions for deployment. It also depends heavily on the server environment. In general, a web server (e.g. [Apache](https://httpd.apache.org/)) and a [web server gateway for Python](https://peps.python.org/pep-3333/) (e.g. [mod_wsgi](https://modwsgi.readthedocs.io/en/master/)) are required to make the software available on the internet.
 
 ## 1 Setup the repository
 
@@ -133,11 +135,13 @@ Navigate to the oeplatform directory you just cloned
 
 Below we explain two methods to install the virtual environment for python.
 
-If you are a windows user, we recommend you use conda because of the dependency on the `shapely` package. It was causing installation issues that potentially have resolved. Don't forget to activate the environment after the setup is done.
+### Conda (on Windows)
+If you are a Windows user, we recommend you use conda because of the dependency on the `shapely` package. It was causing installation issues that potentially have resolved. Don't forget to activate the environment after the setup is done.
 
     conda env create -f environment.yml
     conda activate env
 
+### venv (on Linux / Mac)
 If you are not using windows or don't want to use conda, [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) you can find instructions for setting up virtual environment. In short: You can also use Python to create the environment. Make sure you install the venv package for your python version. Don't forget to activate the environment.
 
 On linux you can use:
@@ -146,6 +150,7 @@ On linux you can use:
     python3 -m venv env
     source env/bin/activate
 
+### Install requirements 
 After you have activated your virtual environment, install the required python libraries
 
     pip install -r requirements.txt
@@ -175,12 +180,7 @@ OPEN_ENERGY_ONTOLOGY_NAME   # Name of the oeo
 OPEN_ENERGY_ONTOLOGY_FOLDER # constructed Path for the oeo directory
 ```
 
-If you use the default naming "ontologies" you should create this directory. Then you can download the full oeo release files from GitHub and unzip them into the new directory. To validate you can check whether you can find the file "oeo-full.owl".
-
-!!! info
-Download the [full oeo release from GitHub: Assets - build-files.zip](https://github.com/OpenEnergyPlatform/ontology/releases) and extract the oeo directory to match the pattern provided above.
-
-    Get only the oeo `full-oeo.owl` from the [openenergyplatform.org](https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl)
+If you use the default naming "ontologies" you should create this directory. Then you can download the [full oeo release from GitHub](https://github.com/OpenEnergyPlatform/ontology/releases) and unzip them into the new directory. To validate you can check whether you can find the file "oeo-full.owl". Please ensure, that you get the structure shown above.
 
 ## 4 Loading and compressing static assets from the Oeplattform applications
 
@@ -192,7 +192,7 @@ To be able to run the commands below we first need to Setup the security setting
 - copy the file `securitysettings.py.default` and rename it to `securitysettings.py`
 
 ??? note "How to configure securitysettings.py"
-The security settings provide information to django to connect to your databases relevant for step 5. below . You can provide the access credentials directly in the script or import them using environment variables. For detailed instructions see section [3. of the manual database setup guide](./manual-db-setup.md#3-connect-database-to-the-django-project).
+    The security settings provide information to django to connect to your databases, relevant for step 5, below. You can provide the access credentials directly in the script or import them using environment variables. For detailed instructions see section [3. of the manual database setup guide](./manual-db-setup.md#3-connect-database-to-the-django-project).
 
 After the above setup is done make sure the python environment is activated and then run:
 
@@ -213,19 +213,15 @@ Additional we use a triple store database:
 
 ### 5.1 How to install the databases
 
-The required steps are:
+You have two options to install the database:
 
-1. Install the database manually
+#### a) Install the database manually
+   * You chose to install the databases manually by installing PostgreSQL & jenna-fuseki and complete the setup. In this case you can follow our [manual database setup guide](./manual-db-setup.md).
+   * Using this option you will install the jenna-fuseki & postgresql databases on your local system. You need to start both databases manually before you can start using them for development.
 
-   - You chose to install the databases manually by installing PostgreSQL & jenna-fuseki and complete the setup. In this case you can follow our [manual database setup guide](./manual-db-setup.md).
-
-   - Using this option you will install the jenna-fuseki & postgresql databases on your local system. You need to start both databases manually before you can start using them for development.
-
-2. User Docker
-
-   - You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system. [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
-
-   - The jenna-fuseki triple store is not part of the docker image so far. You would either have to setup the public docker image here and adjust the credentials in the `securitysettings.py` or you can perform the steps explained in [Section 1.2 of the manual database setup](./manual-db-setup.md#12-install-apache-jena-fuseki) to install the jenna-fuseki database on your system. You will have to start the service manually afterwards.
+#### b) Use our docker image
+   * You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system. [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+   * The jenna-fuseki triple store is not part of the docker image so far. You would either have to setup the public docker image here and adjust the credentials in the `securitysettings.py` or you can perform the steps explained in [Section 1.2 of the manual database setup](./manual-db-setup.md#12-install-apache-jena-fuseki) to install the jenna-fuseki database on your system. You will have to start the service manually afterwards.
 
 ### 5.2 Create the database table structures
 
@@ -250,7 +246,7 @@ We use `alembic` to keep track of changes to the general structure of the primar
     python manage.py alembic upgrade head
 
 !!! Note
-If you encounter errors in this step verify that your database service is available, the databases `oep_django` and `oedb` exist and your `securitysettings.py` provide the correct access credentials.
+    If you encounter errors in this step verify that your database service is available, the databases `oep_django` and `oedb` exist and your `securitysettings.py` provide the correct access credentials.
 
 ## 6 Install the OpenEnergyOntology tools
 
@@ -259,74 +255,79 @@ Only start the following steps if you have completed step 3 above.
 ### 6.1 Setup the OEO-viewer app
 
 !!! note "Optional Step"
-This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website including most ontology pages except for the oeo-viewer.
+    This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website including most ontology pages except for the oeo-viewer.
 
 The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see and use the oeo-viewer as part of the oep-website, follow the steps below:
 
-1- Install npm:
+1. Install npm:  
+   To install npm it is suggested to use the node version manager.
+     - On Linux & Mac:  [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm)
+     - On Windows: [NVM for Windows](https://github.com/coreybutler/nvm-windows).
+     - Install node version 18
+2. Get the ontology files (see [Section 3](#3-setup-the-openenergyontology-integration))
 
-To install npm it is suggested to use the node version manager.
-
-- On Linux & Mac go [here](https://github.com/nvm-sh/nvm)
-
-- On windows see [here](https://github.com/coreybutler/nvm-windows).
-
-- install node version 18
-
-2- Get the ontology files (see [Section 3](#3-setup-the-openenergyontology-integration))
-
-3- Build the oeo-viewer:
-
-    cd oep-website/oeo_viewer/client
+3. Build the oeo-viewer:
+    ```bash
+    cd oep-website/oeplatform/oeo_viewer/client
     npm install
     npm run build
+    ```
 
-After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
+After these steps, a `static` folder inside `oep-website/oeplatform/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
+
+### 6.2 Setup the OEO-extended app
+
+The OEO-extended ([oeo_ext](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/oeo_ext)) app is implemented as a plugin view that can quickly be added to any page of the OEP-website. Currently it is implemented in the OEMetaBuilder to add new composed units that can be annotated in the oemetadata. The OEO-extended itself is a ontology that extends the OEO and it is stored as OWL file format inside the media directory of the oeplatform. As the app itself will write to the files once the user submits a new unit via the interface you must grant access permissions on that directory to the user that runs the oeplatform code on your specific server.
+
+Setup a new folder in the `MEDIA_ROOT` directory specified in the `securitysettings.py`. By default this directory is called `media/`. You must create the sub directory specified in the setting `OEO_EXT_PATH` and add the OEO-extended files with the name specified in the `OEO_EXT_OWL_NAME` setting from `settings.py`.
+
+To get started you can copy the template OEO-extended owl file form [`oeplatform/oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl`](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/oeo_ext/oeo_extended_store/oeox_template).
+
+Below you can find the desired structure using the default setting values:
+
+```bash
+media/
+└── oeo_ext
+    └── oeo_ext.owl
+```
 
 ## 7 Setup the Scenario-Bundles app
 
 !!! note "Optional Step"
-This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website except scenario-bundle pages including the scenario-comparison React modules.
+    This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website except scenario-bundle pages including the scenario-comparison React modules.
 
 In the django app directory `oeplatform/factsheet` we provide a Web-API to access the OEKG and the Scenario-Bundle feature. Similar to the oeo-viewer we need to use npm to install & build the Scenario-Bundle app and integrate the build in the django app.
 
 1. Make sure npm is installed.
-2. Start the jenna-fuseki database (see [instructions](./manual-db-setup.md#12-install-apache-jena-fuseki) from the installation).
-
+2. Start the jenna-fuseki database (see [instructions](./manual-db-setup.md#12-install-apache-jena-fuseki) from the installation).  
    The connection to the database API is setup in the factsheet/views.py you have to make sure that you provide the correct URL to you database instance. In development mode it should be something like:
-
    ```py
    query_endpoint = 'http://localhost:3030/ds/query'
    update_endpoint = 'http://localhost:3030/ds/update'
    ```
 
-3. Configure the the React app:
+3. Configure the React app
 
-   To be able to construct the API URLS that are necessary for communication between the react frontend and the django backend in the react code we have to configure the URL where our django application is available. In development mode this should be:
-
-   `"toep": "http://127.0.0.1:8000/"`
-
-   Add this line to `factsheet/frontend/src/conf.json`
+     To be able to construct the API URLS that are necessary for communication between the react frontend and the django backend in the react code we have to configure the URL where our django application is available. In development mode this should be http://127.0.0.1:8000/, so add the line `"toep": "http://127.0.0.1:8000/"` to `factsheet/frontend/src/conf.json`.
 
 4. Build the scenario bundle app:
+      ```
+      cd factsheet/frontend
+      npm install
+      cd ../..
+      # Use the django management command
+      python manage.py build_factsheet_app
+      ```
 
-   ```
-   cd factsheet/frontend
-   npm install
-   cd ../..
-   # Use the django management command
-   python manage.py build_factsheet_app
-   ```
+5. Serve the React build on a django website  
 
-5. Serve the React build on a django website
+     To serve the React build on a website that is provided by django you have to include the build files from the `factsheet/static` directory in the django template in `factsheet/templates/index.html`. In the HTML-template you must make sure that the JavaScript bundle file is imported. The name of the file changes after each new build and it should read like `main.5654a0e0.js`.
 
-   To serve the React build on a website that is provided by django you have to include the build files from the `factsheet/static` directory in the django template in `factsheet/templates/index.html`. In the html template the you must make sure that the JavaScript bundle file is imported. The name of the file changes after each new build and it should read like `main.5654a0e0.js`.
+     The template should then include this line:
 
-   The tamplate should then include this line:
-
-   ```html
-   <script src="{% static 'factsheet/js/main.55586e26.js' %}"></script>
-   ```
+     ```html
+     <script src="{% static 'factsheet/js/main.55586e26.js' %}"></script>
+     ```
 
 ## Next steps
 

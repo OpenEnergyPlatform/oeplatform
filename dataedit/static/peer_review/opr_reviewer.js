@@ -218,12 +218,12 @@ function isEmptyValue(value) {
 function click_field(fieldKey, fieldValue, category) {
     var isEmpty = isEmptyValue(fieldValue);
 
-    // Далее остальная логика функции
     switchCategoryTab(category);
 
     selectedField = fieldKey;
     selectedFieldValue = fieldValue;
     selectedCategory = category;
+
     const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
     const selectedName = document.querySelector("#review-field-name");
     selectedName.textContent = cleanedFieldKey + " " + fieldValue;
@@ -232,6 +232,7 @@ function click_field(fieldKey, fieldValue, category) {
 
     let selectedDivId = 'field_' + fieldKey;
     let selectedDiv = document.getElementById(selectedDivId);
+
 
     if (fieldDescriptionsData[cleanedFieldKey]) {
         let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
@@ -254,6 +255,7 @@ function click_field(fieldKey, fieldValue, category) {
         fieldDescriptionsElement.textContent = "No description found";
     }
     const fieldState = getFieldState(fieldKey);
+
     if (fieldState) {
         if (fieldState === 'ok') {
             document.getElementById("ok-button").disabled = true;
@@ -268,6 +270,17 @@ function click_field(fieldKey, fieldValue, category) {
         document.getElementById("ok-button").disabled = isEmpty;
         document.getElementById("rejected-button").disabled = isEmpty;
         document.getElementById("suggestion-button").disabled = isEmpty;
+        const explanationContainer = document.getElementById("explanation-container"); // Получаем новый контейнер
+        const existingExplanation = explanationContainer.querySelector('.explanation');
+
+        if (isEmpty && !existingExplanation) {
+            const explanationElement = document.createElement('p');
+            explanationElement.textContent = 'Field is empty. Reviewing is not possible.';
+            explanationElement.classList.add('explanation');
+            explanationContainer.appendChild(explanationElement);
+        } else if (!isEmpty && existingExplanation) {
+            explanationContainer.removeChild(existingExplanation);
+        }
     }
 
     // Set selected / not selected style on metadata fields
@@ -409,36 +422,45 @@ function renderSummaryPageFields() {
   const suggestingFields = [];
   const rejectedFields = [];
   const missingFields = [];
+  const emptyFields = [];
 
   if (state_dict && Object.keys(state_dict).length > 0) {
     const fields = document.querySelectorAll('.field');
     for (let field of fields) {
       let field_id = field.id.slice(6);
-      const fieldValue = $(field).text();
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const fieldState = getFieldState(field_id);
-      const fieldCategory = field.getAttribute('data-category'); // Получаем категорию поля
-      if (fieldState === 'ok') {
-        acceptedFields.push({field_id, fieldValue, fieldCategory});
+      const fieldCategory = field.getAttribute('data-category');
+      const fieldName = field_id.split('.').pop();
+
+      if (isEmptyValue(fieldValue)) {
+        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
+      } else if (fieldState === 'ok') {
+        acceptedFields.push({ fieldName, fieldValue, fieldCategory });
+      } else if (fieldState === 'suggestion') {
+        suggestingFields.push({ fieldName, fieldValue, fieldCategory });
+      } else if (fieldState === 'rejected') {
+        rejectedFields.push({ fieldName, fieldValue, fieldCategory });
       }
-      // TODO: The following line duplicates enties in the summary tab
-      // else if (fieldState === 'suggestion' || fieldState === 'rejected') {
-      // missingFields.push({ field_id, fieldValue, fieldCategory });
-      // }
     }
   }
 
   for (const review of current_review.reviews) {
     const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
-    const fieldValue = $(field_id).text();
+    const fieldValue = $(field_id).find('.value').text().replace(/\s+/g, ' ').trim();
     const fieldState = review.fieldReview.state;
     const fieldCategory = review.category;
+    const fieldName = review.key.split('.').pop();
 
-    if (fieldState === 'ok') {
-      acceptedFields.push({field_id, fieldValue, fieldCategory});
+
+    if (isEmptyValue(fieldValue)) {
+      emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
+    } else if (fieldState === 'ok') {
+      acceptedFields.push({ fieldName, fieldValue, fieldCategory });
     } else if (fieldState === 'suggestion') {
-      suggestingFields.push({field_id, fieldValue, fieldCategory});
+      suggestingFields.push({ fieldName, fieldValue, fieldCategory });
     } else if (fieldState === 'rejected') {
-      rejectedFields.push({field_id, fieldValue, fieldCategory});
+      rejectedFields.push({ fieldName, fieldValue, fieldCategory });
     }
   }
 
@@ -453,13 +475,13 @@ function renderSummaryPageFields() {
     const category_fields = category.querySelectorAll(".field");
     for (field of category_fields) {
       const field_id = field.id.slice(6);
-      const fieldValue = $(field).text();
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const found = current_review.reviews.some((review) => review.key === field_id);
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
-
-      if (!found && fieldState !== 'ok') {
-        missingFields.push({field_id, fieldValue, fieldCategory});
+      const fieldName = field_id.split('.').pop();
+      if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
+        missingFields.push({ fieldName, fieldValue, fieldCategory });
       }
     }
   }
@@ -518,14 +540,14 @@ function renderSummaryPageFields() {
   }
 
 
-  function updateSummaryTable() {
+    function updateSummaryTable() {
     clearSummaryTable();
-
     let allData = [];
     allData.push(...missingFields.map((item) => ({...item, fieldStatus: 'Missing'})));
     allData.push(...acceptedFields.map((item) => ({...item, fieldStatus: 'Accepted'})));
     allData.push(...suggestingFields.map((item) => ({...item, fieldStatus: 'Suggested'})));
     allData.push(...rejectedFields.map((item) => ({...item, fieldStatus: 'Rejected'})));
+    allData.push(...emptyFields.map((item) => ({...item, fieldStatus: 'Empty'})));
 
     let table = generateTable(allData);
     summaryContainer.appendChild(table);
@@ -533,7 +555,6 @@ function renderSummaryPageFields() {
 
   updateSummaryTable();
   updateTabProgressIndicatorClasses();
-  // updatePercentageDisplay();
 }
 
 /**
@@ -880,15 +901,13 @@ function updateTabClasses() {
 
     let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-    let allOk = true;
-    for (let j = 0; j < fields.length; j++) {
-      let fieldState = getFieldState(fields[j].id.replace('field_', ''));
-      if (fieldState !== 'ok') {
-        allOk = false;
-        break;
-      }
-    }
-    if (allOk) {
+    let allOkOrEmpty = fields.every(field => {
+      let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      let fieldState = getFieldState(field.id.replace('field_', ''));
+      return isEmptyValue(fieldValue) || fieldState === 'ok';
+    });
+
+    if (allOkOrEmpty) {
       tab.classList.add('status');
       tab.classList.add('status--done');
     } else {
@@ -896,6 +915,8 @@ function updateTabClasses() {
     }
   }
 }
+
+
 window.addEventListener('DOMContentLoaded', function() {
   updateTabClasses();
   // updatePercentageDisplay() ;
@@ -939,12 +960,13 @@ function updateTabProgressIndicatorClasses() {
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
     let values = getAllFieldsAndValues();
 
-    let allOk = fieldsInTab.every((field, index) => {
-        let currentValue = values[index].fieldValue;
-        return isEmptyValue(currentValue) || field.classList.contains('field-ok');
+    let allOkOrEmpty = fieldsInTab.every((field, index) => {
+      let currentValue = values[index].fieldValue;
+      let fieldState = getFieldState(field.id.replace('field_', ''));
+      return isEmptyValue(currentValue) || fieldState === 'ok';
     });
 
-    if (allOk) {
+    if (allOkOrEmpty) {
       tab.classList.add('status--done');
     } else {
       tab.classList.add('status');

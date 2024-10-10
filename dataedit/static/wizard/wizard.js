@@ -646,8 +646,7 @@ function createTable() {
 
   var tablename = $("#wizard-tablename").val();
   var embargoValue = $("#wizard-embargo").val();
-
-  var embargoData = calculateEmbargoPeriod(embargoValue);
+  // var embargoData = calculateEmbargoPeriod(embargoValue);
 
   var url = getApiTableUrl(tablename) + "/";
   var urlSuccess = getWizardUrl(tablename);
@@ -655,7 +654,8 @@ function createTable() {
     query: {
       "columns": colDefs,
       "constraints": constraints,
-      "embargo": embargoData
+      "embargo": embargoValue === "none" ? null : {"duration": embargoValue} // Conditional check
+      // "embargo": embargoData
     }
   };
 
@@ -667,6 +667,9 @@ function createTable() {
   });
 }
 
+
+// unused until we might want to enable custom embargo periods
+// for now only 6 months up to one year are possible
 function calculateEmbargoPeriod(embargoValue) {
   let endDate = new Date();
   if (embargoValue === "6_months") {
@@ -800,6 +803,12 @@ function calculateEmbargoPeriod(embargoValue) {
         tgt.addClass('is-invalid');
       }
     });
+    // Add this block to remove the "Create Table" card if canAdd is true
+    if (state.canAdd) {
+      // Remove the "Create Table" card
+      $('#wizard-container-create').closest('.card').remove();
+    }
+
     resetUpload();
     if (state.table) {
       $("#wizard-tablename").val(state.table);

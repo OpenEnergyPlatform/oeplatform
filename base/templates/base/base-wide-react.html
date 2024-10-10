@@ -29,7 +29,7 @@
 
 </head>
 
-<body>
+<body class="h-100 d-flex flex-column">
 {% block header %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-target="#navbarSupportedContent"
@@ -65,7 +65,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/ontology/">Overview</a>
-                        <a class="dropdown-item" href="/ontology/oeo/">OEO Modules</a>
+                        <a class="dropdown-item" href="/ontology/oeo/BFO_0000001/">OEO Classes</a>
                         <a class="dropdown-item" href="/viewer/oeo/">OEO Viewer</a>
                         <a class="dropdown-item" href="{% url 'oeo-s-c'%}">OEO Steering Committee</a>
                         <a class="dropdown-item" href="{{ EXTERNAL_URLS.tib_terminology_service }}" target="_blank" data-toggle="tooltip" data-placement="top" title="We want to combine our efforts in ontology development with the TIB as part of the NFDI4Energy project."><i class="fas fa-external-link-alt"></i> TIB Terminology Service</a>
@@ -106,39 +106,43 @@
     </nav>
 
 {% endblock header %}
+<main class="main" style="flex: 1">
+    <div class="" style="padding:0">
+        {% block site-header %}
+        {% endblock site-header %}
+        <div class="" style="padding:0">
+        {% block main %}
+            
+                {% block main-content %}
+                
+                        {% block main-content-body %}{% endblock %}
+                    
+                {% endblock main-content %}
+        
+        {% endblock main %}
+    </div>
+    </div>
+</main>
+{% block footer %}
+<footer class="footer mt-auto py-3 bg-secondary">
+    <nav class="navbar navbar-expand navbar-dark bg-secondary">
+        <div class="container-fluid justify-content-end">
+            <ul class="navbar-nav mr-auto">
 
-<div class="container-fluid base" style="padding:0">
-    {% block site-header %}
-    {% endblock site-header %}
-    {% block main %}
-        <div class="row">
-            {% block main-content %}
-                <div style="width: 100%">
-                    {% block main-content-body %}{% endblock %}
-                </div>
-            {% endblock main-content %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/contact/">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/legal/privacy_policy/">Privacy Policy</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/legal/tou/">Terms of Use</a>
+                </li>
+            </ul>
         </div>
-    {% endblock main %}
-    {% block footer %}
-        <footer class="navbar-footer bg-secondary">
-            <nav class="navbar navbar-expand navbar-dark bg-secondary">
-                <ul class="navbar-nav mr-auto">
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="/contact/">Contact</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/legal/privacy_policy/">Privacy Policy</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/legal/tou/">Terms of Use</a>
-                    </li>
-                </ul>
-            </nav>
-        </footer>
-    {% endblock footer %}
-</div>
-
+    </nav>
+</footer>
+{% endblock footer %}
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
     <script src="{% static 'js/jquery.min.js' %}"></script>

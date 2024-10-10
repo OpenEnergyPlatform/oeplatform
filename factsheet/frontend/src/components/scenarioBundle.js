@@ -60,12 +60,10 @@ import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/compone
 import InfoListItem from '../styles/oep-theme/components/infoListItem.js'
 import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
 import AttachmentIcon from '@mui/icons-material/Attachment.js';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined.js';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined.js';
 import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined.js';
 import LinkIcon from '@mui/icons-material/Link.js';
 import Chip from '@mui/material/Chip';
-import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined.js';
 import Container from '@mui/material/Container';
 import Backdrop from '@mui/material/Backdrop';
 
@@ -74,6 +72,10 @@ import CSRFToken from './csrfToken.js';
 import '../styles/App.css';
 import { TableRow } from '@mui/material';
 import variables from '../styles/oep-theme/variables.js';
+
+import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
+import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.js';
+import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -236,9 +238,12 @@ function Factsheet(props) {
 
   const [technologies, setTechnologies] = React.useState([]);
   const [selectedTechnologies, setSelectedTechnologies] = useState(id !== 'new' ? fsData.technologies : []);
+  const [selectedTechnologiesTree, setSelectedTechnologiesTree] = useState(id !== 'new' ? fsData.technologies : []);
+  const [allNodeIds, setAllNodeIds] = useState([]);
+  
   const [expandedTechnologyList, setExpandedTechnologyList] = useState([]);
 
-  const [scenarioDescriptors, setScenarioDescriptors] = React.useState([]);
+  const [scenarioDescriptors, setScenarioTypes] = React.useState([]);
   const [selectedScenarioDescriptors, setSelectedScenarioDescriptors] = useState([]);
 
   const [modelsList, setModelsList] = useState([]);
@@ -276,37 +281,7 @@ function Factsheet(props) {
     });
   }, []);
 
-  // See https://github.com/OpenEnergyPlatform/oekg/issues/19
-  const StudyKeywords = [
-    ['resilience', 'https://openenergy-platform.org/ontology/oeo/OEO_00360015', 'Resilience is a disposition of a system that represents the capacity of a system to absorb disturbance and reorganize so as to retain essentially the same function, structure, and feedbacks.'],
-    ['life cycle analysis', 'http://www.openenergy-platform.org/ontology/oeo/OEO_00330023', 'A life cycle assessment is a methodology to calculate and analyse environmental impacts of the life cycle of a material entity or process.'],
-    ['CO2 emissions', 'https://openenergy-platform.org/ontology/oeo/OEO_00260007', 'A CO2 emission is an emission that releases carbon dioxide.'],
-    ['Greenhouse gas emissions', 'https://openenergy-platform.org/ontology/oeo/OEO_00000199', 'A greenhouse gas emission is an emission that releases a greenhouse gas.'],
-    ['100% renewables', 'https://openenergy-platform.org/ontology/oeo/OEO_00140133', 'A renewable energy share is a process attribute that indicates the fraction of renewable energy related to the total energy of an energy generation or consumption process.'],
-    ['acceptance', 'https://openenergy-platform.org/ontology/oeo/OEO_00360000', 'Acceptance is a realizable entity that represents the attitude of a person or organisation with respect to a certain constructional, (infra)structural or political measure that may be realized in, affected by or results of complex processes like discussions, communications, transformative measures or former personal experiences.'],
-    ['sufficiency', 'https://openenergy-platform.org/ontology/oeo/OEO_00010444', 'Sufficiency is a plan specification for reducing, in absolute terms, the consumption and production of end-use products and services through changes in social practices in order to comply with environmental sustainability while ensuring an adequate social foundation for all people.'],
-    ['(changes in) demand', '', ''],
-    ['degree of electrifiaction', 'https://openenergy-platform.org/ontology/oeo/OEO_00020254', 'Electrical energy share is a process attribute that indicates the fraction of electrical energy related to the total energy of an energy generation or consumption process.'],
-    ['regionalisation', 'https://openenergy-platform.org/ontology/oeo/OEO_00340006', 'Regionalisation is a methodology to calculate spatially distributed energy producers and consumers with the aim to highlight regional differences in energy supply and potentials, particularly related to renewable energies.'],
-    ['total gross electricity generation', 'https://openenergy-platform.org/ontology/oeo/OEO_00240012', 'Gross electricity generation is a process attribute that refers to the total amount of electrical energy produced in an electricity generation process.'],
-    ['total net electricity generation', '', ''],
-    ['peak electricity generation', 'https://github.com/OpenEnergyPlatform/ontology/issues/1837', ''],
-    ['study report due to legal obligation', 'https://openenergy-platform.org/ontology/oeo/OEO_00020373', 'A study report due to legal obligation is a study report that is created beacause of a legal obligation.'],
-    ['carbon neutrality', 'https://openenergy-platform.org/ontology/oeo/OEO_00360010', 'Climate neutrality criteria are measures to achieve a balance between the amount of greenhouse gases emitted and the amount removed from the atmosphere.'],
-    ['negative emissions', 'https://openenergy-platform.org/ontology/oeo/OEO_00000293', 'Negative emission refers to the removal of greenhouse gases from the atmosphere, typically through various forms of carbon capture and storage.'],
-    ['decarbonization pathways', 'https://openenergy-platform.org/ontology/oeo/OEO_00010212', 'Decarbonization pathways are strategic plans to reduce carbon emissions through various technological, structural, and behavioral changes.'],
-    ['Flexibility', 'https://openenergy-platform.org/ontology/oeo/OEO_00360007', 'Flexibility in energy systems refers to the ability to adapt to changes in supply and demand, often through diverse generation and storage options.'],
-    ['Efficiency', 'https://openenergy-platform.org/ontology/oeo/OEO_00140050', 'Efficiency value is the ratio of useful output to the total input in any system, often related to energy conversion processes.'],
-    ['primary energy demand', 'https://openenergy-platform.org/ontology/oeo/OEO_00140146', 'Energy demand refers to the total amount of energy required by consumers, including both primary and final energy needs.'],
-    ['final energy demand', 'https://openenergy-platform.org/ontology/oeo/OEO_00140146', 'Energy demand refers to the total amount of energy required by consumers, including both primary and final energy needs.'],
-    ['control area', 'https://openenergy-platform.org/ontology/oeo/OEO_00360004', 'A control area is a supply grid that is under the responsibility of a transmission system operator and is a part of a supply grid.'],
-    ['electricity grid', 'https://openenergy-platform.org/ontology/oeo/OEO_00000143', 'An electricity grid is a supply grid that distributes electrical energy / electricity.'],
-    ['gas grid', 'https://openenergy-platform.org/ontology/oeo/OEO_00020004', 'A gas grid is a supply grid that distributes gaseous fuel, e.g. methane.'],
-    ['heating grid', 'https://openenergy-platform.org/ontology/oeo/OEO_00020005', 'A heating grid is a supply grid that distributes thermal energy via circulating steam or liquids.'],
-    ['scenario projection comparison', 'https://openenergy-platform.org/ontology/oeo/OEO_00360003', 'Scenario projection comparison is the analysis of different future scenarios to evaluate potential outcomes and impacts.'],
-    ['model intercomparison study', 'https://openenergy-platform.org/ontology/oeo/OEO_00360002', 'Model intercomparison study involves comparing the outputs of different models to understand variability and improve accuracy in projections.'],
-    ['policies and measures', 'https://openenergy-platform.org/ontology/oeo/OEO_00140151', 'Policy instrument is a means through which governments or organizations implement strategies to influence economic or social outcomes.']
-  ];
+
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
@@ -330,6 +305,32 @@ function Factsheet(props) {
     });
     return ids;
   };
+
+  let idCounter = 1;
+  function generateUniqueId() {
+    return idCounter++;
+  }
+
+  function filterByValue(referenceList, obj) {
+    const referenceSet = new Set(referenceList.map(item => item.value));
+  
+    function recursiveFilter(node) {
+      const uniqueId = generateUniqueId();
+  
+      if (Array.isArray(node.children)) {
+        node.children = node.children.map(recursiveFilter).filter(child => child !== null);
+      }
+  
+      if (referenceSet.has(node.value) || (node.children && node.children.length > 0)) {
+        return { ...node, id: uniqueId };
+      }
+  
+      return null;
+    }
+  
+    return obj.map(recursiveFilter).filter(node => node !== null);
+  }
+
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
@@ -365,10 +366,10 @@ function Factsheet(props) {
       const all_technologies = parse(data.technologies['children']);
       setTechnologies(all_technologies);
 
-
       // setTechnologies(data.technologies['children']);
-
-      setScenarioDescriptors(data.scenario_descriptors);
+      
+      // rephrase scenario descriptors to - types
+      setScenarioTypes(data.scenario_descriptors);
       const sectors_with_tooltips = data.sectors.map(item =>
       ({
         ...item,
@@ -406,9 +407,32 @@ function Factsheet(props) {
         children: []
       }
       setSunburstData(sampleData);
-    });
+
+
+      const filteredResult = filterByValue(selectedTechnologies, technologies);
+      setSelectedTechnologiesTree(filteredResult[0]["children"]);
+
+      function getAllNodeIds(nodes) {
+        let ids = [];
+        nodes.forEach(node => {
+          ids.push(node.id);
+          if (node.children) {
+            ids = ids.concat(getAllNodeIds(node.children));
+          }
+        });
+        return ids;
+      }
+
+      const allIds = getAllNodeIds(filteredResult[0]["children"]);
+      setAllNodeIds(allIds);
 
   }, []);
+
+
+    
+
+
+  }, [selectedTechnologies, technologies]);
 
   const handleSaveFactsheet = () => {
     setOpenBackDrop(true);
@@ -887,7 +911,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewFundingSource = (newElement) => {
-    axios.post(conf.toep + 'scenario-bundlesrio-bundles/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
       {
         entity_type: 'OEO.OEO_00090001',
         entity_label: newElement.name,
@@ -1075,7 +1099,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewInteractingRegion = (newElement) => {
-    axios.post(conf.toep + 'scenario-bundlesrio-bundles/add_entities/',
+    axios.post(conf.toep + 'scenario-bundles/add_entities/',
       {
         entity_type: 'OEO.OEO_00020036',
         entity_label: newElement.name,
@@ -1345,38 +1369,6 @@ function Factsheet(props) {
     return foundObj;
   };
 
-
-  // enhance open url function to handle urls better
-  // TODO change once OEKG is migrated
-  const handleOpenURL = (url, setError) => {
-    if (!url || url.trim() === '') {
-      setError('Invalid URL');
-      return;
-    }
-  
-    let processedURL = url.trim();
-
-    // Handle URLs with spaces in the middle
-    processedURL = processedURL.replace(/\s+/g, '%20');
-  
-    // Prepend base URL if not starting with http:// or https://
-    if (!processedURL.startsWith('http://') && !processedURL.startsWith('https://')) {
-      const baseURL = window.location.origin;
-      processedURL = `${baseURL}${processedURL}`;
-    }
-
-    if (processedURL.startsWith('http://') && !processedURL.startsWith('http://127') && !processedURL.startsWith('http://local')){
-      processedURL = processedURL.replace('http://', 'https://');
-    }
-
-    // Encode the URL to handle special characters
-    try {
-      const encodedURL = encodeURI(processedURL);
-      window.open(encodedURL, "_blank");
-    } catch (error) {
-      setError('Invalid URL format');
-    }
-  };
 
   const scenarioDescriptorHandler = (descriptorList, nodes, id) => {
     const zipped = []
@@ -2115,7 +2107,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.descriptors.map((e) => <span> <span> {e.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
+                    {v.descriptors.map((e) => <span> <span> <Chip sx={{ marginTop: "5px" }} label={e.label} size="small" variant="outlined" onClick={() => handleOpenURL(e.class)} /> </span> <span>  <b className="separator-dot">  </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
@@ -2342,7 +2334,7 @@ function Factsheet(props) {
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    <span> <span> {v.date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                    <span> <span> {v.date_of_publication.split('/')[0]} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
                   </ContentTableCell>
                 </TableRow>
 
@@ -2479,9 +2471,10 @@ function Factsheet(props) {
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedTechnologies.map((v, i) => (
+             {/*  {selectedTechnologies.map((v, i) => (
                 <span> <span> <Chip label={v.value} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-              ))}
+              ))} */}
+              <RichTreeView items={selectedTechnologiesTree} expandedItems={allNodeIds} />
             </ContentTableCell>
           </TableRow>
         </TableBody>
@@ -2517,7 +2510,7 @@ function Factsheet(props) {
                 <><Chip
                   size='small'
                   key={v.id}
-                  label={v.acronym}
+                  label={v.acronym ? v.acronym : v.name}
                   variant="outlined"
                   sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)} /><b className="separator-dot"> . </b></>
                 ))
@@ -2549,7 +2542,7 @@ function Factsheet(props) {
                   <><Chip
                     size='small'
                     key={v.id}
-                    label={v.acronym}
+                    label={v.acronym ? v.acronym : v.name}
                     variant="outlined"
                     sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)} /><b className="separator-dot"> . </b></>
                   ))
@@ -2560,6 +2553,8 @@ function Factsheet(props) {
       </Table>
     </TableContainer>
   )
+
+  
 
   const overview_items = {
     titles: [scenario_count, 'Publications', 'Sectors and technology', 'Models and frameworks'],

@@ -64,21 +64,48 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-ONTOLOGY_FOLDER = '/ontologies'
-ONTOLOGY_ROOT = Path(BASE_DIR, 'ontologies')
+ONTOLOGY_FOLDER = "ontologies"
+ONTOLOGY_ROOT = Path(BASE_DIR, ONTOLOGY_FOLDER)
 
-# Connect to RDF database like jenna
+# Connect to RDF database like jenna https://jena.apache.org/
+# In OEP this is used to store and read triple data on the OEKG
+# For example scenario bundle data is stored there
 RDF_DATABASES = {
     'knowledge': {
         'host': 'host',
         'port': 'port',
         'name': 'your_rdf_dataset'
     },
-    'factsheet': {
-        'dbuser': 'user',
-        'dbpasswd': 'pw'
-    }
+    "oeo_ext": {"host": "localhost", "port": "3030", "name": "oeo_ext"}
 }
+
+# The RDF database brings a server that provides a web api.
+# This service is part of the internal network.
+if RDF_DATABASES:
+    OEKG_SPARQL_ENDPOINT_URL = f"http://{RDF_DATABASES['knowledge']['host']}:{RDF_DATABASES['knowledge']['port']}/{RDF_DATABASES['knowledge']['name']}/sparql"
+
+# The ontop-vkg is used to translate sparql to sql queries
+# https://ontop-vkg.org/guide/cli.html#ontop-endpoint
+# This service is part of the internal network.
+# It depends on a mapping that maps concepts to the relational data structure
+# We use it to implement quantitative scenario comparison
+USE_ONTOP = False
+if USE_ONTOP:
+    ONTOP_SPARQL_ENDPOINT_URL = "http://localhost:8080/sparql"
+
+# The LOEP provides lookup (autocomplete search) functionality implemented
+# using Apache Lucene.
+# https://github.com/dbpedia/dbpedia-lookup/tree/legacy
+# This service is part of the internal network.
+# It can find classes from the OEO and return similar concepts based on
+# the text an user inputs to a search field
+USE_LOEP = False
+if USE_LOEP:
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL = (
+        "http://localhost:8082/lookup-application/api/search?query="
+    )
+else:
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL = ""
 
 if not DEBUG:
     AUTHENTICATION_BACKENDS = ['login.models.UserBackend', 'axes.backends.AxesBackend']
@@ -86,3 +113,5 @@ if not DEBUG:
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+OEKG_SPARQL_ENDPOINT_URL = "http://localhost:3030/ds/sparql"

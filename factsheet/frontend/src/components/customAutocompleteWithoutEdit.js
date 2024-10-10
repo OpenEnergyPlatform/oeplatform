@@ -29,7 +29,8 @@ import uuid from "react-uuid";
 import { makeStyles } from '@material-ui/core/styles';
 
 
-import FactsheetMetadataList from './scenarioBundleMicroComponents/factsheetMetadataList';
+import FactsheetMetadataList from './scenarioBundleUtilityComponents/factsheetMetadataList.js';
+import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.js';
 
 const filter = createFilterOptions();
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -125,37 +126,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
     value[objIndex].name = updatedLabel;
   }
 
-   // enhance open url function to handle urls better
-  // TODO change once OEKG is migrated
-  const handleOpenURL = (url, setError) => {
-    if (!url || url.trim() === '') {
-      setError('Invalid URL');
-      return;
-    }
-  
-    let processedURL = url.trim();
 
-    // Handle URLs with spaces in the middle
-    processedURL = processedURL.replace(/\s+/g, '%20');
-  
-    // Prepend base URL if not starting with http:// or https://
-    if (!processedURL.startsWith('http://') && !processedURL.startsWith('https://')) {
-      const baseURL = window.location.origin;
-      processedURL = `${baseURL}${processedURL}`;
-    }
-
-    if (processedURL.startsWith('http://') && !processedURL.startsWith('http://127') && !processedURL.startsWith('http://local')){
-      processedURL = processedURL.replace('http://', 'https://');
-    }
-
-    // Encode the URL to handle special characters
-    try {
-      const encodedURL = encodeURI(processedURL);
-      window.open(encodedURL, "_blank");
-    } catch (error) {
-      setError('Invalid URL format');
-    }
-  };
 
 
   return (
@@ -324,7 +295,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         }}
       >
         {value.map((v) => (
-          <Chip size='small' key={v.id}  label={v.acronym} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)}/>
+          <Chip size='small' key={v.id}  label={v.acronym ? v.acronym : v.name} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }} onClick={() => handleOpenURL(v.url)}/>
         ))}
       </Box>}
     </Box>
