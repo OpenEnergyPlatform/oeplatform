@@ -8,7 +8,7 @@ The installation steps have been proofed on linux and windows for python 3.10.
 
     We provide 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database). The images are updated & published with each release. They can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
 
-    [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+    [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/README.md)
 
 !!! danger
     Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features. 
@@ -220,7 +220,7 @@ You have two options to install the database:
    * Using this option you will install the jenna-fuseki & postgresql databases on your local system. You need to start both databases manually before you can start using them for development.
 
 #### b) Use our docker image
-   * You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system. [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+   * You can also use our docker based installation to install a container which will automatically setup the two databases. You still have to install docker on your system. [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/README.md)
    * The jenna-fuseki triple store is not part of the docker image so far. You would either have to setup the public docker image here and adjust the credentials in the `securitysettings.py` or you can perform the steps explained in [Section 1.2 of the manual database setup](./manual-db-setup.md#12-install-apache-jena-fuseki) to install the jenna-fuseki database on your system. You will have to start the service manually afterwards.
 
 ### 5.2 Create the database table structures
@@ -267,7 +267,7 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 2. Get the ontology files (see [Section 3](#3-setup-the-openenergyontology-integration))
 
 3. Build the oeo-viewer:
-    ```
+    ```bash
     cd oep-website/oeplatform/oeo_viewer/client
     npm install
     npm run build
@@ -285,11 +285,11 @@ To get started you can copy the template OEO-extended owl file form [`oeplatform
 
 Below you can find the desired structure using the default setting values:
 
-    ```bash
-    media/
-    └── oeo_ext
-        └── oeo_ext.owl
-    ```
+```bash
+media/
+└── oeo_ext
+    └── oeo_ext.owl
+```
 
 ## 7 Setup the Scenario-Bundles app
 
