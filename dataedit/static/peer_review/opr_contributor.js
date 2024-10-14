@@ -223,10 +223,10 @@ function click_field(fieldKey, fieldValue, category) {
     fieldDescriptionsElement.textContent = "No description found";
   }
   const fieldState = getFieldState(fieldKey);
-  if (fieldState === 'ok' || !fieldState) {
+  if (fieldState === 'ok' || !fieldState || fieldState === 'rejected') {
     document.getElementById("ok-button").disabled = true;
     document.getElementById("rejected-button").disabled = true;
-  } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+  } else if (fieldState === 'suggestion') {
     document.getElementById("ok-button").disabled = false;
     document.getElementById("rejected-button").disabled = false;
   } else {
@@ -351,6 +351,8 @@ function renderSummaryPageFields() {
   const missingFields = [];
   const emptyFields = [];
 
+  const processedFields = new Set();
+
   if (state_dict && Object.keys(state_dict).length > 0) {
     const fields = document.querySelectorAll('.field');
     for (let field of fields) {
@@ -359,10 +361,13 @@ function renderSummaryPageFields() {
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
       const fieldName = field_id.split('.').pop();
+      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
       if (isEmptyValue(fieldValue)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
-      } else if (fieldState === 'ok') {
+        processedFields.add(uniqueFieldIdentifier);
+      } else if (fieldState === 'ok' || fieldState === 'rejected') {
         acceptedFields.push({ fieldName, fieldValue, fieldCategory });
+        processedFields.add(uniqueFieldIdentifier);
       }
     }
   }
@@ -374,6 +379,12 @@ function renderSummaryPageFields() {
     const isRejected = review.fieldReview.some((fieldReview) => fieldReview.state === 'rejected');
     const fieldCategory = review.category;
     const fieldName = review.key.split('.').pop();
+    const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
+
+    if (processedFields.has(uniqueFieldIdentifier)) {
+      continue; // Skipp fields that have already been processed from state_dict
+    }
+
 
     if (isEmptyValue(fieldValue)) {
       emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
@@ -400,11 +411,13 @@ function renderSummaryPageFields() {
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
       const fieldName = field_id.split('.').pop();
+      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
-      if (isEmptyValue(fieldValue)) {
+      if (isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
-      } else if (!found && fieldState !== 'ok') {
+      } else if (!found && fieldState !== 'ok' && fieldState === 'rejected' && !isEmptyValue(fieldValue)) {
         missingFields.push({ fieldName, fieldValue, fieldCategory });
+        processedFields.add(uniqueFieldIdentifier);
       }
     }
   }
@@ -435,7 +448,7 @@ function renderSummaryPageFields() {
       let th = document.createElement('th');
       th.scope = "row";
       th.className = "status";
-      if (item.fieldStatus === "Missing") {
+      if (item.fieldStatus === "Pending") {
         th.className = "status missing";
       }
       th.textContent = item.fieldStatus;
@@ -465,9 +478,10 @@ function renderSummaryPageFields() {
     clearSummaryTable();
 
     let allData = [];
-    allData.push(...missingFields.map((item) => ({...item, fieldStatus: 'Missing'})));
-    allData.push(...acceptedFields.map((item) => ({...item, fieldStatus: 'Accepted'})));
+    allData.push(...missingFields.map((item) => ({...item, fieldStatus: 'Pending'})));
     allData.push(...rejectedFields.map((item) => ({...item, fieldStatus: 'Rejected'})));
+    allData.push(...acceptedFields.map((item) => ({...item, fieldStatus: 'Accepted'})));
+
     allData.push(...emptyFields.map((item) => ({...item, fieldStatus: 'Empty'})));
 
     let table = generateTable(allData);
@@ -525,7 +539,7 @@ function showToast(title, message, type) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-  if (selectedState !== "ok") {
+  if (selectedState !== "ok" && selectedState !== "rejected") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
 
@@ -635,7 +649,7 @@ function checkReviewComplete() {
     const fieldState = getFieldState(fieldName);
     let reviewed = current_review["reviews"].find((review) => review.key === fieldName);
 
-    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
+    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(fieldValue) && fieldState !== "rejected") {
       $('#submit_summary').addClass('disabled');
       return;
     }
@@ -742,8 +756,6 @@ window.addEventListener('DOMContentLoaded', updateTabClasses);
 /**
  * Hide and show revier controles once the user clicks the summary tab
  */
-console.log('Script is running...');
-
 document.addEventListener('DOMContentLoaded', function() {
   // console.log('DOM fully loaded and parsed');
 
@@ -756,9 +768,6 @@ document.addEventListener('DOMContentLoaded', function() {
   ];
   const reviewContent = document.querySelector(".review__content");
 
-  console.log('Summary Tab:', summaryTab);
-  console.log('Other Tabs:', otherTabs);
-  console.log('Review Content:', reviewContent);
 
   if (summaryTab && reviewContent) {
     summaryTab.addEventListener('click', function() {
@@ -782,7 +791,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function toggleReviewControls(show) {
     const reviewControls = document.querySelector('.review__controls');
-    console.log('Review Controls:', reviewControls);
     if (reviewControls) {
       reviewControls.style.display = show ? '' : 'none';
     }
