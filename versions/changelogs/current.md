@@ -19,3 +19,5 @@
 - Fixed wrong calls in dataedit wizard to open collapsed items  [(#1881)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1881)
 
 ## Documentation updates
+
+- Added documentation for Design System and Accessibility  [(#1716)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1716)
