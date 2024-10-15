@@ -9,7 +9,7 @@
          xmlns:term="http://purl.org/dc/terms/">
 
 <owl:Ontology rdf:about="http://openenergy-platform.org/ontology/oeox">
-  <owl:imports rdf:resource="http://openenergy-platform.org/ontology/oeo/releases/2.4.0/oeo-full.owl"/>
+  <owl:imports rdf:resource="http://openenergy-platform.org/ontology/oeo/releases/2.5.0/oeo-full.owl"/>
   <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The Open Energy Ontology Extended (OEOX) extends the Open Energy Ontology. It contains compositions of terms that are too specific for the OEO.</dc:description>
   <term:license rdf:datatype="http://www.w3.org/2001/XMLSchema#string">http://creativecommons.org/publicdomain/zero/1.0/</term:license>
   <term:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Open Energy Ontology Extended (OEOX)</term:title>
