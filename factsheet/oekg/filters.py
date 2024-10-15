@@ -1,4 +1,4 @@
-from rdflib import RDF, Literal
+from rdflib import RDF, URIRef
 
 from factsheet.oekg import namespaces
 from factsheet.oekg.connection import oekg
@@ -7,6 +7,23 @@ from factsheet.oekg.connection import oekg
 class OekgQuery:
     def __init__(self):
         self.oekg = oekg
+
+    def serialize_table_iri(self, table_iri: str):
+        """
+        The OEKG stores the full iri to link its resources.
+        Due to structural changes it also stores the iri:urn instead.
+        the serialization will function als a validation preprocessing
+        step.
+
+        IRI Like 'dataedit/view/scenario/abbb_emob' or '
+        https://openenergyplatform.org/dataedit/view/scenario/abbb_emob'
+        becomes comparable even with more variation options.
+        """
+
+        # Trim down variations of table iri´s down to harmonized part.
+        id_from_url = table_iri.split("view/")
+
+        return id_from_url[1]
 
     def get_related_scenarios_where_table_is_input_dataset(self, table_iri):
         """
@@ -23,6 +40,7 @@ class OekgQuery:
                             IRI Like 'dataedit/view/scenario/abbb_emob'
         """
         related_scenarios = set()
+        table_iri = self.serialize_table_iri(table_iri)
 
         # Find all scenario bundles
         for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
@@ -34,13 +52,13 @@ class OekgQuery:
                 ):
                     if o1_input_ds_uid is not None:
                         for s3, p3, o3_input_ds_iri in oekg.triples(
-                            (
-                                o1_input_ds_uid,
-                                namespaces.OEO["has_iri"],
-                                Literal(table_iri),
-                            )
+                            (o1_input_ds_uid, namespaces.OEO["has_iri"], None)
                         ):
-                            related_scenarios.add(s2)
+                            if (
+                                self.serialize_table_iri(str(o3_input_ds_iri))
+                                in table_iri
+                            ):
+                                related_scenarios.add(s2)
 
         return related_scenarios
 
@@ -58,6 +76,7 @@ class OekgQuery:
                             IRI Like 'dataedit/view/scenario/abbb_emob'
         """
         related_scenarios = set()
+        table_iri = self.serialize_table_iri(table_iri)
 
         # Find all scenario bundles
         for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
@@ -69,14 +88,18 @@ class OekgQuery:
                     (o1, namespaces.OEO.RO_0002234, None)
                 ):
                     if o2_output_ds_uid is not None:
-                        for s3, p3, o3_input_ds_iri in oekg.triples(
+                        for s3, p3, o3_output_ds_iri in oekg.triples(
                             (
                                 o2_output_ds_uid,
                                 namespaces.OEO["has_iri"],
-                                Literal(table_iri),
+                                None,
                             )
                         ):
-                            related_scenarios.add(s2)
+                            if (
+                                self.serialize_table_iri(str(o3_output_ds_iri))
+                                in table_iri
+                            ):
+                                related_scenarios.add(s2)
 
         return related_scenarios
 
@@ -167,3 +190,22 @@ class OekgQuery:
 
         uid = bundle.split("/")[-1]
         return uid
+
+    def get_bundle_study_descriptors_where_scenario_is_part_of(self, scenario_uid):
+        scenario_URI = URIRef(
+            "http://openenergy-platform.org/ontology/oekg/scenario/" + scenario_uid
+        )
+        study_descriptors: list = []
+
+        # find bundle for the current scenario
+        for s1, p1, o1 in self.oekg.triples(
+            (None, namespaces.OEKG["has_scenario"], scenario_URI)
+        ):
+            # find all study descriptors for the scenario bundle
+            for s2, p2, o2 in oekg.triples(
+                (s1, namespaces.OEO["has_study_keyword"], None)
+            ):
+                if o2 != None:  # noqa
+                    study_descriptors.append(o2)
+
+        return study_descriptors

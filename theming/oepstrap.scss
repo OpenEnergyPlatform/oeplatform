@@ -3,6 +3,7 @@
 @use 'scss/components/cards';
 @use 'scss/components/collapses';
 @use 'scss/components/controls';
+@use 'scss/components/empty_states';
 @use 'scss/components/headers';
 @use 'scss/components/sidebars';
 @use 'scss/components/paginations';
@@ -11,6 +12,7 @@
 @use 'scss/components/tags';
 @use 'scss/layouts/database';
 @use 'scss/layouts/main';
+@use 'scss/layouts/ontology';
 @use 'scss/layouts/profile';
 @use 'scss/layouts/review';
 @use 'scss/layouts/topics';

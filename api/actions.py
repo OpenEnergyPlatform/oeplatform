@@ -38,7 +38,8 @@ from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from login.utils import validate_open_data_license
+from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -830,7 +831,7 @@ def assert_valid_identifier_name(identifier):
             "Table names must consist of lowercase alpha-numeric words or underscores "
             "and start with a letter "
             f"and must not exceed {MAX_IDENTIFIER_LENGTH} characters "
-            "(current table name length: {len(identifier)})."
+            f"(current table name length: {len(identifier)})."
         )
 
 
@@ -856,11 +857,15 @@ def table_create(schema, table, column_definitions, constraints_definitions):
 
         # check for duplicate column names
         if col.name in columns_by_name:
-            raise APIError("Duplicate column name: %s" % col.name)
+            error = APIError("Duplicate column name: %s" % col.name)
+            logger.error(error)
+            raise error
         columns_by_name[col.name] = col
         if col.primary_key:
             if primary_key_col_names:
-                raise APIError("Multiple definitions of primary key")
+                error = APIError("Multiple definitions of primary key")
+                logger.error(error)
+                raise error
             primary_key_col_names = [col.name]
 
     constraints = []
@@ -886,7 +891,7 @@ def table_create(schema, table, column_definitions, constraints_definitions):
                 # to column level PK, both must be the same (#1110)
                 if set(ccolumns) == set(primary_key_col_names):
                     continue
-                raise APIError("Multiple definitions of primary key")
+                raise APIError("Multiple definitions of primary key.")
             primary_key_col_names = ccolumns
 
             const = sa.schema.PrimaryKeyConstraint(*ccolumns, **kwargs)
@@ -1026,7 +1031,7 @@ def table_change_column(column_definition):
     return perform_sql(sql_string)
 
 
-def table_change_constraint(table, constraint_definition):
+def table_change_constraint(constraint_definition):
     """
     Changes constraint of table
     :param schema: schema
@@ -1555,7 +1560,7 @@ def move(from_schema, table, to_schema):
         except DBTable.DoesNotExist:
             raise APIError("Table for schema movement not found")
         try:
-            to_schema_reg = DBSchema.objects.get(name=to_schema)
+            to_schema_reg, _ = DBSchema.objects.get_or_create(name=to_schema)
         except DBSchema.DoesNotExist:
             raise APIError("Target schema not found")
         if from_schema == to_schema:
@@ -1597,7 +1602,7 @@ def move(from_schema, table, to_schema):
                 to_schema=to_schema
             )
 
-        t.set_is_published()
+        t.set_is_published(to_schema=to_schema)
         session.commit()
         t.save()
     except Exception:
@@ -1609,9 +1614,26 @@ def move(from_schema, table, to_schema):
 
 def move_publish(from_schema, table_name, to_schema, embargo_period):
     """
+    The issue about publishing datatables  in the context of the OEP
+    is that tables must be moved physically in the postgreSQL database.
+    We need to  move the table in the OEDB to update the data & we need
+    to update the table registry in the OEP django database to keep the
+    display information up to date.
+    This function tackales this issue. It implements a procedure in witch
+    the order of execturion matter as for example before updating the
+    schema / datatopic it shall be published in we need to check if the
+    table is already in that schema & if the table holds and open data
+    license in its metadata.
+
+
     Implementation note:
         Currently we implemented two versions of the move functionality
         this will later be harmonized. See 'move'.
+
+    Args:
+
+    Returns:
+
     """
     engine = _get_engine()
     Session = sessionmaker(engine)
@@ -1619,10 +1641,18 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
 
     try:
         t = DBTable.objects.get(name=table_name, schema__name=from_schema)
-        to_schema_reg = DBSchema.objects.get(name=to_schema)
+        to_schema_reg, _ = DBSchema.objects.get_or_create(name=to_schema)
 
         if from_schema == to_schema:
             raise APIError("Target schema same as current schema")
+
+        license_check, license_error = validate_open_data_license(t)
+
+        if not license_check and to_schema != "model_draft":
+            raise APIError(
+                "A issue with the license from the metadata was found: "
+                f"{license_error}"
+            )
 
         t.schema = to_schema_reg
 
@@ -1659,6 +1689,7 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
             OEDBTableTags.schema_name == from_schema,
             OEDBTableTags.table_name == table_name,
         ).update({OEDBTableTags.schema_name: to_schema})
+
         if embargo_period in ["6_months", "1_year"]:
             duration_in_weeks = 26 if embargo_period == "6_months" else 52
             embargo, created = Embargo.objects.get_or_create(
@@ -1668,17 +1699,23 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
                     "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
                 },
             )
-            if not created and embargo.date_started is not None:
-                embargo.date_ended = embargo.date_started + timedelta(
-                    weeks=duration_in_weeks
-                )
+            if not created:
+                if embargo.date_started:
+                    embargo.duration = embargo_period
+                    embargo.date_ended = embargo.date_started + timedelta(
+                        weeks=duration_in_weeks
+                    )
+                else:
+                    embargo.duration = embargo_period
+                    embargo.date_started = datetime.now()
+                    embargo.date_ended = embargo.date_started + timedelta(
+                        weeks=duration_in_weeks
+                    )
                 embargo.save()
-            elif not created:
-                embargo.date_started = datetime.now()
-                embargo.date_ended = embargo.date_started + timedelta(
-                    weeks=duration_in_weeks
-                )
-                embargo.save()
+        elif embargo_period == "none":
+            if Embargo.objects.filter(table=t).exists():
+                reset_embargo = Embargo.objects.get(table=t)
+                reset_embargo.delete()
 
         all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
 
@@ -1687,7 +1724,7 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
                 to_schema=to_schema
             )
 
-        t.set_is_published()
+        t.set_is_published(to_schema=to_schema)
         session.commit()
 
     except DBTable.DoesNotExist:

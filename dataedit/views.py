@@ -50,6 +50,7 @@ from dataedit.models import PeerReview, PeerReviewManager, Table
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
+from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS
 
 from .models import TableRevision
 from .models import View as DataViewModel
@@ -291,7 +292,12 @@ def listschemas(request):
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
-        {"schemas": schemas, "query": searched_query_string, "tags": searched_tag_ids},
+        {
+            "schemas": schemas,
+            "query": searched_query_string,
+            "tags": searched_tag_ids,
+            "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
+        },
     )
 
 
@@ -447,6 +453,7 @@ def listtables(request, schema_name):
             "tables": tables,
             "query": searched_query_string,
             "tags": searched_tag_ids,
+            "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
         },
     )
 
@@ -1548,7 +1555,7 @@ def update_table_tags(request):
                 table=table, schema=schema, metadata=metadata, cursor=con
             )
 
-    messasge = messages.success(
+    message = messages.success(
         request,
         'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
         # noqa
@@ -1557,7 +1564,7 @@ def update_table_tags(request):
     return render(
         request,
         "dataedit/dataview.html",
-        {"messages": messasge, "table": table, "schema": schema},
+        {"messages": message, "table": table, "schema": schema},
     )
 
 
@@ -1794,6 +1801,10 @@ class WizardView(LoginRequiredMixin, View):
             "schema": schema,
             "table": table,
             "can_add": can_add,
+            "wizard_academy_link": EXTERNAL_URLS["tutorials_wizard"],
+            "create_database_conform_data": EXTERNAL_URLS[
+                "tutorials_create_database_conform_data"
+            ],
         }
 
         return render(request, "dataedit/wizard.html", context=context)
@@ -1820,6 +1831,8 @@ class MetaEditView(LoginRequiredMixin, View):
         )
 
         context_dict = {
+            "schema": schema,
+            "table": table,
             "config": json.dumps(
                 {
                     "schema": schema,
@@ -1837,6 +1850,9 @@ class MetaEditView(LoginRequiredMixin, View):
                 }
             ),
             "can_add": can_add,
+            "doc_links": DOCUMENTATION_LINKS,
+            "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
+            "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
         }
 
         return render(
@@ -1846,12 +1862,14 @@ class MetaEditView(LoginRequiredMixin, View):
         )
 
 
-class StandaloneMetaEditView(LoginRequiredMixin, View):
+class StandaloneMetaEditView(View):
     def get(self, request):
         context_dict = {
             "config": json.dumps(
                 {"cancle_url": get_cancle_state(self.request), "standalone": True}
-            )
+            ),
+            "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
+            "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
         }
         return render(
             request,
@@ -1968,7 +1986,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "temporal": [...],
                 "source": [...],
                 "license": [...],
-                "contributor": [...],
             }
 
         """
@@ -1979,7 +1996,6 @@ class PeerReviewView(LoginRequiredMixin, View):
         temporal_key_list = []
         source_key_list = []
         license_key_list = []
-        contributor_key_list = []
 
         for i in val:
             fieldKey = list(i.values())[0]
@@ -1991,8 +2007,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                 source_key_list.append(i)
             elif fieldKey.split(".")[0] == "licenses":
                 license_key_list.append(i)
-            elif fieldKey.split(".")[0] == "contributors":
-                contributor_key_list.append(i)
+
             elif (
                 fieldKey.split(".")[0] == "name"
                 or fieldKey.split(".")[0] == "title"
@@ -2012,7 +2027,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             "temporal": temporal_key_list,
             "source": source_key_list,
             "license": license_key_list,
-            "contributor": contributor_key_list,
         }
 
         return meta
@@ -2107,7 +2121,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "temporal",
                 "source",
                 "license",
-                "contributor",
             ]
             state_dict = process_review_data(
                 review_data=existing_review, metadata=metadata, categories=categories
@@ -2302,7 +2315,6 @@ class PeerRreviewContributorView(PeerReviewView):
             "temporal",
             "source",
             "license",
-            "contributor",
         ]
         state_dict = process_review_data(
             review_data=review_data, metadata=metadata, categories=categories

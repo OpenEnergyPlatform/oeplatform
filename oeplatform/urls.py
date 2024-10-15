@@ -27,10 +27,12 @@ urlpatterns = [
     url(r"^api/", include("api.urls")),
     url(r"^", include("base.urls")),
     url(r"^user/", include("login.urls")),
+    url(r"^oeo_ext/", include("oeo_ext.urls")),
     url(r"^factsheets/", include("modelview.urls")),
     url(r"^dataedit/", include("dataedit.urls")),
     url(r"^ontology/", include("ontology.urls")),
     url(r"^viewer/oeo/", include("oeo_viewer.urls")),
     url(r"^scenario-bundles/", include("factsheet.urls")),
     url(r"^tutorials/.*", redirect_tutorial),
+    url(r"^sparql_query/", include("sparql_query.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -12,6 +12,7 @@
 
     &:last-of-type {
       @extend .border-0;
+      @extend .pb-0;
     }
   }
 
@@ -77,7 +78,7 @@
 
     textarea {
       @extend .fs-8;
-      white-space: nowrap;
+      white-space: pre;
       resize: none;
       overflow-y: hidden;
       font-family: 'Roboto Mono' ,monospace;

@@ -2,28 +2,21 @@
 
 ## Changes
 
-- Update design sidebar on table detail page [(#1652)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1652)
+- Updated oeo in docker image to version 2.5 [(#1878)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1878)
 
-- Update the code that loads the oeo-related files from local static files. All oeo data is not only loaded when the app is started. Starting the app now takes more time, but offers the advantage that the files do not have to be parsed again. This leads to a significantly faster page load of the ontology pages. [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
+- Fix typo and font-size after tag assignment update [(#1880)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1880)
+
+- Include check for oeo-ext on startup [(#1879)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1879)
 
 ## Features
 
-- Scenario bundle: . [(#1676)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1676)
-
-- Scenario bundle: [(#1704)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1704)
-
-  - It is now possible to add multiple publications to a scenario bundle
-  - The drop-down menu for selecting framework and model factsheets now shows all currently available factsheets instead of retrieving the values from a static list. The factsheets are listed by ‘model_name’ as this is a mandatory field that must be filled in when creating a factsheet
-
-- Add toggle functionality to topics table sidebar in order for the table to take 100% of the view width [(#1683)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1683)
-
-- Enhance the OpenPeerReview: New values within a review result (coming from accepted value suggestions) are now also written back to the table metadata. The review now effects the oemetadata for a specific table. [(#1368)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1368)
-
-- Add new embargo area feature: Users can set an embargo period once they create a table or once they publish a table. The embargo period restricts the data access for bot ui & api. [(#1534)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1534)
-
 ## Bugs
 
-- REST-API: Retrieve oemetadata from database instead of comment on table. [(#1703)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1703)
+- Updated Dockerfile for sass at theming dir [(#1855)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1855)
+
+- The OEPs table creation process is now atomic to avoid errors: If an error is raised during creation of tables on the OEDB the table object in the django DB is still created. This leads to ghost tables that only exist in django. [(#1886)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1886)
+
+- Fixed wrong calls in dataedit wizard to open collapsed items  [(#1881)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1881)
 
 ## Documentation updates
 

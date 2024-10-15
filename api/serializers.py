@@ -18,7 +18,7 @@ class EnergyframeworkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Energyframework
-        fields = ["id", "model_name", "acronym", "url"]
+        fields = ["id", "model_name", "acronym", "url", "license", "institutions"]
 
 
 class EnergymodelSerializer(serializers.ModelSerializer):
@@ -35,7 +35,7 @@ class EnergymodelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Energymodel
         # fields = ["id", "model_name", "acronym", "url"]
-        fields = ["id", "model_name", "acronym", "url"]
+        fields = ["id", "model_name", "acronym", "url", "license", "institutions"]
 
 
 class ScenarioDataTablesSerializer(serializers.ModelSerializer):
@@ -52,4 +52,4 @@ class ScenarioDataTablesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         # fields = ["id", "model_name", "acronym", "url"]
-        fields = ["id", "name", "url"]
+        fields = ["id", "name", "human_readable_name", "url"]

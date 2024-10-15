@@ -4,31 +4,10 @@ import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import CustomAutocomplete from './customAutocomplete.js';
 import Typography from '@mui/material/Typography';
-import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import Autocomplete from '@mui/material/Autocomplete';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import uuid from "react-uuid";
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContentText from '@mui/material/DialogContentText';
-import Button from '@mui/material/Button';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
@@ -40,7 +19,6 @@ import LCC from '../data/countries.json';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
 import axios from 'axios';
-import { createFilterOptions } from "@material-ui/lab/Autocomplete";
 import CSRFToken from './csrfToken';
 import conf from "../conf.json";
 
@@ -108,16 +86,8 @@ export default function Scenario(props) {
     scenarioDescriptorHandler
   } = props;
 
-
-
   const [scenariosInputDatasetsObj, setScenariosInputDatasetsObj] = useState(data.input_datasets);
   const [scenariosOutputDatasetsObj, setScenariosOutputDatasetsObj] = useState(data.output_datasets);
-
-  console.log(scenariosInputDatasetsObj);
-
-  scenariosInputDatasetsObj.forEach((element, index) => {
-    console.log(element);
-  });
 
 
   const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
@@ -155,18 +125,28 @@ export default function Scenario(props) {
 
 
   const updateInputDatasetName = (element, key, index) => {
-    console.log(element, key, index);
-    const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj;
-    console.log(updateScenariosInputDatasetsObj);
+    const updateScenariosInputDatasetsObj = [...scenariosInputDatasetsObj]; // Create a copy to avoid mutating state directly
+  
+    // Check if the dataset is already present
+    const isDuplicate = updateScenariosInputDatasetsObj.some((dataset, idx) => {
+      return (dataset.value.label === element.label || dataset.value.url === element.url) && idx !== index;
+    });
+  
+    if (isDuplicate) {
+      console.warn("Duplicate dataset detected. Update aborted.");
+      return; // Exit the function to prevent updating with duplicate data
+    }
+  
+    // Proceed with the update
     updateScenariosInputDatasetsObj[index].value.label = element.label;
     updateScenariosInputDatasetsObj[index].value.url = element.url;
     updateScenariosInputDatasetsObj[index].idx = index;
     updateScenariosInputDatasetsObj[index].key = key;
-    console.log(updateScenariosInputDatasetsObj);
+  
     setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
     scenariosInputDatasetsHandler(updateScenariosInputDatasetsObj, data.id);
   };
-
+  
   const removeInputDataset = (uid, idx) => {
     const updateScenariosInputDatasetsObj = scenariosInputDatasetsObj.filter(e => e.key != uid);
     setScenariosInputDatasetsObj(updateScenariosInputDatasetsObj);
@@ -179,7 +159,19 @@ export default function Scenario(props) {
 
 
   const updateOutputDatasetName = (value, key, index) => {
-    const updateScenariosOutputDatasetsObj = scenariosOutputDatasetsObj;
+    const updateScenariosOutputDatasetsObj = [...scenariosOutputDatasetsObj]; // Create a copy to avoid mutating state directly
+  
+    // Check if the dataset is already present
+    const isDuplicate = updateScenariosOutputDatasetsObj.some((dataset, idx) => {
+      return (dataset.value.label === value.label || dataset.value.url === value.url) && idx !== index;
+    });
+  
+    if (isDuplicate) {
+      console.warn("Duplicate dataset detected. Update aborted.");
+      return; // Exit the function to prevent updating with duplicate data
+    }
+  
+    // Proceed with the update
     updateScenariosOutputDatasetsObj[index].value.label = value.label;
     updateScenariosOutputDatasetsObj[index].value.url = value.url;
     updateScenariosOutputDatasetsObj[index].idx = index;
@@ -229,7 +221,7 @@ export default function Scenario(props) {
   const classes = useStyles();
   const tabClasses = { root: classes.tab };
 
-  const getDAtaTableList = async () => {
+  const getDataTableList = async () => {
     const { data } = await axios.get(conf.toep + `api/v0/datasets/list_all/scenario/`, {
       headers: { 'X-CSRFToken': CSRFToken() }
     });
@@ -237,10 +229,9 @@ export default function Scenario(props) {
   };
 
   useEffect(() => {
-    getDAtaTableList().then((data) => {
+    getDataTableList().then((data) => {
       const tmp = [];
-      console.log(data);
-      data.map((item) => tmp.push({ 'url': item.url, 'label': item.name, 'id': item.id }));
+      data.map((item) => tmp.push({ 'url': item.url, 'label': `${item.human_readable_name ? item.human_readable_name : item.name}`,'name': item.name, 'id': item.id }));
       setDataTableList(tmp);
     });
   }, []);
@@ -258,6 +249,22 @@ export default function Scenario(props) {
         alignItems="start"
         spacing={2}
       >
+
+        <BundleScenariosGridItem
+          {...props}
+          labelGridSize={11}
+          fieldGridSize={1}
+          renderField={() => (
+            <IconButton 
+                size="small"
+                variant="outlined" 
+                color="error" 
+                style={{ marginLeft: '90%' }}
+                onClick={handleRemoveScenario}>  
+              <DeleteOutlineIcon />
+            </IconButton>
+          )}
+        />
 
         <BundleScenariosGridItem
           {...props}
@@ -384,14 +391,14 @@ export default function Scenario(props) {
           tooltipText="A scenario year is a time step that has a duration of one year and is part of a scenario horizon."
           hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020097"
           renderField={() => (
-            <CustomAutocomplete
+            <CustomAutocompleteWithoutAddNew
               width="100%"
               type="scenario year"
-              editHandler={HandleEditScenarioYear}
-              addNewHandler={HandleAddNNewScenarioYear}
               showSelectedElements={true}
               selectedElements={data.scenario_years}
-              manyItems optionsSet={scenarioYears}
+              manyItems 
+              noTooltip
+              optionsSet={scenarioYears}
               kind=''
               handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}
             />

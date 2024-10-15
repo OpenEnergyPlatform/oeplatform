@@ -18,12 +18,12 @@ import { styled } from '@mui/material/styles';
 import { tableCellClasses } from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
 import { Route, Routes, Link } from 'react-router-dom';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ViewComfyAltIcon from '@mui/icons-material/ViewComfyAlt';
+// import VisibilityIcon from '@mui/icons-material/Visibility';
+// import ViewComfyAltIcon from '@mui/icons-material/ViewComfyAlt';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import ReplayIcon from '@mui/icons-material/Replay';
 import Chip from '@mui/material/Chip';
-import ReadMoreIcon from '@mui/icons-material/ReadMore';
+// import ReadMoreIcon from '@mui/icons-material/ReadMore';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -66,6 +66,7 @@ import '../styles/App.css';
 import variables from '../styles/oep-theme/variables.js';
 import palette from '../styles/oep-theme/palette.js';
 import CSRFToken from './csrfToken';
+import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -160,7 +161,7 @@ const headCells = [
     id: 'Date of publication',
     numeric: true,
     disablePadding: false,
-    label: 'Date of publication',
+    label: 'Year of publication',
     align: 'left'
   },
   {
@@ -229,7 +230,7 @@ EnhancedTableHead.propTypes = {
 
 function EnhancedTableToolbar(props) {
   const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected, logged_in } = props;
-
+  const [isDisabled, setIsDisabled] = useState(true); 
   return (
     <div>
       <Grid
@@ -254,6 +255,9 @@ function EnhancedTableToolbar(props) {
           <Typography variant="body2">
             In a nutshell: A scenario bundle provides you with all relevant information to understand a scenario's context and to ease a potential re-use of quantitative data for your own purposes.
           </Typography>
+          <Typography variant="body2">
+            The scenario bundles are stored in the Open Energy Knowledge Graph (OEKG). The OEKG can be queried using the SPARQL language. We provide a <a href="/sparql_query/gui/">User Interface</a> to simplify this rather technical task.
+          </Typography>
         </Grid>
       </Grid>
       <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
@@ -265,7 +269,7 @@ function EnhancedTableToolbar(props) {
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
             </Tooltip> */}
             <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
-            <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px' }} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
+            <Button disabled={true}size="small" key="resetFilterButton" sx={{ marginLeft: '8px' }} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
             <Tooltip title="Compare">
 
               {numSelected > 1 ? <Link to={`scenario-bundles/compare/${[...selected].join('#')}`} onClick={() => this.forceUpdate} style={{ color: 'white' }}>
@@ -353,8 +357,8 @@ export default function CustomTable(props) {
   const [authors, setAuthors] = useState([]);
   const [fundingSources, setFundingSources] = useState([]);
   const [selectedFundingSource, setSelectedFundingSource] = useState([]);
-  const [startDateOfPublication, setStartDateOfPublication] = useState('01-01-1900');
-  const [endDateOfPublication, setEndDateOfPublication] = useState('01-01-1900');
+  const [startDateOfPublication, setStartDateOfPublication] = useState('2000');
+  const [endDateOfPublication, setEndDateOfPublication] = useState('2050');
   const [selectedStudyKewords, setSelectedStudyKewords] = useState([]);
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
   const [selectedAspects, setSelectedAspects] = useState([]);
@@ -452,6 +456,7 @@ export default function CustomTable(props) {
 
   const handleShowAll = (event) => {
     setRows(factsheets);
+    console.log(rows);
   };
 
   const handleCloseQuery = (event) => {
@@ -591,22 +596,6 @@ export default function CustomTable(props) {
     [order, orderBy, page, rowsPerPage],
   );
 
-  const StudyKeywords = [
-    'resilience',
-    'life cycle analysis',
-    'CO2 emissions',
-    'Greenhouse gas emissions',
-    'Reallabor',
-    '100% renewables',
-    'acceptance',
-    'sufficiency',
-    '(changes in) demand',
-    'degree of electrifiaction',
-    'regionalisation',
-    'total gross electricity generation',
-    'total net electricity generation',
-    'peak electricity generation'
-  ];
 
   const scenarioAspects = [
     "Descriptors",
@@ -667,8 +656,16 @@ export default function CustomTable(props) {
               </TableCell>
 
               <TableCell style={{ width: '100px' }}>
-                <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null ? String(row.date_of_publication).substring(0, 10) : ""}</Typography>
-              </TableCell >
+                {row.collected_scenario_publication_dates.length === 0 ? (
+                  <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>None</Typography>
+                ) : (
+                  row.collected_scenario_publication_dates.map((date_of_publication) => (
+                    <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>
+                      {date_of_publication !== null ? String(date_of_publication).substring(0, 4) : "None"}
+                    </Typography>
+                  ))
+                )}
+              </TableCell>
 
               <TableCell style={{ width: '40px' }}>
                 <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
@@ -769,10 +766,12 @@ export default function CustomTable(props) {
                   </Link>
                 }
               />
-              {row.date_of_publication !== null &&
+              {row.collected_scenario_publication_dates !== null &&
                 <CardRow
-                  rowKey='Date of publication'
-                  rowValue={row.date_of_publication}
+                  rowKey='Year of publication'
+                  rowValue={row.collected_scenario_publication_dates
+                    .map(date_of_publication => date_of_publication)
+                    .join(' • ')}
                 />
               }
               <CardRow
@@ -904,20 +903,22 @@ export default function CustomTable(props) {
         <DialogContent>
           <DialogContentText>
             <div>
-              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="institution" showSelectedElements={true} manyItems optionsSet={institutions} kind='Which institutions are you interested in?' handler={institutionHandler} selectedElements={selectedInstitution} />
+               <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="institution" showSelectedElements={true} manyItems optionsSet={institutions} kind='Which institutions are you interested in?' handler={institutionHandler} selectedElements={selectedInstitution} />
               <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="author" showSelectedElements={true} manyItems optionsSet={authors} kind='Which authors are you interested in?' handler={authorsHandler} selectedElements={selectedAuthors} />
-              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="Funding source" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Which funding sources are you interested in?' handler={fundingSourceHandler} selectedElements={selectedFundingSource} />
+              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="Funding source" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Which funding sources are you interested in?' handler={fundingSourceHandler} selectedElements={selectedFundingSource} /> 
               <div>Date of publication:</div>
               <div style={{ display: 'flex', marginTop: "10px" }}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Stack spacing={3} style={{ width: '90%' }}>
                     <DesktopDatePicker
                       label='Start'
-                      inputFormat="MM/DD/YYYY"
-                      value={startDateOfPublication}
+                      views={['year']}
+                      value={startDateOfPublication.split('-')[0]}
                       renderInput={(params) => <TextField {...params} />}
                       onChange={(newValue) => {
-                        setStartDateOfPublication(newValue.toISOString().substring(0, 10));
+                        const dateObj = new Date(newValue);
+                        const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate())
+                        setStartDateOfPublication(dateString.split('-')[0]);
                       }}
                     />
                   </Stack>
@@ -926,11 +927,13 @@ export default function CustomTable(props) {
                   <Stack spacing={3} style={{ width: '90%', marginLeft: '10px' }}>
                     <DesktopDatePicker
                       label='End'
-                      inputFormat="MM/DD/YYYY"
-                      value={endDateOfPublication}
+                      views={['year']}
+                      value={endDateOfPublication.split('-')[0]}
                       renderInput={(params) => <TextField {...params} />}
                       onChange={(newValue) => {
-                        setEndDateOfPublication(newValue.toISOString().substring(0, 10));
+                        const dateObj = new Date(newValue);
+                        const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate())
+                        setEndDateOfPublication(dateString.split('-')[0]);
                       }}
                     />
                   </Stack>
@@ -941,7 +944,9 @@ export default function CustomTable(props) {
                 <FormGroup>
                   <div >
                     {
-                      StudyKeywords.map((item) => <FormControlLabel control={<Checkbox size="small" color="default" />} checked={selectedStudyKewords.includes(item)} onChange={handleStudyKeywords} label={item} name={item} />)
+                      StudyKeywords.map((item) => <FormControlLabel control={
+                        <Checkbox size="small" color="default" />
+                      } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]} />)
                     }
                   </div>
                 </FormGroup>
@@ -990,7 +995,7 @@ export default function CustomTable(props) {
           </Table>
         </TableContainer>}
         {alignment == "list" && <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[15, 25, 50]}
           component="div"
           count={rows.length}
           rowsPerPage={rowsPerPage}
