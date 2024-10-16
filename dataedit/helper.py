@@ -228,71 +228,56 @@ def set_nested_value(metadata, keys, value):
 
 
 def process_review_data(review_data, metadata, categories):
-    """
-    Process the review data and update the metadata with the latest reviews
-    and suggestions.
-
-    Args:
-        review_data (list): A list of dictionaries containing review data for
-                            each field.
-        metadata (dict): The original metadata object that needs to be updated.
-        categories (list): A list of categories in the metadata.
-
-    Returns:
-        dict: A state dictionary containing the state of each field
-            after processing the review data.
-
-    Note:
-        The function sorts the fieldReview entries by timestamp (newest first)
-        and updates the metadata with the latest reviewer suggestions,
-        comments, and new values. The resulting state dictionary indicates
-        the state of each field after processing.
-    """
     state_dict = {}
+
+    # Initialize fields
+    for category in categories:
+        for item in metadata[category]:
+            item["reviewer_suggestion"] = ""
+            item["suggestion_comment"] = ""
+            item["additional_comment"] = ""
+            item["newValue"] = ""
 
     for review in review_data:
         field_key = review.get("key")
         field_review = review.get("fieldReview")
+        category = review.get("category")  # Get the category from the review
 
         if isinstance(field_review, list):
-            # Sortiere die fieldReview-Einträge nach dem timestamp (neueste zuerst)
+            # Sort and get the latest field review
             sorted_field_review = sorted(
                 field_review, key=lambda x: x.get("timestamp"), reverse=True
             )
-            latest_field_review = (
-                sorted_field_review[0] if sorted_field_review else None
-            )
+            latest_field_review = sorted_field_review[0] if sorted_field_review else None
 
             if latest_field_review:
                 state = latest_field_review.get("state")
                 reviewer_suggestion = latest_field_review.get("reviewerSuggestion")
                 reviewer_suggestion_comment = latest_field_review.get("comment")
                 newValue = latest_field_review.get("newValue")
+                additional_comment = latest_field_review.get("additionalComment")
             else:
                 state = None
-                reviewer_suggestion = None
-                reviewer_suggestion_comment = None
-                newValue = None
+                reviewer_suggestion = ""
+                reviewer_suggestion_comment = ""
+                newValue = ""
+                additional_comment = ""
         else:
             state = field_review.get("state")
             reviewer_suggestion = field_review.get("reviewerSuggestion")
             reviewer_suggestion_comment = field_review.get("comment")
             newValue = field_review.get("newValue")
+            additional_comment = field_review.get("additionalComment")
 
-        if reviewer_suggestion is not None and reviewer_suggestion_comment is not None:
-            for category in categories:
-                for item in metadata[category]:
-                    if item["field"] == field_key:
-                        item["reviewer_suggestion"] = reviewer_suggestion
-                        item["suggestion_comment"] = reviewer_suggestion_comment
-                        break
-
-        if newValue is not None:
-            for category in categories:
-                for item in metadata[category]:
-                    if item["field"] == field_key:
-                        item["newValue"] = newValue
-                        break
+        # Update the item in the correct category
+        if category in metadata:
+            for item in metadata[category]:
+                if item["field"] == field_key:
+                    item["reviewer_suggestion"] = reviewer_suggestion or ""
+                    item["suggestion_comment"] = reviewer_suggestion_comment or ""
+                    item["additional_comment"] = additional_comment or ""
+                    item["newValue"] = newValue or ""
+                    break
 
         state_dict[field_key] = state
 
