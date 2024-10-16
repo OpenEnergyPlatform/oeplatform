@@ -24,7 +24,9 @@ var current_review = {
 // BINDS
 // Submit field review
 $('#submitButton').bind('click', saveEntrances);
+$('#submitCommentButton').bind('click', saveEntrances);
 $('#submitButton').bind('click', hideReviewerOptions);
+$('#submitCommentButton').bind('click', hideReviewerOptions);
 // Submit review (not visible to reviewer)
 $('#submit_summary').bind('click', submitPeerReview);
 // save the current review (not visible to reviewer)
@@ -39,7 +41,7 @@ $('#ok-button').bind('click', saveEntrances);
 $('#suggestion-button').bind('click', showReviewerOptions);
 $('#suggestion-button').bind('click', updateSubmitButtonColor);
 // Reject Field View Change
-$('#rejected-button').bind('click', showReviewerOptions);
+$('#rejected-button').bind('click', showReviewerCommentsOptions);
 $('#rejected-button').bind('click', updateSubmitButtonColor);
 // Clear Input fields when new tab is selected
 // nav items are selected via their class
@@ -178,6 +180,7 @@ function cancelPeerReview() {
  * @param {string} fieldValue Value of the field
  * @param {string} category Metadata catgeory related to the fieldKey
  */
+
 
 function getFieldState(fieldKey) {
   // This function gets the state of a field
@@ -534,11 +537,13 @@ function showToast(title, message, type) {
   bsToast.show();
 }
 
-
 /**
  * Saves field review to current review list
  */
+console.log(0)
+
 function saveEntrances() {
+
   if (selectedState !== "ok" && selectedState !== "rejected") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
@@ -577,6 +582,7 @@ function saveEntrances() {
     for (let i = 0; i < current_review["reviews"].length; i++) {
       if (current_review["reviews"][i]["key"] === selectedField) {
         reviewFound = true;
+        console.log("review" + current_review.reviews["reviews"][i]["fieldReview"])
         if (!Array.isArray(current_review["reviews"][i]["fieldReview"])) {
           current_review["reviews"][i]["fieldReview"] = [current_review["reviews"][i]["fieldReview"]];
         }
@@ -589,6 +595,7 @@ function saveEntrances() {
           "contributorValue": selectedFieldValue,
           "newValue": selectedState === "ok" ? initialReviewerSuggestions[selectedField] : "",
           "comment": document.getElementById("commentarea").value,
+          "additionalComment": document.getElementById("comments").value,
           "reviewerSuggestion": document.getElementById("valuearea").value,
           "state": selectedState,
         });
@@ -596,8 +603,10 @@ function saveEntrances() {
         var fieldElement = document.getElementById("field_" + selectedField);
         var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
         var commentElement = fieldElement.querySelector('.suggestion--comment');
+        // var additionalCommentElement = fieldElement.querySelector('.suggestion--additional-comment');
         suggestionElement.innerText = document.getElementById("valuearea").value;
         commentElement.innerText = document.getElementById("commentarea").value;
+        // additionalCommentElement.innerText = document.getElementById("comments").value;
         break;
       }
     }
@@ -616,6 +625,7 @@ function saveEntrances() {
             "contributorValue": selectedFieldValue,
             "newValue": selectedState === "ok" ? initialReviewerSuggestions[selectedField] : "",
             "comment": document.getElementById("commentarea").value,
+            "additionalComment": document.getElementById("comments").value,
             "reviewerSuggestion": document.getElementById("valuearea").value,
             "state": selectedState,
           },
@@ -625,18 +635,21 @@ function saveEntrances() {
       var fieldElement = document.getElementById("field_" + selectedField);
       var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
       var commentElement = fieldElement.querySelector('.suggestion--comment');
+      var additionalCommentElement = fieldElement.querySelector('.suggestion--additional-comment'); // For new comment
+
       suggestionElement.innerText = document.getElementById("valuearea").value;
       commentElement.innerText = document.getElementById("commentarea").value;
+      additionalCommentElement.innerText = document.getElementById("comments").value; // Update new comment
+
     }
   }
-
+    document.getElementById("comments").value = "";
   updateFieldColor();
   checkReviewComplete();
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
 }
-
 /**
  *
  * Checks if all fields are reviewed and activates submit button if ready
@@ -673,6 +686,11 @@ function showReviewerOptions() {
  */
 function hideReviewerOptions() {
   $("#reviewer_remarks").addClass('d-none');
+  $("#reviewer_comments").addClass('d-none');
+}
+
+function showReviewerCommentsOptions() {
+  $("#reviewer_comments").removeClass('d-none');
 }
 
 /**
@@ -693,14 +711,15 @@ function updateFieldColor() {
 function updateSubmitButtonColor() {
   // Color Save comment / new value
   $(submitButton).removeClass('btn-warning');
+  $(submitCommentButton).removeClass('btn-warning');
   $(submitButton).removeClass('btn-danger');
-  if (selectedState == "suggestion") {
+  $(submitCommentButton).removeClass('btn-danger');
+  if (selectedState === "suggestion") {
     $(submitButton).addClass('btn-warning');
   } else {
-    $(submitButton).addClass('btn-danger');
+    $(submitCommentButton).addClass('btn-danger');
   }
 }
-
 
 function updateTabProgressIndicatorClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license'];

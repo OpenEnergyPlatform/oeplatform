@@ -30,7 +30,9 @@ var current_review = {
 
 // Submit field review
 $('#submitButton').bind('click', saveEntrances);
+$('#submitCommentButton').bind('click', saveEntrances);
 $('#submitButton').bind('click', hideReviewerOptions);
+$('#submitCommentButton').bind('click', hideReviewerOptions);
 // Submit review (visible to contributor)
 $('#submit_summary').bind('click', submitPeerReview);
 // save the current review (not visible to contributor)
@@ -44,7 +46,7 @@ $('#ok-button').bind('click', saveEntrances);
 $('#suggestion-button').bind('click', showReviewerOptions);
 $('#suggestion-button').bind('click', updateSubmitButtonColor);
 // Reject Field View Change
-$('#rejected-button').bind('click', showReviewerOptions);
+$('#rejected-button').bind('click', showReviewerCommentsOptions);
 $('#rejected-button').bind('click', updateSubmitButtonColor);
 // Clear Input fields when new tab is selected
 // nav items are selected via their class
@@ -69,7 +71,6 @@ function getCookie(name) {
   }
   return cookieValue;
 }
-
 /**
  * Get CSRF Token
  * @returns {string} CSRF Token
@@ -306,12 +307,7 @@ function click_field(fieldKey, fieldValue, category) {
     hideReviewerOptions();
 }
 
-
-
 // Initialize the review buttons state on page load
-
-
-
 /**
  * Switch to the category tab if needed
  */
@@ -622,7 +618,7 @@ function showToast(title, message, type) {
   var bsToast = new bootstrap.Toast(toast);
   bsToast.show();
 }
-
+console.log(9)
 /**
  * Saves field review to current review list
  */
@@ -676,7 +672,7 @@ function saveEntrances() {
             if (review["key"] === selectedField) {
                 fieldExists = true;
 
-                if (selectedState === "ok") {
+                if (selectedState === "ok" || selectedState === "rejected") {
                     Object.assign(current_review["reviews"][idx], {
                         "category": selectedCategory,
                         "key": selectedField,
@@ -688,11 +684,12 @@ function saveEntrances() {
                             // If there was a suggested value before loading, save it as the new value
                             "newValue": initialReviewerSuggestions[selectedField] ? initialReviewerSuggestions[selectedField] : "",
                             "comment": document.getElementById("commentarea").value,
+                            "additionalComment": document.getElementById("comments").value,
                             "reviewerSuggestion": "",
                             "state": selectedState,
                         },
                     });
-                } else {
+                } else if (selectedState === "suggest" ){
                     Object.assign(current_review["reviews"][idx], {
                         "category": selectedCategory,
                         "key": selectedField,
@@ -703,6 +700,7 @@ function saveEntrances() {
                             "contributorValue": selectedFieldValue,
                             "newValue": document.getElementById("valuearea").value,
                             "comment": document.getElementById("commentarea").value,
+                            "additionalComment": document.getElementById("comments").value,
                             "reviewerSuggestion": document.getElementById("valuearea").value,
                             "state": selectedState,
                         },
@@ -730,6 +728,7 @@ function saveEntrances() {
                     "contributorValue": selectedFieldValue,
                     "newValue": selectedState === "ok" ? (initialReviewerSuggestions[selectedField] || "") : document.getElementById("valuearea").value,
                     "comment": document.getElementById("commentarea").value,
+                    "additionalComment": document.getElementById("comments").value,
                     "reviewerSuggestion": selectedState === "ok" ? "" : document.getElementById("valuearea").value,
                     "state": selectedState,
                 },
@@ -746,18 +745,16 @@ function saveEntrances() {
     }
 
     updateFieldColor();
-
-    if (selectedState === "ok") {
+    if (selectedState === "ok" ) {
         document.getElementById("valuearea").value = "";
         document.getElementById("commentarea").value = "";
     }
-
+    document.getElementById("comments").value = "";
     checkReviewComplete();
     selectNextField();
     renderSummaryPageFields();
     updateTabProgressIndicatorClasses();
 }
-
 function getFieldState(fieldKey) {
   if (state_dict && state_dict[fieldKey] !== undefined) {
     return state_dict[fieldKey];
@@ -767,7 +764,7 @@ function getFieldState(fieldKey) {
     return null;
   }
 }
-
+console.log(7)
 /**
  * Checks if all fields are reviewed and activates submit button if ready
  */
@@ -879,13 +876,19 @@ function check_if_review_finished() {
 function showReviewerOptions() {
   $("#reviewer_remarks").removeClass('d-none');
 }
+function showReviewerCommentsOptions() {
+  $("#reviewer_comments").removeClass('d-none');
+}
 
 /**
  * Hides reviewer Comment and Suggestion Input options
  */
 function hideReviewerOptions() {
   $("#reviewer_remarks").addClass('d-none');
+  $("#reviewer_comments").addClass('d-none');
 }
+
+
 
 /**
  * Colors Field based on Reviewer input
@@ -906,11 +909,13 @@ function updateFieldColor() {
 function updateSubmitButtonColor() {
   // Color Save comment / new value
   $(submitButton).removeClass('btn-warning');
+  $(submitCommentButton).removeClass('btn-warning');
   $(submitButton).removeClass('btn-danger');
+  $(submitCommentButton).removeClass('btn-danger');
   if (selectedState === "suggestion") {
     $(submitButton).addClass('btn-warning');
   } else {
-    $(submitButton).addClass('btn-danger');
+    $(submitCommentButton).addClass('btn-danger');
   }
 }
 
