@@ -125,7 +125,9 @@
                       <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span class="suggestion">{{ reviewer_suggestions.item.field }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span> <br>
+                      <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }} </span>
+
                     {% endif %}
                   </p>
                 </div>
@@ -146,7 +148,8 @@
                       <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span class="suggestion">{{ reviewer_suggestions.item.field }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span> <br>
+                      <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                     {% endif %}
                   </p>
                 </div>
@@ -162,7 +165,8 @@
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span> <br>
+                       <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                     {% endif %}
                   </p>
                 </div>
@@ -181,7 +185,8 @@
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span> <br>
+                      <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                     {% endif %}
                   </p>
                 </div>
@@ -200,7 +205,8 @@
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span> <br>
+                      <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                     {% endif %}
                   </p>
                 </div>
@@ -279,6 +285,13 @@
                 </div>
                 <button type="button" class="btn btn-warning review__field-save" id="submitButton">Save comment/new value</button>
               </div>
+                <div class="d-none review__comments" id="reviewer_comments">
+  <div class="review__field review__field--nolabel" id="field-comment">
+    <label for="comments" class="form-label"></label>
+    <textarea class="form-control" id="comments" rows="2" placeholder="Comment here if you want to explain your suggestion"></textarea>
+  </div>
+  <button type="button" class="btn btn-warning review__field-save" id="submitCommentButton">Save comment</button>
+</div>
             </div>
           </div>
           <div class="review__infos">
@@ -322,16 +335,15 @@ var initialReviewerSuggestions = {};
 
 window.onload = function() {
   var suggestions = document.querySelectorAll('.suggestion--highlight');
+  
 
   suggestions.forEach(function(suggestion) {
     var field = suggestion.id.split('_')[1];
     initialReviewerSuggestions[field] = suggestion.innerText;
   });
+
 }
-
 </script>
-
-
 
 {% compress js %}
   <script src="/static/peer_review/opr_contributor.js"></script>
