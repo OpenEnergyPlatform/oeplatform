@@ -64,3 +64,18 @@ p, h1, h2, h3, h4, h5, h6 {
   background-color: var(--md-danger-bg-color);
   color: var(--md-invert-text-color);
 }
+
+/* Globale Einstellungen für den Darkmode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --md-main-text-color: #FFFFFF; /* Weiß für den Haupttext im Darkmode */
+    --md-secondary-text-color: #CCCCCC; /* Hellgrau für sekundären Text */
+    --md-dark-text-color: #FFFFFF; /* Weiß für den dunklen Text */
+    --md-primary-fg-color--dark: var(--md-info-text-color); /* Passe falls nötig weitere Farben an */
+  }
+
+  /* Spezifische Stile für Text im Darkmode */
+  body, p, h1, h2, h3, h4, h5, h6 {
+    color: var(--md-main-text-color);
+  }
+}
