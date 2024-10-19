@@ -1,0 +1,1 @@
+We specified the users personas and described their use of the OpenEnergyFamily specially with the usage of the OpenEnergyPlatform in mind. You can find the details in the [OpenEnergyFamily compendium](https://openenergyplatform.github.io/organisation/family_community/personas/personas/). The personas might change over time but in general thy reflect our current community.
