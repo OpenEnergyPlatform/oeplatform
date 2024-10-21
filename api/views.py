@@ -1614,22 +1614,26 @@ class ManageScenarioDatasets(APIView):
         if serializer.is_valid():
             scenario_uuid = serializer.validated_data["scenario"]
             datasets = serializer.validated_data["dataset"]
-            dataset_type = serializer.validated_data["type"]
 
-            # Remove datasets from the scenario in the bundle
-            success = remove_datasets_from_scenario(
-                scenario_uuid, datasets, dataset_type
+            # Iterate over each dataset to process it properly
+            for dataset in datasets:
+                dataset_name = dataset["name"]
+                dataset_type = dataset["type"]
+
+                # Remove the dataset from the scenario in the bundle
+                success = remove_datasets_from_scenario(
+                    scenario_uuid, dataset_name, dataset_type
+                )
+
+                if not success:
+                    return Response(
+                        {"error": f"Failed to remove dataset {dataset_name}"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            return Response(
+                {"message": "Datasets removed successfully"},
+                status=status.HTTP_200_OK,
             )
-
-            if success:
-                return Response(
-                    {"message": "Datasets removed successfully"},
-                    status=status.HTTP_200_OK,
-                )
-            else:
-                return Response(
-                    {"error": "Failed to remove datasets"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
