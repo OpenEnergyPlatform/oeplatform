@@ -53,3 +53,18 @@ class ScenarioDataTablesSerializer(serializers.ModelSerializer):
         model = Table
         # fields = ["id", "model_name", "acronym", "url"]
         fields = ["id", "name", "human_readable_name", "url"]
+
+
+class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
+    scenario = serializers.UUIDField(required=True)  # Validate the scenario UUID
+    dataset = serializers.ListField(
+        child=serializers.CharField(max_length=255), required=True
+    )  # List of dataset table names
+    type = serializers.ChoiceField(
+        choices=["input", "output"], required=True
+    )  # Type: input or output
+
+    def __getitem__(self, items):
+        print(type(items), items)
+        if items is None:
+            return None
