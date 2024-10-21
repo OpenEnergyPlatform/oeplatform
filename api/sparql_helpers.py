@@ -3,41 +3,40 @@ import requests
 from factsheet.oekg.connection import update_endpoint
 
 
-def add_datasets_to_scenario(scenario_uuid, datasets, dataset_type):
+def add_datasets_to_scenario(scenario_uuid, dataset_name, dataset_type):
     """
     Function to add datasets to a scenario bundle in Jena Fuseki.
     """
-    for dataset in datasets:
-        sparql_query = f"""
-        PREFIX oeo: <http://example.org/ontology#>
-        INSERT DATA {{
-            GRAPH <http://example.org/scenario/{scenario_uuid}> {{
-                oeo:{dataset} a oeo:{dataset_type}Dataset .
-            }}
+
+    sparql_query = f"""
+    PREFIX oeo: <http://example.org/ontology#>
+    INSERT DATA {{
+        GRAPH <http://example.org/scenario/{scenario_uuid}> {{
+            oeo:{dataset_name} a oeo:{dataset_type}Dataset .
         }}
-        """
-        response = send_sparql_update(sparql_query)
-        if not response.ok:
-            return False  # Return False if any query fails
+    }}
+    """
+    response = send_sparql_update(sparql_query)
+    if not response.ok:
+        return False  # Return False if any query fails
     return True
 
 
-def remove_datasets_from_scenario(scenario_uuid, datasets, dataset_type):
+def remove_datasets_from_scenario(scenario_uuid, dataset_name, dataset_type):
     """
     Function to remove datasets from a scenario bundle in Jena Fuseki.
     """
-    for dataset in datasets:
-        sparql_query = f"""
-        PREFIX oeo: <http://example.org/ontology#>
-        DELETE DATA {{
-            GRAPH <http://example.org/scenario/{scenario_uuid}> {{
-                oeo:{dataset} a oeo:{dataset_type}Dataset .
-            }}
+    sparql_query = f"""
+    PREFIX oeo: <http://example.org/ontology#>
+    DELETE DATA {{
+        GRAPH <http://example.org/scenario/{scenario_uuid}> {{
+            oeo:{dataset_name} a oeo:{dataset_type}Dataset .
         }}
-        """
-        response = send_sparql_update(sparql_query)
-        if not response.ok:
-            return False  # Return False if any query fails
+    }}
+    """
+    response = send_sparql_update(sparql_query)
+    if not response.ok:
+        return False  # Return False if any query fails
     return True
 
 
