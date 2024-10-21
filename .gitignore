@@ -79,6 +79,7 @@ venv*/
 0_env/
 /envs
 /node_env
+/oep-django-5
 
 .DS_Store
 
