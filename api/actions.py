@@ -857,11 +857,15 @@ def table_create(schema, table, column_definitions, constraints_definitions):
 
         # check for duplicate column names
         if col.name in columns_by_name:
-            raise APIError("Duplicate column name: %s" % col.name)
+            error = APIError("Duplicate column name: %s" % col.name)
+            logger.error(error)
+            raise error
         columns_by_name[col.name] = col
         if col.primary_key:
             if primary_key_col_names:
-                raise APIError("Multiple definitions of primary key")
+                error = APIError("Multiple definitions of primary key")
+                logger.error(error)
+                raise error
             primary_key_col_names = [col.name]
 
     constraints = []
@@ -887,7 +891,7 @@ def table_create(schema, table, column_definitions, constraints_definitions):
                 # to column level PK, both must be the same (#1110)
                 if set(ccolumns) == set(primary_key_col_names):
                     continue
-                raise APIError("Multiple definitions of primary key")
+                raise APIError("Multiple definitions of primary key.")
             primary_key_col_names = ccolumns
 
             const = sa.schema.PrimaryKeyConstraint(*ccolumns, **kwargs)
