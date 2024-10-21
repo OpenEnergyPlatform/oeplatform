@@ -30,6 +30,10 @@ from django.views.decorators.cache import never_cache
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
+
+# views.py
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import api.parser
@@ -42,12 +46,15 @@ from api.helpers.http import ModHttpResponse
 from api.serializers import (
     EnergyframeworkSerializer,
     EnergymodelSerializer,
+    ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
+from api.sparql_helpers import add_datasets_to_scenario, remove_datasets_from_scenario
 from dataedit.models import Embargo
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
+from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
 
@@ -1571,3 +1578,58 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     topic = "scenario"
     queryset = DBTable.objects.filter(schema__name=topic)
     serializer_class = ScenarioDataTablesSerializer
+
+
+class ManageScenarioDatasets(APIView):
+    permission_classes = [IsAuthenticated]  # Require authentication
+
+    @only_if_user_is_owner_of_scenario_bundle
+    def post(self, request):
+        serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
+        if serializer.is_valid():
+            scenario_uuid = serializer.validated_data["scenario"]
+            datasets = serializer.validated_data["dataset"]
+            dataset_type = serializer.validated_data["type"]
+
+            # Add datasets to the scenario in the bundle (implementation depends
+            # on your model)
+            success = add_datasets_to_scenario(scenario_uuid, datasets, dataset_type)
+
+            if success:
+                return Response(
+                    {"message": "Datasets added successfully"},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"error": "Failed to add datasets"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @only_if_user_is_owner_of_scenario_bundle
+    def delete(self, request):
+        serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
+        if serializer.is_valid():
+            scenario_uuid = serializer.validated_data["scenario"]
+            datasets = serializer.validated_data["dataset"]
+            dataset_type = serializer.validated_data["type"]
+
+            # Remove datasets from the scenario in the bundle
+            success = remove_datasets_from_scenario(
+                scenario_uuid, datasets, dataset_type
+            )
+
+            if success:
+                return Response(
+                    {"message": "Datasets removed successfully"},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"error": "Failed to remove datasets"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
