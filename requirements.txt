@@ -1,4 +1,5 @@
 Django==3.2.25
+django-allauth[socialaccount]==0.63.6 # this version is compatible with django 3.2
 matplotlib==3.8.3
 urllib3==1.26.19
 # scipy==1.12.0 # big package, only used when attemping to get the github activity graph -> not implemented ATM
