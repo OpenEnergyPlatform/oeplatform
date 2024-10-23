@@ -115,3 +115,18 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 CORS_ORIGIN_ALLOW_ALL = True
 
 OEKG_SPARQL_ENDPOINT_URL = "http://localhost:3030/ds/sparql"
+
+SOCIALACCOUNT_PROVIDERS = {
+    "openid_connect": {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        "APP": {
+            "provider_id": "",
+            "name": "",
+            "client_id": "",
+            "secret": "",
+            "settings": {"server_url": ""},
+        }
+    }
+}
