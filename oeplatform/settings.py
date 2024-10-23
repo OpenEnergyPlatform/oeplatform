@@ -38,6 +38,10 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sessions.backends.signed_cookies",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.openid_connect",
     "django_bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
@@ -78,6 +82,7 @@ MIDDLEWARE = (
     "axes.middleware.AxesMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 )
 
 ROOT_URLCONF = "oeplatform.urls"
@@ -210,8 +215,10 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
     "axes.backends.AxesBackend",
-    # custom class extenging Django ModelBackend for login with username OR email
+    "django.contrib.auth.backends.ModelBackend",
+    # custom class extending Django ModelBackend for login with username OR email
     "login.backends.ModelBackendWithEmail",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
@@ -228,3 +235,8 @@ COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "name"
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
