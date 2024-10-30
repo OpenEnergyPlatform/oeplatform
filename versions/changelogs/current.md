@@ -12,6 +12,8 @@
 
 - divide metadata builder flow into subsections [(#1747)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1747)
 
+- update tab indicators once all fields in a specific metadata category are reviewed [(#1900)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1900)
+
 ## Bugs
 
 - Updated Dockerfile for sass at theming dir [(#1855)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1855)
