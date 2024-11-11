@@ -3,7 +3,7 @@ import itertools
 import json
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta  # noqa
 from decimal import Decimal
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
@@ -14,10 +14,19 @@ import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.db.utils import IntegrityError
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseServerError,
+    JsonResponse,
+    StreamingHttpResponse,
+)
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import generics, status
@@ -26,6 +35,7 @@ from rest_framework.views import APIView
 import api.parser
 import login.models as login_models
 from api import actions, parser, sessions
+from api.actions import assert_valid_identifier_name
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
@@ -39,7 +49,14 @@ from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from modelview.models import Energyframework, Energymodel
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
+
+if USE_LOEP:
+    from oeplatform.settings import DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
+
+if USE_ONTOP:
+    from oeplatform.settings import ONTOP_SPARQL_ENDPOINT_URL
+
 
 logger = logging.getLogger("oeplatform")
 
@@ -190,6 +207,8 @@ def api_exception(f):
             return JsonResponse({"reason": e.message}, status=e.status)
         except KeyError as e:
             return JsonResponse({"reason": e}, status=400)
+        except DBTable.DoesNotExist:
+            return JsonResponse({"reason": "table does not exist"}, status=404)
 
     return wrapper
 
@@ -259,6 +278,7 @@ class Sequence(APIView):
 
 class Metadata(APIView):
     @api_exception
+    @never_cache
     def get(self, request, schema, table):
         metadata = actions.get_table_metadata(schema, table)
         return JsonResponse(metadata)
@@ -305,7 +325,7 @@ class Metadata(APIView):
 
 class Table(APIView):
     """
-    Handels the creation of tables and serves information on existing tables
+    Handles the creation of tables and serves information on existing tables
     """
 
     objects = None
@@ -437,12 +457,6 @@ class Table(APIView):
             embargo_data=embargo_data,
         )
 
-        perm, _ = login_models.UserPermission.objects.get_or_create(
-            table=DBTable.load(schema, table), holder=request.user
-        )
-        perm.level = login_models.ADMIN_PERM
-        perm.save()
-        request.user.save()
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
     def validate_column_names(self, column_definitions):
@@ -469,6 +483,100 @@ class Table(APIView):
             if len(colname) > MAX_COL_NAME_LENGTH:
                 raise APIError(f"Column name is too long! {err_msg}")
 
+    def oep_create_table_transaction(
+        self,
+        django_schema_object,
+        schema,
+        table,
+        column_definitions,
+        constraint_definitions,
+    ):
+        """
+        This method handles atomic table creation transactions on the OEP. It
+        attempts to create first the django table objects and stored it in
+        dataedit_tables table. Then it attempts to create the OEDB table.
+        If there is an error raised during the first two steps the function
+        will cleanup any table object or table artifacts created during the
+        process. The order of execution matters, it should always first
+        create the django table object.
+
+        Params:
+            django_schema_object: The schema object stored in the django
+                database
+            schema:
+            table
+            column_definitions
+            constraint_definitions
+
+        returns:
+            table_object: The django table objects that was created
+        """
+
+        try:
+            with transaction.atomic():
+                # First create the table object in the django database.
+                table_object = self._create_table_object(django_schema_object, table)
+            # Then attempt to create the OEDB table to check
+            # if creation will succeed - action includes checks
+            # and will raise api errors
+            actions.table_create(
+                schema, table, column_definitions, constraint_definitions
+            )
+        except DatabaseError as e:
+            # remove any oedb table artifacts left after table creation
+            # transaction failed
+            self.__remove_oedb_table_on_exception_raised_during_creation_transaction(
+                table, schema
+            )
+
+            # also remove any django table object
+            # find the created django table object
+            object_to_delete = DBTable.objects.filter(
+                name=table, schema=django_schema_object
+            )
+            # delete it if it exists
+            if object_to_delete.exists():
+                object_to_delete.delete()
+
+            raise APIError(
+                message="Error during table creation transaction. All table fragments"
+                f"have been removed. For further details see: {e}"
+            )
+
+        # for now only return the django table object
+        # TODO: Check if is necessary to return the response dict returned by the oedb
+        # table creation function
+        return table_object
+
+    def __remove_oedb_table_on_exception_raised_during_creation_transaction(
+        self, table, schema
+    ):
+        """
+        This private method handles removing a table form the OEDB only for the case
+        where an error was raised during table creation. It specifically will delete
+        the OEDB table created by the user and also the edit_ meta(revision) table
+        that is automatically created in the background.
+        """
+        # find the created oedb table
+        if actions.has_table({"table": table, "schema": schema}):
+            # get table and schema names, also for meta(revision) tables
+            schema, table = actions.get_table_name(schema, table)
+            meta_schema = actions.get_meta_schema_name(schema)
+
+            # drop the revision table with edit_ prefix
+            edit_table = actions.get_edit_table_name(schema, table)
+            actions._get_engine().execute(
+                'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
+                    schema=meta_schema, table=edit_table
+                )
+            )
+            # drop the data table
+            actions._get_engine().execute(
+                'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
+                    schema=schema, table=table
+                )
+            )
+
     @load_cursor()
     def __create_table(
         self,
@@ -480,51 +588,122 @@ class Table(APIView):
         metadata=None,
         embargo_data=None,
     ):
+        assert_valid_identifier_name(table)
         self.validate_column_names(column_definitions)
 
         schema_object, _ = DBSchema.objects.get_or_create(name=schema)
-        try:
-            table_object = DBTable.objects.create(name=table, schema=schema_object)
-        except IntegrityError:
-            raise APIError("Table aready exists")
-
         context = {
             "connection_id": actions.get_or_403(request.data, "connection_id"),
             "cursor_id": actions.get_or_403(request.data, "cursor_id"),
         }
         cursor = sessions.load_cursor_from_context(context)
-        actions.table_create(
-            schema,
-            table,
-            column_definitions,
-            constraint_definitions,
-        )
-        table_object.save()
 
-        if metadata:
-            actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=cursor
+        embargo_error, embargo_payload_check = self._check_embargo_payload_valid(
+            embargo_data
+        )
+        if embargo_error:
+            raise embargo_error
+
+        if embargo_payload_check:
+            table_object = self.oep_create_table_transaction(
+                django_schema_object=schema_object,
+                table=table,
+                schema=schema,
+                column_definitions=column_definitions,
+                constraint_definitions=constraint_definitions,
             )
-        if embargo_data:
-            start_date = embargo_data.get("start")
-            end_date = embargo_data.get("end")
-            if start_date and end_date:
-                date_started = datetime.strptime(start_date, "%Y-%m-%d").date()
-                date_ended = datetime.strptime(end_date, "%Y-%m-%d").date()
-                duration_days = (date_ended - date_started).days
-                if duration_days <= 182:
-                    duration = "6_months"
-                elif duration_days <= 365:
-                    duration = "1_year"
-                else:
-                    duration = None
-                if date_started <= timezone.now().date() <= date_ended:
-                    Embargo.objects.create(
-                        table=table_object,
-                        date_started=date_started,
-                        date_ended=date_ended,
-                        duration=duration,
-                    )
+            self._apply_embargo(table_object, embargo_data)
+
+            if metadata:
+                actions.set_table_metadata(
+                    table=table, schema=schema, metadata=metadata, cursor=cursor
+                )
+
+            try:
+                self._assign_table_holder(request.user, schema, table)
+            except ValueError as e:
+                # Ensure the user is assigned as the table holder
+                self._assign_table_holder(request.user, schema, table)
+                raise APIError(
+                    "Table was created without embargo due to an unexpected "
+                    "error during embargo setup."
+                    f"{e}"
+                )
+
+        else:
+            table_object = self.oep_create_table_transaction(
+                django_schema_object=schema_object,
+                table=table,
+                schema=schema,
+                column_definitions=column_definitions,
+                constraint_definitions=constraint_definitions,
+            )
+            self._assign_table_holder(request.user, schema, table)
+
+            if metadata:
+                actions.set_table_metadata(
+                    table=table, schema=schema, metadata=metadata, cursor=cursor
+                )
+
+    def _create_table_object(self, schema_object, table):
+        try:
+            table_object = DBTable.objects.create(name=table, schema=schema_object)
+        except IntegrityError:
+            raise APIError("Table already exists")
+        return table_object
+
+    def _check_embargo_payload_valid(self, embargo_data):
+        if not embargo_data:
+            return None, False
+
+        if not isinstance(embargo_data, dict):
+            error = APIError("The embargo payload must be a dict")
+            return error, False
+
+        embargo_period = embargo_data.get("duration")
+        if embargo_period in ["6_months", "1_year"]:
+            # self._apply_embargo(table_object, embargo_period)
+            return None, True
+        elif embargo_period == "none":
+            return None, False
+        else:
+            error = actions.APIError(
+                f"Could not parse the embargo period format: {embargo_period}. "
+                "Please use {'embargo': {'duration':'6_months'} } or '1_year' to "
+                "set the embargo or use 'none' to remove the embargo."
+            )
+            return error, False
+
+    def _apply_embargo(self, table_object, embargo_period):
+        unpack_embargo_period = embargo_period.get("duration")
+        duration_in_weeks = 26 if unpack_embargo_period == "6_months" else 52
+        embargo, created = Embargo.objects.get_or_create(
+            table=table_object,
+            defaults={
+                "duration": unpack_embargo_period,
+                "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
+            },
+        )
+        if not created:
+            if embargo.date_started:
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+            else:
+                embargo.date_started = datetime.now()
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+            embargo.save()
+
+    def _assign_table_holder(self, user, schema, table):
+        table_object = DBTable.load(schema, table)
+        perm, _ = login_models.UserPermission.objects.get_or_create(
+            table=table_object, holder=user
+        )
+        perm.level = login_models.ADMIN_PERM
+        perm.save()
+        user.save()
 
     @api_exception
     @require_delete_permission
@@ -577,6 +756,7 @@ class Index(APIView):
 
 class Column(APIView):
     @api_exception
+    @never_cache
     def get(self, request, schema, table, column=None):
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         response = actions.describe_columns(schema, table)
@@ -637,7 +817,11 @@ class MovePublish(APIView):
     def post(self, request, schema, table, to_schema):
         if schema not in schema_whitelist or to_schema not in schema_whitelist:
             raise APIError("Invalid origin or target schema")
-        embargo_period = request.data.get("embargo", {}).get("duration", None)
+        # Make payload more friendly as users tend to use the query wrapper in payload
+        json_data = request.data.get("query", {})
+        embargo_period = request.data.get("embargo", {}).get(
+            "duration", None
+        ) or json_data.get("embargo", {}).get("duration", None)
         actions.move_publish(schema, table, to_schema, embargo_period)
 
         # tables = Table.objects.all()
@@ -1303,13 +1487,56 @@ def get_groups(request):
 
 
 def oeo_search(request):
-    # get query from user request # TODO validate input to prevent sneaky stuff
-    query = request.GET["query"]
-    # call local search service
-    # TODO: this url should not be hardcoded here - get it from oeplatform/settings.py
-    url = f"http://loep/lookup-application/api/search?query={query}"
-    res = requests.get(url).json()
-    # res: something like [{"label": "testlabel", "resource": "testresource"}]
+    if USE_LOEP:
+        # get query from user request # TODO validate input to prevent sneaky stuff
+        query = request.GET["query"]
+        # call local search service
+        # "http://loep/lookup-application/api/search?query={query}"
+        url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL}{query}"
+        res = requests.get(url).json()
+        # res: something like [{"label": "testlabel", "resource": "testresource"}]
+        # send back to client
+    else:
+        return HttpResponseServerError(
+            "The endpoint for LOEP is not setup. Please contact a server admin."
+        )
+    return JsonResponse(res, safe=False)
+
+
+def oevkg_search(request):
+    if USE_ONTOP:
+        # get query from user request # TODO validate input to prevent sneaky stuff
+        try:
+            query = request.body.decode("utf-8")
+        except UnicodeDecodeError:
+            return HttpResponseBadRequest(
+                "Invalid request body encoding. Please use 'utf-8'."
+            )
+        headers = {
+            "Accept": "application/sparql-results+json",
+            "Content-Type": "application/sparql-query",
+        }
+        # call local search service
+        try:
+            response = requests.post(
+                ONTOP_SPARQL_ENDPOINT_URL, data=query, headers=headers
+            )
+            response.raise_for_status()
+        except requests.RequestException as e:
+            return HttpResponseServerError(
+                f"Error contacting SPARQL endpoint: {str(e)}"
+            )
+
+        # res: something like [{"label": "testlabel", "resource": "testresource"}]
+        # Maybe validate using shacl or other data model descriptor file
+        try:
+            res = response.json()
+        except json.JSONDecodeError:
+            return HttpResponseServerError("Error decoding SPARQL endpoint response.")
+    else:
+        return HttpResponseServerError(
+            "The SPARQL endpoint for OEVKG is not setup. Please contact your server admin."  # noqa
+        )
     # send back to client
     return JsonResponse(res, safe=False)
 

@@ -646,8 +646,7 @@ function createTable() {
 
   var tablename = $("#wizard-tablename").val();
   var embargoValue = $("#wizard-embargo").val();
-
-  var embargoData = calculateEmbargoPeriod(embargoValue);
+  // var embargoData = calculateEmbargoPeriod(embargoValue);
 
   var url = getApiTableUrl(tablename) + "/";
   var urlSuccess = getWizardUrl(tablename);
@@ -655,7 +654,8 @@ function createTable() {
     query: {
       "columns": colDefs,
       "constraints": constraints,
-      "embargo": embargoData
+      "embargo": embargoValue === "none" ? null : {"duration": embargoValue} // Conditional check
+      // "embargo": embargoData
     }
   };
 
@@ -667,6 +667,9 @@ function createTable() {
   });
 }
 
+
+// unused until we might want to enable custom embargo periods
+// for now only 6 months up to one year are possible
 function calculateEmbargoPeriod(embargoValue) {
   let endDate = new Date();
   if (embargoValue === "6_months") {
@@ -712,8 +715,8 @@ function calculateEmbargoPeriod(embargoValue) {
   function showCreate() {
     // create default id column
     addColumn({"name": "id", "data_type": "bigint", "is_nullable": false, "is_pk": true});
-    $("#wizard-container-upload").collapse("hide");
-    $("#wizard-container-create").collapse("show");
+    new bootstrap.Collapse('#wizard-container-create', {'toggle': false}).show();
+    new bootstrap.Collapse('#wizard-container-upload', {'toggle': false}).hide();
     $("#wizard-table-delete").hide();
     $("#wizard-container-upload").find(".btn").hide();
     $("#wizard-container-upload").find("input").prop("readonly", true);
@@ -721,10 +724,11 @@ function calculateEmbargoPeriod(embargoValue) {
 
 
   function showUpload() {
-    $("#wizard-container-create").collapse("hide");
-    $("#wizard-container-upload").collapse("show");
-    $("#wizard-container-create").find(".btn").hide();
+    new bootstrap.Collapse('#wizard-container-create', {'toggle': false}).hide();
+    new bootstrap.Collapse('#wizard-container-upload', {'toggle': false}).show();
     $("#wizard-table-delete").show();
+
+    $("#wizard-container-create").find(".btn").hide();
     $("#wizard-container-create").find("input").prop("readonly", true);
     $("#wizard-container-create").find("input,select,.combobox-container").not("[type=text]").prop("disabled", true);
     if (!state.canAdd) {
@@ -800,6 +804,12 @@ function calculateEmbargoPeriod(embargoValue) {
         tgt.addClass('is-invalid');
       }
     });
+    // Add this block to remove the "Create Table" card if canAdd is true
+    if (state.canAdd) {
+      // Remove the "Create Table" card
+      $('#wizard-container-create').closest('.card').remove();
+    }
+
     resetUpload();
     if (state.table) {
       $("#wizard-tablename").val(state.table);
@@ -821,7 +831,6 @@ function calculateEmbargoPeriod(embargoValue) {
         $('#wizard-confirm-delete').modal('hide');
       });
       $("#wizard-confirm-delete-delete").bind("click", deleteTable);
-
 
       showUpload();
     } else {
