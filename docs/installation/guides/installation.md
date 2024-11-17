@@ -213,7 +213,9 @@ Additional we use a triple store database:
 
 ### 5.1 How to install the databases
 
-You have two options to install the database:
+You can install the database and connect it to django as you like. Note that we currently use PostgreSQL version 14. 
+
+Below we offer our best practice to setup the databases. You have two options to install the databases:
 
 #### a) Install the database manually
    * You chose to install the databases manually by installing PostgreSQL & jenna-fuseki and complete the setup. In this case you can follow our [manual database setup guide](./manual-db-setup.md).
