@@ -81,6 +81,9 @@ venv*/
 0_env/
 /envs
 /node_env
+.env*
+/fuseki
+apache*
 
 .DS_Store
 
