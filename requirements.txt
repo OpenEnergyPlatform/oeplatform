@@ -27,6 +27,6 @@ SPARQLWrapper==1.8.5
 GeoAlchemy2==0.11.1
 jsonschema==3.2.0
 oemetadata==1.6.0
-django-compressor==4.4
+django-compressor==4.5.1
 django-cors-headers==4.3.1
 owlready2==0.45
