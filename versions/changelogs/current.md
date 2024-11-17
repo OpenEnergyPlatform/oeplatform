@@ -24,3 +24,4 @@
 
 - Added documentation for Design System and Accessibility [(#1716)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1716)
 - Restructure documentation layout & enhance content [(#1905)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1905)
+- Fix  link to rest-api documentation on mkdocs and update text formatting on the documentation main page.  [(#1907)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1907)
