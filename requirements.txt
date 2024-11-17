@@ -12,7 +12,7 @@ psycopg2-binary==2.9.9
 webcolors==1.13
 djangorestframework==3.14.0
 django-axes==5.41.1
-Shapely==1.8.5.post1
+Shapely==1.8.5.post1 # In python v3.12 use at least Shapely==2.0.0
 markdown2==2.4.13
 alembic==1.13.1
 django-simple-captcha==0.5.20
