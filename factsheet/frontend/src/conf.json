@@ -1,4 +1,4 @@
 {
-  "toep": "/",
+  "toep": "http://127.0.0.1:8000/",
   "obdi": "/api/v0/oevkg-query"
 }

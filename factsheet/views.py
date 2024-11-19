@@ -24,6 +24,8 @@ from .models import OEKG_Modifications, ScenarioBundleAccessControl
 
 oekg = bind_all_namespaces(graph=oekg)
 
+query_endpoint = "http://localhost:3030/ds/query"
+update_endpoint = "http://localhost:3030/ds/update"
 
 def clean_name(name):
     return (
@@ -1339,7 +1341,7 @@ def factsheet_by_id(request, *args, **kwargs):
     return response
 
 
-#@login_required
+# @login_required
 def query_oekg(request, *args, **kwargs):
     """
     This function takes filter objects provided by the user and utilises
