@@ -7,10 +7,10 @@ title: Home
 Welcome to the Open Energy Platform Documentation. This site provides the developer documentation for the Open Energy Platform (OEP).
 
 !!! Info "State of the documentation"
-The documentation already provides helpful information but is not yet complete. As only parts of it were maintained during the long-term development, we have to catch up. This is a task that we cannot complete in one go. We have therefore decided to complete it step by step. This means that we will update the documentation of the missing code as soon as we have to work on the corresponding code again. Documentation for the Community area will be added continuously and in a timely manner.
+    The documentation already provides helpful information but is not yet complete. As only parts of it were maintained during the long-term development, we have to catch up. This is a task that we cannot complete in one go. We have therefore decided to complete it step by step. This means that we will update the documentation of the missing code as soon as we have to work on the corresponding code again. Documentation for the Community area will be added continuously and in a timely manner.
 
 !!! Info "Compendium"
-If you want to get an overview about the complete Open Energy Family Framework please have a look at our [Compendium](https://openenergyplatform.github.io/organisation/).
+    If you want to get an overview about the complete Open Energy Family Framework please have a look at our [Compendium](https://openenergyplatform.github.io/organisation/).
 
 ## Structure of the documentation
 
