@@ -205,7 +205,7 @@ Integration of the OpenEnergyOntology (view, search download full .owl file that
 ```plaintext
 ├── docker
 │   ├── Dockerfile
-│   ├── README.md
+│   ├── USAGE.md
 │   ├── apache2.conf
 │   ├── docker-compose.yaml
 │   └── docker-entrypoint.sh
