@@ -52,7 +52,7 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
    - `versioneer` automatically updates the version number based on the tag
    - this is now the official tagged commit
    - Push the tag upstream: `git push upstream --tags`
-   - Alternatievely: tag on github platform while creating release
+   - Alternatively: tag on github platform while creating release
 1. Make a new release on Github
    - https://github.com/OpenEnergyPlatform/oeplatform/releases/new
    - make sure that you choose the tag name defined above
