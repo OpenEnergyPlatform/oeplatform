@@ -15,7 +15,7 @@ This repository is licensed under [GNU Affero General Public License v3.0 (AGPL-
 
 # Installation & Setup
 
-Follow the detailed [installation guide](https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/).
+Follow the detailed [installation guide](https://openenergyplatform.github.io/oeplatform/installation/guides/installation/).
 
 ## Development & Code contribution
 
