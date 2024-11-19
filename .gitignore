@@ -79,6 +79,7 @@ venv*/
 0_env/
 /envs
 /node_env
+/oep-django-5
 
 .DS_Store
 
@@ -98,3 +99,7 @@ ontologies/
 scripts/
 
 site/
+
+# Jenna fuseki graph db installation
+/apache-jena-fuseki*/
+/apache-jena-fuseki*.tar.gz*

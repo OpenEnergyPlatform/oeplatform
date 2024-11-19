@@ -78,7 +78,7 @@
 
     textarea {
       @extend .fs-8;
-      white-space: nowrap;
+      white-space: pre;
       resize: none;
       overflow-y: hidden;
       font-family: 'Roboto Mono' ,monospace;
