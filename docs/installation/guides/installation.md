@@ -1,7 +1,6 @@
 # Install and setup the OpenEnergyPlatform Application
 
 Below we describe the manual installation of the oeplatform code and infrastructure.
-The installation steps have been proofed on linux and windows for python 3.10.
 
 !!! tip
     We also offer the possibility to use [docker](https://www.docker.com/), to install the oeplatform and additional databases. As the hole setup is pre-configured docker can be used to automatically install the hole infrastructure.
@@ -32,6 +31,7 @@ The installation steps have been proofed on linux and windows for python 3.10.
     1. Get code & install dependencies.
         - `git clone https://github.com/OpenEnergyPlatform/oeplatform.git`
         - `cd oeplatform`
+        - Install python 3.10.
         - `python -m venv env`
         - `source env/bin/activate`
         - `pip install -r requirements.txt`
@@ -106,9 +106,9 @@ The installation steps have been proofed on linux and windows for python 3.10.
 
 ## 0 Prequisit
 
-The installation instructions mainly refer to the creation of a local instance of the oeplatform with a focus on the development or contribution to the software development on github. Before you start the installation look at [this section](./development-setup.md#choose-your-development-environment-and-tools) and think about which operating system you want to use.
+The installation instructions mainly refer to the creation of a local instance of the oeplatform with a focus on the development or contribution to the software development on github. We use mainly linux and sometimes windows for development with python 3.10 currently (Python 3.12 is also tested with some tweaks in the requirements.txt). Before you start the installation look at [this section](./development-setup.md#choose-your-development-environment-and-tools) and think about which operating system you want to use.
 
-Deploying the software on a server to make it publicly accessible via the Internet is a further step.
+Deploying the software on a server to make it publicly accessible via the Internet is a further step. Please get in touch as the deployment depends heavily on your server setup.
 
 ### Notes for deployment
 
@@ -213,7 +213,7 @@ Additional we use a triple store database:
 
 ### 5.1 How to install the databases
 
-You can install the database and connect it to django as you like. Note that we currently use PostgreSQL version 14. 
+You can install the database and connect it to django as you like. Note that we currently use PostgreSQL version 14.
 
 Below we offer our best practice to setup the databases. You have two options to install the databases:
 
