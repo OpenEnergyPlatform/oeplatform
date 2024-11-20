@@ -10,13 +10,13 @@
 
 
     {% if group %}
-    <form id="group-form" hx-post="{% url 'group-partial-edit-form' group_id=group.id %}" hx-target=".htmxFormComponent">
+    <form id="group-form" hx-post="{% url 'login:group-partial-edit-form' group_id=group.id %}" hx-target=".htmxFormComponent">
         {% csrf_token %}
         {% bootstrap_form form %}
         <!-- <input form="group-form" class="btn btn-success" type="submit" value="Submit"> -->
     </form>
     {% else %}
-    <form id="group-form" hx-post="{% url 'group-create' %}" hx-trigger="submit" hx-target=".htmxFormComponent">
+    <form id="group-form" hx-post="{% url 'login:group-create' %}" hx-trigger="submit" hx-target=".htmxFormComponent">
         {% csrf_token %}
         {% bootstrap_form form %}
     </form>

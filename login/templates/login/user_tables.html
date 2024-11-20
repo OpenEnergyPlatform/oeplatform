@@ -200,7 +200,7 @@
                                 Reviewed
                             </div>
                             <div class="profile-table-card__badge">
-                                <div id="badge-container" hx-get="{% url 'metadata-review-badge-icon' request.user.id table.name %}" hx-trigger="load" hx-swap="outerHTML">
+                                <div id="badge-container" hx-get="{% url 'login:metadata-review-badge-icon' request.user.id table.name %}" hx-trigger="load" hx-swap="outerHTML">
                                 </div>
                                 <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_bronze.png"> -->
                                 <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_platinum.png"> -->
