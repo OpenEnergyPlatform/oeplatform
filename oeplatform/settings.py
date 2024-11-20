@@ -241,10 +241,22 @@ COMPRESS_MTIME_DELAY = 0
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "name"
 ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory" # requires ACCOUNT_EMAIL_REQUIRED = True
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+ACCOUNT_ADAPTER = "login.adapters.AccountAdapter"
+# https://django-allauth.readthedocs.io/en/latest/forms.html
+ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
 # ACCOUNT_EMAIL_REQUIRED = True
 # ACCOUNT_USERNAME_REQUIRED = False
 # ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_ALLOW_REGISTRATION = True
+
+
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+SOCIALACCOUNT_ADAPTER = "login.adapters.SocialAccountAdapter"
+# https://django-allauth.readthedocs.io/en/latest/forms.html
+SOCIALACCOUNT_FORMS = {"signup": "htmxdj.users.forms.UserSocialSignupForm"}
 
 
 # axes login throttling
