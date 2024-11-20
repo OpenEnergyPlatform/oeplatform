@@ -136,6 +136,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "oeplatform.settings.external_urls_context_processor",
+                "oeplatform.context_processors.allauth_settings",
             ]
         },
     }
