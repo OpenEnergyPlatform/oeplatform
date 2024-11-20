@@ -73,10 +73,10 @@
             {% if ACCOUNT_ALLOW_REGISTRATION %}
                 {# URL provided by django-allauth/account/urls.py #}
                 <a href="{% url 'account_signup' %}"
-                    class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">{% translate "Sign Up" %}</a>
+                class="btn btn-info btn-sm m-1">{% translate "Sign Up" %}</a>
             {% endif %}
             {# URL provided by django-allauth/account/urls.py #}
-            <a class="btn btn-info" style="float: right;margin:5px" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
+            <a class="btn btn-info btn-sm m-1" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
         {% endif %}
     </div>
 </nav>
