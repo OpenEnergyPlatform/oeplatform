@@ -1,48 +1,47 @@
-from django.conf.urls import include
 from django.contrib.auth.views import (
     PasswordResetCompleteView,
     PasswordResetConfirmView,
     PasswordResetDoneView,
     PasswordResetView,
 )
-from django.urls import re_path
+from django.urls import path, re_path
 
 from login import partial_views, views
 
 # from login.views import AccountDeleteView
 
+app_name = "login"
 urlpatterns = [
     re_path(
         "password_reset/",
         PasswordResetView.as_view(
-            html_email_template_name="registration/password_reset_email.html",
-            email_template_name="registration/password_reset_email.txt",
-            template_name="registration/custom_password_reset_form.html",
+            html_email_template_name="account/password_reset_email.html",
+            email_template_name="account/password_reset_email.txt",
+            template_name="account/custom_password_reset_form.html",
         ),
         name="password_reset",
     ),
     re_path(
         "password_reset/done/",
         PasswordResetDoneView.as_view(
-            template_name="registration/custom_password_reset_done.html"
+            template_name="account/custom_password_reset_done.html"
         ),
         name="password_reset_done",
     ),
     re_path(
         "reset/<uidb64>/<token>/",
         PasswordResetConfirmView.as_view(
-            template_name="registration/custom_password_reset_confirm.html"
+            template_name="account/custom_password_reset_confirm.html"
         ),
         name="password_reset_confirm",
     ),
     re_path(
         "reset/done/",
         PasswordResetCompleteView.as_view(
-            template_name="registration/custom_password_reset_complete.html"
+            template_name="account/custom_password_reset_complete.html"
         ),
         name="password_reset_complete",
     ),
-    re_path("^", include("django.contrib.auth.urls")),
     re_path(
         r"^profile/(?P<user_id>[\d]+)$",
         views.TablesView.as_view(),
@@ -136,4 +135,5 @@ urlpatterns = [
     re_path(r"^activate/(?P<token>[\w\d\-\s]+)$", views.activate),
     re_path(r"^activate/$", views.ActivationNoteView.as_view(), name="activate"),
     re_path(r"^reset/token$", views.token_reset, name="reset-token"),
+    path("~redirect/", view=views.user_redirect_view, name="redirect"),
 ]
