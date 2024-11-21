@@ -137,11 +137,19 @@ var MetaEdit = function(config) {
     // these will be removed at the end
     function fixRecursive(schemaProps, elemObject, path) {
       // is object ?
-      if (typeof elemObject != 'object' || $.isArray(elemObject)) {
+      if (elemObject == null || typeof elemObject != 'object' || $.isArray(elemObject)) {
         return;
       }
+
       // for each key: fill missing (recursively)
       Object.keys(schemaProps).map(function(key) {
+        if (elemObject[key] !== undefined && key === "foreignKeys" && elemObject[key].length > 0 && elemObject[key][0] !== null) { 
+          // reset the FK field if the fields property is empty to avoid omi parsing errors
+          console.log(elemObject[key])
+          if (elemObject[key][0]["fields"][0] === null) { 
+            elemObject[key] = []
+          }
+        }
         var prop = schemaProps[key];
         // console.log(path + '.' + key, prop.type)
         if (prop.type == 'object') {
@@ -150,11 +158,14 @@ var MetaEdit = function(config) {
         } else if (prop.type == 'array') {
           elemObject[key] = elemObject[key] || [];
           // if non empty array
-          if ($.isArray(elemObject[key]) && elemObject[key].length > 0) {
+          console.log(key, elemObject[key][0])
+          if ($.isArray(elemObject[key]) && elemObject[key].length > 0 && elemObject[key][0] !== null) {
             elemObject[key].map(function(elem, i) {
               fixRecursive(prop.items.properties, elem, path + '.' + key + '.' + i);
             });
-          }
+          } else {
+            elemObject[key] =[];
+          }          
         } else { // value
           if (elemObject[key] === undefined) {
             // console.log('adding empty value: ' + path + '.' + key)
