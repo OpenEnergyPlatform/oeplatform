@@ -158,7 +158,6 @@ var MetaEdit = function(config) {
         } else if (prop.type == 'array') {
           elemObject[key] = elemObject[key] || [];
           // if non empty array
-          console.log(key, elemObject[key][0])
           if ($.isArray(elemObject[key]) && elemObject[key].length > 0 && elemObject[key][0] !== null) {
             elemObject[key].map(function(elem, i) {
               fixRecursive(prop.items.properties, elem, path + '.' + key + '.' + i);
