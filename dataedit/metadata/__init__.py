@@ -1,3 +1,5 @@
+from metadata.v160.template import OEMETADATA_V160_TEMPLATE
+
 from dataedit.metadata import v1_4 as __LATEST
 from dataedit.metadata.v1_3 import TEMPLATE_v1_3
 from dataedit.metadata.v1_4 import TEMPLATE_V1_4
@@ -6,6 +8,7 @@ from dataedit.metadata.v1_5 import TEMPLATE_V1_5
 from .error import MetadataException
 
 METADATA_TEMPLATE = {
+    6: OEMETADATA_V160_TEMPLATE,
     5: TEMPLATE_V1_5,
     4: TEMPLATE_V1_4,
     3: TEMPLATE_v1_3,
@@ -173,7 +176,7 @@ def parse_meta_data(metadata, schema, table):
     # if "error" in metadata:
     #     return metadata
     if not metadata:
-        metadata = __LATEST.get_empty(schema, table)
+        metadata = OEMETADATA_V160_TEMPLATE
     else:
         if "error" in metadata:
             return {"description": metadata["content"], "error": metadata["error"]}
