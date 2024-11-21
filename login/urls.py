@@ -12,6 +12,8 @@ from login import partial_views, views
 
 app_name = "login"
 urlpatterns = [
+    ###############################################################
+    # Might be deprecated as django allauth is implemented
     re_path(
         "password_reset/",
         PasswordResetView.as_view(
@@ -42,6 +44,7 @@ urlpatterns = [
         ),
         name="password_reset_complete",
     ),
+    #################################################################
     re_path(
         r"^profile/(?P<user_id>[\d]+)$",
         views.TablesView.as_view(),
