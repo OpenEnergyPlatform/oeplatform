@@ -222,37 +222,6 @@ def parse_meta_data(metadata, schema, table):
     return metadata
 
 
-def read_metadata_from_post(content_query, schema, table):
-    """Prepare dict to modify the comment prop of a table in OEP database
-    i.e. contains the metadata
-
-    :param content_query: the content of the POST request
-
-    :param schema: name of the OEP schema
-    :param table: name of the OEP table in the OEP schema
-    :return: metadata dict
-    """
-    version = get_metadata_version(content_query)
-    if version is tuple and len(version) > 2:
-        template = METADATA_TEMPLATE[version[1]].copy()
-    else:
-        template = METADATA_TEMPLATE[4].copy()
-    metadata = assign_content_values_to_metadata(
-        content=content_query, template=template
-    )
-    # TODO fill the "resource" field for v1.4
-    # d["resources"] = [
-    #     {
-    #         "name": "%s.%s" % (schema, table),
-    #         "format": "PostgreSQL",
-    #         "fields": d["field"],
-    #     }
-    # ]
-    # d["metadata_version"] = "1.3"
-
-    return metadata
-
-
 def get_metadata_version(metadata):
     """Find the metadata version in the metadata
 
