@@ -40,7 +40,7 @@ For the creation of spatial objects we use the [PostGIS](https://postgis.net/ins
     # sudo apt-get install bin utils libproj-dev gdal-bin
 
 ??? Info "How to get PostGIS"
-PostGIS is a plugin for PostgreSQL and must be installed additionally. If you use an installation wizard, this step is probably included in the general PostgreSQL installation.
+    PostGIS is a plugin for PostgreSQL and must be installed additionally. If you use an installation wizard, this step is probably included in the general PostgreSQL installation.
 
     - On Windows, We recommend installing the postgis for your local PostgreSQL installation from [Application Stack Builder](https://www.enterprisedb.com/edb-docs/d/postgresql/installation-getting-started/installation-guide-installers/9.6/PostgreSQL_Installation_Guide.1.09.html) under `Spatial Extensions`. There should automatically be an entry for `PostGIS bundle ...` based on the installed version of PostgreSQL, please make sure it is checked and click next. The stack builder will then continue to download and install PostGIS. Alternately PostGIS can also be downloaded from [this official ftp server](http://ftp.postgresql.org/pub/postgis/) by PostgreSQL. Proceed to install the package. (Flag it as safe in the downloads if prompted, and select Run anyway from the Windows SmartScreen Application Blocked Window)
 
@@ -52,7 +52,10 @@ After the installation completed you can start the service. On linux you can sim
 
 ### 1.2 Install Apache Jena Fuseki
 
-!!! note - Skip the installation if your development task is not aimed at the [OEKG](https://openenergyplatform.github.io/organisation/family_members/knowledge-representation/oekg/). - For more information about Apache Jena Fuseki please visit [this page.](https://jena.apache.org/documentation/fuseki2/) - Note that java is required to run the software
+!!! note
+    - Skip the installation if your development task is not aimed at the [OEKG](https://openenergyplatform.github.io/organisation/family_members/knowledge-representation/oekg/).
+    - For more information about Apache Jena Fuseki please visit [this page.](https://jena.apache.org/documentation/fuseki2/)
+    - Note that java is required to run the software
 
 1.  Download [apache-jena-fuseki-4.2.0.tar.gz](https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-4.2.0.tar.gz)
     (for other versions please check [here](https://jena.apache.org/download/))
@@ -144,14 +147,14 @@ In the oeplatform repository, copy the file `oeplatform/securitysettings.py.defa
 To setup the connection in the oeplatform project you can either setup environment variables that store the database connection credentials locally on your system or you can change the default value in the securitysetting. For production systems it is recommended to use the concept of environment variables.
 
 !!! Note
-You have to provide the user name and password (with access to the oep_django and oedb database). Additionally you can configure the database name and the host and port variables if you don't run the database server using the default values.
+    You have to provide the user name and password (with access to the oep_django and oedb database). Additionally you can configure the database name and the host and port variables if you don't run the database server using the default values.
 
 #### 3.1.1 oep_django internal database
 
 In the oeplatform/securitysettings.py file enter the database connection details in this section:
 
 !!! Info
-This code will attempt to collect the value from a environment variable in case it is not available the fallback value is used.
+    This code will attempt to collect the value from a environment variable in case it is not available the fallback value is used.
 
     `'NAME': os.environ.get("OEP_DJANGO_NAME", "oep_django")`
 
@@ -171,7 +174,7 @@ DATABASES = {
 ```
 
 ??? Note "Setup environment variables"
-Create environment variables `OEP_DJANGO_USER` and `OEP_DJANGO_PW` with values `oep_django_user` and `<oep_django_password>`, respectively.
+    Create environment variables `OEP_DJANGO_USER` and `OEP_DJANGO_PW` with values `oep_django_user` and `<oep_django_password>`, respectively.
 
     | environment variable | required |
     | -------------------- | -------- |
@@ -249,6 +252,6 @@ dbname = os.environ.get("LOCAL_DB_NAME", "oedb")
 
 ## 4 Create the database tables
 
-To complete the database installation, the table structures must then be installed. [Step 3](./installation.md#3-setup-the-openenergyontology-integation) & [Step 4](./installation.md#4-loading-and-compressing-static-assets-from-the-oeplattform-applications) must be completed first so that the necessary commands can be executed after.
+To complete the database installation, the table structures must then be installed. [Step 3](./installation.md#3-setup-the-openenergyontology-integration) & [Step 4](./installation.md#4-loading-and-compressing-static-assets-from-the-oeplattform-applications) must be completed first so that the necessary commands can be executed after.
 
 After that Proceed with the next steps in section [4.2 Create the database table structures](installation.md#32-create-the-database-table-structures) of the oeplatform installation guide.
