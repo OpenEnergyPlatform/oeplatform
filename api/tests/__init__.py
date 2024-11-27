@@ -31,10 +31,7 @@ class APITestCase(TestCase):
         cls.token = Token.objects.get(user=cls.user)
 
         cls.other_user, _ = myuser.objects.get_or_create(
-            name="NotMrTest",
-            email="notmrtest@test.com",
-            did_agree=True,
-            is_mail_verified=True,
+            name="NotMrTest", email="notmrtest@test.com", did_agree=True
         )
         cls.other_user.save()
         cls.other_token = Token.objects.get(user=cls.other_user)
