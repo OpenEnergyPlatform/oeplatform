@@ -1,0 +1,36 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load allauth %}
+{% block head_title %}
+    {% trans "Signup" %}
+{% endblock head_title %}
+{% block content %}
+    {% element h1 %}
+        {% trans "Sign Up" %}
+    {% endelement %}
+    {% element h2 %}
+        {% trans "You are nearly done! Just one last step...." %}
+    {% endelement %}
+    {% element p %}
+        {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}You are about to use your {{provider_name}} account to login to
+{{site_name}}.{% endblocktrans %}
+    {% endelement %}
+    {% element p %}
+        {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}Please complete the following form, as we did not get this information from your provider:{% endblocktrans %}
+    {% endelement %}
+    {% url 'socialaccount_signup' as action_url %}
+    {% element form form=form method="post" action=action_url %}
+        {% slot body %}
+            {% csrf_token %}
+            {% element fields form=form unlabeled=True %}
+            {% endelement %}
+            {{ redirect_field }}
+        {% endslot %}
+        {% slot actions %}
+            {% element button type="submit" %}
+                {% trans "Sign Up" %}
+            {% endelement %}
+        {% endslot %}
+    {% endelement %}
+{% endblock content %}

@@ -22,4 +22,7 @@
     {% endif %}
     <button class="btn btn-primary" type="submit">{% translate "Sign Up" %} »</button>
   </form>
+    {% if SOCIALACCOUNT_ENABLED %}
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+    {% endif %}
 {% endblock inner %}
