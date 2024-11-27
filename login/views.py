@@ -13,8 +13,8 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
-from django.views.generic import FormView, View
+from django.urls import reverse, reverse_lazy
+from django.views.generic import FormView, RedirectView, View
 from django.views.generic.edit import DeleteView, UpdateView
 from rest_framework.authtoken.models import Token
 
@@ -831,6 +831,16 @@ class CreateUserView(View):
             return redirect("activate")
         else:
             return render(request, "login/oepuser_create_form.html", {"form": form})
+
+
+class UserRedirectView(LoginRequiredMixin, RedirectView):
+    permanent = False
+
+    def get_redirect_url(self):
+        return reverse("login:settings", kwargs={"user_id": self.request.user.id})
+
+
+user_redirect_view = UserRedirectView.as_view()
 
 
 class DetachView(LoginRequiredMixin, View):

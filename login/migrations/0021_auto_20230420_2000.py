@@ -8,6 +8,10 @@ class Migration(migrations.Migration):
         ("login", "0020_myuser_profile_img_squashed_0032_auto_20230320_1542"),
     ]
 
+    run_before = [
+        ("account", "0001_initial"),  # Ensure Allauth migration waits
+    ]
+
     operations = [
         migrations.RenameField(
             model_name="myuser", old_name="username", new_name="fullname"

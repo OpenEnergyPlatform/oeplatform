@@ -1,5 +1,5 @@
 <section class="profile-category htmxComponentGroupMembership">
-    <h2 class="profile-category__heading profile-category__heading--border-btm"><span class="profile-category__heading--sm"><div class="member-count" hx-get="{% url 'count-group-memberships' group.id %}" hx-trigger="load"></div></span></h2>
+    <h2 class="profile-category__heading profile-category__heading--border-btm"><span class="profile-category__heading--sm"><div class="member-count" hx-get="{% url 'login:count-group-memberships' group.id %}" hx-trigger="load"></div></span></h2>
     <div id="alter-user-result"></div>
     <div class="profile-category__members">
         {% for membership in group.memberships.all %}
@@ -11,7 +11,7 @@
                     {{ membership.user.name }}
                 </div>
                 <div class="profile-category__member-status">
-                    <form hx-post="{% url 'partial-group-membership' group_id=group.id %}" hx-trigger="change" hx-target="#alter-user-result" data-error-display="alter-user-result">
+                    <form hx-post="{% url 'login:partial-group-membership' group_id=group.id %}" hx-trigger="change" hx-target="#alter-user-result" data-error-display="alter-user-result">
                         <input type="hidden" name="mode" value="alter_user">
                         <input type="hidden" name="user_id" value="{{membership.user.id}}">
                         <select aria-label="Group member's status" name="selected_value">
@@ -36,7 +36,7 @@
             </div>
             {% endif %}
             {% if can_delete or is_admin %}
-            <form hx-post="{% url 'partial-group-membership' group_id=group.id %}"
+            <form hx-post="{% url 'login:partial-group-membership' group_id=group.id %}"
             hx-target="#alter-user-result"
             hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ group.name }} and retract all permissions?"
             hx-swap="outerHTML"
@@ -97,12 +97,12 @@
         // create user response
         if(xhr.status === 201) {
             // update rendered membership component after user invite
-            htmx.ajax('GET', "{% url 'partial-group-membership' group.id %}", {target: '.htmxComponentGroupMembership'});
+            htmx.ajax('GET', "{% url 'login:partial-group-membership' group.id %}", {target: '.htmxComponentGroupMembership'});
         }
 
         // remove user response
         if(xhr.status === 204) {
-            htmx.ajax('GET', "{% url 'partial-group-membership' group.id %}", {target: '.htmxComponentGroupMembership'});
+            htmx.ajax('GET', "{% url 'login:partial-group-membership' group.id %}", {target: '.htmxComponentGroupMembership'});
         }
     });
 

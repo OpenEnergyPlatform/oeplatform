@@ -1,3 +1,5 @@
+from allauth.account.forms import SignupForm
+from allauth.socialaccount.forms import SignupForm as SocialSignupForm
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -5,7 +7,6 @@ from django.contrib.auth.forms import (
     PasswordChangeForm,
     SetPasswordForm,
     UserChangeForm,
-    UserCreationForm,
 )
 from django.core.exceptions import ValidationError
 
@@ -13,7 +14,15 @@ from .models import UserGroup
 from .models import myuser as OepUser
 
 
-class CreateUserForm(UserCreationForm):
+class UserSocialSignupForm(SocialSignupForm):
+    """
+    Renders the form when user has signed up using social accounts.
+    Default fields will be added automatically.
+    See UserSignupForm otherwise.
+    """
+
+
+class CreateUserForm(SignupForm):
     captcha = CaptchaField()
 
     class Meta:

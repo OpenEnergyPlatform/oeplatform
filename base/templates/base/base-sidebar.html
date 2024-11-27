@@ -42,88 +42,8 @@ all copies or substantial portions of the Software. -->
 
 <body class="d-flex flex-column h-100">
 {% block header %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-        <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <a class="navbar-brand" href="/">
-                <img style="width:45px;height: 45px;" src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}"/>
-            </a>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dataedit/schemas">Database</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFS" role="button"
-                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Scenario Bundles
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdownFS">
-                            <!-- <a class="dropdown-item" href="/factsheets/overview/">Overview</a> -->
-                            <a class="dropdown-item" href="/scenario-bundles/main">Scenario Bundle</a>
-                            <a class="dropdown-item" href="/factsheets/frameworks/">Framework Factsheet</a>
-                            <a class="dropdown-item" href="/factsheets/models/">Model Factsheet</a>
-                            <!-- <a class="dropdown-item" href="/factsheets/scenarios/">Scenario Factsheet</a> -->
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownOntology" role="button"
-                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Ontology
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdownOntology">
-                            <a class="dropdown-item" href="/ontology/">Overview</a>
-                            <a class="dropdown-item" href="/ontology/oeo/BFO_0000001/">OEO Classes</a>
-                            <a class="dropdown-item" href="/viewer/oeo/">OEO Viewer</a>
-                            <a class="dropdown-item" href="{% url 'oeo-s-c'%}">OEO Steering Committee</a>
-                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.tib_terminology_service }}" target="_blank" data-toggle="tooltip" data-placement="top" title="We want to combine our efforts in ontology development with the TIB as part of the NFDI4Energy project."><i class="fas fa-external-link-alt"></i> TIB Terminology Service</a>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ EXTERNAL_URLS.tutorials_index }}" target="_blank">Academy <i class="fas fa-external-link-alt"></i></a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAbout" role="button"
-                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            About
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
-                            <a class="dropdown-item" href="/about/">Overview</a>
-                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.compendium }}" target="_blank"><i class="fas fa-external-link-alt"></i> Compendium</a>
-                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.mkdocs }}" target="_blank"><i class="fas fa-external-link-alt"></i> Developer Documentation</a>
-                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.readthedocs }}" target="_blank"><i class="fas fa-external-link-alt"></i> REST-API Documentation</a>
-                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.tutorials_faq }}" target="_blank"><i class="fas fa-external-link-alt"></i> FAQ</a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
 
-            <div class="d-flex align-items-center gap-3">
-                <!-- Profile Link -->
-                <a class="btn btn-link text-white p-0" href="/user/profile/{{ user.pk }}/settings">
-                    {% fa5_icon 'user' 'fas' %} {{ user }}
-                </a>
-            
-                <!-- Logout Form -->
-                <form method="post" action="{% url 'logout' %}" class="m-0">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="/">
-                    <button type="submit" class="btn btn-danger btn-sm">
-                        {% fa5_icon 'arrow-right' 'fas' %} Logout
-                    </button>
-                </form>
-            </div>
-
-            {% else %}
-                <a class="btn btn-info" style="float: right;margin:5px"
-                   href="/user/login/?next={{ request.get_full_path|urlencode }}">{% fa5_icon 'log-in' 'fas' %} Login</a>
-            {% endif %}
-
-        </div>
-    </nav>
+    {% include "base/navbar.html" %}
 
 {% endblock header %}
 {% block main %}

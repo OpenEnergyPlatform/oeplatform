@@ -121,12 +121,15 @@ SOCIALACCOUNT_PROVIDERS = {
         # For each OAuth based provider, either add a ``SocialApp``
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:
-        "APP": {
+        "APPS": [{
             "provider_id": "",
             "name": "",
             "client_id": "",
             "secret": "",
+            "VERIFIED_EMAIL": True,
+                "SOCIALACCOUNT_EMAIL_AUTHENTICATION": True,
+                "SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT": True,
             "settings": {"server_url": ""},
-        }
+        }]
     }
 }
