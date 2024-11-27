@@ -145,7 +145,6 @@ var MetaEdit = function(config) {
       Object.keys(schemaProps).map(function(key) {
         if (elemObject[key] !== undefined && key === "foreignKeys" && elemObject[key].length > 0 && elemObject[key][0] !== null) { 
           // reset the FK field if the fields property is empty to avoid omi parsing errors
-          console.log(elemObject[key])
           if (elemObject[key][0]["fields"][0] === null) { 
             elemObject[key] = []
           }
