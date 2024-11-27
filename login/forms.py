@@ -25,36 +25,11 @@ class UserSocialSignupForm(SocialSignupForm):
 class CreateUserForm(SignupForm):
     captcha = CaptchaField()
 
-    class Meta:
-        model = OepUser
-        fields = (
-            "name",
-            "email",
-            "fullname",
-            "location",
-            "affiliation",
-            "work",
-            "linkedin",
-            "twitter",
-            "facebook",
-            "profile_img",
-            "password1",
-            "password2",
-        )
-
-    def save(self, commit=True):
-        user = super(CreateUserForm, self).save(commit=commit)
-        user.send_activation_mail()
+    def save(self, request):
+        user = super(CreateUserForm, self).save(request)
         return user
 
-    def __init__(self, *args, **kwargs):
-        super(CreateUserForm, self).__init__(*args, **kwargs)
-        for key in self.Meta.fields:
-            field = self.fields[key]
-            cstring = field.widget.attrs.get("class", "")
-            field.widget.attrs["class"] = cstring + "form-control"
-            if field.required:
-                field.label_suffix = "*"
+    # def signup(self, request, user):
 
 
 class EditUserForm(UserChangeForm):
