@@ -135,8 +135,6 @@ urlpatterns = [
     # ),
     re_path(r"^register$", views.CreateUserView.as_view()),
     re_path(r"^detach$", views.DetachView.as_view()),
-    re_path(r"^activate/(?P<token>[\w\d\-\s]+)$", views.activate),
-    re_path(r"^activate/$", views.ActivationNoteView.as_view(), name="activate"),
     re_path(r"^reset/token$", views.token_reset, name="reset-token"),
     path("~redirect/", view=views.user_redirect_view, name="redirect"),
 ]

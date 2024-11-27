@@ -3,7 +3,6 @@ import itertools
 import requests
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, Group, UserManager
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -18,7 +17,6 @@ except Exception:
 
     logging.error("No securitysettings found. Triggerd in login/models.py")
 
-from login.mail import send_verification_mail
 
 NO_PERM = 0
 WRITE_PERM = 4
@@ -61,7 +59,6 @@ class OEPUserManager(UserManager):
         )
 
         user.save(using=self._db)
-        user.send_activation_mail()
         return user
 
     def create_superuser(
@@ -104,7 +101,6 @@ class OEPUserManager(UserManager):
             name=name,
             email=self.normalize_email(email),
             affiliation=name,
-            is_mail_verified=True,
         )
         user.save(using=self._db)
         return user
@@ -195,7 +191,10 @@ class myuser(AbstractBaseUser, PermissionHolder):
     did_agree = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
-    is_mail_verified = models.BooleanField(default=False)
+
+    ###################################################################
+    is_mail_verified = models.BooleanField(default=False)  # TODO: remove
+    ###################################################################
 
     is_admin = models.BooleanField(default=False)
 
@@ -249,26 +248,6 @@ class myuser(AbstractBaseUser, PermissionHolder):
             )
 
         return permission_level
-
-    def send_activation_mail(self, reset_token=False):
-        token = self._generate_activation_code(reset_token=reset_token)
-        send_verification_mail(self.email, token.value)
-
-    def _generate_activation_code(self, reset_token=False):
-        token = None
-        if reset_token:
-            ActivationToken.objects.filter(user=self).delete()
-        else:
-            token = ActivationToken.objects.filter(user=self).first()
-        if not token:
-            token = ActivationToken(user=self)
-            candidate = PasswordResetTokenGenerator().make_token(self)
-            # Make sure the token is unique
-            while ActivationToken.objects.filter(value=candidate).first():
-                candidate = PasswordResetTokenGenerator().make_token(self)
-            token.value = candidate
-            token.save()
-        return token
 
 
 class ActivationToken(models.Model):

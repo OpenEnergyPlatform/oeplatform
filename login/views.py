@@ -1,6 +1,5 @@
 from itertools import groupby
 
-from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
@@ -14,7 +13,7 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import FormView, RedirectView, View
+from django.views.generic import RedirectView, View
 from django.views.generic.edit import DeleteView, UpdateView
 from rest_framework.authtoken.models import Token
 
@@ -31,7 +30,6 @@ from login.utils import (
 from oeplatform.settings import UNVERSIONED_SCHEMAS
 
 from .forms import (
-    ChangeEmailForm,
     CreateUserForm,
     DetachForm,
     EditUserForm,
@@ -881,35 +879,6 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
         return render(request, "login/delete_account.html", {"profile_user": user})
-
-
-class ActivationNoteView(FormView):
-    template_name = "login/activate.html"
-    form_class = ChangeEmailForm
-    success_url = "user/activate"
-
-    def form_valid(self, form):
-        if self.request.user.is_anonymous or self.request.user.is_mail_verified:
-            raise PermissionDenied
-        form.save(self.request.user)
-        return super(ActivationNoteView, self).form_valid(form)
-
-
-def activate(request, token):
-    token_obj = models.ActivationToken.objects.filter(value=token).first()
-    if not token_obj:
-        form = ChangeEmailForm()
-        form._errors = {
-            forms.forms.NON_FIELD_ERRORS: form.error_class(
-                ["Your token was invalid or expired"]
-            )
-        }
-        return render(request, "login/activate.html", {"form": form})
-    else:
-        token_obj.user.is_mail_verified = True
-        token_obj.user.save()
-        token_obj.delete()
-    return redirect("/user/profile/{id}".format(id=token_obj.user.id))
 
 
 def token_reset(request):
