@@ -424,13 +424,13 @@ class Table(APIView):
         :return:
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
+            raise APIError('Schema is not in allowed set of schemes for upload')
         if schema.startswith("_"):
-            raise PermissionDenied
+            raise APIError('Schema starts with _, which is not allowed')
         if request.user.is_anonymous:
-            raise PermissionDenied
+            raise APIError('User is anonymous', 401)
         if actions.has_table(dict(schema=schema, table=table), {}):
-            raise APIError("Table already exists")
+            raise APIError("Table already exists", 409)
         json_data = request.data.get("query", {})
         embargo_data = request.data.get("embargo") or json_data.get("embargo", {})
         constraint_definitions = []
