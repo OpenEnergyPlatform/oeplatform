@@ -165,24 +165,7 @@ all copies or substantial portions of the Software. -->
     </main>
 {% endblock main %}
 {% block footer %}
-    <footer class="footer mt-auto py-3 bg-secondary">
-        <nav class="navbar navbar-expand navbar-dark bg-secondary">
-            <div class="container-fluid justify-content-end">
-                <ul class="navbar-nav mr-auto">
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="/contact/">Contact</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/legal/privacy_policy/">Privacy Policy</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/legal/tou/">Terms of Use</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-    </footer>
+    {% include 'base/_footer.html' %}
 {% endblock footer %}
 
 <div id="uiWarnings"></div><!-- container for UI messages -->
