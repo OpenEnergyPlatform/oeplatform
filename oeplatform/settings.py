@@ -63,6 +63,7 @@ INSTALLED_APPS = (
     "owlready2",
     "compressor",
     "sparql_query",
+    "databus",
 )
 
 MIDDLEWARE = (
@@ -90,7 +91,7 @@ EXTERNAL_URLS = {
     "tutorials_wizard": "https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/",  # noqa E501
     "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
     "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
-    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",
+    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
     "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
     "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
@@ -228,3 +229,6 @@ COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
+
+DATABUS_URI_BASE = "https://databus.openenergyplatform.org"
+MOSS_URL = "https://moss.openenergyplatform.org/"
