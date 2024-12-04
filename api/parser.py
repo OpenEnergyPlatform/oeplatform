@@ -671,29 +671,6 @@ def parse_scolumnd_from_columnd(schema, table, name, column_description):
     }
 
 
-def parse_sconstd_from_constd(schema, table, name_const, constraint_description):
-    defi = constraint_description.get("definition")
-    return {
-        "action": None,  # {ADD, DROP}
-        "constraint_type": constraint_description.get(
-            "constraint_typ"
-        ),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
-        "constraint_name": name_const,
-        "constraint_parameter": constraint_description.get("definition")
-        .split("(")[1]
-        .split(")")[0],
-        # Things in Brackets, e.g. name of column
-        "reference_table": defi.split("REFERENCES ")[1].split("(")[2]
-        if "REFERENCES" in defi
-        else None,
-        "reference_column": defi.split("(")[2].split(")")[1]
-        if "REFERENCES" in defi
-        else None,
-        "c_schema": schema,
-        "c_table": table,
-    }
-
-
 def replace_None_with_NULL(dictonary):
     # Replacing None with null for Database
     for key, value in dictonary.items():
