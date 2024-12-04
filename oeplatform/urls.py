@@ -13,6 +13,7 @@ Including another URLconf
     1. Add an import:  from blog import urls as blog_urls
     2. Add a URL to urlpatterns: re_path(r'^blog/', include(blog_urls))
 """
+
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.urls import path, re_path
@@ -36,4 +37,5 @@ urlpatterns = [
     re_path(r"^scenario-bundles/", include("factsheet.urls")),
     re_path(r"^tutorials/.*", redirect_tutorial),
     re_path(r"^sparql_query/", include("sparql_query.urls")),
+    path("databus/", include("databus.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
