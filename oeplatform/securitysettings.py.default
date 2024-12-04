@@ -115,3 +115,16 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 CORS_ORIGIN_ALLOW_ALL = True
 
 OEKG_SPARQL_ENDPOINT_URL = "http://localhost:3030/ds/sparql"
+
+# The OEP can be integrated with dbpedias databus. We provide a specific instance of the
+# databus for this purpose. It is called databus.openenergyplatform.org
+USE_DATABUS = True
+# Tho get the following information you have to create an account on the databus page.
+# There you can create a API key.
+ENERGY_DATABUS_API_KEY = ""
+# As the OEP will register datasets on the databus we need to specify the user that will be
+# used for the databus as it groups the data under each user.
+ENERGY_DATABUS_USERNAME = ""
+# The group can be specified for testing. By default it will be the name
+# of the OEP´s database topic
+ENERGY_DATABUS_TEST_GROUP = "test-register"
