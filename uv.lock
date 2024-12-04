@@ -230,6 +230,19 @@ wheels = [
 ]
 
 [[package]]
+name = "databusclient"
+version = "0.12"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "typer" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/12/f5/4e31ff733a5a4adae794cff92affa5b17af64cfc5968cafe5ad8896caafe/databusclient-0.12.tar.gz", hash = "sha256:77709d61796c50a304872ca8a0d2220801cfcc570bd452cd53e9ea0102335eed", size = 7860 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/23/4f/2877a631b152ad2a0532246fac6c5644eecc29f37e80e3eb1ba73c6bca85/databusclient-0.12-py3-none-any.whl", hash = "sha256:7a9a40a3eaaae0c9f2b8063bc070e09cb083807c3483d1c445f61b8a22b6c7c9", size = 8054 },
+]
+
+[[package]]
 name = "django"
 version = "5.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -731,6 +744,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "alembic" },
     { name = "bibtexparser" },
+    { name = "databusclient" },
     { name = "django" },
     { name = "django-axes" },
     { name = "django-better-admin-arrayfield" },
@@ -766,6 +780,7 @@ dependencies = [
 requires-dist = [
     { name = "alembic", specifier = "==1.13.1" },
     { name = "bibtexparser", specifier = "==1.4.1" },
+    { name = "databusclient", specifier = ">=0.12" },
     { name = "django", specifier = "==5.1.1" },
     { name = "django-axes", specifier = "==5.41.1" },
     { name = "django-better-admin-arrayfield", specifier = "==1.4.2" },
@@ -1132,6 +1147,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/57/61/5bc3aff85dc5bf98291b37cf469dab74b3d0aef2dd88eade9070a200af05/sqlparse-0.5.2.tar.gz", hash = "sha256:9e37b35e16d1cc652a2545f0997c1deb23ea28fa1f3eefe609eee3063c3b105f", size = 84951 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7a/13/5f6654c9d915077fae255686ca6fa42095b62b7337e3e1aa9e82caa6f43a/sqlparse-0.5.2-py3-none-any.whl", hash = "sha256:e99bc85c78160918c3e1d9230834ab8d80fc06c59d03f8db2618f65f65dda55e", size = 44407 },
+]
+
+[[package]]
+name = "typer"
+version = "0.6.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cf/f9/27c5cd9ab067e3ece4cecb920c33f38cc986f839b12de19650fd49dc3c63/typer-0.6.1.tar.gz", hash = "sha256:2d5720a5e63f73eaf31edaa15f6ab87f35f0690f8ca233017d7d23d743a91d73", size = 249789 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/9b/7470461c68588ed09c2e53cbb16b802815232796d95f7b4744cc8842f19d/typer-0.6.1-py3-none-any.whl", hash = "sha256:54b19e5df18654070a82f8c2aa1da456a4ac16a2a83e6dcd9f170e291c56338e", size = 38293 },
 ]
 
 [[package]]
