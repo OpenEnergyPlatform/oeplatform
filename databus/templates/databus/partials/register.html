@@ -1,0 +1,35 @@
+{% load django_bootstrap5 %}
+
+<div class="htmxComponent">
+    <button class="btn"
+    hx-post="{% url 'databus:register' schema table %}" 
+    hx-trigger="click"
+    hx-swap="innerHTML">
+        Register
+    </button>
+    <div id="htmx-databus-response-error">
+
+    </div>
+</div>
+
+<script>
+    document.body.addEventListener('htmx:responseError', function(event) {
+        // Identify the form that triggered the error
+        var button = event.target;
+
+        // Use the button's data attribute to find where to display the error message
+        // var errorDisplayId = button.getAttribute('error-display');
+        var errorMessageDiv = document.getElementById('htmx-databus-response-error');
+
+        // Parse the error message from the response
+        var response = JSON.parse(event.detail.xhr.responseText);
+
+        // Handle different error keys appropriately
+        if (response.err_leave) { // For the alter user permissions error
+            errorMessageDiv.innerText = response.err_leave;
+        }
+
+        errorMessageDiv.style.display = 'block'; // Make the error message visible
+        errorMessageDiv.style.color = 'red'; // Optional styling
+    });
+</script>
