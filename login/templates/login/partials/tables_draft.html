@@ -39,6 +39,10 @@
                         <div class="profile-table-card__content--right">
                             {% if table.license_status.status %}
                             <button class="profile-table-card__btn profile-table-card__btn--sm publish-button" data-bs-toggle="modal" data-bs-target="#publishModal" data-schema="{{ table.schema }}" data-tableName="{{ table.name }}">Publish</button>
+                            <div class="htmxComponent">
+                                <div id="databus-register" hx-get="{% url 'databus:register' table.schema table.name %}"  hx-trigger="revealed" hx-swap="outerHTML">
+                                </div>
+                            </div>
                             {% else %}
                             <button class="profile-table-card__btn profile-table-card__btn--sm disabled">Publish</button>
                             {% endif %}
