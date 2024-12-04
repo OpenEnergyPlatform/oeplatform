@@ -78,11 +78,11 @@
 
     // Refresh the page after any htmx request ... keep until partials are 
     // implemented for the draft & published tables 
-    document.addEventListener('htmx:afterRequest', function(event) {
-        if (event.detail.successful) {
-            window.location.reload();
-        }
-    });
+    // document.addEventListener('htmx:afterRequest', function(event) {
+    //     if (event.detail.successful) {
+    //         window.location.reload();
+    //     }
+    // });
 
     document.addEventListener('DOMContentLoaded', function () {
         let schemaWhitelist = [];
