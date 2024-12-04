@@ -35,11 +35,19 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
 
         See: https://django-allauth.readthedocs.io/en/latest/advanced.html?#creating-and-populating-user-instances # noqa
         """
-        user = sociallogin.user
-        if name := data.get("name"):
-            user.name = name
-        elif first_name := data.get("first_name"):
-            user.name = first_name
-            if last_name := data.get("last_name"):
-                user.name += f" {last_name}"
+        provider = sociallogin.account.provider
+
+        # Specific modifications for the RegApp context data.
+        # Provider name must be the same as in securitysettings.
+        if provider == "RegApp":
+            name = data.get(
+                "name"
+            )  # NOTE: Consider to add random user name if not available
+            first_name = data.get("given_name")
+            last_name = data.get("given_name")
+            new_data = data
+            new_data["username"] = name
+            new_data["first_name"] = first_name
+            new_data["last_name"] = last_name
+
         return super().populate_user(request, sociallogin, data)
