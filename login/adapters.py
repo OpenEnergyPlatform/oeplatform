@@ -14,11 +14,19 @@ if typing.TYPE_CHECKING:
 
 
 class AccountAdapter(DefaultAccountAdapter):
+    """
+    Handles default logins
+    """
+
     def is_open_for_signup(self, request: HttpRequest) -> bool:
         return getattr(settings, "ACCOUNT_ALLOW_REGISTRATION", True)
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
+    """
+    Handles logins via 3rd party organizations like ORCID.
+    """
+
     def is_open_for_signup(
         self, request: HttpRequest, sociallogin: SocialLogin
     ) -> bool:
