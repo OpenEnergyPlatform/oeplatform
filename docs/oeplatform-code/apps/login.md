@@ -4,9 +4,41 @@ This app handles the user authentication using django allauth and implements a u
 
 ## Setup
 
-- install latest requirements in the python environment
-- run python migrations `python manage.py migrate` to setup the new django allauth models (tables)
-- check your iptables setting on the server to enable server to server connection using the service static ip address
+First make sure to install django allauth package and install it into the existing project:
+
+- install latest requirements.txt in the python environment
+
+    `pip install -r requirements.txt`
+
+- run python migrations to setup the new django allauth models (tables)
+
+    `python manage.py migrate`
+
+- check your iptables setting on the server to enable server to server connection using the service static ip address. Don`t forget to restart the iptables service to apply the updates.
+
+Now edit your securitysettings.py and update it with the content form the securitysettings.py.default template file to setup the social provider used for 3rd Party Login flow. We use openIDConnect that is implemented by django allauth:
+
+!!! Note
+    Filling out the values in the dictionary depends on your Provider. They should provide documentation or provide you with the relevant credentials. In some cases the provider_id must be in line with the specification of the provider in others you can choose your own name here. The client_id & secret should also be provided as well as the server_url.
+
+```python
+SOCIALACCOUNT_PROVIDERS = {
+    "openid_connect": {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        "APPS": [{
+            "provider_id": "",
+            "name": "",
+            "client_id": "",
+            "secret": "",
+            "VERIFIED_EMAIL": True,
+            "EMAIL_AUTHENTICATION": True,
+            "settings": {"server_url": ""},
+        }]
+    }
+}
+```
 
 ## App Components
 
@@ -14,4 +46,28 @@ The components of each app implement the django app structure and implement a MV
 
 ### Views
 
-::: login.views
+**ProfileUpdateView**
+::: login.views.ProfileUpdateView
+
+### Forms
+
+**3rd party Signup**
+::: login.forms.UserSocialSignupForm
+
+**Default Signup**
+::: login.forms.CreateUserForm
+
+**Edit existing user data**
+::: login.forms.EditUserForm
+
+### Adapters
+
+::: login.adapters
+
+### Models
+
+**The user manager that handles oeplatform users and their system role**
+::: login.models.OEPUserManager
+
+**The user model of a oeplatform user**
+::: login.models.myuser
