@@ -107,8 +107,6 @@ if USE_LOEP:
 else:
     DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL = ""
 
-if not DEBUG:
-    AUTHENTICATION_BACKENDS = ['login.models.UserBackend', 'axes.backends.AxesBackend']
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
