@@ -116,6 +116,9 @@ nav:
         # - Draft open-API schema: oeplatform-code/web-api/oedb-rest-api/swagger-ui.html
       - OEKG API:
         - oeplatform-code/web-api/oekg-api/index.md
+    - Django Apps:
+      - oeplatform-code/apps/index.md
+      - oeplatform-code/apps/login.md
     - Features:
       - oeplatform-code/features/index.md
       - metaBuilder Metadata creation:
