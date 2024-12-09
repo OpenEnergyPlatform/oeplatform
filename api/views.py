@@ -36,10 +36,16 @@ from rest_framework.views import APIView
 import api.parser
 import login.models as login_models
 from api import actions, parser, sessions
-from api.actions import assert_valid_identifier_name
+from api.actions import assert_permission, assert_valid_identifier_name
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
+from api.permissions import (
+    require_admin_permission,
+    require_delete_permission,
+    require_read_permission,
+    require_write_permission,
+)
 from api.serializers import (
     EnergyframeworkSerializer,
     EnergymodelSerializer,
@@ -214,28 +220,6 @@ def api_exception(f):
     return wrapper
 
 
-def permission_wrapper(permission, f):
-    def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", actions.DEFAULT_SCHEMA)
-        table = kwargs.get("table") or kwargs.get("sequence")
-        actions.assert_permission(request.user, table, permission, schema=schema)
-        return f(caller, request, *args, **kwargs)
-
-    return wrapper
-
-
-def require_write_permission(f):
-    return permission_wrapper(login_models.WRITE_PERM, f)
-
-
-def require_delete_permission(f):
-    return permission_wrapper(login_models.DELETE_PERM, f)
-
-
-def require_admin_permission(f):
-    return permission_wrapper(login_models.ADMIN_PERM, f)
-
-
 def conjunction(clauses):
     return {"type": "operator", "operator": "AND", "operands": clauses}
 
@@ -244,11 +228,11 @@ class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError('Schema is not in allowed set of schemes for upload')
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise APIError('Schema starts with _, which is not allowed')
+            raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
-            raise APIError('User is anonymous', 401)
+            raise APIError("User is anonymous", 401)
         if actions.has_table(dict(schema=schema, sequence_name=sequence), {}):
             raise APIError("Sequence already exists", 409)
         return self.__create_sequence(request, schema, sequence, request.data)
@@ -257,11 +241,11 @@ class Sequence(APIView):
     @require_delete_permission
     def delete(self, request, schema, sequence):
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError('Schema is not in allowed set of schemes for upload')
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise APIError('Schema starts with _, which is not allowed')
+            raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
-            raise APIError('User is anonymous', 401)
+            raise APIError("User is anonymous", 401)
         return self.__delete_sequence(request, schema, sequence, request.data)
 
     @load_cursor()
@@ -331,6 +315,7 @@ class Table(APIView):
 
     objects = None
 
+    @require_read_permission
     @api_exception
     @method_decorator(never_cache)
     def get(self, request, schema, table):
@@ -362,6 +347,7 @@ class Table(APIView):
         )
 
     @api_exception
+    @require_write_permission
     def post(self, request, schema, table):
         """
         Changes properties of tables and table columns
@@ -371,9 +357,9 @@ class Table(APIView):
         :return:
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError('Schema is not in allowed set of schemes for upload')
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise APIError('Schema starts with _, which is not allowed')
+            raise APIError("Schema starts with _, which is not allowed")
         json_data = request.data
 
         if "column" in json_data["type"]:
@@ -411,6 +397,7 @@ class Table(APIView):
             )
 
     @api_exception
+    @require_write_permission
     def put(self, request, schema, table):
         """
         Every request to unsave http methods have to contain a "csrftoken".
@@ -423,11 +410,11 @@ class Table(APIView):
         :return:
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError('Schema is not in allowed set of schemes for upload')
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise APIError('Schema starts with _, which is not allowed')
+            raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
-            raise APIError('User is anonymous', 401)
+            raise APIError("User is anonymous", 401)
         if actions.has_table(dict(schema=schema, table=table), {}):
             raise APIError("Table already exists", 409)
         json_data = request.data.get("query", {})
@@ -757,6 +744,7 @@ class Index(APIView):
 
 class Column(APIView):
     @api_exception
+    @require_read_permission
     @method_decorator(never_cache)
     def get(self, request, schema, table, column=None):
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
@@ -967,10 +955,10 @@ class Rows(APIView):
                 content_type="text/csv",
                 session=session,
             )
-            response["Content-Disposition"] = (
-                'attachment; filename="{schema}__{table}.csv"'.format(
-                    schema=schema, table=table
-                )
+            response[
+                "Content-Disposition"
+            ] = 'attachment; filename="{schema}__{table}.csv"'.format(
+                schema=schema, table=table
             )
             return response
         elif format == "datapackage":
@@ -998,10 +986,10 @@ class Rows(APIView):
                 content_type="application/zip",
                 session=session,
             )
-            response["Content-Disposition"] = (
-                'attachment; filename="{schema}__{table}.zip"'.format(
-                    schema=schema, table=table
-                )
+            response[
+                "Content-Disposition"
+            ] = 'attachment; filename="{schema}__{table}.zip"'.format(
+                schema=schema, table=table
             )
             return response
         else:
@@ -1309,6 +1297,18 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
         @cors(allow_cors)
         @api_exception
         def post(self, request):
+            # TODO: make this section optional and add a setting to activate it.
+            # Access control -> require read permissions #######################
+            post_data = request.POST
+            schema = post_data.get("schema")
+            table = post_data.get("table")
+            assert_permission(
+                user=request.user,
+                schema=schema,
+                table=table,
+                permission=login_models.READ_PERM,
+            )
+            ####################################################################
             result = self.execute(request)
             session = (
                 sessions.load_session_from_context(result.pop("context"))
