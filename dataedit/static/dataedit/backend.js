@@ -9,6 +9,8 @@ var table_container;
 var query_builder;
 var where;
 var view;
+var table;
+var schema;
 
 function getCookie(name) {
   var cookieValue = null;
@@ -37,6 +39,8 @@ function fail_handler(jqXHR, exception) {
   var msg = '';
   if (jqXHR.status === 0) {
     msg = 'Not connected.\n Verify Network.';
+  } else if (jqXHR.status == 403) {
+    msg = 'Access permission denied. [403]';
   } else if (jqXHR.status == 404) {
     msg = 'Requested page not found. [404]';
   } else if (jqXHR.status == 500) {
@@ -131,6 +135,8 @@ function request_data(data, callback, settings) {
         data: {
           csrfmiddlewaretoken: csrftoken,
           query: JSON.stringify(count_query),
+          schema: schema,
+          table: table,
         },
       }), $.ajax({
         type: 'POST',
@@ -139,6 +145,8 @@ function request_data(data, callback, settings) {
         data: {
           csrfmiddlewaretoken: csrftoken,
           query: JSON.stringify(select_query),
+          schema: schema,
+          table: table,
         },
       }),
   ).done(function(count_response, select_response) {
@@ -287,6 +295,8 @@ function load_view(schema, table, csrftoken, current_view) {
         data: {
           csrfmiddlewaretoken: csrftoken,
           query: JSON.stringify(count_query),
+          schema: schema,
+          table: table,
         },
       }),
   ).done(function(column_response, count_response) {
@@ -358,6 +368,8 @@ function parse_download() {
     data: {
       csrfmiddlewaretoken: csrftoken,
       query: JSON.stringify(base_query),
+      schema: schema,
+      table: table,
     },
   }).done((response) => {
     var regex = new RegExp(/\[|\]/, "gmi");
