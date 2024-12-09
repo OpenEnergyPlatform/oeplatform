@@ -21,6 +21,7 @@ except Exception:
 from login.mail import send_verification_mail
 
 NO_PERM = 0
+READ_PERM = 2
 WRITE_PERM = 4
 DELETE_PERM = 8
 ADMIN_PERM = 12
@@ -111,6 +112,12 @@ class OEPUserManager(UserManager):
 
 
 class PermissionHolder:
+    def has_read_permissions(self, schema, table):
+        """
+        This function returns the authorization given the schema and table.
+        """
+        return self.__get_perm(schema, table) >= READ_PERM
+
     def has_write_permissions(self, schema, table):
         """
         This function returns the authorization given the schema and table.
@@ -164,6 +171,7 @@ class UserGroup(Group, PermissionHolder):
 class TablePermission(models.Model):
     choices = (
         (NO_PERM, "None"),
+        (READ_PERM, "Read"),
         (WRITE_PERM, "Write"),
         (DELETE_PERM, "Delete"),
         (ADMIN_PERM, "Admin"),
@@ -195,7 +203,10 @@ class myuser(AbstractBaseUser, PermissionHolder):
     did_agree = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
-    is_mail_verified = models.BooleanField(default=False)
+
+    ###################################################################
+    is_mail_verified = models.BooleanField(default=False)  # TODO: remove
+    ###################################################################
 
     is_admin = models.BooleanField(default=False)
 
