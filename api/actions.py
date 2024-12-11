@@ -103,10 +103,10 @@ class ResponsiveException(Exception):
 def assert_permission(user, table, permission, schema=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
-    if (
-        user.is_anonymous
-        or user.get_table_permission_level(DBTable.load(schema, table)) < permission
-    ):
+    if user.is_anonymous:
+        raise APIError('User is anonymous', 401)
+
+    if user.get_table_permission_level(DBTable.load(schema, table)) < permission:
         raise PermissionDenied
 
 
@@ -131,10 +131,10 @@ def assert_add_tag_permission(user, table, permission, schema):
     #         level = request.user.get_table_permission_level(table)
     #         can_add = level >= login_models.WRITE_PERM
 
-    if (
-        user.is_anonymous
-        or user.get_table_permission_level(DBTable.load(schema, table)) < permission
-    ):
+    if user.is_anonymous:
+        raise APIError('User is anonymous', 401)
+
+    if user.get_table_permission_level(DBTable.load(schema, table)) < permission:
         raise PermissionDenied
 
 
