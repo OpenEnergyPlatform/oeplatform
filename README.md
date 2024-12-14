@@ -7,7 +7,7 @@
 
 # Open Energy Family - Open Energy Platform (OEP)
 
-Repository for the code of the Open Energy Platform (OEP) website [https://openenergy-platform.org/](https://openenergy-platform.org/). This repository does not contain data, for data access please consult [this page](https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md)
+Repository for the code of the Open Energy Platform (OEP) website [https://openenergyplatform.org/](https://openenergy-platform.org/). This repository does not contain data, for data access please consult [this page](https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md)
 
 ## License / Copyright
 
