@@ -576,14 +576,14 @@ The `uid` should belong to an existing bundle in OEKG. The remaining fields are 
 
 ### The SPARQL endpoint for OEKG
 
-`https://openenergy-platform.org/knowledge/oekg_main`
+`https://openenergyplatform.org/oekg/sparql/`
 
 Here is an example of how to query the Open Energy Knowledge Graph (OEKG) using SPARQL.
 
 ```python
 import requests
 
-sparql_endpoint = "https://openenergy-platform.org/knowledge/oekg_main"
+sparql_endpoint = "https://openenergy-platform.org/oekg/sparql/"
 sparql_query = {
     "query": """SELECT ?s ?p ?o
                             WHERE {
