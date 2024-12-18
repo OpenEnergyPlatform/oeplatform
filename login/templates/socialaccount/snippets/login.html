@@ -1,0 +1,23 @@
+{% load i18n %}
+{% load allauth %}
+{% load socialaccount %}
+{% get_providers as socialaccount_providers %}
+{% if socialaccount_providers %}
+    {% if not SOCIALACCOUNT_ONLY %}
+        {% element hr %}
+        {% endelement %}
+    <span></span>
+    {% endif %}
+    <div class="provider-buttons">
+        {% providers_media_js %}
+        {% for provider in socialaccount_providers %}
+            <form method="post" action="{% provider_login_url provider.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    Sign Up through your institution
+                </button>
+            </form>
+        {% endfor %}
+    </div>
+    {% include "socialaccount/snippets/login_extra.html" %}
+{% endif %}
