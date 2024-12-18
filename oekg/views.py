@@ -1,11 +1,11 @@
 import requests
 from django.core.exceptions import SuspiciousOperation
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
-from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
 from oekg.utils import validate_sparql_query
+from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
 
 
 def main_view(request):
@@ -17,6 +17,17 @@ def main_view(request):
 @require_POST
 def sparql_endpoint(request):
     sparql_query = request.POST.get("query", "")
+    response_format = request.POST.get(
+        "format", "application/sparql-results+json"
+    )  # Default format
+
+    # Whitelist of supported formats
+    supported_formats = {
+        "json": "application/sparql-results+json",
+        "json-ld": "application/ld+json",
+        "xml": "application/rdf+xml",
+        "turtle": "text/turtle",
+    }
 
     if not sparql_query:
         return HttpResponseBadRequest("Missing 'query' parameter.")
@@ -24,12 +35,37 @@ def sparql_endpoint(request):
     if not validate_sparql_query(sparql_query):
         raise SuspiciousOperation("Invalid SPARQL query.")
 
-    endpoint_url = OEKG_SPARQL_ENDPOINT_URL
+    # Validate and map the requested format
+    if response_format not in supported_formats:
+        return HttpResponseBadRequest(f"Unsupported format: {response_format}")
 
-    headers = {"Accept": "application/sparql-results+json"}
+    endpoint_url = OEKG_SPARQL_ENDPOINT_URL
+    headers = {"Accept": supported_formats[response_format]}
 
     response = requests.get(
         endpoint_url, params={"query": sparql_query}, headers=headers
     )
 
-    return JsonResponse(response.json())
+    # Handle different response types
+    content_type = supported_formats[response_format]
+    if content_type == "application/sparql-results+json":
+        return JsonResponse(response.json(), safe=False)
+    else:
+        return HttpResponse(response.content, content_type=content_type)
+
+
+@require_GET
+def sparql_metadata(request):
+    supported_formats = {
+        "json": "application/sparql-results+json",
+        "json-ld": "application/ld+json",
+        "xml": "application/rdf+xml",
+        "turtle": "text/turtle",
+    }
+    return JsonResponse(
+        {
+            "description": "This API accepts SPARQL queries and returns"
+            "the results in various formats.",
+            "supported_formats": supported_formats,
+        }
+    )
