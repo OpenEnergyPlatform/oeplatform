@@ -22,12 +22,7 @@
         {% endblocktranslate %}
       {% endif %}
     </p>
-    <div class="socialaccount_ballot">
-      <ul class="socialaccount_providers">
-        {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-      </ul>
-      <div class="login-or">{% translate "or" %}</div>
-    </div>
+    
     {% include "socialaccount/snippets/login_extra.html" %}
   {% else %}
     {% if ACCOUNT_ALLOW_REGISTRATION %}
@@ -49,5 +44,21 @@
     {% endif %}
     <button class="primaryAction btn btn-primary" type="submit">{% translate "Sign In" %}</button>
   </form>
+  <span>---------</span>
+  <div class="socialaccount_ballot">
+    
+      <div class="provider-buttons">
+        {% providers_media_js %}
+        {% for provider in socialaccount_providers %}
+            <form method="post" action="{% provider_login_url provider.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                  Sign In through your institution
+                </button>
+            </form>
+        {% endfor %}
+    </div>
+
+  </div>
 {% endblock inner %}
 {% endblock %}
