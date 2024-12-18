@@ -8,6 +8,8 @@
 
 - Removed the outdated & unmaintained references module that was intended to handle bibtex files and store them in a django model [(#1913)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1913).
 
+- Change sparql endpoint for OEKG to use the http post method to match the expected usage  [(#1913)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1913).
+
 - Extract header/footer template [(#1914)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1914)
 
 ## Features
