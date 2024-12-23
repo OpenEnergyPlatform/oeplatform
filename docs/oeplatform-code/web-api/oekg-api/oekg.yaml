@@ -1,0 +1,107 @@
+openapi: 3.0.2
+info:
+  title: SPARQL Query API
+  description: An API to execute SPARQL queries on a Jena Fuseki endpoint and retrieve results in various formats.
+  version: 1.0.0
+servers:
+  - url: https://openenergyplatform.org/
+    description: Production server
+  - url: http://localhost:8080"
+    description: Development server
+paths:
+  /oekg/sparql:
+    post:
+      summary: Execute a SPARQL query
+      description: |
+        This endpoint accepts a SPARQL query and returns the results in the specified format.
+        Supported query types include `SELECT`, `CONSTRUCT`, and `DESCRIBE`. The response format must be specified using the `format` parameter.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: The SPARQL query to execute.
+                  example: SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10
+                format:
+                  type: string
+                  description: |
+                    The desired format of the SPARQL query results. Supported values are:
+                    - `json`: SPARQL Query Results JSON (default, for SELECT queries).
+                    - `json-ld`: JSON-LD (for CONSTRUCT/DESCRIBE queries).
+                    - `xml`: RDF/XML (for CONSTRUCT/DESCRIBE queries).
+                    - `turtle`: Turtle (for CONSTRUCT/DESCRIBE queries).
+                  example: json
+                  default: json
+                  enum:
+                    - json
+                    - json-ld
+                    - xml
+                    - turtle
+      responses:
+        '200':
+          description: Successful response with query results.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The SPARQL query results in JSON format.
+            application/ld+json:
+              schema:
+                type: object
+                description: The SPARQL query results in JSON-LD format.
+            application/rdf+xml:
+              schema:
+                type: string
+                description: The SPARQL query results in RDF/XML format.
+            text/turtle:
+              schema:
+                type: string
+                description: The SPARQL query results in Turtle format.
+        '400':
+          description: Bad request due to invalid query or unsupported format.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                  supported_formats:
+                    type: array
+                    items:
+                      type: string
+                    description: List of supported formats.
+                  example:
+                    error:
+                      Unsupported format: csv
+                    supported_formats: ["json", "json-ld", "xml", "turtle"]
+  /sparql_metadata:
+    get:
+      summary: Retrieve metadata about the SPARQL API
+      description: Provides information about the SPARQL API, including supported response formats.
+      responses:
+        '200':
+          description: Successful response with API metadata.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  description:
+                    type: string
+                    description: General description of the API.
+                  supported_formats:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    description: Mapping of format keys to MIME types.
+                    example:
+                      json: application/sparql-results+json
+                      json-ld: application/ld+json
+                      xml: application/rdf+xml
+                      turtle: text/turtle
