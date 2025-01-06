@@ -189,6 +189,11 @@ urlpatterns = [
     path("oeo-search", views.oeo_search),
     path("oevkg-query", views.oevkg_search),
     re_path(
+        r"^v0/oekg/sparql/?$",
+        views.SparqlAPIView.as_view(),
+        name="oekg-sparql-http-api",
+    ),
+    re_path(
         r"^v0/factsheet/frameworks/?$",
         views.EnergyframeworkFactsheetListAPIView.as_view(),
         name="list-framework-factsheets",
