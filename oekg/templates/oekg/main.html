@@ -34,13 +34,33 @@
 {% block after-body-bottom-js %}
 <script src="{% static 'sparql_ui/vendor/yasgui-2.5.0/js/yasgui.min.js' %}"></script>
 <script>
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+            }
+        }
+        return cookieValue;
+    }
+
+    
     document.addEventListener('DOMContentLoaded', function() {
+    var csrftoken = getCookie('csrftoken');
     const referrer = document.referrer;
     console.log(referrer)
     const yasgui = YASGUI(document.getElementById('yasgui'), {
         requestConfig: {
-            endpoint: "{% url 'sparql_endpoint' %}",
-            method: 'GET',
+            endpoint: '{% url "sparql_endpoint" %}',
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken},
+            withCredentials: true,
         },
         copyEndpointOnNewTab: false,
         // Disabling the endpoint selector and the ability to add new tabs
