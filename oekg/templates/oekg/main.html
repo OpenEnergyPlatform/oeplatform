@@ -32,60 +32,49 @@
 {% endblock main-content-body %}
 
 {% block after-body-bottom-js %}
-<script src="{% static 'sparql_ui/vendor/yasgui-2.5.0/js/yasgui.min.js' %}"></script>
+<script src="{% static 'sparql_ui/vendor/yasgui-4.2.28/js/yasgui.min.js' %}"></script>
 <script>
-    function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-            }
-        }
-        return cookieValue;
-    }
 
     
-    document.addEventListener('DOMContentLoaded', function() {
-    var csrftoken = getCookie('csrftoken');
-    const referrer = document.referrer;
-    console.log(referrer)
-    const yasgui = YASGUI(document.getElementById('yasgui'), {
-        requestConfig: {
-            endpoint: '{% url "sparql_endpoint" %}',
-            method: 'POST',
-            headers: {'X-CSRFToken': csrftoken},
-            withCredentials: true,
-        },
-        copyEndpointOnNewTab: false,
-        // Disabling the endpoint selector and the ability to add new tabs
-        multipleEndpoints: false,
-        tabConfig: {
-            readOnly: true // Prevent adding/removing tabs
-        },
-        // Configuring which endpoints appear in the endpoint catalogue list
-        endpointCatalogueOptions: {
-            getData: () => {
-                return [
-                    // List of objects should contain the endpoint field
-                    // Feel free to include any other fields (e.g. a description or icon
-                    // that you'd like to use when rendering)
-                    {
-                        endpoint: referrer + "{% url 'main' %}"
-                    }
-                ];
+    document.addEventListener('DOMContentLoaded', function () {
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+                }
             }
-        },
-        // Hiding the control bar
-        hideControlBar: true
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        // Initialize Yasgui with specific endpoint
+        const yasgui = new Yasgui(document.getElementById("yasgui"), {
+            // Specify request configuration, including endpoint and headers
+            requestConfig: {
+                endpoint: "{% url 'sparql_endpoint' %}", // "http://127.0.0.1:8000/oekg/sparql/"
+                method: "POST",
+                headers: () => ({
+                    'X-CSRFToken': csrftoken
+                })
+            },
+            copyEndpointOnNewTab: true,
+            yasqe: {
+                // Additional Yasqe-specific configurations can go here
+            }
+        });
+
+        // Verify that the endpoint is set correctly
+        console.log("Endpoint:", yasgui.getTab().getYasqe().config.requestConfig.endpoint);
     });
-    YASGUI.defaults.catalogueEndpoints = null
-});
+
 
 
 </script>
