@@ -14,12 +14,13 @@ def main_view(request):
     return response
 
 
+# TODO: This endpoint requires a CSRF token, to be usable via a
+# https call using CURL or requests (what the user expects when using a web-api)
+# this endpoint must also accessible using the API token via the RestFramework.
 @require_POST
 def sparql_endpoint(request):
     sparql_query = request.POST.get("query", "")
-    response_format = request.POST.get(
-        "format", "application/sparql-results+json"
-    )  # Default format
+    response_format = request.POST.get("format", "json")  # Default format
 
     # Whitelist of supported formats
     supported_formats = {
@@ -42,8 +43,8 @@ def sparql_endpoint(request):
     endpoint_url = OEKG_SPARQL_ENDPOINT_URL
     headers = {"Accept": supported_formats[response_format]}
 
-    response = requests.get(
-        endpoint_url, params={"query": sparql_query}, headers=headers
+    response = requests.post(
+        endpoint_url, data={"query": sparql_query}, headers=headers
     )
 
     # Handle different response types
