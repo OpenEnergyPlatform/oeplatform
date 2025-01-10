@@ -48,7 +48,6 @@ var MetaEdit = function(config) {
     /* recursively remove null types */
     function fixRecursive(elem) {
       Object.keys(elem).map(function(key) {
-        console.log(key);
         var prop = elem[key];
         prop.title = prop.title || key[0].toLocaleUpperCase() + key.slice(1);
         if (prop.type == 'array') {
