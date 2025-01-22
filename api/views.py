@@ -13,7 +13,7 @@ import sqlalchemy as sqla
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.db.utils import IntegrityError
@@ -251,24 +251,24 @@ class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
+            raise APIError('Schema is not in allowed set of schemes for upload')
         if schema.startswith("_"):
-            raise PermissionDenied
+            raise APIError('Schema starts with _, which is not allowed')
         if request.user.is_anonymous:
-            raise PermissionDenied
-        if actions.has_sequence(dict(schema=schema, sequence_name=sequence), {}):
-            raise APIError("Sequence already exists")
+            raise APIError('User is anonymous', 401)
+        if actions.has_table(dict(schema=schema, sequence_name=sequence), {}):
+            raise APIError("Sequence already exists", 409)
         return self.__create_sequence(request, schema, sequence, request.data)
 
     @api_exception
     @require_delete_permission
     def delete(self, request, schema, sequence):
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
+            raise APIError('Schema is not in allowed set of schemes for upload')
         if schema.startswith("_"):
-            raise PermissionDenied
+            raise APIError('Schema starts with _, which is not allowed')
         if request.user.is_anonymous:
-            raise PermissionDenied
+            raise APIError('User is anonymous', 401)
         return self.__delete_sequence(request, schema, sequence, request.data)
 
     @load_cursor()
@@ -378,9 +378,9 @@ class Table(APIView):
         :return:
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
+            raise APIError('Schema is not in allowed set of schemes for upload')
         if schema.startswith("_"):
-            raise PermissionDenied
+            raise APIError('Schema starts with _, which is not allowed')
         json_data = request.data
 
         if "column" in json_data["type"]:
@@ -393,7 +393,6 @@ class Table(APIView):
         elif "constraint" in json_data["type"]:
             # Input has nothing to do with DDL from Postgres.
             # Input is completely different.
-            # Using actions.parse_sconstd_from_constd is not applicable
             # dict.get() returns None, if key does not exist
             constraint_definition = {
                 "action": json_data["action"],  # {ADD, DROP}
@@ -431,13 +430,13 @@ class Table(APIView):
         :return:
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
+            raise APIError('Schema is not in allowed set of schemes for upload')
         if schema.startswith("_"):
-            raise PermissionDenied
+            raise APIError('Schema starts with _, which is not allowed')
         if request.user.is_anonymous:
-            raise PermissionDenied
+            raise APIError('User is anonymous', 401)
         if actions.has_table(dict(schema=schema, table=table), {}):
-            raise APIError("Table already exists")
+            raise APIError("Table already exists", 409)
         json_data = request.data.get("query", {})
         embargo_data = request.data.get("embargo") or json_data.get("embargo", {})
         constraint_definitions = []
@@ -975,10 +974,10 @@ class Rows(APIView):
                 content_type="text/csv",
                 session=session,
             )
-            response[
-                "Content-Disposition"
-            ] = 'attachment; filename="{schema}__{table}.csv"'.format(
-                schema=schema, table=table
+            response["Content-Disposition"] = (
+                'attachment; filename="{schema}__{table}.csv"'.format(
+                    schema=schema, table=table
+                )
             )
             return response
         elif format == "datapackage":
@@ -1006,10 +1005,10 @@ class Rows(APIView):
                 content_type="application/zip",
                 session=session,
             )
-            response[
-                "Content-Disposition"
-            ] = 'attachment; filename="{schema}__{table}.zip"'.format(
-                schema=schema, table=table
+            response["Content-Disposition"] = (
+                'attachment; filename="{schema}__{table}.zip"'.format(
+                    schema=schema, table=table
+                )
             )
             return response
         else:
