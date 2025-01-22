@@ -5,16 +5,18 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 Examples:
 Function views
     1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
+    2. Add a URL to urlpatterns: re_path(r'^$', views.home, name='home')
 Class-based views
     1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
+    2. Add a URL to urlpatterns: re_path(r'^$', Home.as_view(), name='home')
 Including another URLconf
     1. Add an import:  from blog import urls as blog_urls
-    2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
+    2. Add a URL to urlpatterns: re_path(r'^blog/', include(blog_urls))
 """
-from django.conf.urls import include, url
+
+from django.conf.urls import include
 from django.conf.urls.static import static
+from django.urls import path, re_path
 
 from oeplatform import settings
 
@@ -24,15 +26,15 @@ handler500 = "base.views.handler500"
 handler404 = "base.views.handler404"
 
 urlpatterns = [
-    url(r"^api/", include("api.urls")),
-    url(r"^", include("base.urls")),
-    url(r"^user/", include("login.urls")),
-    url(r"^oeo_ext/", include("oeo_ext.urls")),
-    url(r"^factsheets/", include("modelview.urls")),
-    url(r"^dataedit/", include("dataedit.urls")),
-    url(r"^ontology/", include("ontology.urls")),
-    url(r"^viewer/oeo/", include("oeo_viewer.urls")),
-    url(r"^scenario-bundles/", include("factsheet.urls")),
-    url(r"^tutorials/.*", redirect_tutorial),
-    url(r"^sparql_query/", include("sparql_query.urls")),
+    re_path(r"^api/", include("api.urls")),
+    path("", include("base.urls")),
+    re_path(r"^user/", include("login.urls")),
+    re_path(r"^oeo_ext/", include("oeo_ext.urls")),
+    re_path(r"^factsheets/", include("modelview.urls")),
+    re_path(r"^dataedit/", include("dataedit.urls")),
+    re_path(r"^ontology/", include("ontology.urls")),
+    re_path(r"^viewer/oeo/", include("oeo_viewer.urls")),
+    re_path(r"^scenario-bundles/", include("factsheet.urls")),
+    re_path(r"^tutorials/.*", redirect_tutorial),
+    re_path(r"^oekg/", include("oekg.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

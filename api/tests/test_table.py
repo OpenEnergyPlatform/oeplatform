@@ -226,7 +226,7 @@ class TestPut(APITestCase):
 
         self.test_table = "table_anonymous"
         self.api_req(
-            "put", data={"query": self._structure_data}, auth=False, exp_code=403
+            "put", data={"query": self._structure_data}, auth=False, exp_code=401
         )
         self.api_req("get", exp_code=404)
 
@@ -270,13 +270,13 @@ class TestPut(APITestCase):
         }
         self.test_table = "table_all_columns"
         self.api_req(
-            "put", data={"query": self._structure_data}, auth=False, exp_code=403
+            "put", data={"query": self._structure_data}, auth=False, exp_code=401
         )
 
 
 class TestDelete(APITestCaseWithTable):
     def test_anonymous(self):
-        self.api_req("delete", auth=False, exp_code=403)
+        self.api_req("delete", auth=False, exp_code=401)
 
     def test_wrong_user(self):
         self.api_req("delete", auth=self.other_token, exp_code=403)
