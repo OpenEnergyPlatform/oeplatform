@@ -75,11 +75,11 @@ urlpatterns = [
         views.SettingsView.as_view(),
         name="settings",
     ),
-    re_path(
-        r"^profile/(?P<user_id>[\d]+)/password_change$",
-        views.OEPPasswordChangeView.as_view(),
-        name="input",
-    ),
+    # re_path(
+    #     r"^profile/(?P<user_id>[\d]+)/password_change$",
+    #     views.OEPPasswordChangeView.as_view(),
+    #     name="input",
+    # ),
     # TODO: implement tests before we allow user deletion
     # re_path(
     #    r"^profile/(?P<user_id>[\d]+)/delete_acc$",
