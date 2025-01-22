@@ -163,6 +163,26 @@ function savePeerReview() {
   });
 }
 
+function deletePeerReview() {
+  // confirm
+  if (!confirm("Are you sure?")) {
+    return;
+  }
+
+  const json = JSON.stringify({ reviewType: 'delete', reviewData: current_review });
+
+  $('#peer_review-delete').addClass('d-none');
+
+  sendJson("POST", config.url_peer_review, json)
+    .then(function() {
+      window.location = config.url_table;
+    })
+    .catch(function(err) {
+      $('#peer_review-delete').removeClass('d-none');
+      alert(getErrorMsg(err));
+    });
+}
+
 /**
  * Submits peer review to backend
  */
