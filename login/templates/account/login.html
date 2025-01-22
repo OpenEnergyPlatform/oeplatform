@@ -10,6 +10,7 @@
 {% block content %}
 
 {% block inner %}
+  {% include 'account/messages/messages.html' %}
   <h1>{% translate "Sign In" %}</h1>
   {% get_providers as socialaccount_providers %}
   {% if socialaccount_providers %}
