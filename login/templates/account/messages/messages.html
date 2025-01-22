@@ -1,0 +1,15 @@
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-dismissible alert-success">
+      <h4>
+        Success!!!!
+      </h4>
+      <button type="button" class="btn-close" data-bs-dismiss="alert">
+      
+      </button>
+      <p class="mb-0">
+      {{message}}
+      </p>
+    </div>
+ {% endfor %}
+{% endif %}
