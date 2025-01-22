@@ -2,8 +2,10 @@
   "title": "oemetaBuilder - Create & edit oemetadata json files using OEMetadata v1.6",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/master/oemetadata/latest/schema.json",
-  "description": "Create & edit oemetadata json files using the OEMetadata v1.6 schema. See the Open Energy Platform metadata standard: https://github.com/OpenEnergyPlatform/oemetadata",
+  "description": "Application to create oemetadata in JSON format and download the JSON file to use it later or edit metadata on existing data tables. The builder currently uses the OEMetadata v1.6 schema. See the Open Energy Platform metadata standard: https://github.com/OpenEnergyPlatform/oemetadata",
   "type": "object",
+  "format": "categories",
+  "basicCategoryTitle": "General",
   "properties": {
     "name": {
       "description": "File name or database table name",
@@ -63,6 +65,17 @@
             "badge": "Platinum",
             "title": "Path",
             "format": "uri"
+          },
+          "openModalButton": {
+            "description": "Button to open a modal for HTMX request",
+            "format": "button",
+            "options": {
+              "button": {
+                "text": "Open OEO-extended",
+                "icon": "external-link-alt",
+                "action": "openModalAction"
+              }
+            }
           }
         },
         "badge": "Platinum",
@@ -580,6 +593,17 @@
                             "badge": "Platinum",
                             "title": "Path",
                             "format": "uri"
+                          },
+                          "openModalButton": {
+                            "description": "Button to open a modal for HTMX request",
+                            "format": "button",
+                            "options": {
+                              "button": {
+                                "text": "Open OEO-extended",
+                                "icon": "external-link-alt",
+                                "action": "openModalAction"
+                              }
+                            }
                           }
                         },
                         "badge": "Platinum",
@@ -625,6 +649,17 @@
                             "badge": "Platinum",
                             "title": "Path",
                             "format": "uri"
+                          },
+                          "openModalButton": {
+                            "description": "Button to open a modal for HTMX request",
+                            "format": "button",
+                            "options": {
+                              "button": {
+                                "text": "Open OEO-extended",
+                                "icon": "external-link-alt",
+                                "action": "openModalAction"
+                              }
+                            }
                           }
                         },
                         "badge": "Platinum",
@@ -837,56 +872,6 @@
       },
       "additionalProperties": false,
       "title": "Meta Metadata",
-      "options": {
-        "hidden": true
-      }
-    },
-    "_comment": {
-      "description": "Object. The “_comment”-section is used as a self-description of the final metadata-file. It is text, intended for humans and can include a link to the metadata documentation(s), required value formats and similar remarks. The comment section has no fix structure or mandatory values, but a useful self-description, similar to the one depicted here, is encouraged.",
-      "type": "object",
-      "properties": {
-        "metadata": {
-          "description": "Reference to the metadata documentation in use. Example: Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",
-          "type": ["string", "null"],
-          "title": "Metadata"
-        },
-        "dates": {
-          "description": "Comment on data/time format. Example: Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
-          "type": ["string", "null"],
-          "title": "Dates"
-        },
-        "units": {
-          "description": "Comment on units. Example: If you must use units in cells (which is discouraged), leave a space between numbers and units (100 m)",
-          "type": ["string", "null"],
-          "title": "Units"
-        },
-        "languages": {
-          "description": "Comment on language format. Example: Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
-          "type": ["string", "null"],
-          "title": "Languages"
-        },
-        "licenses": {
-          "description": "Reference to license format. Example: License name must follow the SPDX License List (https://spdx.org/licenses/)",
-          "type": ["string", "null"],
-          "title": "Licenses"
-        },
-        "review": {
-          "description": "Reference to review documentation. Example: Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
-          "type": ["string", "null"],
-          "title": "Review"
-        },
-        "null": {
-          "description": "Feel free to add more descriptive comments. Like \"null\". Example: If a field is not applicable just enter \"null\"",
-          "type": ["string", "null"],
-          "title": "Null"
-        },
-        "todo": {
-          "description": "If an applicable value is not yet available and will be inserted later on use: 'todo' ",
-          "type": ["string", "null"],
-          "title": "Todo"
-        }
-      },
-      "title": "_comment",
       "options": {
         "hidden": true
       }

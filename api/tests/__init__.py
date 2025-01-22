@@ -68,13 +68,13 @@ class APITestCase(TestCase):
 
     def api_req(
         self,
-        method,
-        table=None,
-        schema=None,
-        path=None,
-        data=None,
+        method: str,
+        table: str = None,
+        schema: str = None,
+        path: str = None,
+        data: dict = None,
         auth=None,
-        exp_code=None,
+        exp_code: int = None,
         exp_res=None,
     ):
         path = path or ""
@@ -116,7 +116,14 @@ class APITestCase(TestCase):
                 exp_code = 201
             else:
                 exp_code = 200
-        self.assertEqualJson(resp.status_code, exp_code, msg=json_resp)
+
+        if not isinstance(exp_code, (list, tuple)):
+            exp_code = [exp_code]
+
+        self.assertTrue(
+            resp.status_code in exp_code,
+            f"Status {resp.status_code} not in {exp_code}: {json_resp}",
+        )
 
         if exp_res:
             if json_resp and "data" in json_resp:
@@ -125,7 +132,9 @@ class APITestCase(TestCase):
 
         return json_resp
 
-    def create_table(self, structure=None, data=None, schema=None, table=None):
+    def create_table(
+        self, structure=None, data=None, schema=None, table=None, exp_code=201
+    ):
         # default structure
         structure = structure or {"columns": [{"name": "id", "data_type": "bigint"}]}
         self.api_req("put", table, schema, data={"query": structure})
@@ -136,15 +145,15 @@ class APITestCase(TestCase):
                 schema,
                 "rows/new",
                 data={"query": data},
-                exp_code=201,
+                exp_code=exp_code,
             )
 
-    def drop_table(self, schema=None, table=None):
-        self.api_req("delete", table, schema)
+    def drop_table(self, schema=None, table=None, exp_code=200):
+        self.api_req("delete", table, schema, exp_code=exp_code)
 
 
 class APITestCaseWithTable(APITestCase):
-    """Test class with that creates/deletes the table alreadyon setup/teardown"""
+    """Test class with that creates/deletes the table already on setup/teardown"""
 
     test_structure = {
         "constraints": [
@@ -183,5 +192,5 @@ class APITestCaseWithTable(APITestCase):
         self.create_table(structure=self.test_structure, data=self.test_data)
 
     def tearDown(self) -> None:
-        super().setUp()
+        super().tearDown()
         self.drop_table()
