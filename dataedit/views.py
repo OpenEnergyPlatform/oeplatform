@@ -2219,6 +2219,17 @@ class PeerReviewView(LoginRequiredMixin, View):
             review_finished = review_datamodel.get("reviewFinished")
             # TODO: Send a notification to the user that he can't review tables
             # he is the table holder.
+            if review_post_type == "delete":
+                if review_id:
+                    peer_review = PeerReview.objects.filter(id=review_id).first()
+                    if peer_review:
+                        peer_review.delete()
+                        return JsonResponse({"message": "PeerReview successfully deleted."})
+                    else:
+                        return JsonResponse({"error": "PeerReview not found."}, status=404)
+                else:
+                    return JsonResponse({"error": "Review ID is required."}, status=400)
+
             contributor = PeerReviewManager.load_contributor(schema, table)
 
             if contributor is not None:
