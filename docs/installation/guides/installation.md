@@ -1,7 +1,6 @@
 # Install and setup the OpenEnergyPlatform Application
 
 Below we describe the manual installation of the oeplatform code and infrastructure.
-The installation steps have been proofed on linux and windows for python 3.10.
 
 !!! tip
     We also offer the possibility to use [docker](https://www.docker.com/), to install the oeplatform and additional databases. As the hole setup is pre-configured docker can be used to automatically install the hole infrastructure.
@@ -11,7 +10,7 @@ The installation steps have been proofed on linux and windows for python 3.10.
     [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
 
 !!! danger
-    Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features. 
+    Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features.
     It is not mandatory to run the core functionality of the oeplatform. You need to install it manually as described in the installation guide.
 
 
@@ -32,6 +31,7 @@ The installation steps have been proofed on linux and windows for python 3.10.
     1. Get code & install dependencies.
         - `git clone https://github.com/OpenEnergyPlatform/oeplatform.git`
         - `cd oeplatform`
+        - Install python 3.10.
         - `python -m venv env`
         - `source env/bin/activate`
         - `pip install -r requirements.txt`
@@ -106,9 +106,9 @@ The installation steps have been proofed on linux and windows for python 3.10.
 
 ## 0 Prequisit
 
-The installation instructions mainly refer to the creation of a local instance of the oeplatform with a focus on the development or contribution to the software development on github. Before you start the installation look at [this section](./development-setup.md#choose-your-development-environment-and-tools) and think about which operating system you want to use.
+The installation instructions mainly refer to the creation of a local instance of the oeplatform with a focus on the development or contribution to the software development on github. We use mainly linux and sometimes windows for development with python 3.10 currently (Python 3.12 is also tested with some tweaks in the requirements.txt). Before you start the installation look at [this section](./development-setup.md#choose-your-development-environment-and-tools) and think about which operating system you want to use.
 
-Deploying the software on a server to make it publicly accessible via the Internet is a further step.
+Deploying the software on a server to make it publicly accessible via the Internet is a further step. Please get in touch as the deployment depends heavily on your server setup.
 
 ### Notes for deployment
 
@@ -150,7 +150,7 @@ On linux you can use:
     python3 -m venv env
     source env/bin/activate
 
-### Install requirements 
+### Install requirements
 After you have activated your virtual environment, install the required python libraries
 
     pip install -r requirements.txt
@@ -213,7 +213,9 @@ Additional we use a triple store database:
 
 ### 5.1 How to install the databases
 
-You have two options to install the database:
+You can install the database and connect it to django as you like. Note that we currently use PostgreSQL version 14.
+
+Below we offer our best practice to setup the databases. You have two options to install the databases:
 
 #### a) Install the database manually
    * You chose to install the databases manually by installing PostgreSQL & jenna-fuseki and complete the setup. In this case you can follow our [manual database setup guide](./manual-db-setup.md).
@@ -259,7 +261,7 @@ Only start the following steps if you have completed step 3 above.
 
 The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see and use the oeo-viewer as part of the oep-website, follow the steps below:
 
-1. Install npm:  
+1. Install npm:
    To install npm it is suggested to use the node version manager.
      - On Linux & Mac:  [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm)
      - On Windows: [NVM for Windows](https://github.com/coreybutler/nvm-windows).
@@ -283,7 +285,7 @@ After these steps, a `static` folder inside `oep-website/oeplatform/oeo_viewer/`
 In the django app directory `oeplatform/factsheet` we provide a Web-API to access the OEKG and the Scenario-Bundle feature. Similar to the oeo-viewer we need to use npm to install & build the Scenario-Bundle app and integrate the build in the django app.
 
 1. Make sure npm is installed.
-2. Start the jenna-fuseki database (see [instructions](./manual-db-setup.md#12-install-apache-jena-fuseki) from the installation).  
+2. Start the jenna-fuseki database (see [instructions](./manual-db-setup.md#12-install-apache-jena-fuseki) from the installation).
    The connection to the database API is setup in the factsheet/views.py you have to make sure that you provide the correct URL to you database instance. In development mode it should be something like:
    ```py
    query_endpoint = 'http://localhost:3030/ds/query'
@@ -303,7 +305,7 @@ In the django app directory `oeplatform/factsheet` we provide a Web-API to acces
       python manage.py build_factsheet_app
       ```
 
-5. Serve the React build on a django website  
+5. Serve the React build on a django website
 
      To serve the React build on a website that is provided by django you have to include the build files from the `factsheet/static` directory in the django template in `factsheet/templates/index.html`. In the HTML-template you must make sure that the JavaScript bundle file is imported. The name of the file changes after each new build and it should read like `main.5654a0e0.js`.
 

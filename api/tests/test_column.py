@@ -35,7 +35,7 @@ class TestPut(APITestCaseWithTable):
 
     def test_anonymous(self):
         structure_data = {"data_type": "varchar", "character_maximum_length": 30}
-        self.api_req("put", data={"query": structure_data}, auth=False, exp_code=403)
+        self.api_req("put", data={"query": structure_data}, auth=False, exp_code=401)
 
     def test_wrong_user(self):
         structure_data = {"data_type": "varchar", "character_maximum_length": 30}
