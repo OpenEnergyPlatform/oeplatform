@@ -39,6 +39,8 @@ $('#submit_summary').bind('click', submitPeerReview);
 $('#peer_review-save').bind('click', savePeerReview);
 // Cancel review
 $('#peer_review-cancel').bind('click', cancelPeerReview);
+// Delete review
+$('#peer_review-delete').bind('click', deletePeerReview);
 // OK Field View Change
 $('#ok-button').bind('click', hideReviewerOptions);
 $('#ok-button').bind('click', saveEntrances);
