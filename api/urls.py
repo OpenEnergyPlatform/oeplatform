@@ -203,4 +203,9 @@ urlpatterns = [
         views.ScenarioDataTablesListAPIView.as_view(),
         name="list-scenario-datasets",
     ),
+    re_path(
+        r"^v0/scenario-bundle/scenario/manage-datasets/?$",
+        views.ManageScenarioDatasets.as_view(),
+        name="add-scenario-datasets",
+    ),
 ]
