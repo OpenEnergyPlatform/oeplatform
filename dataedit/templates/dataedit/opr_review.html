@@ -102,10 +102,14 @@
         <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--quit">
           <button id="peer_review-cancel">Quit</button>
         </div>
-          <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--delete">
-          <button id="peer_review-delete">Delete</button>
-        </div>
+          {% if review_id is not None and not review_finished %}
+          	<div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--delete">
+        <button class="btn btn-dark" id="peer_review-delete">Delete</button>
+    </div>
+          {% endif %} 
+
       </div>
+    
     </div>
   </div>
   <div class="content">
