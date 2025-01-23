@@ -2156,7 +2156,9 @@ class PeerReviewView(LoginRequiredMixin, View):
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
             "state_dict": json.dumps(state_dict),
-        }
+            "review_finished": review_finished,
+            "review_id": review_id,
+                }
         return render(request, "dataedit/opr_review.html", context=context_meta)
 
     def post(self, request, schema, table, review_id=None):
