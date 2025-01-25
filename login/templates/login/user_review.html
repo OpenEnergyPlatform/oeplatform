@@ -434,6 +434,18 @@
 
 {% block after-body-bottom-js %}
 <script>
+
+  var config = {
+    url_peer_review: "{% url 'delete_peer_review_simple' %}",
+    review_id: "{{ latest_review_id }}"    // ID for в POST request
+  };
+
+</script>
+
+  <script src="{% static '/peer_review/opr_reviewer.js' %}"></script>
+
+
+<script>
     $(function () {
         $('[data-bs-toggle="popover"]').popover()
     } )
