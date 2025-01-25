@@ -2145,6 +2145,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             "topic": schema,
             "table": table,
             "review_finished": review_finished,
+            "review_id": review_id,
         }
         context_meta = {
             # need this here as json.dumps breaks the template syntax access
