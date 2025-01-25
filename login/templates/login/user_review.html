@@ -140,6 +140,8 @@
                             <a href="{% url 'dataedit:peer_review_reviewer' reviewer_reviewed.latest_active.schema reviewer_reviewed.latest_active.table reviewer_reviewed.latest_active.id %}" class="btn btn-primary">
                                 {{ reviewer_reviewed.latest_active.schema }} - {{ reviewer_reviewed.latest_active.table }}
                             </a>
+        <button class="btn btn-dark" id="peer_review-delete">Delete</button>
+
                         </div>
                         <div class="profile-rvw__item-history">
                             <!-- remove button wrapper div once history dropdown is implemented -->
@@ -434,9 +436,6 @@
 <script>
     $(function () {
         $('[data-bs-toggle="popover"]').popover()
-        // $('.popover-dismiss').popover({
-        //     trigger: 'focus'
-        // })
     } )
 
 </script>
