@@ -169,7 +169,7 @@ function deletePeerReview() {
     return;
   }
 
-  const json = JSON.stringify({ reviewType: 'delete', reviewData: current_review });
+  const json = JSON.stringify({ reviewType: 'delete', reviewData: current_review, review_id: current_review.review_id || config.review_id});
 
   $('#peer_review-delete').addClass('d-none');
 
