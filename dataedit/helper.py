@@ -2,8 +2,10 @@
 Provide helper functionality for views to reduce code lines in views.py
 make the codebase more modular.
 """
+from django.http import JsonResponse
 
-from dataedit.models import Table
+from dataedit.models import Table, PeerReview
+
 
 ##############################################
 #          Table view related                #
@@ -282,6 +284,26 @@ def process_review_data(review_data, metadata, categories):
         state_dict[field_key] = state
 
     return state_dict
+
+
+def delete_peer_review(review_id):
+    """
+    Remove Peer Review by review_id.
+    Args:
+        review_id (int): ID review.
+
+    Returns:
+        JsonResponse: JSON response about successful deletion or error.
+    """
+    if review_id:
+        peer_review = PeerReview.objects.filter(id=review_id).first()
+        if peer_review:
+            peer_review.delete()
+            return JsonResponse({"message": "PeerReview successfully deleted."})
+        else:
+            return JsonResponse({"error": "PeerReview not found."}, status=404)
+    else:
+        return JsonResponse({"error": "Review ID is required."}, status=400)
 
 
 
