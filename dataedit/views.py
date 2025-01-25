@@ -42,7 +42,7 @@ from django.utils.decorators import method_decorator
 from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
-from dataedit.helper import merge_field_reviews, process_review_data, recursive_update
+from dataedit.helper import merge_field_reviews, process_review_data, recursive_update, delete_peer_review
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
@@ -2223,15 +2223,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             # TODO: Send a notification to the user that he can't review tables
             # he is the table holder.
             if review_post_type == "delete":
-                if review_id:
-                    peer_review = PeerReview.objects.filter(id=review_id).first()
-                    if peer_review:
-                        peer_review.delete()
-                        return JsonResponse({"message": "PeerReview successfully deleted."})
-                    else:
-                        return JsonResponse({"error": "PeerReview not found."}, status=404)
-                else:
-                    return JsonResponse({"error": "Review ID is required."}, status=400)
+                return delete_peer_review(review_id)
 
             contributor = PeerReviewManager.load_contributor(schema, table)
 
