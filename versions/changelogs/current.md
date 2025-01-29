@@ -8,11 +8,15 @@
 
 - Removed the outdated & unmaintained references module that was intended to handle bibtex files and store them in a django model [(#1913)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1913).
 
-- Change sparql endpoint for OEKG to use the http post method to match the expected usage  [(#1913)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1913).
+- Change sparql endpoint for OEKG to use the http post method to match the expected usage [(#1913)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1913).
 
 - Extract header/footer template [(#1914)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1914)
 
 ## Features
+
+- divide metadata builder flow into subsections [(#1747)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1747)
+
+- update tab indicators once all fields in a specific metadata category are reviewed [(#1900)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1900)
 
 ## Bugs
 
