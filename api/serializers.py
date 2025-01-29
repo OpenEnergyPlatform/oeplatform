@@ -72,7 +72,7 @@ class DatasetSerializer(serializers.Serializer):
                 "Dataset name should contain only"
                 "alphanumeric characters and underscores."
             )
-        # Add any additional custom validation logic here
+
         return value
 
 
@@ -88,7 +88,7 @@ class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
             UUID(str(value))
         except ValueError:
             raise serializers.ValidationError("Invalid UUID format for scenario.")
-        # Add any additional custom validation logic here
+
         return value
 
     # Custom validation for the entire dataset list
@@ -101,5 +101,4 @@ class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
         if len(dataset_names) != len(set(dataset_names)):
             raise serializers.ValidationError("Dataset names must be unique.")
 
-        # Add any additional custom validation logic here
         return value
