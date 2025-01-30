@@ -47,14 +47,17 @@ $('#ok-button').bind('click', saveEntrances);
 // Suggestion Field View Change
 $('#suggestion-button').bind('click', showReviewerOptions);
 $('#suggestion-button').bind('click', updateSubmitButtonColor);
+$('#suggestion-button').bind('click', hideReviewerCommentOptions);
+
 // Reject Field View Change
 $('#rejected-button').bind('click', showReviewerCommentsOptions);
 $('#rejected-button').bind('click', updateSubmitButtonColor);
+$('#rejected-button').bind('click', hideReviewerOptions);
+
 // Clear Input fields when new tab is selected
 // nav items are selected via their class
 $('.nav-link').click(clearInputFields);
 // field items selector
-
 /**
  * Returns name from cookies
  * @param {string} name Key to look up in cookie
@@ -162,7 +165,6 @@ function savePeerReview() {
     alert(getErrorMsg(err));
   });
 }
-
 function deletePeerReview() {
   // confirm
   if (!confirm("Are you sure?")) {
@@ -279,7 +281,6 @@ function click_field(fieldKey, fieldValue, category) {
 
     const fieldState = getFieldState(fieldKey);
     const fieldWasEvaluated = fieldEvaluations[fieldKey]; // Check if the field has been evaluated
-
     if (fieldState) {
         if (fieldState === 'ok' && !fieldWasEvaluated) {
             document.getElementById("ok-button").disabled = true;
@@ -318,7 +319,6 @@ function click_field(fieldKey, fieldValue, category) {
         fieldEvaluations[fieldKey] = 'suggestion';
     });
 
-
     reviewItem.forEach(function(div) {
         div.style.backgroundColor = '';
     });
@@ -327,6 +327,7 @@ function click_field(fieldKey, fieldValue, category) {
     }
     clearInputFields();
     hideReviewerOptions();
+    hideReviewerCommentOptions();
 }
 
 // Initialize the review buttons state on page load
@@ -640,7 +641,6 @@ function showToast(title, message, type) {
   var bsToast = new bootstrap.Toast(toast);
   bsToast.show();
 }
-console.log(9)
 /**
  * Saves field review to current review list
  */
@@ -921,6 +921,8 @@ function showReviewerCommentsOptions() {
  */
 function hideReviewerOptions() {
   $("#reviewer_remarks").addClass('d-none');
+}
+function hideReviewerCommentOptions() {
   $("#reviewer_comments").addClass('d-none');
 }
 
