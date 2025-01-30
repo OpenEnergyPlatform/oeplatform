@@ -434,15 +434,20 @@
 
 {% block after-body-bottom-js %}
 <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    config.redirectUrl = window.location.href;  // redirect to the same page
+    config.url_table = window.location.href;  // url for redirect
+  });
 
   var config = {
     url_peer_review: "{% url 'delete_peer_review_simple' %}",
-    review_id: "{{ latest_review_id }}"    // ID for в POST request
+    review_id: "{{ latest_review_id }}"
   };
-
 </script>
 
+
   <script src="{% static '/peer_review/opr_reviewer.js' %}"></script>
+
 
 
 <script>
