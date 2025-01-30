@@ -645,6 +645,19 @@ console.log(9)
  * Saves field review to current review list
  */
 function saveEntrances() {
+    if (selectedState === "rejected") {
+        const comments = document.getElementById('comments');
+
+        if (comments.value.trim() === '') {
+            comments.setCustomValidity('Comment is required');
+            showToast("Error", "The comment text field is required to save the field review!", "error");
+            return;
+        } else {
+            comments.setCustomValidity('');
+        }
+
+        valuearea.reportValidity();
+    }
     // If the field state is neither "ok" nor "rejected", user input should be checked for suggestions
     if (selectedState !== "ok" && selectedState !== "rejected") {
         const valuearea = document.getElementById('valuearea');
@@ -776,6 +789,7 @@ function saveEntrances() {
     selectNextField();
     renderSummaryPageFields();
     updateTabProgressIndicatorClasses();
+    check_if_review_finished();
 }
 function getFieldState(fieldKey) {
   if (state_dict && state_dict[fieldKey] !== undefined) {
@@ -786,7 +800,6 @@ function getFieldState(fieldKey) {
     return null;
   }
 }
-console.log(7)
 /**
  * Checks if all fields are reviewed and activates submit button if ready
  */
@@ -831,17 +844,19 @@ function checkReviewComplete() {
 }
 
 function checkFieldStates() {
-  const fieldList = getAllFieldsAndValues();
+    const allFields = getAllFieldsAndValues();
 
-  for (const { fieldName, fieldValue } of fieldList) {
-    if (!isEmptyValue(fieldValue)) {
-      const fieldState = state_dict[fieldName];
-      if (fieldState !== 'ok' && fieldState !== 'rejected') {
-        return false;
-      }
+    for (const { fieldName, fieldValue } of allFields) {
+        if (!isEmptyValue(fieldValue)) {
+            const fieldState = getFieldState(fieldName);
+            const review = current_review["reviews"].find((r) => r.key === fieldName);
+
+            if (!review || (fieldState === 'rejected' && (!review.fieldReview.additionalComment || review.fieldReview.additionalComment.trim() === ''))) {
+                return false;
+            }
+        }
     }
-  }
-  return true;
+    return true;
 }
 
 
@@ -851,46 +866,45 @@ function checkFieldStates() {
  * Also deactivates the submitbutton.
  */
 function check_if_review_finished() {
-  if (checkFieldStates() && !clientSideReviewFinished) {
-    clientSideReviewFinished = true;
-    showToast("Review completed!", "You completed the review and can now award a suitable badge!", 'success');
-    // Creating the div with radio buttons
-    var reviewerDiv = $('<div class="bg-warning" id="finish-review-div"></div>');
-    var bronzeRadio = $('<input type="radio" name="reviewer-option" value="bronze"> Bronze<br>');
-    var silverRadio = $('<input type="radio" name="reviewer-option" value="silver"> Silver<br>');
-    var goldRadio = $('<input type="radio" name="reviewer-option" value="gold"> Gold<br>');
-    var platinRadio = $('<input type="radio" name="reviewer-option" value="platin"> Platin <br>');
-    var reviewText = $('<p>The review is complete. Please award a badge and finish the review.</p>');
-    var finishButton = $('<button type="button" id="review-finish-button">Finish</button>');
-
-
-
-    // Adding the radio buttons, text, and button to the div
-    reviewerDiv.append(reviewText);
-    reviewerDiv.append(bronzeRadio);
-    reviewerDiv.append(silverRadio);
-    reviewerDiv.append(goldRadio);
-    reviewerDiv.append(platinRadio);
-    reviewerDiv.append(finishButton);
-
-    finishButton.on('click', finishPeerReview);
-
-    if (config.review_finished !== true) {
-      // Displaying the div
-      reviewerDiv.show();
-      $('#submit_summary').prop('disabled', true);
-    } else {
-      reviewerDiv.hide(); // Hiding the div
-      $('#submit_summary').hide();
-      $('#peer_review-save').hide();
-      // $('#review-window').hide();
-      $('#review-window').css('visibility', 'hidden');
+    if (!checkFieldStates()) {
+        return;
     }
 
-    // Adding the div to the desired location in the document
-    $('.content-finish-review').append(reviewerDiv);
-  }
+    if (!clientSideReviewFinished) {
+        clientSideReviewFinished = true;
+        showToast("Review completed!", "You completed the review and can now award a suitable badge!", 'success');
+
+        var reviewerDiv = $('<div class="bg-warning" id="finish-review-div"></div>');
+        var bronzeRadio = $('<input type="radio" name="reviewer-option" value="bronze"> Bronze<br>');
+        var silverRadio = $('<input type="radio" name="reviewer-option" value="silver"> Silver<br>');
+        var goldRadio = $('<input type="radio" name="reviewer-option" value="gold"> Gold<br>');
+        var platinRadio = $('<input type="radio" name="reviewer-option" value="platin"> Platin <br>');
+        var reviewText = $('<p>The review is complete. Please award a badge and finish the review.</p>');
+        var finishButton = $('<button type="button" id="review-finish-button">Finish</button>');
+
+        reviewerDiv.append(reviewText);
+        reviewerDiv.append(bronzeRadio);
+        reviewerDiv.append(silverRadio);
+        reviewerDiv.append(goldRadio);
+        reviewerDiv.append(platinRadio);
+        reviewerDiv.append(finishButton);
+
+        finishButton.on('click', finishPeerReview);
+
+        if (!config.review_finished) {
+            reviewerDiv.show();
+            $('#submit_summary').prop('disabled', true);
+        } else {
+            reviewerDiv.hide();
+            $('#submit_summary').hide();
+            $('#peer_review-save').hide();
+            $('#review-window').css('visibility', 'hidden');
+        }
+
+        $('.content-finish-review').append(reviewerDiv);
+    }
 }
+
 
 /**
  * Shows reviewer Comment and Suggestion Input options
