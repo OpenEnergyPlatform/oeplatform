@@ -1,10 +1,10 @@
 from uuid import UUID
 
 import requests
-from sparqlModels import DatasetConfig
 from SPARQLWrapper import JSON, POST
 
 from factsheet.oekg.connection import sparql_wrapper_update, update_endpoint
+from oekg.sparqlModels import DatasetConfig
 
 
 def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig):
