@@ -410,7 +410,8 @@ function Factsheet(props) {
 
 
       const filteredResult = filterByValue(selectedTechnologies, technologies);
-      setSelectedTechnologiesTree(filteredResult[0]["children"]);
+      // setSelectedTechnologiesTree(filteredResult[0]);
+      // setSelectedTechnologies(s)
 
       function getAllNodeIds(nodes) {
         let ids = [];
@@ -426,13 +427,9 @@ function Factsheet(props) {
       const allIds = getAllNodeIds(filteredResult[0]["children"]);
       setAllNodeIds(allIds);
 
-  }, []);
+    }, []);
 
-
-    
-
-
-  }, [selectedTechnologies, technologies]);
+  }, []); // Todo: check if the empty dependency array raises errors
 
   const handleSaveFactsheet = () => {
     setOpenBackDrop(true);
@@ -2010,6 +2007,7 @@ function Factsheet(props) {
     ]
   }
   const scenario_count = 'Scenarios' + ' (' + scenarios.length + ')';
+  console.log(scenarios);
   const renderScenariosOverview = () => (
     <Container maxWidth="lg2" sx={{ padding: '0px !important' }}>
       {
