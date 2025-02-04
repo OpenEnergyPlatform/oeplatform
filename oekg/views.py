@@ -4,8 +4,8 @@ from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
-from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
 from oekg.utils import validate_sparql_query
+from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
 
 
 def main_view(request):
@@ -16,6 +16,9 @@ def main_view(request):
 
 @require_POST
 def sparql_endpoint(request):
+    """
+    Public SPARQL endpoint. Must only allow read queries.
+    """
     sparql_query = request.POST.get("query", "")
 
     if not sparql_query:
