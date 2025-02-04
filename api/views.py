@@ -50,13 +50,13 @@ from api.serializers import (
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
-from api.sparql_helpers import add_datasets_to_scenario, remove_datasets_from_scenario
 from dataedit.models import Embargo
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
-from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
+from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
+from oekg.sparqlQuery import add_datasets_to_scenario, remove_datasets_from_scenario
 from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
 
 if USE_LOEP:
@@ -251,11 +251,11 @@ class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError('Schema is not in allowed set of schemes for upload')
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise APIError('Schema starts with _, which is not allowed')
+            raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
-            raise APIError('User is anonymous', 401)
+            raise APIError("User is anonymous", 401)
         if actions.has_table(dict(schema=schema, sequence_name=sequence), {}):
             raise APIError("Sequence already exists", 409)
         return self.__create_sequence(request, schema, sequence, request.data)
@@ -264,11 +264,11 @@ class Sequence(APIView):
     @require_delete_permission
     def delete(self, request, schema, sequence):
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError('Schema is not in allowed set of schemes for upload')
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise APIError('Schema starts with _, which is not allowed')
+            raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
-            raise APIError('User is anonymous', 401)
+            raise APIError("User is anonymous", 401)
         return self.__delete_sequence(request, schema, sequence, request.data)
 
     @load_cursor()
@@ -378,9 +378,9 @@ class Table(APIView):
         :return:
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError('Schema is not in allowed set of schemes for upload')
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise APIError('Schema starts with _, which is not allowed')
+            raise APIError("Schema starts with _, which is not allowed")
         json_data = request.data
 
         if "column" in json_data["type"]:
@@ -430,11 +430,11 @@ class Table(APIView):
         :return:
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError('Schema is not in allowed set of schemes for upload')
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise APIError('Schema starts with _, which is not allowed')
+            raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
-            raise APIError('User is anonymous', 401)
+            raise APIError("User is anonymous", 401)
         if actions.has_table(dict(schema=schema, table=table), {}):
             raise APIError("Table already exists", 409)
         json_data = request.data.get("query", {})
@@ -974,10 +974,10 @@ class Rows(APIView):
                 content_type="text/csv",
                 session=session,
             )
-            response["Content-Disposition"] = (
-                'attachment; filename="{schema}__{table}.csv"'.format(
-                    schema=schema, table=table
-                )
+            response[
+                "Content-Disposition"
+            ] = 'attachment; filename="{schema}__{table}.csv"'.format(
+                schema=schema, table=table
             )
             return response
         elif format == "datapackage":
@@ -1005,10 +1005,10 @@ class Rows(APIView):
                 content_type="application/zip",
                 session=session,
             )
-            response["Content-Disposition"] = (
-                'attachment; filename="{schema}__{table}.zip"'.format(
-                    schema=schema, table=table
-                )
+            response[
+                "Content-Disposition"
+            ] = 'attachment; filename="{schema}__{table}.zip"'.format(
+                schema=schema, table=table
             )
             return response
         else:
@@ -1586,10 +1586,11 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
 class ManageScenarioDatasets(APIView):
     permission_classes = [IsAuthenticated]  # Require authentication
 
-    @only_if_user_is_owner_of_scenario_bundle
+    @post_only_if_user_is_owner_of_scenario_bundle
     def post(self, request):
         serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
         if serializer.is_valid():
+            bundle_uuid = serializer.validated_data["scenario_bundle"]
             scenario_uuid = serializer.validated_data["scenario"]
             datasets = serializer.validated_data["dataset"]
 
@@ -1601,7 +1602,7 @@ class ManageScenarioDatasets(APIView):
                 # Add datasets to the scenario in the bundle (implementation depends
                 # on your model)
                 success = add_datasets_to_scenario(
-                    scenario_uuid, dataset_name, dataset_type
+                    bundle_uuid, scenario_uuid, dataset_name, dataset_type
                 )
                 if not success:
                     return Response(
@@ -1616,7 +1617,7 @@ class ManageScenarioDatasets(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @only_if_user_is_owner_of_scenario_bundle
+    @post_only_if_user_is_owner_of_scenario_bundle
     def delete(self, request):
         serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
         if serializer.is_valid():
