@@ -12,6 +12,8 @@
 
 - Extract header/footer template [(#1914)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1914)
 
+Update the oemetadata sectionin 'dataedit/static/metaEdit/' to enable metadata editing for the new oemetadata v2. Additionally, introduce more extensive category tabs to enhance the metaBuilder UI [(#1914)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1914).
+
 ## Features
 
 - divide metadata builder flow into subsections [(#1747)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1747)
