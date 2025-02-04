@@ -325,6 +325,7 @@ function click_field(fieldKey, fieldValue, category) {
     if (selectedDiv) {
         selectedDiv.style.backgroundColor = '#F6F9FB';
     }
+
     clearInputFields();
     hideReviewerOptions();
     hideReviewerCommentOptions();
@@ -851,7 +852,13 @@ function checkFieldStates() {
             const fieldState = getFieldState(fieldName);
             const review = current_review["reviews"].find((r) => r.key === fieldName);
 
-            if (!review || (fieldState === 'rejected' && (!review.fieldReview.additionalComment || review.fieldReview.additionalComment.trim() === ''))) {
+            // ✅ 1. Проверка, что состояние поля "ok" или "rejected"
+            if (fieldState !== 'ok' && fieldState !== 'rejected') {
+                return false;
+            }
+
+            // ✅ 2. Проверка, что если поле "rejected", то у него есть `additionalComment`
+            if (fieldState === 'rejected' && (!review || !review.fieldReview.additionalComment || review.fieldReview.additionalComment.trim() === '')) {
                 return false;
             }
         }
