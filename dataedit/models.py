@@ -719,5 +719,6 @@ class PeerReviewManager(models.Model):
         """
         return PeerReview.objects.filter(schema=schema, table=table)
 
+    @staticmethod
     def filter_opr_by_id(opr_id):
         return PeerReview.objects.filter(id=opr_id).first()
