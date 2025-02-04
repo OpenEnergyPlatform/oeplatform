@@ -77,6 +77,9 @@ class DatasetSerializer(serializers.Serializer):
 
 
 class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
+    scenario_bundle = serializers.UUIDField(
+        required=True
+    )  # Validate the scenario bundle UUID
     scenario = serializers.UUIDField(required=True)  # Validate the scenario UUID
     dataset = serializers.ListField(
         child=DatasetSerializer(), required=True
