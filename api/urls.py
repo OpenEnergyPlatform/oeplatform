@@ -205,7 +205,7 @@ urlpatterns = [
     ),
     re_path(
         r"^v0/scenario-bundle/scenario/manage-datasets/?$",
-        views.ManageScenarioDatasets.as_view(),
+        views.ManageOekgScenarioDatasets.as_view(),
         name="add-scenario-datasets",
     ),
 ]
