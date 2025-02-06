@@ -2355,9 +2355,6 @@ class PeerRreviewContributorView(PeerReviewView):
         Handle POST requests for contributor's review. Merges and updates
         the review data in the PeerReview table.
 
-        Missing parts:
-            - merge contributor field review and reviewer field review
-
         Args:
             request (HttpRequest): The incoming HTTP POST request.
             schema (str): The schema of the table.
@@ -2367,9 +2364,6 @@ class PeerRreviewContributorView(PeerReviewView):
         Returns:
             HttpResponse: Rendered HTML response for contributor review.
 
-        Note:
-            This method has some missing parts regarding the merging of contributor
-            and reviewer field review.
         """
 
         context = {}

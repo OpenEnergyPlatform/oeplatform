@@ -14,6 +14,8 @@
 
 ## Features
 
+- Implement new API Endpoint to add new datasets to a scenario bundle -> scenario -> input or output datasets. This eases bulk adding datasets. The API provides extensive error messages. Datasets listed in the scenario topic on the OEP and external datasets registered on the databus.openenergyplatform.org can be used. [(#1914)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1894)
+
 - divide metadata builder flow into subsections [(#1747)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1747)
 
 - update tab indicators once all fields in a specific metadata category are reviewed [(#1900)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1900)
@@ -21,3 +23,5 @@
 ## Bugs
 
 ## Documentation updates
+
+- Provide documentation for the OEKG:Scenario Bundle dataset management as described in #1890 [(#1914)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1894)

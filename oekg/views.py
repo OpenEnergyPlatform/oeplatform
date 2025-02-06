@@ -4,8 +4,8 @@ from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
+from oekg.utils import validate_public_sparql_query
 from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
-from oekg.utils import validate_sparql_query
 
 
 def main_view(request):
@@ -16,19 +16,22 @@ def main_view(request):
 
 @require_POST
 def sparql_endpoint(request):
+    """
+    Public SPARQL endpoint. Must only allow read queries.
+    """
     sparql_query = request.POST.get("query", "")
 
     if not sparql_query:
         return HttpResponseBadRequest("Missing 'query' parameter.")
 
-    if not validate_sparql_query(sparql_query):
+    if not validate_public_sparql_query(sparql_query):
         raise SuspiciousOperation("Invalid SPARQL query.")
 
     endpoint_url = OEKG_SPARQL_ENDPOINT_URL
 
     headers = {"Accept": "application/sparql-results+json"}
 
-    response = requests.get(
+    response = requests.post(
         endpoint_url, params={"query": sparql_query}, headers=headers
     )
 
