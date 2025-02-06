@@ -61,28 +61,33 @@ def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig):
     Function to add datasets to a scenario bundle in Jena Fuseki.
     """
 
-    new_dataset_uid = UUID()
+    # Check if a dataset with the same label exists
+    if dataset_exists(oekgDatasetConfig.scenario_uuid, oekgDatasetConfig.dataset_url):
+        return False  # Skip insertion
 
+    # Check: used constant string values here. Get ids from oeo
+    # graph to make sure ids still exists?
     if oekgDatasetConfig.dataset_type == "input":
         rel_property = "RO_0002233"
+        type_entity = "OEO_00030029"
     elif oekgDatasetConfig.dataset_type == "output":
         rel_property = "RO_0002234"
+        type_entity = "OEO_00030030"
 
+    # oeo:has_id "{oekgDatasetConfig.dataset_id}" ;
+    # The above seems to be deprecated in the OEKG
     sparql_query = f"""
     PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
     INSERT DATA {{
-        GRAPH <http://openenergy-platform.org/ontology/oekg/{oekgDatasetConfig.scenario_uuid}> {{
-            <http://openenergy-platform.org/ontology/oekg/input_datasets/{new_dataset_uid}> a oeo:OEO_00030030 ;
-                rdfs:label "{oekgDatasetConfig.dataset_label}" ;
-                oeo:has_iri "{oekgDatasetConfig.dataset_url}" ;
-                oeo:has_id "{oekgDatasetConfig.dataset_id}" ;
-                oeo:has_key "{oekgDatasetConfig.dataset_key}" .
+        <http://openenergy-platform.org/ontology/oekg/input_datasets/{oekgDatasetConfig.dataset_id}> a oeo:{type_entity} ;
+            rdfs:label "{oekgDatasetConfig.dataset_label}" ;
+            oeo:has_iri "{oekgDatasetConfig.dataset_url}" ;
+            oeo:has_key "{oekgDatasetConfig.dataset_id}" .
 
-            <http://openenergy-platform.org/ontology/oekg/{oekgDatasetConfig.scenario_uuid}> oeo:{rel_property}
-                <http://openenergy-platform.org/ontology/oekg/input_datasets/{new_dataset_uid}> .
-        }}
+        <http://openenergy-platform.org/ontology/oekg/scenario/{oekgDatasetConfig.scenario_uuid}> oeo:{rel_property}
+            <http://openenergy-platform.org/ontology/oekg/input_datasets/{oekgDatasetConfig.dataset_id}> .
     }}
     """  # noqa
 
@@ -91,10 +96,15 @@ def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig):
     sparql_wrapper_update.setQuery(sparql_query)
     sparql_wrapper_update.setMethod(POST)
     sparql_wrapper_update.setReturnFormat(JSON)
-    response = sparql_wrapper_update.query()
-    http_response = response.response
-    if not http_response.status == 200:
-        return False  # Return False if any query fails
+    try:
+        response = sparql_wrapper_update.query()
+        http_response = response.response
+        if not http_response.status == 200:
+            return False  # Return False if any query fails
+    except Exception as e:
+        logger.error(f"Failed to update datasets in OEKG: {e}")
+        return False
+
     return True
 
 
