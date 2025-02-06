@@ -4,7 +4,7 @@ from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
-from oekg.utils import validate_sparql_query
+from oekg.utils import validate_public_sparql_query
 from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
 
 
@@ -24,7 +24,7 @@ def sparql_endpoint(request):
     if not sparql_query:
         return HttpResponseBadRequest("Missing 'query' parameter.")
 
-    if not validate_sparql_query(sparql_query):
+    if not validate_public_sparql_query(sparql_query):
         raise SuspiciousOperation("Invalid SPARQL query.")
 
     endpoint_url = OEKG_SPARQL_ENDPOINT_URL
