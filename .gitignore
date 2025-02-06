@@ -32,6 +32,8 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+/oep-django-5
+oep-django-5/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -79,6 +81,9 @@ venv*/
 0_env/
 /envs
 /node_env
+.env*
+/fuseki
+apache*
 /oep-django-5
 
 .DS_Store

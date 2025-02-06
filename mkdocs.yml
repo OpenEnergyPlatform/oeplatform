@@ -116,6 +116,7 @@ nav:
         # - Draft open-API schema: oeplatform-code/web-api/oedb-rest-api/swagger-ui.html
       - OEKG API:
         - oeplatform-code/web-api/oekg-api/index.md
+        - Edit scenario datasets: oeplatform-code/web-api/oekg-api/scenario-dataset.md
     - Features:
       - oeplatform-code/features/index.md
       - metaBuilder Metadata creation:

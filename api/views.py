@@ -13,7 +13,7 @@ import sqlalchemy as sqla
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.db.utils import IntegrityError
@@ -26,10 +26,15 @@ from django.http import (
     StreamingHttpResponse,
 )
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
+
+# views.py
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import api.parser
@@ -42,13 +47,19 @@ from api.helpers.http import ModHttpResponse
 from api.serializers import (
     EnergyframeworkSerializer,
     EnergymodelSerializer,
+    ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
+from api.utils import get_dataset_configs
 from dataedit.models import Embargo
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
+from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
+
+# from oekg.sparqlQuery import remove_datasets_from_scenario
+from oekg.utils import process_datasets_sparql_query
 from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
 
 if USE_LOEP:
@@ -243,24 +254,24 @@ class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise PermissionDenied
+            raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
-            raise PermissionDenied
-        if actions.has_sequence(dict(schema=schema, sequence_name=sequence), {}):
-            raise APIError("Sequence already exists")
+            raise APIError("User is anonymous", 401)
+        if actions.has_table(dict(schema=schema, sequence_name=sequence), {}):
+            raise APIError("Sequence already exists", 409)
         return self.__create_sequence(request, schema, sequence, request.data)
 
     @api_exception
     @require_delete_permission
     def delete(self, request, schema, sequence):
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise PermissionDenied
+            raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
-            raise PermissionDenied
+            raise APIError("User is anonymous", 401)
         return self.__delete_sequence(request, schema, sequence, request.data)
 
     @load_cursor()
@@ -278,7 +289,7 @@ class Sequence(APIView):
 
 class Metadata(APIView):
     @api_exception
-    @never_cache
+    @method_decorator(never_cache)
     def get(self, request, schema, table):
         metadata = actions.get_table_metadata(schema, table)
         return JsonResponse(metadata)
@@ -331,6 +342,7 @@ class Table(APIView):
     objects = None
 
     @api_exception
+    @method_decorator(never_cache)
     def get(self, request, schema, table):
         """
         Returns a dictionary that describes the DDL-make-up of this table.
@@ -369,9 +381,9 @@ class Table(APIView):
         :return:
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise PermissionDenied
+            raise APIError("Schema starts with _, which is not allowed")
         json_data = request.data
 
         if "column" in json_data["type"]:
@@ -384,7 +396,6 @@ class Table(APIView):
         elif "constraint" in json_data["type"]:
             # Input has nothing to do with DDL from Postgres.
             # Input is completely different.
-            # Using actions.parse_sconstd_from_constd is not applicable
             # dict.get() returns None, if key does not exist
             constraint_definition = {
                 "action": json_data["action"],  # {ADD, DROP}
@@ -422,13 +433,13 @@ class Table(APIView):
         :return:
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
+            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
-            raise PermissionDenied
+            raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
-            raise PermissionDenied
+            raise APIError("User is anonymous", 401)
         if actions.has_table(dict(schema=schema, table=table), {}):
-            raise APIError("Table already exists")
+            raise APIError("Table already exists", 409)
         json_data = request.data.get("query", {})
         embargo_data = request.data.get("embargo") or json_data.get("embargo", {})
         constraint_definitions = []
@@ -756,7 +767,7 @@ class Index(APIView):
 
 class Column(APIView):
     @api_exception
-    @never_cache
+    @method_decorator(never_cache)
     def get(self, request, schema, table, column=None):
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         response = actions.describe_columns(schema, table)
@@ -787,6 +798,7 @@ class Column(APIView):
 
 
 class Fields(APIView):
+    @method_decorator(never_cache)
     def get(self, request, schema, table, id, column=None):
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         if (
@@ -858,6 +870,7 @@ def check_embargo(schema, table):
 
 class Rows(APIView):
     @api_exception
+    @method_decorator(never_cache)
     def get(self, request, schema, table, row_id=None):
         if check_embargo(schema, table):
             return JsonResponse(
@@ -1571,3 +1584,56 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     topic = "scenario"
     queryset = DBTable.objects.filter(schema__name=topic)
     serializer_class = ScenarioDataTablesSerializer
+
+
+class ManageOekgScenarioDatasets(APIView):
+    permission_classes = [IsAuthenticated]  # Require authentication
+
+    @post_only_if_user_is_owner_of_scenario_bundle
+    def post(self, request):
+        serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            dataset_configs = get_dataset_configs(serializer.validated_data)
+            response_data = process_datasets_sparql_query(dataset_configs)
+        except APIError as e:
+            return Response({"error": str(e)}, status=e.status)
+        except Exception:
+            return Response({"error": "An unexpected error occurred."}, status=500)
+
+        if "error" in response_data:
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    # @post_only_if_user_is_owner_of_scenario_bundle
+    # def delete(self, request):
+    #     serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         scenario_uuid = serializer.validated_data["scenario"]
+    #         datasets = serializer.validated_data["datasets"]
+
+    #         # Iterate over each dataset to process it properly
+    #         for dataset in datasets:
+    #             dataset_name = dataset["name"]
+    #             dataset_type = dataset["type"]
+
+    #             # Remove the dataset from the scenario in the bundle
+    #             success = remove_datasets_from_scenario(
+    #                 scenario_uuid, dataset_name, dataset_type
+    #             )
+
+    #             if not success:
+    #                 return Response(
+    #                     {"error": f"Failed to remove dataset {dataset_name}"},
+    #                     status=status.HTTP_400_BAD_REQUEST,
+    #                 )
+
+    #         return Response(
+    #             {"message": "Datasets removed successfully"},
+    #             status=status.HTTP_200_OK,
+    #         )
+
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

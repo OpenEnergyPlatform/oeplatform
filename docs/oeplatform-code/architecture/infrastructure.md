@@ -23,7 +23,7 @@ Out technology stacks describes the inventory of all larger software libraries o
 The "oeplatform" project depends on the these technologies:
 
 - Python (Version 3.10)
-- Django (version 3.2, Webframework)
+- Django (version 5.1, Webframework)
 - Django rest framework (WEB-API)
 - django-allauth (login / registration / SSO)
 - SQLAlchemy (Primary-Database access)

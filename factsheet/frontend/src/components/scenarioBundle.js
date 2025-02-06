@@ -26,6 +26,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import AddIcon from '@mui/icons-material/Add.js';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
@@ -410,7 +411,8 @@ function Factsheet(props) {
 
 
       const filteredResult = filterByValue(selectedTechnologies, technologies);
-      setSelectedTechnologiesTree(filteredResult[0]["children"]);
+      // setSelectedTechnologiesTree(filteredResult[0]);
+      // setSelectedTechnologies(s)
 
       function getAllNodeIds(nodes) {
         let ids = [];
@@ -426,13 +428,9 @@ function Factsheet(props) {
       const allIds = getAllNodeIds(filteredResult[0]["children"]);
       setAllNodeIds(allIds);
 
-  }, []);
+    }, []);
 
-
-    
-
-
-  }, [selectedTechnologies, technologies]);
+  }, []); // Todo: check if the empty dependency array raises errors
 
   const handleSaveFactsheet = () => {
     setOpenBackDrop(true);
@@ -2010,11 +2008,30 @@ function Factsheet(props) {
     ]
   }
   const scenario_count = 'Scenarios' + ' (' + scenarios.length + ')';
-  const renderScenariosOverview = () => (
-    <Container maxWidth="lg2" sx={{ padding: '0px !important' }}>
-      {
-        scenarios.map((v, i) =>
-          v.acronym !== '' &&
+console.log(scenarios);
+
+const renderScenariosOverview = () => (
+  <Container maxWidth="lg2" sx={{ padding: '0px !important' }}>
+    {scenarios.map((v, i) =>
+      v.acronym !== '' ? (
+        <React.Fragment key={i}>
+          <Button startIcon={<ContentCopyOutlinedIcon />} variant="outlined" onClick={() => navigator.clipboard.writeText(v.id)}>
+            Copy Scenario UID
+            <HtmlTooltip
+              title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="subtitle1">
+                    {'This can be used to copy the universal identifier for the scenario object below. You need the scenario UID if you want to edit the scenario using Web-API functionality.'}
+                    <br />
+                    <a href="https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oekg-api/scenario-dataset/">How to use the Web-API</a>
+                  </Typography>
+                </React.Fragment>
+              }
+            >
+              <InfoOutlinedIcon sx={{ color: '#708696' }} />
+            </HtmlTooltip>
+          </Button>
+
           <TableContainer>
             <Table>
               <TableBody>
@@ -2228,10 +2245,12 @@ function Factsheet(props) {
               </TableBody>
             </Table>
           </TableContainer>
-        )
-      }
-    </Container>
-  )
+        </React.Fragment>
+      ) : null
+    )}
+  </Container>
+);
+
 
   const renderPublicationOverview = () => (
     <Container maxWidth="lg2" sx={{ padding: '0px !important' }}>
