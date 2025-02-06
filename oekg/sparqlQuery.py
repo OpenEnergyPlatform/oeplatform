@@ -1,10 +1,59 @@
+import logging
 from uuid import UUID
 
 import requests
 from SPARQLWrapper import JSON, POST
 
-from factsheet.oekg.connection import sparql_wrapper_update, update_endpoint
+from factsheet.oekg.connection import sparql, sparql_wrapper_update, update_endpoint
 from oekg.sparqlModels import DatasetConfig
+
+logger = logging.getLogger("oeplatform")
+
+
+def scenario_in_bundle(bundle_uuid: UUID, scenario_uuid: UUID) -> bool:
+    """
+    Check if a scenario is part of a scenario bundle in the KG.
+    """
+    sparql_query = f"""
+    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+
+    ASK {{
+        <http://openenergy-platform.org/ontology/oekg/{bundle_uuid}> ?p
+            <http://openenergy-platform.org/ontology/oekg/scenario/{scenario_uuid}> .
+    }}
+    """
+    sparql.setQuery(sparql_query)
+    sparql.setMethod(POST)
+    sparql.setReturnFormat(JSON)
+    response = sparql.query().convert()
+
+    return response.get(
+        "boolean", False
+    )  # Returns True if scenario is part of the bundle
+
+
+def dataset_exists(scenario_uuid: UUID, dataset_url: str) -> bool:
+    """
+    Check if a dataset with the same label already exists.
+    """
+
+    sparql_query = f"""
+    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    ASK {{
+        <http://openenergy-platform.org/ontology/oekg/scenario/{scenario_uuid}> ?p ?dataset .
+        ?dataset oeo:has_iri "{dataset_url}" .
+    }}
+
+    """  # noqa
+
+    sparql.setQuery(sparql_query)
+    sparql.setMethod(POST)
+    sparql.setReturnFormat(JSON)
+    response = sparql.query().convert()
+
+    return response.get("boolean", False)  # Returns True if dataset exists
 
 
 def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig):
