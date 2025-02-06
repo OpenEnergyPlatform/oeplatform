@@ -4,8 +4,10 @@ from uuid import UUID
 from django.urls import reverse
 from rest_framework import serializers
 
+from dataedit.helper import get_readable_table_name
 from dataedit.models import Table
 from modelview.models import Energyframework, Energymodel
+from oeplatform.settings import URL
 
 
 class EnergyframeworkSerializer(serializers.ModelSerializer):
@@ -59,21 +61,73 @@ class ScenarioDataTablesSerializer(serializers.ModelSerializer):
 
 
 class DatasetSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=255, required=True)  # Dataset table name
-    type = serializers.ChoiceField(
-        choices=["input", "output"], required=True
-    )  # Type: input or output
+    name = serializers.CharField(max_length=255, required=True)
+    external_url = serializers.URLField(
+        max_length=1000, required=False, allow_null=True
+    )
+    type = serializers.ChoiceField(choices=["input", "output"], required=True)
+    # title = serializers.SerializerMethodField()
 
-    # Custom validation for 'name'
+    # ✅ Basic validation for 'name' (regex check only)
     def validate_name(self, value):
-        # Use regex to allow alphanumeric characters and underscores
         if not match(r"^[\w]+$", value):
             raise serializers.ValidationError(
-                "Dataset name should contain only"
-                "alphanumeric characters and underscores."
+                "Dataset name should contain only alphanumeric characters "
+                "and underscores."
             )
+        return value  # Don't check DB here, do it in validate()
 
-        return value
+    # ✅ Main validation logic (includes db check for object existence)
+    def validate(self, data):
+        name = data.get("name")
+        external_url = data.get("external_url")
+
+        if external_url:
+            # ✅ External URL provided → Skip DB check for 'name'
+            if not external_url.startswith("https://databus.openenergyplatform.org"):
+                raise serializers.ValidationError(
+                    {
+                        "external_url": (
+                            "If you want to link distributions stored outside the OEP, "
+                            "please use the Databus: "
+                            "https://databus.openenergyplatform.org/app/publish-wizard "
+                            "to register your data and use the file or version URI as "
+                            "a persistent identifier."
+                        )
+                    }
+                )
+            data["name"] = f"{name} (external dataset)"
+        else:
+            # ✅ No external URL → Validate 'name' in the database
+            if not Table.objects.filter(name=name).exists():
+                raise serializers.ValidationError(
+                    {
+                        "name": f"Dataset '{name}' does not exist in the database."
+                        "If you want to add links to external distributions please "
+                        "add 'external_url' to the request body."
+                    }
+                )
+            full_label = self.get_title(data)
+            if full_label:
+                data["name"] = full_label
+
+            # ✅ Generate internal distribution URL
+            reversed_url = reverse(
+                "dataedit:view",
+                kwargs={"schema": "scenario", "table": name},
+            )
+            data["external_url"] = f"{URL}{reversed_url}"
+
+        return data  # Return updated data with 'distribution_url' if applicable
+
+    def get_title(self, data):
+        name = data.get("name")
+        # ✅ Generate internal distribution label
+        full_label = get_readable_table_name(table_obj=Table.objects.get(name=name))
+        if full_label:
+            return full_label
+        else:
+            return None
 
 
 class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
@@ -81,7 +135,7 @@ class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
         required=True
     )  # Validate the scenario bundle UUID
     scenario = serializers.UUIDField(required=True)  # Validate the scenario UUID
-    dataset = serializers.ListField(
+    datasets = serializers.ListField(
         child=DatasetSerializer(), required=True
     )  # List of datasets with 'name' and 'type'
 
