@@ -458,7 +458,6 @@ function renderSummaryPageFields() {
   const emptyFields = [];
 
   const processedFields = new Set();
-
   if (state_dict && Object.keys(state_dict).length > 0) {
     const fields = document.querySelectorAll('.field');
     for (let field of fields) {
@@ -466,11 +465,21 @@ function renderSummaryPageFields() {
       const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
-      const fieldName = field_id.split('.').pop();
+        const fieldSuggestion = field.querySelector('.suggestion.suggestion--highlight')?.textContent.trim() || "";
+
+
+      // ✅ Убираем цифры и заменяем точки на пробелы
+      let fieldName = field_id.replace(/\./g, ' ');
+
+      // ✅ Если категория не "general", удаляем первое слово
+      if (fieldCategory !== "general") {
+        fieldName = fieldName.split(' ').slice(1).join(' '); // Удаляем первое слово
+      }
+
       const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
       if (isEmptyValue(fieldValue)) {
-        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
+        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields", fieldSuggestion });
       } else if (fieldState === 'ok') {
         acceptedFields.push({ fieldName, fieldValue, fieldCategory });
         processedFields.add(uniqueFieldIdentifier);
@@ -483,11 +492,19 @@ function renderSummaryPageFields() {
     const fieldValue = $(field_id).find('.value').text().replace(/\s+/g, ' ').trim();
     const fieldState = review.fieldReview.state;
     const fieldCategory = review.category;
-    const fieldName = review.key.split('.').pop();
+    const fieldSuggestion = review.fieldReview.reviewerSuggestion
+    // ✅ Убираем цифры и заменяем точки на пробелы
+    let fieldName = review.key.replace(/\./g, ' ');
+
+    // ✅ Если категория не "general", удаляем первое слово
+    if (fieldCategory !== "general") {
+      fieldName = fieldName.split(' ').slice(1).join(' '); // Удаляем первое слово
+    }
+
     const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
     if (processedFields.has(uniqueFieldIdentifier)) {
-      continue; // Skipping processed fields
+      continue; // Пропускаем уже обработанные поля
     }
 
     if (isEmptyValue(fieldValue)) {
@@ -495,20 +512,19 @@ function renderSummaryPageFields() {
     } else if (fieldState === 'ok') {
       acceptedFields.push({ fieldName, fieldValue, fieldCategory });
     } else if (fieldState === 'suggestion') {
-      suggestingFields.push({ fieldName, fieldValue, fieldCategory });
+      suggestingFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
     } else if (fieldState === 'rejected') {
       rejectedFields.push({ fieldName, fieldValue, fieldCategory });
     }
 
-    // Add the field to processedFields after full check
     processedFields.add(uniqueFieldIdentifier);
   }
 
-  // Processing the remaining fields that did not fall into the previous categories
+  // Обрабатываем оставшиеся поля, не вошедшие в предыдущие категории
   const categories = document.querySelectorAll(".tab-pane");
 
   for (const category of categories) {
-    const category_name = category.id.slice(0);
+    const category_name = category.id;
 
     if (category_name === "summary") {
       continue;
@@ -520,16 +536,28 @@ function renderSummaryPageFields() {
       const found = current_review.reviews.some((review) => review.key === field_id);
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
-      const fieldName = field_id.split('.').pop();
+      const fieldSuggestion = field.querySelector('.suggestion.suggestion--highlight')?.textContent.trim() || "";
+
+
+      // ✅ Убираем цифры и заменяем точки на пробелы
+      let fieldName = field_id.replace(/\./g, ' ');
+
+      // ✅ Если категория не "general", удаляем первое слово
+      if (fieldCategory !== "general") {
+        fieldName = fieldName.split(' ').slice(1).join(' '); // Удаляем первое слово
+      }
+
       const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
-      // If the field is not found in the review and its state is not "ok", add it to missingFields
+      // Если поле не найдено в рецензиях и его статус не "ok", добавляем его в missingFields
       if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
-        missingFields.push({ fieldName, fieldValue, fieldCategory });
+        missingFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
         processedFields.add(uniqueFieldIdentifier);
       }
     }
   }
+
+
 
   // Functions for displaying a table with results on a page
   const summaryContainer = document.getElementById("summary");
@@ -546,7 +574,7 @@ function renderSummaryPageFields() {
 
     let thead = document.createElement('thead');
     let header = document.createElement('tr');
-    header.innerHTML = '<th scope="col">Status</th><th scope="col">Field Category</th><th scope="col">Field Name</th><th scope="col">Field Value</th>';
+    header.innerHTML = '<th scope="col">Status</th><th scope="col">Field Category</th><th scope="col">Field Name</th><th scope="col">Field Value</th><th scope="col">Field Suggestion</th>';
     thead.appendChild(header);
     table.appendChild(thead);
 
@@ -575,6 +603,10 @@ function renderSummaryPageFields() {
       let tdFieldValue = document.createElement('td');
       tdFieldValue.textContent = item.fieldValue;
       row.appendChild(tdFieldValue);
+
+      let tdFieldSuggestion = document.createElement('td');
+        tdFieldSuggestion.textContent = item.fieldSuggestion;
+        row.appendChild(tdFieldSuggestion);
 
       tbody.appendChild(row);
     });
