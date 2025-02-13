@@ -363,7 +363,7 @@ function renderSummaryPageFields() {
       const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
-      const fieldName = field_id.split('.').pop();
+      let fieldName = field_id.replace(/\./g, ' ');
       const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
       if (isEmptyValue(fieldValue)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
@@ -381,7 +381,8 @@ function renderSummaryPageFields() {
     const isAccepted = review.fieldReview.some((fieldReview) => fieldReview.state === 'ok');
     const isRejected = review.fieldReview.some((fieldReview) => fieldReview.state === 'rejected');
     const fieldCategory = review.category;
-    const fieldName = review.key.split('.').pop();
+    let fieldName = review.key.replace(/\./g, ' ');
+
     const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
     if (processedFields.has(uniqueFieldIdentifier)) {
@@ -413,12 +414,12 @@ function renderSummaryPageFields() {
       const found = current_review.reviews.some((review) => review.key === field_id);
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
-      const fieldName = field_id.split('.').pop();
+      let fieldName = field_id.replace(/\./g, ' ');
       const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
       if (isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
-        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
-      } else if (!found && fieldState !== 'ok' && fieldState === 'rejected' && !isEmptyValue(fieldValue)) {
+        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields", fieldSuggestion });
+      } else if (!found && fieldState !== 'ok' && fieldState !== 'rejected' && !isEmptyValue(fieldValue)) {
         missingFields.push({ fieldName, fieldValue, fieldCategory });
         processedFields.add(uniqueFieldIdentifier);
       }
