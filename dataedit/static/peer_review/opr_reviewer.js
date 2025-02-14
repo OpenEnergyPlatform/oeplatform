@@ -468,12 +468,11 @@ function renderSummaryPageFields() {
         const fieldSuggestion = field.querySelector('.suggestion.suggestion--highlight')?.textContent.trim() || "";
 
 
-      // ✅ Убираем цифры и заменяем точки на пробелы
+      // remove the numbers and replace the dots with spaces
       let fieldName = field_id.replace(/\./g, ' ');
 
-      // ✅ Если категория не "general", удаляем первое слово
       if (fieldCategory !== "general") {
-        fieldName = fieldName.split(' ').slice(1).join(' '); // Удаляем первое слово
+        fieldName = fieldName.split(' ').slice(1).join(' '); // remove first word
       }
 
       const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
@@ -493,18 +492,16 @@ function renderSummaryPageFields() {
     const fieldState = review.fieldReview.state;
     const fieldCategory = review.category;
     const fieldSuggestion = review.fieldReview.reviewerSuggestion
-    // ✅ Убираем цифры и заменяем точки на пробелы
     let fieldName = review.key.replace(/\./g, ' ');
 
-    // ✅ Если категория не "general", удаляем первое слово
     if (fieldCategory !== "general") {
-      fieldName = fieldName.split(' ').slice(1).join(' '); // Удаляем первое слово
+      fieldName = fieldName.split(' ').slice(1).join(' ');
     }
 
     const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
     if (processedFields.has(uniqueFieldIdentifier)) {
-      continue; // Пропускаем уже обработанные поля
+      continue;
     }
 
     if (isEmptyValue(fieldValue)) {
@@ -520,7 +517,6 @@ function renderSummaryPageFields() {
     processedFields.add(uniqueFieldIdentifier);
   }
 
-  // Обрабатываем оставшиеся поля, не вошедшие в предыдущие категории
   const categories = document.querySelectorAll(".tab-pane");
 
   for (const category of categories) {
@@ -539,17 +535,14 @@ function renderSummaryPageFields() {
       const fieldSuggestion = field.querySelector('.suggestion.suggestion--highlight')?.textContent.trim() || "";
 
 
-      // ✅ Убираем цифры и заменяем точки на пробелы
       let fieldName = field_id.replace(/\./g, ' ');
 
-      // ✅ Если категория не "general", удаляем первое слово
       if (fieldCategory !== "general") {
-        fieldName = fieldName.split(' ').slice(1).join(' '); // Удаляем первое слово
+        fieldName = fieldName.split(' ').slice(1).join(' ');
       }
 
       const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
-      // Если поле не найдено в рецензиях и его статус не "ok", добавляем его в missingFields
       if (!found && fieldState !== 'ok' && !isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
         missingFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
         processedFields.add(uniqueFieldIdentifier);
