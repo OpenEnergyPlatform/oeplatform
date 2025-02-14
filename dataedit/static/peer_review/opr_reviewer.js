@@ -856,6 +856,7 @@ function checkReviewComplete() {
 
   for (let field of fields) {
     const fieldState = getFieldState(field.fieldName);
+
     const reviewed = current_review["reviews"].find((review) => review.key === field.fieldName);
 
     if (!reviewed && fieldState !== 'ok' && fieldState !== 'rejected' && !isEmptyValue(field.fieldValue)) {
@@ -1009,21 +1010,21 @@ function updateTabClasses() {
 
     let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-    let allOkOrEmpty = fields.every(field => {
+    let allReviewed = fields.every(field => {
       let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       let fieldState = getFieldState(field.id.replace('field_', ''));
-      return isEmptyValue(fieldValue) || fieldState === 'ok';
+      return isEmptyValue(fieldValue) || ['ok', 'suggest', 'rejected'].includes(fieldState);
     });
 
-    if (allOkOrEmpty) {
+    if (allReviewed) {
       tab.classList.add('status');
       tab.classList.add('status--done');
     } else {
       tab.classList.add('status');
+      tab.classList.remove('status--done');
     }
   }
 }
-
 
 window.addEventListener('DOMContentLoaded', function() {
   updateTabClasses();
@@ -1057,6 +1058,7 @@ function updatePercentageDisplay() {
 }
 
 
+
 function updateTabProgressIndicatorClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
 
@@ -1068,20 +1070,19 @@ function updateTabProgressIndicatorClasses() {
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
     let values = getAllFieldsAndValues();
 
-    let allOkOrEmpty = fieldsInTab.every((field, index) => {
-      let currentValue = values[index].fieldValue;
+    let allReviewed = fieldsInTab.every((field, index) => {
+      let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       let fieldState = getFieldState(field.id.replace('field_', ''));
-      return isEmptyValue(currentValue) || fieldState === 'ok';
+      return isEmptyValue(fieldValue) || ['ok', 'suggestion', 'rejected'].includes(fieldState);
     });
 
-    if (allOkOrEmpty) {
+    if (allReviewed) {
       tab.classList.add('status--done');
     } else {
-      tab.classList.add('status');
+      tab.classList.remove('status--done');
     }
   }
 }
-
 
 summaryTab.addEventListener('click', function() {
   toggleReviewControls(false);
