@@ -140,7 +140,7 @@ function peerReview(config) {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
-  // updatePercentageDisplay();
+  updatePercentageDisplay();
   if (state_dict) {
     check_if_review_finished();
   }
@@ -555,6 +555,7 @@ function renderSummaryPageFields() {
 
   updateSummaryTable();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
 }
 
 /**
@@ -722,8 +723,9 @@ function saveEntrances() {
 
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
-  // updatePercentageDisplay();
+  updatePercentageDisplay();
 }
+
 function getFieldState(fieldKey) {
   if (state_dict && state_dict[fieldKey] !== undefined) {
     return state_dict[fieldKey];
@@ -919,9 +921,11 @@ function updateTabClasses() {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-  updateTabClasses();
-  // updatePercentageDisplay() ;
+    updateTabClasses();
+    updatePercentageDisplay() ;
+    updateTabClasses();
 });
+
 
 
 
@@ -930,18 +934,21 @@ function getTotalFieldCount() {
   return allFields.length;
 }
 
-
 function calculateOkPercentage(stateDict) {
-  let totalCount = getTotalFieldCount();
+  let totalCount = 0;
   let okCount = 0;
 
   for (let key in stateDict) {
-    if (stateDict[key] === "ok") {
-      okCount++;
+    let fieldValue = $(document.getElementById(`field_${key}`)).find('.value').text().replace(/\s+/g, ' ').trim();
+    if (!isEmptyValue(fieldValue)) {
+      totalCount++;
+      if (stateDict[key] === "ok") {
+        okCount++;
+      }
     }
   }
 
-  let percentage = (okCount / totalCount) * 100;
+  let percentage = totalCount === 0 ? 0 : (okCount / totalCount) * 100;
   return percentage.toFixed(2);
 }
 
