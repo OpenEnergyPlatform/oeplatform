@@ -1,0 +1,77 @@
+name: Archive 4 years old & inactive Issues
+
+on:
+  schedule:
+    - cron: "0 0 1 * *" # Runs on the 1st day of every month at midnight
+
+jobs:
+  archive_inactive_issues:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Archive issues inactive for more than 4 years
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          four_years_ago=$(date -d '4 years ago' +%Y-%m-%d)
+          project_id=$(gh api graphql -f query='
+            {
+              repository(owner: "${{ github.repository_owner }}", name: "${{ github.event.repository.name }}") {
+                projectsV2(first: 100) {
+                  nodes {
+                    id
+                    title
+                  }
+                }
+              }
+            }
+          ' | jq -r '.data.repository.projectsV2.nodes[] | select(.title == "IssueGraveyard") | .id')
+
+          if [[ -z "$project_id" ]]; then
+            echo "IssueGraveyard project not found!"
+            exit 1
+          fi
+
+          page=1
+          while true; do
+            # Fetch 100 issues per page using GitHub REST API
+            response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}/issues?state=open&per_page=100&page=$page")
+
+            issues=$(echo "$response" | jq -r '.[] | select(.updated_at < "'$four_years_ago'") | [.number, .title, .updated_at]')
+
+            if [[ -z "$issues" ]]; then
+              break
+            fi
+
+            # Loop through the fetched issues
+            echo "$issues" | while IFS= read -r issue; do
+              issue_number=$(echo $issue | jq -r '.[0]')
+              issue_title=$(echo $issue | jq -r '.[1]')
+              issue_updated_at=$(echo $issue | jq -r '.[2]')
+
+              echo "Archiving issue #$issue_number ($issue_title) last updated at $issue_updated_at"
+
+              # Add the issue to the IssueGraveyard project
+              gh api graphql -f query='
+                mutation($projectId: ID!, $contentId: ID!) {
+                  addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+                    item {
+                      id
+                    }
+                  }
+                }
+              ' -f projectId="$project_id" -f contentId="$issue_number"
+
+              # Close the original issue and add 'stale' label
+              curl -s -X PATCH -H "Authorization: token $GITHUB_TOKEN" \
+                -d "{\"state\": \"closed\", \"labels\": [\"stale\"]}" \
+                "https://api.github.com/repos/${{ github.repository }}/issues/$issue_number"
+            done
+
+            # Move to the next page of issues
+            ((page++))
+          done
