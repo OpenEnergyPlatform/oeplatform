@@ -732,17 +732,18 @@ function updateTabProgressIndicatorClasses() {
 
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-    let allOk = fieldsInTab.every((field) => {
-      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
-      return isEmptyValue(fieldValue) || field.classList.contains('field-ok');
+    let allReviewed = fieldsInTab.every((field, index) => {
+      let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      let fieldState = getFieldState(field.id.replace('field_', ''));
+      return isEmptyValue(fieldValue) || ['ok', 'suggestion', 'rejected'].includes(fieldState);
     });
 
-    if (allOk) {
+    if (allReviewed) {
       tab.classList.add('status--done');
     } else {
-      tab.classList.add('status');
+      tab.classList.remove('status--done');
     }
-  }
+    }
 }
 
 function updateTabClasses() {
@@ -754,25 +755,24 @@ function updateTabClasses() {
 
     let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-    let allOk = true;
-    for (let j = 0; j < fields.length; j++) {
-      let fieldState = getFieldState(fields[j].id.replace('field_', ''));
-      if (fieldState !== 'ok') {
-        allOk = false;
-        break;
-      }
-    }
-    if (allOk) {
+   let allReviewed = fields.every(field => {
+      let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      let fieldState = getFieldState(field.id.replace('field_', ''));
+      return isEmptyValue(fieldValue) || ['ok', 'suggest', 'rejected'].includes(fieldState);
+    });
+
+    if (allReviewed) {
       tab.classList.add('status');
       tab.classList.add('status--done');
     } else {
       tab.classList.add('status');
+      tab.classList.remove('status--done');
     }
   }
 }
 window.addEventListener('DOMContentLoaded', updateTabClasses);
 
-
+console.log(4444)
 /**
  * Hide and show revier controles once the user clicks the summary tab
  */
