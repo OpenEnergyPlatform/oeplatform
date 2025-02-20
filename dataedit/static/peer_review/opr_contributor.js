@@ -368,8 +368,12 @@ function renderSummaryPageFields() {
       if (isEmptyValue(fieldValue)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields" });
         processedFields.add(uniqueFieldIdentifier);
-      } else if (fieldState === 'ok' || fieldState === 'rejected') {
+      } else if (fieldState === 'ok' ) {
         acceptedFields.push({ fieldName, fieldValue, fieldCategory });
+        processedFields.add(uniqueFieldIdentifier);
+      }
+      else if (fieldState === 'rejected') {
+        rejectedFields.push({ fieldName, fieldValue, fieldCategory });
         processedFields.add(uniqueFieldIdentifier);
       }
     }
@@ -772,7 +776,7 @@ function updateTabClasses() {
 }
 window.addEventListener('DOMContentLoaded', updateTabClasses);
 
-console.log(4444)
+console.log(888)
 /**
  * Hide and show revier controles once the user clicks the summary tab
  */
