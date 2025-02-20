@@ -7,6 +7,10 @@ from django.views.decorators.http import require_GET, require_POST
 
 from oekg.utils import execute_sparql_query
 
+from oekg.utils import validate_public_sparql_query
+from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
+
+
 
 @login_required
 def main_view(request):
@@ -20,6 +24,9 @@ def main_view(request):
 # this endpoint must also accessible using the API token via the RestFramework.
 @require_POST
 def sparql_endpoint(request):
+    """
+    Public SPARQL endpoint. Must only allow read queries.
+    """
     sparql_query = request.POST.get("query", "")
     response_format = request.POST.get("format", "json")  # Default format
 
@@ -55,6 +62,7 @@ def sparql_endpoint(request):
 #     # Validate and map the requested format
 #     if response_format not in supported_formats:
 #         return HttpResponseBadRequest(f"Unsupported format: {response_format}")
+
 
 #     endpoint_url = OEKG_SPARQL_ENDPOINT_URL
 #     headers = {"Accept": supported_formats[response_format]}

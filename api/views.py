@@ -31,9 +31,11 @@ from django.views.decorators.cache import never_cache
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import generics, status
+
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -47,14 +49,18 @@ from api.helpers.http import ModHttpResponse
 from api.serializers import (
     EnergyframeworkSerializer,
     EnergymodelSerializer,
+    ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
+from api.utils import get_dataset_configs
 from dataedit.models import Embargo
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
+from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import execute_sparql_query
+
 from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
 
 if USE_LOEP:
@@ -1598,3 +1604,56 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     topic = "scenario"
     queryset = DBTable.objects.filter(schema__name=topic)
     serializer_class = ScenarioDataTablesSerializer
+
+
+class ManageOekgScenarioDatasets(APIView):
+    permission_classes = [IsAuthenticated]  # Require authentication
+
+    @post_only_if_user_is_owner_of_scenario_bundle
+    def post(self, request):
+        serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            dataset_configs = get_dataset_configs(serializer.validated_data)
+            response_data = process_datasets_sparql_query(dataset_configs)
+        except APIError as e:
+            return Response({"error": str(e)}, status=e.status)
+        except Exception:
+            return Response({"error": "An unexpected error occurred."}, status=500)
+
+        if "error" in response_data:
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    # @post_only_if_user_is_owner_of_scenario_bundle
+    # def delete(self, request):
+    #     serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         scenario_uuid = serializer.validated_data["scenario"]
+    #         datasets = serializer.validated_data["datasets"]
+
+    #         # Iterate over each dataset to process it properly
+    #         for dataset in datasets:
+    #             dataset_name = dataset["name"]
+    #             dataset_type = dataset["type"]
+
+    #             # Remove the dataset from the scenario in the bundle
+    #             success = remove_datasets_from_scenario(
+    #                 scenario_uuid, dataset_name, dataset_type
+    #             )
+
+    #             if not success:
+    #                 return Response(
+    #                     {"error": f"Failed to remove dataset {dataset_name}"},
+    #                     status=status.HTTP_400_BAD_REQUEST,
+    #                 )
+
+    #         return Response(
+    #             {"message": "Datasets removed successfully"},
+    #             status=status.HTTP_200_OK,
+    #         )
+
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

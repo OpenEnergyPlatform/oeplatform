@@ -16,6 +16,7 @@ from django.db.models import (
     IntegerField,
     JSONField,
 )
+from django.urls import reverse
 from django.utils import timezone
 
 # Create your models here.
@@ -76,6 +77,9 @@ class Table(Tagable):
     is_reviewed = BooleanField(default=False, null=False)
     is_publish = BooleanField(null=False, default=False)
     human_readable_name = CharField(max_length=1000, null=True)
+
+    def get_absolute_url(self):
+        return reverse("dataedit:view", kwargs={"pk": self.pk})
 
     @classmethod
     def load(cls, schema, table):
@@ -719,5 +723,6 @@ class PeerReviewManager(models.Model):
         """
         return PeerReview.objects.filter(schema=schema, table=table)
 
+    @staticmethod
     def filter_opr_by_id(opr_id):
         return PeerReview.objects.filter(id=opr_id).first()
