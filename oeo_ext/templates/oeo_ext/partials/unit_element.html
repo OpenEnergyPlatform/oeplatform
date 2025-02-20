@@ -41,7 +41,7 @@
             if (query.length > 0) {
                 // use static path here to always use the open (data seeded) endpoint for 
                 // all (local, deployed) client executions
-                fetch(`https://openenergyplatform.org/api/v0/oeo-search?query=${query}`, {
+                fetch(`https://openenergyplatform.org/api/oeo-search?query=${query}`, {
                     mode: 'cors',
                 })
                 .then(response => response.json())

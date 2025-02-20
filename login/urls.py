@@ -5,9 +5,10 @@ from django.contrib.auth.views import (
     PasswordResetDoneView,
     PasswordResetView,
 )
-from django.urls import re_path
+from django.urls import re_path, path
 
 from login import partial_views, views
+from login.views import delete_peer_review_simple
 
 # from login.views import AccountDeleteView
 
@@ -136,4 +137,9 @@ urlpatterns = [
     re_path(r"^activate/(?P<token>[\w\d\-\s]+)$", views.activate),
     re_path(r"^activate/$", views.ActivationNoteView.as_view(), name="activate"),
     re_path(r"^reset/token$", views.token_reset, name="reset-token"),
+    path(
+        'delete_peer_review/',
+        delete_peer_review_simple,
+        name='delete_peer_review_simple'
+    ),
 ]
