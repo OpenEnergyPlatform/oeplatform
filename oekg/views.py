@@ -6,11 +6,14 @@ from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_POST
 
 from oekg.utils import execute_sparql_query
+from oeplatform.settings import DOCUMENTATION_LINKS
 
 
 @login_required
 def main_view(request):
-    response = render(request, "oekg/main.html")
+    response = render(
+        request, "oekg/main.html", context={"oekg_api": DOCUMENTATION_LINKS["oekg_api"]}
+    )
     response["Content-Type"] = "text/html; charset=utf-8"
     return response
 
