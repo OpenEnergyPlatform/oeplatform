@@ -770,8 +770,11 @@ function saveEntrances() {
                     var fieldElement = document.getElementById("field_" + selectedField);
                     if (fieldElement) {
                         var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+                        var additionalCommentElement = fieldElement.querySelector('.suggestion--additional-comment');
                         if (suggestionElement) {
                             suggestionElement.innerText = document.getElementById("valuearea").value;
+                        } if (additionalCommentElement) {
+                            additionalCommentElement.innerText = document.getElementById("comments").value;
                         }
                     }
                 }
@@ -798,8 +801,11 @@ function saveEntrances() {
             var fieldElement = document.getElementById("field_" + selectedField);
             if (fieldElement) {
                 var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+                var additionalCommentElement = fieldElement.querySelector('.suggestion--additional-comment');
                 if (suggestionElement) {
                     suggestionElement.innerText = document.getElementById("valuearea").value;
+                } if (additionalCommentElement) {
+                    additionalCommentElement.innerText = document.getElementById("comments").value;
                 }
             }
         }
@@ -817,6 +823,7 @@ function saveEntrances() {
     updateTabProgressIndicatorClasses();
     check_if_review_finished();
 }
+
 function getFieldState(fieldKey) {
   if (state_dict && state_dict[fieldKey] !== undefined) {
     return state_dict[fieldKey];
