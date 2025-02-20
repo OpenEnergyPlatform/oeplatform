@@ -86,7 +86,6 @@ venv*/
 apache*
 /oep-django-5
 
-
 .DS_Store
 
 # Deployment files

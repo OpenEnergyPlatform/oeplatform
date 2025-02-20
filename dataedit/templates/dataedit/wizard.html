@@ -1,6 +1,7 @@
 {% extends "dataedit/base.html" %} 
 {% load static %} 
 {% load django_bootstrap5 %} 
+{% load compress %}
 
 {% block after-head %}
     <link href="/static/wizard/wizard.css" rel="stylesheet"> 
@@ -75,10 +76,7 @@
                                             </span></td>
                                             <td><span class="label help-title" data-bs-toggle="tooltip" title="Allow column values to be empty (NULL)">
                                                 Nullable
-                                            </span></td>
-                                            <td><span class="label help-title" data-bs-toggle="tooltip" title="Column is the primary key (index/id) of this table.">
-                                                Primary key
-                                            </span></td>
+                                            </span></td>                                            
                                         </tr>
                                         <tr class="wizard-column" id="wizard-column-template">
                                             <td>
@@ -91,14 +89,8 @@
                                                 <input type="text" class="form-control wizard-column-type is-invalid" list="wizard-column-types" placeholder="" data-bs-toggle="tooltip" title="Valid sql data type for this column" />
                                             </td>
                                             <td>
-                                                <input class="wizard-column-nullable" type="checkbox" data-bs-toggle="tooltip" title="Allow column values to be empty (NULL)" />
-                                                <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
-                                            </td>
-
-                                            <td>
-                                                <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" data-bs-toggle="tooltip" title="Column is the primary key (index/id) of this table." />
-                                                <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
-                                            </td>
+                                                <input class="wizard-column-nullable" type="checkbox" data-bs-toggle="tooltip" title="Allow column values to be empty (NULL)" />                                                
+                                            </td>                                            
                                         </tr>
                                     </thead>
                                     <tbody id="wizard-columns">
@@ -334,14 +326,20 @@
 </div>
 
 <script src="/static/wizard/vendor/papaparse-5.0.2/papaparse.min.js"></script>
-<script src="/static/wizard/wizard.js"></script>
-<script>
-    var config = JSON.parse("{{ config|escapejs }}");
-    var wizard = Wizard(config);
 
-    $(function () {
-        $('[data-bs-toggle="tooltip"]').tooltip()
-    })
+{% compress js %}
+<script src="/static/wizard/wizard.js?v=latest"></script>
+{% endcompress %}
+
+
+<script>
+$(document).ready(function () {
+    var config = JSON.parse("{{ config|escapejs }}");    
+    var wizard = Wizard(config);
+    
+    $('[data-bs-toggle="tooltip"]').tooltip();
+});
 </script>
+
 
 {% endblock after-body-bottom-js %}
