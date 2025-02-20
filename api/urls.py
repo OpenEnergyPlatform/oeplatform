@@ -190,7 +190,7 @@ urlpatterns = [
     path("oevkg-query", views.oevkg_search),
     re_path(
         r"^v0/oekg/sparql/?$",
-        views.SparqlAPIView.as_view(),
+        views.OekgSparqlAPIView.as_view(),
         name="oekg-sparql-http-api",
     ),
     re_path(
