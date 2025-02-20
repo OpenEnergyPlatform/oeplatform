@@ -8,7 +8,7 @@
 
 ## Bugs
 
-- Fix outdated service url to send requests to the LEOP from the oemetaBuilder and oeo-extended features[(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/).
+- Fix outdated service url to send requests to the LEOP from the oemetaBuilder and oeo-extended features[(#1938)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1938).
 
 ## Documentation updates
 
