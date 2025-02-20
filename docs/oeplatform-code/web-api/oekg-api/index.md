@@ -4,20 +4,20 @@ In this document we describe how you can access the contents of the OEKG via Web
 
 ### The SPARQL endpoint for OEKG
 
-`https://openenergyplatform.org/oekg/sparql/`
+`https://openenergyplatform.org/api/v0/oekg/sparql/`
 
 Here is an example of how to query the Open Energy Knowledge Graph (OEKG) using SPARQL using python and the requests library for http requests.
 
 ```python
 import requests
 
-sparql_endpoint = "https://openenergy-platform.org/oekg/sparql/"
+sparql_endpoint = "https://openenergy-platform.org/api/v0/oekg/sparql/"
 payload = {
     "query": """SELECT ?s ?p ?o
                 WHERE {
                   ?s ?p ?o
                 }"""
-    "format": "json-ld"
+    "format": "json"
 }
 
 r = requests.post(url=sparql_endpoint, json=payload)
