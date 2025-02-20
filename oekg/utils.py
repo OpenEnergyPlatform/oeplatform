@@ -40,6 +40,12 @@ def execute_sparql_query(sparql_query, response_format):
         endpoint_url, data={"query": sparql_query}, headers=headers, timeout=10
     )
 
+    if response.status_code != 200:
+        raise ValueError(
+            f"Failed to execute SPARQL query. Reason: {response.reason},"
+            f"Status Code {response.status_code}."
+        )
+
     return response.content, SUPPORTED_FORMATS[response_format]
 
 
