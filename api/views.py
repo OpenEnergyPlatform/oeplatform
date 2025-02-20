@@ -1511,7 +1511,7 @@ def oeo_search(request):
     return JsonResponse(res, safe=False)
 
 
-class SparqlAPIView(APIView):
+class OekgSparqlAPIView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
