@@ -8,6 +8,13 @@ servers:
     description: Production server
   - url: http://localhost:8000"
     description: Development server
+components:
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: "Token-based authentication using Django REST Framework's token authentication. Include 'Token <your_token>' in the Authorization header."
 paths:
   /api/v0/oekg/sparql:
     post:
@@ -15,10 +22,11 @@ paths:
       description: |
         This endpoint accepts a SPARQL query and returns the results in the specified format.
         Supported query types include `SELECT`, `CONSTRUCT`, and `DESCRIBE`. The response format must be specified using the `format` parameter.
+        Please provide your API Token as Authorization header. The token can be obtained from your Profile on the Open Energy Platform.
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
               type: object
               properties:
