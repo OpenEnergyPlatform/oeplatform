@@ -2,9 +2,9 @@ import re
 
 import requests
 
-from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
 from oekg.sparqlModels import DatasetConfig
 from oekg.sparqlQuery import add_datasets_to_scenario, scenario_in_bundle
+from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
 
 # Whitelist of supported formats
 SUPPORTED_FORMATS = {
@@ -43,8 +43,6 @@ def execute_sparql_query(sparql_query, response_format):
     return response.content, SUPPORTED_FORMATS[response_format]
 
 
-
-
 def validate_public_sparql_query(query):
     """
     Validate the SPARQL query to prevent injection attacks.
@@ -52,18 +50,6 @@ def validate_public_sparql_query(query):
     Note: not in use currently, keep for later. Review and remove if
     deprecated.
     """
-
-    # Basic length check
-    if not query or len(query) > 10000:  # Set an appropriate limit for your use case
-        return False
-
-    # Basic SPARQL syntax check using a regular expression (this is a simplistic check)
-    pattern = re.compile(
-        r"^\s*(PREFIX\s+[^\s]+:\s*<[^>]+>\s*)*(SELECT|CONSTRUCT|ASK|DESCRIBE)\s+",
-        re.IGNORECASE,
-    )
-    if not pattern.match(query):
-        return False
 
     # Check for disallowed keywords (e.g., DROP, DELETE, INSERT)
     disallowed_keywords = ["DROP", "DELETE", "INSERT"]
