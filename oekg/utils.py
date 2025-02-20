@@ -35,7 +35,7 @@ def execute_sparql_query(sparql_query, response_format):
 
     # Execute the SPARQL query
     response = requests.post(
-        endpoint_url, data={"query": sparql_query}, headers=headers
+        endpoint_url, data={"query": sparql_query}, headers=headers, timeout=10
     )
 
     return response.content, SUPPORTED_FORMATS[response_format]
@@ -44,6 +44,9 @@ def execute_sparql_query(sparql_query, response_format):
 def validate_sparql_query(query):
     """
     Validate the SPARQL query to prevent injection attacks.
+
+    Note: not in use currently, keep for later. Review and remove if
+    deprecated.
     """
 
     # Basic length check
