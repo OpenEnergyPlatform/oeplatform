@@ -7,7 +7,7 @@ Below we describe the manual installation of the oeplatform code and infrastruct
 
     We provide 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database). The images are updated & published with each release. They can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
 
-    [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+    [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/docker)
 
 !!! danger
     Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features.
