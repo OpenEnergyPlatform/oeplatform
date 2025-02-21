@@ -63,8 +63,17 @@ You can run your own local copy of the OEP website server with
 
     python manage.py runserver
 
-By default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser.
+By default, you should be able to connect to this copy by visiting [127.0.0.1:8000](http://127.0.0.1:8000) in your web browser.
 This way you can insert your changes without worrying about breaking anything in the production system.
+
+### Deploy react app´s locally
+
+!!! Note
+    This solution is not the best developer experience and needs optimization
+
+As some Apps of the Oeplatform integrate React apps they need to be build using npm locally. We offer build scripts that can be triggered using django management commands. For example to build the scenario bundles react app and deploy it in the django app factsheet you can run the command `python manage.py build_factsheet_app`. Once done you can access the scenario bundles app via your locally deployed django instance (see above).
+
+Keep in mind that you now use a bundled version of the react app and all changes you might want to add to the React jsx components will only show up once you build the app again. For development this might be a bit clunky but since the app is deployed inside the django app this enables the React app to use the django authentication. An alternative that will not be able to use the django user authentication currently is to deploy the React app alongside the locally deployed django instance. You can use npm start while being inside the `factsheet/frontend/` directory in the terminal. To make this work you will have to change the config.json inside the same directory. In this file you find the key `"toep": "/"` you'll have to change this `/` value to `http://127.0.0.1:8000` to point to the django instance currently deployed locally. If your react test server is still running (`npm start`) you can now access it at `http://127.0.0.1:3000/scenario-bundles/main`. All changes made to the React jsx components will now be reflected instantly using live reloading.
 
 ## User Management - Setup a test user
 
