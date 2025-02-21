@@ -13,3 +13,7 @@
 ## Documentation updates
 
 - Updated documentation to simplify usage of vendor software swagger ui and update the documentation on scenario bundles. Add documentation on how to use the updated OEKG web API [(#1928)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1928).
+
+- Fix outdated docstring in HTTP-API view: Table.put [(#1940)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1940)
+
+- Fix broken link in documentation linking the docker setup instructions [(#1940)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1940)
