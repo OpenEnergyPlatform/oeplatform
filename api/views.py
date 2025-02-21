@@ -439,7 +439,7 @@ class Table(APIView):
              schema: The schema in which the table should be created
              table: The name of the table to be created
 
-         Returns:
+        Returns:
              JsonResponse: A JSON response with the status code 201 CREATED
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
