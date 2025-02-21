@@ -425,22 +425,22 @@ class Table(APIView):
     @api_exception
     def put(self, request, schema, table):
         """
-         REST-API endpoint used to create a new table in the database.
-         The table is created with the columns and constraints specified in the
-         request body. The request body must contain a JSON object with the following
-         keys: 'columns', 'constraints' and 'metadata'.
-         The payload must be a  groped in a 'query' key.
+        REST-API endpoint used to create a new table in the database.
+        The table is created with the columns and constraints specified in the
+        request body. The request body must contain a JSON object with the following
+        keys: 'columns', 'constraints' and 'metadata'.
+        The payload must be a  groped in a 'query' key.
 
-         For authentication, the request must contain a valid token in the
-         Authentication header.
+        For authentication, the request must contain a valid token in the
+        Authentication header.
 
         Args:
-             request: The request object
-             schema: The schema in which the table should be created
-             table: The name of the table to be created
+            request: The request object
+            schema: The schema in which the table should be created
+            table: The name of the table to be created
 
         Returns:
-             JsonResponse: A JSON response with the status code 201 CREATED
+            JsonResponse: A JSON response with the status code 201 CREATED
         """
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise APIError("Schema is not in allowed set of schemes for upload")
