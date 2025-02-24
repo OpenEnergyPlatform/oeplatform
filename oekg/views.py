@@ -1,35 +1,61 @@
-import requests
-from django.core.exceptions import SuspiciousOperation
-from django.http import HttpResponseBadRequest, JsonResponse
+import json
+
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
-from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
-from oekg.utils import validate_sparql_query
+from oekg.utils import execute_sparql_query
+from oeplatform.settings import DOCUMENTATION_LINKS
 
 
+@login_required
 def main_view(request):
-    response = render(request, "oekg/main.html")
+    response = render(
+        request, "oekg/main.html", context={"oekg_api": DOCUMENTATION_LINKS["oekg_api"]}
+    )
     response["Content-Type"] = "text/html; charset=utf-8"
     return response
 
 
 @require_POST
 def sparql_endpoint(request):
+    """
+    Internal SPARQL endpoint. Must only allow read queries. Intended to be use
+    with a djago app frontend as it requires an CSRF token.
+
+    Note: The http based oekg sparql endpoint is implemented in api/views.py
+    OekgSparqlAPIView. It is usable by providing a valid API key in the request
+    """
     sparql_query = request.POST.get("query", "")
+    response_format = request.POST.get("format", "json")  # Default format
 
-    if not sparql_query:
-        return HttpResponseBadRequest("Missing 'query' parameter.")
+    try:
+        content, content_type = execute_sparql_query(sparql_query, response_format)
+    except ValueError as e:
+        return HttpResponseBadRequest(
+            f"{str(e)}. Please provide a valid SPARQL query."
+            "This does not include update/delete queries."
+        )
 
-    if not validate_sparql_query(sparql_query):
-        raise SuspiciousOperation("Invalid SPARQL query.")
+    if content_type == "application/sparql-results+json":
+        return JsonResponse(json.loads(content), safe=False)
+    else:
+        return HttpResponse(content, content_type=content_type)
 
-    endpoint_url = OEKG_SPARQL_ENDPOINT_URL
 
-    headers = {"Accept": "application/sparql-results+json"}
-
-    response = requests.get(
-        endpoint_url, params={"query": sparql_query}, headers=headers
+@require_GET
+def sparql_metadata(request):
+    supported_formats = {
+        "json": "application/sparql-results+json",
+        "json-ld": "application/ld+json",
+        "xml": "application/rdf+xml",
+        "turtle": "text/turtle",
+    }
+    return JsonResponse(
+        {
+            "description": "This API accepts SPARQL queries and returns"
+            "the results in various formats.",
+            "supported_formats": supported_formats,
+        }
     )
-
-    return JsonResponse(response.json())
