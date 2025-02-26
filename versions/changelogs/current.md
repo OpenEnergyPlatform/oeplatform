@@ -4,6 +4,8 @@
 
 - Change sparql endpoint for OEKG to use the http post method to match the expected usage. The OEKG API is also extended to return data in common rdf/graph formats like tutle or json ld [(#1928)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1928).
 
+- Update login styling by adding component placeholders [(#1943)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1943).
+
 ## Features
 
 ## Bugs
