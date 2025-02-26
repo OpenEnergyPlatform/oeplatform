@@ -11,15 +11,26 @@
     max-width: 28rem;
   }
 
+  &__logo {
+    display: flex;
+    justify-content: center;
+
+    img {
+      width: 4.5rem;
+      height: auto;
+    }
+  }
+
   &__heading {
     margin-bottom: 1.5rem;
     font-size: $h2-font-size;
-    color: $secondary;
+    color: $black;
+    text-align: center;
   }
 
   &__alert {
     width: 100%;
-    padding: 1rem;
+    padding: 1rem 1rem 0.5rem;
     margin-bottom: 1.5rem;
     border-left-width: 2px;
     border-left-style: solid;
@@ -27,6 +38,28 @@
     &--info {
       @extend .background-info;
       border-left-color: $info;
+    }
+
+    &--success {
+      @extend .background-success;
+      border-left-color: $success;
+      color: $green-800;
+    }
+
+    &--warning {
+      @extend .background-warning;
+      border-left-color: $warning;
+      color: $yellow-900;
+    }
+
+    &--danger {
+      @extend .background-danger;
+      border-left-color: $danger;
+      color: $red-800;
+    }
+
+    &--100 {
+      text-align: center;
     }
   }
 
@@ -48,11 +81,17 @@
   }
 
   &__hint {
-    text-align: right;
+    padding-top: 0.5rem;
+    color: $gray-600;
+    line-height: normal;
 
-    &--password a {
-      text-decoration: none;
-      font-weight: 700;
+    &--password {
+      text-align: right;
+
+      a {
+        text-decoration: none;
+        font-weight: 700;
+      }
     }
   }
 
@@ -63,12 +102,26 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+    margin-bottom: 1rem;
 
-    &--secondary {
-      @extend .btn;
+    &--outline-primary {
+      background-color: #FFF;
+      color: $secondary;
+      border: 1px solid $secondary;
+
+      &:hover,
+      &:active,
+      &:focus {
+        background-color: #FFF;
+        color: $secondary;
+        border: 1px solid $secondary;
+      }
+    }
+
+    &--outline-secondary {
       background-color: #FFF;
       color: $body-color;
-      border: 1px solid $body-color;
+      border: 1px solid $gray-300;
 
       &:hover,
       &:active,
@@ -77,6 +130,14 @@
         color: $body-color;
         border: 1px solid $body-color;
       }
+    }
+
+    &--warning {
+      @extend .btn-warning;
+    }
+
+    &--danger {
+      @extend .btn-danger;
     }
 
     span:has(svg) {
@@ -88,12 +149,12 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 2rem 0;
+    padding: 1rem 0 2rem;
 
     &-line {
       flex: 1;
       height: 1px;
-      background-color: $gray-400;
+      background-color: $gray-300;
     }
 
     &-word {
@@ -108,5 +169,33 @@
     justify-content: center;
     gap: 0.5rem;
     padding-top: 2rem;
+
+    p {
+      color: $gray-600;
+    }
+
+    a {
+      text-decoration: none;
+      font-weight: 700;
+    }
+  }
+
+  &__verification {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 1rem;
+
+    h2 {
+      font-size: $h4-font-size;
+      font-weight: 700;
+      color: $body-color;
+    }
+
+    p {
+      @extend .fs-7;
+      color: $gray-600;
+    }
   }
 }
