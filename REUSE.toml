@@ -1,35 +1,23 @@
-# SPDX-FileCopyrightText: 2024 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: super-repo v0.5.0 <https://github.com/rl-institut/super-repo>
-# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform v0.5.0 <https://github.com/rl-institut/oeplatform>
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 version = 1
 SPDX-PackageName = "oeplatform"
-SPDX-PackageSupplier = "Ludwig Hülk <https://github.com/Ludee>"
+SPDX-PackageSupplier = "Jonas Huber <https://github.com/jh-RLI"
 SPDX-PackageDownloadLocation = "https://github.com/rl-institut/oeplatform"
-SPDX-PackageComment = "The code of this repository is licensed under the MIT License (MIT)."
+SPDX-PackageComment = "AGPL-3.0-or-later"
 
-[[annotations]]
-path = "docs/**"
-precedence = "override"
-SPDX-FileCopyrightText = ["2023 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut", "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut", "super-repo <https://github.com/rl-institut/super-repo>"]
-SPDX-License-Identifier = "CC-BY-4.0"
-SPDX-FileComment = "Copyright: super-repo documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+#[[annotations]]
+#path = "docs/**"
+#precedence = "override"
+#SPDX-FileCopyrightText = ["2023 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut", "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut", "super-repo <https://github.com/rl-institut/super-repo>"]
+#SPDX-License-Identifier = "CC-BY-4.0"
+#SPDX-FileComment = "Copyright: super-repo documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
-[[annotations]]
-path = ".github/pull_request_template.md"
-precedence = "override"
-SPDX-FileCopyrightText = ["2023 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut", "super-repo <https://github.com/rl-institut/super-repo>"]
-SPDX-License-Identifier = "CC0-1.0"
+#[[annotations]]
+#path = ".github/pull_request_template.md"
+#precedence = "override"
+#SPDX-FileCopyrightText = ["2023 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut", "super-repo <https://github.com/rl-institut/super-repo>"]
+#SPDX-License-Identifier = "CC0-1.0"
 
-[[annotations]]
-path = ".github/ISSUE_TEMPLATE/*.md"
-precedence = "override"
-SPDX-FileCopyrightText = ["2023 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut", "super-repo <https://github.com/rl-institut/super-repo>"]
-SPDX-License-Identifier = "CC0-1.0"
-
-[[annotations]]
-path = "super_repo/example.json"
-precedence = "override"
-SPDX-FileCopyrightText = "OEMetadata <https://github.com/OpenEnergyPlatform/oemetadata>"
-SPDX-License-Identifier = "CC0-1.0"
-SPDX-FileComment = "OEMetadata-2.0.2 licensed CC0-1.0"
