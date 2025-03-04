@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2023 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: super-repo v0.5.0 <https://github.com/rl-institut/super-repo>
+# SPDX-License-Identifier: MIT
+
+[build-system]
+build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.8.0,<4"]
+
+[project]
+name = "oeplatform"
+version = "0.5.0"
+authors = [
+    {name = "Ludwig Hülk", email = "datenzentrum@rl-institut.de"}]
+description = "A template repo for research software."
+readme = "README.rst"
+license = {file = "LICENSE.txt"}
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    "stringcase ~=1.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/rl-institut/super-repo"
+Source = "https://github.com/rl-institut/super-repo"
+Documentation = "https://rl-institut.github.io/super-repo/latest/"
+
+[tool.ruff]
+builtins = ["ellipsis"]
+target-version = "py38"
+
+[tool.ruff.lint]
+exclude = [
+  ".eggs",
+  "doc",
+  "_typed_ops.pyi",
+]
+# E402: module level import not at top of file
+# E501: line too long - let black worry about that
+# E731: do not assign a lambda expression, use a def
+# E741: ambiguous variable names
+ignore = [
+  "E402",
+  "E501",
+  "E731",
+  "E741",
+]
+select = [
+  # Pyflakes
+  "F", # Pycodestyle
+  "E",
+  "W", # isort
+  "I", # Pyupgrade
+  "UP",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# F401: imported but unsued
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pandas_indexing"]
+lines-after-imports = 2
