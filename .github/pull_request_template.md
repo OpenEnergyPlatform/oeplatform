@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2023 Stephan Uller  <steull> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2023 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# PDX-FileCopyrightText: 2024 Eike Broda <ebroda>
+# SPDX-FileCopyrightText: 2024 wingechr <wingechr>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: CC0-1.0
+
+
 ## Summary of the discussion
 
 Describe the findings of the discussion in the issue or meeting.
