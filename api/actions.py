@@ -1,3 +1,16 @@
+# SPDX-FileCopyrightText: 2016 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: 2017 Johann Wagner <johannwagner>
+# SPDX-FileCopyrightText: 2017 Tom Heimbrodt <tom-heimbrodt>
+# SPDX-FileCopyrightText: 2019 <Bachibouzouk>
+# SPDX-FileCopyrightText: 2021 Christian <christian-rli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2021 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: 2022 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2022 <henhuy> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2024 Eike Broda <ebroda>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
+
 import json
 import logging
 import re
