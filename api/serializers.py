@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 from re import match
 from uuid import UUID
 
