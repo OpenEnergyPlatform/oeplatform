@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 """
 inserting the string "1000" in a varchar column
 that has unique constraint  leads to an error.

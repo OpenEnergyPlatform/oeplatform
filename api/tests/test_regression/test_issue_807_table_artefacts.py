@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 """Some api actions run `assert_permission`, which calls
 DBTable.load(schema, table), which used get_or_create().
 

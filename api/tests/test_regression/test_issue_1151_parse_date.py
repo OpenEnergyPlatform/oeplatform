@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 from api.tests import APITestCaseWithTable
 
 BAD_VALUES = [True, {}, "", "not a date", "200", "2020-30-40", "2020-01-01 WTF"]
