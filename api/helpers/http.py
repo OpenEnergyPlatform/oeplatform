@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2017 Johann Wagner <johannwagner>
+# SPDX-FileCopyrightText: 2019 Martin Glauer <MGlauer>
+# PDX-FileCopyrightText: 2024 Eike Broda <ebroda>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 from django.http import HttpResponse
 
 

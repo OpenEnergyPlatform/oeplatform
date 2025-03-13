@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 import logging
 import re
 
