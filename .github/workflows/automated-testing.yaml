@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2021 Johann Wagner <johannwagner>
+# SPDX-FileCopyrightText: 2021 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: 2023 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: 2024 Heinz-Alexander Fuetterer <afuetterer>
+# SPDX-License-Identifier: MIT
+
 name: Automated Test
 
 # We run this automated testing job on every commit on master and develop and for every pull request.
