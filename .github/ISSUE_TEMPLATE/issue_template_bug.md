@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023 Stephan Uller  <steull> © Reiner Lemoine Institut
 # SPDX-FileCopyrightText: 2023 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2024 wChristian Winger <wingechr>
+# SPDX-FileCopyrightText: 2024 Christian Winger <wingechr>
 # SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
 # SPDX-License-Identifier: CC0-1.0
 
