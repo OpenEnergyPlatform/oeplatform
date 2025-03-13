@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: 2021 Johann Wagner <johannwagner>
 # SPDX-FileCopyrightText: 2021 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: 2022 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
 # SPDX-FileCopyrightText: 2023 Christian Winger <wingechr>
 # SPDX-FileCopyrightText: 2024 Heinz-Alexander Fuetterer <afuetterer>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
 # SPDX-License-Identifier: MIT
 
 name: Automated Test

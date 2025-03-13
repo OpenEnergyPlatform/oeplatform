@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2021 Johann Wagner <johannwagner>
+# SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: 2024 Heinz-Alexander Fuetterer <afuetterer>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 name: Create and publish a Docker image
 
 on:

@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2023 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2024 Heinz-Alexander Fuetterer <afuetterer>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 name: Deploy-Docs
 on:
   push:
