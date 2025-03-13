@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2019 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: 2022 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 import json
 
 from omi.dialects.oep.dialect import OEP_V_1_5_Dialect

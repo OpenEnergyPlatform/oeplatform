@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2017 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: 2024 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 from api.tests import APITestCase
 
 

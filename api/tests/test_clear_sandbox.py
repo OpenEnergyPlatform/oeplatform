@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2023 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: 2024 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
+
 from dataedit.management.commands.clear_sandbox import (
     SANDBOX_SCHEMA,
     clear_sandbox,
