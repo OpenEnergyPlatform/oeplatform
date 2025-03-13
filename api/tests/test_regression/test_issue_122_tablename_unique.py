@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 from api import actions
 from api.actions import has_table
 from api.tests import APITestCase
