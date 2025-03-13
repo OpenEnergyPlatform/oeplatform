@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2018 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 import itertools as it
 from json.encoder import INFINITY, encode_basestring, encode_basestring_ascii
 from types import GeneratorType
