@@ -8,12 +8,23 @@ SPDX-PackageSupplier = "Jonas Huber <https://github.com/jh-RLI"
 SPDX-PackageDownloadLocation = "https://github.com/rl-institut/oeplatform"
 SPDX-PackageComment = "AGPL-3.0-or-later"
 
-#[[annotations]]
-#path = "docs/**"
-#precedence = "override"
-#SPDX-FileCopyrightText = ["2023 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut", "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut", "super-repo <https://github.com/rl-institut/super-repo>"]
-#SPDX-License-Identifier = "CC-BY-4.0"
-#SPDX-FileComment = "Copyright: super-repo documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+[[annotations]]
+path = "docs/**"
+precedence = "override"
+SPDX-FileCopyrightText = ["2016 Martin Glauer <MGlauer>",
+  "2017 Johann Wagner <johannwagner>",
+  "2018 Christian Winger <wingechr>",
+  "2020 Jonas Huber <@jh-RLI> © Reiner Lemoine Institut",
+  "2020 Christian Hofmann <christian-rli> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <@Ludee> © Reiner Lemoine Institut",
+  "2023 Adel Memariani <adelmemariani>",
+    "2023 Daryna <Darynarli> © Reiner Lemoine Institut",
+    "2023 Stephen Bosch <pajot>",
+    "2024 Eike Broda <ebroda>",
+    "2024 Bryan Lancien <bmlancien>",
+    "oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
 #[[annotations]]
 #path = ".github/pull_request_template.md"
