@@ -277,6 +277,14 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 
 After these steps, a `static` folder inside `oep-website/oeplatform/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
 
+### 6.2 Setup the oeo extended app
+
+The oeo extended is used to create new ontology classes on the fly while annotating a oemetadata document. Especially if one wants to annotate composed units which are more complex than a simple meter or square meter unit. These composed units are stored separate from the OEO ontology in the OEOX which is located in its own owl file.
+
+The use case described above requires to setup the oeo extended template file in the `media/` directory. We offer a template file to simplify this task.
+
+    cp oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl  media/oeo_ext/oeo_ext.owl
+
 ## 7 Setup the Scenario-Bundles app
 
 !!! note "Optional Step"

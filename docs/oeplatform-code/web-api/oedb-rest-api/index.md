@@ -19,9 +19,9 @@ Below you see a draft version of the OpenAPI-based. It is the documentation for 
 <head>
     <meta charset="UTF-8">
     <title>API Documentation</title>
-    <link rel="stylesheet" type="text/css" href="dist/swagger-ui.css">
-    <script src="dist/swagger-ui-bundle.js"></script>
-    <script src="dist/swagger-ui-standalone-preset.js"></script>
+    <link rel="stylesheet" type="text/css" href="../dist/swagger-ui.css">
+    <script src="../dist/swagger-ui-bundle.js"></script>
+    <script src="../dist/swagger-ui-standalone-preset.js"></script>
 </head>
 <body>
 <div id="swagger-ui"></div>
