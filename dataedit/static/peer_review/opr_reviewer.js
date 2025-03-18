@@ -883,22 +883,14 @@ function checkFieldStates() {
     for (const { fieldName, fieldValue } of allFields) {
         if (!isEmptyValue(fieldValue)) {
             const fieldState = getFieldState(fieldName);
-            const review = current_review["reviews"].find((r) => r.key === fieldName);
 
-            // ✅ 1. Проверка, что состояние поля "ok" или "rejected"
             if (fieldState !== 'ok' && fieldState !== 'rejected') {
-                return false;
-            }
-
-            // ✅ 2. Проверка, что если поле "rejected", то у него есть `additionalComment`
-            if (fieldState === 'rejected' && (!review || !review.fieldReview.additionalComment || review.fieldReview.additionalComment.trim() === '')) {
                 return false;
             }
         }
     }
     return true;
 }
-
 
 
 /**
