@@ -479,7 +479,7 @@ function renderSummaryPageFields() {
         if (!groupedFields[prefix]) groupedFields[prefix] = { indexed: {}, noIndex: [] };
 
         if (hasIndex) {
-          const index = rest[0];
+          const index = (parseInt(rest[0], 10) + 1).toString();
           const nameWithoutPrefixIndex = rest.slice(1).join(' ');
           if (!groupedFields[prefix].indexed[index]) {
             groupedFields[prefix].indexed[index] = [];
