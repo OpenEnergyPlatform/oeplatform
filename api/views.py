@@ -31,9 +31,9 @@ from django.views.decorators.cache import never_cache
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import generics, status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
-
-# views.py
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -57,9 +57,11 @@ from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
-
-# from oekg.sparqlQuery import remove_datasets_from_scenario
-from oekg.utils import process_datasets_sparql_query
+from oekg.utils import (
+    execute_sparql_query,
+    process_datasets_sparql_query,
+    validate_public_sparql_query,
+)
 from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
 
 if USE_LOEP:
@@ -1514,6 +1516,30 @@ def oeo_search(request):
             "The endpoint for LOEP is not setup. Please contact a server admin."
         )
     return JsonResponse(res, safe=False)
+
+
+class OekgSparqlAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        sparql_query = request.data.get("query", "")
+        response_format = request.data.get("format", "json")  # Default format
+
+        if not validate_public_sparql_query(sparql_query):
+            raise ValidationError(
+                "Invalid SPARQL query. Update/delete queries are not allowed."
+            )
+
+        try:
+            content, content_type = execute_sparql_query(sparql_query, response_format)
+        except ValueError as e:
+            raise ValidationError(str(e))
+
+        if content_type == "application/sparql-results+json":
+            return Response(content)
+        else:
+            return Response(content, content_type=content_type)
 
 
 def oevkg_search(request):

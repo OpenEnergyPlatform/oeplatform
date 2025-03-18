@@ -297,7 +297,7 @@ def listschemas(request):
             "schemas": schemas,
             "query": searched_query_string,
             "tags": searched_tag_ids,
-            "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
+            "doc_oem_builder_link": EXTERNAL_URLS["tutorials_oemetabuilder"],
         },
     )
 
@@ -1856,6 +1856,7 @@ class MetaEditView(LoginRequiredMixin, View):
             "doc_links": DOCUMENTATION_LINKS,
             "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
             "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
+            "oemetabuilder_tutorial": EXTERNAL_URLS["tutorials_oemetabuilder"],
         }
 
         return render(
@@ -1873,6 +1874,7 @@ class StandaloneMetaEditView(View):
             ),
             "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
             "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
+            "oemetabuilder_tutorial": EXTERNAL_URLS["tutorials_oemetabuilder"],
         }
         return render(
             request,
