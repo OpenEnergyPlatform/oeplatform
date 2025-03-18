@@ -500,8 +500,6 @@ function renderSummaryPageFields() {
   updateTabProgressIndicatorClasses();
 }
 
-
-
 /**
  * Creates an HTML list of fields with their categories
  * @param {Array} fields Array of field objects
@@ -587,7 +585,8 @@ function saveEntrances() {
     for (let i = 0; i < current_review["reviews"].length; i++) {
       if (current_review["reviews"][i]["key"] === selectedField) {
         reviewFound = true;
-        console.log("review" + current_review.reviews["reviews"][i]["fieldReview"])
+        // console.log("review" + current_review.reviews["reviews"][i]["fieldReview"]) //undefined "reviews"
+        console.log("review" + current_review["reviews"][i]["fieldReview"]) //undefined "reviews"
         if (!Array.isArray(current_review["reviews"][i]["fieldReview"])) {
           current_review["reviews"][i]["fieldReview"] = [current_review["reviews"][i]["fieldReview"]];
         }
