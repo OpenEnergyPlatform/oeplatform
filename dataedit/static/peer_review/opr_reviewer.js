@@ -426,18 +426,15 @@ function renderSummaryPageFields() {
     const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
     const fieldState = getFieldState(field_id);
     const fieldCategory = field.getAttribute('data-category');
-    const fieldName = field_id.replace(/\./g, ' ');
-
-    let fieldStatus = '';
-    if (isEmptyValue(fieldValue)) {
-      fieldStatus = 'Empty';
-    } else if (fieldState === 'ok') {
-      fieldStatus = 'Accepted';
-    } else if (fieldState === 'suggestion') {
-      fieldStatus = 'Suggested';
-    } else if (fieldState === 'rejected') {
-      fieldStatus = 'Rejected';
+    let fieldName = field_id.replace(/\./g, ' ');
+    if (fieldCategory !== "general") {
+      fieldName = fieldName.split(' ').slice(1).join(' ');
     }
+
+    let fieldStatus = isEmptyValue(fieldValue) ? 'Empty' :
+                      fieldState === 'ok' ? 'Accepted' :
+                      fieldState === 'suggestion' ? 'Suggested' :
+                      fieldState === 'rejected' ? 'Rejected' : 'Missing';
 
     addFieldToCategory(fieldCategory, { fieldName, fieldValue, fieldStatus });
   });
@@ -447,18 +444,15 @@ function renderSummaryPageFields() {
     const fieldValue = $(`#field_${field_id.replace(/\./g, '\\.')}`).find('.value').text().replace(/\s+/g, ' ').trim();
     const fieldState = review.fieldReview.state;
     const fieldCategory = review.category;
-    const fieldName = review.key.replace(/\./g, ' ');
-
-    let fieldStatus = '';
-    if (isEmptyValue(fieldValue)) {
-      fieldStatus = 'Empty';
-    } else if (fieldState === 'ok') {
-      fieldStatus = 'Accepted';
-    } else if (fieldState === 'suggestion') {
-      fieldStatus = 'Suggested';
-    } else if (fieldState === 'rejected') {
-      fieldStatus = 'Rejected';
+    let fieldName = review.key.replace(/\./g, ' ');
+    if (fieldCategory !== "general") {
+      fieldName = fieldName.split(' ').slice(1).join(' ');
     }
+
+    let fieldStatus = isEmptyValue(fieldValue) ? 'Empty' :
+                      fieldState === 'ok' ? 'Accepted' :
+                      fieldState === 'suggestion' ? 'Suggested' :
+                      fieldState === 'rejected' ? 'Rejected' : 'Missing';
 
     addFieldToCategory(fieldCategory, { fieldName, fieldValue, fieldStatus });
   });
@@ -476,44 +470,88 @@ function renderSummaryPageFields() {
     const tabsContent = document.createElement('div');
     tabsContent.className = 'tab-content';
 
-    let first = true;
+    let firstTab = true;
     for (const category in categoriesMap) {
       const tabId = `tab-${category}`;
 
-      // Tab Navigation
       const navItem = document.createElement('li');
       navItem.className = 'nav-item';
-      navItem.innerHTML = `<button class="nav-link${first ? ' active' : ''}" data-bs-toggle="tab" data-bs-target="#${tabId}">${category}</button>`;
+      navItem.innerHTML = `<button class="nav-link${firstTab ? ' active' : ''}" data-bs-toggle="tab" data-bs-target="#${tabId}">${category}</button>`;
       tabsNav.appendChild(navItem);
 
-      // Tab Content
       const tabPane = document.createElement('div');
-      tabPane.className = `tab-pane fade${first ? ' show active' : ''}`;
+      tabPane.className = `tab-pane fade${firstTab ? ' show active' : ''}`;
       tabPane.id = tabId;
 
-      const table = document.createElement('table');
-      table.className = 'table review-summary';
-      table.innerHTML = `
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Field Name</th>
-            <th>Field Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${categoriesMap[category].map(field => `
-            <tr>
-              <td class="status ${field.fieldStatus.toLowerCase()}">${field.fieldStatus}</td>
-              <td>${field.fieldName}</td>
-              <td>${field.fieldValue}</td>
-            </tr>`).join('')}
-        </tbody>`;
+      const fields = categoriesMap[category];
+      const singleFields = fields.filter(f => f.fieldName.trim().split(' ').length === 1);
+      const groupedFields = fields.filter(f => f.fieldName.trim().split(' ').length > 1)
+        .reduce((acc, field) => {
+          const prefix = field.fieldName.split(' ')[0];
+          if (!acc[prefix]) acc[prefix] = [];
+          acc[prefix].push(field);
+          return acc;
+        }, {});
 
-      tabPane.appendChild(table);
+      if (singleFields.length > 0) {
+        const table = document.createElement('table');
+        table.className = 'table review-summary';
+        table.innerHTML = `
+          <thead><tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr></thead>
+          <tbody>
+            ${singleFields.map(f => `
+              <tr>
+                <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+                <td>${f.fieldName}</td>
+                <td>${f.fieldValue}</td>
+              </tr>`).join('')}
+          </tbody>`;
+        tabPane.appendChild(table);
+      }
+
+      if (Object.keys(groupedFields).length > 0) {
+        const accordionContainer = document.createElement('div');
+        accordionContainer.className = 'accordion';
+        accordionContainer.id = `accordion-${category}`;
+
+        let accordionIndex = 0;
+        for (const prefix in groupedFields) {
+          const accordionItem = document.createElement('div');
+          accordionItem.className = 'accordion-item';
+          const headingId = `heading-${category}-${accordionIndex}`;
+          const collapseId = `collapse-${category}-${accordionIndex}`;
+
+          accordionItem.innerHTML = `
+            <h2 class="accordion-header" id="${headingId}">
+              <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
+                ${prefix}
+              </button>
+            </h2>
+            <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#accordion-${category}">
+              <div class="accordion-body">
+                <table class="table table-sm table-bordered">
+                  <thead>
+                    <tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr>
+                  </thead>
+                  <tbody>
+                    ${groupedFields[prefix].map(f => `
+                      <tr>
+                        <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+                        <td>${f.fieldName}</td>
+                        <td>${f.fieldValue}</td>
+                      </tr>`).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>`;
+          accordionContainer.appendChild(accordionItem);
+          accordionIndex++;
+        }
+        tabPane.appendChild(accordionContainer);
+      }
+
       tabsContent.appendChild(tabPane);
-
-      first = false;
+      firstTab = false;
     }
 
     summaryContainer.appendChild(tabsNav);
@@ -524,6 +562,7 @@ function renderSummaryPageFields() {
   generateTabs(categoriesMap);
   updateTabProgressIndicatorClasses();
 }
+
 
 /**
  * Renders fields on the Summary page, sorted by review state
