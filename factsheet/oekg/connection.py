@@ -17,7 +17,7 @@ from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME, RDF_DA
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 )  # TODO bad - windows dev will get path error
-# Bryans custom hack!! print(versions.remove(".DS_Store"))
+print(versions.remove(".DS_Store"))
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
 onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 path = onto_base_path / version  # TODO bad - windows dev will get path error
