@@ -341,121 +341,196 @@ function selectState(state) { // eslint-disable-line no-unused-vars
 
 function renderSummaryPageFields() {
   const categoriesMap = {};
-  const processedFields = new Set();
 
-  function addFieldToCategory(category, field, field_id) {
+  function addFieldToCategory(category, field) {
     if (!categoriesMap[category]) {
       categoriesMap[category] = [];
     }
-    if (!categoriesMap[category].some(f => f.fieldId === field.fieldId)) {
-      categoriesMap[category].push(field);
-    }
+    categoriesMap[category].push(field);
   }
-
-  current_review.reviews.forEach(review => {
-    const field_id = review.key;
-    const fieldValue = $(`#field_${field_id.replace(/\./g, '\\.')}`).find('.value').text().replace(/\s+/g, ' ').trim();
-    const isAccepted = review.fieldReview.some(fr => fr.state === 'ok');
-    const isRejected = review.fieldReview.some((fieldReview) => fieldReview.state === 'rejected');
-    const fieldCategory = review.category;
-
-    let fieldStatus = '';
-    if (isEmptyValue(fieldValue)) {
-      fieldStatus = 'Empty';
-    } else if (isAccepted) {
-      fieldStatus = 'Accepted';
-    } else if (isRejected) {
-      fieldStatus = 'Rejected';
-    }
-    addFieldToCategory(fieldCategory, { fieldId: review.key, fieldName: review.key.replace(/\./g, ' '), fieldValue, fieldStatus });
-  });
 
   const fields = document.querySelectorAll('.field');
   fields.forEach(field => {
     const field_id = field.id.slice(6);
-    const alreadyAdded = current_review.reviews.some((review) => review.key === field_id);
-
-    if (alreadyAdded) return;
-
     const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
     const fieldState = getFieldState(field_id);
     const fieldCategory = field.getAttribute('data-category');
-
-    let fieldStatus = '';
-    if (isEmptyValue(fieldValue)) {
-      fieldStatus = 'Empty';
-    } else if (fieldState === 'ok') {
-      fieldStatus = 'Accepted';
-    } else if (fieldState === 'rejected') {
-      fieldStatus = 'Rejected';
+    let fieldName = field_id.replace(/\./g, ' ');
+    if (fieldCategory !== "general") {
+      fieldName = fieldName.split(' ').slice(1).join(' ');
     }
 
-    addFieldToCategory(fieldCategory, { fieldId: field_id, fieldName: field_id.replace(/\./g, ' '), fieldValue, fieldStatus });
+    let fieldStatus = isEmptyValue(fieldValue) ? 'Empty' :
+                      fieldState === 'ok' ? 'Accepted' :
+                      fieldState === 'rejected' ? 'Rejected' : 'Missing';
+
+    addFieldToCategory(fieldCategory, { fieldName, fieldValue, fieldStatus });
   });
 
   const summaryContainer = document.getElementById("summary");
+  summaryContainer.innerHTML = '';
 
-  function clearSummaryTabs() {
-     while (summaryContainer.firstChild) {
-       summaryContainer.firstChild.remove();
-     }
-   }
+  const tabsNav = document.createElement('ul');
+  tabsNav.className = 'nav nav-tabs';
 
-  function generateTabs(categoriesMap) {
-    const tabsNav = document.createElement('ul');
-    tabsNav.className = 'nav nav-tabs';
+  const tabsContent = document.createElement('div');
+  tabsContent.className = 'tab-content';
 
-    const tabsContent = document.createElement('div');
-    tabsContent.className = 'tab-content';
+  let firstTab = true;
 
-    let first = true;
-    for (const category in categoriesMap) {
-      const tabId = `tab-${category}`;
+  for (const category in categoriesMap) {
+    const tabId = `tab-${category}`;
 
-      // Tab Navigation
-      const navItem = document.createElement('li');
-      navItem.className = 'nav-item';
-      navItem.innerHTML = `<button class="nav-link${first ? ' active' : ''}" data-bs-toggle="tab" data-bs-target="#${tabId}">${category}</button>`;
-      tabsNav.appendChild(navItem);
+    const navItem = document.createElement('li');
+    navItem.className = 'nav-item';
+    navItem.innerHTML = `<button class="nav-link${firstTab ? ' active' : ''}" data-bs-toggle="tab" data-bs-target="#${tabId}">${category}</button>`;
+    tabsNav.appendChild(navItem);
 
-      // Tab Content
-      const tabPane = document.createElement('div');
-      tabPane.className = `tab-pane fade${first ? ' show active' : ''}`;
-      tabPane.id = tabId;
+    const tabPane = document.createElement('div');
+    tabPane.className = `tab-pane fade${firstTab ? ' show active' : ''}`;
+    tabPane.id = tabId;
 
+    const fields = categoriesMap[category];
+
+    const singleFields = [];
+    const groupedFields = {};
+
+    fields.forEach(field => {
+      const words = field.fieldName.split(' ');
+      if (words.length === 1) {
+        singleFields.push(field);
+      } else {
+        const prefix = words[0];
+        const rest = words.slice(1);
+        const hasIndex = !isNaN(rest[0]);
+
+        if (!groupedFields[prefix]) groupedFields[prefix] = { indexed: {}, noIndex: [] };
+
+        if (hasIndex) {
+          const index = (parseInt(rest[0], 10) + 1).toString();
+          const nameWithoutPrefixIndex = rest.slice(1).join(' ');
+          if (!groupedFields[prefix].indexed[index]) {
+            groupedFields[prefix].indexed[index] = [];
+          }
+          groupedFields[prefix].indexed[index].push({ ...field, fieldName: nameWithoutPrefixIndex });
+        } else {
+          const nameWithoutPrefix = rest.join(' ');
+          groupedFields[prefix].noIndex.push({ ...field, fieldName: nameWithoutPrefix });
+        }
+      }
+    });
+
+    if (singleFields.length > 0) {
       const table = document.createElement('table');
       table.className = 'table review-summary';
       table.innerHTML = `
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Field Name</th>
-            <th>Field Value</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr></thead>
         <tbody>
-          ${categoriesMap[category].map(field => `
+          ${singleFields.map(f => `
             <tr>
-              <td class="status ${field.fieldStatus.toLowerCase()}">${field.fieldStatus}</td>
-              <td>${field.fieldName}</td>
-              <td>${field.fieldValue}</td>
+              <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+              <td>${f.fieldName}</td>
+              <td>${f.fieldValue}</td>
             </tr>`).join('')}
         </tbody>`;
-
       tabPane.appendChild(table);
-      tabsContent.appendChild(tabPane);
-
-      first = false;
     }
 
-    summaryContainer.appendChild(tabsNav);
-    summaryContainer.appendChild(tabsContent);
+    if (Object.keys(groupedFields).length > 0) {
+      const accordionContainer = document.createElement('div');
+      accordionContainer.className = 'accordion';
+      accordionContainer.id = `accordion-${category}`;
+
+      let accordionIndex = 0;
+      for (const prefix in groupedFields) {
+        const accordionItem = document.createElement('div');
+        accordionItem.className = 'accordion-item';
+        const headingId = `heading-${category}-${accordionIndex}`;
+        const collapseId = `collapse-${category}-${accordionIndex}`;
+
+        let innerHTML = '';
+
+        const { noIndex, indexed } = groupedFields[prefix];
+
+        // No-index fields table
+        if (noIndex.length > 0) {
+          innerHTML += `
+            <table class="table table-sm table-bordered">
+              <thead><tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr></thead>
+              <tbody>
+                ${noIndex.map(f => `
+                  <tr>
+                    <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+                    <td>${f.fieldName}</td>
+                    <td>${f.fieldValue}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>`;
+        }
+
+        // Indexed fields sub-accordion
+        if (Object.keys(indexed).length > 0) {
+          const subAccordionId = `subAccordion-${category}-${accordionIndex}`;
+          innerHTML += `<div class="accordion" id="${subAccordionId}">`;
+
+          Object.entries(indexed).forEach(([idx, idxFields], idxAccordionIndex) => {
+            const idxHeadingId = `idxHeading-${category}-${accordionIndex}-${idxAccordionIndex}`;
+            const idxCollapseId = `idxCollapse-${category}-${accordionIndex}-${idxAccordionIndex}`;
+
+            innerHTML += `
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="${idxHeadingId}">
+                  <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#${idxCollapseId}">
+                    ${prefix} ${idx}
+                  </button>
+                </h2>
+                <div id="${idxCollapseId}" class="accordion-collapse collapse" data-bs-parent="#${subAccordionId}">
+                  <div class="accordion-body">
+                    <table class="table table-sm table-bordered">
+                      <thead><tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr></thead>
+                      <tbody>
+                        ${idxFields.map(f => `
+                          <tr>
+                            <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+                            <td>${f.fieldName}</td>
+                            <td>${f.fieldValue}</td>
+                          </tr>`).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>`;
+          });
+
+          innerHTML += `</div>`; // close sub-accordion
+        }
+
+
+        accordionItem.innerHTML = `
+          <h2 class="accordion-header" id="${headingId}">
+            <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
+              ${prefix}
+            </button>
+          </h2>
+          <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#accordion-${category}">
+            <div class="accordion-body">${innerHTML}</div>
+          </div>`;
+
+        accordionContainer.appendChild(accordionItem);
+        accordionIndex++;
+      }
+      tabPane.appendChild(accordionContainer);
+    }
+
+    tabsContent.appendChild(tabPane);
+    firstTab = false;
   }
 
-  clearSummaryTabs();
-  generateTabs(categoriesMap);
+  summaryContainer.appendChild(tabsNav);
+  summaryContainer.appendChild(tabsContent);
   updateTabProgressIndicatorClasses();
 }
+
 /**
  * Renders fields on the Summary page, sorted by review state
  */
