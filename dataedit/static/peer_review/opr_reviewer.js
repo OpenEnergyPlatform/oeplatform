@@ -480,18 +480,24 @@ function renderSummaryPageFields() {
       tabsNav.appendChild(navItem);
 
       const tabPane = document.createElement('div');
-      tabPane.className = `tab-pane fade${firstTab ? ' show active' : ''}`;
-      tabPane.id = tabId;
+        tabPane.className = `tab-pane fade${firstTab ? ' show active' : ''}`;
+        tabPane.id = tabId;
 
-      const fields = categoriesMap[category];
-      const singleFields = fields.filter(f => f.fieldName.trim().split(' ').length === 1);
-      const groupedFields = fields.filter(f => f.fieldName.trim().split(' ').length > 1)
-        .reduce((acc, field) => {
-          const prefix = field.fieldName.split(' ')[0];
-          if (!acc[prefix]) acc[prefix] = [];
-          acc[prefix].push(field);
-          return acc;
-        }, {});
+        const fields = categoriesMap[category];
+        const singleFields = fields.filter(f => f.fieldName.trim().split(' ').length === 1);
+
+        const groupedFields = {};
+        fields.forEach(field => {
+          const words = field.fieldName.trim().split(' ');
+          if (words.length > 1) {
+            const prefix = words[0];
+            const nameWithoutPrefix = words.slice(1).join(' ');
+            if (!groupedFields[prefix]) {
+              groupedFields[prefix] = [];
+            }
+            groupedFields[prefix].push({ ...field, fieldName: nameWithoutPrefix });
+          }
+        });
 
       if (singleFields.length > 0) {
         const table = document.createElement('table');
@@ -570,7 +576,6 @@ function renderSummaryPageFields() {
 /**
  * Displays fields based on selected category
  */
-
 
 // function renderSummaryPageFields() {
 //   const acceptedFields = [];
