@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2016 Martin Glauer <MGlauer>
 # SPDX-FileCopyrightText: 2017 Johann Wagner <johannwagner>
 # SPDX-FileCopyrightText: 2019 Christian Winger <wingechr>
-# SPDX-FileCopyrightText: 2020 Christian <christian-rli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2020 Christian Hofmann <christian-rli> © Reiner Lemoine Institut
 # SPDX-FileCopyrightText: 2020 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
 # SPDX-FileCopyrightText: 2022 Adel Memariani <adelmemariani>
 # SPDX-FileCopyrightText: 2022 <chrwm>
