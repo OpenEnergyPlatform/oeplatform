@@ -23,8 +23,8 @@ from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
-from metadata.v160.schema import OEMETADATA_V160_SCHEMA
-from metadata.v160.template import OEMETADATA_V160_TEMPLATE
+from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
+from oemetadata.v1.v160.template import OEMETADATA_V160_TEMPLATE
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -942,6 +942,7 @@ class DataView(View):
 
         oemetadata = table_obj.oemetadata
 
+        # TODO: Adapt this stuff to v2
         from dataedit.metadata import TEMPLATE_V1_5
 
         def iter_oem_key_order(metadata: dict):
