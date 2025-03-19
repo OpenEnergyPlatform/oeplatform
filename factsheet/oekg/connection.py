@@ -39,6 +39,7 @@ query_endpoint = "http://%(host)s:%(port)s/%(name)s/query" % rdfdb
 update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
 
 sparql = SPARQLWrapper(query_endpoint)
+sparql_wrapper_update = SPARQLWrapper(update_endpoint)
 
 store = sparqlstore.SPARQLUpdateStore()
 
