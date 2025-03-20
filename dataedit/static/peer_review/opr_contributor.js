@@ -350,16 +350,14 @@ function renderSummaryPageFields() {
   const categoriesMap = {};
 
   function addFieldToCategory(category, field) {
-    if (!categoriesMap[category]) {
-      categoriesMap[category] = [];
-    }
+    if (!categoriesMap[category]) categoriesMap[category] = [];
     categoriesMap[category].push(field);
   }
 
   const fields = document.querySelectorAll('.field');
   fields.forEach(field => {
     const field_id = field.id.slice(6);
-    const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+    const fieldValue = $(field).find('.value').text().trim();
     const fieldState = getFieldState(field_id);
     const fieldCategory = field.getAttribute('data-category');
     let fieldName = field_id.replace(/\./g, ' ');
@@ -398,7 +396,6 @@ function renderSummaryPageFields() {
     tabPane.id = tabId;
 
     const fields = categoriesMap[category];
-
     const singleFields = [];
     const groupedFields = {};
 
@@ -409,20 +406,17 @@ function renderSummaryPageFields() {
       } else {
         const prefix = words[0];
         const rest = words.slice(1);
-        const hasIndex = !isNaN(rest[0]);
+        const indices = rest.filter(word => !isNaN(word));
+        const nameWithoutIndices = rest.filter(word => isNaN(word)).join(' ');
 
         if (!groupedFields[prefix]) groupedFields[prefix] = { indexed: {}, noIndex: [] };
 
-        if (hasIndex) {
-          const index = (parseInt(rest[0], 10) + 1).toString();
-          const nameWithoutPrefixIndex = rest.slice(1).join(' ');
-          if (!groupedFields[prefix].indexed[index]) {
-            groupedFields[prefix].indexed[index] = [];
-          }
-          groupedFields[prefix].indexed[index].push({ ...field, fieldName: nameWithoutPrefixIndex });
+        if (indices.length > 0) {
+          const indexKey = indices.map(num => (parseInt(num, 10) + 1)).join('.');
+          if (!groupedFields[prefix].indexed[indexKey]) groupedFields[prefix].indexed[indexKey] = [];
+          groupedFields[prefix].indexed[indexKey].push({ ...field, fieldName: nameWithoutIndices });
         } else {
-          const nameWithoutPrefix = rest.join(' ');
-          groupedFields[prefix].noIndex.push({ ...field, fieldName: nameWithoutPrefix });
+          groupedFields[prefix].noIndex.push({ ...field, fieldName: nameWithoutIndices });
         }
       }
     });
@@ -432,13 +426,12 @@ function renderSummaryPageFields() {
       table.className = 'table review-summary';
       table.innerHTML = `
         <thead><tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr></thead>
-        <tbody>
-          ${singleFields.map(f => `
-            <tr>
-              <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-              <td>${f.fieldName}</td>
-              <td>${f.fieldValue}</td>
-            </tr>`).join('')}
+        <tbody>${singleFields.map(f => `
+          <tr>
+            <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+            <td>${f.fieldName}</td>
+            <td>${f.fieldValue}</td>
+          </tr>`).join('')}
         </tbody>`;
       tabPane.appendChild(table);
     }
@@ -455,27 +448,24 @@ function renderSummaryPageFields() {
         const headingId = `heading-${category}-${accordionIndex}`;
         const collapseId = `collapse-${category}-${accordionIndex}`;
 
-        let innerHTML = '';
-
         const { noIndex, indexed } = groupedFields[prefix];
 
-        // No-index fields table
+        let innerHTML = '';
+
         if (noIndex.length > 0) {
           innerHTML += `
             <table class="table table-sm table-bordered">
               <thead><tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr></thead>
-              <tbody>
-                ${noIndex.map(f => `
-                  <tr>
-                    <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-                    <td>${f.fieldName}</td>
-                    <td>${f.fieldValue}</td>
-                  </tr>`).join('')}
+              <tbody>${noIndex.map(f => `
+                <tr>
+                  <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+                  <td>${f.fieldName}</td>
+                  <td>${f.fieldValue}</td>
+                </tr>`).join('')}
               </tbody>
             </table>`;
         }
 
-        // Indexed fields sub-accordion
         if (Object.keys(indexed).length > 0) {
           const subAccordionId = `subAccordion-${category}-${accordionIndex}`;
           innerHTML += `<div class="accordion" id="${subAccordionId}">`;
@@ -484,24 +474,25 @@ function renderSummaryPageFields() {
             const idxHeadingId = `idxHeading-${category}-${accordionIndex}-${idxAccordionIndex}`;
             const idxCollapseId = `idxCollapse-${category}-${accordionIndex}-${idxAccordionIndex}`;
 
+            const tabLabel = ['source', 'license'].includes(category) ? 'fields' : `${prefix} ${idx}`;
+
             innerHTML += `
               <div class="accordion-item">
                 <h2 class="accordion-header" id="${idxHeadingId}">
                   <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#${idxCollapseId}">
-                    ${prefix} ${idx}
+                    ${tabLabel}
                   </button>
                 </h2>
                 <div id="${idxCollapseId}" class="accordion-collapse collapse" data-bs-parent="#${subAccordionId}">
                   <div class="accordion-body">
                     <table class="table table-sm table-bordered">
                       <thead><tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr></thead>
-                      <tbody>
-                        ${idxFields.map(f => `
-                          <tr>
-                            <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-                            <td>${f.fieldName}</td>
-                            <td>${f.fieldValue}</td>
-                          </tr>`).join('')}
+                      <tbody>${idxFields.map(f => `
+                        <tr>
+                          <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+                          <td>${f.fieldName}</td>
+                          <td>${f.fieldValue}</td>
+                        </tr>`).join('')}
                       </tbody>
                     </table>
                   </div>
@@ -509,14 +500,13 @@ function renderSummaryPageFields() {
               </div>`;
           });
 
-          innerHTML += `</div>`; // close sub-accordion
+          innerHTML += `</div>`;
         }
-
 
         accordionItem.innerHTML = `
           <h2 class="accordion-header" id="${headingId}">
             <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
-              ${prefix}
+              ${['source', 'license'].includes(category) ? 'fields name' : prefix}
             </button>
           </h2>
           <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#accordion-${category}">
@@ -532,10 +522,11 @@ function renderSummaryPageFields() {
     tabsContent.appendChild(tabPane);
     firstTab = false;
   }
-  // new tab "views"
   const viewsNavItem = document.createElement('li');
   viewsNavItem.className = 'nav-item';
-  viewsNavItem.innerHTML = `<button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-views">views</button>`;
+  viewsNavItem.innerHTML = <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-views">views</button>;
+
+
   tabsNav.appendChild(viewsNavItem);
 
   const viewsPane = document.createElement('div');
@@ -546,20 +537,20 @@ function renderSummaryPageFields() {
     fields.map(f => ({...f, category}))
   );
 
-  viewsPane.innerHTML = `
+  viewsPane.innerHTML =
     <table class="table review-summary">
       <thead>
         <tr><th>Status</th><th>Category</th><th>Field Name</th><th>Field Value</th></tr>
       </thead>
-      <tbody>${allFields.map(f => `
+      <tbody>${allFields.map(f =>
         <tr>
           <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
           <td>${f.category}</td>
           <td>${f.fieldName}</td>
           <td>${f.fieldValue}</td>
-        </tr>`).join('')}
+        </tr>).join('')}
       </tbody>
-    </table>`;
+    </table>;
 
   tabsContent.appendChild(viewsPane);
   summaryContainer.appendChild(tabsNav);
