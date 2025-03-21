@@ -1,0 +1,147 @@
+{% load compress %}
+{% load django_bootstrap5 %}
+{% load static %}
+
+
+<!-- ###### Published ###### -->
+
+<section class="profile-category">
+    <h2 class="profile-category__heading">Published tables</h2>
+    <div class="profile-tables">
+        {% if published_tables_page %}
+        <div class="profile-tables__row">
+            {% for table in published_tables_page %}
+            <div class="profile-tables__col">
+                <div class="profile-table-card">
+                    <div class="profile-table-card__content">
+                        <div class="profile-table-card__content--left">
+                            <div class="profile-table-card__tag">
+                                <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"></path>
+                                </svg>
+                                {{ table.schema }}
+                            </div>
+                            {% if table.license_status.status %}
+                            <div class="profile-table-card__tag profile-table-card__tag--info" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check successful">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                                </svg>
+                                License
+                            </div>
+                            {% else %}
+                            <div class="profile-table-card__tag profile-table-card__tag--danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Open License check failed">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                </svg>
+                                License check failed
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="profile-table-card__content--right">
+                            <button class="profile-table-card__btn profile-table-card__btn--sm publish-button" hx-post="/api/v0/schema/{{table.schema}}/tables/{{table.name}}/move_publish/model_draft/" hx-confirm="Are you sure you want to move the table back to the model_draft topic to indicate that this table is a draft?" hx-target="">Unpublish</button>
+                        </div>
+                        <div class="profile-table-card__content--title">
+                            <!-- Add as soon as the open peer review is finalized -->
+                            {% comment %}
+                            {% if table.is_reviewed %}
+                            <div class="profile-table-card__tag profile-table-card__tag--success" data-bs-toggle="tooltip" data-bs-placement="top" title="The table has been successfully reviewed">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                                </svg>
+                                Reviewed
+                            </div>
+                            <div class="profile-table-card__badge">
+                                <img style="width:112px;height: 23px;" src="/static/img/badges/badge_iron.png">
+                                <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_bronze.png"> -->
+                                <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_platinum.png"> -->
+                            </div>
+                            {% else %}
+                            <div class="profile-table-card__tag profile-table-card__tag--warning" data-bs-toggle="tooltip" data-bs-placement="top" title="The table hasn't been reviewed yet">
+                                Not reviewed
+                            </div>
+                            {% endif %}
+                            {% endcomment %}
+                            <div class="profile-table-card__link">
+                                <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{% if table.table_label %} {{ table.table_label }} {% else %} {{ table.name }} {% endif %}</a>
+                            </div>
+                        </div>
+                        
+                        
+
+                        <!-- Add once embargo branch is merged PR https://github.com/OpenEnergyPlatform/oeplatform/pull/1534 -->
+                        <!-- <div class="profile-table-card__content-secondary">
+                            <span class="profile-table-card__embargo">
+                                Embargo until 06/05/2024
+                                <button type="button" class="btn btn-outline-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Test text">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#294456" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                                    </svg>
+                                </button>
+                            </span>
+                        </div> -->
+                    </div>
+                    
+                    {% if table.license_status.error %}
+                    <div class="profile-table-card__content-danger">
+                        <div class="profile-table-card__content-danger-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                            </svg>
+                        </div>
+                        <div class="profile-table-card__content-danger-message">
+                            Potential publishing without an open license.
+                        </div>
+                        <div class="profile-table-card__content-danger-details">
+                            <p>
+                                <button type="button" data-bs-toggle="collapse" data-bs-target="#collapseWarningDetails{{ table.name }}" aria-expanded="false" aria-controls="collapseWarningDetails{{ table.name }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+                                        <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                                    </svg>
+                                    Details
+                                </button>
+                            </p>
+                            <div class="collapse" id="collapseWarningDetails{{ table.name }}">
+                                License check failed because of: {{ table.license_status.error }} <br><br>
+                                <a href={{EXTERNAL_URLS.spdx_licenses}} class="card-link">Please use a SPDX license identifier.</a> <br><br>
+                                Please revisit your metadata and check the license information. Do not publish data that does not hold an open license.
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <nav aria-label="Page navigation profile tables" class="pagination-nav">
+        <span class="current">
+            Page {{ published_tables_page.number }} of {{ published_tables_page.paginator.num_pages }}.
+        </span>
+        <ul>
+            {% if published_tables_page.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?published_page={{ published_tables_page.previous_page_number }}" tabindex="-1" aria-disabled="true">&laquo;Previous</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <a class="page-link" href="?published_page={{ published_tables_page.number }}"> {{ published_tables_page.number  }} </a>
+            </li>
+
+            {% if published_tables_page.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?published_page={{published_tables_page.next_page_number}}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+
+    </nav>
+    {% else %}
+        You have never published a table.
+    {% endif %}
+</section>
+
+
+

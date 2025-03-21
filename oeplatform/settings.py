@@ -62,6 +62,7 @@ INSTALLED_APPS = (
     "corsheaders",
     "owlready2",
     "compressor",
+    "databus",
     "oekg",
 )
 
@@ -230,3 +231,6 @@ COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
+
+DATABUS_URI_BASE = "https://databus.openenergyplatform.org"
+MOSS_URL = "https://moss.openenergyplatform.org/"

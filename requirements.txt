@@ -30,3 +30,4 @@ oemetadata==1.6.0
 django-compressor==4.5.1
 django-cors-headers==4.3.1
 owlready2==0.45
+databusclient==0.12

@@ -1,3 +1,5 @@
+from metadata.v160.template import OEMETADATA_V160_TEMPLATE
+
 from dataedit.metadata import v1_4 as __LATEST
 from dataedit.metadata.v1_3 import TEMPLATE_v1_3
 from dataedit.metadata.v1_4 import TEMPLATE_V1_4
@@ -6,6 +8,7 @@ from dataedit.metadata.v1_5 import TEMPLATE_V1_5
 from .error import MetadataException
 
 METADATA_TEMPLATE = {
+    6: OEMETADATA_V160_TEMPLATE,
     5: TEMPLATE_V1_5,
     4: TEMPLATE_V1_4,
     3: TEMPLATE_v1_3,
@@ -173,7 +176,7 @@ def parse_meta_data(metadata, schema, table):
     # if "error" in metadata:
     #     return metadata
     if not metadata:
-        metadata = __LATEST.get_empty(schema, table)
+        metadata = OEMETADATA_V160_TEMPLATE
     else:
         if "error" in metadata:
             return {"description": metadata["content"], "error": metadata["error"]}
@@ -216,37 +219,6 @@ def parse_meta_data(metadata, schema, table):
                     me.error.message if hasattr(me.error, "message") else str(me.error)
                 ),
             }
-    return metadata
-
-
-def read_metadata_from_post(content_query, schema, table):
-    """Prepare dict to modify the comment prop of a table in OEP database
-    i.e. contains the metadata
-
-    :param content_query: the content of the POST request
-
-    :param schema: name of the OEP schema
-    :param table: name of the OEP table in the OEP schema
-    :return: metadata dict
-    """
-    version = get_metadata_version(content_query)
-    if version is tuple and len(version) > 2:
-        template = METADATA_TEMPLATE[version[1]].copy()
-    else:
-        template = METADATA_TEMPLATE[4].copy()
-    metadata = assign_content_values_to_metadata(
-        content=content_query, template=template
-    )
-    # TODO fill the "resource" field for v1.4
-    # d["resources"] = [
-    #     {
-    #         "name": "%s.%s" % (schema, table),
-    #         "format": "PostgreSQL",
-    #         "fields": d["field"],
-    #     }
-    # ]
-    # d["metadata_version"] = "1.3"
-
     return metadata
 
 
