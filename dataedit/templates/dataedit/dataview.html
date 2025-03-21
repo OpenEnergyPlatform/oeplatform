@@ -198,10 +198,16 @@
     </a>
     </span>
   </div>
-  <div class="table-container">
-    {{ meta_widget }}
+  <div 
+  hx-get="{% url 'dataedit:metadata-widget' %}"
+  hx-trigger="revealed once"
+  hx-vals='{"schema": "{{schema}}", "table": "{{table}}"}'
+  hx-target="#metadata-container">
   </div>
-  </div>
+
+  <div id="metadata-container"></div>
+
+</div>
 
   <div class="tab-pane opr fade" id="opr-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
     <div class="opr__info">
