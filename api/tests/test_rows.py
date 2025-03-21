@@ -55,7 +55,7 @@ class TestPut(APITestCaseWithTable):
     def test_anonymous(self):
         row = {"id": 1, "name": "John Doe", "address": None}
         self.api_req(
-            "put", path="rows/1", data={"query": row}, auth=False, exp_code=403
+            "put", path="rows/1", data={"query": row}, auth=False, exp_code=401
         )
 
     def test_wrong_user(self):
@@ -91,7 +91,7 @@ class TestPost(APITestCaseWithTable):
         }
 
         self.api_req(
-            "post", path="rows/new", data={"query": row}, auth=False, exp_code=403
+            "post", path="rows/new", data={"query": row}, auth=False, exp_code=401
         )
 
     def test_wrong_user(self, rid=1):

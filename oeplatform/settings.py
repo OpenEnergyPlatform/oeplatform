@@ -62,8 +62,8 @@ INSTALLED_APPS = (
     "corsheaders",
     "owlready2",
     "compressor",
-    "sparql_query",
     "databus",
+    "oekg",
 )
 
 MIDDLEWARE = (
@@ -91,6 +91,7 @@ EXTERNAL_URLS = {
     "tutorials_wizard": "https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/",  # noqa E501
     "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
     "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
+    "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
     "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
     "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
@@ -104,9 +105,10 @@ EXTERNAL_URLS = {
 # Kept this separate for now to avoid messing with the other list ...
 # TODO move to EXTERNAL_URLS if possible
 DOCUMENTATION_LINKS = {
-    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#3-setup-the-openenergyontology-integration",  # noqa:E501
-    "oeo_ext_setup": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/install/installation/#62-setup-the-oeo-extended-app",  # noqa:E501
-    "oemetabuilder": "https://openenergyplatform.github.io/oeplatform/install-and-documentation/oeplatform-code/features/metaBuilder/",  # noqa:E501
+    "oeo_setup": "https://openenergyplatform.github.io/oeplatform/installation/guides/installation/#3-setup-the-openenergyontology-integration",  # noqa:E501
+    "oeo_ext_setup": "https://openenergyplatform.github.io/oeplatform/installation/guides/installation/#62-setup-the-oeo-extended-app",  # noqa:E501
+    "oemetabuilder": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/features/metaBuilder/",  # noqa:E501
+    "oekg_api": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oekg-api/",  # noqa:E501
 }
 
 

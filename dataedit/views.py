@@ -42,7 +42,7 @@ from django.utils.decorators import method_decorator
 from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
-from dataedit.helper import merge_field_reviews, process_review_data, recursive_update
+from dataedit.helper import merge_field_reviews, process_review_data, recursive_update, delete_peer_review
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
@@ -297,7 +297,7 @@ def listschemas(request):
             "schemas": schemas,
             "query": searched_query_string,
             "tags": searched_tag_ids,
-            "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
+            "doc_oem_builder_link": EXTERNAL_URLS["tutorials_oemetabuilder"],
         },
     )
 
@@ -1856,6 +1856,7 @@ class MetaEditView(LoginRequiredMixin, View):
             "doc_links": DOCUMENTATION_LINKS,
             "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
             "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
+            "oemetabuilder_tutorial": EXTERNAL_URLS["tutorials_oemetabuilder"],
         }
 
         return render(
@@ -1873,6 +1874,7 @@ class StandaloneMetaEditView(View):
             ),
             "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
             "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
+            "oemetabuilder_tutorial": EXTERNAL_URLS["tutorials_oemetabuilder"],
         }
         return render(
             request,
@@ -2145,6 +2147,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             "topic": schema,
             "table": table,
             "review_finished": review_finished,
+            "review_id": review_id,
         }
         context_meta = {
             # need this here as json.dumps breaks the template syntax access
@@ -2156,7 +2159,9 @@ class PeerReviewView(LoginRequiredMixin, View):
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
             "state_dict": json.dumps(state_dict),
-        }
+            "review_finished": review_finished,
+            "review_id": review_id,
+                }
         return render(request, "dataedit/opr_review.html", context=context_meta)
 
     def post(self, request, schema, table, review_id=None):
@@ -2219,6 +2224,9 @@ class PeerReviewView(LoginRequiredMixin, View):
             review_finished = review_datamodel.get("reviewFinished")
             # TODO: Send a notification to the user that he can't review tables
             # he is the table holder.
+            if review_post_type == "delete":
+                return delete_peer_review(review_id)
+
             contributor = PeerReviewManager.load_contributor(schema, table)
 
             if contributor is not None:
@@ -2262,14 +2270,13 @@ class PeerReviewView(LoginRequiredMixin, View):
                 review_table = Table.load(schema=schema, table=table)
                 review_table.set_is_reviewed()
                 metadata = self.load_json(schema, table, review_id=review_id)
-
-                recursive_update(metadata, review_data)
-
-                save_metadata_to_db(schema, table, metadata)
+                updated_metadata = recursive_update(metadata, review_data)
+                save_metadata_to_db(schema, table, updated_metadata)
+                active_peer_review = PeerReview.load(schema=schema, table=table)
 
                 if active_peer_review:
-                    # Update the oemetadata in the active PeerReview
-                    active_peer_review.oemetadata = metadata
+                    updated_oemetadata = recursive_update(active_peer_review.oemetadata, review_data)
+                    active_peer_review.oemetadata = updated_oemetadata
                     active_peer_review.save()
 
                 # TODO: also update reviewFinished in review datamodel json
@@ -2355,9 +2362,6 @@ class PeerRreviewContributorView(PeerReviewView):
         Handle POST requests for contributor's review. Merges and updates
         the review data in the PeerReview table.
 
-        Missing parts:
-            - merge contributor field review and reviewer field review
-
         Args:
             request (HttpRequest): The incoming HTTP POST request.
             schema (str): The schema of the table.
@@ -2367,9 +2371,6 @@ class PeerRreviewContributorView(PeerReviewView):
         Returns:
             HttpResponse: Rendered HTML response for contributor review.
 
-        Note:
-            This method has some missing parts regarding the merging of contributor
-            and reviewer field review.
         """
 
         context = {}
