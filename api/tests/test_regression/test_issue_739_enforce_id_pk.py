@@ -20,7 +20,7 @@ class Test_issue_739_enforce_id_pk(APITestCase):
     def create_table(self, table_definition, table=None):
         table = table or "test_id_pk_table"
         table_url = reverse(
-            "api_table", kwargs={"schema": self.test_schema, "table": table}
+            "api:api_table", kwargs={"schema": self.test_schema, "table": table}
         )
         return self.cli.put(table_url, {"query": table_definition}, format="json")
 
@@ -36,13 +36,15 @@ class Test_issue_739_enforce_id_pk(APITestCase):
         # this fails if there is no column named `id`
         # which should be auto generated, if missing
         url = reverse(
-            "api_rows_new", kwargs={"schema": self.test_schema, "table": table}
+            "apiapi_rows_new", kwargs={"schema": self.test_schema, "table": table}
         )
         res = self.cli.post(url, {"query": [{"not_id": 99}]}, format="json")
         self.assertEqual(res.status_code, 201)
 
         # retrieve data
-        url = reverse("api_rows", kwargs={"schema": self.test_schema, "table": table})
+        url = reverse(
+            "api:api_rows", kwargs={"schema": self.test_schema, "table": table}
+        )
         res = json.loads(self.cli.get(url).getvalue().decode())
         self.assertEqual(len(res), 1)
         self.assertGreaterEqual(res[0]["id"], 0)  # auto generated id

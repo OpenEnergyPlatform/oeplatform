@@ -34,7 +34,8 @@ class Test_879(APITestCase):
         )
 
         url = reverse(
-            "api_rows", kwargs={"schema": self.test_schema, "table": self.test_table}
+            "api:api_rows",
+            kwargs={"schema": self.test_schema, "table": self.test_table},
         )
         url = url + "?form=csv"
 
