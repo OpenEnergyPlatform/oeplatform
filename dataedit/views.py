@@ -24,7 +24,11 @@ from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
 from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
-from oemetadata.v1.v160.template import OEMETADATA_V160_TEMPLATE
+
+# from oemetadata.v1.v160.template import OEMETADATA_V160_TEMPLATE
+# from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
+# from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
+from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -951,6 +955,7 @@ class DataView(View):
                 yield key, metadata.get(key)
 
         ordered_oem_151 = {key: value for key, value in iter_oem_key_order(metadata)}
+        # TODO: refactor the widget
         meta_widget = MetaDataWidget(ordered_oem_151)
         revisions = []
 
@@ -1545,7 +1550,7 @@ def update_table_tags(request):
                 actions.set_table_metadata(
                     table=table,
                     schema=schema,
-                    metadata=OEMETADATA_V160_TEMPLATE,
+                    metadata=OEMETADATA_V20_EXAMPLE,
                     cursor=con,
                 )
                 # update tags in db and harmonize metadata
@@ -1844,7 +1849,7 @@ class MetaEditView(LoginRequiredMixin, View):
                     "columns": columns,
                     "url_table_id": url_table_id,
                     "url_api_meta": reverse(
-                        "api_table_meta", kwargs={"schema": schema, "table": table}
+                        "api:api_table_meta", kwargs={"schema": schema, "table": table}
                     ),
                     "url_view_table": reverse(
                         "dataedit:view", kwargs={"schema": schema, "table": table}
@@ -2386,3 +2391,33 @@ class PeerRreviewContributorView(PeerReviewView):
             current_opr.update(review_type=review_post_type)
 
         return render(request, "dataedit/opr_contributor.html", context=context)
+
+
+def metadata_widget(request):
+    """
+    A view to render the metadata widget for the dataedit app.
+    The metadata widget is a small widget that can be embedded in other
+    applications to display metadata information.
+
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+
+    Returns:
+        HttpResponse: Rendered HTML response for the metadata widget.
+    """
+    schema = request.GET.get("schema")
+    table = request.GET.get("table")
+
+    if schema is None or table is None:
+        return JsonResponse(
+            {"error": "Schema and table parameters are required."}, status=400
+        )
+
+    context = {
+        "meta_api": reverse(
+            "api:api_table_meta", kwargs={"schema": schema, "table": table}
+        )
+    }
+    # context = {"meta": OEMETADATA_V20_EXAMPLE}
+
+    return render(request, "partials/metadata_viewer.html", context=context)
