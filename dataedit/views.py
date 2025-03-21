@@ -46,7 +46,12 @@ from django.utils.decorators import method_decorator
 from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
-from dataedit.helper import merge_field_reviews, process_review_data, recursive_update, delete_peer_review
+from dataedit.helper import (
+    delete_peer_review,
+    merge_field_reviews,
+    process_review_data,
+    recursive_update,
+)
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
@@ -1406,8 +1411,12 @@ def get_tag_keywords_synchronized_metadata(
     session = create_oedb_session()
 
     metadata = load_metadata_from_db(schema=schema, table=table)
+    # TODO: Fixed resource index will fail to produce good
+    # metadata for metadata with multiple resource
     keywords_old = set(
-        k for k in metadata.get("keywords", []) if Tag.create_name_normalized(k)
+        k
+        for k in metadata["resources"][0].get("keywords", [])
+        if Tag.create_name_normalized(k)
     )  # remove empy
 
     tag_ids_old = set(
@@ -1510,7 +1519,9 @@ def get_tag_keywords_synchronized_metadata(
     session.commit()
     session.close()
 
-    metadata["keywords"] = keywords_new
+    # TODO: Fixed resource index will fail to produce good
+    # metadata for metadata with multiple resource
+    metadata["resources"][0]["keywords"] = keywords_new
 
     return metadata
 
@@ -2167,7 +2178,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             "state_dict": json.dumps(state_dict),
             "review_finished": review_finished,
             "review_id": review_id,
-                }
+        }
         return render(request, "dataedit/opr_review.html", context=context_meta)
 
     def post(self, request, schema, table, review_id=None):
@@ -2281,7 +2292,9 @@ class PeerReviewView(LoginRequiredMixin, View):
                 active_peer_review = PeerReview.load(schema=schema, table=table)
 
                 if active_peer_review:
-                    updated_oemetadata = recursive_update(active_peer_review.oemetadata, review_data)
+                    updated_oemetadata = recursive_update(
+                        active_peer_review.oemetadata, review_data
+                    )
                     active_peer_review.oemetadata = updated_oemetadata
                     active_peer_review.save()
 
