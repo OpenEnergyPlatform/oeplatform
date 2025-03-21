@@ -36,7 +36,7 @@ class Test_issue_739_enforce_id_pk(APITestCase):
         # this fails if there is no column named `id`
         # which should be auto generated, if missing
         url = reverse(
-            "apiapi_rows_new", kwargs={"schema": self.test_schema, "table": table}
+            "api:api_rows_new", kwargs={"schema": self.test_schema, "table": table}
         )
         res = self.cli.post(url, {"query": [{"not_id": 99}]}, format="json")
         self.assertEqual(res.status_code, 201)
