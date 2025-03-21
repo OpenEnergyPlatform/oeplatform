@@ -1,6 +1,9 @@
 """
 changing tags in the UI and changing keywords in metadata should be synchronized
 """
+
+from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
+
 from api.connection import create_oedb_session
 from api.tests import APITestCase, Client
 from dataedit.structures import TableTags, Tag
@@ -11,8 +14,7 @@ class Test_sync_tags_keywords_969(APITestCase):
         table = "test_keyword_tags"
         structure = {"columns": [{"name": "id", "data_type": "bigserial"}]}
         post_tag_url = "/dataedit/tags/add/"
-        meta_template = {"id": "id"}  # must have id
-
+        meta_template = OEMETADATA_V20_EXAMPLE  # must have id
         client = Client()
         client.token = self.token
         client.force_login(self.user)
@@ -27,12 +29,16 @@ class Test_sync_tags_keywords_969(APITestCase):
         # get existing keywords (none)
         def get_keywords():
             meta = self.api_req("get", table=table, path="meta/")
-            keywords = meta.get("keywords", [])
+            # TODO: Dont use the fixed index when getting keywords
+            # to handle mulitple resources correctly
+            keywords = meta["resources"][0].get("keywords", [])
             names = [Tag.create_name_normalized(k) for k in keywords]
             return sorted(names)
 
         def set_keywords(keywords, exp_code=200, auth=self.token):
-            meta_template["keywords"] = keywords
+            # TODO: Dont use the fixed index when getting keywords
+            # to handle mulitple resources correctly
+            meta_template["resources"][0]["keywords"] = keywords
             self.api_req(
                 "post",
                 table=table,
