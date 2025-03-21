@@ -110,6 +110,18 @@ var MetaEdit = function(config) {
   }
 
   function fixData(json) {
+    // Ensure the metaMetadata object exists
+    if (!json.metaMetadata) {
+      json.metaMetadata = {};
+    }
+
+    // Only update metadataVersion if the OEM metadata field exists
+    // and the metaMetadata.metadataVersion is currently empty
+    if (json && !json.metaMetadata.metadataVersion) {
+      // Add or update the metadataVersion property
+      // Variations: OEMetadata-2.0.X OEP-1.6.0
+      json.metaMetadata.metadataVersion = "OEP-1.6.0";
+    }
     // MUST have ID
     json["id"] = config["url_table_id"];
 
