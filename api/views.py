@@ -28,8 +28,6 @@ from django.http import (
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
-
-# from omi.dialects.oep.compiler import JSONCompiler
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
@@ -303,6 +301,9 @@ class Metadata(APIView):
     def post(self, request, schema, table):
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
+
+        if not error and metadata is not None:
+            metadata = actions.try_convert_metadata_to_v2(metadata)
 
         if not error:
             metadata, error = actions.try_validate_metadata(metadata)
