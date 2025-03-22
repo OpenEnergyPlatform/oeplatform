@@ -1,12 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/metadata/v20/v20/schema.json",
+  "$id": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/v2/v20/schema.json",
   "description": "Open Energy Metadata (OEMetadata) - metadata schema",
   "type": "object",
   "format": "categories",
   "basicCategoryTitle": "General",
   "required": ["resources"],
   "properties": {
+    "@context": {
+      "description": "Explanation of metadata keys in ontology terms.",
+      "examples": [
+        "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json"
+      ],
+      "type": ["string", "null"],
+      "badge": "Platinum",
+      "title": "@context",
+      "readOnly": true
+    },
     "name": {
       "description": "A filename or database conform dataset name.",
       "type": ["string", "null"],
@@ -28,13 +38,13 @@
       "badge": "Bronze",
       "title": "Dataset Description"
     },
-    "id": {
+    "@id": {
       "description": "A unique identifier (UUID/DOI) for the collection.",
       "type": ["string", "null"],
       "examples": [
-        "https://databus.openenergyplatform.org/oeplatform/reference"
+        "https://databus.openenergyplatform.org/oeplatform/supply/wri_global_power_plant_database/"
       ],
-      "badge": "Silver",
+      "badge": "Platinum",
       "title": "Dataset Identifier",
       "format": "uri",
       "readOnly": true
@@ -50,20 +60,10 @@
             "description": "A Uniform Resource Identifier (URI) that links the resource via the OpenEnergyDatabus (DBpedia Databus).",
             "type": ["string", "null"],
             "examples": [
-              "https://databus.openenergyplatform.org/oeplatform/supply/wri_global_power_plant_database/2022-11-07"
+              "https://databus.openenergyplatform.org/oeplatform/supply/wri_global_power_plant_database/2022-11-07/wri_global_power_plant_database_variant=data.csv"
             ],
             "badge": "Platinum",
             "title": "@Id",
-            "readOnly": true
-          },
-          "@context": {
-            "description": "Explanation of metadata keys in ontology terms.",
-            "examples": [
-              "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/metadata/latest/context.json"
-            ],
-            "type": ["string", "null"],
-            "badge": "Platinum",
-            "title": "@context",
             "readOnly": true
           },
           "name": {
