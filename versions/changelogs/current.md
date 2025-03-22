@@ -34,6 +34,8 @@ Update the oemetadata sectionin 'dataedit/static/metaEdit/' to enable metadata e
 
 - Reworked metadata widget: Gaining more controlled on what is and what is not visible while displaying most of the metadata string. Compared to the previous version especially the mew nested and sometimes very long full print of the json document became uneasy to read still the advantage was a quick lookup on certain entries - we will provide a text search in a lter iteration [(#1954)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1954)
 
+- Full support for oemetadata v2.0 including a automated version conversion for oemetadata documents uploaded via the metadata api. This will apply for all metadata documents which are uploaded and do not yet hold a version identifier for v2 [(#1954)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1954)
+
 ## Bugs
 
 - Open-Peer-Review [(#1800)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1800):
