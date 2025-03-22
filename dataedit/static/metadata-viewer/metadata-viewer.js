@@ -7,7 +7,22 @@ function initMetadataViewer() {
 
   const metadataId = metadataViewer.dataset.metadataId;
 
-  fetch(window.meta_api)
+  // First fetch the schema to get field descriptions
+  fetch("/static/metaedit/schema.json")
+    .then(response => {
+      if (!response.ok) {
+        console.warn("Could not fetch schema, proceeding without field descriptions");
+        return null;
+      }
+      return response.json();
+    })
+    .then(schema => {
+      // Store schema globally for use in rendering
+      window.metadataSchema = schema;
+      
+      // Now fetch the actual metadata
+      return fetch(window.meta_api);
+    })
     .then((response) => {
       if (!response.ok) {
         throw new Error(`Failed to fetch metadata: ${response.status} ${response.statusText}`);
@@ -16,6 +31,9 @@ function initMetadataViewer() {
     })
     .then((metadata) => {
       renderMetadataViewer(metadata, metadataViewer);
+      
+      // Initialize tooltips after rendering
+      initializeTooltips();
     })
     .catch((error) => {
       console.error("Error fetching metadata:", error);
@@ -28,140 +46,61 @@ function initMetadataViewer() {
     });
 }
 
+// Initialize Bootstrap tooltips
+function initializeTooltips() {
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
+    html: true,
+    placement: 'right'
+  }));
+}
+
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initMetadataViewer);
 } else {
   initMetadataViewer();
 }
 
-
-// Update tab names
-function renderMetadataViewer(metadata, container) {
-  // Create the main container
-  const html = `
-    <div class="metadata-container">
-      <!-- Header with title and download button -->
-      <div class="d-flex justify-content-between align-items-center metadata-header">
-        <h1>${metadata.title || metadata.name || "Metadata Specification"}</h1>
-        <button id="download-json" class="btn btn-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
-            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-          </svg>
-          Download JSON
-        </button>
-      </div>
-      
-      <!-- Tabs -->
-      <ul class="nav nav-tabs mb-4" id="metadataTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="resources-tab" data-bs-toggle="tab" data-bs-target="#resources" type="button" role="tab" aria-controls="resources" aria-selected="false">Resources</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="schema-tab" data-bs-toggle="tab" data-bs-target="#schema" type="button" role="tab" aria-controls="schema" aria-selected="false">Data Model</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="metameta-tab" data-bs-toggle="tab" data-bs-target="#metameta" type="button" role="tab" aria-controls="metameta" aria-selected="false">Metadata Version</button>
-        </li>
-      </ul>
-      
-      <!-- Tab content -->
-      <div class="tab-content" id="metadataTabsContent">
-        <!-- Overview tab -->
-        <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-          ${renderOverviewTab(metadata)}
-        </div>
-        
-        <!-- Resources tab -->
-        <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab">
-          ${renderResourcesTab(metadata)}
-        </div>
-        
-        <!-- Data Model tab (formerly Schema) -->
-        <div class="tab-pane fade" id="schema" role="tabpanel" aria-labelledby="schema-tab">
-          ${renderSchemaTab(metadata)}
-        </div>
-        
-        <!-- Metadata Version tab (formerly Meta Metadata) -->
-        <div class="tab-pane fade" id="metameta" role="tabpanel" aria-labelledby="metameta-tab">
-          ${renderMetadataTab(metadata)}
-        </div>
-      </div>
-    </div>
-  `
-
-  // Set the HTML content
-  container.innerHTML = html
-
-  // Add event listener for download button
-  document.getElementById("download-json").addEventListener("click", () => {
-    downloadJson(metadata)
-  })
-
-  // Add event listeners for collapsible sections
-  setupCollapsibleSections()
-
-  // Add event listeners for resource detail links
-  setupResourceDetailLinks()
-}
-
-// Add function to handle resource detail links
-function setupResourceDetailLinks() {
-  document.querySelectorAll(".resource-details-link").forEach((link) => {
-    link.addEventListener("click", function () {
-      const resourceIndex = this.dataset.resourceIndex
-
-      // Switch to resources tab
-      const resourcesTab = document.querySelector("#resources-tab")
-      // Use Bootstrap's Tab API to show the tab
-      const bootstrapTab = new bootstrap.Tab(resourcesTab)
-      bootstrapTab.show()
-
-      // Scroll to the resource after a short delay to allow the tab to render
-      setTimeout(() => {
-        const resourceElement = document.querySelector(`#resource-${resourceIndex}`)
-        if (resourceElement) {
-          resourceElement.scrollIntoView({ behavior: "smooth" })
-        }
-      }, 300)
-    })
-  })
-}
-
-function downloadJson(metadata) {
-  const dataStr = JSON.stringify(metadata, null, 2)
-  const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`
-
-  const downloadAnchorNode = document.createElement("a")
-  downloadAnchorNode.setAttribute("href", dataUri)
-  downloadAnchorNode.setAttribute("download", `${metadata.name || "metadata"}.json`)
-  document.body.appendChild(downloadAnchorNode)
-  downloadAnchorNode.click()
-  downloadAnchorNode.remove()
-}
-
-function setupCollapsibleSections() {
-  document.querySelectorAll(".metadata-collapsible-header").forEach((header) => {
-    header.addEventListener("click", function () {
-      // Toggle the content visibility
-      const content = this.nextElementSibling
-      const isVisible = content.style.display !== "none"
-
-      // Toggle the chevron icon
-      const chevron = this.querySelector(".chevron-icon")
-
-      if (isVisible) {
-        content.style.display = "none"
-        chevron.classList.remove("expanded")
+// Helper function to get field description from schema
+function getFieldDescription(fieldPath) {
+  if (!window.metadataSchema) return null;
+  
+  try {
+    // Navigate through the schema to find the field description
+    const pathParts = fieldPath.split('.');
+    let current = window.metadataSchema;
+    
+    for (const part of pathParts) {
+      if (current.properties && current.properties[part]) {
+        current = current.properties[part];
+      } else if (current.items && current.items.properties && current.items.properties[part]) {
+        current = current.items.properties[part];
       } else {
-        content.style.display = "block"
-        chevron.classList.add("expanded")
+        return null;
       }
-    })
-  })
+    }
+    
+    return current.description || null;
+  } catch (error) {
+    console.warn(`Error getting description for ${fieldPath}:`, error);
+    return null;
+  }
+}
+
+// Helper function to create info icon with tooltip
+function createInfoIcon(fieldPath, title) {
+  const description = getFieldDescription(fieldPath);
+  
+  if (!description) return '';
+  
+  return `
+    <span class="info-icon ms-1" data-bs-toggle="tooltip" data-bs-title="${description}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+      </svg>
+    </span>
+  `;
 }
 
 // Update the overview tab to remove metadata version and add licenses to resource summary
@@ -173,20 +112,20 @@ function renderOverviewTab(metadata) {
     <div class="col-md-6 mb-4">
       <div class="card metadata-card">
         <div class="card-header metadata-card-header">
-          <h5 class="card-title mb-0">Basic Information</h5>
+          <h5 class="card-title mb-0">Dataset information</h5>
         </div>
         <div class="card-body metadata-card-body">
           <dl>
-            <dt>Name</dt>
+            <dt>Name ${createInfoIcon('name', 'Dataset Name')}</dt>
             <dd>${metadata.name || "-"}</dd>
             
-            <dt>Title</dt>
+            <dt>Title ${createInfoIcon('title', 'Dataset Title')}</dt>
             <dd>${metadata.title || "-"}</dd>
             
-            <dt>Description</dt>
+            <dt>Description ${createInfoIcon('description', 'Dataset Description')}</dt>
             <dd>${metadata.description || "-"}</dd>
             
-            <dt>Identifier</dt>
+            <dt>Identifier ${createInfoIcon('@id', 'Dataset Identifier')}</dt>
             <dd>
               ${
                 metadata["@id"]
@@ -263,8 +202,6 @@ function renderOverviewTab(metadata) {
 
   html += "</div>" // End of row
 
-  // Removed the metadata version card from here
-
   return html
 }
 
@@ -287,10 +224,10 @@ function renderResourcesTab(metadata) {
             <div class="col-md-6">
               <h6 class="metadata-section-title">Basic Information</h6>
               <dl>
-                <dt>Name</dt>
+                <dt>Name ${createInfoIcon('resources.name', 'Resource Name')}</dt>
                 <dd>${resource.name || "-"}</dd>
                 
-                <dt>Path</dt>
+                <dt>Path ${createInfoIcon('resources.path', 'Resource Path')}</dt>
                 <dd>
                   ${
                     resource.path
@@ -305,14 +242,29 @@ function renderResourcesTab(metadata) {
                   }
                 </dd>
                 
-                <dt>Type</dt>
+                <dt>Type ${createInfoIcon('resources.type', 'Resource Type')}</dt>
                 <dd>${resource.type || "-"}</dd>
                 
-                <dt>Format</dt>
+                <dt>Format ${createInfoIcon('resources.format', 'Resource Format')}</dt>
                 <dd>${resource.format || "-"}</dd>
                 
-                <dt>Publication Date</dt>
+                <dt>Publication Date ${createInfoIcon('resources.publicationDate', 'Publication Date')}</dt>
                 <dd>${resource.publicationDate || "-"}</dd>
+
+                <dt>Databus Identifier ${createInfoIcon('resources.@id', 'Databus Identifier')}</dt>
+                <dd>
+                  ${
+                    resource["@id"]
+                      ? `<a href="${ resource["@id"]}" target="_blank" rel="noopener noreferrer">
+                      ${ resource["@id"]}
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                        <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                      </svg>
+                    </a>`
+                      : "-"
+                  }
+                </dd>
               </dl>
             </div>
             
@@ -324,12 +276,12 @@ function renderResourcesTab(metadata) {
     if (resource.topics && resource.topics.length > 0) {
       html += `
         <div class="mb-3">
-          <h6 class="small text-muted mb-2">Topics</h6>
+          <h6 class="small text-muted mb-2">Topics ${createInfoIcon('resources.topics', 'Topics')}</h6>
           <div>
       `
 
       resource.topics.forEach((topic) => {
-        html += `<span class="metadata-badge metadata-badge-blue">${topic}</span>`
+        html += `<span class="metadata-badge metadata-badge-blue">${topic}</span> `
       })
 
       html += `
@@ -342,12 +294,12 @@ function renderResourcesTab(metadata) {
     if (resource.languages && resource.languages.length > 0) {
       html += `
         <div class="mb-3">
-          <h6 class="small text-muted mb-2">Languages</h6>
+          <h6 class="small text-muted mb-2">Languages ${createInfoIcon('resources.languages', 'Languages')}</h6>
           <div>
       `
 
       resource.languages.forEach((lang) => {
-        html += `<span class="metadata-badge metadata-badge-green">${lang}</span>`
+        html += `<span class="metadata-badge metadata-badge-green">${lang}</span> `
       })
 
       html += `
@@ -360,12 +312,12 @@ function renderResourcesTab(metadata) {
     if (resource.keywords && resource.keywords.length > 0) {
       html += `
         <div class="mb-3">
-          <h6 class="small text-muted mb-2">Keywords</h6>
+          <h6 class="small text-muted mb-2">Keywords ${createInfoIcon('resources.keywords', 'Keywords')}</h6>
           <div>
       `
 
       resource.keywords.forEach((keyword) => {
-        html += `<span class="metadata-badge metadata-badge-gray">${keyword}</span>`
+        html += `<span class="metadata-badge metadata-badge-gray">${keyword}</span> `
       })
 
       html += `
@@ -384,7 +336,7 @@ function renderResourcesTab(metadata) {
     // Subject
     if (resource.subject && resource.subject.length > 0) {
       html += createCollapsibleSection(
-        "Subject",
+        `Subject ${createInfoIcon('resources.subject', 'Subject')}`,
         `resource-${resourceIndex}-subject`,
         renderSubjectContent(resource.subject),
       )
@@ -393,7 +345,7 @@ function renderResourcesTab(metadata) {
     // Context
     if (resource.context) {
       html += createCollapsibleSection(
-        "Context",
+        `Context ${createInfoIcon('resources.context', 'Context')}`,
         `resource-${resourceIndex}-context`,
         renderContextContent(resource.context),
       )
@@ -402,7 +354,7 @@ function renderResourcesTab(metadata) {
     // Spatial
     if (resource.spatial) {
       html += createCollapsibleSection(
-        "Spatial Information",
+        `Spatial Information ${createInfoIcon('resources.spatial', 'Spatial Information')}`,
         `resource-${resourceIndex}-spatial`,
         renderSpatialContent(resource.spatial),
       )
@@ -411,7 +363,7 @@ function renderResourcesTab(metadata) {
     // Temporal
     if (resource.temporal) {
       html += createCollapsibleSection(
-        "Temporal Information",
+        `Temporal Information ${createInfoIcon('resources.temporal', 'Temporal Information')}`,
         `resource-${resourceIndex}-temporal`,
         renderTemporalContent(resource.temporal),
       )
@@ -420,7 +372,7 @@ function renderResourcesTab(metadata) {
     // Sources
     if (resource.sources && resource.sources.length > 0) {
       html += createCollapsibleSection(
-        "Sources",
+        `Sources ${createInfoIcon('resources.sources', 'Sources')}`,
         `resource-${resourceIndex}-sources`,
         renderSourcesContent(resource.sources),
       )
@@ -429,7 +381,7 @@ function renderResourcesTab(metadata) {
     // Licenses
     if (resource.licenses && resource.licenses.length > 0) {
       html += createCollapsibleSection(
-        "Licenses",
+        `Licenses ${createInfoIcon('resources.licenses', 'Licenses')}`,
         `resource-${resourceIndex}-licenses`,
         renderLicensesContent(resource.licenses),
       )
@@ -438,7 +390,7 @@ function renderResourcesTab(metadata) {
     // Contributors
     if (resource.contributors && resource.contributors.length > 0) {
       html += createCollapsibleSection(
-        "Contributors",
+        `Contributors ${createInfoIcon('resources.contributors', 'Contributors')}`,
         `resource-${resourceIndex}-contributors`,
         renderContributorsContent(resource.contributors),
       )
@@ -447,7 +399,7 @@ function renderResourcesTab(metadata) {
     // Review
     if (resource.review) {
       html += createCollapsibleSection(
-        "Review",
+        `Review ${createInfoIcon('resources.review', 'Review')}`,
         `resource-${resourceIndex}-review`,
         renderReviewContent(resource.review),
       )
@@ -486,7 +438,7 @@ function renderSchemaTab(metadata) {
     // Fields table with search
     if (resource.schema.fields && resource.schema.fields.length > 0) {
       html += `
-        <h6 class="metadata-section-title">Fields</h6>
+        <h6 class="metadata-section-title">Fields ${createInfoIcon('resources.schema.fields', 'Fields')}</h6>
         
         <div class="mb-3">
           <input type="text" id="field-search-${resourceIndex}" class="form-control" placeholder="Search fields...">
@@ -496,11 +448,11 @@ function renderSchemaTab(metadata) {
           <table class="table table-striped metadata-table" id="fields-table-${resourceIndex}">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Description</th>
-                <th>Nullable</th>
-                <th>Unit</th>
+                <th>Name ${createInfoIcon('resources.schema.fields.name', 'Field Name')}</th>
+                <th>Type ${createInfoIcon('resources.schema.fields.type', 'Field Type')}</th>
+                <th>Description ${createInfoIcon('resources.schema.fields.description', 'Description')}</th>
+                <th>Nullable ${createInfoIcon('resources.schema.fields.nullable', 'Nullable')}</th>
+                <th>Unit ${createInfoIcon('resources.schema.fields.unit', 'Unit')}</th>
               </tr>
             </thead>
             <tbody>
@@ -509,11 +461,11 @@ function renderSchemaTab(metadata) {
       resource.schema.fields.forEach((field) => {
         html += `
           <tr>
-            <td>${field.name || "-"}</td>
-            <td>${field.type || "-"}</td>
+            <td>${field.name || "-"} </td>
+            <td>${field.type || "-"} </td>
             <td>${field.description || "-"}</td>
-            <td>${field.nullable !== undefined ? (field.nullable ? "Yes" : "No") : "-"}</td>
-            <td>${field.unit || "-"}</td>
+            <td>${field.nullable !== undefined ? (field.nullable ? "Yes" : "No") : "-"} </td>
+            <td>${field.unit || "-"} </td>
           </tr>
         `
       })
@@ -533,14 +485,14 @@ function renderSchemaTab(metadata) {
           <div class="col-md-6 mb-4">
             <div class="card">
               <div class="card-header">
-                <h6 class="card-title mb-0">Primary Key</h6>
+                <h6 class="card-title mb-0">Primary Key ${createInfoIcon('resources.schema.primaryKey', 'Primary Key')}</h6>
               </div>
               <div class="card-body">
                 <div>
         `
 
         resource.schema.primaryKey.forEach((key) => {
-          html += `<span class="metadata-badge metadata-badge-blue">${key}</span>`
+          html += `<span class="metadata-badge metadata-badge-blue">${key}</span> `
         })
 
         html += `
@@ -557,7 +509,7 @@ function renderSchemaTab(metadata) {
           <div class="col-md-6 mb-4">
             <div class="card">
               <div class="card-header">
-                <h6 class="card-title mb-0">Foreign Keys</h6>
+                <h6 class="card-title mb-0">Foreign Keys ${createInfoIcon('resources.schema.foreignKeys', 'Foreign Keys')}</h6>
               </div>
               <div class="card-body">
                 <div class="list-group list-group-flush">
@@ -587,7 +539,7 @@ function renderSchemaTab(metadata) {
         html += `
           <div class="card mt-4">
             <div class="card-header">
-              <h6 class="card-title mb-0">Dialect</h6>
+              <h6 class="card-title mb-0">Dialect ${createInfoIcon('resources.dialect', 'Dialect')}</h6>
             </div>
             <div class="card-body">
               <dl class="row">
@@ -595,7 +547,7 @@ function renderSchemaTab(metadata) {
 
         Object.entries(resource.dialect).forEach(([key, value]) => {
           html += `
-            <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)}</dt>
+            <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.dialect.${key}`, key)}</dt>
             <dd class="col-sm-9">${value}</dd>
           `
         })
@@ -627,13 +579,13 @@ function renderSchemaTab(metadata) {
                 
                 <div class="row mb-3">
                   <div class="col-md-4">
-                    <strong>Type:</strong> ${field.type || "-"}
+                    <strong>Type ${createInfoIcon('resources.schema.fields.type', 'Field Type')}:</strong> ${field.type || "-"}
                   </div>
                   <div class="col-md-4">
-                    <strong>Nullable:</strong> ${field.nullable !== undefined ? (field.nullable ? "Yes" : "No") : "-"}
+                    <strong>Nullable ${createInfoIcon('resources.schema.fields.nullable', 'Nullable')}:</strong> ${field.nullable !== undefined ? (field.nullable ? "Yes" : "No") : "-"}
                   </div>
                   <div class="col-md-4">
-                    <strong>Unit:</strong> ${field.unit || "-"}
+                    <strong>Unit ${createInfoIcon('resources.schema.fields.unit', 'Unit')}:</strong> ${field.unit || "-"}
                   </div>
                 </div>
         `
@@ -642,7 +594,7 @@ function renderSchemaTab(metadata) {
         if (field.isAbout && field.isAbout.length > 0) {
           html += `
             <div class="mb-3">
-              <h6 class="small text-muted mb-2">Is About</h6>
+              <h6 class="small text-muted mb-2">Is About ${createInfoIcon('resources.schema.fields.isAbout', 'Is About')}</h6>
               <div class="list-group">
           `
 
@@ -655,7 +607,7 @@ function renderSchemaTab(metadata) {
                     ? `<a href="${about["@id"]}" target="_blank" rel="noopener noreferrer" class="small">
                     ${about["@id"]}
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
-                      <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                      <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
                       <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
                     </svg>
                   </a>`
@@ -679,7 +631,7 @@ function renderSchemaTab(metadata) {
         ) {
           html += `
             <div class="mb-3">
-              <h6 class="small text-muted mb-2">Value References</h6>
+              <h6 class="small text-muted mb-2">Value References ${createInfoIcon('resources.schema.fields.valueReference', 'Value References')}</h6>
               <div class="list-group">
           `
 
@@ -764,7 +716,7 @@ function renderMetadataTab(metadata) {
 
   if (metadata.metaMetadata.metadataLicense) {
     html += `
-          <dt class="col-sm-3">Metadata License</dt>
+          <dt class="col-sm-3">Metadata License ${createInfoIcon('metaMetadata.metadataLicense', 'Metadata License')}</dt>
           <dd class="col-sm-9">
             <div class="card">
               <div class="card-body">
@@ -786,7 +738,7 @@ function renderMetadataTab(metadata) {
   Object.entries(metadata.metaMetadata).forEach(([key, value]) => {
     if (key !== "metadataVersion" && key !== "metadataLicense") {
       html += `
-        <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)}</dt>
+        <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`metaMetadata.${key}`, key)}</dt>
         <dd class="col-sm-9">
           ${typeof value === "object" ? JSON.stringify(value, null, 2) : value}
         </dd>
@@ -861,14 +813,14 @@ function renderSubjectContent(subjects) {
   subjects.forEach((subject) => {
     html += `
       <div class="list-group-item">
-        <div class="fw-bold">${subject.name || "-"}</div>
+        <div class="fw-bold">${subject.name || "-"} ${createInfoIcon('resources.subject.name', 'Subject Name')}</div>
         ${
           subject["@id"]
             ? `<a href="${subject["@id"]}" target="_blank" rel="noopener noreferrer" class="small">
             ${subject["@id"]}
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
               <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
-              <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5.5 0 0 0 1 0v-5z"/>
+              <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
             </svg>
           </a>`
             : ""
@@ -886,7 +838,7 @@ function renderContextContent(context) {
 
   Object.entries(context).forEach(([key, value]) => {
     html += `
-      <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)}</dt>
+      <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.context.${key}`, key)}</dt>
       <dd class="col-sm-9">
         ${
           typeof value === "string" && value.startsWith("http")
@@ -913,13 +865,13 @@ function renderSpatialContent(spatial) {
   if (spatial.location) {
     html += `
       <div class="mb-4">
-        <h6 class="fw-bold mb-2">Location</h6>
+        <h6 class="fw-bold mb-2">Location ${createInfoIcon('resources.spatial.location', 'Location')}</h6>
         <dl class="row">
     `
 
     Object.entries(spatial.location).forEach(([key, value]) => {
       html += `
-        <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)}</dt>
+        <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.spatial.location.${key}`, key)}</dt>
         <dd class="col-sm-9">
           ${
             typeof value === "string" && value.startsWith("http")
@@ -945,7 +897,7 @@ function renderSpatialContent(spatial) {
   if (spatial.extent) {
     html += `
       <div>
-        <h6 class="fw-bold mb-2">Extent</h6>
+        <h6 class="fw-bold mb-2">Extent ${createInfoIcon('resources.spatial.extent', 'Extent')}</h6>
         <dl class="row">
     `
 
@@ -953,7 +905,7 @@ function renderSpatialContent(spatial) {
       .filter(([key]) => key !== "boundingBox")
       .forEach(([key, value]) => {
         html += `
-          <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)}</dt>
+          <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.spatial.extent.${key}`, key)}</dt>
           <dd class="col-sm-9">
             ${
               typeof value === "string" && value.startsWith("http")
@@ -977,7 +929,7 @@ function renderSpatialContent(spatial) {
     if (spatial.extent.boundingBox) {
       html += `
         <div class="mt-3">
-          <h6 class="small text-muted mb-2">Bounding Box</h6>
+          <h6 class="small text-muted mb-2">Bounding Box ${createInfoIcon('resources.spatial.extent.boundingBox', 'Bounding Box')}</h6>
           <div class="p-2 bg-light rounded">
             <code>[${spatial.extent.boundingBox.join(", ")}]</code>
           </div>
@@ -997,7 +949,7 @@ function renderTemporalContent(temporal) {
   if (temporal.referenceDate) {
     html += `
       <div class="mb-4">
-        <h6 class="small text-muted mb-2">Reference Date</h6>
+        <h6 class="small text-muted mb-2">Reference Date ${createInfoIcon('resources.temporal.referenceDate', 'Reference Date')}</h6>
         <p>${temporal.referenceDate}</p>
       </div>
     `
@@ -1006,7 +958,7 @@ function renderTemporalContent(temporal) {
   if (temporal.timeseries && temporal.timeseries.length > 0) {
     html += `
       <div>
-        <h6 class="small text-muted mb-2">Time Series</h6>
+        <h6 class="small text-muted mb-2">Time Series ${createInfoIcon('resources.temporal.timeseries', 'Time Series')}</h6>
         <div class="list-group">
     `
 
@@ -1018,7 +970,7 @@ function renderTemporalContent(temporal) {
 
       Object.entries(series).forEach(([key, value]) => {
         html += `
-          <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)}</dt>
+          <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.temporal.timeseries.${key}`, key)}</dt>
           <dd class="col-sm-9">${value}</dd>
         `
       })
@@ -1044,15 +996,15 @@ function renderSourcesContent(sources) {
   sources.forEach((source) => {
     html += `
       <div class="list-group-item">
-        <h6 class="mb-2">${source.title || "-"}</h6>
+        <h6 class="mb-2">${source.title || "-"} ${createInfoIcon('resources.sources.title', 'Source Title')}</h6>
         <p class="small text-muted mb-3">${source.description || "-"}</p>
         
         <div class="row mb-3">
           <div class="col-md-6">
-            <strong>Publication Year:</strong> ${source.publicationYear || "-"}
+            <strong>Publication Year ${createInfoIcon('resources.sources.publicationYear', 'Publication Year')}:</strong> ${source.publicationYear || "-"}
           </div>
           <div class="col-md-6">
-            <strong>Path:</strong> 
+            <strong>Path ${createInfoIcon('resources.sources.path', 'Path')}:</strong> 
             ${
               source.path
                 ? `<a href="${source.path}" target="_blank" rel="noopener noreferrer">
@@ -1071,12 +1023,12 @@ function renderSourcesContent(sources) {
     if (source.authors && source.authors.length > 0) {
       html += `
         <div class="mb-3">
-          <h6 class="small text-muted mb-2">Authors</h6>
+          <h6 class="small text-muted mb-2">Authors ${createInfoIcon('resources.sources.authors', 'Authors')}</h6>
           <div>
       `
 
       source.authors.forEach((author) => {
-        html += `<span class="metadata-badge metadata-badge-gray">${author}</span>`
+        html += `<span class="metadata-badge metadata-badge-gray">${author}</span> `
       })
 
       html += `
@@ -1088,14 +1040,14 @@ function renderSourcesContent(sources) {
     if (source.sourceLicenses && source.sourceLicenses.length > 0) {
       html += `
         <div>
-          <h6 class="small text-muted mb-2">Licenses</h6>
+          <h6 class="small text-muted mb-2">Licenses ${createInfoIcon('resources.sources.sourceLicenses', 'Source Licenses')}</h6>
           <div class="list-group">
       `
 
       source.sourceLicenses.forEach((license) => {
         html += `
           <div class="list-group-item">
-            <div class="fw-bold">${license.title || "-"}</div>
+            <div class="fw-bold">${license.title || "-"} ${createInfoIcon('resources.sources.sourceLicenses.title', 'License Title')}</div>
             <a href="${license.path}" target="_blank" rel="noopener noreferrer" class="small">
               ${license.name || "-"}
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
@@ -1128,7 +1080,7 @@ function renderLicensesContent(licenses) {
   licenses.forEach((license) => {
     html += `
       <div class="list-group-item">
-        <h6 class="mb-2">${license.title || "-"}</h6>
+        <h6 class="mb-2">${license.title || "-"} ${createInfoIcon('resources.licenses.title', 'License Title')}</h6>
         <a href="${license.path}" target="_blank" rel="noopener noreferrer" class="small">
           ${license.name || "-"}
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
@@ -1167,7 +1119,7 @@ function renderContributorsContent(contributors) {
     html += `
       <div class="list-group-item">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="mb-0">${contributor.title || "-"}</h6>
+          <h6 class="mb-0">${contributor.title || "-"} ${createInfoIcon('resources.contributors.title', 'Contributor Title')}</h6>
           <span class="metadata-badge metadata-badge-blue">${contributor.organization || "-"}</span>
         </div>
         
@@ -1176,12 +1128,12 @@ function renderContributorsContent(contributors) {
             contributor.path
               ? `
             <div class="col-md-6">
-              <strong>Path:</strong> 
+              <strong>Path ${createInfoIcon('resources.contributors.path', 'Path')}:</strong> 
               <a href="${contributor.path}" target="_blank" rel="noopener noreferrer" class="small">
                 ${contributor.path}
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
                   <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
-                  <path fill-rule="evenodd" d="M16 .5a.5.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                  <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
                 </svg>
               </a>
             </div>
@@ -1193,7 +1145,7 @@ function renderContributorsContent(contributors) {
             contributor.date
               ? `
             <div class="col-md-6">
-              <strong>Date:</strong> ${contributor.date}
+              <strong>Date ${createInfoIcon('resources.contributors.date', 'Date')}:</strong> ${contributor.date}
             </div>
           `
               : ""
@@ -1203,7 +1155,7 @@ function renderContributorsContent(contributors) {
             contributor.object
               ? `
             <div class="col-md-6">
-              <strong>Object:</strong> ${contributor.object}
+              <strong>Object ${createInfoIcon('resources.contributors.object', 'Object')}:</strong> ${contributor.object}
             </div>
           `
               : ""
@@ -1214,12 +1166,12 @@ function renderContributorsContent(contributors) {
     if (contributor.roles && contributor.roles.length > 0) {
       html += `
         <div class="mb-3">
-          <h6 class="small text-muted mb-2">Roles</h6>
+          <h6 class="small text-muted mb-2">Roles ${createInfoIcon('resources.contributors.roles', 'Roles')}</h6>
           <div>
       `
 
       contributor.roles.forEach((role) => {
-        html += `<span class="metadata-badge metadata-badge-gray">${role}</span>`
+        html += `<span class="metadata-badge metadata-badge-gray">${role}</span> `
       })
 
       html += `
@@ -1244,7 +1196,7 @@ function renderReviewContent(review) {
 
   Object.entries(review).forEach(([key, value]) => {
     html += `
-      <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)}</dt>
+      <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.review.${key}`, key)}</dt>
       <dd class="col-sm-9">
         ${
           typeof value === "string" && value.startsWith("http")
@@ -1252,7 +1204,7 @@ function renderReviewContent(review) {
             ${value}
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
               <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
-              <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+              <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
             </svg>
           </a>`
             : value
@@ -1263,6 +1215,136 @@ function renderReviewContent(review) {
 
   html += "</dl>"
   return html
+}
+
+// Main function to render the metadata viewer
+function renderMetadataViewer(metadata, container) {
+  // Create the main container
+  const html = `
+    <div class="metadata-container">
+      <!-- Header with title and download button -->
+      <div class="d-flex justify-content-between align-items-center metadata-header">
+        <h1>Dataset: ${metadata.title || metadata.name || "Metadata Specification"}</h1>
+        <!-- 
+        <button id="download-json" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
+            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+          </svg>
+          Download JSON
+        </button> 
+        -->
+      </div>
+      
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mb-4" id="metadataTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="resources-tab" data-bs-toggle="tab" data-bs-target="#resources" type="button" role="tab" aria-controls="resources" aria-selected="false">Resources</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="schema-tab" data-bs-toggle="tab" data-bs-target="#schema" type="button" role="tab" aria-controls="schema" aria-selected="false">Data Model</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="metameta-tab" data-bs-toggle="tab" data-bs-target="#metameta" type="button" role="tab" aria-controls="metameta" aria-selected="false">Metadata Version</button>
+        </li>
+      </ul>
+      
+      <!-- Tab content -->
+      <div class="tab-content" id="metadataTabsContent">
+        <!-- Overview tab -->
+        <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+          ${renderOverviewTab(metadata)}
+        </div>
+        
+        <!-- Resources tab -->
+        <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab">
+          ${renderResourcesTab(metadata)}
+        </div>
+        
+        <!-- Data Model tab (formerly Schema) -->
+        <div class="tab-pane fade" id="schema" role="tabpanel" aria-labelledby="schema-tab">
+          ${renderSchemaTab(metadata)}
+        </div>
+        
+        <!-- Metadata Version tab (formerly Meta Metadata) -->
+        <div class="tab-pane fade" id="metameta" role="tabpanel" aria-labelledby="metameta-tab">
+          ${renderMetadataTab(metadata)}
+        </div>
+      </div>
+    </div>
+  `
+
+  // Set the HTML content
+  container.innerHTML = html
+
+  // Add event listener for download button
+  // document.getElementById("download-json").addEventListener("click", () => {
+  //   downloadJson(metadata)
+  // })
+
+  // Add event listeners for collapsible sections
+  setupCollapsibleSections()
+
+  // Add event listeners for resource detail links
+  setupResourceDetailLinks()
+}
+
+function downloadJson(metadata) {
+  const dataStr = JSON.stringify(metadata, null, 2)
+  const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`
+
+  const downloadAnchorNode = document.createElement("a")
+  downloadAnchorNode.setAttribute("href", dataUri)
+  downloadAnchorNode.setAttribute("download", `${metadata.name || "metadata"}.json`)
+  document.body.appendChild(downloadAnchorNode)
+  downloadAnchorNode.click()
+  downloadAnchorNode.remove()
+}
+
+function setupCollapsibleSections() {
+  document.querySelectorAll(".metadata-collapsible-header").forEach((header) => {
+    header.addEventListener("click", function () {
+      // Toggle the content visibility
+      const content = this.nextElementSibling
+      const isVisible = content.style.display !== "none"
+
+      // Toggle the chevron icon
+      const chevron = this.querySelector(".chevron-icon")
+
+      if (isVisible) {
+        content.style.display = "none"
+        chevron.classList.remove("expanded")
+      } else {
+        content.style.display = "block"
+        chevron.classList.add("expanded")
+      }
+    })
+  })
+}
+
+function setupResourceDetailLinks() {
+  document.querySelectorAll(".resource-details-link").forEach((link) => {
+    link.addEventListener("click", function () {
+      const resourceIndex = this.dataset.resourceIndex
+
+      // Switch to resources tab
+      const resourcesTab = document.querySelector("#resources-tab")
+      // Use Bootstrap's Tab API to show the tab
+      const bootstrapTab = new bootstrap.Tab(resourcesTab)
+      bootstrapTab.show()
+
+      // Scroll to the resource after a short delay to allow the tab to render
+      setTimeout(() => {
+        const resourceElement = document.querySelector(`#resource-${resourceIndex}`)
+        if (resourceElement) {
+          resourceElement.scrollIntoView({ behavior: "smooth" })
+        }
+      }, 300)
+    })
+  })
 }
 
 // Add event listener setup for field search
@@ -1326,4 +1408,3 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   })
 })
-
