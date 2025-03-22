@@ -10,6 +10,8 @@ import sqlalchemy as sa
 from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404
+from omi.base import get_metadata_version
+from omi.conversion import convert_metadata
 from omi.validation import ValidationError, parse_metadata, validate_metadata
 from shapely import wkb
 from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
@@ -30,6 +32,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
+from api.utils import check_if_oem_license_exists
 from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Schema as DBSchema
@@ -196,19 +199,14 @@ def try_parse_metadata(inp):
     if isinstance(inp, dict):
         # already parsed but need to check if metaMetadata version exists
 
-        if "metaMetadata" not in inp:
-            return None, "No metaMetadata information in metadata."
-        if "metadataVersion" not in inp["metaMetadata"]:
-            return None, "No version info in metaMetadata."
-        if (
-            inp["metaMetadata"]["metadataVersion"] == ""
-            or inp["metaMetadata"]["metadataVersion"] is None
-        ):
-            return None, "The version info in metaMetadata is empty."
+        result = check_if_oem_license_exists(inp)
+        if result[1] is not None:
+            return result
 
         # cleanup curser metadata
 
         return inp, None
+    # TODO: is this even needed anymore?
     elif not isinstance(inp, (str, bytes)):
         # in order to use the omi parsers, input needs to be str (or bytes)
         try:
@@ -220,9 +218,10 @@ def try_parse_metadata(inp):
 
     try:
         parsed_meta = parse_metadata(inp)
-        # cleanup curser metadata
-        # parsed_meta.pop("connection_id", None)
-        # parsed_meta.pop("cursor_id", None)
+
+        result = check_if_oem_license_exists(parsed_meta)
+        if result[1] is not None:
+            return result
 
         return parsed_meta, None
     except ValidationError as e:
@@ -258,6 +257,22 @@ def try_validate_metadata(inp):
         last_err = e
 
     raise APIError(f"Metadata validation failed: {last_err}")
+
+
+def try_convert_metadata_to_v2(metadata: dict):
+    valid_oemetadata_versions = ["OEP-1.5.2", "OEP-1.6.0", "OEMetadata-2.0"]
+    valid_conversable_oemetadata_versions = ["OEP-1.5.2", "OEP-1.6.0"]
+    version = get_metadata_version(metadata)
+    if version in valid_conversable_oemetadata_versions:
+        converted = convert_metadata(metadata, "OEMetadata-2.0")
+        return converted
+    # Try to force conversion to v2
+    elif version not in valid_oemetadata_versions:
+        metadata["metaMetadata"]["metadataVersion"] = "OEP-1.6.0"
+        converted = convert_metadata(metadata, "OEMetadata-2.0")
+        return converted
+
+    return metadata
 
 
 def describe_columns(schema, table):
