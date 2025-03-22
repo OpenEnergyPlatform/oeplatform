@@ -186,22 +186,32 @@
   <div class="tab-pane metadata fade" id="metadata-tab-pane" role="tabpanel" aria-labelledby="metadata-tab" tabindex="0">
     <div class="metadata__options">
       <span class="me-3">
-        <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank" title="Click to open the OEMetadata specification">
+        <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/production/oemetadata/latest/metadata_key_description.md" target="_blank" title="Click to open the OEMetadata specification">
           <i class="fas fa-arrow-right"></i>
           Metadata specification
         </a>
       </span>
-      <button onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format">Download JSON</button>
-      <span {% if not can_add or opr.opr_id and not opr.is_finished %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata or your review is in progress, data can't be changed" {% endif %}>
+      <button onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
+        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+      </svg>Download JSON</button>
+      
+      <span {% if not can_add or opr.opr_id and not opr.is_finished %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata. If you have permissions it is likely that a metadata review is in progress, data can't be changed during ongoing Open Peer Reviews." {% endif %}>
     <a href="{{table}}/meta_edit" type="button" class="btn btn-primary btn-sm {% if not can_add or opr.opr_id and not opr.is_finished %} disabled {% endif %}">
       Edit
     </a>
     </span>
   </div>
-  <div class="table-container">
-    {{ meta_widget }}
+  <div 
+  hx-get="{% url 'dataedit:metadata-widget' %}"
+  hx-trigger="revealed once"
+  hx-vals='{"schema": "{{schema}}", "table": "{{table}}"}'
+  hx-target="#metadata-container">
   </div>
-  </div>
+
+  <div id="metadata-container"></div>
+
+</div>
 
   <div class="tab-pane opr fade" id="opr-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
     <div class="opr__info">

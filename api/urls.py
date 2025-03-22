@@ -2,6 +2,8 @@ from django.urls import path, re_path
 
 from api import actions, views
 
+app_name = "api"
+
 pgsql_qualifier = r"[\w\d_]+"
 equal_qualifier = r"[\w\d\s\'\=]"
 structures = r"table|sequence"

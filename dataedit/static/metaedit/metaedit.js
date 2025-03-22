@@ -74,11 +74,11 @@ var MetaEdit = function(config) {
 
     // make some readonly
     if (config.standalone == false) {
-      json.properties.id.readonly = true;
+      json.properties["@id"].readonly = false;
       json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
       json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
     } else {
-      json.properties.id.readonly = false;
+      json.properties["@id"].readonly = false;
       json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = false;
       json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = false;
     }
@@ -112,8 +112,20 @@ var MetaEdit = function(config) {
   }
 
   function fixData(json) {
+    // Ensure the metaMetadata object exists
+    if (!json.metaMetadata) {
+      json.metaMetadata = {};
+    }
+
+    // Only update metadataVersion if the OEM metadata field exists
+    // and the metaMetadata.metadataVersion is currently empty
+    if (json && !json.metaMetadata.metadataVersion) {
+      // Add or update the metadataVersion property
+      // Variations: OEMetadata-2.0.X OEP-1.6.0
+      json.metaMetadata.metadataVersion = "OEMetadata-2.0.4";
+    }
     // MUST have ID
-    json["id"] = config["url_table_id"];
+    // json["id"] = config["url_table_id"];
 
     // MUST have one resource with name == id == tablename
     json["resources"] = json["resources"] || [{}];
@@ -355,7 +367,7 @@ var MetaEdit = function(config) {
             "getResultValue_name": function getResultValue(jseditor_editor, result) {
               selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
 
-              let path = String(jseditor_editor.path).replace("name", "path");
+              let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
               path_uri.setValue(String(result.resource));
 
@@ -449,7 +461,7 @@ var MetaEdit = function(config) {
             "getResultValue_name": function getResultValue(jseditor_editor, result) {
               selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
 
-              let path = String(jseditor_editor.path).replace("name", "path");
+              let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
               path_uri.setValue(String(result.resource));
 

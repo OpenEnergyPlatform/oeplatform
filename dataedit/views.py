@@ -23,8 +23,12 @@ from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
-from metadata.v160.schema import OEMETADATA_V160_SCHEMA
-from metadata.v160.template import OEMETADATA_V160_TEMPLATE
+from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
+
+# from oemetadata.v1.v160.template import OEMETADATA_V160_TEMPLATE
+# from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
+# from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
+from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -42,7 +46,12 @@ from django.utils.decorators import method_decorator
 from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
-from dataedit.helper import merge_field_reviews, process_review_data, recursive_update, delete_peer_review
+from dataedit.helper import (
+    delete_peer_review,
+    merge_field_reviews,
+    process_review_data,
+    recursive_update,
+)
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
@@ -942,6 +951,7 @@ class DataView(View):
 
         oemetadata = table_obj.oemetadata
 
+        # TODO: Adapt this stuff to v2
         from dataedit.metadata import TEMPLATE_V1_5
 
         def iter_oem_key_order(metadata: dict):
@@ -950,6 +960,7 @@ class DataView(View):
                 yield key, metadata.get(key)
 
         ordered_oem_151 = {key: value for key, value in iter_oem_key_order(metadata)}
+        # TODO: refactor the widget
         meta_widget = MetaDataWidget(ordered_oem_151)
         revisions = []
 
@@ -1400,8 +1411,12 @@ def get_tag_keywords_synchronized_metadata(
     session = create_oedb_session()
 
     metadata = load_metadata_from_db(schema=schema, table=table)
+    # TODO: Fixed resource index will fail to produce good
+    # metadata for metadata with multiple resource
     keywords_old = set(
-        k for k in metadata.get("keywords", []) if Tag.create_name_normalized(k)
+        k
+        for k in metadata["resources"][0].get("keywords", [])
+        if Tag.create_name_normalized(k)
     )  # remove empy
 
     tag_ids_old = set(
@@ -1504,7 +1519,9 @@ def get_tag_keywords_synchronized_metadata(
     session.commit()
     session.close()
 
-    metadata["keywords"] = keywords_new
+    # TODO: Fixed resource index will fail to produce good
+    # metadata for metadata with multiple resource
+    metadata["resources"][0]["keywords"] = keywords_new
 
     return metadata
 
@@ -1544,7 +1561,7 @@ def update_table_tags(request):
                 actions.set_table_metadata(
                     table=table,
                     schema=schema,
-                    metadata=OEMETADATA_V160_TEMPLATE,
+                    metadata=OEMETADATA_V20_EXAMPLE,
                     cursor=con,
                 )
                 # update tags in db and harmonize metadata
@@ -1843,7 +1860,7 @@ class MetaEditView(LoginRequiredMixin, View):
                     "columns": columns,
                     "url_table_id": url_table_id,
                     "url_api_meta": reverse(
-                        "api_table_meta", kwargs={"schema": schema, "table": table}
+                        "api:api_table_meta", kwargs={"schema": schema, "table": table}
                     ),
                     "url_view_table": reverse(
                         "dataedit:view", kwargs={"schema": schema, "table": table}
@@ -2161,7 +2178,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             "state_dict": json.dumps(state_dict),
             "review_finished": review_finished,
             "review_id": review_id,
-                }
+        }
         return render(request, "dataedit/opr_review.html", context=context_meta)
 
     def post(self, request, schema, table, review_id=None):
@@ -2275,7 +2292,9 @@ class PeerReviewView(LoginRequiredMixin, View):
                 active_peer_review = PeerReview.load(schema=schema, table=table)
 
                 if active_peer_review:
-                    updated_oemetadata = recursive_update(active_peer_review.oemetadata, review_data)
+                    updated_oemetadata = recursive_update(
+                        active_peer_review.oemetadata, review_data
+                    )
                     active_peer_review.oemetadata = updated_oemetadata
                     active_peer_review.save()
 
@@ -2390,3 +2409,33 @@ class PeerRreviewContributorView(PeerReviewView):
             current_opr.update(review_type=review_post_type)
 
         return render(request, "dataedit/opr_contributor.html", context=context)
+
+
+def metadata_widget(request):
+    """
+    A view to render the metadata widget for the dataedit app.
+    The metadata widget is a small widget that can be embedded in other
+    applications to display metadata information.
+
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+
+    Returns:
+        HttpResponse: Rendered HTML response for the metadata widget.
+    """
+    schema = request.GET.get("schema")
+    table = request.GET.get("table")
+
+    if schema is None or table is None:
+        return JsonResponse(
+            {"error": "Schema and table parameters are required."}, status=400
+        )
+
+    context = {
+        "meta_api": reverse(
+            "api:api_table_meta", kwargs={"schema": schema, "table": table}
+        )
+    }
+    # context = {"meta": OEMETADATA_V20_EXAMPLE}
+
+    return render(request, "partials/metadata_viewer.html", context=context)

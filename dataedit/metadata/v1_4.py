@@ -1,4 +1,4 @@
-from omi.dialects.oep.dialect import OEP_V_1_3_Dialect, OEP_V_1_4_Dialect
+# from omi.dialects.oep.dialect import OEP_V_1_3_Dialect, OEP_V_1_4_Dialect
 
 from api import actions
 from dataedit.metadata import v1_3
@@ -88,6 +88,7 @@ def from_v1_2(comment_on_table):
 
 
 def from_v1_3(comment):
-    d13 = OEP_V_1_3_Dialect()
-    d14 = OEP_V_1_4_Dialect()
-    return d14.compile(d13._parser().parse(comment))
+    # d13 = OEP_V_1_3_Dialect()
+    # d14 = OEP_V_1_4_Dialect()
+    # return d14.compile(d13._parser().parse(comment))
+    return comment
