@@ -28,12 +28,11 @@ from django.http import (
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
-from omi.dialects.oep.compiler import JSONCompiler
-from omi.structure import OEPMetadata
+from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
-
-# views.py
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -57,9 +56,11 @@ from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
-
-# from oekg.sparqlQuery import remove_datasets_from_scenario
-from oekg.utils import process_datasets_sparql_query
+from oekg.utils import (
+    execute_sparql_query,
+    process_datasets_sparql_query,
+    validate_public_sparql_query,
+)
 from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
 
 if USE_LOEP:
@@ -301,11 +302,18 @@ class Metadata(APIView):
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
 
+        if not error and metadata is not None:
+            metadata = actions.try_convert_metadata_to_v2(metadata)
+
+        if not error:
+            metadata, error = actions.try_validate_metadata(metadata)
+
         if metadata is not None:
             cursor = actions.load_cursor_from_context(request.data)
 
             # update/sync keywords with tags before saving metadata
-            keywords = metadata.keywords or []
+            # TODO make this iter over all resources
+            keywords = metadata["resources"][0].get("keywords", []) or []
 
             # get_tag_keywords_synchronized_metadata returns the OLD metadata
             # but with the now harmonized keywords (harmonized with tags)
@@ -314,7 +322,8 @@ class Metadata(APIView):
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
-            metadata.keywords = _metadata["keywords"]
+            # TODO make this iter over all resources
+            metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
 
             # Write oemetadata json to dataedit.models.tables
             # and to SQL comment on table
@@ -324,7 +333,12 @@ class Metadata(APIView):
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
-            metadata.keywords = _metadata["keywords"]
+            # TODO make this iter over all resources
+            metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
+
+            # make sure extra metadata is removed
+            metadata.pop("connection_id", None)
+            metadata.pop("cursor_id", None)
 
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
@@ -995,13 +1009,16 @@ class Rows(APIView):
                     for x in itertools.chain([cols], return_obj["data"])
                 ),
             )
-            table_obj = actions._get_table(schema=schema, table=table)
-            if table_obj.comment:
-                zf.writestr("datapackage.json", table_obj.comment.encode("utf-8"))
+            django_table = DBTable.load(schema, table)
+            if django_table and django_table.oemetadata:
+                zf.writestr(
+                    "datapackage.json",
+                    json.dumps(django_table.oemetadata).encode("utf-8"),
+                )
             else:
                 zf.writestr(
                     "datapackage.json",
-                    json.dumps(JSONCompiler().visit(OEPMetadata())).encode("utf-8"),
+                    json.dumps(OEMETADATA_LATEST_TEMPLATE).encode("utf-8"),
                 )
             response = OEPStream(
                 (chunk for chunk in zf),
@@ -1514,6 +1531,30 @@ def oeo_search(request):
             "The endpoint for LOEP is not setup. Please contact a server admin."
         )
     return JsonResponse(res, safe=False)
+
+
+class OekgSparqlAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        sparql_query = request.data.get("query", "")
+        response_format = request.data.get("format", "json")  # Default format
+
+        if not validate_public_sparql_query(sparql_query):
+            raise ValidationError(
+                "Invalid SPARQL query. Update/delete queries are not allowed."
+            )
+
+        try:
+            content, content_type = execute_sparql_query(sparql_query, response_format)
+        except ValueError as e:
+            raise ValidationError(str(e))
+
+        if content_type == "application/sparql-results+json":
+            return Response(content)
+        else:
+            return Response(content, content_type=content_type)
 
 
 def oevkg_search(request):

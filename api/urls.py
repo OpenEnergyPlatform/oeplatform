@@ -2,6 +2,8 @@ from django.urls import path, re_path
 
 from api import actions, views
 
+app_name = "api"
+
 pgsql_qualifier = r"[\w\d_]+"
 equal_qualifier = r"[\w\d\s\'\=]"
 structures = r"table|sequence"
@@ -188,6 +190,11 @@ urlpatterns = [
     path("grpprop/", views.get_groups),
     path("oeo-search", views.oeo_search),
     path("oevkg-query", views.oevkg_search),
+    re_path(
+        r"^v0/oekg/sparql/?$",
+        views.OekgSparqlAPIView.as_view(),
+        name="oekg-sparql-http-api",
+    ),
     re_path(
         r"^v0/factsheet/frameworks/?$",
         views.EnergyframeworkFactsheetListAPIView.as_view(),
