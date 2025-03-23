@@ -949,7 +949,7 @@ class DataView(View):
         if table_obj is None:
             raise Http404("Table object could not be loaded")
 
-        oemetadata = table_obj.oemetadata
+        # oemetadata = table_obj.oemetadata
 
         # TODO: Adapt this stuff to v2
         from dataedit.metadata import TEMPLATE_V1_5
@@ -1022,8 +1022,9 @@ class DataView(View):
                 schema=schema, table=table
             ),
             "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
-            "opr_enabled": oemetadata
-            is not None,  # check if the table has the metadata
+            "opr_enabled": False,
+            # oemetadata
+            # is not None,  # check if the table has the metadata
         }
 
         opr_result_context = {}
