@@ -2,10 +2,10 @@
 Provide helper functionality for views to reduce code lines in views.py
 make the codebase more modular.
 """
+
 from django.http import JsonResponse
 
-from dataedit.models import Table, PeerReview
-
+from dataedit.models import PeerReview, Table
 
 ##############################################
 #          Table view related                #
@@ -27,10 +27,10 @@ def read_label(table, oemetadata) -> str:
     :return: Readable name appended by the true table name as string or None
     """
     try:
-        if oemetadata.get("title"):
-            return oemetadata["title"].strip() + " (" + table + ")"
-        elif oemetadata.get("Title"):
-            return oemetadata["Title"].strip() + " (" + table + ")"
+        if oemetadata.get("resources"):
+            return oemetadata.get("resources", {})["title"].strip() + " (" + table + ")"
+        # elif oemetadata.get("Title"):
+        #     return oemetadata["Title"].strip() + " (" + table + ")"
 
         else:
             return None
@@ -136,23 +136,28 @@ def get_review_for_key(key, review_data):
 
 def recursive_update(metadata, review_data):
     """
-    Recursively updates metadata with new values from review_data, skipping or removing fields with status 'rejected'.
+    Recursively updates metadata with new values from review_data,
+    skipping or removing fields with status 'rejected'.
 
     Args:
     metadata (dict): The original metadata dictionary to update.
-    review_data (dict): The review data containing the new values for various keys.
+    review_data (dict): The review data containing the new values
+    for various keys.
 
     Note:
-    The function iterates through the review data and for each key updates the corresponding value in metadata if the
-    new value is present and is not an empty string, and if the field status is not 'rejected'.
-        """
+    The function iterates through the review data and for each key
+    updates the corresponding value in metadata if the new value is
+    present and is not an empty string, and if the field status is
+    not 'rejected'.
+    """
 
     def delete_nested_field(data, keys):
         """
         Removes a nested field from a dictionary based on a list of keys.
 
         Args:
-            data (dict or list): The dictionary or list from which to remove the field.
+            data (dict or list): The dictionary or list from which
+            to remove the field.
             keys (list): A list of keys pointing to the field to remove.
         """
         for key in keys[:-1]:
@@ -215,8 +220,8 @@ def set_nested_value(metadata, keys, value):
         value (Any): The value to set.
 
     Note:
-        The function navigates through the dictionary using the keys and sets the value
-        at the position indicated by the last key in the list.
+        The function navigates through the dictionary using the keys
+        and sets the value at the position indicated by the last key in the list.
     """
 
     for key in keys[:-1]:
@@ -250,7 +255,9 @@ def process_review_data(review_data, metadata, categories):
             sorted_field_review = sorted(
                 field_review, key=lambda x: x.get("timestamp"), reverse=True
             )
-            latest_field_review = sorted_field_review[0] if sorted_field_review else None
+            latest_field_review = (
+                sorted_field_review[0] if sorted_field_review else None
+            )
 
             if latest_field_review:
                 state = latest_field_review.get("state")
@@ -304,14 +311,3 @@ def delete_peer_review(review_id):
             return JsonResponse({"error": "PeerReview not found."}, status=404)
     else:
         return JsonResponse({"error": "Review ID is required."}, status=400)
-
-
-
-
-
-
-
-
-
-
-
