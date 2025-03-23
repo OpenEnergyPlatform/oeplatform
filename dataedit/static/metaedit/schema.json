@@ -81,10 +81,10 @@
               "type": ["string", "null"],
               "examples": ["model_draft", "reference"],
               "badge": "Bronze",
-              "title": "Keyword"
+              "title": "Topic"
             },
             "badge": "Bronze",
-            "title": "Keywords"
+            "title": "Topics"
           },
           "title": {
             "description": "A human readable table name.",
