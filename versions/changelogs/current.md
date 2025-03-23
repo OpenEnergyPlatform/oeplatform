@@ -15,6 +15,8 @@ Update the oemetadata sectionin 'dataedit/static/metaEdit/' to enable metadata e
 
 - All metadata in the oeplatform will now use oemetadata v2 specifications. Current metadata will be converted and all new metadata submitting in previous versions will also be converted to the new specification. [(#1954)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1954)
 
+- Deactivate the open peer review feature. It is under construction for the oemetadata v2.0 update [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+
 ## Features
 
 - Open-Peer-Review [(#1800)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1800)
