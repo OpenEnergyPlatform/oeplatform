@@ -129,7 +129,9 @@ var MetaEdit = function(config) {
 
     // MUST have one resource with name == id == tablename
     json["resources"] = json["resources"] || [{}];
+    json["@context"] = "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json";
     json["resources"][0]["name"] = json["resources"][0]["name"] || config.table;
+    json["resources"][0]["path"] = json["resources"][0]["path"] || config.url_table_id;
 
     // auto set / correct columns
     json["resources"][0]["schema"] = json["resources"][0]["schema"] || {};
@@ -154,6 +156,7 @@ var MetaEdit = function(config) {
       if (typeof elemObject != 'object' || $.isArray(elemObject)) {
         return;
       }
+      console.log(schemaProps, elemObject, path);
       // for each key: fill missing (recursively)
       Object.keys(schemaProps).map(function(key) {
         var prop = schemaProps[key];
@@ -164,11 +167,13 @@ var MetaEdit = function(config) {
         } else if (prop.type == 'array') {
           elemObject[key] = elemObject[key] || [];
           // if non empty array
-          if ($.isArray(elemObject[key]) && elemObject[key].length > 0) {
+          if ($.isArray(elemObject[key]) && elemObject[key].length > 0 && elemObject[key] === undefined ) {
             elemObject[key].map(function(elem, i) {
               fixRecursive(prop.items.properties, elem, path + '.' + key + '.' + i);
             });
           }
+
+         
         } else { // value
           if (elemObject[key] === undefined) {
             // console.log('adding empty value: ' + path + '.' + key)
