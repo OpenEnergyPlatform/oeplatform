@@ -102,9 +102,9 @@ var MetaEdit = function(config) {
     };
 
     if (config.standalone == false) {
-      json["title"] = "Metadata for " + config.table;
+      json["title"] = "Metadata for the Dataset: " + config.table;
     } else {
-      json["title"] = "Create new Metadata";
+      json["title"] = "Create new Metadata for your Dataset";
     }
 
 

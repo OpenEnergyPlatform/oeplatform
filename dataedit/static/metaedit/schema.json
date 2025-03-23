@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/v2/v20/schema.json",
-  "description": "Open Energy Metadata (OEMetadata) - metadata schema",
+  "description": "Open Energy Metadata (OEMetadata) - Metadata schema for documenting 1...n datasets using the json / jsonld format. Structure and validation is implemented in the tool OMI using the json-schema specification. Best suited for tabular data including relational models. Compatible with frictionless datapackage specification and its tooling. Optimized for precise data annotations using ontology terms to annotate both columns and cell values which enables broad data comparisons.",
   "type": "object",
   "format": "categories",
-  "basicCategoryTitle": "General",
+  "basicCategoryTitle": "Dataset overview",
   "required": ["resources"],
   "properties": {
     "@context": {
