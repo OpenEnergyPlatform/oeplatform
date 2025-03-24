@@ -1,4 +1,4 @@
-from django.urls import re_path
+from django.urls import path, re_path
 from django.views.generic import RedirectView
 
 from dataedit import views
@@ -124,4 +124,5 @@ urlpatterns = [
         views.PeerRreviewContributorView.as_view(),
         name="peer_review_contributor",
     ),
+    path("metadata-viewer/", views.metadata_widget, name="metadata-widget"),
 ]
