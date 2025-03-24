@@ -26,10 +26,10 @@ SPDX-FileCopyrightText = ["2016 Martin Glauer <MGlauer>",
 SPDX-License-Identifier = "CC-BY-4.0"
 SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
+[[annotations]]
 path = "base/static/img/**"
 precedence = "override"
-SPDX-FileCopyrightText = ["2016 Martin Glauer <MGlauer>",
-  "2017 Marco Finkendei <MFinkendei>",
+SPDX-FileCopyrightText = ["2017 Marco Finkendei <MFinkendei>",
   "2019 Johann Wagner <johannwagner>",
   "2020 Martin Glauer <MGlauer>",
   "2020 Ludwig Hülk <@Ludee> © Reiner Lemoine Institut",
@@ -37,10 +37,21 @@ SPDX-FileCopyrightText = ["2016 Martin Glauer <MGlauer>",
   "2024 Bryan Lancien <bmlancien>",
   "2024 Christian Hofmann <christian-rli> © Reiner Lemoine Institut",
   "oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>"]
-SPDX-License-Identifier = "CC0-1.0"
+SPDX-License-Identifier = "CC-BY-4.0"
 SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
+[[annotations]]
 
+path = "base/static/logos/**"
+precedence = "override"
+SPDX-FileCopyrightText = ["2017 Martin Glauer <MGlauer>",
+  "2020 Ludwig Hülk <@Ludee> © Reiner Lemoine Institut",
+  "2022 Jonas Huber <@jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Hofmann <christian-rli> © Reiner Lemoine Institut",
+  "2024 Santosh Mutyala <smutyala1at>",
+  "oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
 
 #[[annotations]]
