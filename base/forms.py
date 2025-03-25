@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 from captcha.fields import CaptchaField
 from django import forms
 

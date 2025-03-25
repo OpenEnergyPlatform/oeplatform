@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2016 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: 2019 Klara Reder <klarareder>
+# SPDX-FileCopyrightText: 2019 Johann Wagner <johannwagner>
+# SPDX-FileCopyrightText: 2019 Pierre Francois <Bachibouzouk>
+# SPDX-FileCopyrightText: 2022 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
+
 import json
 import os
 import re
