@@ -74,6 +74,30 @@ SPDX-FileCopyrightText = ["2019 Johann Wagner <johannwagner>"]
 SPDX-License-Identifier = "CC-BY-4.0"
 SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
+[[annotations]]
+path = "base/static/open_ego_logo_breit.png"
+precedence = "override"
+SPDX-FileCopyrightText = ["2017 Martin Glauer <MGlauer>"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+
+[[annotations]]
+path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg"
+SPDX-FileCopyrightText = ["2021 Ludwig Hülk <@Ludee> © Reiner Lemoine Institut"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+
+[[annotations]]
+path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.png"
+SPDX-FileCopyrightText = ["2021 Ludwig Hülk <@Ludee> © Reiner Lemoine Institut"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+
+[[annotations]]
+path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.svg"
+SPDX-FileCopyrightText = ["2021 Ludwig Hülk <@Ludee> © Reiner Lemoine Institut"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
 #[[annotations]]
 #path = ".github/pull_request_template.md"
