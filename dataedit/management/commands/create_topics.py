@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2023 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
+
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 

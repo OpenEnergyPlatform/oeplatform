@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2020 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 import sqlalchemy as sqla
 from django.core.management.base import BaseCommand
 

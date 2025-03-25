@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 from typing import List
 
 import sqlalchemy as sqla
