@@ -54,6 +54,14 @@ SPDX-License-Identifier = "CC-BY-4.0"
 SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
 [[annotations]]
+path = "base/static/favicon.ico"
+precedence = "override"
+SPDX-FileCopyrightText = ["2017 Martin Glauer <MGlauer>",
+  "2022 Ludwig Hülk <@Ludee> © Reiner Lemoine Institut",]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+
+[[annotations]]
 path = "base/static/OEP_logo_2_no_text.svg"
 precedence = "override"
 SPDX-FileCopyrightText = ["2017 Martin Glauer <MGlauer>"]
