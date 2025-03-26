@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2019 Pierre Francois <Bachibouzouk>
+# SPDX-FileCopyrightText: 2019 Alexis Michaltsis <4lm>
+# SPDX-FileCopyrightText: 2010 Johann Wagner <johannwagner>
+# SPDX-FileCopyrightText: 2020 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: 2020 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
 import re
 
 from django.utils.html import conditional_escape, format_html, format_html_join

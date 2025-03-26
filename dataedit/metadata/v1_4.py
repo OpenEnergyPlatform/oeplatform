@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2019 Pierre Francois <Bachibouzouk>
+# SPDX-FileCopyrightText: 2020 Martin Glauer <MGlauer>
+# SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: MIT
+
+
 # from omi.dialects.oep.dialect import OEP_V_1_3_Dialect, OEP_V_1_4_Dialect
 
 from api import actions
