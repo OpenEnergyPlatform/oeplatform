@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2019 Pierre Francois <Bachibouzouk>
 # SPDX-FileCopyrightText: 2019 Alexis Michaltsis <4lm>
-# SPDX-FileCopyrightText: 2010 Johann Wagner <johannwagner>
+# SPDX-FileCopyrightText: 2020 Johann Wagner <johannwagner>
 # SPDX-FileCopyrightText: 2020 Martin Glauer <MGlauer>
 # SPDX-FileCopyrightText: 2020 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
 # SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
