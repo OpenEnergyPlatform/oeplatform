@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2023 Daryna <Darynarli> © Reiner Lemoine Institut
 # SPDX-FileCopyrightText: 2024 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
 # SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
 # SPDX-License-Identifier: MIT
