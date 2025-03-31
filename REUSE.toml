@@ -123,6 +123,26 @@ SPDX-FileCopyrightText = ["2023 Jonas Huber <@jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier = "CC-BY-4.0"
 SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
+[[annotations]]
+path = "dataedit/static/colorfield/jscolor/*"
+SPDX-FileCopyrightText = ["2016 Martin Glauer <MGlauer>",
+  "2022 Christian Winger <wingechr>"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+
+[[annotations]]
+path = "dataedit/static/dataedit/images/*"
+SPDX-FileCopyrightText = ["2022 Christian Winger <wingechr>"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+
+[[annotations]]
+path = " dataedit/static/images/*"
+SPDX-FileCopyrightText = ["2022 Christian Winger <wingechr>"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+
+
 
 #[[annotations]]
 #path = ".github/pull_request_template.md"
