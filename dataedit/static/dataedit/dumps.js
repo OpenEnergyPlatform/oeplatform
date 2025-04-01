@@ -1,3 +1,11 @@
+/*! 
+* SPDX-FileCopyrightText: 2016 Martin Glauer <MGlauer>
+* SPDX-FileCopyrightText: 2020 Johann Wagner <johannwagner>
+* SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-License-Identifier: MIT
+*/
+
 function request_dump(schema, table) {
   var dfd = new $.Deferred();
   var div = $('#revision_request_'+ schema + table)[0];
