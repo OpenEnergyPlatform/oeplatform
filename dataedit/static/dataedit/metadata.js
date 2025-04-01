@@ -1,3 +1,14 @@
+/*! 
+* SPDX-FileCopyrightText: 2017 Martin Glauer <MGlauer>
+* SPDX-FileCopyrightText: 2017 Ludwig Hülk <Ludee> © Reiner Lemoine Institut    
+* SPDX-FileCopyrightText: 2019 Pierre Francois <Bachibouzouk>
+* SPDX-FileCopyrightText: 2020 Johann Wagner <johannwagner>
+* SPDX-FileCopyrightText: 2022 Bryan Lancien <bmlancien>
+* SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-License-Identifier: MIT
+*/
+
 function format_label(s) {
   // capitalize the string
   if (typeof s !== 'string') return '';

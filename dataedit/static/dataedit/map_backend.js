@@ -1,3 +1,11 @@
+/*! 
+* SPDX-FileCopyrightText: 2018 Tom Heimbrodt <tom-heimbrodt>
+* SPDX-FileCopyrightText: 2019 Martin Glauer <MGlauer>
+* SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-License-Identifier: MIT
+*/
+
 var getMapData = function(schema, table, column, bounds, callback) {
   let left = bounds.getEast();
   let right = bounds.getWest();
