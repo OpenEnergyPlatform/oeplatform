@@ -1,3 +1,12 @@
+/*! 
+* SPDX-FileCopyrightText: 2019 Martin Glauer <MGlauer>
+* SPDX-FileCopyrightText: 2022 Bryan Lancien <bmlancien>
+* SPDX-FileCopyrightText: 2022 Christian Winger <wingechr>
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-FileCopyrightText: Copyright 2014-2018 Damien "Mistic" Sorel (http://www.strangeplanet.fr)
+* SPDX-License-Identifier: MIT
+*/
+
 /* !
  * jQuery.extendext 0.1.2
  *
