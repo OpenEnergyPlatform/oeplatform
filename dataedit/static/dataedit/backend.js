@@ -1,3 +1,12 @@
+/*! 
+* SPDX-FileCopyrightText: 2016 Martin Glauer <MGlauer>
+* SPDX-FileCopyrightText: 2019 Christian Winger <wingechr>
+* SPDX-FileCopyrightText: 2019 Pierre Francois <Bachibouzouk>
+* SPDX-FileCopyrightText: 2020 Kirann Bhavaraju <KirannBhavaraju>
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-License-Identifier: MIT
+*/
+
 "use strict";
 
 var map;

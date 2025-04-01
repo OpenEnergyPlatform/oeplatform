@@ -1,3 +1,10 @@
+/*! 
+* SPDX-FileCopyrightText: 2020 Johann Wagner <johannwagner>
+* SPDX-FileCopyrightText: 2023 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-License-Identifier: MIT
+*/
+
 var DataEdit = function(table, schema) {
   var state = {
     schema: schema,
