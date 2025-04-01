@@ -1,3 +1,9 @@
+/*! 
+* SPDX-FileCopyrightText: 2025 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-License-Identifier: MIT
+*/
+
 // My idea v0´s code :)
 function initMetadataViewer() {
   console.log("hi");
