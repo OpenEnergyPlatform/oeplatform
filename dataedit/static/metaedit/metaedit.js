@@ -1,3 +1,10 @@
+/*! 
+* SPDX-FileCopyrightText: 2020 Christian Winger <wingechr>
+* SPDX-FileCopyrightText: 2022 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2022 Adel Memariani <adelmemariani>
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-License-Identifier: MIT
+*/
 
 // e.preventDefault(), e.stopPropagation(), t.saveJSON()
 
