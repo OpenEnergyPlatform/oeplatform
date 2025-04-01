@@ -157,6 +157,26 @@ SPDX-FileCopyrightText = ["2023 Adel Memariani <adelmemariani>",
 SPDX-License-Identifier = "CC-BY-4.0"
 SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
+[[annotations]]
+path = "dataedit/static/images/*"
+SPDX-FileCopyrightText = ["2016 Martin Glauer <MGlauer>",
+  "2022 Christian Winger <wingechr>"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+
+[[annotations]]
+path = "dataedit/static/dataedit/api.png"
+precedence = "override"
+SPDX-FileCopyrightText = ["2017 Martin Glauer <MGlauer>"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
+
+[[annotations]]
+path = "dataedit/static/dataedit/dataview.png"
+precedence = "override"
+SPDX-FileCopyrightText = ["2017 Martin Glauer <MGlauer>"]
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
 
 #[[annotations]]
