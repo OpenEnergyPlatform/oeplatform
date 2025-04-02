@@ -1,3 +1,13 @@
+/*!
+* SPDX-FileCopyrightText: 2020 Christian Winger <wingechr>
+* SPDX-FileCopyrightText: 2024 Daryna <Darynarli> © Reiner Lemoine Institut
+* SPDX-FileCopyrightText: 2024 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+* SPDX-FileCopyrightText: 2024 Eike Broda <ebroda>
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-License-Identifier: MIT
+*/
+
+
 window.Wizard = function (config) {
   var state = {
     schema: "model_draft",
