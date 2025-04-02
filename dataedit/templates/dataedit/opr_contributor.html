@@ -346,6 +346,8 @@ window.onload = function() {
 </script>
 
 {% compress js %}
-  <script src="/static/peer_review/opr_contributor.js"></script>
+    <script type="module" src="{% static '/peer_review/opr_contributor.js' %}"></script>
+
+{#  <script type="module" src="/static/peer_review/opr_contributor.js"></script>#}
 {% endcompress %}
 {% endblock after-body-bottom-js %}
