@@ -356,6 +356,15 @@ class PeerReview(models.Model):
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
+    def delete(self, *args, **kwargs):
+        """
+        Custom delete method to remove related PeerReviewManager entries.
+        """
+        # Remove related records in PeerReviewManager
+        PeerReviewManager.objects.filter(opr=self).delete()
+
+        super().delete(*args, **kwargs)
+
     def update(self, *args, **kwargs):
         """
         Update the peer review if the latest peer review is not finished yet
