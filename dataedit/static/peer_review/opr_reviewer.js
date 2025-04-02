@@ -1,3 +1,13 @@
+/*!
+* SPDX-FileCopyrightText: 2023 Stephan Uller <steull>
+* SPDX-FileCopyrightText: 2023 Christian Hofmann <christian-rli> © Reiner Lemoine Institut
+* SPDX-FileCopyrightText: 2023 Daryna <Darynarli> © Reiner Lemoine Institut
+* SPDX-FileCopyrightText: 2023 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+* SPDX-FileCopyrightText: 2023 Bryan Lancien <bmlancien>
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-License-Identifier: MIT
+*/
+
 // this raises more errors as transition from script to module
 // makes it more complicated to use onclick in html elements
 // import { updateClientStateDict } from './frontend/state.js'

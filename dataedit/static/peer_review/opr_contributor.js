@@ -1,3 +1,12 @@
+/*!
+* SPDX-FileCopyrightText: 2023 Stephan Uller <steull>
+* SPDX-FileCopyrightText: 2023 Daryna <Darynarli> © Reiner Lemoine Institut
+* SPDX-FileCopyrightText: 2023 Jonas Huber <jh-RLI> © Reiner Lemoine Institut
+* SPDX-FileCopyrightText: 2023 Bryan Lancien <bmlancien>
+* SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+* SPDX-License-Identifier: MIT
+*/
+
 var selectedField;
 var selectedFieldValue;
 var selectedState;
