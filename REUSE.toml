@@ -148,6 +148,27 @@ SPDX-FileCopyrightText = ["2023 Jonas Huber <@jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier = "CC-BY-4.0"
 SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut licensed CC-BY-4.0"
 
+[[annotations]]
+path = "dataedit/static/peer_review/schema.json"
+SPDX-FileCopyrightText = ["2022 Stephan Uller <steull>",
+  "2023 Christian Hofmann <christian-rli> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <@jh-RLI> © Reiner Lemoine Institut"]
+SPDX-License-Identifier = "MIT"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut"
+
+[[annotations]]
+path = "dataedit/static/peer_review/example_datenmodell.json"
+SPDX-FileCopyrightText = ["2023 Jonas Huber <@jh-RLI> © Reiner Lemoine Institut"]
+SPDX-License-Identifier = "MIT"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut"
+
+[[annotations]]
+path = "dataedit/static/peer_review/template_datenmodell.json"
+SPDX-FileCopyrightText = ["2023 Jonas Huber <@jh-RLI> © Reiner Lemoine Institut"]
+SPDX-License-Identifier = "MIT"
+SPDX-FileComment = "Copyright: OEMetadata documentation © Reiner Lemoine Institut"
+
+
 
 [[annotations]]
 path = "oeo_viewer/client/source-code/statics/**"
