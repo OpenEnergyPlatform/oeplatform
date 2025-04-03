@@ -28,8 +28,7 @@ from django.http import (
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
-from omi.dialects.oep.compiler import JSONCompiler
-from omi.structure import OEPMetadata
+from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import ValidationError
@@ -303,11 +302,18 @@ class Metadata(APIView):
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
 
+        if not error and metadata is not None:
+            metadata = actions.try_convert_metadata_to_v2(metadata)
+
+        if not error:
+            metadata, error = actions.try_validate_metadata(metadata)
+
         if metadata is not None:
             cursor = actions.load_cursor_from_context(request.data)
 
             # update/sync keywords with tags before saving metadata
-            keywords = metadata.keywords or []
+            # TODO make this iter over all resources
+            keywords = metadata["resources"][0].get("keywords", []) or []
 
             # get_tag_keywords_synchronized_metadata returns the OLD metadata
             # but with the now harmonized keywords (harmonized with tags)
@@ -316,7 +322,8 @@ class Metadata(APIView):
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
-            metadata.keywords = _metadata["keywords"]
+            # TODO make this iter over all resources
+            metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
 
             # Write oemetadata json to dataedit.models.tables
             # and to SQL comment on table
@@ -326,7 +333,12 @@ class Metadata(APIView):
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
-            metadata.keywords = _metadata["keywords"]
+            # TODO make this iter over all resources
+            metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
+
+            # make sure extra metadata is removed
+            metadata.pop("connection_id", None)
+            metadata.pop("cursor_id", None)
 
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
@@ -1005,13 +1017,16 @@ class Rows(APIView):
                     for x in itertools.chain([cols], return_obj["data"])
                 ),
             )
-            table_obj = actions._get_table(schema=schema, table=table)
-            if table_obj.comment:
-                zf.writestr("datapackage.json", table_obj.comment.encode("utf-8"))
+            django_table = DBTable.load(schema, table)
+            if django_table and django_table.oemetadata:
+                zf.writestr(
+                    "datapackage.json",
+                    json.dumps(django_table.oemetadata).encode("utf-8"),
+                )
             else:
                 zf.writestr(
                     "datapackage.json",
-                    json.dumps(JSONCompiler().visit(OEPMetadata())).encode("utf-8"),
+                    json.dumps(OEMETADATA_LATEST_TEMPLATE).encode("utf-8"),
                 )
             response = OEPStream(
                 (chunk for chunk in zf),
