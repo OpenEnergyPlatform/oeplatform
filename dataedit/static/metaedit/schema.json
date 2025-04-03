@@ -341,7 +341,7 @@
                   }
                 },
                 "badge": "Silver",
-                "title": "Extent"
+                "title": "Location"
               },
               "extent": {
                 "description": "An object that describes a covered area or region.",
@@ -504,10 +504,10 @@
                       "The Core Writing Team"
                     ],
                     "badge": "Bronze",
-                    "title": "Keyword"
+                    "title": "Author"
                   },
                   "badge": "Bronze",
-                  "title": "Keywords"
+                  "title": "Authors"
                 },
                 "description": {
                   "description": "A free text description of the source.",
@@ -982,7 +982,7 @@
                 "title": "Foreign Keys"
               }
             },
-            "title": "Schema",
+            "title": "Tabular data schema",
             "required": ["primaryKey"]
           },
           "dialect": {
