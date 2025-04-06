@@ -10,6 +10,8 @@ var query_builder;
 var where;
 var view;
 
+var current_table_count;
+
 function getCookie(name) {
   var cookieValue = null;
   if (document.cookie && document.cookie !== '') {
@@ -85,6 +87,7 @@ function request_data(data, callback, settings) {
     function: "count",
     operands: ["*"],
   }];
+  console.log(where)
   count_query.where = where;
   var select_query = JSON.parse(JSON.stringify(base_query));
   select_query["order_by"] = data.order.map(function(c) {
@@ -122,47 +125,141 @@ function request_data(data, callback, settings) {
   if (where !== null) {
     select_query.where = where;
   }
+  // var draw = Number(data.draw);
+  // $.when(
+  //     $.ajax({
+  //       type: 'POST',
+  //       url: '/api/v0/advanced/search',
+  //       dataType: 'json',
+  //       data: {
+  //         csrfmiddlewaretoken: csrftoken,
+  //         query: JSON.stringify(count_query),
+  //       },
+  //     }), $.ajax({
+  //       type: 'POST',
+  //       url: '/api/v0/advanced/search',
+  //       dataType: 'json',
+  //       data: {
+  //         csrfmiddlewaretoken: csrftoken,
+  //         query: JSON.stringify(select_query),
+  //       },
+  //     }),
+  // ).done(function(count_response, select_response) {
+  //   $("#loading-indicator").hide();
+
+  //   /* fix missing data (on successful query)*/
+  //   select_response[0].data = select_response[0].data || [];
+
+  //   if (map !== undefined) {
+  //     build_map(select_response[0].data, select_response[0].description);
+  //   }
+
+  //   if (view.type === "map") {
+  //     build_map(select_response[0].data, select_response[0].description);
+  //   } else if (view.type === "graph") {
+  //     build_graph(select_response[0].data);
+  //   }
+  //   console.log(count_response[0].data[0][0])
+  //   callback({
+  //     data: select_response[0].data,
+  //     draw: draw,
+  //     recordsFiltered: count_response[0].data[0][0],
+  //     recordsTotal: table_info.rows,
+  //   });
+  // }).fail(fail_handler);
+
   var draw = Number(data.draw);
-  $.when(
-      $.ajax({
-        type: 'POST',
-        url: '/api/v0/advanced/search',
-        dataType: 'json',
-        data: {
-          csrfmiddlewaretoken: csrftoken,
-          query: JSON.stringify(count_query),
-        },
-      }), $.ajax({
-        type: 'POST',
-        url: '/api/v0/advanced/search',
-        dataType: 'json',
-        data: {
-          csrfmiddlewaretoken: csrftoken,
-          query: JSON.stringify(select_query),
-        },
-      }),
-  ).done(function(count_response, select_response) {
+
+// Array to store the AJAX requests
+var ajaxRequests = [];
+
+// Add count query AJAX request
+if (where !== null && where !== undefined) {
+ajaxRequests.push(
+  $.ajax({
+    type: 'POST',
+    url: '/api/v0/advanced/search',
+    dataType: 'json',
+    data: {
+      csrfmiddlewaretoken: csrftoken,
+      query: JSON.stringify(count_query),
+    },
+  })
+);
+}
+
+// Add select query AJAX request if where is not null or undefined
+
+  ajaxRequests.push(
+    $.ajax({
+      type: 'POST',
+      url: '/api/v0/advanced/search',
+      dataType: 'json',
+      data: {
+        csrfmiddlewaretoken: csrftoken,
+        query: JSON.stringify(select_query),
+      },
+    })
+  );
+
+
+$.when.apply($, ajaxRequests)
+  .done(function(countResponse, selectResponse) {
+    // $("#loading-indicator").hide();
+
+    // // Extract responses from arguments
+    // var responses = Array.prototype.slice.call(arguments);
+
+    // console.log(responses);
+    // // Fix missing data (on successful query)
+    // // responses.forEach(function(response) {
+    // //   response[0].data = responses[0].data[0][0] || [];
+    // // });
+
+    // if (map !== undefined && responses.length > 1) {
+    //   build_map(responses[1].data, responses[1].description);
+    // }
+
+    // if (view.type === "map") {
+    //   build_map(responses[1].data, responses[1].description);
+    // } else if (view.type === "graph" && responses.length > 1) {
+    //   build_graph(responses[1].data);
+    // }
+
+    // // Callback with data
+    // callback({
+    //   data: responses[0].data,
+    //   draw: draw,
+    //   recordsFiltered: responses[1].data,
+    //   recordsTotal: table_info.rows,
+    // });
+    
     $("#loading-indicator").hide();
 
+    console.log(selectResponse, countResponse);
+
     /* fix missing data (on successful query)*/
-    select_response[0].data = select_response[0].data || [];
+    selectResponse[0].data = selectResponse[0].data || [];
 
     if (map !== undefined) {
-      build_map(select_response[0].data, select_response[0].description);
+      build_map(selectResponse[0].data, selectResponse[0].description);
     }
 
     if (view.type === "map") {
-      build_map(select_response[0].data, select_response[0].description);
+      build_map(selectResponse[0].data, selectResponse[0].description);
     } else if (view.type === "graph") {
-      build_graph(select_response[0].data);
+      build_graph(selectResponse[0].data);
     }
+    console.log(countResponse[0].data[0][0])
     callback({
-      data: select_response[0].data,
+      data: selectResponse[0].data,
       draw: draw,
-      recordsFiltered: count_response[0].data[0][0],
+      recordsFiltered: countResponse[0].data[0][0],
       recordsTotal: table_info.rows,
     });
-  }).fail(fail_handler);
+  })
+  .fail(fail_handler);
+
 }
 
 function build_map(data, description) {
@@ -317,7 +414,7 @@ function load_view(schema, table, csrftoken, current_view) {
       );
       tile_layer.addTo(map);
     }
-
+    current_table_count = count_response[0].data[0][0];
     table_info.rows = count_response[0].data[0][0];
     table_container = $('#datatable').DataTable({
       ajax: request_data,
