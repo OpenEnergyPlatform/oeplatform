@@ -6,7 +6,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "node dev-server.js",
-    "build": "cd .. && rm -r static && mkdir static && cd static && mkdir oeo_viewer && cd ../client && npx parcel build source-code/index.html --out-dir ../static/oeo_viewer"
+    "update": "npm install --legacy-peer-deps --no-save --omit=optional && npm prune --legacy-peer-deps --omit=optional",
+    "clean": "npx --no-install shx mkdir -p ../static/oeo_viewer && npx --no-install shx rm -r ../static/oeo_viewer && npx --no-install shx mkdir -p ../static/oeo_viewer",
+    "build": "npm run clean && npx --no-install parcel build source-code/index.html --out-dir ../static/oeo_viewer"
   },
   "keywords": [
     "Graph"
@@ -17,8 +19,10 @@
     "@babel/core": "^7.14.8",
     "@babel/plugin-proposal-class-properties": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
+    "caniuse-lite": "^1.0.30001663",
     "parcel-bundler": "^1.12.5",
-    "sass": "^1.37.0"
+    "sass": "^1.37.0",
+    "shx": "^0.3.4"
   },
   "dependencies": {
     "@material-ui/core": "^4.12.3",
@@ -29,13 +33,14 @@
     "@react-spring/web": "^9.2.4",
     "@types/react": "^17.0.15",
     "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
+    "babel-preset-env": "^0.0.0",
     "babel-preset-react": "^6.24.1",
     "d3": "^7.0.0",
+    "es-abstract": "^1.23.3",
     "http-proxy": "^1.18.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-force-graph": "^1.41.7",
+    "react-force-graph": "^1.29.3",
     "react-force-graph-2d": "^1.23.8",
     "react-force-graph-3d": "^1.21.10",
     "react-router-dom": "^6.26.2",
