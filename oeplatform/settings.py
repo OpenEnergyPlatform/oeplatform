@@ -97,7 +97,7 @@ EXTERNAL_URLS = {
     "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
     "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
     "spdx_licenses": "https://spdx.github.io/license-list-data/",
-    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md",  # noqa E501
+    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
     "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
 }
 
@@ -226,7 +226,7 @@ STATICFILES_FINDERS = {
 
 
 # https://django-compressor.readthedocs.io/en/stable/settings.html
-COMPRESS_ENABLED = True
+COMPRESS_ENABLED = False
 COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
