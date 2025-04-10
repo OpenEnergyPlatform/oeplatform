@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     "django_bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
+    "django_vite",
     "modelview",
     "modelview.templatetags.modelview_extras",
     "login",
