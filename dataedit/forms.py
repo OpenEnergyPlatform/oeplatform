@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institute.de>
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 from django import forms
 from django.db import models
 from django.forms import ModelForm

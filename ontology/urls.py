@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@winadms-MacBook-Pro.local>
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 from django.urls import path, re_path
 from django.views.generic import TemplateView
 

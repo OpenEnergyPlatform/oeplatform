@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 """Add association between tags and labels
 
 Revision ID: 3886946416ba

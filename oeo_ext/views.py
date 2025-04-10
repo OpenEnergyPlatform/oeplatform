@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
+# SPDX-FileCopyrightText: 2025 Hannah Spinde <hannah.spinde@st.ovgu.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin

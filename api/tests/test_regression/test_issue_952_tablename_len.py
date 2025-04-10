@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+#
+# SPDX-License-Identifier: MIT
+
 from functools import partial
 
 from api.actions import MAX_IDENTIFIER_LENGTH

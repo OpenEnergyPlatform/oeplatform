@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 """
 Collection of utility functions for the API used to define various action
 like processing steps.

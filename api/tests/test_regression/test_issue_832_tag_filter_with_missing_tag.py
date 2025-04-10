@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 from django.urls import reverse
 
 from api.tests import APITestCase

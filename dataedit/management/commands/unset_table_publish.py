@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+#
+# SPDX-License-Identifier: MIT
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
 

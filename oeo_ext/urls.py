@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 from django.urls import re_path  # noqa:F401
 
 from oeo_ext import views

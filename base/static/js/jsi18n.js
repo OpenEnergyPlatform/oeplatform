@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+//
+// SPDX-License-Identifier: MIT
 
 (function(globals) {
   var django = globals.django || (globals.django = {});

@@ -1,3 +1,20 @@
+# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institute.de>
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <heimbrodt@posteo.de>
+# SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+# SPDX-FileCopyrightText: 2025 daryna <Daryna.Martymianova@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 steull <stephanuller.su@gmail.com>
+# SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 import json
 import logging
 from datetime import datetime, timedelta

@@ -1,3 +1,24 @@
+# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <heimbrodt@posteo.de>
+# SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+# SPDX-FileCopyrightText: 2025 christian-rli <42000429+christian-rli@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 chrwm <christoph.muschner@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 henhuy <hendrik.huyskens@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
+# SPDX-FileCopyrightText: 2025 wingechr <wingechr@users.noreply.github.com>
+#
+# SPDX-License-Identifier: MIT
+
 import json
 import logging
 import re

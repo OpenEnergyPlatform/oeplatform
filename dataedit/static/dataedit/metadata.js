@@ -1,3 +1,14 @@
+// SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institute.de>
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien@yahoo.fr>
+// SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+// SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
+// SPDX-FileCopyrightText: 2025 Ludwig Huelk <ludwig.huelk@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+// SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+//
+// SPDX-License-Identifier: MIT
+
 function format_label(s) {
   // capitalize the string
   if (typeof s !== 'string') return '';

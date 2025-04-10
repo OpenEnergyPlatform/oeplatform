@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+//
+// SPDX-License-Identifier: MIT
+
 // My idea v0´s code :)
 function initMetadataViewer() {
   console.log("hi");

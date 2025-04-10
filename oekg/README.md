@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # What is this app used for?
 
 The OEKG django app is used to encapsulate functionality to interact with the OEKG within the OEP. If one needs such functionality in another django app like `api` then the oekg app should be imported there. New functionality should also extend the oekg app.

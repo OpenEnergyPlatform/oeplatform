@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+//
+// SPDX-License-Identifier: MIT
+
 import React from 'react';
 import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
 

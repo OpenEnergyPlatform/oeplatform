@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import { styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import palette from '../palette';

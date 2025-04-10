@@ -1,3 +1,19 @@
+# SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
+# SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>
+# SPDX-FileCopyrightText: 2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 MFinkendei <anubis-mf@web.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 daryna <Daryna.Martymianova@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 import json
 from itertools import groupby
 from django import forms

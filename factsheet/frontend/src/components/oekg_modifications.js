@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
+// SPDX-FileCopyrightText: 2025 Adel Memariani <memariani.adel@gmail.com>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+//
+// SPDX-License-Identifier: MIT
+
 import React, { PureComponent, Fragment, useState, useEffect } from "react";
 import conf from "../conf.json";
 import axios from "axios";

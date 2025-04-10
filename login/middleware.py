@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 Stephan Günther <gnn.code@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 from django.http import HttpResponseRedirect
 
 DETACH_PATH = "/user/detach"

@@ -1,3 +1,11 @@
+<!--
+SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
+SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Bootstrap 5 Theme Generation
 We use a custom bootstrap theme to style the platform. If I did everything correctly, you never need to touch this, but this is very unlikely, so this is how to generate a new bootstrap.min.css, which contains the theme.
 

@@ -1,3 +1,18 @@
+# SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
+# SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+# SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@winadms-MacBook-Pro.local>
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <glauer@iws.cs.ovgu.de>
+# SPDX-FileCopyrightText: 2025 NB-KREDER\kreder <klara.reder@iee.fraunhofer.de>
+# SPDX-FileCopyrightText: 2025 Tu Phan Ngoc <RL-INSTITUT\tuphan.ngoc@rli-nb-65.rl-institut.local>
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 """oeplatform URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:

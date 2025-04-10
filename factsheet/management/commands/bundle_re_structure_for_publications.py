@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
+#
+# SPDX-License-Identifier: MIT
+
 import os
 import subprocess as sp
 from rdflib import Graph, RDFS, URIRef

@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 from django import template
 
 register = template.Library()

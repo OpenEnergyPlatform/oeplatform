@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 # from django.contrib.auth import authenticate, login, logout
 from django.test import TestCase
 

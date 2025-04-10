@@ -1,3 +1,19 @@
+# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <heimbrodt@posteo.de>
+# SPDX-FileCopyrightText: 2025 christian-rli <christian.hofmann@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 steull <stephanuller.su@gmail.com>
+# SPDX-FileCopyrightText: 2025 wingechr <wingechr@users.noreply.github.com>
+#
+# SPDX-License-Identifier: MIT
+
 from django.urls import path, re_path
 from django.views.generic import RedirectView
 

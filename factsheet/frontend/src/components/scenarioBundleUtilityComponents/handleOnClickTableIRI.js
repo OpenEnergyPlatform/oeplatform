@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+//
+// SPDX-License-Identifier: MIT
+
 // enhance open url function to handle urls better
 // TODO change once OEKG is migrated
 const handleOpenURL = (url, setError) => {

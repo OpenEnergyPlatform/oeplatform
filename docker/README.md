@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Docker Usage
 
 > Works for Linux & MacOS (probably). It is tested with Linux.

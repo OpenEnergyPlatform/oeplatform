@@ -1,3 +1,30 @@
+# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institute.de>
+# SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien@yahoo.fr>
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
+# SPDX-FileCopyrightText: 2025 Jonas H <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <kirann9999@hotmail.com>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 Tu Phan Ngoc <RL-INSTITUT\tuphan.ngoc@rli-nb-65.rl-institut.local>
+# SPDX-FileCopyrightText: 2025 Venkatesh Murugadas <venkatesh.murugadas@st.ovgu.de>
+# SPDX-FileCopyrightText: 2025 Zoë Schaaff <z.schaaff@oeko.de>
+# SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+# SPDX-FileCopyrightText: 2025 christian-rli <christian.hofmann@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 daryna <Daryna.Martymianova@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 pietro <peter.zamb@gmail.com>
+# SPDX-FileCopyrightText: 2025 solar-c <@>
+# SPDX-FileCopyrightText: 2025 wingechr <wingechr@users.noreply.github.com>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 Django==5.1.4
 matplotlib==3.8.3
 urllib3==1.26.19

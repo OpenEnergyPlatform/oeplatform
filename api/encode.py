@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 import itertools as it
 from json.encoder import INFINITY, encode_basestring, encode_basestring_ascii
 from types import GeneratorType

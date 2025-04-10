@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 from oeo_ext.oeo_extended_store.connection import oeo_owl
 
 # Static parts, object properties:

@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 import os
 
 from django.core.management.base import BaseCommand

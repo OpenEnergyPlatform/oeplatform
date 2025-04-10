@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+//
+// SPDX-License-Identifier: MIT
+
 window.onload = function() {
   //<editor-fold desc="Changeable Configuration Block">
 

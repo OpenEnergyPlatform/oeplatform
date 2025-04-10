@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 from copy import deepcopy
 
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE

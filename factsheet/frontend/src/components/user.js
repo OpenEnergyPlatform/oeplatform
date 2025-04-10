@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+//
+// SPDX-License-Identifier: MIT
+
 import React from 'react';
 import { useQuery } from 'react-apollo';
 import { gql } from 'apollo-boost';

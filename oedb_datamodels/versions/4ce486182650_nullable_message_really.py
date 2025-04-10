@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+#
+# SPDX-License-Identifier: MIT
+
 """Make message nullable
 
 Revision ID: 4ce486182650

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Martin Glauer <glauer@iws.cs.ovgu.de>
+#
+# SPDX-License-Identifier: MIT
+
 """
 WSGI config for oeplatform project.
 

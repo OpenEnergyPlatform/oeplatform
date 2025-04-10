@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+#
+# SPDX-License-Identifier: MIT
+
 from rest_framework.permissions import BasePermission
 
 

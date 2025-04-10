@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+#
+# SPDX-License-Identifier: MIT
+
 """empty message
 
 Revision ID: 3c2369dfcc55

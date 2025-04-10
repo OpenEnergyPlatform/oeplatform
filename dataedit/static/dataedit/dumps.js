@@ -1,3 +1,10 @@
+// SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+// SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
+// SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+// SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+//
+// SPDX-License-Identifier: MIT
+
 function request_dump(schema, table) {
   var dfd = new $.Deferred();
   var div = $('#revision_request_'+ schema + table)[0];

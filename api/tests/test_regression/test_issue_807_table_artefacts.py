@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+#
+# SPDX-License-Identifier: MIT
+
 """Some api actions run `assert_permission`, which calls
 DBTable.load(schema, table), which used get_or_create().
 

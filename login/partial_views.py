@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+#
+# SPDX-License-Identifier: MIT
+
 from django.shortcuts import get_object_or_404, render
 
 from dataedit.models import Table

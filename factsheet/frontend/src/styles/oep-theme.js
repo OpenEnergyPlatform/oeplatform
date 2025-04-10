@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import { createTheme } from '@mui/material/styles';
 import palette from './oep-theme/palette';
 import { buttonStyles, buttonGroupStyles } from './oep-theme/components/buttonStyles';

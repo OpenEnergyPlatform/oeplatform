@@ -1,3 +1,10 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 ## OEKG web based access
 
 In this document we describe how you can access the contents of the OEKG via Web based Requests using HTTP

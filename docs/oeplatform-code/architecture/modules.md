@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Modules of the oeplatform software
 
 This section describes the modules of the oeplatoform website software. As we use django modules are also called apps. Each modules describes a django app that provides all the backend functionality as well as the user interface for a specific area of the website.

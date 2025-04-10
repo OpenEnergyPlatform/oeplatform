@@ -1,3 +1,13 @@
+<!--
+SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institute.de>
+SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 ## Development
 
 ### Prerequisites

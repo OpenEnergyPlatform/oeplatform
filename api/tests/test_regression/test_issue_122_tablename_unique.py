@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+#
+# SPDX-License-Identifier: MIT
+
 from api import actions
 from api.actions import has_table
 from api.tests import APITestCase

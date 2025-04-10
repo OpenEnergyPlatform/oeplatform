@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 from __future__ import with_statement
 
 import os

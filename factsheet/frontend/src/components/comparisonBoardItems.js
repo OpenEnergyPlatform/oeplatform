@@ -1,3 +1,12 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
+// SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+// SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@winadms-mbp.speedport.ip>
+// SPDX-FileCopyrightText: 2025 Adel Memariani <memariani.adel@gmail.com>
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+//
+// SPDX-License-Identifier: MIT
+
 import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Typography from '@mui/material/Typography';

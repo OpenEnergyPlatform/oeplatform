@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+#
+# SPDX-License-Identifier: MIT
+
 """
 inserting the string "1000" in a varchar column
 that has unique constraint  leads to an error.

@@ -1,0 +1,1949 @@
+
+Files: VERSION
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: christian-rli <42000429+christian-rli@users.noreply.github.com>
+Copyright: Adel Memariani <memariani.adel@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: .gitmodules
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: .dockerignore
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: LICENSE
+Copyright: Martin Glauer <martinglauer89@googlemail.com>
+License: MIT
+
+Files: .eslintrc.json
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: .bumpversion.cfg
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Adel Memariani <memariani.adel@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: mkdocs.yml
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: user <martimanovadarina@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: .prettierignore
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: c.winger <c.winger@oeko.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: .gitignore
+Copyright: Martin Glauer <glauer@iws.cs.ovgu.de>
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+Copyright: Alexis Michaltsis <alexis.michaltsis@rl-institut.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+License: MIT
+
+Files: CITATION.cff
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Adel Memariani <memariani.adel@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: tox.ini
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: alembic.ini
+Copyright: MGlauer <martinglauer89@gmail.com>
+License: MIT
+
+Files: environment.yml
+Copyright: Bachibouzouk <pierre-francois.duc@rl-institute.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: RL-INSTITUT\hendrik.huyskens <hendrik.huyskens@rl-institut.de>
+License: MIT
+
+Files: .pre-commit-config.yaml
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: c.winger <c.winger@oeko.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docker/apache2.conf
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: docker/Dockerfile
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Eike Broda <git@ebroda.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docker/docker-compose.yaml
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oeo_ext/oeo_extended_store/test/data/expected_composedUnit.owl
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oeo_ext/templates/oeo_ext/partials/oeo-ext-plugin-ui.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oeo_ext/templates/oeo_ext/partials/success.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oeo_ext/templates/oeo_ext/partials/unit_element.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/img/OEP-Datasets-System-2023-06-15-1708.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: docs/img/draft-infrastructure-oep-2023-10-24-1338.png
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: docs/oeplatform-code/web-api/oekg-api/oekg.yaml
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/oauth2-redirect.html
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle-core.js.map
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/swagger-ui.js.map
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/swagger-ui.css
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle.js.map
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/favicon-32x32.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: docs/oeplatform-code/web-api/dist/swagger-ui.css.map
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/swagger-ui-standalone-preset.js.map
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/index.html
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/index.css
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/swagger-ui-bundle.js.map
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/oeplatform-code/web-api/dist/favicon-16x16.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: docs/oeplatform-code/web-api/oedb-rest-api/schema.json
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: docs/css/extra.css
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: c.winger <c.winger@oeko.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: modelview/static/css/form-style.css
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: solar-c <@>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/static/css/mv-style.css
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/static/css/custom_alert.css
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/templates/modelview/editframework.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: quentinpeyras <quentinpey@hotmail.fr>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Martin Glauer <glauer@iws.cs.ovgu.de>
+Copyright: solar-c <@>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: modelview/templates/modelview/editmodel_snippet_depend.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+License: MIT
+
+Files: modelview/templates/modelview/editmodel_snippet.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: quentinpeyras <quentinpey@hotmail.fr>
+Copyright: solar-c <@>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/templates/modelview/error_template.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: modelview/templates/modelview/detail_view.html
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: modelview/templates/modelview/array_snippet.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/templates/modelview/modellist.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Martin Glauer <martinglauer89@googlemail.com>
+Copyright: Martin Glauer <glauer@iws.cs.ovgu.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: modelview/templates/modelview/editmodel.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: quentinpeyras <quentinpey@hotmail.fr>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Martin Glauer <glauer@iws.cs.ovgu.de>
+Copyright: solar-c <@>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: modelview/templates/modelview/base.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Martin Glauer <glauer@iws.cs.ovgu.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/templates/modelview/overview.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: modelview/templates/modelview/form_element_factory.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/templates/modelview/model.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: quentinpeyras <quentinpey@hotmail.fr>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: solar-c <@>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: modelview/templates/modelview/error_snipet.html
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/templates/modelview/tag_selector.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/templates/modelview/model_snippet.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: quentinpeyras <quentinpey@hotmail.fr>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: solar-c <@>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/templates/modelview/framework.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: quentinpeyras <quentinpey@hotmail.fr>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: solar-c <@>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: modelview/templates/modelview/FactSheets_schema.svg
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: modelview/templates/modelview/widgets/dynamic_edit.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: modelview/templates/modelview/widgets/multiwidget.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+License: MIT
+
+Files: modelview/templates/modelview/widgets/dynamic_array.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+License: MIT
+
+Files: login/templates/login/generic_form.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: login/templates/login/list_memberships.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: login/templates/login/detach.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: login/templates/login/oepuser_edit_form.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>
+Copyright: daryna <Daryna.Martymianova@rl-institut.de>
+License: MIT
+
+Files: login/templates/login/user_settings.html
+Copyright: daryna <Daryna.Martymianova@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+License: MIT
+
+Files: login/templates/login/oepuser_create_form.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>
+License: MIT
+
+Files: login/templates/login/activate.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: login/templates/login/user_tables.html
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: user <martimanovadarina@gmail.com>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+License: MIT
+
+Files: login/templates/login/user_groups.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: login/templates/login/admin_group.html
+Copyright: MFinkendei <anubis-mf@web.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: login/templates/login/sidebar_user.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: login/templates/login/user_nav.html
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: login/templates/login/user_review.html
+Copyright: daryna <Daryna.Martymianova@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <Jonas.Huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Darynarli <“Daryna.Barabanova@rl-institut.de”>
+License: MIT
+
+Files: login/templates/login/delete_account.html
+Copyright: daryna <Daryna.Martymianova@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: login/templates/login/modals/table_publish.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: login/templates/login/partials/group_component_tables.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: login/templates/login/partials/group_component_form_edit.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: login/templates/login/partials/user_partial_tables.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: login/templates/login/partials/group_component_invite_user.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: login/templates/login/partials/badge_icon.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: login/templates/login/partials/groups.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: login/templates/login/partials/group_component_membership.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: login/templates/login/partials/group_management.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: login/templates/registration/custom_password_reset_done.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: login/templates/registration/custom_password_reset_form.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+License: MIT
+
+Files: login/templates/registration/password_reset_email.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: login/templates/registration/login.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: login/templates/registration/custom_password_reset_confirm.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: login/templates/registration/custom_password_reset_complete.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: login/templates/mails/base.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: login/templates/mails/verification_mail.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: oekg/static/sparql_ui/vendor/yasgui-4.2.28/js/yasgui.min.js.map
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oekg/static/sparql_ui/vendor/yasgui-4.2.28/css/yasgui.min.css
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oekg/templates/oekg/main.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/favicon.ico
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/OEP_logo_2_no_text.svg
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.svg
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/oeplogo.svg
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: base/static/open_ego_logo_breit.png
+Copyright: MGlauer <martinglauer89@gmail.com>
+License: CC-BY-4.0
+
+Files: base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.png
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/OEP_logo_2.png
+Copyright: MGlauer <martinglauer89@gmail.com>
+License: CC-BY-4.0
+
+Files: base/static/project_detail_pages_content/szenarien_db.json
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/static/project_detail_pages_content/sirop.json
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/static/project_detail_pages_content/lod_geoss.json
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/static/project_detail_pages_content/open_fred.json
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/static/project_detail_pages_content/.PROJECT_TEMPLATE.jsonc
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/static/project_detail_pages_content/open_modex.json
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/static/project_detail_pages_content/open_ego.json
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/static/logos/project/open_MODEX_Header.jpg
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/project/open_FRED_Header.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/project/SzenarienDB_Header.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/project/LOD-GEOSS_Header.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/project/open_ego_logo.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/project/SIROP_logo.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/project/open_eGo_Header.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/funder/BMWK.png
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/HZG.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/ZNES.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/pik_logo.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/Logo_IER_UniStuttgart-1200x386.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/OvGU.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/partner_logo_fortiss.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/RLI.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/partner_logo_hereon.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/IEE.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/DLR-VE.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/FZJuelich-1.jpg
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/NE.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/OEI.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/EUF.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/partner_logo_nfdi4energy.png
+Copyright: SMutyala18 <santosh.mutyala@uni-oldenburg.de>
+License: CC-BY-4.0
+
+Files: base/static/logos/partner/InfAI-Logo.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/selector-icons.svg
+Copyright: MFinkendei <anubis-mf@web.de>
+License: CC-BY-4.0
+
+Files: base/static/img/icon-unknown.svg
+Copyright: MFinkendei <anubis-mf@web.de>
+License: CC-BY-4.0
+
+Files: base/static/img/search.svg
+Copyright: MFinkendei <anubis-mf@web.de>
+License: CC-BY-4.0
+
+Files: base/static/img/OpenEnergyFamily_OEPlatypus.png
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/OpenEnergyFamily_modules_trans.png
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/icon-unknown-alt.svg
+Copyright: MFinkendei <anubis-mf@web.de>
+License: CC-BY-4.0
+
+Files: base/static/img/about/OpenEnergyFamily_modeling-cycle.png
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/about/OpenEnergyFamily_modeling-open-science.png
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/about/OpenEnergyFamily_GroupPhoto.png
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/about/OpenEnergyFamily_GroupPhoto2.png
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/about-community.svg
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/ontology.svg
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/videos.svg
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/documentation.png
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/beginners.svg
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/bundles.png
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/api.png
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/database.png
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/OEP_Documentation.svg
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/factsheets.png
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/about-openscience.svg
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/concept.png
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+License: CC-BY-4.0
+
+Files: base/static/img/welcome/about-process-modelling.svg
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: base/static/img/badges/badge_iron.png
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: CC-BY-4.0
+
+Files: base/static/img/badges/badge_silver.png
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: CC-BY-4.0
+
+Files: base/static/img/badges/badge_bronze.png
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: CC-BY-4.0
+
+Files: base/static/img/badges/badge_platinum.png
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: CC-BY-4.0
+
+Files: base/static/img/badges/badge_gold.png
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: CC-BY-4.0
+
+Files: base/static/css/jquery-ui.min.css
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/static/css/base-style.css
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: Till I <thsstll@users.noreply.github.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Martin Glauer <martinglauer89@googlemail.com>
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: base/static/css/filterform.css
+Copyright: MFinkendei <anubis-mf@web.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/static/css/index-style.css
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Kirann Bhavaraju <kirann9999@hotmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: base/static/css/bootstrap.min.css
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/static/css/bootstrap-select.min.css
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/templates/base/base-full.html
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/templates/base/_footer.html
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/templates/base/base-wide-react.html
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/templates/base/500.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: NB-KREDER\kreder <klara.reder@iee.fraunhofer.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+License: MIT
+
+Files: base/templates/base/base-profile.html
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/templates/base/base.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: quentinpeyras <quentinpey@hotmail.fr>
+Copyright: Martin Glauer <martinglauer89@googlemail.com>
+Copyright: Till I <thsstll@users.noreply.github.com>
+Copyright: MFinkendei <anubis-mf@web.de>
+Copyright: Johann Wagner <johann.wagner@st.ovgu.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Dhruvin1412 <48323399+Dhruvin1412@users.noreply.github.com>
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+Copyright: Bachibouzouk <pierre-francois.duc@rl-institut.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Martin Glauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: wingechr <wingechr@users.noreply.github.com>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/templates/base/privacy_policy.html
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/templates/base/terms_of_use.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: WolfBunke <wolf-dieter.bunke@uni-flensburg.de>
+Copyright: EdithaK <editha.koetter@rl-institut.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/templates/base/faq.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/templates/base/base-sidebar.html
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/templates/base/discussion.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Berit Müller <berit.mueller@rl-institut.de>
+Copyright: EdithaK <editha.koetter@rl-institut.de>
+Copyright: Hannah Förster <h.foerster@oeko.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/templates/base/contact.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: WolfBunke <wolf-dieter.bunke@uni-flensburg.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Lukas Emele <l.emele@oeko.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/templates/base/project-detail.html
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: base/templates/base/about.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: EdithaK <editha.koetter@rl-institut.de>
+Copyright: Berit Müller <berit.mueller@rl-institut.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: SMutyala18 <santosh.mutyala@uni-oldenburg.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: base/templates/base/_header.html
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: base/templates/base/index.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: Till I <thsstll@users.noreply.github.com>
+Copyright: Berit Müller <berit.mueller@rl-institut.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: EdithaK <editha.koetter@rl-institut.de>
+Copyright: WolfBunke <wolf-dieter.bunke@uni-flensburg.de>
+Copyright: Martin Glauer <martinglauer89@googlemail.com>
+Copyright: Stephan Günther <gnn.code@gmail.com>
+Copyright: NB-KREDER\kreder <klara.reder@iee.fraunhofer.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Johann Wagner <wagner@creatdev-solutions.com>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: christian-rli <42000429+christian-rli@users.noreply.github.com>
+Copyright: Kirann Bhavaraju <kirann9999@hotmail.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: base/templates/base/404.html
+Copyright: NB-KREDER\kreder <klara.reder@iee.fraunhofer.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: factsheet/templates/factsheet/index.html
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Adel Memariani <memarian@winadms-mbp.speedport.ip>
+Copyright: Adel Memariani <memariani.adel@gmail.com>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+License: MIT
+
+Files: factsheet/templates/partials/related_oekg_scenarios.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: factsheet/frontend/package-lock.json
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Copyright: Adel Memariani <memariani.adel@gmail.com>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+License: MIT
+
+Files: factsheet/frontend/.gitignore
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: factsheet/frontend/package.json
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Adel Memariani <memarian@winadms-mbp.speedport.ip>
+Copyright: Adel Memariani <memariani.adel@gmail.com>
+Copyright: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+License: MIT
+
+Files: factsheet/frontend/public/manifest.json
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: factsheet/frontend/public/index.html
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: factsheet/frontend/src/app.less
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: factsheet/frontend/src/index.css
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: factsheet/frontend/src/conf.json
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Adel Memariani <memarian@winadms-mbp.speedport.ip>
+Copyright: Adel Memariani <memariani.adel@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: factsheet/frontend/src/data/countries.json
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: factsheet/frontend/src/styles/App.css
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: factsheet/frontend/src/styles/react-checkbox-tree.css
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: factsheet/frontend/src/styles/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: CC-BY-4.0
+
+Files: ontology/templates/ontology/partial_ontology_sidebar_content.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: ontology/templates/ontology/partial_ontology_full.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: ontology/templates/ontology/partial_ontology_content.html
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: ontology/templates/ontology/oeo-steering-committee.html
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: ontology/templates/ontology/about.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Janna Hastings <janna.hastings@gmail.com>
+Copyright: stap-m <38690039+stap-m@users.noreply.github.com>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: ontology/templates/ontology/oeo.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: ontology/templates/ontology/class.html
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: dataedit/fixtures/topics.json
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/static/colorfield/jscolor/hv.png
+Copyright: MGlauer <martinglauer89@googlemail.com>
+License: CC-BY-4.0
+
+Files: dataedit/static/colorfield/jscolor/arrow.gif
+Copyright: MGlauer <martinglauer89@googlemail.com>
+License: CC-BY-4.0
+
+Files: dataedit/static/colorfield/jscolor/demo.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+License: MIT
+
+Files: dataedit/static/colorfield/jscolor/hs.png
+Copyright: MGlauer <martinglauer89@googlemail.com>
+License: CC-BY-4.0
+
+Files: dataedit/static/colorfield/jscolor/cross.gif
+Copyright: MGlauer <martinglauer89@googlemail.com>
+License: CC-BY-4.0
+
+Files: dataedit/static/metaedit/schema.json
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Hendrik Huyskens <hendrik.huyskens@rl-institut.de>
+License: MIT
+
+Files: dataedit/static/metaedit/metaedit.css
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+License: MIT
+
+Files: dataedit/static/peer_review/schema.json
+Copyright: steull <stephanuller.su@gmail.com>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/static/peer_review/example_datenmodell.json
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/static/peer_review/template_datenmodell.json
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/static/peer_review/img/opr-process-bpmn.png
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: dataedit/static/dataedit/dataview.png
+Copyright: MGlauer <martinglauer89@googlemail.com>
+License: CC-BY-4.0
+
+Files: dataedit/static/dataedit/dataedit.css
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/static/dataedit/api.png
+Copyright: MGlauer <martinglauer89@googlemail.com>
+License: CC-BY-4.0
+
+Files: dataedit/static/dataedit/metadata.css
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Bachibouzouk <pierre-francois.duc@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/static/dataedit/jquery.dataTables.min.css
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/static/dataedit/query-builder.default.min.css
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/static/dataedit/leaflet.css
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/static/dataedit/images/marker-shadow.png
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: dataedit/static/dataedit/images/marker-icon.png
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: dataedit/static/metadata-viewer/metadata-viewer.css
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/static/images/sort_asc.png
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: dataedit/static/images/sort_asc_disabled.png
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: dataedit/static/images/sort_desc_disabled.png
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: dataedit/static/images/sort_both.png
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: dataedit/static/images/sort_desc.png
+Copyright: Christian Winger <c@wingechr.de>
+License: CC-BY-4.0
+
+Files: dataedit/static/wizard/wizard.css
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/static/wizard/.gitignore
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/templates/messages.html
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/dataedit_tablelist.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Lukas Emele <l.emele@oeko.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/tag_editor.html
+Copyright: Tom Heimbrodt <heimbrodt@posteo.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: dataedit/templates/dataedit/url_list_field.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/wizard.html
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: user <martimanovadarina@gmail.com>
+Copyright: c.winger <c.winger@oeko.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/dataedit_schemalist.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Jonas H <jonas.huber@rl-institut.de>
+Copyright: Dhruvin1412 <48323399+Dhruvin1412@users.noreply.github.com>
+Copyright: Pierre Francois <pierre-francois.duc@rl-institut.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: dataedit/templates/dataedit/tablemap_form.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/opr_contributor.html
+Copyright: steull <stephanuller.su@gmail.com>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: user <martimanovadarina@gmail.com>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Darynarli <“Daryna.Barabanova@rl-institut.de”>
+License: MIT
+
+Files: dataedit/templates/dataedit/tablegraph_form.html
+Copyright: Bachibouzouk <pierre-francois.duc@rl-institut.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/table_permissions.html
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/opr_review.html
+Copyright: steull <stephanuller.su@gmail.com>
+Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: daryna <Daryna.Martymianova@rl-institut.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: user <martimanovadarina@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Darynarli <martimanovadarina@gmail.com>
+Copyright: Darynarli <“Daryna.Barabanova@rl-institut.de”>
+License: MIT
+
+Files: dataedit/templates/dataedit/tag_overview.html
+Copyright: Tom Heimbrodt <heimbrodt@posteo.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: c.winger <c.winger@oeko.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/base.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: Tom Heimbrodt <heimbrodt@posteo.de>
+Copyright: Johann Wagner <johann.wagner@st.ovgu.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/base-sidebar.html
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: dataedit/templates/dataedit/base_fullwidth.html
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/meta_edit.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Ludwig Huelk <ludwig.huelk@rl-institut.de>
+Copyright: Bachibouzouk <pierre-francois.duc@rl-institute.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/tagged_field.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+License: MIT
+
+Files: dataedit/templates/dataedit/dataview.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Martin Glauer <martinglauer89@googlemail.com>
+Copyright: Ludwig Huelk <ludwig.huelk@rl-institut.de>
+Copyright: Tom Heimbrodt <heimbrodt@posteo.de>
+Copyright: Bachibouzouk <pierre-francois.duc@rl-institute.de>
+Copyright: Bachibouzouk <pierre-francois.duc@rl-institut.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Hannah <36844029+han-f@users.noreply.github.com>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Martin Glauer <martinglauer89@gmail.com>
+Copyright: wingechr <wingechr@users.noreply.github.com>
+Copyright: Kirann Bhavaraju <kirann9999@hotmail.com>
+Copyright: steull <stephanuller.su@gmail.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: user <martimanovadarina@gmail.com>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Eike Broda <git@ebroda.de>
+Copyright: Darynarli <“Daryna.Barabanova@rl-institut.de”>
+License: MIT
+
+Files: dataedit/templates/dataedit/tag_form.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/filter.html
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: steull <stephanuller.su@gmail.com>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/taggable_setting.html
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: dataedit/templates/dataedit/admin.html
+Copyright: Johann Wagner <johann.wagner@st.ovgu.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: dataedit/templates/partials/metadata_viewer.html
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oedb_datamodels/script.py.mako
+Copyright: MGlauer <martinglauer89@gmail.com>
+License: MIT
+
+Files: oedb_datamodels/README
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: oeplatform/securitysettings.py.default
+Copyright: MGlauer <martinglauer89@googlemail.com>
+Copyright: Martin Glauer <martinglauer89@googlemail.com>
+Copyright: pietro <peter.zamb@gmail.com>
+Copyright: MGlauer <martinglauer89@gmail.com>
+Copyright: Bachibouzouk <pierre-francois.duc@rl-institute.de>
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: christian-rli <42000429+christian-rli@users.noreply.github.com>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+License: MIT
+
+Files: script/setup_and_migrate_db
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oeo_viewer/.gitignore
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oeo_viewer/data/oeo_viewer_json_data.json
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+Copyright: c.winger <c.winger@oeko.de>
+License: MIT
+
+Files: oeo_viewer/templates/index.html
+Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oeo_viewer/client/.babelrc
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/package-lock.json
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Copyright: wingechr <wingechr@users.noreply.github.com>
+Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/package.json
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+License: MIT
+
+Files: oeo_viewer/client/source-code/index.html
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/source-code/statics/oep.png
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: CC-BY-4.0
+
+Files: oeo_viewer/client/source-code/statics/network.svg
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: CC-BY-4.0
+
+Files: oeo_viewer/client/source-code/statics/oeo_info.json
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+Copyright: c.winger <c.winger@oeko.de>
+License: MIT
+
+Files: oeo_viewer/client/source-code/statics/d3-dependencies.csv
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: oeo_viewer/client/source-code/styles/index.scss
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/oep.fa81489f.png
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: CC-BY-4.0
+
+Files: oeo_viewer/client/dist/flags.c284a657.png
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: CC-BY-4.0
+
+Files: oeo_viewer/client/dist/icons.c653e3a9.woff2
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/brand-icons.a1ff5e2a.woff2
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/outline-icons.73dd3248.woff2
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/outline-icons.1bbd56ed.svg
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: oeo_viewer/client/dist/brand-icons.eb08bf9d.ttf
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/brand-icons.e4ffb4d8.eot
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/outline-icons.585fe6ab.ttf
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/outline-icons.00440017.woff
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/icons.f15da7ef.ttf
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/brand-icons.85906eb5.woff
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/network.2770f24c.svg
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: CC-BY-4.0
+
+Files: oeo_viewer/client/dist/scripts.bcf3243b.js.map
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Adel Memariani <adel.memariani@ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/icons.69098388.svg
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: oeo_viewer/client/dist/scripts.bcf3243b.css.map
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: c.winger <c.winger@oeko.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/outline-icons.5d6254f9.eot
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/index.html
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/brand-icons.ea4bcc5e.svg
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: CC-BY-4.0
+
+Files: oeo_viewer/client/dist/icons.6f55393b.woff
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/icons.1164acc1.eot
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/scripts.bcf3243b.css
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+Copyright: c.winger <c.winger@oeko.de>
+License: MIT
+
+Files: oeo_viewer/client/dist/bezier.c0025d7c.cjs
+Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+License: MIT
+
+Files: theming/_variables.scss
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+License: MIT
+
+Files: theming/.dockerignore
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: theming/oepstrap.scss
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+License: MIT
+
+Files: theming/.gitignore
+Copyright: Christian Winger <c@wingechr.de>
+License: MIT
+
+Files: theming/Dockerfile
+Copyright: Johann Wagner <johann@wagnerdevelopment.de>
+Copyright: Christian Winger <c@wingechr.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: theming/scss/layouts/_ontology.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: theming/scss/layouts/_database.scss
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: c.winger <c.winger@oeko.de>
+License: MIT
+
+Files: theming/scss/layouts/_profile.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: theming/scss/layouts/_review.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: theming/scss/layouts/_main.scss
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: c.winger <c.winger@oeko.de>
+License: MIT
+
+Files: theming/scss/layouts/_topics.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: theming/scss/base/_index.scss
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+License: MIT
+
+Files: theming/scss/base/_custom_variables.scss
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+License: MIT
+
+Files: theming/scss/base/_mixins.scss
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: theming/scss/components/_tabs.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: c.winger <c.winger@oeko.de>
+License: MIT
+
+Files: theming/scss/components/_paginations.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: theming/scss/components/_buttons.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: theming/scss/components/_headers.scss
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: theming/scss/components/_alerts.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: c.winger <c.winger@oeko.de>
+License: MIT
+
+Files: theming/scss/components/_sidebars.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: c.winger <c.winger@oeko.de>
+Copyright: Eike Broda <git@ebroda.de>
+License: MIT
+
+Files: theming/scss/components/_empty_states.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: theming/scss/components/_tables.scss
+Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+License: MIT
+
+Files: theming/scss/components/_cards.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: theming/scss/components/_tags.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: theming/scss/components/_controls.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT
+
+Files: theming/scss/components/_collapses.scss
+Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+License: MIT

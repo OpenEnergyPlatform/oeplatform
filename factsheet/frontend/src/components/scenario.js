@@ -1,3 +1,12 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
+// SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
+// SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@winadms-mbp.speedport.ip>
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+//
+// SPDX-License-Identifier: MIT
+
 import React, { PureComponent, Fragment, useState, useEffect } from "react";
 import { Route } from 'react-router-dom';
 import Grid from '@mui/material/Grid';

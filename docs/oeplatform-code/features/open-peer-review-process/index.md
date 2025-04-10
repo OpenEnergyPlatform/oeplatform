@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Developer documentation of the Open Peer Review Process
 
 !!! Danger "🚧 Feature currently deactivated"

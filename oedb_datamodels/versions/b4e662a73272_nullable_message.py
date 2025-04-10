@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 """Make message nullable
 
 Revision ID: b4e662a73272

@@ -1,3 +1,14 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <wagner@creatdev-solutions.com>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <glauer@iws.cs.ovgu.de>
+# SPDX-FileCopyrightText: 2025 quentinpeyras <quentinpey@hotmail.fr>
+# SPDX-FileCopyrightText: 2025 solar-c <@>
+#
+# SPDX-License-Identifier: MIT
+
 from django import template
 from django.contrib.postgres.forms.array import SimpleArrayField
 from django.utils.html import escape, format_html

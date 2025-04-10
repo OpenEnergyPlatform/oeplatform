@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+#
+# SPDX-License-Identifier: MIT
+
 import logging
 from uuid import UUID
 

@@ -1,17 +1,16 @@
+# SPDX-FileCopyrightText: 2025 vismayajochem <vismayajochem>
+#
+# SPDX-License-Identifier: MIT
+
 import os
 import subprocess
-from reuse import Project
-from reuse.files import File
 
-# License mappings
+# License mapping
 LICENSE_MAP = {
     "code": "MIT",
     "docs": "CC0-1.0",
     "media": "CC-BY-4.0",
 }
-
-# Your name/email
-COPYRIGHT = "2024 Your Name <your@email.com>"
 
 # File groups
 COMMENTABLE_CODE = {".py", ".js", ".ts", ".java", ".c", ".cpp", ".h", ".cs", ".sh", ".go", ".rs"}
@@ -27,12 +26,38 @@ def get_license_type(filename):
     elif ext in UNCOMMENTABLE_MEDIA:
         return LICENSE_MAP["media"], False
     else:
-        # Default to MIT for unknown files, but mark as non-commentable
         return LICENSE_MAP["code"], False
 
-def main():
-    project = Project(os.getcwd())
+def get_git_authors(filepath):
+    try:
+        result = subprocess.run(
+            ["git", "log", "--reverse", "--format=%an <%ae>", "--", filepath],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            check=True
+        )
+        authors_raw = result.stdout.strip().split("\n")
+        seen = set()
+        authors = []
+        for line in authors_raw:
+            if line and line not in seen:
+                seen.add(line)
+                authors.append(line)
+        return authors
+    except subprocess.CalledProcessError:
+        return []
 
+def add_to_dep5(filepath, authors, license_id):
+    dep5_block = f"\nFiles: {filepath}\n"
+    for author in authors:
+        dep5_block += f"Copyright: {author}\n"
+    dep5_block += f"License: {license_id}\n"
+    
+    with open(".reuse/dep5", "a", encoding="utf-8") as f:
+        f.write(dep5_block)
+
+def main():
     for root, _, files in os.walk("."):
         if root.startswith("./.reuse") or ".git" in root:
             continue
@@ -46,25 +71,26 @@ def main():
 
             rel_path = os.path.relpath(filepath, os.getcwd())
             license_id, commentable = get_license_type(filename)
+            authors = get_git_authors(rel_path)
+
+            if not authors:
+                print(f"⚠️  No authors found for {rel_path}, skipping.")
+                continue
 
             if commentable:
                 try:
                     subprocess.run([
                         "reuse", "addheader",
-                        "--copyright", COPYRIGHT,
-                        "--license", license_id,
+                        *(f"--copyright={a}" for a in authors),
+                        f"--license={license_id}",
                         rel_path
                     ], check=True)
-                    print(f"Header added to {rel_path} with {license_id}")
+                    print(f"✅ Header added to {rel_path} with {license_id}")
                 except subprocess.CalledProcessError as e:
-                    print(f"Failed to add header to {rel_path}: {e}")
+                    print(f"❌ Failed to add header to {rel_path}: {e}")
             else:
-                # Add to .reuse/dep5
-                file_obj = File(rel_path, project)
-                file_obj.mark_license(license_id)
-                file_obj.mark_copyright(COPYRIGHT)
-                file_obj.dump()
-                print(f"Marked {rel_path} in .reuse/dep5 with {license_id}")
+                add_to_dep5(rel_path, authors, license_id)
+                print(f"📄 Added {rel_path} to .reuse/dep5 with {license_id}")
 
 if __name__ == "__main__":
     main()

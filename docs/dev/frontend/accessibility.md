@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Accessibility
 
 ## Why does it matter?

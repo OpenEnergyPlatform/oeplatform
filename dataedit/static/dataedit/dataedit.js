@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+//
+// SPDX-License-Identifier: MIT
+
 var DataEdit = function(table, schema) {
   var state = {
     schema: schema,

@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+//
+// SPDX-License-Identifier: MIT
+
 import { Grid } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import variables from '../variables';

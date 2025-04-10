@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 from django.http import HttpResponse
 
 

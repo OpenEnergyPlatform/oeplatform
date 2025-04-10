@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+//
+// SPDX-License-Identifier: MIT
+
 import React from 'react';
 import Chip from '@mui/material/Chip';
 import palette from '../palette';

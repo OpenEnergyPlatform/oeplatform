@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # metaBuilder
 
 The metaBuilder is a tool to create, edit and download metadata for the oeplatform.

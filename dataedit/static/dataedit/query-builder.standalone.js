@@ -1,11 +1,9 @@
-/* !
- * jQuery.extendext 0.1.2
- *
- * Copyright 2014-2016 Damien "Mistic" Sorel (http://www.strangeplanet.fr)
- * Licensed under MIT (http://opensource.org/licenses/MIT)
- *
- * Based on jQuery.extend by jQuery Foundation, Inc. and other contributors
- */
+// Copyright 2014-2016 Damien "Mistic" Sorel (http://www.strangeplanet.fr)
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien@yahoo.fr>
+// SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
+// SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+//
+// SPDX-License-Identifier: MIT
 
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
