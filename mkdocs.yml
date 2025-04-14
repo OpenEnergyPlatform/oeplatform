@@ -122,6 +122,8 @@ nav:
       - 🚧 OEP-Datasets:
         - oeplatform-code/features/oep-datasets/datasets.md
         - oeplatform-code/features/oep-datasets/tech-stack.md
+      - 🚧🔄 Upload-Wizard:
+        - oeplatform-code/features/upload-wizard/tabular-data-upload.md
       - metaBuilder (Metadata creation):
         - oeplatform-code/features/metaBuilder/index.md
       - 🚧 Open Peer Review:
