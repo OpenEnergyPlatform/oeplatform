@@ -14,27 +14,38 @@ class TestOekgQuery(unittest.TestCase):
         self.oekg_query = OekgQuery()
         self.oekg_query.oekg = self.oekg_mock
 
-    def test_get_related_scenarios_where_table_is_input_dataset(self):
-        # Set up mock triples for testing
-        triples = [
-            (URIRef("scenario1"), RDF.type, namespaces.OEO.OEO_00000365),
-            (URIRef("scenario1"), namespaces.OEO.RO_0002233, URIRef("input_ds_uid")),
-            (URIRef("input_ds_uid"), namespaces.OEO["has_iri"], Literal("test_table")),
-            (URIRef("scenario2"), RDF.type, namespaces.OEO.OEO_00000365),
-            (URIRef("scenario2"), namespaces.OEO.RO_0002233, URIRef("input_ds_uid")),
-            (URIRef("input_ds_uid"), namespaces.OEO["has_iri"], Literal("test_table")),
-        ]
+    def test_with_real_graph(self):
+        """
+        This test uses a real RDF graph to test the functionality of the
+        OekgQuery class instead of mocking it. During writing the test i noticed
+        that there ia workarounds hassle involved when testing graphs with
+        multiple values.
 
-        self.oekg_mock.triples.return_value = triples
+        The method get_related_scenarios_where_table_is_input_dataset is checked
+        if correctly retrieves scenarios where a specific table is listed as an
+        input dataset.
+        """
+        g = Graph()
 
-        # Call the method being tested
-        result = self.oekg_query.get_related_scenarios_where_table_is_input_dataset(
-            "test_table"
-        )
+        iri = "dataedit/view/scenario/test_table"
+        bundle = URIRef("bundle1")
+        scenario1 = URIRef("scenario1")
+        scenario2 = URIRef("scenario2")
+        input1 = URIRef("input1")
+        input2 = URIRef("input2")
 
-        # Assert the expected result
-        expected_result = {URIRef("scenario1"), URIRef("scenario2")}
-        self.assertEqual(result, expected_result)
+        g.add((bundle, RDF.type, namespaces.OEO.OEO_00010252))
+        g.add((bundle, namespaces.OEKG["has_scenario"], scenario1))
+        g.add((bundle, namespaces.OEKG["has_scenario"], scenario2))
+        g.add((scenario1, namespaces.OEO.RO_0002233, input1))
+        g.add((scenario2, namespaces.OEO.RO_0002233, input2))
+        g.add((input1, namespaces.OEO["has_iri"], Literal(iri)))
+        g.add((input2, namespaces.OEO["has_iri"], Literal(iri)))
+
+        self.oekg_query.oekg = g
+
+        result = self.oekg_query.get_related_scenarios_where_table_is_input_dataset(iri)
+        self.assertEqual(result, {scenario1, scenario2})
 
     def test_get_scenario_acronym(self):
         # Set up mock triples for testing
