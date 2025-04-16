@@ -30,3 +30,4 @@ oemetadata==2.0.4
 django-compressor==4.5.1
 django-cors-headers==4.3.1
 owlready2==0.45
+django_vite==3.1.0
