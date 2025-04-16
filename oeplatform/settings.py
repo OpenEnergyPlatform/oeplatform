@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     "django_bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
+    "django_vite",
     "modelview",
     "modelview.templatetags.modelview_extras",
     "login",
@@ -97,7 +98,7 @@ EXTERNAL_URLS = {
     "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
     "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
     "spdx_licenses": "https://spdx.github.io/license-list-data/",
-    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md",  # noqa E501
+    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
     "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
 }
 

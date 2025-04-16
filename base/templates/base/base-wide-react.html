@@ -1,6 +1,7 @@
 {% load static %}
 {% load django_bootstrap5 %}
 {% load fontawesome_5 %}
+{% load django_vite %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -20,7 +21,8 @@
     {% fontawesome_5_static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
-
+    {% vite_hmr_client %}
+    
     {% block after-head %}{% endblock after-head %}
 
     {% block style %}
