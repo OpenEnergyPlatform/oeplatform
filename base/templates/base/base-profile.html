@@ -2,6 +2,7 @@
 {% load django_bootstrap5 %}
 {% load fontawesome_5 %}
 {% load compress %}
+{% load django_vite %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -22,6 +23,8 @@
     {% compress css %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}?md5=d4e024ac45daad057d0191a8f6266156">
+
+    {% vite_hmr_client %}
     {% endcompress %}
     {% block after-head %}{% endblock after-head %}
 </head>
