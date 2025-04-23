@@ -1,0 +1,28 @@
+# docker/Dockerfile.dev
+
+FROM python:3.10.14
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      build-essential libpq-dev wget unzip \
+ && rm -rf /var/lib/apt/lists/*
+
+# create a non-root user
+RUN useradd -m appuser
+
+WORKDIR /home/appuser/app
+
+# install your Python deps
+COPY requirements.txt ./requirements.txt
+RUN pip install --upgrade pip \
+ && pip install --no-cache-dir -r requirements.txt
+
+# bring in your dev-entrypoint (in docker/)
+COPY docker/docker-entrypoint.dev.sh .
+RUN chmod +x ./docker-entrypoint.dev.sh
+
+USER appuser
+
+EXPOSE 8000
+ENTRYPOINT ["./docker/docker-entrypoint.dev.sh"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

@@ -1,0 +1,76 @@
+version: "3.9"
+
+volumes:
+  pgdata:
+  fuseki_databases:
+
+services:
+  postgres:
+    image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  fuseki:
+    image: stain/jena-fuseki:5.1.0
+    container_name: fuseki
+    environment:
+      ADMIN_PASSWORD: "admin"
+      FUSEKI_DATASET_1: "ds"
+    volumes:
+      - fuseki_databases:/home/fuseki/databases
+      # - ./fuseki/config:/home/fuseki/configuration
+    ports:
+      - "3030:3030"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    image: oeplatform-dev
+    working_dir: /home/appuser/app   # match the WORKDIR in your Dockerfile.dev
+    volumes:
+      - type: bind
+        source: ..
+        target: /home/appuser/app
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: "oeplatform.settings"
+      CHOKIDAR_USEPOLLING: "true"
+      DEBUG: True
+      OEP_DJANGO_USER: postgres
+      OEP_DB_PW: postgres
+      OEP_DJANGO_HOST: postgres
+      OEP_DJANGO_NAME: oep_django
+      LOCAL_DB_USER: postgres
+      LOCAL_DB_PASSWORD: postgres
+      LOCAL_DB_NAME: oedb
+      LOCAL_DB_HOST: postgres
+      VITE_DEV_MODE: "True"
+      VITE_DEV_SERVER_URL: "http://vite:5173"
+    depends_on:
+      - postgres
+
+  vite:
+    build:
+      context: ..                     # same root context
+      dockerfile: docker/Dockerfile.vite
+    image: oeplatform-vite-dev
+    working_dir: /home/appuser/app   # same path inside container
+    volumes:
+      - type: bind
+        source: ..
+        target: /home/appuser/app
+    ports:
+      - "5173:5173"
+    environment:
+      CHOKIDAR_USEPOLLING: "false"
+      HOST: "0.0.0.0"
+    depends_on:
+      - web

@@ -1,0 +1,13 @@
+# docker/Dockerfile.vite
+
+FROM node:18 AS deps
+WORKDIR /home/appuser/app
+COPY package*.json ./
+RUN npm ci
+
+FROM node:18 AS dev
+WORKDIR /home/appuser/app
+# COPY --from=deps /home/appuser/app/node_modules ./node_modules
+# COPY . .
+EXPOSE 5173
+CMD ["npm", "run", "dev"]
