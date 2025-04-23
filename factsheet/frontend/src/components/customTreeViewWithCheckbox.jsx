@@ -9,12 +9,12 @@ import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
-import EditIcon from '@mui/icons-material/Edit';
-import Typography from '@mui/material/Typography';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import Tooltip from '@mui/material/Tooltip';
-import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+// import EditIcon from '@mui/icons-material/Edit';
+// import Typography from '@mui/material/Typography';
+// import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+// import Tooltip from '@mui/material/Tooltip';
+// import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
+// import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 export default function CustomTreeViewWithCheckBox(props) {
   const {
@@ -67,9 +67,9 @@ export default function CustomTreeViewWithCheckBox(props) {
         sx={{
           'marginTop': '10px',
           'overflow': 'auto',
+        // 'overflow': 'scroll',
           'height': '100%',
           // 'border': '1px dashed #cecece',
-          'overflow': 'scroll',
           'borderRadius': '0px',
           // 'backgroundColor':'#FCFCFC'
         }}

@@ -7,15 +7,15 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
-import ColorToggleButton from './customSwapButton.js';
-import CustomTabs from './customTabs.js';
-import CustomAutocomplete from './customAutocomplete.js';
-import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit.js';
-import Scenario from './scenario.js';
-import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
+import ColorToggleButton from './customSwapButton.jsx';
+import CustomTabs from './customTabs.jsx';
+import CustomAutocomplete from './customAutocomplete.jsx';
+import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit.jsx';
+import Scenario from './scenario.jsx';
+import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.jsx';
 import Snackbar from '@mui/material/Snackbar';
 import Typography from '@mui/material/Typography';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline.js';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -25,7 +25,7 @@ import Stack from '@mui/material/Stack';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import Fab from '@mui/material/Fab';
+// import Fab from '@mui/material/Fab';
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import AddIcon from '@mui/icons-material/Add.js';
 import Checkbox from '@mui/material/Checkbox';
@@ -33,7 +33,7 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import conf from "../conf.json";
 import { colors, Tooltip } from '@mui/material';
-import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline.js';
 import { styled } from '@mui/material/styles';
 import SaveIcon from '@mui/icons-material/Save.js';
@@ -41,29 +41,29 @@ import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import CircularProgress from '@mui/material/CircularProgress';
-import Badge from '@mui/material/Badge';
+// import Badge from '@mui/material/Badge';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import ShareIcon from '@mui/icons-material/Share.js';
 import sunburstKapsule from 'sunburst-chart';
 import fromKapsule from 'react-kapsule';
-import Select from '@mui/material/Select';
-import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
+// import Select from '@mui/material/Select';
+import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.jsx';
 import IconButton from '@mui/material/IconButton';
-import Divider from '@mui/material/Divider';
-import { makeStyles, Theme } from '@material-ui/core/styles';
-import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
+// import Divider from '@mui/material/Divider';
+import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.jsx';
+import { VerticalTab, AddTabWrapper } from '../styles/oep-theme/components/factsheetsStyles.tsx';
 import TableContainer from '@mui/material/TableContainer';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
+// import TableCell from '@mui/material/TableCell';
 import Toolbar from '@mui/material/Toolbar';
-import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/components/tableStyles.js';
-import InfoListItem from '../styles/oep-theme/components/infoListItem.js'
-import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
+import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/components/tableStyles';
+import InfoListItem from '../styles/oep-theme/components/infoListItem'
+import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.jsx';
 import AttachmentIcon from '@mui/icons-material/Attachment.js';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined.js';
-import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined.js';
-import LinkIcon from '@mui/icons-material/Link.js';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+// import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined.js';
+// import LinkIcon from '@mui/icons-material/Link.js';
 import Chip from '@mui/material/Chip';
 import Container from '@mui/material/Container';
 import Backdrop from '@mui/material/Backdrop';
@@ -75,10 +75,10 @@ import { TableRow } from '@mui/material';
 import variables from '../styles/oep-theme/variables.js';
 
 import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
-import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.js';
+import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 
-function TabPanel(props: TabPanelProps) {
+function TabPanel(props) {
   const { children, value, index, ...other } = props;
   return (
     <div
@@ -200,7 +200,7 @@ function Factsheet(props) {
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
-  const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios : [{
+  const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios || [] : [{
     id: uuid(),
     name: '',
     acronym: '',
@@ -214,7 +214,7 @@ function Factsheet(props) {
   }
   ]);
 
-  const [publications, setPublications] = useState(id !== 'new' ? fsData.publications : [{
+  const [publications, setPublications] = useState(id !== 'new' ? fsData.publications || [] : [{
     id: uuid(),
     report_title: '',
     authors: [],
@@ -241,7 +241,7 @@ function Factsheet(props) {
   const [selectedTechnologies, setSelectedTechnologies] = useState(id !== 'new' ? fsData.technologies : []);
   const [selectedTechnologiesTree, setSelectedTechnologiesTree] = useState(id !== 'new' ? fsData.technologies : []);
   const [allNodeIds, setAllNodeIds] = useState([]);
-  
+
   const [expandedTechnologyList, setExpandedTechnologyList] = useState([]);
 
   const [scenarioDescriptors, setScenarioTypes] = React.useState([]);
@@ -266,7 +266,7 @@ function Factsheet(props) {
   }, []);
 
   const [frameworksList, setFrameworkList] = useState([]);
-  
+
   const getFrameworkList = async () => {
     const { data } = await axios.get(conf.toep + `api/v0/factsheet/frameworks/`, {
       headers: { 'X-CSRFToken': CSRFToken() }
@@ -314,21 +314,21 @@ function Factsheet(props) {
 
   function filterByValue(referenceList, obj) {
     const referenceSet = new Set(referenceList.map(item => item.value));
-  
+
     function recursiveFilter(node) {
       const uniqueId = generateUniqueId();
-  
+
       if (Array.isArray(node.children)) {
         node.children = node.children.map(recursiveFilter).filter(child => child !== null);
       }
-  
+
       if (referenceSet.has(node.value) || (node.children && node.children.length > 0)) {
         return { ...node, id: uniqueId };
       }
-  
+
       return null;
     }
-  
+
     return obj.map(recursiveFilter).filter(node => node !== null);
   }
 
@@ -368,7 +368,7 @@ function Factsheet(props) {
       setTechnologies(all_technologies);
 
       // setTechnologies(data.technologies['children']);
-      
+
       // rephrase scenario descriptors to - types
       setScenarioTypes(data.scenario_descriptors);
       const sectors_with_tooltips = data.sectors.map(item =>
@@ -1446,23 +1446,6 @@ function Factsheet(props) {
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
 
-
-  const useStyles = makeStyles((theme: Theme) => ({
-    root: {
-      flexGrow: 1,
-      backgroundColor: theme.palette.background.paper,
-    },
-    tab: {
-      background: '#e3eaef',
-      '&.Mui-selected': {
-        background: '#001c30e6',
-        color: 'white'
-      }
-    },
-  }));
-  const classes = useStyles();
-  const tabClasses = { root: classes.tab };
-
   const renderScenario = () => {
     return <div>
       <Box sx={{ flexGrow: 1, display: 'flex', overflow: 'auto' }} >
@@ -1479,7 +1462,6 @@ function Factsheet(props) {
             <Tab
               label={item.acronym !== undefined && item.acronym !== '' ? item.acronym.substring(0, 16) : 'Scenario ' + (Number(i) + Number(1))}
               key={'Scenario_tab_' + item.id}
-              classes={tabClasses}
               style={{ border: '1px solid #cecece', marginBottom: '5px' }}
             />
           )}
@@ -1493,6 +1475,16 @@ function Factsheet(props) {
               <AddIcon />
             </IconButton>
           </Box>
+          <AddTabWrapper>
+            <IconButton
+              color="primary"
+              aria-label="add"
+              size="small"
+              onClick={handleAddScenario}
+            >
+              <AddIcon />
+            </IconButton>
+          </AddTabWrapper>
         </Tabs>
         {scenarios.map((item, i) =>
           <TabPanel
@@ -1551,7 +1543,6 @@ function Factsheet(props) {
             <Tab
               label={item.acronym !== undefined && item.acronym !== '' ? item.acronym.substring(0, 16) : 'Publication ' + (Number(i) + Number(1))}
               key={'Publication_tab_' + item.id}
-              classes={tabClasses}
               style={{ border: '1px solid #cecece', marginBottom: '5px' }}
             />
           )}
@@ -1565,6 +1556,16 @@ function Factsheet(props) {
               <AddIcon />
             </IconButton>
           </Box>
+          <AddTabWrapper>
+            <IconButton
+              color="primary"
+              aria-label="add"
+              size="small"
+              onClick={handleAddScenario}
+            >
+              <AddIcon />
+            </IconButton>
+          </AddTabWrapper>
         </Tabs>
         {publications.map((item, i) =>
           <TabPanel
@@ -1579,13 +1580,13 @@ function Factsheet(props) {
                 labelGridSize={11}
                 fieldGridSize={1}
                 renderField={() => (
-                  <IconButton 
+                  <IconButton
                       size="small"
-                      variant="outlined" 
-                      color="error" 
+                      variant="outlined"
+                      color="error"
                       style={{ marginLeft: '90%' }}
                       onClick={() => removePublication(item.id)}
-                    >  
+                    >
                     <DeleteOutlineIcon />
                   </IconButton>
                 )}
@@ -2004,7 +2005,7 @@ function Factsheet(props) {
       renderPublications(),
       renderSectorsAndTecnology(),
       renderScenario(),
-      renderModelsAndFrameworks() 
+      renderModelsAndFrameworks()
     ]
   }
   const scenario_count = 'Scenarios' + ' (' + scenarios.length + ')';
@@ -2573,7 +2574,7 @@ const renderScenariosOverview = () => (
     </TableContainer>
   )
 
-  
+
 
   const overview_items = {
     titles: [scenario_count, 'Publications', 'Sectors and technology', 'Models and frameworks'],

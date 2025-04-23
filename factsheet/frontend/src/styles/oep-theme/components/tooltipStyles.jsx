@@ -1,10 +1,10 @@
 import React from 'react';
 import { styled, Tooltip, tooltipClasses } from '@mui/material';
-import { TooltipProps } from '@mui/material/Tooltip';
+// import { TooltipProps } from '@mui/material/Tooltip';
 import palette from '../palette';
 import variables from '../variables';
 
-const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+const HtmlTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.tooltip}`]: {

@@ -29,7 +29,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
+import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit.jsx';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import Collapse from '@mui/material/Collapse';
@@ -40,8 +40,8 @@ import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
 import RuleIcon from '@mui/icons-material/Rule';
-import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
-import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
+import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -60,12 +60,12 @@ import FormatListBulletedOutlinedIcon from '@mui/icons-material/FormatListBullet
 import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
-import { CardItem, CardHeader, CardBody, CardRow } from '../styles/oep-theme/components/cardView.js';
+import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.jsx';
+import { CardItem, CardHeader, CardBody, CardRow } from '../styles/oep-theme/components/cardView.jsx';
 import '../styles/App.css';
 import variables from '../styles/oep-theme/variables.js';
 import palette from '../styles/oep-theme/palette.js';
-import CSRFToken from './csrfToken';
+import CSRFToken from './csrfToken.js';
 import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -230,7 +230,7 @@ EnhancedTableHead.propTypes = {
 
 function EnhancedTableToolbar(props) {
   const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected, logged_in } = props;
-  const [isDisabled, setIsDisabled] = useState(true); 
+  const [isDisabled, setIsDisabled] = useState(true);
   return (
     <div>
       <Grid
@@ -256,8 +256,8 @@ function EnhancedTableToolbar(props) {
             In a nutshell: A scenario bundle provides you with all relevant information to understand a scenario's context and to ease a potential re-use of quantitative data for your own purposes.
           </Typography>
           <Typography variant="body2">
-            The scenario bundles are stored in the Open Energy Knowledge Graph (OEKG). The OEKG can be queried using the SPARQL language. We provide a <a href="/oekg/gui/">User Interface</a> to simplify this rather technical task. 
-            If you want to send your own SPARQL query you can do this by send a request to the http-api endpoint. 
+            The scenario bundles are stored in the Open Energy Knowledge Graph (OEKG). The OEKG can be queried using the SPARQL language. We provide a <a href="/oekg/gui/">User Interface</a> to simplify this rather technical task.
+            If you want to send your own SPARQL query you can do this by send a request to the http-api endpoint.
           </Typography>
         </Grid>
       </Grid>
@@ -368,8 +368,7 @@ export default function CustomTable(props) {
   const [logged_in, setLogged_in] = React.useState('');
 
   const handleChangeView = (
-    event: React.MouseEvent<HTMLElement>,
-    newAlignment: string,
+    newAlignment,
   ) => {
     newAlignment !== null && setAlignment(newAlignment);
   };
@@ -906,7 +905,7 @@ export default function CustomTable(props) {
             <div>
                <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="institution" showSelectedElements={true} manyItems optionsSet={institutions} kind='Which institutions are you interested in?' handler={institutionHandler} selectedElements={selectedInstitution} />
               <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="author" showSelectedElements={true} manyItems optionsSet={authors} kind='Which authors are you interested in?' handler={authorsHandler} selectedElements={selectedAuthors} />
-              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="Funding source" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Which funding sources are you interested in?' handler={fundingSourceHandler} selectedElements={selectedFundingSource} /> 
+              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="Funding source" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Which funding sources are you interested in?' handler={fundingSourceHandler} selectedElements={selectedFundingSource} />
               <div>Date of publication:</div>
               <div style={{ display: 'flex', marginTop: "10px" }}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>

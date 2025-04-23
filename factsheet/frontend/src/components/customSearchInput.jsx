@@ -1,9 +1,9 @@
 /* eslint-disable no-use-before-define */
 import React from 'react';
-import TextField from '@material-ui/core/TextField';
-import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import SearchIcon from "@material-ui/icons/Search";
-import InputAdornment from "@material-ui/core/InputAdornment";
+import TextField from '@mui/core/TextField';
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
+import SearchIcon from "@mui/icons/Search";
+import InputAdornment from "@mui/core/InputAdornment";
 
 const filter = createFilterOptions();
 

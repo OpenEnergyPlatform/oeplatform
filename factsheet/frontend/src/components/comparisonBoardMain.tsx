@@ -1,7 +1,7 @@
 import React, { useState, useEffect, } from 'react';
-import Chart from "chart.js/auto";
+// import Chart from "chart.js/auto";
 import { Bar } from "react-chartjs-2";
-import ComparisonBoardItems from "./comparisonBoardItems";
+import ComparisonBoardItems from "./comparisonBoardItems.jsx";
 // import { Box } from "@mui/system";
 // import ComparisonControl from "./comparisonControl";
 import Grid from '@mui/material/Grid';
@@ -18,8 +18,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Toolbar from '@mui/material/Toolbar';
 import { Tooltip, Box } from '@mui/material';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
-import OptionBox from '../styles/oep-theme/components/optionBox.js';
+import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.jsx';
+import OptionBox from '../styles/oep-theme/components/optionBox';
 // import MultipleSelectChip from '../styles/oep-theme/components/multiselect.js';
 import Chip from '@mui/material/Chip';
 import ToggleButton from '@mui/material/ToggleButton';
@@ -27,13 +27,13 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
 import Typography from '@mui/material/Typography';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
+// import Radio from '@mui/material/Radio';
+// import RadioGroup from '@mui/material/RadioGroup';
 import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
+// import FormLabel from '@mui/material/FormLabel';
 import 'chartjs-plugin-datalabels'
 import CSRFToken from './csrfToken.js';
-import CircularProgress from '@mui/material/CircularProgress';
+// import CircularProgress from '@mui/material/CircularProgress';
 import SendIcon from '@mui/icons-material/Send';
 import LinearProgress from '@mui/material/LinearProgress';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -41,14 +41,14 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemText from '@mui/material/ListItemText';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import IconButton from '@mui/material/IconButton';
-import AddIcon from '@mui/icons-material/Add';
+// import IconButton from '@mui/material/IconButton';
+// import AddIcon from '@mui/icons-material/Add';
 import { useRef } from 'react';
 import Tabs, { tabsClasses } from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
+// import AlertTitle from '@mui/material/AlertTitle';
 import variables from '../styles/oep-theme/variables.js';
 
 const ComparisonBoardMain = (props) => {
@@ -88,7 +88,7 @@ const ComparisonBoardMain = (props) => {
   const [showTitle, setShowTitle] = React.useState(false);
   const [disableAddVisualization, setDisableAddVisualization] = React.useState(false);
   const [units, SetUnits] = React.useState([]);
-  
+
   const category_disctionary = {
     "OEO_00010038" : "1 Energy",
     "OEO_00010039" : "1.A Fuel combustion",
@@ -152,18 +152,18 @@ const ComparisonBoardMain = (props) => {
     "Total_ESR_GHGs" :"Total ESR GHGs"
   }
 
-  
+
   // const generateRandomColor = () => {
   //   return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
   // };
 
   const generateRandomColor = () => {
     let color;
-    
+
     do {
       color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
-    } while (color === "#000000" || parseInt(color.slice(1), 16) <= 0x222222); 
-  
+    } while (color === "#000000" || parseInt(color.slice(1), 16) <= 0x222222);
+
     return color;
   };
 
@@ -186,7 +186,7 @@ const ComparisonBoardMain = (props) => {
       const allInputDatasets =  Array.from(new Set(ScenariosInputTableNames.flat()));
 
       setInputTableNames(allInputDatasets);
-      
+
       // const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
       const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => elem[1].split('/').pop()));
       const allOutputDatasets = Array.from(new Set(ScenariosOutputTableNames.flat())); //[].concat(...uniqueScenariosOutputTableNames);
@@ -199,12 +199,11 @@ const ComparisonBoardMain = (props) => {
   }, []);
 
   const handleChangeView = (
-    event: React.MouseEvent<HTMLElement>,
-    newAlignment: string,
+    newAlignment,
   ) => {
     newAlignment !== null && setAlignment(newAlignment);
   };
-  
+
   // 'http://oevkg:8080/sparql'
 
   const Criteria = [
@@ -234,19 +233,19 @@ const ComparisonBoardMain = (props) => {
   function divideByTableNameValue(items) {
     return items.reduce((acc, obj) => {
       const tableNameValue = obj.table_name.value;
-      
+
       if (!acc[tableNameValue]) {
         acc[tableNameValue] = [];
       }
-  
+
       acc[tableNameValue].push(obj);
       return acc;
     }, {});
   }
 
-  const handleYearChange = (event: React.SyntheticEvent, newValue: number, index) => {
+  const handleYearChange = (event, newValue, index) => {
     setLoading(true);
-   
+
     if (sparqOutput.length !== 0) {
 
 
@@ -272,12 +271,12 @@ const ComparisonBoardMain = (props) => {
               distinctYears.push(obj.year.value)
             }
           } );
-      
+
           const newScenarioYears = scenarioYears;
           newScenarioYears[index] = distinctYears.sort();
           setScenarioYears(newScenarioYears);
-    
-    
+
+
           const newScenarioYear = scenarioYear;
           newScenarioYear[index] = scenarioYears[index][0].toString();
           setScenarioYear(newScenarioYear);
@@ -312,7 +311,7 @@ const ComparisonBoardMain = (props) => {
 
 
         const filtered_output = sparqOutput.filter(item => item.year.value == newValue);
-        
+
         const groupedItems = divideByTableNameValue(filtered_output);
 
         const groupedStackedBarChartsLegend = [];
@@ -341,18 +340,18 @@ const ComparisonBoardMain = (props) => {
                 .map(el => el.value.value);
               categorized['backgroundColor'] = groupedBarChartsRandomColors[colorIndex];
               categorized['stack'] = mainIndex;
-              
+
               country_labels[index] = filtered_output
                 .filter((obj) => obj.category.value === cat)
                 .map(el => el.country_code.value.split('/').pop());
-              
+
               groupedStackedBarChartsLegend.push([group, category_disctionary[cat.split("/").pop()], cat,  groupedBarChartsRandomColors[colorIndex]]);
               colorIndex++;
               return categorized;
             });
 
             console.log(chart_data_category);
-            
+
             result[group] = {
               chart_data_category: chart_data_category,
               country_labels: country_labels,
@@ -370,7 +369,7 @@ const ComparisonBoardMain = (props) => {
 
 
 /*      for (let group in transformedGroupedItems) {
-          
+
           const { chart_data_category, country_labels } = transformedGroupedItems[group];
 
           chart_data_category.forEach((categoryData, catIndex) => {
@@ -385,16 +384,16 @@ const ComparisonBoardMain = (props) => {
         } */
 
         for (let group in transformedGroupedItems) {
-    
+
           const { chart_data_category, country_labels } = transformedGroupedItems[group];
-      
+
           chart_data_category.forEach((categoryData, catIndex) => {
               const categoryDataList = Array.isArray(categoryData) ? categoryData : [categoryData];
-      
+
               if (categoryDataList.length === 1) {
                   const singleCategoryData = categoryDataList[0];
                   const dataset = {};
-                  dataset['label'] = group;   
+                  dataset['label'] = group;
                   dataset['data'] = singleCategoryData.data;
                   dataset['backgroundColor'] = singleCategoryData.backgroundColor;
                   dataset['stack'] = singleCategoryData.stack;
@@ -402,53 +401,53 @@ const ComparisonBoardMain = (props) => {
               } else {
                   categoryDataList.forEach((categoryDataItem, categoryIndex) => {
                       const dataset = {};
-                      dataset['label'] = `${group} - Category ${categoryIndex + 1}`;  
+                      dataset['label'] = `${group} - Category ${categoryIndex + 1}`;
                       dataset['data'] = categoryDataItem.data;
                       dataset['backgroundColor'] = categoryDataItem.backgroundColor;
                       dataset['stack'] = categoryDataItem.stack;
                       datasets.push(dataset);
                   });
               }
-              
+
               if (!labels.includes(country_labels[catIndex])) {
                   labels.push(country_labels[catIndex]);
               }
           });
       }
-      
-   
+
+
         const combinedLabels = [...new Set(labels.flat())];
 
          const alignedDatasets = datasets.map((dataset, index) => {
-          const datasetLabels = labels[index];  
+          const datasetLabels = labels[index];
 
           const alignedData = combinedLabels.map(label => {
             const labelIndex = datasetLabels.indexOf(label);
-            return labelIndex !== -1 ? dataset.data[labelIndex] : null;  
+            return labelIndex !== -1 ? dataset.data[labelIndex] : null;
           });
 
           return {
-            ...dataset,  
-            data: alignedData 
+            ...dataset,
+            data: alignedData
           };
         });
-        
-        
-      
 
-        /* const combinedLabels = [...new Set(labels.flat())] 
+
+
+
+        /* const combinedLabels = [...new Set(labels.flat())]
 
           const alignedDatasets = datasets.map((dataset, index) => {
-            const datasetLabels = labels[index]; 
+            const datasetLabels = labels[index];
 
             const alignedData = combinedLabels.map(label => {
-              const labelIndex = datasetLabels.indexOf(label);  
-              return labelIndex !== -1 ? dataset.data[labelIndex] : null; 
+              const labelIndex = datasetLabels.indexOf(label);
+              return labelIndex !== -1 ? dataset.data[labelIndex] : null;
             });
 
             return {
-              ...dataset,   
-              data: alignedData  
+              ...dataset,
+              data: alignedData
             };
           });
           */
@@ -456,13 +455,13 @@ const ComparisonBoardMain = (props) => {
         const newChartData = [...chartData];
         newChartData[index] = alignedDatasets ;
         setChartData(newChartData);
-    
+
         const newChartLabels = [...chartLabels];
         newChartLabels[index] = combinedLabels;
         setChartLabels(newChartLabels);
 
       }
-        
+
       const newScenarioYear = scenarioYear;
       newScenarioYear[index] = newValue;
       setScenarioYear(newScenarioYear);
@@ -474,7 +473,7 @@ const ComparisonBoardMain = (props) => {
       setShowChart(false);
       setOpenEmptyResultDialog(true);
     }
-   
+
   };
 
   const ITEM_HEIGHT = 48;
@@ -521,7 +520,7 @@ const ComparisonBoardMain = (props) => {
     setShowTitle(false);
 
   };
-  
+
 
   const sendGetScenariosQuery = async () => {
     setLoading(true);
@@ -529,10 +528,10 @@ const ComparisonBoardMain = (props) => {
     const get_scenarios_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
               SELECT DISTINCT ?scenario WHERE {
               ?s oeo:OEO_00020226 ?scenario .
-    }`  
+    }`
 
     const response = await axios.post(
-      conf.obdi, 
+      conf.obdi,
       get_scenarios_query,
       {
         headers: {
@@ -546,9 +545,9 @@ const ComparisonBoardMain = (props) => {
       const scenariosObj = response.data.results.bindings;
 
       const scenarios = scenariosObj.map((obj) => obj.scenario.value.split('/').pop() );
-      const scenarioNames = scenarios.map((elem) => scenarios_disctionary[elem]); 
+      const scenarioNames = scenarios.map((elem) => scenarios_disctionary[elem]);
       setScenariosInTables(scenarioNames);
-      
+
       setLoading(false);
 
 
@@ -578,7 +577,7 @@ const ComparisonBoardMain = (props) => {
     }`
 
     const response = await axios.post(
-      conf.obdi, 
+      conf.obdi,
       get_categories_query,
       {
         headers: {
@@ -594,21 +593,21 @@ const ComparisonBoardMain = (props) => {
       const categoriesByTable = categoriesObj.reduce((acc, obj) => {
         const category = obj.category.value;
         const tableName = obj.table_name.value;
-      
+
         if (!acc[tableName]) {
           acc[tableName] = new Set();
         }
-      
+
         acc[tableName].add(category);
-      
+
         return acc;
       }, {});
-      
+
       const allTableNames = Object.values(categoriesByTable);
       const commonCategories = allTableNames.reduce((acc, categoriesSet) => {
         return new Set([...acc].filter(category => categoriesSet.has(category)));
       }, allTableNames[0]);
-      
+
       const filteredObjects = categoriesObj.filter(obj => commonCategories.has(obj.category.value));
 
 
@@ -643,7 +642,7 @@ const ComparisonBoardMain = (props) => {
     }`
 
     const response = await axios.post(
-      conf.obdi, 
+      conf.obdi,
       get_gas_query,
       {
         headers: {
@@ -659,21 +658,21 @@ const ComparisonBoardMain = (props) => {
       const gasesByTable = gasesObj.reduce((acc, obj) => {
         const gas = obj.gas.value;
         const tableName = obj.table_name.value;
-      
+
         if (!acc[tableName]) {
           acc[tableName] = new Set();
         }
-      
+
         acc[tableName].add(gas);
-      
+
         return acc;
       }, {});
-      
+
       const allTableNames = Object.values(gasesByTable);
       const commonGases = allTableNames.reduce((acc, gasesSet) => {
         return new Set([...acc].filter(gas => gasesSet.has(gas)));
       }, allTableNames[0]);
-      
+
 
       const gases = Array.from(commonGases).map((obj) => obj.split('/').pop() );
       const gasNames = gases.filter(elem => elem in gas_dictionary ).map(el => gas_dictionary[el] ).sort();
@@ -704,8 +703,8 @@ const ComparisonBoardMain = (props) => {
     setSelectedCategories([]);
     setSelectedScenarios([]);
     setSelectedGas([]);
-  }, [selectedOutputDatasets]); 
-  
+  }, [selectedOutputDatasets]);
+
   const handleInputDatasetsChange = (event: SelectChangeEvent<typeof selectedInputDatasets>) => {
     const {
       target: { value },
@@ -729,7 +728,7 @@ const ComparisonBoardMain = (props) => {
       typeof value === 'string' ? value.split(',') : value,
     );
   };
-    
+
   const handleEmptyResultMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
@@ -761,14 +760,14 @@ const sendQuery = async (index) => {
 
     selectedInputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
-    
+
     const categories = [];
     for (let key in category_disctionary) {
         if (selectedCategories.includes(category_disctionary[key])) {
           categories.push('oeo:' + key);
         }
     }
-  
+
     const gases = [];
     for (let key in gas_dictionary) {
         if (selectedGas.includes(gas_dictionary[key])) {
@@ -782,14 +781,14 @@ const sendQuery = async (index) => {
           scenariosFilter.push('oeo:' + key);
         }
     }
-  
+
     const main_query = `PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX ou: <http://opendata.unex.es/def/ontouniversidad#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
     PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
-  
+
     SELECT DISTINCT ?s ?value ?country_code ?year ?category ?gas ?table_name ?unit WHERE {
       ?s oeo:OEO_00020221 ?country_code .
       ?s oeo:OEO_00020224 ?year .
@@ -803,7 +802,7 @@ const sendQuery = async (index) => {
     }`;
 
     const response = await axios.post(
-      conf.obdi, 
+      conf.obdi,
       main_query,
       {
         headers: {
@@ -850,7 +849,7 @@ const sendQuery = async (index) => {
                 distinctYears.push(obj.year.value)
               }
             } );
-      
+
             const newScenarioYears = scenarioYears;
             newScenarioYears[index] = distinctYears.sort();
             setScenarioYears(newScenarioYears);
@@ -893,10 +892,10 @@ const sendQuery = async (index) => {
 
           let distinctYears = [];
           for (let i = 0; i < distinctTables.length; i++) {
-            distinctYears.push([]);  
+            distinctYears.push([]);
           }
 
-          distinctTables.map((tbl, idx) => 
+          distinctTables.map((tbl, idx) =>
               sparqOutput.filter(el => el.table_name.value === tbl).map((obj) => {
                 if (!distinctYears[idx].includes(obj.year.value)) {
                   distinctYears[idx].push(obj.year.value)
@@ -906,15 +905,15 @@ const sendQuery = async (index) => {
              );
 
           const sharedYears = findSharedElements(distinctYears).sort();
-      
+
           const newScenarioYears = scenarioYears;
           newScenarioYears[index] = sharedYears;
           setScenarioYears(newScenarioYears);
 
           const newScenarioYear = scenarioYear;
-          newScenarioYear[index] =  scenarioYears[index].includes("2025") ? "2025" : scenarioYears[index][0].toString(); 
+          newScenarioYear[index] =  scenarioYears[index].includes("2025") ? "2025" : scenarioYears[index][0].toString();
           setScenarioYear(newScenarioYear);
-    
+
           const filtered_output = sparqOutput.filter(item => item.year.value == scenarioYear[index].toString());
 
           const groupedItems = divideByTableNameValue(filtered_output);
@@ -924,11 +923,11 @@ const sendQuery = async (index) => {
             const total_num_of_colors =  Object.keys(groupedItems).length + categorieIDs.length
             const groupedRandomColors = Array.from({ length: total_num_of_colors + 1 }, generateRandomColor);
             setGroupedBarChartsRandomColors(groupedRandomColors);
-            
+
             const result = {};
             let mainIndex = 0;
             let colorIndex = 0;
-          
+
             for (let group in groupedItems) {
               const filtered_output = groupedItems[group].sort((a, b) => {
                 const countryA = a.country_code.value.split('/').pop();
@@ -937,7 +936,7 @@ const sendQuery = async (index) => {
               });
 
               const country_labels = [];
-              
+
               const chart_data_category = categorieIDs.map((cat, idx) => {
                 const categorized = {};
                 categorized['label'] = selectedCategories[index];
@@ -946,16 +945,16 @@ const sendQuery = async (index) => {
                   .map(el => el.value.value);
                 categorized['backgroundColor'] = groupedRandomColors[colorIndex];
                 categorized['stack'] = mainIndex;
-                
+
                 country_labels[index] = filtered_output
                   .filter((obj) => obj.category.value === cat)
                   .map(el => el.country_code.value.split('/').pop());
-                  
+
                 groupedStackedBarChartsLegend.push([group, category_disctionary[cat.split("/").pop()], cat,  groupedRandomColors[colorIndex]]);
                 colorIndex++;
                 return categorized;
               });
-              
+
               result[group] = {
                 chart_data_category: chart_data_category,
                 country_labels: country_labels,
@@ -973,16 +972,16 @@ const sendQuery = async (index) => {
           const labels = [];
 
           for (let group in transformedGroupedItems) {
-    
+
             const { chart_data_category, country_labels } = transformedGroupedItems[group];
-        
+
             chart_data_category.forEach((categoryData, catIndex) => {
                 const categoryDataList = Array.isArray(categoryData) ? categoryData : [categoryData];
-        
+
                 if (categoryDataList.length === 1) {
                     const singleCategoryData = categoryDataList[0];
                     const dataset = {};
-                    dataset['label'] = group;   
+                    dataset['label'] = group;
                     dataset['data'] = singleCategoryData.data;
                     dataset['backgroundColor'] = singleCategoryData.backgroundColor;
                     dataset['stack'] = singleCategoryData.stack;
@@ -990,49 +989,49 @@ const sendQuery = async (index) => {
                 } else {
                     categoryDataList.forEach((categoryDataItem, categoryIndex) => {
                         const dataset = {};
-                        dataset['label'] = `${group} - Category ${categoryIndex + 1}`;  
+                        dataset['label'] = `${group} - Category ${categoryIndex + 1}`;
                         dataset['data'] = categoryDataItem.data;
                         dataset['backgroundColor'] = categoryDataItem.backgroundColor;
                         dataset['stack'] = categoryDataItem.stack;
                         datasets.push(dataset);
                     });
                 }
-                
+
                 if (!labels.includes(country_labels[catIndex])) {
                     labels.push(country_labels[catIndex]);
                 }
             });
           }
-        
-        
-          
+
+
+
           const combinedLabels = [...new Set(labels.flat())];
 
           const alignedDatasets = datasets.map((dataset, index) => {
-            const datasetLabels = labels[index]; 
+            const datasetLabels = labels[index];
 
             const alignedData = combinedLabels.map(label => {
               const labelIndex = datasetLabels.indexOf(label);
-              return labelIndex !== -1 ? dataset.data[labelIndex] : null;  
+              return labelIndex !== -1 ? dataset.data[labelIndex] : null;
             });
 
             return {
-              ...dataset,  
-              data: alignedData 
+              ...dataset,
+              data: alignedData
             };
           });
-         
+
 
           const newChartData = [...chartData];
           newChartData[index] = alignedDatasets ;
           setChartData(newChartData);
-      
+
           const newChartLabels = [...chartLabels];
           newChartLabels[index] = combinedLabels;
           setChartLabels(newChartLabels);
 
         }
-        
+
         setLoading(false);
         setShowChart(true);
         setShowTitle(true);
@@ -1046,7 +1045,7 @@ const sendQuery = async (index) => {
     }).catch(error => {
         console.error('API Error:', error.message);
     }).finally(() => {
-      
+
     });
   }
 
@@ -1162,7 +1161,7 @@ const sendQuery = async (index) => {
                     </ToggleButton>
                     <ToggleButton style={{ width:'250px' }} value="Quantitative"><EqualizerIcon />
                     Quantitative
-                    
+
                     </ToggleButton>
               </ToggleButtonGroup>
             </Grid>
@@ -1172,7 +1171,7 @@ const sendQuery = async (index) => {
         </Toolbar>
         {/* <ComparisonControl /> */}
 
-        {alignment == "Qualitative" && 
+        {alignment == "Qualitative" &&
         <Grid item xs={12}>
           <OptionBox>
             <h2>Criteria</h2>
@@ -1192,12 +1191,12 @@ const sendQuery = async (index) => {
           </OptionBox>
           <ComparisonBoardItems elements={scenarios} c_aspects={selectedCriteria} />
         </Grid>
-        } 
+        }
         {alignment == "Quantitative" &&
 
         <Grid container spacing={2}>
           <Grid item lg={6} sx={{ borderLeft: variables.border.light, px: 2 }}>
-            
+
             <Alert severity="warning">
             <Chip label="Early Access" color="error" />
               <p>
@@ -1206,7 +1205,7 @@ const sendQuery = async (index) => {
                 case study tables</a> how projection data can in principle be automatically compared on the Open Energy Platform. It is a proof of concept.
               </p>
               <p>
-                Please keep in mind that the resulting visualization is still in a beta phase and may contain some minor errors. However, we are 
+                Please keep in mind that the resulting visualization is still in a beta phase and may contain some minor errors. However, we are
                 working actively to improve it. We aim to make it more robust in the near future.
               </p>
             </Alert>
@@ -1214,19 +1213,19 @@ const sendQuery = async (index) => {
           <Grid item lg={6} sx={{ borderLeft: variables.border.light, px: 2 }}>
             <Alert severity="info">
               <p>
-                The <a href="https://github.com/OpenEnergyPlatform/oekg" target="_blank" rel="noopener noreferrer">Open Energy Knowledge Graph </a> 
+                The <a href="https://github.com/OpenEnergyPlatform/oekg" target="_blank" rel="noopener noreferrer">Open Energy Knowledge Graph </a>
                 enables this comparison, based on the <a href="https://github.com/OpenEnergyPlatform/ontology" target="_blank" rel="noopener noreferrer">
                 ontological annotation</a> of the <a href="https://github.com/OpenEnergyPlatform/oemetadata" target="_blank" rel="noopener noreferrer">
                 OEMetadata</a> of the datasets that are part of the scenarios you selected initially to start this comparison.
-                
+
 
               </p>
               <p>
-              The dropdown fields below are populated with data from the datasets. These values will change depending on the previous 
-              scenario selection. To generate a visualization, please select at least one option for each field. You can choose multiple output datasets for comparison, 
-              but if you do, selecting multiple sectors is not allowed. However, if you select only one dataset, you can also choose multiple sectors, 
+              The dropdown fields below are populated with data from the datasets. These values will change depending on the previous
+              scenario selection. To generate a visualization, please select at least one option for each field. You can choose multiple output datasets for comparison,
+              but if you do, selecting multiple sectors is not allowed. However, if you select only one dataset, you can also choose multiple sectors,
               and the plot will change to a stacked bar chart style.
-             
+
               </p>
             </Alert>
           </Grid>
@@ -1294,7 +1293,7 @@ const sendQuery = async (index) => {
                     input={<OutlinedInput label="Scenario" />}
                     renderValue={(selected) => selected.join(', ')}
                     MenuProps={MenuProps}
-                  > 
+                  >
                     {scenariosInTables.map((name) => (
                       <MenuItem key={name} value={name}>
                         <ListItemText primary={name} />
@@ -1351,9 +1350,9 @@ const sendQuery = async (index) => {
               </Grid>
               <Grid item xs={10} sx={{ display: 'flex', justifyContent: 'center' }}>
               {showTitle === true && <Typography variant="body1" gutterBottom>
-                {selectedGas.map((i, index) => index === selectedGas.length - 1 ? i + ', ': i + ' and ')} from {selectedCategories.map((i, index) => index === selectedCategories.length - 1 ? i + ', ': i + ' and ')}  {selectedScenarios.map(i => i)} 
+                {selectedGas.map((i, index) => index === selectedGas.length - 1 ? i + ', ': i + ' and ')} from {selectedCategories.map((i, index) => index === selectedCategories.length - 1 ? i + ', ': i + ' and ')}  {selectedScenarios.map(i => i)}
               </Typography>}
-              
+
               </Grid>
               <Grid item xs={1} >
               </Grid>
@@ -1379,7 +1378,7 @@ const sendQuery = async (index) => {
                               <Tab label={year} key={year} value={scenarioYears[index][idx]}/>
                             ) )
                           }
-    
+
                         </Tabs>
                       </Box>
                   </Grid>
@@ -1397,8 +1396,8 @@ const sendQuery = async (index) => {
                     <Bar data={{
                               labels: chartLabels[index],
                               datasets: chartData[index]
-                            }} 
-                        options={options} width={100} height={40} 
+                            }}
+                        options={options} width={100} height={40}
                         ref={chartRef}
                         />
                   </Grid>
@@ -1454,7 +1453,7 @@ const sendQuery = async (index) => {
               </Snackbar>
           </Grid>
           </Grid>
-          } 
+          }
       </Container>
     </Grid>
   );

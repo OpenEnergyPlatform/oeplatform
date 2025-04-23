@@ -3,11 +3,11 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import StudyChip from '../styles/oep-theme/components/studyChip';
-import palette from '../styles/oep-theme/palette';
-import variables from '../styles/oep-theme/variables';
-import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
-import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.js';
-import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.js'
+import palette from '../styles/oep-theme/palette.js';
+import variables from '../styles/oep-theme/variables.js';
+import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors';
+import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);

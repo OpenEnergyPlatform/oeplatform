@@ -5,17 +5,17 @@ const handleOpenURL = (url, setError) => {
       setError('Invalid URL');
       return;
     }
-  
+
     let processedURL = url.trim();
 
     // Handle URLs with spaces in the middle
     processedURL = processedURL.replace(/\s+/g, '%20');
-  
+
     // Prepend base URL if not starting with http:// or https://
     if (!processedURL.startsWith('http://') && !processedURL.startsWith('https://')) {
       if (!processedURL.startsWith('/') )
         processedURL = "/" + processedURL;
-      
+
       const baseURL = window.location.origin;
       processedURL = `${baseURL}${processedURL}`;
     }
