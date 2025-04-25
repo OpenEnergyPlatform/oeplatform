@@ -1,6 +1,7 @@
 // vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import eslint from 'vite-plugin-eslint'
 import { resolve } from 'path'
 
 export default defineConfig({
@@ -12,6 +13,11 @@ export default defineConfig({
       babel: {
         plugins: ['@emotion/babel-plugin'],
       },
+    }),
+    eslint({
+      include: ['src/**/*.js', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx'],
+      failOnWarning: false,
+      failOnError:   true,
     }),
   ],
   optimizeDeps: {
