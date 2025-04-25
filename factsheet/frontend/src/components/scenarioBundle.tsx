@@ -119,7 +119,7 @@ function Factsheet(props) {
   const [prevUID, setPrevUID] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
-  const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
+  const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors || [] : []);
   const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? [] : []);
   const [expandedTechnologies, setExpandedTechnologies] = useState(id !== 'new' ? [] : []);
 
@@ -196,10 +196,10 @@ function Factsheet(props) {
   const [sectors, setSectors] = useState([]);
   const [sectorDivisions, setSectorDivisions] = useState([]);
   const [filteredSectors, setFilteredSectors] = useState([]);
-  const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
-  const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
-  const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources : []);
-  const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
+  const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions || [] : []);
+  const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution || [] : []);
+  const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources || [] : []);
+  const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person || [] : []);
   const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios || [] : [{
     id: uuid(),
     name: '',
@@ -227,8 +227,8 @@ function Factsheet(props) {
 
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
-  const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models : []);
-  const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks : []);
+  const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models || [] : []);
+  const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks || [] : []);
   const [removeReport, setRemoveReport] = useState(false);
   const [addedEntity, setAddedEntity] = useState(false);
   const [openAddedDialog, setOpenAddedDialog] = React.useState(false);
@@ -414,9 +414,10 @@ function Factsheet(props) {
       // setSelectedTechnologiesTree(filteredResult[0]);
       // setSelectedTechnologies(s)
 
-      function getAllNodeIds(nodes) {
+      function getAllNodeIds(nodes = []) {
         let ids = [];
         nodes.forEach(node => {
+          if (!node) return;
           ids.push(node.id);
           if (node.children) {
             ids = ids.concat(getAllNodeIds(node.children));
@@ -425,7 +426,9 @@ function Factsheet(props) {
         return ids;
       }
 
-      const allIds = getAllNodeIds(filteredResult[0]["children"]);
+
+
+      const allIds = getAllNodeIds(filteredResult?.[0]?.children ?? []);
       setAllNodeIds(allIds);
 
     }, []);
@@ -1456,7 +1459,7 @@ function Factsheet(props) {
           aria-label="Vertical tabs example"
           sx={{ borderRight: 1, borderColor: 'divider' }}
           key={'Scenario_tabs'}
-          classes={'tabs'}
+          classesName='tabs'
         >
           {scenarios.map((item, i) =>
             <Tab
@@ -1537,7 +1540,7 @@ function Factsheet(props) {
           aria-label="Vertical tabs example"
           sx={{ borderRight: 1, borderColor: 'divider' }}
           key={'Publications_tabs'}
-          classes={'tabs'}
+          className='tabs'
         >
           {publications.map((item, i) =>
             <Tab
@@ -1817,7 +1820,7 @@ function Factsheet(props) {
             style={{ width: '100%' }}
             variant="outlined"
             multiline
-            rows={6}
+            minRows={6}
             maxRows={10}
             value={abstract}
             onChange={handleAbstract}
@@ -1836,7 +1839,7 @@ function Factsheet(props) {
             <div >
               {
                 StudyKeywords.map((item) =>
-                  <span >
+                  <span key={item[0]}>
                     {item[1] !== '' ? <HtmlTooltip
                       style={{ marginLeft: '10px' }}
                       placement="top"
@@ -2254,10 +2257,10 @@ const renderScenariosOverview = () => (
 
 
   const renderPublicationOverview = () => (
-    <Container maxWidth="lg2" sx={{ padding: '0px !important' }}>
+    <Container sx={{ maxWidth:"lg2",  padding: '0px !important' }}>
       {
         publications.map((v, i) =>
-          <TableContainer>
+          <TableContainer key={v.id ?? i}>
             <Table>
               <TableBody>
                 <TableRow>
@@ -2669,10 +2672,14 @@ const renderScenariosOverview = () => (
                     <Button disableElevation={true} size="small" sx={{ mr: 1 }} variant="contained" color="primary" onClick={handleSaveFactsheet} startIcon={<SaveIcon />}> Save </Button>
                   </Tooltip>}
                   <Tooltip title="Share this factsheet">
-                    <Button disableElevation={true} size="small" sx={{ mr: 1 }} variant="outlined" color="primary" startIcon={<ShareIcon />} disabled> Share </Button>
+                    <span>
+                      <Button disableElevation={true} size="small" sx={{ mr: 1 }} variant="outlined" color="primary" startIcon={<ShareIcon />} disabled> Share </Button>
+                    </span>
                   </Tooltip>
                   <Tooltip title="Delete factsheet">
+                  <span>
                     <Button disableElevation={true} size="small" variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon />}> Delete </Button>
+                  </span>
                   </Tooltip>
                 </div >
               </Grid>

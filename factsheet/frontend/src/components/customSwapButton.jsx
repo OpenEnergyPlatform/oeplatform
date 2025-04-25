@@ -71,19 +71,23 @@ const ColorToggleButton = (props) => {
       </Tooltip>
       <ButtonGroup variant="contained" aria-label="outlined primary button group" sx={{ mr: 1 }}>
         <Tooltip title="Overview">
-          <Button size="small" name="overview" disabled={String(window.location.href).split('/').pop() === "new"} onClick={(e) => handleChange(e, 'overview')}>
-            <RemoveRedEyeOutlinedIcon sx={{ mr: 1 }} /> <span>View</span>
-          </Button>
+          <span>
+            <Button size="small" name="overview" disabled={String(window.location.href).split('/').pop() === "new"} onClick={(e) => handleChange(e, 'overview')}>
+              <RemoveRedEyeOutlinedIcon sx={{ mr: 1 }} /> <span>View</span>
+            </Button>
+          </span>
         </Tooltip>
         <Tooltip title="Edit">
-          <Button
-            size="small"
-            value="edit"
-            disabled={String(window.location.href).split('/').pop() === "new" | !isOwner}
-            onClick={(e) => handleChange(e, 'edit')}
-          >
-            <EditOutlinedIcon sx={{ mr: 1 }} /> <span>Edit</span>
-          </Button>
+          <span>
+            <Button
+              size="small"
+              value="edit"
+              disabled={String(window.location.href).split('/').pop() === "new" || !isOwner}
+              onClick={(e) => handleChange(e, 'edit')}
+            >
+              <EditOutlinedIcon sx={{ mr: 1 }} /> <span>Edit</span>
+            </Button>
+          </span>
         </Tooltip>
         {/* <Tooltip title="Similar factsheets!">
           <Button size="small" value="playground" > <DiamondIcon /> </Button>

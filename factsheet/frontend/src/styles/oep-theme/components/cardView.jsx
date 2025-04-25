@@ -57,6 +57,7 @@ export const CardRow = ({ rowKey, rowValue }) => {
       sx={{ paddingBottom: variables.spacing[2] }}
     >
       <Typography
+        component="div"
         variant="body2"
         sx={{
           fontWeight: variables.fontWeight.bold,
@@ -65,7 +66,10 @@ export const CardRow = ({ rowKey, rowValue }) => {
       >
         {rowKey}
       </Typography>
-      <Typography variant="body2">
+      <Typography
+        component="div"
+        variant="body2"
+      >
         {rowValue}
       </Typography>
     </Stack>

@@ -17,7 +17,8 @@ const InfoListItemContainer = styled(Grid)(({ theme }) => ({
 }));
 
 const InfoListItem = (props) => {
-  return <InfoListItemContainer container {...props} />;
+  const { fullWidth, ...safeProps } = props;
+  return <InfoListItemContainer container {...safeProps} />;
 };
 
 export default InfoListItem;

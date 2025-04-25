@@ -31,7 +31,7 @@ root.render(
             v7_startTransition: true,
             v7_relativeSplatPath: true,
           }}>
-            <App />
+            <App sx={{ '& :first-of-type': { marginTop: 0 } }} />
           </BrowserRouter>
         </LocalizationProvider>
       </ThemeProvider>

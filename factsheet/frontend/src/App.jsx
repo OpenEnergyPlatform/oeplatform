@@ -1,60 +1,67 @@
 // src/App.jsx
-import React, { useState, useEffect } from 'react';
-import CircularProgress from '@mui/material/CircularProgress';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react'
+import CircularProgress from '@mui/material/CircularProgress'
+import axios from 'axios'
 
-import Home from './home';
-import Factsheet from './components/scenarioBundle';
-import ComparisonBoardMain from './components/comparisonBoardMain';
-import HistoryTable from './components/historyTable';
-import Diff from './components/oekg_modifications';
+import Home from './home'
+import Factsheet from './components/scenarioBundle'
+import ComparisonBoardMain from './components/comparisonBoardMain'
+import HistoryTable from './components/historyTable'
+import Diff from './components/oekg_modifications'
 
-import './styles/App.css';
-import conf from './conf.json';
+import './styles/App.css'
+import conf from './conf.json'
 
 function App() {
   console.log('🏠 App rendered');
-  const [factsheet, setFactsheet] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [factsheet, setFactsheet] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  // parse the first three path segments: /{param1}/{param2}/{param3}
-  const [param1, param2] = window.location.pathname.split('/').slice(1, 3);
+  // split all path segments, e.g. '/scenario-bundles/id/NEW' → ['scenario-bundles','id','NEW']
+  const [resource, route, idOrNew] =
+    window.location.pathname.split('/').slice(1)
 
   useEffect(() => {
     async function fetchData() {
-      if (param1 === 'id' && param2) {
+      // only fetch when route==='id' and we have an id/new
+      if (resource === 'scenario-bundles' && route === 'id' && idOrNew) {
         try {
           const { data } = await axios.get(
             `${conf.toep}scenario-bundles/get/`,
-            { params: { id: param2 } }
-          );
-          setFactsheet(data);
+            { params: { id: idOrNew } }
+          )
+          setFactsheet(data)
         } catch (err) {
-          console.error('Fetch error:', err);
+          console.error('Fetch error:', err)
         }
       }
-      setLoading(false);
+      setLoading(false)
     }
-    fetchData();
-  }, [param1, param2]);
+    fetchData()
+  }, [resource, route, idOrNew])
 
-  // top‐level routes
-  if (param2 === 'main') return <Home />;
-  if (param2 === 'oekg_history') return <HistoryTable />;
-  if (param2 === 'oekg_modifications') return <Diff />;
-
-  // once data is loaded
+  // top-level routes that don’t need data
+  if (resource === 'scenario-bundles' && route === 'main') {
+    return <Home />
+  }
+  if (resource === 'scenario-bundles' && route === 'oekg_history') {
+    return <HistoryTable />
+  }
+  if (resource === 'scenario-bundles' && route === 'oekg_modifications') {
+    return <Diff />
+  }
   if (!loading) {
-    if (param2 === 'compare') {
-      return <ComparisonBoardMain params={param2} />;
+    if (resource === 'scenario-bundles' && route === 'compare') {
+      return <ComparisonBoardMain params={route} />
     }
-    if (param2 === 'id') {
-      return <Factsheet id={param2} fsData={factsheet} />;
+    // now matches both '/scenario-bundles/id/new' and '/scenario-bundles/id/<uuid>'
+    if (resource === 'scenario-bundles' && route === 'id' && idOrNew) {
+      return <Factsheet id={idOrNew} fsData={factsheet || {}} />
     }
-    return null;
+    return null
   }
 
-  // loading spinner
+  // still loading
   return (
     <div style={{
       display: 'flex',
@@ -64,7 +71,7 @@ function App() {
     }}>
       <CircularProgress />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

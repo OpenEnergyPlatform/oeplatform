@@ -10,23 +10,37 @@ interface TabPanelProps {
   index: number;
   value: number;
 }
-function TabPanel({ children, value, index, ...other }: TabPanelProps) {
+function TabPanel({
+  children,
+  value,
+  index,
+  ...other
+}: TabPanelProps & { [key: string]: any }) {
+  const {
+    fullWidth,
+    selectionFollowsFocus,
+    indicator,
+    textColor,
+    ...rest
+  } = other; // ✅ strip all known non-DOM props
+
   return (
     <div
       role="tabpanel"
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      {...other}
+      {...rest}
     >
       {value === index && (
         <Box sx={{ pt: 2, pb: 2 }}>
-          <Typography>{children}</Typography>
+          {children}
         </Box>
       )}
     </div>
   );
 }
+
 
 function arrayProps(index: number) {
   return {
@@ -102,11 +116,14 @@ export default function CustomTabs({ factsheetObjectHandler, items }: CustomTabs
       </TabsWrapper>
 
       <Box>
-        {items.contents.map((content, idx) => (
-          <TabPanel key={idx} value={value} index={idx}>
-            {content}
-          </TabPanel>
-        ))}
+        {items.contents.map((content, idx) => {
+          console.log("🚨 TabPanel content", content);
+          return (
+            <TabPanel key={idx} value={value} index={idx}>
+              {content}
+            </TabPanel>
+          );
+        })}
       </Box>
     </Box>
   );

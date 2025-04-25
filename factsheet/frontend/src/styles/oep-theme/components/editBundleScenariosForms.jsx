@@ -3,6 +3,7 @@ import { styled } from '@mui/system';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import Box from '@mui/material/Box';
 import palette from '../palette';
 
 const BundleScenariosGrid = styled(Grid)({
@@ -39,7 +40,7 @@ const BundleScenariosGridItem = ({
 }) => {
   return (
     <BundleScenariosGrid item xs={12}>
-      <Typography variant="body2">
+      <Box sx={{ typography: 'body2' }}>
         <Grid container>
           <Grid item xs={labelGridSize}>
             <LabelItem>
@@ -68,7 +69,7 @@ const BundleScenariosGridItem = ({
             {typeof renderField === 'function' ? renderField() : null}
           </Grid>
         </Grid>
-      </Typography>
+      </Box>
     </BundleScenariosGrid>
   );
 };

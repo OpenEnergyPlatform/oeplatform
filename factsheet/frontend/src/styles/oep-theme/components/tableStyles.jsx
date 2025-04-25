@@ -73,12 +73,12 @@ export const FirstRowTableCell = styled(TableCell)(({ theme }) => ({
   fontWeight: theme.typography.fontWeightBold,
   width: '10rem',
   '& > div': {
-    'display': 'flex',
-    'flex-direction': 'row',
-    'align-items': 'center'
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   '& > div > span': {
-    'padding-right': variables.spacing[2],
-    'white-space': 'nowrap'
+    paddingRight: variables.spacing[2],
+    whiteSpace: 'nowrap',
   }
 }));

@@ -40,6 +40,17 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   }
 }));
 
+function stripInvalidProps(props) {
+  const {
+    fullWidth,
+    textColor,
+    indicator,
+    selectionFollowsFocus,
+    ...safeProps
+  } = props;
+  return safeProps;
+}
+
 export default function CustomAutocompleteWithoutEdit(props) {
   const {
     manyItems,
@@ -122,7 +133,7 @@ export default function CustomAutocompleteWithoutEdit(props) {
         renderTags={() => null}
         filterOptions={(opts, params) => filter(opts, params)}
         renderOption={(props, option, { selected }) => (
-          <li {...props}>
+          <li {...stripInvalidProps(props)}>
             {!option.inputValue && (
               <Checkbox
                 icon={icon}

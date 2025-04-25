@@ -11,7 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
+// import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import { visuallyHidden } from '@mui/utils';
 import { styled } from '@mui/material/styles';
@@ -36,10 +36,10 @@ import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import axios from 'axios';
 import conf from "../conf.json";
-import SelectAllIcon from '@mui/icons-material/SelectAll';
+// import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
-import RuleIcon from '@mui/icons-material/Rule';
+// import RuleIcon from '@mui/icons-material/Rule';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
@@ -55,7 +55,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import ArrowCircleRightOutlinedIcon from '@mui/icons-material/ArrowCircleRightOutlined';
+// import ArrowCircleRightOutlinedIcon from '@mui/icons-material/ArrowCircleRightOutlined';
 import FormatListBulletedOutlinedIcon from '@mui/icons-material/FormatListBulletedOutlined';
 import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
 import ToggleButton from '@mui/material/ToggleButton';
@@ -64,7 +64,7 @@ import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNaviga
 import { CardItem, CardHeader, CardBody, CardRow } from '../styles/oep-theme/components/cardView.jsx';
 import '../styles/App.css';
 import variables from '../styles/oep-theme/variables.js';
-import palette from '../styles/oep-theme/palette.js';
+// import palette from '../styles/oep-theme/palette.js';
 import CSRFToken from './csrfToken.js';
 import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 
@@ -367,10 +367,10 @@ export default function CustomTable(props) {
   const [filteredFactsheets, setFilteredFactsheets] = useState([]);
   const [logged_in, setLogged_in] = React.useState('');
 
-  const handleChangeView = (
-    newAlignment,
-  ) => {
-    newAlignment !== null && setAlignment(newAlignment);
+ const handleChangeView = (event, newAlignment) => {
+    if (newAlignment !== null) {
+     setAlignment(newAlignment);
+    }
   };
 
   const handleScenarioYearChange = (event, newValue) => {
@@ -613,7 +613,7 @@ export default function CustomTable(props) {
         const isItemSelected = isSelected(row.study_name);
         const labelId = `enhanced-table-checkbox-${index}`;
         return (
-          <React.Fragment>
+          <React.Fragment key={row.study_name}>
             <StyledTableRow
               hover
               role="checkbox"
@@ -638,6 +638,7 @@ export default function CustomTable(props) {
               <TableCell style={{ width: '300px', padding: "5px" }}>
                 {row.scenarios.map((v) => (
                   <HtmlTooltip
+                    key={v.uid}
                     style={{ marginLeft: '10px' }}
                     placement="top"
                     title={
@@ -657,13 +658,28 @@ export default function CustomTable(props) {
 
               <TableCell style={{ width: '100px' }}>
                 {row.collected_scenario_publication_dates.length === 0 ? (
-                  <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>None</Typography>
+                  <Typography
+                    variant="subtitle1"
+                    gutterBottom
+                    style={{ marginTop: '2px' }}
+                  >
+                    None
+                  </Typography>
                 ) : (
-                  row.collected_scenario_publication_dates.map((date_of_publication) => (
-                    <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>
-                      {date_of_publication !== null ? String(date_of_publication).substring(0, 4) : "None"}
-                    </Typography>
-                  ))
+                  row.collected_scenario_publication_dates.map(
+                    (date_of_publication, idx) => (
+                      <Typography
+                        key={date_of_publication ?? idx}           // ← add key here
+                        variant="subtitle1"
+                        gutterBottom
+                        style={{ marginTop: '2px' }}
+                      >
+                        {date_of_publication
+                          ? String(date_of_publication).substring(0, 4)
+                          : 'None'}
+                      </Typography>
+                    )
+                  )
                 )}
               </TableCell>
 
@@ -698,22 +714,22 @@ export default function CustomTable(props) {
 
                       <Grid item xs={12}>
                         <b>Institutions: </b>{row.institutions.map((v) => (
-                          <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                          <span key={v}> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                         ))}
                       </Grid>
 
                       <Grid item xs={12}>
                         <b>Funding sources: </b>{row.funding_sources.map((v) => (
-                          <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                          <span key={v}> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                         ))}
                       </Grid>
 
                       <Grid item xs={12} >
                         <b>Models and frameworks: </b>{row.models.map((v) => (
-                          <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                          <span key={v}> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                         ))}
                         {row.frameworks.map((v) => (
-                          <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                          <span key={v}> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                         ))}
                       </Grid>
                     </Grid>
@@ -741,15 +757,10 @@ export default function CustomTable(props) {
         const isItemSelected = isSelected(row.study_name);
         const labelId = `enhanced-table-checkbox-${index}`;
         return (
-          <CardItem>
+          <CardItem key={index}>
             <CardHeader>
-              <Link
-                to={`scenario-bundles/id/${row.uid}`}
-                onClick={() => this.forceUpdate}
-              >
-                <Typography variant="link">
-                  {row.study_name}
-                </Typography>
+              <Link to={`scenario-bundles/id/${row.uid}`}>
+                {row.acronym}
               </Link>
             </CardHeader>
             <CardBody>
@@ -783,7 +794,7 @@ export default function CustomTable(props) {
                 rowKey='Institutions'
                 rowValue={
                   row.institutions.map((v) => (
-                    <span>
+                    <span key={v}>
                       <span> {v} </span>
                       <span>
                         <b className="separator-dot"> . </b>
@@ -796,7 +807,7 @@ export default function CustomTable(props) {
                 rowKey='Funding sources'
                 rowValue={
                   row.funding_sources.map((v) => (
-                    <span>
+                    <span key={v}>
                       <span> {v} </span>
                       <span>
                         <b className="separator-dot"> . </b>
@@ -810,7 +821,7 @@ export default function CustomTable(props) {
                 rowValue={
                   <>
                     {row.models.map((v) => (
-                      <span>
+                      <span key={v}>
                         <span> {v} </span>
                         <span>
                           <b className="separator-dot"> . </b>
@@ -818,7 +829,7 @@ export default function CustomTable(props) {
                       </span>
                     ))}
                     {row.frameworks.map((v) => (
-                      <span>
+                      <span key={v}>
                         <span> {v} </span>
                         <span>
                           <b className="separator-dot"> . </b>
@@ -835,7 +846,7 @@ export default function CustomTable(props) {
                     style={{ marginLeft: '10px' }}
                     placement="top"
                     title={
-                      <React.Fragment>
+                      <React.Fragment key={v}>
                         <div>
                           <b>Full name: </b> {v.full_name}
                           <Divider style={{ marginTop: '10px', marginBottom: '10px' }} />
@@ -944,7 +955,7 @@ export default function CustomTable(props) {
                 <FormGroup>
                   <div >
                     {
-                      StudyKeywords.map((item) => <FormControlLabel control={
+                      StudyKeywords.map((item) => <FormControlLabel key={item[0]} control={
                         <Checkbox size="small" color="default" />
                       } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]} />)
                     }
@@ -984,7 +995,7 @@ export default function CustomTable(props) {
             size={dense ? 'small' : 'medium'}
           >
             <EnhancedTableHead
-              numSelected={selected.length}
+              numSelected={selected.size}
               order={order}
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
@@ -995,7 +1006,7 @@ export default function CustomTable(props) {
           </Table>
         </TableContainer>}
         {alignment == "list" && <TablePagination
-          rowsPerPageOptions={[15, 25, 50]}
+          rowsPerPageOptions={[5, 15, 25, 50]}
           component="div"
           count={rows.length}
           rowsPerPage={rowsPerPage}
