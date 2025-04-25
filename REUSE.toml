@@ -1,6 +1,7 @@
-[[File]]
-Path = "VERSION"
-Licenses = [ "MIT",]
+[[annotations]]
+path = "VERSION"
+precedence = "override"
+Licenses = "MIT"
 Copyright = [ "MGlauer <martinglauer89@gmail.com>", "christian-rli <christian.hofmann@rl-institut.de>", "christian-rli <42000429+christian-rli@users.noreply.github.com>", "Adel Memariani <memariani.adel@gmail.com>", "Christian Winger <c@wingechr.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
 
 [[File]]
