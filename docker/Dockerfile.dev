@@ -1,5 +1,6 @@
 # docker/Dockerfile.dev
 
+# We currently stick to this python version
 FROM python:3.10.14
 
 RUN apt-get update \
@@ -14,8 +15,9 @@ WORKDIR /home/appuser/app
 
 # install your Python deps
 COPY requirements.txt ./requirements.txt
+COPY requirements-dev.txt ./requirements-dev.txt
 RUN pip install --upgrade pip \
- && pip install --no-cache-dir -r requirements.txt
+ && pip install --no-cache-dir -r requirements-dev.txt
 
 # bring in your dev-entrypoint (in docker/)
 COPY docker/docker-entrypoint.dev.sh .
@@ -23,6 +25,6 @@ RUN chmod +x ./docker-entrypoint.dev.sh
 
 USER appuser
 
-EXPOSE 8000
+EXPOSE 8000 5678
 ENTRYPOINT ["./docker/docker-entrypoint.dev.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
