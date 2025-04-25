@@ -1,0 +1,1640 @@
+[[File]]
+Path = "VERSION"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "christian-rli <christian.hofmann@rl-institut.de>", "christian-rli <42000429+christian-rli@users.noreply.github.com>", "Adel Memariani <memariani.adel@gmail.com>", "Christian Winger <c@wingechr.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = ".gitmodules"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = ".dockerignore"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "LICENSE"
+Licenses = [ "MIT",]
+Copyright = [ "Martin Glauer <martinglauer89@googlemail.com>",]
+
+[[File]]
+Path = ".eslintrc.json"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = ".bumpversion.cfg"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Adel Memariani <memariani.adel@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "mkdocs.yml"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "user <martimanovadarina@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = ".prettierignore"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>", "c.winger <c.winger@oeko.de>", "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = ".gitignore"
+Licenses = [ "MIT",]
+Copyright = [ "Martin Glauer <glauer@iws.cs.ovgu.de>", "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <wagner@creatdev-solutions.com>", "Alexis Michaltsis <alexis.michaltsis@rl-institut.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Christian Winger <c@wingechr.de>", "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "jh-RLI <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",]
+
+[[File]]
+Path = "CITATION.cff"
+Licenses = [ "MIT",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>", "Christian Winger <c@wingechr.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Adel Memariani <memariani.adel@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "tox.ini"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "alembic.ini"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>",]
+
+[[File]]
+Path = "environment.yml"
+Licenses = [ "MIT",]
+Copyright = [ "Bachibouzouk <pierre-francois.duc@rl-institute.de>", "Christian Winger <c@wingechr.de>", "RL-INSTITUT\\hendrik.huyskens <hendrik.huyskens@rl-institut.de>",]
+
+[[File]]
+Path = ".pre-commit-config.yaml"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>", "c.winger <c.winger@oeko.de>", "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docker/apache2.conf"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "docker/Dockerfile"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>", "Eike Broda <git@ebroda.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docker/docker-compose.yaml"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_ext/oeo_extended_store/test/data/expected_composedUnit.owl"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_ext/templates/oeo_ext/partials/oeo-ext-plugin-ui.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_ext/templates/oeo_ext/partials/success.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_ext/templates/oeo_ext/partials/unit_element.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/img/OEP-Datasets-System-2023-06-15-1708.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/img/draft-infrastructure-oep-2023-10-24-1338.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/oekg-api/oekg.yaml"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/oauth2-redirect.html"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle-core.js.map"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/swagger-ui.js.map"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/swagger-ui.css"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle.js.map"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/favicon-32x32.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/swagger-ui.css.map"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/swagger-ui-standalone-preset.js.map"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/index.html"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/index.css"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/swagger-ui-bundle.js.map"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/dist/favicon-16x16.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/oeplatform-code/web-api/oedb-rest-api/schema.json"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "docs/css/extra.css"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>", "c.winger <c.winger@oeko.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "modelview/static/css/form-style.css"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "solar-c <@>", "Johann Wagner <johann@wagnerdevelopment.de>", "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/static/css/mv-style.css"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/static/css/custom_alert.css"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/editframework.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "quentinpeyras <quentinpey@hotmail.fr>", "MGlauer <martinglauer89@gmail.com>", "Martin Glauer <glauer@iws.cs.ovgu.de>", "solar-c <@>", "Johann Wagner <johann@wagnerdevelopment.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/editmodel_snippet_depend.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>",]
+
+[[File]]
+Path = "modelview/templates/modelview/editmodel_snippet.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "quentinpeyras <quentinpey@hotmail.fr>", "solar-c <@>", "Johann Wagner <johann@wagnerdevelopment.de>", "MGlauer <martinglauer89@gmail.com>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/error_template.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/detail_view.html"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/array_snippet.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/modellist.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "Martin Glauer <martinglauer89@googlemail.com>", "Martin Glauer <glauer@iws.cs.ovgu.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/editmodel.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "quentinpeyras <quentinpey@hotmail.fr>", "MGlauer <martinglauer89@gmail.com>", "Martin Glauer <glauer@iws.cs.ovgu.de>", "solar-c <@>", "Johann Wagner <johann@wagnerdevelopment.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/base.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Martin Glauer <glauer@iws.cs.ovgu.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/overview.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "christian-rli <christian.hofmann@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/form_element_factory.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/model.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "quentinpeyras <quentinpey@hotmail.fr>", "MGlauer <martinglauer89@gmail.com>", "solar-c <@>", "Johann Wagner <johann@wagnerdevelopment.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/error_snipet.html"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/tag_selector.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/model_snippet.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "quentinpeyras <quentinpey@hotmail.fr>", "MGlauer <martinglauer89@gmail.com>", "solar-c <@>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/framework.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "quentinpeyras <quentinpey@hotmail.fr>", "MGlauer <martinglauer89@gmail.com>", "solar-c <@>", "Johann Wagner <johann@wagnerdevelopment.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/FactSheets_schema.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/widgets/dynamic_edit.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "modelview/templates/modelview/widgets/multiwidget.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>",]
+
+[[File]]
+Path = "modelview/templates/modelview/widgets/dynamic_array.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Bryan Lancien <bryanlancien@yahoo.fr>",]
+
+[[File]]
+Path = "login/templates/login/generic_form.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "login/templates/login/list_memberships.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "login/templates/login/detach.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "login/templates/login/oepuser_edit_form.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>", "daryna <Daryna.Martymianova@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/login/user_settings.html"
+Licenses = [ "MIT",]
+Copyright = [ "daryna <Daryna.Martymianova@rl-institut.de>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",]
+
+[[File]]
+Path = "login/templates/login/oepuser_create_form.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "christian-rli <christian.hofmann@rl-institut.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>",]
+
+[[File]]
+Path = "login/templates/login/activate.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "login/templates/login/user_tables.html"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "user <martimanovadarina@gmail.com>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",]
+
+[[File]]
+Path = "login/templates/login/user_groups.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "login/templates/login/admin_group.html"
+Licenses = [ "MIT",]
+Copyright = [ "MFinkendei <anubis-mf@web.de>", "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "login/templates/login/sidebar_user.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/login/user_nav.html"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/login/user_review.html"
+Licenses = [ "MIT",]
+Copyright = [ "daryna <Daryna.Martymianova@rl-institut.de>", "Christian Winger <c@wingechr.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <Jonas.Huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "Darynarli <“Daryna.Barabanova@rl-institut.de”>",]
+
+[[File]]
+Path = "login/templates/login/delete_account.html"
+Licenses = [ "MIT",]
+Copyright = [ "daryna <Daryna.Martymianova@rl-institut.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "login/templates/login/modals/table_publish.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/login/partials/group_component_tables.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/login/partials/group_component_form_edit.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/login/partials/user_partial_tables.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/login/partials/group_component_invite_user.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/login/partials/badge_icon.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/login/partials/groups.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "login/templates/login/partials/group_component_membership.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/login/partials/group_management.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "login/templates/registration/custom_password_reset_done.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "login/templates/registration/custom_password_reset_form.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Bryan Lancien <bryanlancien@yahoo.fr>",]
+
+[[File]]
+Path = "login/templates/registration/password_reset_email.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "login/templates/registration/login.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "login/templates/registration/custom_password_reset_confirm.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "login/templates/registration/custom_password_reset_complete.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "login/templates/mails/base.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "login/templates/mails/verification_mail.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "oekg/static/sparql_ui/vendor/yasgui-4.2.28/js/yasgui.min.js.map"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oekg/static/sparql_ui/vendor/yasgui-4.2.28/css/yasgui.min.css"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oekg/templates/oekg/main.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>", "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/favicon.ico"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/OEP_logo_2_no_text.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/oeplogo.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <wagner@creatdev-solutions.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/open_ego_logo_breit.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>",]
+
+[[File]]
+Path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/OEP_logo_2.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>",]
+
+[[File]]
+Path = "base/static/project_detail_pages_content/szenarien_db.json"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Maja Zimmermann <Maja.Zimmermann@rl-institut.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/project_detail_pages_content/sirop.json"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Maja Zimmermann <Maja.Zimmermann@rl-institut.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/project_detail_pages_content/lod_geoss.json"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Maja Zimmermann <Maja.Zimmermann@rl-institut.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/project_detail_pages_content/open_fred.json"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Maja Zimmermann <Maja.Zimmermann@rl-institut.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/project_detail_pages_content/.PROJECT_TEMPLATE.jsonc"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Christian Winger <c@wingechr.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/static/project_detail_pages_content/open_modex.json"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Maja Zimmermann <Maja.Zimmermann@rl-institut.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/project_detail_pages_content/open_ego.json"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Maja Zimmermann <Maja.Zimmermann@rl-institut.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/logos/project/open_MODEX_Header.jpg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/project/open_FRED_Header.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/project/SzenarienDB_Header.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/project/LOD-GEOSS_Header.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/project/open_ego_logo.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/project/SIROP_logo.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/project/open_eGo_Header.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/funder/BMWK.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "christian-rli <christian.hofmann@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/HZG.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/ZNES.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/pik_logo.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/Logo_IER_UniStuttgart-1200x386.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/OvGU.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/partner_logo_fortiss.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/RLI.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/partner_logo_hereon.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/IEE.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/DLR-VE.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/FZJuelich-1.jpg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/NE.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/OEI.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/EUF.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/partner_logo_nfdi4energy.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "SMutyala18 <santosh.mutyala@uni-oldenburg.de>",]
+
+[[File]]
+Path = "base/static/logos/partner/InfAI-Logo.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/selector-icons.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MFinkendei <anubis-mf@web.de>",]
+
+[[File]]
+Path = "base/static/img/icon-unknown.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MFinkendei <anubis-mf@web.de>",]
+
+[[File]]
+Path = "base/static/img/search.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MFinkendei <anubis-mf@web.de>",]
+
+[[File]]
+Path = "base/static/img/OpenEnergyFamily_OEPlatypus.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/OpenEnergyFamily_modules_trans.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/icon-unknown-alt.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MFinkendei <anubis-mf@web.de>",]
+
+[[File]]
+Path = "base/static/img/about/OpenEnergyFamily_modeling-cycle.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/about/OpenEnergyFamily_modeling-open-science.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/about/OpenEnergyFamily_GroupPhoto.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/about/OpenEnergyFamily_GroupPhoto2.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "christian-rli <christian.hofmann@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/welcome/about-community.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/img/welcome/ontology.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/img/welcome/videos.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <wagner@creatdev-solutions.com>",]
+
+[[File]]
+Path = "base/static/img/welcome/documentation.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <wagner@creatdev-solutions.com>",]
+
+[[File]]
+Path = "base/static/img/welcome/beginners.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <wagner@creatdev-solutions.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/img/welcome/bundles.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <wagner@creatdev-solutions.com>",]
+
+[[File]]
+Path = "base/static/img/welcome/api.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <wagner@creatdev-solutions.com>",]
+
+[[File]]
+Path = "base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/welcome/database.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <wagner@creatdev-solutions.com>",]
+
+[[File]]
+Path = "base/static/img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/welcome/OEP_Documentation.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/welcome/factsheets.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <wagner@creatdev-solutions.com>",]
+
+[[File]]
+Path = "base/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/img/welcome/about-openscience.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/img/welcome/concept.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <wagner@creatdev-solutions.com>",]
+
+[[File]]
+Path = "base/static/img/welcome/about-process-modelling.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/img/badges/badge_iron.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "base/static/img/badges/badge_silver.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "base/static/img/badges/badge_bronze.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "base/static/img/badges/badge_platinum.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "base/static/img/badges/badge_gold.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "base/static/css/jquery-ui.min.css"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/css/base-style.css"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "Till I <thsstll@users.noreply.github.com>", "MGlauer <martinglauer89@gmail.com>", "Martin Glauer <martinglauer89@googlemail.com>", "Johann Wagner <wagner@creatdev-solutions.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/static/css/filterform.css"
+Licenses = [ "MIT",]
+Copyright = [ "MFinkendei <anubis-mf@web.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/static/css/index-style.css"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <wagner@creatdev-solutions.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Kirann Bhavaraju <kirann9999@hotmail.com>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "base/static/css/bootstrap.min.css"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "jh-RLI <jonas.huber@rl-institut.de>", "jh-RLI <38939526+jh-RLI@users.noreply.github.com>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/static/css/bootstrap-select.min.css"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/templates/base/base-full.html"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/templates/base/_footer.html"
+Licenses = [ "MIT",]
+Copyright = [ "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/templates/base/base-wide-react.html"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/templates/base/500.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "NB-KREDER\\kreder <klara.reder@iee.fraunhofer.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Ludee <Ludwig.Huelk@rl-institut.de>",]
+
+[[File]]
+Path = "base/templates/base/base-profile.html"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/templates/base/base.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "quentinpeyras <quentinpey@hotmail.fr>", "Martin Glauer <martinglauer89@googlemail.com>", "Till I <thsstll@users.noreply.github.com>", "MFinkendei <anubis-mf@web.de>", "Johann Wagner <johann.wagner@st.ovgu.de>", "MGlauer <martinglauer89@gmail.com>", "Dhruvin1412 <48323399+Dhruvin1412@users.noreply.github.com>", "Johann Wagner <wagner@creatdev-solutions.com>", "Bachibouzouk <pierre-francois.duc@rl-institut.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "christian-rli <christian.hofmann@rl-institut.de>", "Martin Glauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>", "wingechr <wingechr@users.noreply.github.com>", "jh-RLI <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/templates/base/privacy_policy.html"
+Licenses = [ "MIT",]
+Copyright = [ "christian-rli <christian.hofmann@rl-institut.de>", "MGlauer <martinglauer89@gmail.com>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/templates/base/terms_of_use.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "WolfBunke <wolf-dieter.bunke@uni-flensburg.de>", "EdithaK <editha.koetter@rl-institut.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "christian-rli <christian.hofmann@rl-institut.de>", "Christian Winger <c@wingechr.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/templates/base/faq.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/templates/base/base-sidebar.html"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/templates/base/discussion.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Berit Müller <berit.mueller@rl-institut.de>", "EdithaK <editha.koetter@rl-institut.de>", "Hannah Förster <h.foerster@oeko.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/templates/base/contact.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "WolfBunke <wolf-dieter.bunke@uni-flensburg.de>", "MGlauer <martinglauer89@gmail.com>", "Lukas Emele <l.emele@oeko.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/templates/base/project-detail.html"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "base/templates/base/about.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "EdithaK <editha.koetter@rl-institut.de>", "Berit Müller <berit.mueller@rl-institut.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "jh-RLI <jonas.huber@rl-institut.de>", "jh-RLI <38939526+jh-RLI@users.noreply.github.com>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "christian-rli <christian.hofmann@rl-institut.de>", "SMutyala18 <santosh.mutyala@uni-oldenburg.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/templates/base/_header.html"
+Licenses = [ "MIT",]
+Copyright = [ "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "base/templates/base/index.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "Till I <thsstll@users.noreply.github.com>", "Berit Müller <berit.mueller@rl-institut.de>", "MGlauer <martinglauer89@gmail.com>", "EdithaK <editha.koetter@rl-institut.de>", "WolfBunke <wolf-dieter.bunke@uni-flensburg.de>", "Martin Glauer <martinglauer89@googlemail.com>", "Stephan Günther <gnn.code@gmail.com>", "NB-KREDER\\kreder <klara.reder@iee.fraunhofer.de>", "Christian Winger <c@wingechr.de>", "Johann Wagner <wagner@creatdev-solutions.com>", "Ludee <Ludwig.Huelk@rl-institut.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "jh-RLI <jonas.huber@rl-institut.de>", "christian-rli <christian.hofmann@rl-institut.de>", "christian-rli <42000429+christian-rli@users.noreply.github.com>", "Kirann Bhavaraju <kirann9999@hotmail.com>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "base/templates/base/404.html"
+Licenses = [ "MIT",]
+Copyright = [ "NB-KREDER\\kreder <klara.reder@iee.fraunhofer.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "MGlauer <martinglauer89@gmail.com>", "Ludee <Ludwig.Huelk@rl-institut.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "factsheet/templates/factsheet/index.html"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Adel Memariani <memarian@winadms-mbp.speedport.ip>", "Adel Memariani <memariani.adel@gmail.com>", "Adel Memariani <adel.memariani@ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",]
+
+[[File]]
+Path = "factsheet/templates/partials/related_oekg_scenarios.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "factsheet/frontend/package-lock.json"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>", "Adel Memariani <memariani.adel@gmail.com>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Adel Memariani <adel.memariani@ovgu.de>",]
+
+[[File]]
+Path = "factsheet/frontend/.gitignore"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "factsheet/frontend/package.json"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Adel Memariani <memarian@winadms-mbp.speedport.ip>", "Adel Memariani <memariani.adel@gmail.com>", "dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>", "Christian Winger <c@wingechr.de>", "Adel Memariani <adel.memariani@ovgu.de>",]
+
+[[File]]
+Path = "factsheet/frontend/public/manifest.json"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "factsheet/frontend/public/index.html"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "factsheet/frontend/src/app.less"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "factsheet/frontend/src/index.css"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "factsheet/frontend/src/conf.json"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Adel Memariani <memarian@winadms-mbp.speedport.ip>", "Adel Memariani <memariani.adel@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Adel Memariani <adel.memariani@ovgu.de>", "Christian Winger <c@wingechr.de>", "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "factsheet/frontend/src/data/countries.json"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "factsheet/frontend/src/styles/App.css"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "factsheet/frontend/src/styles/react-checkbox-tree.css"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "factsheet/frontend/src/styles/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "ontology/templates/ontology/partial_ontology_sidebar_content.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "ontology/templates/ontology/partial_ontology_full.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "ontology/templates/ontology/partial_ontology_content.html"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "ontology/templates/ontology/oeo-steering-committee.html"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Ludee <Ludwig.Huelk@rl-institut.de>", "christian-rli <christian.hofmann@rl-institut.de>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "ontology/templates/ontology/about.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Janna Hastings <janna.hastings@gmail.com>", "stap-m <38690039+stap-m@users.noreply.github.com>", "jh-RLI <jonas.huber@rl-institut.de>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "christian-rli <christian.hofmann@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "ontology/templates/ontology/oeo.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Adel Memariani <adel.memariani@ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "ontology/templates/ontology/class.html"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Adel Memariani <adel.memariani@ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "dataedit/fixtures/topics.json"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/static/colorfield/jscolor/hv.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>",]
+
+[[File]]
+Path = "dataedit/static/colorfield/jscolor/arrow.gif"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>",]
+
+[[File]]
+Path = "dataedit/static/colorfield/jscolor/demo.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>",]
+
+[[File]]
+Path = "dataedit/static/colorfield/jscolor/hs.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>",]
+
+[[File]]
+Path = "dataedit/static/colorfield/jscolor/cross.gif"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>",]
+
+[[File]]
+Path = "dataedit/static/metaedit/schema.json"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "Hendrik Huyskens <hendrik.huyskens@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/static/metaedit/metaedit.css"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>",]
+
+[[File]]
+Path = "dataedit/static/peer_review/schema.json"
+Licenses = [ "MIT",]
+Copyright = [ "steull <stephanuller.su@gmail.com>", "christian-rli <christian.hofmann@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/static/peer_review/example_datenmodell.json"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/static/peer_review/template_datenmodell.json"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/static/peer_review/img/opr-process-bpmn.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/static/dataedit/dataview.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>",]
+
+[[File]]
+Path = "dataedit/static/dataedit/dataedit.css"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/dataedit/api.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>",]
+
+[[File]]
+Path = "dataedit/static/dataedit/metadata.css"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Bachibouzouk <pierre-francois.duc@rl-institut.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/dataedit/jquery.dataTables.min.css"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/dataedit/query-builder.default.min.css"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/dataedit/leaflet.css"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/dataedit/images/marker-shadow.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/dataedit/images/marker-icon.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/metadata-viewer/metadata-viewer.css"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/static/images/sort_asc.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/images/sort_asc_disabled.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/images/sort_desc_disabled.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/images/sort_both.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/images/sort_desc.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/wizard/wizard.css"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/static/wizard/.gitignore"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/templates/messages.html"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/dataedit_tablelist.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "Lukas Emele <l.emele@oeko.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/tag_editor.html"
+Licenses = [ "MIT",]
+Copyright = [ "Tom Heimbrodt <heimbrodt@posteo.de>", "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/url_list_field.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/wizard.html"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "user <martimanovadarina@gmail.com>", "c.winger <c.winger@oeko.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/dataedit_schemalist.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "Jonas H <jonas.huber@rl-institut.de>", "Dhruvin1412 <48323399+Dhruvin1412@users.noreply.github.com>", "Pierre Francois <pierre-francois.duc@rl-institut.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/tablemap_form.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/opr_contributor.html"
+Licenses = [ "MIT",]
+Copyright = [ "steull <stephanuller.su@gmail.com>", "jh-RLI <jonas.huber@rl-institut.de>", "user <martimanovadarina@gmail.com>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "jh-RLI <38939526+jh-RLI@users.noreply.github.com>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "Darynarli <“Daryna.Barabanova@rl-institut.de”>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/tablegraph_form.html"
+Licenses = [ "MIT",]
+Copyright = [ "Bachibouzouk <pierre-francois.duc@rl-institut.de>", "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/table_permissions.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/opr_review.html"
+Licenses = [ "MIT",]
+Copyright = [ "steull <stephanuller.su@gmail.com>", "christian-rli <christian.hofmann@rl-institut.de>", "jh-RLI <jonas.huber@rl-institut.de>", "daryna <Daryna.Martymianova@rl-institut.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "user <martimanovadarina@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "jh-RLI <38939526+jh-RLI@users.noreply.github.com>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "Darynarli <martimanovadarina@gmail.com>", "Darynarli <“Daryna.Barabanova@rl-institut.de”>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/tag_overview.html"
+Licenses = [ "MIT",]
+Copyright = [ "Tom Heimbrodt <heimbrodt@posteo.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "MGlauer <martinglauer89@gmail.com>", "c.winger <c.winger@oeko.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/base.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "Tom Heimbrodt <heimbrodt@posteo.de>", "Johann Wagner <johann.wagner@st.ovgu.de>", "MGlauer <martinglauer89@gmail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/base-sidebar.html"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/base_fullwidth.html"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/meta_edit.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "Ludwig Huelk <ludwig.huelk@rl-institut.de>", "Bachibouzouk <pierre-francois.duc@rl-institute.de>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/tagged_field.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/dataview.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "Martin Glauer <martinglauer89@googlemail.com>", "Ludwig Huelk <ludwig.huelk@rl-institut.de>", "Tom Heimbrodt <heimbrodt@posteo.de>", "Bachibouzouk <pierre-francois.duc@rl-institute.de>", "Bachibouzouk <pierre-francois.duc@rl-institut.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>", "Hannah <36844029+han-f@users.noreply.github.com>", "jh-RLI <jonas.huber@rl-institut.de>", "Martin Glauer <martinglauer89@gmail.com>", "wingechr <wingechr@users.noreply.github.com>", "Kirann Bhavaraju <kirann9999@hotmail.com>", "steull <stephanuller.su@gmail.com>", "Bryan Lancien <bryanlancien@yahoo.fr>", "jh-RLI <38939526+jh-RLI@users.noreply.github.com>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "user <martimanovadarina@gmail.com>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "Eike Broda <git@ebroda.de>", "Darynarli <“Daryna.Barabanova@rl-institut.de”>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/tag_form.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/filter.html"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "jh-RLI <jonas.huber@rl-institut.de>", "Christian Winger <c@wingechr.de>", "MGlauer <martinglauer89@gmail.com>", "jh-RLI <38939526+jh-RLI@users.noreply.github.com>", "steull <stephanuller.su@gmail.com>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/taggable_setting.html"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "dataedit/templates/dataedit/admin.html"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann.wagner@st.ovgu.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "dataedit/templates/partials/metadata_viewer.html"
+Licenses = [ "MIT",]
+Copyright = [ "jh-RLI <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oedb_datamodels/script.py.mako"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>",]
+
+[[File]]
+Path = "oedb_datamodels/README"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@gmail.com>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "oeplatform/securitysettings.py.default"
+Licenses = [ "MIT",]
+Copyright = [ "MGlauer <martinglauer89@googlemail.com>", "Martin Glauer <martinglauer89@googlemail.com>", "pietro <peter.zamb@gmail.com>", "MGlauer <martinglauer89@gmail.com>", "Bachibouzouk <pierre-francois.duc@rl-institute.de>", "Johann Wagner <johann@wagnerdevelopment.de>", "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "christian-rli <42000429+christian-rli@users.noreply.github.com>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",]
+
+[[File]]
+Path = "script/setup_and_migrate_db"
+Licenses = [ "MIT",]
+Copyright = [ "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_viewer/.gitignore"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_viewer/data/oeo_viewer_json_data.json"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Adel Memariani <adel.memariani@ovgu.de>", "c.winger <c.winger@oeko.de>",]
+
+[[File]]
+Path = "oeo_viewer/templates/index.html"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@winadms-MacBook-Pro.local>", "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Christian Winger <c@wingechr.de>", "Adel Memariani <adel.memariani@ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/.babelrc"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/package-lock.json"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>", "wingechr <wingechr@users.noreply.github.com>", "jh-RLI <38939526+jh-RLI@users.noreply.github.com>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Adel Memariani <adel.memariani@ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/package.json"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Christian Winger <c@wingechr.de>", "Adel Memariani <adel.memariani@ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",]
+
+[[File]]
+Path = "oeo_viewer/client/source-code/index.html"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/source-code/statics/oep.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/source-code/statics/network.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/source-code/statics/oeo_info.json"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Adel Memariani <adel.memariani@ovgu.de>", "c.winger <c.winger@oeko.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/source-code/statics/d3-dependencies.csv"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Christian Winger <c@wingechr.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/source-code/styles/index.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/oep.fa81489f.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/flags.c284a657.png"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/icons.c653e3a9.woff2"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/brand-icons.a1ff5e2a.woff2"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/outline-icons.73dd3248.woff2"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/outline-icons.1bbd56ed.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/brand-icons.eb08bf9d.ttf"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/brand-icons.e4ffb4d8.eot"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/outline-icons.585fe6ab.ttf"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/outline-icons.00440017.woff"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/icons.f15da7ef.ttf"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/brand-icons.85906eb5.woff"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/network.2770f24c.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/scripts.bcf3243b.js.map"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Adel Memariani <adel.memariani@ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/icons.69098388.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/scripts.bcf3243b.css.map"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "c.winger <c.winger@oeko.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/outline-icons.5d6254f9.eot"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/index.html"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/brand-icons.ea4bcc5e.svg"
+Licenses = [ "CC-BY-4.0",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/icons.6f55393b.woff"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/icons.1164acc1.eot"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/scripts.bcf3243b.css"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>", "c.winger <c.winger@oeko.de>",]
+
+[[File]]
+Path = "oeo_viewer/client/dist/bezier.c0025d7c.cjs"
+Licenses = [ "MIT",]
+Copyright = [ "Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",]
+
+[[File]]
+Path = "theming/_variables.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",]
+
+[[File]]
+Path = "theming/.dockerignore"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "theming/oepstrap.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>", "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",]
+
+[[File]]
+Path = "theming/.gitignore"
+Licenses = [ "MIT",]
+Copyright = [ "Christian Winger <c@wingechr.de>",]
+
+[[File]]
+Path = "theming/Dockerfile"
+Licenses = [ "MIT",]
+Copyright = [ "Johann Wagner <johann@wagnerdevelopment.de>", "Christian Winger <c@wingechr.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "theming/scss/layouts/_ontology.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "theming/scss/layouts/_database.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "c.winger <c.winger@oeko.de>",]
+
+[[File]]
+Path = "theming/scss/layouts/_profile.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "theming/scss/layouts/_review.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "jh-RLI <jonas.huber@rl-institut.de>", "jh-RLI <38939526+jh-RLI@users.noreply.github.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "theming/scss/layouts/_main.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "c.winger <c.winger@oeko.de>",]
+
+[[File]]
+Path = "theming/scss/layouts/_topics.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "theming/scss/base/_index.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",]
+
+[[File]]
+Path = "theming/scss/base/_custom_variables.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",]
+
+[[File]]
+Path = "theming/scss/base/_mixins.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "theming/scss/components/_tabs.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "jh-RLI <jonas.huber@rl-institut.de>", "Jonas Huber <jonas.huber@rl-institut.de>", "Jonas Huber <38939526+jh-RLI@users.noreply.github.com>", "c.winger <c.winger@oeko.de>",]
+
+[[File]]
+Path = "theming/scss/components/_paginations.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "theming/scss/components/_buttons.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "theming/scss/components/_headers.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "theming/scss/components/_alerts.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "c.winger <c.winger@oeko.de>",]
+
+[[File]]
+Path = "theming/scss/components/_sidebars.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "c.winger <c.winger@oeko.de>", "Eike Broda <git@ebroda.de>",]
+
+[[File]]
+Path = "theming/scss/components/_empty_states.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "theming/scss/components/_tables.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien@yahoo.fr>", "Bryan Lancien <bryanlancien.ui@gmail.com>",]
+
+[[File]]
+Path = "theming/scss/components/_cards.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "theming/scss/components/_tags.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "theming/scss/components/_controls.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
+[[File]]
+Path = "theming/scss/components/_collapses.scss"
+Licenses = [ "MIT",]
+Copyright = [ "Bryan Lancien <bryanlancien.ui@gmail.com>", "Jonas Huber <jonas.huber@rl-institut.de>",]
+
