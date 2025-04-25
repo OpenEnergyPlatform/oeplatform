@@ -1,8 +1,10 @@
-version: "3.9"
-
 volumes:
   pgdata:
   fuseki_databases:
+  vite_node_modules:
+  vite_cache:
+  vite_temp:
+
 
 services:
   postgres:
@@ -33,16 +35,28 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.dev
     image: oeplatform-dev
-    working_dir: /home/appuser/app   # match the WORKDIR in your Dockerfile.dev
+    container_name: oeplatform-web-dev
+    working_dir: /home/appuser/app # match the WORKDIR in your Dockerfile.dev
     volumes:
       - type: bind
         source: ..
         target: /home/appuser/app
     ports:
       - "8000:8000"
+      - "5678:5678" # add debugpy port
+    command:
+      - python
+      - -m
+      - debugpy
+      - --listen
+      - "0.0.0.0:5678"
+      # - --wait-for-client
+      - manage.py
+      - runserver
+      - "0.0.0.0:8000"
     environment:
       DJANGO_SETTINGS_MODULE: "oeplatform.settings"
-      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_USEPOLLING: "false"
       DEBUG: True
       OEP_DJANGO_USER: postgres
       OEP_DB_PW: postgres
@@ -59,14 +73,28 @@ services:
 
   vite:
     build:
-      context: ..                     # same root context
+      context: .. # same root context
       dockerfile: docker/Dockerfile.vite
     image: oeplatform-vite-dev
-    working_dir: /home/appuser/app   # same path inside container
+    container_name: vite-js-dev
+    working_dir: /home/appuser/app # same path inside container
     volumes:
       - type: bind
         source: ..
         target: /home/appuser/app
+      # 2) keep dependencies in a named volume *inside* /app
+      - type: volume
+        source: vite_node_modules
+        target: /home/appuser/node_modules
+
+      # 3) Vite’s own cache directories in named volumes
+      - type: volume
+        source: vite_cache
+        target: /home/appuser/node_modules/.vite
+
+      - type: volume
+        source: vite_temp
+        target: /home/appuser/node_modules/.vite-temp
     ports:
       - "5173:5173"
     environment:
