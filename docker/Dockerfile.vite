@@ -1,13 +1,17 @@
-# docker/Dockerfile.vite
+FROM node:18
 
-FROM node:18 AS deps
 WORKDIR /home/appuser/app
+
+# copy package manifests so entrypoint can npm ci
 COPY package*.json ./
-RUN npm ci
 
-FROM node:18 AS dev
-WORKDIR /home/appuser/app
-# COPY --from=deps /home/appuser/app/node_modules ./node_modules
-# COPY . .
+# drop in our install-if-missing entrypoint
+COPY docker/vite-entrypoint.sh /usr/local/bin/vite-entrypoint.sh
+RUN chmod +x /usr/local/bin/vite-entrypoint.sh
+
+# expose dev port
 EXPOSE 5173
-CMD ["npm", "run", "dev"]
+
+# first runs entrypoint, then runs 'npm run dev'
+ENTRYPOINT [ "vite-entrypoint.sh" ]
+CMD       [ "npm", "run", "dev", "--", "--host", "0.0.0.0" ]
