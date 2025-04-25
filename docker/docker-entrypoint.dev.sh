@@ -60,7 +60,13 @@ echo "Ensuring dev user 'test' exists…"
 python manage.py create_dev_user test test@mail.com --password pass || true
 
 # ————————————————————
-# 6) Launch dev server
+# 6) Create a example table
+# ————————————————————
+echo "Seeding DataEdit tables…"
+python manage.py create_example_tables
+
+# ————————————————————
+# 7) Launch dev server
 # ————————————————————
 echo "Starting Django dev server…"
 exec "$@"
