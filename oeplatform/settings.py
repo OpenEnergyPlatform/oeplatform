@@ -229,11 +229,20 @@ STATICFILES_FINDERS = {
 
 # https://django-compressor.readthedocs.io/en/stable/settings.html
 COMPRESS_ENABLED = True
-COMPRESS_OFFLINE = not DEBUG
+COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
 
-# COMPRESS_FILTERS =
+COMPRESS_FILTERS = {
+    # do not minify js, we do it with parcel
+    # and it can create problems with react
+    "js": [],
+    # we minify with parcel, but we need to pass it
+    # through CssAbsoluteFilter to resolve linked fonts
+    "css": [
+        "compressor.filters.css_default.CssAbsoluteFilter",
+    ],
+}
 
 
 LOGGING = {
