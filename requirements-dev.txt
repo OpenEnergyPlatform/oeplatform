@@ -4,3 +4,4 @@ black
 isort
 pre-commit
 bumpversion
+debugpy
