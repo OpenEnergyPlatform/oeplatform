@@ -1,33 +1,29 @@
-// this raises more errors as transition from script to module
-// makes it more complicated to use onclick in html elements
-// import { updateClientStateDict } from './frontend/state.js'
 import * as common from './peer_review.js';
 import {
-    isEmptyValue,
-    hideReviewerOptions,
-    switchCategoryTab,
-    setSelectedField,
-    setselectedFieldValue,
-    clearInputFields,
-    selectedState,
-    selectedField,
-    selectedFieldValue,
-    current_review,
-    selectedCategory,
-    setSelectedCategory,
-    updateFieldColor,
-    checkReviewComplete,
-    selectNextField,
-    renderSummaryPageFields,
-    updateTabProgressIndicatorClasses,
-    showToast,
-    updateFieldDescription,
-    highlightSelectedField
+  isEmptyValue,
+  hideReviewerOptions,
+  switchCategoryTab,
+  setSelectedField,
+  setselectedFieldValue,
+  clearInputFields,
+  selectedState,
+  selectedFieldValue,
+  current_review,
+  selectedCategory,
+  setSelectedCategory,
+  updateFieldColor,
+  checkReviewComplete,
+  selectNextField,
+  renderSummaryPageFields,
+  updateTabProgressIndicatorClasses,
+  showToast,
+  updateFieldDescription,
+  highlightSelectedField, initializeEventBindings, setGetFieldState,
+  getFieldState
 
 } from './peer_review.js';
 window.selectState = common.selectState;
 
-common.initializeEventBindings();
 // OK Field View Change
 $('#button').bind('click', hideReviewerOptions);
 
@@ -35,6 +31,7 @@ $('#button').bind('click', hideReviewerOptions);
 
 
 function click_field(fieldKey, fieldValue, category) {
+
   const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
 
   switchCategoryTab(category);
@@ -83,12 +80,14 @@ document.addEventListener('DOMContentLoaded', function() {
  * @param fieldKey
  */
 
-export function getFieldState(fieldKey) {
+export function getFieldStateForContributor(fieldKey) {
   // This function gets the state of a field
-  return window.state_dict[fieldKey];
+  return state_dict[fieldKey];
 }
 
-export function saveEntrances() {
+setGetFieldState(getFieldStateForContributor);
+
+function saveEntrancesForContributor() {
 
   if (selectedState !== "ok" && selectedState !== "rejected") {
     // Get the valuearea element
@@ -197,6 +196,10 @@ export function saveEntrances() {
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
 }
+initializeEventBindings(saveEntrancesForContributor);
 
 
-common.peerReview(config, true);
+document.addEventListener('DOMContentLoaded', function () {
+    common.initCurrentReview(config);
+  common.peerReview(config, true);
+});
