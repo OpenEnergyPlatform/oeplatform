@@ -115,8 +115,13 @@
             <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
               <div class="review__items">
                 {% for item in meta.general %}
-                <div id="field_{{item.field}}" class="field review__item" data-category="general" onclick="click_field('{{item.field}}', '{{ item.value }}', 'general');">
-                  <p class="review__item-content">
+<div 
+  id="field_{{ item.field|default:'undefined' }}" 
+  class="field review__item" 
+  data-fieldkey="{{ item.field|default:'' }}" 
+  data-fieldvalue="{{ item.value|default:'' }}" 
+  data-category="general"> 
+    <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
@@ -138,8 +143,13 @@
               <div class="review__items">
                 <p class="review__items-cat">Spatial</p>
                 {% for item in meta.spatial %}
-                <div id="field_{{item.field}}" class="field review__item" data-category="spatial" onclick="click_field('{{item.field}}', '{{ item.value }}', 'spatial');">
-                  <p class="review__item-content">
+<div 
+  id="field_{{ item.field|default:'undefined' }}" 
+  class="field review__item" 
+  data-fieldkey="{{ item.field|default:'' }}" 
+  data-fieldvalue="{{ item.value|default:'' }}" 
+  data-category="spatial">
+    <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
@@ -156,8 +166,13 @@
                 {% endfor %}
                 <p class="review__items-cat">Temporal</p>
                 {% for item in meta.temporal %}
-                <div id="field_{{item.field}}" class="field review__item" data-category="temporal" onclick="click_field('{{item.field}}', '{{ item.value }}', 'temporal');">
-                  <p class="review__item-content">
+<div 
+  id="field_{{ item.field|default:'undefined' }}" 
+  class="field review__item" 
+  data-fieldkey="{{ item.field|default:'' }}" 
+  data-fieldvalue="{{ item.value|default:'' }}" 
+  data-category="temporal"> 
+    <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
@@ -176,8 +191,13 @@
             <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
               <div class="review__items">
               {% for item in meta.source %}
-                <div id="field_{{item.field}}" class="field review__item" data-category="source" onclick="click_field('{{item.field}}', '{{ item.value }}', 'source');">
-                  <p class="review__item-content">
+<div 
+  id="field_{{ item.field|default:'undefined' }}" 
+  class="field review__item" 
+  data-fieldkey="{{ item.field|default:'' }}" 
+  data-fieldvalue="{{ item.value|default:'' }}" 
+  data-category="source"> 
+    <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
@@ -196,8 +216,13 @@
             <div class="tab-pane fade" id="license" role="tabpanel" aria-labelledby="license-tab">
               <div class="review__items">
               {% for item in meta.license %}
-                <div id="field_{{item.field}}" class="field review__item" data-category="license" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
-                  <p class="review__item-content">
+<div 
+  id="field_{{ item.field|default:'undefined' }}" 
+  class="field review__item" 
+  data-fieldkey="{{ item.field|default:'' }}" 
+  data-fieldvalue="{{ item.value|default:'' }}" 
+  data-category="license"> 
+    <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
