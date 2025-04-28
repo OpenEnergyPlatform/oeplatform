@@ -1,13 +1,9 @@
 import {
-  getAllFieldsAndValues,
   checkFieldStates,
-    getFieldState,
-    saveEntrances,
-  check_if_review_finished, clientSideReviewFinished
-} from './opr_reviewer.js';
-import {common} from "../../../oeo_viewer/client/dist/scripts.bcf3243b";
+  check_if_review_finished
+} from './opr_reviewer_logic.js';
 
-export let selectedField=null;
+window.selectedField = window.selectedField ?? null;
 export let selectedFieldValue=null;
 
 export function setSelectedField(fieldKey) {
@@ -23,31 +19,34 @@ export function setSelectedCategory(value) {
   selectedCategory = value;
 }
 
-export let current_review = {
-  "topic": config.topic,
-  "table": config.table,
-  "dateStarted": null,
-  "dateFinished": null,
-  "metadataVersion": "v1.6.0",
-  "reviews": [],
-  "reviewFinished": false,
-  "grantedBadge": null,
-  "metaMetadata": {
-    "reviewVersion": "OEP-0.1.0",
-    "metadataLicense": {
-      "name": "CC0-1.0",
-      "title": "Creative Commons Zero v1.0 Universal",
-      "path": "https://creativecommons.org/publicdomain/zero/1.0/",
+export let current_review;
+
+export function initCurrentReview(config) {
+  current_review = {
+    topic: config.topic,
+    table: config.table,
+    dateStarted: null,
+    dateFinished: null,
+    metadataVersion: "v1.6.0",
+    reviews: [],
+    reviewFinished: false,
+    grantedBadge: null,
+    metaMetadata: {
+      reviewVersion: "OEP-0.1.0",
+      metadataLicense: {
+        name: "CC0-1.0",
+        title: "Creative Commons Zero v1.0 Universal",
+        path: "https://creativecommons.org/publicdomain/zero/1.0/",
+      },
     },
-  },
-};
+  };
+  window.current_review = current_review;
+}
 
-// common.js
-
-export function initializeEventBindings() {
+export function initializeEventBindings(saveEntrancesFn) {
   // Submit field review
-  $('#submitButton').bind('click', saveEntrances);
-  $('#submitCommentButton').bind('click', saveEntrances);
+  $('#submitButton').bind('click', saveEntrancesFn);
+  $('#submitCommentButton').bind('click', saveEntrancesFn);
   $('#submitButton').bind('click', hideReviewerOptions);
   $('#submitCommentButton').bind('click', hideReviewerOptions);
 
@@ -57,7 +56,7 @@ export function initializeEventBindings() {
   $('#peer_review-save').bind('click', savePeerReview);
   // Cancel review
   $('#peer_review-cancel').bind('click', cancelPeerReview);
-  $('#ok-button').bind('click', saveEntrances);
+  $('#ok-button').bind('click', saveEntrancesFn);
 
   // Suggestion Field View Change
   $('#suggestion-button').bind('click', showReviewerOptions);
@@ -70,7 +69,6 @@ export function initializeEventBindings() {
   // Clear Input fields when new tab is selected
   $('.nav-link').click(clearInputFields);
 }
-
 
 /**
  * Returns name from cookies
@@ -125,7 +123,18 @@ export function sendJson(method, url, data, success, error) {
     error: error,
   });
 }
+export function getAllFieldsAndValues() {
+  const fields = document.querySelectorAll('.field');
+  const fieldList = [];
 
+  fields.forEach(field => {
+    const fieldName = field.id.slice(6);
+    const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+    fieldList.push({ fieldName, fieldValue });
+  });
+
+  return fieldList;
+}
 /**
  * Reads error message from response
  * @param {json} response Get or post request
@@ -298,7 +307,7 @@ export function makeFieldList() {
  */
 export function selectNextField() {
   var fieldList = makeFieldList();
-  var next = fieldList.indexOf('field_' + selectedField) + 1;
+  var next = fieldList.indexOf('field_' + window.selectedField) + 1;
   selectField(fieldList, next);
 }
 
@@ -307,7 +316,7 @@ export function selectNextField() {
  */
 export function selectPreviousField() {
   var fieldList = makeFieldList();
-  var prev = fieldList.indexOf('field_' + selectedField) - 1;
+  var prev = fieldList.indexOf('field_' + window.selectedField) - 1;
   selectField(fieldList, prev);
 }
 
@@ -590,7 +599,6 @@ export function showReviewerCommentsOptions() {
 export function updateFieldColor() {
   // Color ok/suggestion/rejected
   let field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
-  // console.log(field_id)
   $(field_id).removeClass('field-ok');
   $(field_id).removeClass('field-suggestion');
   $(field_id).removeClass('field-rejected');
@@ -699,4 +707,16 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-common.peerReview(config, true);
+let getFieldStateImpl = (fieldKey) => {
+  console.warn(`getFieldState is not defined yet. Can't get state for fieldKey: ${fieldKey}`);
+  return null;
+};
+
+export function setGetFieldState(fn) {
+  getFieldStateImpl = fn;
+}
+
+export function getFieldState(fieldKey) {
+  return getFieldStateImpl(fieldKey);
+}
+
