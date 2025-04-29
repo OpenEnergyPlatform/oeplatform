@@ -68,7 +68,7 @@ This will only remove the containers not the images or the volumes. If you want 
 
 If you want to create them again you can run the first command again. In most cases it is useful to add the --build flag to trigger a new build which will include latest changes. You can add the -D flag to detach the terminal form the container once it is started.
 
-docker compose -f docker/docker-compose.dev.yaml up --build -d
+    docker compose -f docker/docker-compose.dev.yaml up --build -d
 
 ### Inspect docker containers
 
