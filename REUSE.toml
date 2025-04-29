@@ -2007,6 +2007,7 @@ Copyright = [
 Path = "dataedit/static/dataedit/query-builder.default.min.css"
 Licenses = [ "MIT",]
 Copyright = [
+    "Copyright 2014-2018 Damien 'Mistic' Sorel (http://www.strangeplanet.fr)",
   "2019 MGlauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -2663,6 +2664,8 @@ Copyright = [
 Path = "oeo_viewer/client/dist/scripts.bcf3243b.css"
 Licenses = [ "MIT",]
 Copyright = [
+    "Copyright 2014 Contributors",
+    "Copyright 2013 Contributors",
   "2023 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
   "2024 c.winger <c.winger@oeko.de>",
 ]
