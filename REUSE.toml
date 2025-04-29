@@ -1387,6 +1387,7 @@ Copyright = [
 Path = "base/static/css/jquery-ui.min.css"
 Licenses = [ "MIT",]
 Copyright = [
+    "Copyright 2014 jQuery Foundation and other contributors",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -1429,7 +1430,9 @@ Copyright = [
 [[File]]
 Path = "base/static/css/bootstrap.min.css"
 Licenses = [ "MIT",]
-Copyright = [
+Copyright = [ 
+    "Copyright 2011-2022 The Bootstrap Authors",
+    "Copyright 2011-2022 Twitter, Inc.",
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -1444,6 +1447,7 @@ Copyright = [
 Path = "base/static/css/bootstrap-select.min.css"
 Licenses = [ "MIT",]
 Copyright = [
+    "Copyright 2012-2021 SnapAppointments, LLC",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -1563,6 +1567,7 @@ Copyright = [
 Path = "base/templates/base/base-sidebar.html"
 Licenses = [ "MIT",]
 Copyright = [
+    "Copyright (c) 2011-2024 The Bootstrap Authors",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 jh-RLI <jonas.huber@rl-institut.de>",
