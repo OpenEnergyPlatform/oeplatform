@@ -51,18 +51,22 @@ Add the following commands into your terminal which supports git and docker comp
     # navigate into the cloned directory
     docker compose -f docker/docker-compose.dev.yaml
 
+#### Using a existing repository
 
 This should print the build process and result in successfully build infrastructure with several containers running. On first start up of the oeplatform container it is likely that you will have to adapt some django settings and or remove some directories in case you have used an existing distribution of the oeplatform code together with previous installations.
 
-Once everything is up and running you are good to start development. This setup also gets you started with some of the main features of the oeplatform as it creates a test user (user "test" and password "pass") and dummy datasets in the database as well as dummy model and framework factsheets and a example scenario bundle.
+Checklist:
 
-The docker setups bind mounts your current workspace which is the directory you cloned the oeplatform to. The bind mount enables you to do edits to any code files which will then be picked up by the docker container which is restarting and you will find your edits in the development deployment which you can access in your browser at <http://127.0.0.1:8000>.
+- Remove the `oeplatform_data` directory from the docker folder
+- Remove any older images and volumes
+- Make sure you have a internet connection for the initial setup
+- In your oeplatform/securitysettings.py make sure you have the variables from the securitysettings.default.py file available especially the DJANGO_VITE, VITE_DEV_SERVER_URL and the Updated RDF_DATABASES connection credentials are new and you might have to add them.
 
 #### Remove installations
 
 Using the command below will stop and all containers. Keep in mind that you will detach from the volume which contains all data from you current database, factsheet and scenario bundles as well as all user.
 
-    docker compose -f docker/docker-compose.dev.yaml down
+    docker compose -f docker/docker-compose.dev.yaml down -v
 
 This will only remove the containers not the images or the volumes. If you want to install everything make sure to prune all images and if you also want to remove the data you must also remove the images. You can also do this using docker desktop.
 
@@ -72,4 +76,49 @@ If you want to create them again you can run the first command again. In most ca
 
 ### Inspect docker containers
 
-To monitor your deployment a very simple way is to use docker desktop. You will find all installed containers and find easy to use options to read the logs or even execute commands. This gives you full insights and control in case some errors and you need to inspect the development server output.
+To monitor your deployment a very simple way is to use docker desktop or output the container in your terminal by not using the -d flag when spinning up containers. You will find all installed containers and find easy to use options to read the logs or even execute commands. This gives you full insights and control in case some errors and you need to inspect the development server output.
+
+## Usage
+
+Once everything is up and running you are good to start development. You should now have the following containers running:
+
+- vite (javascript dev server)
+- oeplatform-web-dev (OEP)
+- postgres-1 (OEDB, Django DB)
+- fuseki (OEKG)
+- SOON: LOEP (oeo term lookup tool used for ontological annotation)
+- SOON: ontop (quantitative data comparison)
+- SOON: Docs (mkdocs based documentation website)
+
+### Restart, rebuild and cleanup containers to apply changes
+
+While developing and adding changes you might want to rebuild your docker containers. There are several ways to do this, one is already documented above in the remove installation section. A typical sequence when updating the composed containers:
+
+    # Remove everything, assuming you have a terminal which is at the oeplatform root directory
+    docker compose -f docker/docker-compose.dev.yaml down -v
+    # Install everything again
+    docker compose -f docker/docker-compose.dev.yaml up --build
+
+    # Just apply changes to a specific container (see vite as ref to the container name)
+    docker compose -f docker/docker-compose.dev.yaml vite down -v
+    docker compose -f docker/docker-compose.dev.yaml vite up
+
+### Dummy user and data
+
+This setup also gets you started with some of the main features of the oeplatform as it creates a test user and dummy datasets in the database as well as dummy model and framework factsheets and a example scenario bundle.
+
+- Login with user "test" and password "pass"
+
+### Docker reload on files changes
+
+The docker setups bind mounts your current workspace which is the directory you cloned the oeplatform to. The bind mount enables you to do edits to any code files which will then be picked up by the docker container which is restarting and you will find your edits in the development deployment which you can access in your browser at <http://127.0.0.1:8000>.
+
+This includes python and javascript sourcecode files.
+
+### Working with node/npm (javaScript)
+
+You might want to use node and its package manager npm to install or update package in the package.json file. To do so you should have node installed locally (using node-version-manager "nvm") and install new packages using the npm cli.
+
+- npm install "package-name" --save
+
+Then you can restart the vite container, it will pickup the changes in the package.json / package-lock.json and update the container node_modules.
