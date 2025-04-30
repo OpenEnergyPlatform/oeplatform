@@ -1,11 +1,19 @@
 #!/usr/bin/env sh
 set -e
 
-# if there's no node_modules (or it's empty), install from package*.json
-if [ ! -d node_modules ] || [ -z "$(ls -A node_modules)" ]; then
-  echo "⟳  installing dependencies…"
+STAMP=".node_modules_stamp"
+# compute the current lockfile checksum
+checksum=$(md5sum package-lock.json | awk '{print $1}')
+
+# if modules missing/empty, or stamp missing, or deps changed → reinstall
+if [ ! -d node_modules ] \
+   || [ -z "$(ls -A node_modules)" ] \
+   || [ ! -f "$STAMP" ] \
+   || [ "$(cat "$STAMP")" != "$checksum" ]; then
+  echo "⟳  installing/updating dependencies…"
   npm ci
+  echo "$checksum" > "$STAMP"
 fi
 
-# now hand off to whatever CMD you passed in
+# hand off to the original CMD (e.g. `npm run dev …`)
 exec "$@"
