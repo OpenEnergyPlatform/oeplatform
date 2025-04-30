@@ -88,6 +88,9 @@ apache*
 
 .DS_Store
 
+# Docker
+.node_modules_stamp
+
 # Deployment files
 docker/oeplatform_data
 
