@@ -4,17 +4,38 @@ set -euo pipefail
 # give Postgres a moment
 sleep 5
 
+# ----------------------------------------------------------------
+# Bootstrap permissions on bind-mounted dirs so appuser can write
+# ----------------------------------------------------------------
+for d in ontologies media/oeo_ext static; do
+  TARGET="/home/appuser/app/$d"
+
+  # ensure the directory exists
+  mkdir -p "$TARGET"
+
+  # make appuser own it
+  chown -R appuser:appuser "$TARGET"
+
+  # owner & group: read/write + conditional-exec (dirs executable,
+  # files only if already marked) ; others: read + conditional-exec
+  chmod -R u+rwX,g+rwX,o+rX "$TARGET"
+done
+
 # ————————————————————
 # 1) Ontologies & media setup
 # ————————————————————
 ONT_DIR=/home/appuser/app/ontologies
-if [ ! -d "$ONT_DIR" ]; then
+if [ ! -d "$ONT_DIR/oeo" ]; then
   echo "Downloading ontology…"
   mkdir -p "$ONT_DIR"
   wget -qO- https://github.com/OpenEnergyPlatform/ontology/releases/download/v2.5.0/build-files.zip \
     | funzip > /tmp/ont.zip \
     && unzip -q /tmp/ont.zip -d "$ONT_DIR" \
     && rm /tmp/ont.zip
+
+  # fix perms on the new files
+  chown -R appuser:appuser "$ONT_DIR"
+  chmod -R u+rwX,g+rwX,o+rX "$ONT_DIR"
 fi
 
 MEDIA_DIR=/home/appuser/app/media/oeo_ext
@@ -23,6 +44,10 @@ if [ ! -f "${MEDIA_DIR}/oeo_ext.owl" ]; then
   mkdir -p "$MEDIA_DIR"
   cp /home/appuser/app/oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl \
      "$MEDIA_DIR/oeo_ext.owl"
+
+  # fix perms on the new file
+  chown appuser:appuser "$MEDIA_DIR/oeo_ext.owl"
+  chmod u+rw,g+rw,o+rX "$MEDIA_DIR"
 fi
 
 # ————————————————————
@@ -33,6 +58,8 @@ SEC_DEF=/home/appuser/app/oeplatform/securitysettings.py.default
 if [ ! -f "$SEC" ]; then
   echo "Copying default securitysettings…"
   cp "$SEC_DEF" "$SEC"
+  chown appuser:appuser "$SEC"
+  chmod u+rw,g+rw,o+rX "$SEC"
 fi
 
 # ————————————————————
@@ -56,8 +83,11 @@ python manage.py compress --force
 # ————————————————————
 # 5) Create dev user
 # ————————————————————
-echo "Ensuring dev user 'test' exists…"
-python manage.py create_dev_user test test@mail.com --password pass || true
+DEV_USER=test
+DEV_PW=pass
+echo "Ensuring dev user '$DEV_USER' exists…"
+python manage.py create_dev_user "$DEV_USER" "$DEV_USER@mail.com" --password "$DEV_PW" || true
+echo "✅  Dev user '$DEV_USER' password is: $DEV_PW"
 
 # ————————————————————
 # 6) Create a example table
