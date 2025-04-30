@@ -6,9 +6,13 @@
   Currently not all parts fo the infrastructure are covered. Missing are the ONTOP and LOEP services also not all javascript modules are yet connected to vite but will be added later on.
   What is about to be added: We will provide dummy scenario bundles and factsheets for model and frameworks as well as an example sematic mapping which is used by ontop to enable the scenario comparison and its graph based data visualizations. [(#1988)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1988)
 
+- Update test related to oekg queries and avoide using Mocks to keep tests simpler and more realistic by using actual rdflib Graph [(#1980)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1980)
+
 ## Features
 
 ## Bugs
+
+- Fix the table iri serialized, which now supports external urls stored in the oekg (e.g. When scenarios link to external datasets). External datasets are ignored and return a empty string to avoid exceptions [(#1980)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1980)
 
 ## Documentation updates
 
