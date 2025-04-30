@@ -11,3 +11,5 @@
 ## Bugs
 
 ## Documentation updates
+
+- Add documentation on how to use docker for development [(#1988)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1988)
