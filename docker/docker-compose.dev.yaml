@@ -82,19 +82,16 @@ services:
       - type: bind
         source: ..
         target: /home/appuser/app
+
       # 2) keep dependencies in a named volume *inside* /app
       - type: volume
         source: vite_node_modules
-        target: /home/appuser/node_modules
+        target: /home/appuser/app/node_modules
 
       # 3) Vite’s own cache directories in named volumes
       - type: volume
         source: vite_cache
-        target: /home/appuser/node_modules/.vite
-
-      - type: volume
-        source: vite_temp
-        target: /home/appuser/node_modules/.vite-temp
+        target: /home/appuser/app/.vite_cache
     ports:
       - "5173:5173"
     environment:
