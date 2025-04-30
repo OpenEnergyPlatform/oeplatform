@@ -28,12 +28,13 @@ ONT_DIR=/home/appuser/app/ontologies
 if [ ! -d "$ONT_DIR/oeo" ]; then
   echo "Downloading ontology…"
   mkdir -p "$ONT_DIR"
-  wget -qO- https://github.com/OpenEnergyPlatform/ontology/releases/download/v2.5.0/build-files.zip \
-    | funzip > /tmp/ont.zip \
-    && unzip -q /tmp/ont.zip -d "$ONT_DIR" \
-    && rm /tmp/ont.zip
 
-  # fix perms on the new files
+  wget -qO /tmp/ont.zip \
+    https://github.com/OpenEnergyPlatform/ontology/releases/latest/download/build-files.zip
+
+  unzip -q /tmp/ont.zip -d "$ONT_DIR"
+  rm /tmp/ont.zip
+
   chown -R appuser:appuser "$ONT_DIR"
   chmod -R u+rwX,g+rwX,o+rX "$ONT_DIR"
 fi
