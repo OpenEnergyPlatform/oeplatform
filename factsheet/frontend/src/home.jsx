@@ -36,7 +36,7 @@ export default function Home() {
   }
 
   return (
-    <Box sx={{ mt: '72px' }}>
+    <Box>
       <CustomTable factsheets={factsheets} />
     </Box>
   );
