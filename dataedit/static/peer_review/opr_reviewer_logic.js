@@ -1,4 +1,6 @@
-import {current_review, getAllFieldsAndValues, getFieldState, isEmptyValue, showToast, sendJson} from "./peer_review.js";
+import {current_review, getAllFieldsAndValues, getErrorMsg, showToast} from "./peer_review.js";
+import {isEmptyValue, sendJson} from "./utilities.js";
+import {getFieldState} from "./state_current_review.js";
 export function finishPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
 
