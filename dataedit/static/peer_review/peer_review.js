@@ -2,6 +2,10 @@ import {
   checkFieldStates,
   check_if_review_finished
 } from './opr_reviewer_logic.js';
+import {renderSummaryPageFields, updateSubmitButtonColor, updateTabProgressIndicatorClasses} from "./summary.js";
+import {selectNextField} from "./navigation.js";
+import {isEmptyValue, sendJson, getCookie} from "./utilities.js";
+import {getFieldState, updateClientStateDict} from "./state_current_review.js";
 
 window.selectedField = window.selectedField ?? null;
 export let selectedFieldValue=null;
