@@ -1,8 +1,6 @@
 import * as common from './peer_review.js';
 import {
-  isEmptyValue,
   hideReviewerOptions,
-  switchCategoryTab,
   setSelectedField,
   setselectedFieldValue,
   clearInputFields,
@@ -11,17 +9,16 @@ import {
   current_review,
   selectedCategory,
   setSelectedCategory,
-  updateFieldColor,
   checkReviewComplete,
-  selectNextField,
-  renderSummaryPageFields,
-  updateTabProgressIndicatorClasses,
   showToast,
   updateFieldDescription,
-  highlightSelectedField, initializeEventBindings, setGetFieldState,
-  getFieldState
+  highlightSelectedField, initializeEventBindings,
 
 } from './peer_review.js';
+import {selectNextField, switchCategoryTab} from "./navigation.js";
+import {getFieldState, setGetFieldState} from "./state_current_review.js";
+import {updateFieldColor} from "./utilities.js";
+import {renderSummaryPageFields, updateTabProgressIndicatorClasses} from "./summary.js";
 window.selectState = common.selectState;
 
 // OK Field View Change
@@ -198,8 +195,3 @@ function saveEntrancesForContributor() {
 }
 initializeEventBindings(saveEntrancesForContributor);
 
-
-document.addEventListener('DOMContentLoaded', function () {
-    common.initCurrentReview(config);
-  common.peerReview(config, true);
-});
