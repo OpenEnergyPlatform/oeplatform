@@ -404,5 +404,9 @@
 }
 </script>
 
-
+{% compress js %}
+    <script type="module" src="{% static '/peer_review/opr_reviewer.js' %}"></script>
+    <script type="module" src="{% static '/peer_review/peer_review.js' %}"></script>
+    <script type="module" src="{% static '/peer_review/main.js' %}"></script>
+{% endcompress %}
 {% endblock after-body-bottom-js %}
