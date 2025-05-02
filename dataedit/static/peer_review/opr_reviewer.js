@@ -3,9 +3,7 @@
 // import { updateClientStateDict } from './frontend/state.js'
 import * as common from './peer_review.js';
 import {
-    isEmptyValue,
     hideReviewerOptions,
-    switchCategoryTab,
     setSelectedField,
     setselectedFieldValue,
     clearInputFields,
@@ -14,20 +12,19 @@ import {
     current_review,
     selectedCategory,
     setSelectedCategory,
-    updateFieldColor,
     checkReviewComplete,
-    selectNextField,
-    renderSummaryPageFields,
-    updateTabProgressIndicatorClasses,
     showToast,
-    highlightSelectedField, updateFieldDescription, initializeEventBindings, setGetFieldState, getFieldState
-
+    highlightSelectedField, updateFieldDescription, initializeEventBindings, makeFieldList
 
 } from './peer_review.js';
 window.selectState = common.selectState;
 
 
 import {check_if_review_finished, checkFieldStates } from './opr_reviewer_logic.js';
+import {getFieldState, setGetFieldState} from "./state_current_review.js";
+import {selectNextField, switchCategoryTab} from "./navigation.js";
+import {renderSummaryPageFields, updateTabProgressIndicatorClasses} from "./summary.js";
+import {isEmptyValue, updateFieldColor} from "./utilities.js";
 
 window.clientSideReviewFinished = window.clientSideReviewFinished ?? false;
 
@@ -378,8 +375,3 @@ function calculateOkPercentage(stateDict) {
 function updatePercentageDisplay() {
   document.getElementById("percentageDisplay").textContent = calculateOkPercentage(window.state_dict);
 }
-document.addEventListener('DOMContentLoaded', function () {
-  common.initCurrentReview(config);
-
-  common.peerReview(config, true);
-});
