@@ -1,5 +1,9 @@
 # JavaScript integration
 
+!!! Note
+
+    The information provided here is only relevant if you encounter issues in the vite (nodejs) setup. During development the javascript server is running automatically and in production only a bundled version of the code is shipped which keeps the production environment clean.
+
 We integrate nodejs into the django project to support JavaScript and enhance developer experience, enhance consistency for JavaScript modules and more.
 
 ## Benefits
