@@ -156,6 +156,17 @@
                   "badge": "Platinum",
                   "title": "Subject Identifier",
                   "format": "uri"
+                },
+                "openModalButton": {
+                  "description": "Button to open a modal for HTMX request",
+                  "format": "button",
+                  "options": {
+                    "button": {
+                      "text": "Open OEO-extended",
+                      "icon": "external-link-alt",
+                      "action": "openModalAction"
+                    }
+                  }
                 }
               },
               "badge": "Platinum",
@@ -778,6 +789,7 @@
                 "items": {
                   "type": "object",
                   "format": "categories",
+                  "basicCategoryTitle": "Column",
                   "properties": {
                     "name": {
                       "description": "The name of the field. The name may only consist of lowercase alphanumeric characters or underscores. It must not begin with a number or an underscore.",
@@ -850,6 +862,17 @@
                             "badge": "Platinum",
                             "title": "Is About Identifier",
                             "format": "uri"
+                          },
+                          "openModalButton": {
+                            "description": "Button to open a modal for HTMX request",
+                            "format": "button",
+                            "options": {
+                              "button": {
+                                "text": "Open OEO-extended",
+                                "icon": "external-link-alt",
+                                "action": "openModalAction"
+                              }
+                            }
                           }
                         },
                         "badge": "Platinum",
@@ -896,6 +919,17 @@
                             "badge": "Platinum",
                             "title": "Value Reference Identifier",
                             "format": "uri"
+                          },
+                          "openModalButton": {
+                            "description": "Button to open a modal for HTMX request",
+                            "format": "button",
+                            "options": {
+                              "button": {
+                                "text": "Open OEO-extended",
+                                "icon": "external-link-alt",
+                                "action": "openModalAction"
+                              }
+                            }
                           }
                         },
                         "badge": "Platinum",
@@ -982,7 +1016,7 @@
                 "title": "Foreign Keys"
               }
             },
-            "title": "Tabular data schema",
+            "title": "Data schema",
             "required": ["primaryKey"]
           },
           "dialect": {
