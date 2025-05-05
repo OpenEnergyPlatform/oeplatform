@@ -6,6 +6,4 @@
 
 ## Bugs
 
-- Fix a bug in the OEMetaBuilder which prevented adding inputs to some fields as they are annotated as readOnly and remove hidden tabs to avoid confusion when creating or editing metadata. Also enable the oeo extended plugin view in subject, isAbout and valueReference fields [(#1994)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1994)
-
 ## Documentation updates
