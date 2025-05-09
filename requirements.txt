@@ -14,8 +14,8 @@
 # SPDX-FileCopyrightText: 2025 Venkatesh Murugadas <venkatesh.murugadas@st.ovgu.de>
 # SPDX-FileCopyrightText: 2025 Zoë Schaaff <z.schaaff@oeko.de>
 # SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
-# SPDX-FileCopyrightText: 2025 christian-rli <christian.hofmann@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 daryna <Daryna.Martymianova@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <christian.hofmann@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>

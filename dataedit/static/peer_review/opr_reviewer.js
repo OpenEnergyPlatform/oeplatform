@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: 2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-// SPDX-FileCopyrightText: 2025 christian-rli <christian.hofmann@rl-institut.de>
-// SPDX-FileCopyrightText: 2025 daryna <Daryna.Martymianova@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 Christian Hofmann <christian.hofmann@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 // SPDX-FileCopyrightText: 2025 steull <stephanuller.su@gmail.com>

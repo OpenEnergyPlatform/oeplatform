@@ -8,7 +8,7 @@
 # SPDX-FileCopyrightText: 2025 Johann Wagner <wagner@creatdev-solutions.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Ludee <Ludwig.Huelk@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
@@ -16,7 +16,7 @@
 # SPDX-FileCopyrightText: 2025 Tu Phan Ngoc <RL-INSTITUT\tuphan.ngoc@rli-nb-65.rl-institut.local>
 # SPDX-FileCopyrightText: 2025 Venkatesh Murugadas <venkatesh.murugadas@st.ovgu.de>
 # SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
-# SPDX-FileCopyrightText: 2025 daryna <Daryna.Martymianova@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 #
 # SPDX-License-Identifier: MIT

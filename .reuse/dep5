@@ -1,8 +1,8 @@
 
 Files: VERSION
 Copyright: Martin Glauer <martinglauer89@gmail.com>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
-Copyright: christian-rli <42000429+christian-rli@users.noreply.github.com>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <42000429+Christian Hofmann@users.noreply.github.com>
 Copyright: Adel Memariani <memariani.adel@gmail.com>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
@@ -66,7 +66,7 @@ Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 License: MIT
 
 Files: CITATION.cff
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <memariani.adel@gmail.com>
@@ -311,10 +311,10 @@ License: MIT
 Files: modelview/templates/modelview/overview.html
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
@@ -415,11 +415,11 @@ Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>
-Copyright: daryna <Daryna.Martymianova@rl-institut.de>
+Copyright: Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
 License: MIT
 
 Files: login/templates/login/user_settings.html
-Copyright: daryna <Daryna.Martymianova@rl-institut.de>
+Copyright: Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
@@ -429,7 +429,7 @@ License: MIT
 Files: login/templates/login/oepuser_create_form.html
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>
 License: MIT
@@ -475,7 +475,7 @@ Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: login/templates/login/user_review.html
-Copyright: daryna <Daryna.Martymianova@rl-institut.de>
+Copyright: Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <Jonas.Huber@rl-institut.de>
@@ -486,7 +486,7 @@ Copyright: Darynarli <“Daryna.Barabanova@rl-institut.de”>
 License: MIT
 
 Files: login/templates/login/delete_account.html
-Copyright: daryna <Daryna.Martymianova@rl-institut.de>
+Copyright: Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
@@ -585,12 +585,12 @@ Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/favicon.ico
 Copyright: Martin Glauer <martinglauer89@gmail.com>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/OEP_logo_2_no_text.svg
@@ -599,7 +599,7 @@ Copyright: Christian Winger <c@wingechr.de>
 License: CC-BY-4.0
 
 Files: base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.svg
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/oeplogo.svg
@@ -612,7 +612,7 @@ Copyright: Martin Glauer <martinglauer89@gmail.com>
 License: CC-BY-4.0
 
 Files: base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.png
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/OEP_logo_2.png
@@ -622,28 +622,28 @@ License: CC-BY-4.0
 Files: base/static/project_detail_pages_content/szenarien_db.json
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: base/static/project_detail_pages_content/sirop.json
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: base/static/project_detail_pages_content/lod_geoss.json
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: base/static/project_detail_pages_content/open_fred.json
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
@@ -656,14 +656,14 @@ License: MIT
 Files: base/static/project_detail_pages_content/open_modex.json
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: base/static/project_detail_pages_content/open_ego.json
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
@@ -696,7 +696,7 @@ Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/funder/BMWK.png
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/HZG.png
@@ -776,11 +776,11 @@ Copyright: MFinkendei <anubis-mf@web.de>
 License: CC-BY-4.0
 
 Files: base/static/img/OpenEnergyFamily_OEPlatypus.png
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/OpenEnergyFamily_modules_trans.png
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/icon-unknown-alt.svg
@@ -788,19 +788,19 @@ Copyright: MFinkendei <anubis-mf@web.de>
 License: CC-BY-4.0
 
 Files: base/static/img/about/OpenEnergyFamily_modeling-cycle.png
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/about/OpenEnergyFamily_modeling-open-science.png
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/about/OpenEnergyFamily_GroupPhoto.png
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/about/OpenEnergyFamily_GroupPhoto2.png
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/welcome/about-community.svg
@@ -835,7 +835,7 @@ Copyright: Johann Wagner <wagner@creatdev-solutions.com>
 License: CC-BY-4.0
 
 Files: base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/welcome/database.png
@@ -843,11 +843,11 @@ Copyright: Johann Wagner <wagner@creatdev-solutions.com>
 License: CC-BY-4.0
 
 Files: base/static/img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/welcome/OEP_Documentation.svg
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/welcome/factsheets.png
@@ -855,11 +855,11 @@ Copyright: Johann Wagner <wagner@creatdev-solutions.com>
 License: CC-BY-4.0
 
 Files: base/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/welcome/about-openscience.svg
@@ -969,7 +969,7 @@ Copyright: NB-KREDER\kreder <klara.reder@iee.fraunhofer.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: MIT
 
 Files: base/templates/base/base-profile.html
@@ -991,8 +991,8 @@ Copyright: Dhruvin1412 <48323399+Dhruvin1412@users.noreply.github.com>
 Copyright: Johann Wagner <wagner@creatdev-solutions.com>
 Copyright: Bachibouzouk <pierre-francois.duc@rl-institut.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: wingechr <wingechr@users.noreply.github.com>
@@ -1004,7 +1004,7 @@ Copyright: Eike Broda <git@ebroda.de>
 License: MIT
 
 Files: base/templates/base/privacy_policy.html
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
@@ -1015,7 +1015,7 @@ Copyright: Martin Glauer <martinglauer89@googlemail.com>
 Copyright: WolfBunke <wolf-dieter.bunke@uni-flensburg.de>
 Copyright: EdithaK <editha.koetter@rl-institut.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Eike Broda <git@ebroda.de>
 License: MIT
@@ -1058,7 +1058,7 @@ License: MIT
 
 Files: base/templates/base/project-detail.html
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
@@ -1069,12 +1069,12 @@ Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: EdithaK <editha.koetter@rl-institut.de>
 Copyright: Berit Müller <berit.mueller@rl-institut.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: SMutyala18 <santosh.mutyala@uni-oldenburg.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
@@ -1095,11 +1095,11 @@ Copyright: Stephan Günther <gnn.code@gmail.com>
 Copyright: NB-KREDER\kreder <klara.reder@iee.fraunhofer.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Johann Wagner <wagner@creatdev-solutions.com>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
-Copyright: christian-rli <42000429+christian-rli@users.noreply.github.com>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <42000429+Christian Hofmann@users.noreply.github.com>
 Copyright: Kirann Bhavaraju <kirann9999@hotmail.com>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
@@ -1110,7 +1110,7 @@ Files: base/templates/base/404.html
 Copyright: NB-KREDER\kreder <klara.reder@iee.fraunhofer.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
@@ -1221,8 +1221,8 @@ License: MIT
 
 Files: ontology/templates/ontology/oeo-steering-committee.html
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
@@ -1233,7 +1233,7 @@ Copyright: Janna Hastings <janna.hastings@gmail.com>
 Copyright: stap-m <38690039+stap-m@users.noreply.github.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 License: MIT
@@ -1295,7 +1295,7 @@ License: MIT
 
 Files: dataedit/static/peer_review/schema.json
 Copyright: steull <stephanuller.su@gmail.com>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
@@ -1477,9 +1477,9 @@ License: MIT
 
 Files: dataedit/templates/dataedit/opr_review.html
 Copyright: steull <stephanuller.su@gmail.com>
-Copyright: christian-rli <christian.hofmann@rl-institut.de>
+Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: daryna <Daryna.Martymianova@rl-institut.de>
+Copyright: Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: user <martimanovadarina@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
@@ -1616,7 +1616,7 @@ Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Bachibouzouk <pierre-francois.duc@rl-institute.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
-Copyright: christian-rli <42000429+christian-rli@users.noreply.github.com>
+Copyright: Christian Hofmann <42000429+Christian Hofmann@users.noreply.github.com>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>

@@ -684,7 +684,7 @@
                 "path": {
                   "description": "A qualified link or path pointing to a relevant location online for the contributor. This can be the GitHub page or ORCID.",
                   "type": ["string", "null"],
-                  "examples": ["https://github.com/Ludee"],
+                  "examples": ["https://github.com/Ludwig Huelk"],
                   "badge": "Bronze",
                   "title": "Path"
                 },

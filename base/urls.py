@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 christian-rli <christian.hofmann@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <christian.hofmann@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 #
 # SPDX-License-Identifier: MIT

@@ -82,7 +82,7 @@ Copyright = [
 Path = "CITATION.cff"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2023 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2023 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Adel Memariani <memariani.adel@gmail.com>",
@@ -453,10 +453,10 @@ Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
-  "2023 christian-rli <christian.hofmann@rl-institut.de>",
+  "2023 Christian Hofmann <christian.hofmann@rl-institut.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
@@ -599,14 +599,14 @@ Copyright = [
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
   "2023 Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>",
-  "2023 daryna <Daryna.Martymianova@rl-institut.de>",
+  "2023 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>",
 ]
 
 [[File]]
 Path = "login/templates/login/user_settings.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 daryna <Daryna.Martymianova@rl-institut.de>",
+  "2023 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>",
   "2023 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
@@ -619,7 +619,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2018 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 christian-rli <christian.hofmann@rl-institut.de>",
+  "2020 Christian Hofmann <christian.hofmann@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2023 Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>",
 ]
@@ -686,7 +686,7 @@ Copyright = [
 Path = "login/templates/login/user_review.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 daryna <Daryna.Martymianova@rl-institut.de>",
+  "2023 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>",
   "2023 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Jonas Huber <Jonas.Huber@rl-institut.de>",
@@ -700,7 +700,7 @@ Copyright = [
 Path = "login/templates/login/delete_account.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 daryna <Daryna.Martymianova@rl-institut.de>",
+  "2023 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>",
   "2023 Christian Winger <c@wingechr.de>",
 ]
 
@@ -862,7 +862,7 @@ Copyright = [
 Path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
@@ -870,7 +870,7 @@ Path = "base/static/favicon.ico"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
   "2017 Martin Glauer <martinglauer89@gmail.com>",
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
@@ -885,7 +885,7 @@ Copyright = [
 Path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
@@ -907,7 +907,7 @@ Copyright = [
 Path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
@@ -923,7 +923,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -933,7 +933,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -943,7 +943,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -953,7 +953,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -972,7 +972,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -982,7 +982,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -1039,7 +1039,7 @@ Copyright = [
 Path = "base/static/logos/funder/BMWK.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2023 christian-rli <christian.hofmann@rl-institut.de>",
+  "2023 Christian Hofmann <christian.hofmann@rl-institut.de>",
 ]
 
 [[File]]
@@ -1179,14 +1179,14 @@ Copyright = [
 Path = "base/static/img/OpenEnergyFamily_OEPlatypus.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/img/OpenEnergyFamily_modules_trans.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2020 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2020 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
@@ -1200,28 +1200,28 @@ Copyright = [
 Path = "base/static/img/about/OpenEnergyFamily_modeling-cycle.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/img/about/OpenEnergyFamily_modeling-open-science.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/img/about/OpenEnergyFamily_GroupPhoto.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/img/about/OpenEnergyFamily_GroupPhoto2.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2024 christian-rli <christian.hofmann@rl-institut.de>",
+  "2024 Christian Hofmann <christian.hofmann@rl-institut.de>",
 ]
 
 [[File]]
@@ -1280,7 +1280,7 @@ Copyright = [
 Path = "base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
@@ -1294,14 +1294,14 @@ Copyright = [
 Path = "base/static/img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/img/welcome/OEP_Documentation.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
@@ -1315,14 +1315,14 @@ Copyright = [
 Path = "base/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
@@ -1490,7 +1490,7 @@ Copyright = [
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
 ]
 
 [[File]]
@@ -1518,8 +1518,8 @@ Copyright = [
   "2019 Johann Wagner <wagner@creatdev-solutions.com>",
   "2019 Bachibouzouk <pierre-francois.duc@rl-institut.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 Ludee <Ludwig.Huelk@rl-institut.de>",
-  "2020 christian-rli <christian.hofmann@rl-institut.de>",
+  "2020 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
+  "2020 Christian Hofmann <christian.hofmann@rl-institut.de>",
   "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2021 Christian Winger <c@wingechr.de>",
   "2022 wingechr <wingechr@users.noreply.github.com>",
@@ -1534,7 +1534,7 @@ Copyright = [
 Path = "base/templates/base/privacy_policy.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 christian-rli <christian.hofmann@rl-institut.de>",
+  "2020 Christian Hofmann <christian.hofmann@rl-institut.de>",
   "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -1548,7 +1548,7 @@ Copyright = [
   "2017 WolfBunke <wolf-dieter.bunke@uni-flensburg.de>",
   "2017 EdithaK <editha.koetter@rl-institut.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 christian-rli <christian.hofmann@rl-institut.de>",
+  "2020 Christian Hofmann <christian.hofmann@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
   "2024 Eike Broda <git@ebroda.de>",
 ]
@@ -1607,7 +1607,7 @@ Path = "base/templates/base/project-detail.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -1621,12 +1621,12 @@ Copyright = [
   "2017 EdithaK <editha.koetter@rl-institut.de>",
   "2017 Berit Müller <berit.mueller@rl-institut.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2020 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
-  "2023 christian-rli <christian.hofmann@rl-institut.de>",
+  "2023 Christian Hofmann <christian.hofmann@rl-institut.de>",
   "2024 SMutyala18 <santosh.mutyala@uni-oldenburg.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
@@ -1653,11 +1653,11 @@ Copyright = [
   "2018 Klara Reder <klara.reder@iee.fraunhofer.de>",
   "2018 Christian Winger <c@wingechr.de>",
   "2019 Johann Wagner <wagner@creatdev-solutions.com>",
-  "2019 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2019 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2020 christian-rli <christian.hofmann@rl-institut.de>",
-  "2020 christian-rli <42000429+christian-rli@users.noreply.github.com>",
+  "2020 Christian Hofmann <christian.hofmann@rl-institut.de>",
+  "2020 Christian Hofmann <42000429+Christian Hofmann@users.noreply.github.com>",
   "2020 Kirann Bhavaraju <kirann9999@hotmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
@@ -1671,7 +1671,7 @@ Copyright = [
   "2019 Klara Reder <klara.reder@iee.fraunhofer.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2019 Martin Glauer <martinglauer89@gmail.com>",
-  "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
+  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -1826,8 +1826,8 @@ Path = "ontology/templates/ontology/oeo-steering-committee.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2020 Ludee <Ludwig.Huelk@rl-institut.de>",
-  "2021 christian-rli <christian.hofmann@rl-institut.de>",
+  "2020 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>",
+  "2021 Christian Hofmann <christian.hofmann@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
@@ -1841,7 +1841,7 @@ Copyright = [
   "2020 stap-m <38690039+stap-m@users.noreply.github.com>",
   "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2021 Adel Memariani <memarian@winadms-MacBook-Pro.local>",
-  "2023 christian-rli <christian.hofmann@rl-institut.de>",
+  "2023 Christian Hofmann <christian.hofmann@rl-institut.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
 ]
@@ -1936,7 +1936,7 @@ Path = "dataedit/static/peer_review/schema.json"
 Licenses = [ "MIT",]
 Copyright = [
   "2022 steull <stephanuller.su@gmail.com>",
-  "2023 christian-rli <christian.hofmann@rl-institut.de>",
+  "2023 Christian Hofmann <christian.hofmann@rl-institut.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
@@ -2212,9 +2212,9 @@ Path = "dataedit/templates/dataedit/opr_review.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 steull <stephanuller.su@gmail.com>",
-  "2023 christian-rli <christian.hofmann@rl-institut.de>",
+  "2023 Christian Hofmann <christian.hofmann@rl-institut.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2023 daryna <Daryna.Martymianova@rl-institut.de>",
+  "2023 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 user <martimanovadarina@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -2396,7 +2396,7 @@ Copyright = [
   "2019 Bachibouzouk <pierre-francois.duc@rl-institute.de>",
   "2021 Johann Wagner <johann@wagnerdevelopment.de>",
   "2021 Adel Memariani <memarian@winadms-MacBook-Pro.local>",
-  "2021 christian-rli <42000429+christian-rli@users.noreply.github.com>",
+  "2021 Christian Hofmann <42000429+Christian Hofmann@users.noreply.github.com>",
   "2023 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",

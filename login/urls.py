@@ -5,7 +5,7 @@
 # SPDX-FileCopyrightText: 2025 MFinkendei <anubis-mf@web.de>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 daryna <Daryna.Martymianova@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
 #
 # SPDX-License-Identifier: MIT
 
