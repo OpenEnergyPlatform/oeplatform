@@ -1144,7 +1144,7 @@ Copyright = [
 Path = "base/static/logos/partner/partner_logo_nfdi4energy.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2024 Santosch Mutyala <santosh.mutyala@uni-oldenburg.de>",
+  "2024 Santosch Mutyala <santosh.mutyala@uni-oldenburg.de> © Uni Oldenburg",
 ]
 
 [[File]]
@@ -1545,7 +1545,7 @@ Path = "base/templates/base/terms_of_use.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <martinglauer89@googlemail.com>",
-  "2017 Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de>",
+  "2017 Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de> © Uni Flensburg",
   "2017 Editha Koetter <editha.koetter@rl-institut.de> © Reiner Lemoine Institut",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Christian Hofmann <christian.hofmann@rl-institut.de> © Reiner Lemoine Institut",
@@ -1593,7 +1593,7 @@ Path = "base/templates/base/contact.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <martinglauer89@googlemail.com>",
-  "2017 Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de>",
+  "2017 Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de> © Uni Flensburg",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Lukas Emele <l.emele@oeko.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
@@ -1627,7 +1627,7 @@ Copyright = [
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
   "2023 Christian Hofmann <christian.hofmann@rl-institut.de> © Reiner Lemoine Institut",
-  "2024 Santosch Mutyala <santosh.mutyala@uni-oldenburg.de>",
+  "2024 Santosch Mutyala <santosh.mutyala@uni-oldenburg.de> © Uni Oldenburg",
   "2024 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
@@ -1647,7 +1647,7 @@ Copyright = [
   "2016 Berit Müller <berit.mueller@rl-institut.de> © Reiner Lemoine Institut",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Editha Koetter <editha.koetter@rl-institut.de> © Reiner Lemoine Institut",
-  "2017 Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de>",
+  "2017 Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de> © Uni Flensburg",
   "2017 Martin Glauer <martinglauer89@googlemail.com>",
   "2017 Stephan Günther <gnn.code@gmail.com>",
   "2018 Klara Reder <klara.reder@iee.fraunhofer.de>",
