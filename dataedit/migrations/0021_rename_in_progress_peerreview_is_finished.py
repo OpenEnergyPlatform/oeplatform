@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 steull <stephanuller.su@gmail.com>
+# SPDX-FileCopyrightText: 2025 Stephan Uller <stephanuller.su@gmail.com>
 #
 # SPDX-License-Identifier: MIT
 

@@ -12,7 +12,7 @@
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 SMutyala18 <santosh.mutyala@uni-oldenburg.de>
+# SPDX-FileCopyrightText: 2025 Santosch Mutyala <santosh.mutyala@uni-oldenburg.de>
 # SPDX-FileCopyrightText: 2025 Tu Phan Ngoc <RL-INSTITUT\tuphan.ngoc@rli-nb-65.rl-institut.local>
 # SPDX-FileCopyrightText: 2025 Venkatesh Murugadas <venkatesh.murugadas@st.ovgu.de>
 # SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>

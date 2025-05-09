@@ -1,5 +1,5 @@
-# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institute.de>
+# SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institute.de>
 # SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>

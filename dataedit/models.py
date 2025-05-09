@@ -1,5 +1,5 @@
-# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institute.de>
+# SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institute.de>
 # SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
 # SPDX-FileCopyrightText: 2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
@@ -10,7 +10,7 @@
 # SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
 # SPDX-FileCopyrightText: 2025 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 steull <stephanuller.su@gmail.com>
+# SPDX-FileCopyrightText: 2025 Stephan Uller <stephanuller.su@gmail.com>
 # SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
 #
 # SPDX-License-Identifier: MIT

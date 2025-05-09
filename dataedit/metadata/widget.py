@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2025 Alexis Michaltsis <alexis.michaltsis@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institute.de>
+# SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institute.de>
 # SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>

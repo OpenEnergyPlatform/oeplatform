@@ -456,7 +456,7 @@ Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 License: MIT
 
 Files: login/templates/login/admin_group.html
-Copyright: MFinkendei <anubis-mf@web.de>
+Copyright: Marco Finkendei <anubis-mf@web.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Christian Winger <c@wingechr.de>
@@ -756,7 +756,7 @@ Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/partner_logo_nfdi4energy.png
-Copyright: SMutyala18 <santosh.mutyala@uni-oldenburg.de>
+Copyright: Santosch Mutyala <santosh.mutyala@uni-oldenburg.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/InfAI-Logo.png
@@ -764,15 +764,15 @@ Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/selector-icons.svg
-Copyright: MFinkendei <anubis-mf@web.de>
+Copyright: Marco Finkendei <anubis-mf@web.de>
 License: CC-BY-4.0
 
 Files: base/static/img/icon-unknown.svg
-Copyright: MFinkendei <anubis-mf@web.de>
+Copyright: Marco Finkendei <anubis-mf@web.de>
 License: CC-BY-4.0
 
 Files: base/static/img/search.svg
-Copyright: MFinkendei <anubis-mf@web.de>
+Copyright: Marco Finkendei <anubis-mf@web.de>
 License: CC-BY-4.0
 
 Files: base/static/img/OpenEnergyFamily_OEPlatypus.png
@@ -784,7 +784,7 @@ Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/icon-unknown-alt.svg
-Copyright: MFinkendei <anubis-mf@web.de>
+Copyright: Marco Finkendei <anubis-mf@web.de>
 License: CC-BY-4.0
 
 Files: base/static/img/about/OpenEnergyFamily_modeling-cycle.png
@@ -913,7 +913,7 @@ Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: base/static/css/filterform.css
-Copyright: MFinkendei <anubis-mf@web.de>
+Copyright: Marco Finkendei <anubis-mf@web.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
@@ -984,7 +984,7 @@ Copyright: Martin Glauer <martinglauer89@googlemail.com>
 Copyright: quentinpeyras <quentinpey@hotmail.fr>
 Copyright: Martin Glauer <martinglauer89@googlemail.com>
 Copyright: Till I <thsstll@users.noreply.github.com>
-Copyright: MFinkendei <anubis-mf@web.de>
+Copyright: Marco Finkendei <anubis-mf@web.de>
 Copyright: Johann Wagner <johann.wagner@st.ovgu.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Dhruvin1412 <48323399+Dhruvin1412@users.noreply.github.com>
@@ -995,7 +995,7 @@ Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: wingechr <wingechr@users.noreply.github.com>
+Copyright: Christian Winger<wingechr@users.noreply.github.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
@@ -1012,8 +1012,8 @@ License: MIT
 
 Files: base/templates/base/terms_of_use.html
 Copyright: Martin Glauer <martinglauer89@googlemail.com>
-Copyright: WolfBunke <wolf-dieter.bunke@uni-flensburg.de>
-Copyright: EdithaK <editha.koetter@rl-institut.de>
+Copyright: Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de>
+Copyright: Editha Koetter <editha.koetter@rl-institut.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
@@ -1037,7 +1037,7 @@ License: MIT
 Files: base/templates/base/discussion.html
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Berit Müller <berit.mueller@rl-institut.de>
-Copyright: EdithaK <editha.koetter@rl-institut.de>
+Copyright: Editha Koetter <editha.koetter@rl-institut.de>
 Copyright: Hannah Förster <h.foerster@oeko.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
@@ -1047,7 +1047,7 @@ License: MIT
 
 Files: base/templates/base/contact.html
 Copyright: Martin Glauer <martinglauer89@googlemail.com>
-Copyright: WolfBunke <wolf-dieter.bunke@uni-flensburg.de>
+Copyright: Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Lukas Emele <l.emele@oeko.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
@@ -1066,7 +1066,7 @@ License: MIT
 Files: base/templates/base/about.html
 Copyright: Martin Glauer <martinglauer89@googlemail.com>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
-Copyright: EdithaK <editha.koetter@rl-institut.de>
+Copyright: Editha Koetter <editha.koetter@rl-institut.de>
 Copyright: Berit Müller <berit.mueller@rl-institut.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
@@ -1075,7 +1075,7 @@ Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Christian Hofmann <christian.hofmann@rl-institut.de>
-Copyright: SMutyala18 <santosh.mutyala@uni-oldenburg.de>
+Copyright: Santosch Mutyala <santosh.mutyala@uni-oldenburg.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
@@ -1088,8 +1088,8 @@ Copyright: Martin Glauer <martinglauer89@googlemail.com>
 Copyright: Till I <thsstll@users.noreply.github.com>
 Copyright: Berit Müller <berit.mueller@rl-institut.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
-Copyright: EdithaK <editha.koetter@rl-institut.de>
-Copyright: WolfBunke <wolf-dieter.bunke@uni-flensburg.de>
+Copyright: Editha Koetter <editha.koetter@rl-institut.de>
+Copyright: Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de>
 Copyright: Martin Glauer <martinglauer89@googlemail.com>
 Copyright: Stephan Günther <gnn.code@gmail.com>
 Copyright: NB-KREDER\kreder <klara.reder@iee.fraunhofer.de>
@@ -1548,7 +1548,7 @@ Copyright: Christian Winger <c@wingechr.de>
 Copyright: Hannah <36844029+han-f@users.noreply.github.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
-Copyright: wingechr <wingechr@users.noreply.github.com>
+Copyright: Christian Winger<wingechr@users.noreply.github.com>
 Copyright: Kirann Bhavaraju <kirann9999@hotmail.com>
 Copyright: steull <stephanuller.su@gmail.com>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
@@ -1652,7 +1652,7 @@ License: MIT
 Files: oeo_viewer/client/package-lock.json
 Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
 Copyright: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
-Copyright: wingechr <wingechr@users.noreply.github.com>
+Copyright: Christian Winger<wingechr@users.noreply.github.com>
 Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
