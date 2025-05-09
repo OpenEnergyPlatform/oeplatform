@@ -4,11 +4,11 @@
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
-# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 Tom Heimbrodt <heimbrodt@posteo.de>
-# SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+# SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
 # SPDX-FileCopyrightText: 2025 christian-rli <42000429+christian-rli@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 chrwm <christoph.muschner@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 henhuy <hendrik.huyskens@rl-institut.de>

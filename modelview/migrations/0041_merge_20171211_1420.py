@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <glauer@iws.cs.ovgu.de>
 #
 # SPDX-License-Identifier: MIT

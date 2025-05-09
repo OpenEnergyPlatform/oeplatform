@@ -3,8 +3,8 @@
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
-# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 # SPDX-FileCopyrightText: 2025 Tom Heimbrodt <heimbrodt@posteo.de>
 # SPDX-FileCopyrightText: 2025 christian-rli <christian.hofmann@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>

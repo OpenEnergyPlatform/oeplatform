@@ -13,13 +13,13 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <kirann9999@hotmail.com>
 SPDX-FileCopyrightText: 2025 Ludee <Ludwig.Huelk@rl-institut.de>
 SPDX-FileCopyrightText: 2025 Ludwig Hülk <ludwig.huelk@rl-institut.de>
-SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
+SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institut.de>
 SPDX-FileCopyrightText: 2025 SMutyala18 <santosh.mutyala@uni-oldenburg.de>
 SPDX-FileCopyrightText: 2025 Tu Phan Ngoc <RL-INSTITUT\tuphan.ngoc@rli-nb-65.rl-institut.local>
-SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
 SPDX-FileCopyrightText: 2025 christian-rli <42000429+christian-rli@users.noreply.github.com>
 SPDX-FileCopyrightText: 2025 christian-rli <christian.hofmann@rl-institut.de>
 SPDX-FileCopyrightText: 2025 chrwm <christoph.muschner@rl-institut.de>

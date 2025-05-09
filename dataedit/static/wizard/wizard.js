@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-// SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
+// SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
 // SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
 //
 // SPDX-License-Identifier: MIT

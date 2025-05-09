@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Bachibouzouk <pierre-francois.duc@rl-institut.de>
 // SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
 // SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <kirann9999@hotmail.com>
-// SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
-// SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+// SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
+// SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 //
 // SPDX-License-Identifier: MIT
 

@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: 2025 Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 MFinkendei <anubis-mf@web.de>
-# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
-# SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 # SPDX-FileCopyrightText: 2025 daryna <Daryna.Martymianova@rl-institut.de>
 #
 # SPDX-License-Identifier: MIT

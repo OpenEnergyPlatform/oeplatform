@@ -54,7 +54,7 @@ Path = ".prettierignore"
 Licenses = [ "MIT",]
 Copyright = [
   "2024 Christian Winger <c@wingechr.de>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
@@ -63,8 +63,8 @@ Path = ".gitignore"
 Licenses = [ "MIT",]
 Copyright = [
   "2015 Martin Glauer <glauer@iws.cs.ovgu.de>",
-  "2015 MGlauer <martinglauer89@googlemail.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2015 Martin Glauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <wagner@creatdev-solutions.com>",
   "2019 Alexis Michaltsis <alexis.michaltsis@rl-institut.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
@@ -93,7 +93,7 @@ Copyright = [
 Path = "tox.ini"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 MGlauer <martinglauer89@gmail.com>",
+  "2019 Martin Glauer <martinglauer89@gmail.com>",
   "2021 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Christian Winger <c@wingechr.de>",
@@ -103,7 +103,7 @@ Copyright = [
 Path = "alembic.ini"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
 ]
 
 [[File]]
@@ -120,7 +120,7 @@ Path = ".pre-commit-config.yaml"
 Licenses = [ "MIT",]
 Copyright = [
   "2022 Christian Winger <c@wingechr.de>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
@@ -307,7 +307,7 @@ Path = "docs/css/extra.css"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
 ]
 
@@ -315,7 +315,7 @@ Copyright = [
 Path = "modelview/static/css/form-style.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2019 solar-c <@>",
   "2021 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
@@ -326,8 +326,8 @@ Copyright = [
 Path = "modelview/static/css/mv-style.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -345,9 +345,9 @@ Copyright = [
 Path = "modelview/templates/modelview/editframework.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Martin Glauer <glauer@iws.cs.ovgu.de>",
   "2019 solar-c <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
@@ -362,18 +362,18 @@ Copyright = [
 Path = "modelview/templates/modelview/editmodel_snippet_depend.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
 ]
 
 [[File]]
 Path = "modelview/templates/modelview/editmodel_snippet.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
   "2019 solar-c <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 MGlauer <martinglauer89@gmail.com>",
+  "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -401,7 +401,7 @@ Copyright = [
 Path = "modelview/templates/modelview/array_snippet.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -410,8 +410,8 @@ Copyright = [
 Path = "modelview/templates/modelview/modellist.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Martin Glauer <martinglauer89@googlemail.com>",
   "2017 Martin Glauer <glauer@iws.cs.ovgu.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
@@ -424,9 +424,9 @@ Copyright = [
 Path = "modelview/templates/modelview/editmodel.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Martin Glauer <glauer@iws.cs.ovgu.de>",
   "2019 solar-c <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
@@ -440,7 +440,7 @@ Copyright = [
 Path = "modelview/templates/modelview/base.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Martin Glauer <glauer@iws.cs.ovgu.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -451,7 +451,7 @@ Copyright = [
 Path = "modelview/templates/modelview/overview.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -464,7 +464,7 @@ Copyright = [
 Path = "modelview/templates/modelview/form_element_factory.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 MGlauer <martinglauer89@gmail.com>",
+  "2021 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -473,9 +473,9 @@ Copyright = [
 Path = "modelview/templates/modelview/model.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 solar-c <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2021 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -496,7 +496,7 @@ Copyright = [
 Path = "modelview/templates/modelview/tag_selector.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -505,9 +505,9 @@ Copyright = [
 Path = "modelview/templates/modelview/model_snippet.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 solar-c <@>",
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -518,9 +518,9 @@ Copyright = [
 Path = "modelview/templates/modelview/framework.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 solar-c <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -534,7 +534,7 @@ Copyright = [
 Path = "modelview/templates/modelview/FactSheets_schema.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -542,7 +542,7 @@ Copyright = [
 Path = "modelview/templates/modelview/widgets/dynamic_edit.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 MGlauer <martinglauer89@gmail.com>",
+  "2021 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -550,14 +550,14 @@ Copyright = [
 Path = "modelview/templates/modelview/widgets/multiwidget.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 MGlauer <martinglauer89@gmail.com>",
+  "2021 Martin Glauer <martinglauer89@gmail.com>",
 ]
 
 [[File]]
 Path = "modelview/templates/modelview/widgets/dynamic_array.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 MGlauer <martinglauer89@gmail.com>",
+  "2021 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
 ]
 
@@ -565,7 +565,7 @@ Copyright = [
 Path = "login/templates/login/generic_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 MGlauer <martinglauer89@gmail.com>",
+  "2018 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -575,7 +575,7 @@ Copyright = [
 Path = "login/templates/login/list_memberships.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -584,7 +584,7 @@ Copyright = [
 Path = "login/templates/login/detach.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 MGlauer <martinglauer89@gmail.com>",
+  "2018 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -594,7 +594,7 @@ Copyright = [
 Path = "login/templates/login/oepuser_edit_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 MGlauer <martinglauer89@gmail.com>",
+  "2018 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -617,7 +617,7 @@ Copyright = [
 Path = "login/templates/login/oepuser_create_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 MGlauer <martinglauer89@gmail.com>",
+  "2018 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 christian-rli <christian.hofmann@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -628,7 +628,7 @@ Copyright = [
 Path = "login/templates/login/activate.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 MGlauer <martinglauer89@gmail.com>",
+  "2018 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -659,7 +659,7 @@ Path = "login/templates/login/admin_group.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 MFinkendei <anubis-mf@web.de>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Christian Winger <c@wingechr.de>",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
@@ -772,7 +772,7 @@ Copyright = [
 Path = "login/templates/registration/custom_password_reset_done.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 MGlauer <martinglauer89@gmail.com>",
+  "2021 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -780,7 +780,7 @@ Copyright = [
 Path = "login/templates/registration/custom_password_reset_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 MGlauer <martinglauer89@gmail.com>",
+  "2021 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
 ]
 
@@ -788,7 +788,7 @@ Copyright = [
 Path = "login/templates/registration/password_reset_email.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 MGlauer <martinglauer89@gmail.com>",
+  "2019 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -796,8 +796,8 @@ Copyright = [
 Path = "login/templates/registration/login.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
-  "2018 MGlauer <martinglauer89@gmail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
+  "2018 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
@@ -807,7 +807,7 @@ Copyright = [
 Path = "login/templates/registration/custom_password_reset_confirm.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 MGlauer <martinglauer89@gmail.com>",
+  "2021 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -816,7 +816,7 @@ Copyright = [
 Path = "login/templates/registration/custom_password_reset_complete.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 MGlauer <martinglauer89@gmail.com>",
+  "2021 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -824,7 +824,7 @@ Copyright = [
 Path = "login/templates/mails/base.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 MGlauer <martinglauer89@gmail.com>",
+  "2018 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -832,7 +832,7 @@ Copyright = [
 Path = "login/templates/mails/verification_mail.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 MGlauer <martinglauer89@gmail.com>",
+  "2018 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -869,7 +869,7 @@ Copyright = [
 Path = "base/static/favicon.ico"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2021 Ludee <Ludwig.Huelk@rl-institut.de>",
 ]
 
@@ -877,7 +877,7 @@ Copyright = [
 Path = "base/static/OEP_logo_2_no_text.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -900,7 +900,7 @@ Copyright = [
 Path = "base/static/open_ego_logo_breit.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
 ]
 
 [[File]]
@@ -914,7 +914,7 @@ Copyright = [
 Path = "base/static/OEP_logo_2.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
 ]
 
 [[File]]
@@ -1395,9 +1395,9 @@ Copyright = [
 Path = "base/static/css/base-style.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 Till I <thsstll@users.noreply.github.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Martin Glauer <martinglauer89@googlemail.com>",
   "2019 Johann Wagner <wagner@creatdev-solutions.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
@@ -1485,7 +1485,7 @@ Copyright = [
 Path = "base/templates/base/500.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Klara Reder <klara.reder@iee.fraunhofer.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -1507,13 +1507,13 @@ Copyright = [
 Path = "base/templates/base/base.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 Till I <thsstll@users.noreply.github.com>",
   "2017 MFinkendei <anubis-mf@web.de>",
   "2017 Johann Wagner <johann.wagner@st.ovgu.de>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Dhruvin1412 <48323399+Dhruvin1412@users.noreply.github.com>",
   "2019 Johann Wagner <wagner@creatdev-solutions.com>",
   "2019 Bachibouzouk <pierre-francois.duc@rl-institut.de>",
@@ -1535,7 +1535,7 @@ Path = "base/templates/base/privacy_policy.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 christian-rli <christian.hofmann@rl-institut.de>",
-  "2020 MGlauer <martinglauer89@gmail.com>",
+  "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -1544,7 +1544,7 @@ Copyright = [
 Path = "base/templates/base/terms_of_use.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@googlemail.com>",
   "2017 WolfBunke <wolf-dieter.bunke@uni-flensburg.de>",
   "2017 EdithaK <editha.koetter@rl-institut.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
@@ -1557,7 +1557,7 @@ Copyright = [
 Path = "base/templates/base/faq.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@googlemail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -1578,7 +1578,7 @@ Copyright = [
 Path = "base/templates/base/discussion.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Berit Müller <berit.mueller@rl-institut.de>",
   "2017 EdithaK <editha.koetter@rl-institut.de>",
   "2018 Hannah Förster <h.foerster@oeko.de>",
@@ -1592,9 +1592,9 @@ Copyright = [
 Path = "base/templates/base/contact.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@googlemail.com>",
   "2017 WolfBunke <wolf-dieter.bunke@uni-flensburg.de>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Lukas Emele <l.emele@oeko.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -1616,8 +1616,8 @@ Copyright = [
 Path = "base/templates/base/about.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@googlemail.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 EdithaK <editha.koetter@rl-institut.de>",
   "2017 Berit Müller <berit.mueller@rl-institut.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
@@ -1642,10 +1642,10 @@ Copyright = [
 Path = "base/templates/base/index.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 Till I <thsstll@users.noreply.github.com>",
   "2016 Berit Müller <berit.mueller@rl-institut.de>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 EdithaK <editha.koetter@rl-institut.de>",
   "2017 WolfBunke <wolf-dieter.bunke@uni-flensburg.de>",
   "2017 Martin Glauer <martinglauer89@googlemail.com>",
@@ -1670,7 +1670,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2019 Klara Reder <klara.reder@iee.fraunhofer.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2019 MGlauer <martinglauer89@gmail.com>",
+  "2019 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -1836,7 +1836,7 @@ Copyright = [
 Path = "ontology/templates/ontology/about.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 MGlauer <martinglauer89@gmail.com>",
+  "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2020 Janna Hastings <janna.hastings@gmail.com>",
   "2020 stap-m <38690039+stap-m@users.noreply.github.com>",
   "2020 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -1850,7 +1850,7 @@ Copyright = [
 Path = "ontology/templates/ontology/oeo.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 MGlauer <martinglauer89@gmail.com>",
+  "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2021 Adel Memariani <memarian@winadms-MacBook-Pro.local>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -1881,35 +1881,35 @@ Copyright = [
 Path = "dataedit/static/colorfield/jscolor/hv.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
 ]
 
 [[File]]
 Path = "dataedit/static/colorfield/jscolor/arrow.gif"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
 ]
 
 [[File]]
 Path = "dataedit/static/colorfield/jscolor/demo.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
 ]
 
 [[File]]
 Path = "dataedit/static/colorfield/jscolor/hs.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
 ]
 
 [[File]]
 Path = "dataedit/static/colorfield/jscolor/cross.gif"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
 ]
 
 [[File]]
@@ -1967,15 +1967,15 @@ Copyright = [
 Path = "dataedit/static/dataedit/dataview.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@googlemail.com>",
 ]
 
 [[File]]
 Path = "dataedit/static/dataedit/dataedit.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2021 Christian Winger <c@wingechr.de>",
 ]
@@ -1984,14 +1984,14 @@ Copyright = [
 Path = "dataedit/static/dataedit/api.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@googlemail.com>",
 ]
 
 [[File]]
 Path = "dataedit/static/dataedit/metadata.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Bachibouzouk <pierre-francois.duc@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -2008,7 +2008,7 @@ Path = "dataedit/static/dataedit/query-builder.default.min.css"
 Licenses = [ "MIT",]
 Copyright = [
     "Copyright 2014-2018 Damien 'Mistic' Sorel (http://www.strangeplanet.fr)",
-  "2019 MGlauer <martinglauer89@gmail.com>",
+  "2019 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -2103,8 +2103,8 @@ Copyright = [
 Path = "dataedit/templates/dataedit/dataedit_tablelist.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2018 Lukas Emele <l.emele@oeko.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -2118,7 +2118,7 @@ Path = "dataedit/templates/dataedit/tag_editor.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Tom Heimbrodt <heimbrodt@posteo.de>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
 ]
@@ -2127,7 +2127,7 @@ Copyright = [
 Path = "dataedit/templates/dataedit/url_list_field.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -2142,15 +2142,15 @@ Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 user <martimanovadarina@gmail.com>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
 ]
 
 [[File]]
 Path = "dataedit/templates/dataedit/dataedit_schemalist.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Jonas H <jonas.huber@rl-institut.de>",
   "2019 Dhruvin1412 <48323399+Dhruvin1412@users.noreply.github.com>",
   "2019 Pierre Francois <pierre-francois.duc@rl-institut.de>",
@@ -2165,7 +2165,7 @@ Copyright = [
 Path = "dataedit/templates/dataedit/tablemap_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 MGlauer <martinglauer89@gmail.com>",
+  "2019 Martin Glauer <martinglauer89@gmail.com>",
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -2190,7 +2190,7 @@ Path = "dataedit/templates/dataedit/tablegraph_form.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2019 Bachibouzouk <pierre-francois.duc@rl-institut.de>",
-  "2020 MGlauer <martinglauer89@gmail.com>",
+  "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -2200,7 +2200,7 @@ Copyright = [
 Path = "dataedit/templates/dataedit/table_permissions.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -2230,8 +2230,8 @@ Licenses = [ "MIT",]
 Copyright = [
   "2017 Tom Heimbrodt <heimbrodt@posteo.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2019 MGlauer <martinglauer89@gmail.com>",
-  "2022 c.winger <c.winger@oeko.de>",
+  "2019 Martin Glauer <martinglauer89@gmail.com>",
+  "2022 Christian Winger <Christian Winger@oeko.de>",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
@@ -2240,10 +2240,10 @@ Copyright = [
 Path = "dataedit/templates/dataedit/base.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2017 Tom Heimbrodt <heimbrodt@posteo.de>",
   "2017 Johann Wagner <johann.wagner@st.ovgu.de>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
   "2022 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -2270,8 +2270,8 @@ Copyright = [
 Path = "dataedit/templates/dataedit/meta_edit.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Ludwig Huelk <ludwig.huelk@rl-institut.de>",
   "2019 Bachibouzouk <pierre-francois.duc@rl-institute.de>",
   "2020 Christian Winger <c@wingechr.de>",
@@ -2285,15 +2285,15 @@ Copyright = [
 Path = "dataedit/templates/dataedit/tagged_field.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
 ]
 
 [[File]]
 Path = "dataedit/templates/dataedit/dataview.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Martin Glauer <martinglauer89@googlemail.com>",
   "2017 Ludwig Huelk <ludwig.huelk@rl-institut.de>",
   "2018 Tom Heimbrodt <heimbrodt@posteo.de>",
@@ -2321,8 +2321,8 @@ Copyright = [
 Path = "dataedit/templates/dataedit/tag_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
-  "2019 MGlauer <martinglauer89@gmail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
+  "2019 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -2333,7 +2333,7 @@ Copyright = [
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2020 Christian Winger <c@wingechr.de>",
-  "2020 MGlauer <martinglauer89@gmail.com>",
+  "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2022 steull <stephanuller.su@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -2346,7 +2346,7 @@ Copyright = [
 Path = "dataedit/templates/dataedit/taggable_setting.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 MGlauer <martinglauer89@googlemail.com>",
+  "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -2374,14 +2374,14 @@ Copyright = [
 Path = "oedb_datamodels/script.py.mako"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
 ]
 
 [[File]]
 Path = "oedb_datamodels/README"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -2389,10 +2389,10 @@ Copyright = [
 Path = "oeplatform/securitysettings.py.default"
 Licenses = [ "MIT",]
 Copyright = [
-  "2015 MGlauer <martinglauer89@googlemail.com>",
+  "2015 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 pietro <peter.zamb@gmail.com>",
-  "2017 MGlauer <martinglauer89@gmail.com>",
+  "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Bachibouzouk <pierre-francois.duc@rl-institute.de>",
   "2021 Johann Wagner <johann@wagnerdevelopment.de>",
   "2021 Adel Memariani <memarian@winadms-MacBook-Pro.local>",
@@ -2423,7 +2423,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2023 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
   "2023 Adel Memariani <adel.memariani@ovgu.de>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
 ]
 
 [[File]]
@@ -2489,7 +2489,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2023 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
   "2023 Adel Memariani <adel.memariani@ovgu.de>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
 ]
 
 [[File]]
@@ -2621,7 +2621,7 @@ Path = "oeo_viewer/client/dist/scripts.bcf3243b.css.map"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
 ]
 
 [[File]]
@@ -2667,7 +2667,7 @@ Copyright = [
     "Copyright 2014 Contributors",
     "Copyright 2013 Contributors",
   "2023 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
 ]
 
 [[File]]
@@ -2740,7 +2740,7 @@ Copyright = [
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
 ]
 
 [[File]]
@@ -2770,7 +2770,7 @@ Copyright = [
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
 ]
 
 [[File]]
@@ -2818,7 +2818,7 @@ Copyright = [
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
 ]
 
 [[File]]
@@ -2851,7 +2851,7 @@ Path = "theming/scss/components/_alerts.scss"
 Licenses = [ "MIT",]
 Copyright = [
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
 ]
 
 [[File]]
@@ -2859,7 +2859,7 @@ Path = "theming/scss/components/_sidebars.scss"
 Licenses = [ "MIT",]
 Copyright = [
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
-  "2024 c.winger <c.winger@oeko.de>",
+  "2024 Christian Winger <Christian Winger@oeko.de>",
   "2024 Eike Broda <git@ebroda.de>",
 ]
 
