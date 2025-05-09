@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
 # SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
 # SPDX-FileCopyrightText: 2025 Adel Memariani <memariani.adel@gmail.com>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 #
 # SPDX-License-Identifier: MIT
 

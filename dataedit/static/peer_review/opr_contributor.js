@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
 // SPDX-FileCopyrightText: 2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>
-// SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-// SPDX-FileCopyrightText: 2025 jh-RLI <38939526+jh-RLI@users.noreply.github.com>
-// SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 // SPDX-FileCopyrightText: 2025 steull <stephanuller.su@gmail.com>
 // SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
 //

@@ -1,13 +1,13 @@
 # SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
 # SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
 # SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
-# SPDX-FileCopyrightText: 2025 jh-RLI <38939526+jh-RLI@users.noreply.github.com>
-# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
 #
 # SPDX-License-Identifier: MIT

@@ -5,13 +5,13 @@ Copyright: christian-rli <christian.hofmann@rl-institut.de>
 Copyright: christian-rli <42000429+christian-rli@users.noreply.github.com>
 Copyright: Adel Memariani <memariani.adel@gmail.com>
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: .gitmodules
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
@@ -30,13 +30,13 @@ License: MIT
 
 Files: .bumpversion.cfg
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <memariani.adel@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: mkdocs.yml
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: user <martimanovadarina@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
@@ -45,7 +45,7 @@ License: MIT
 Files: .prettierignore
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: c.winger <c.winger@oeko.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: .gitignore
@@ -59,16 +59,16 @@ Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 License: MIT
 
 Files: CITATION.cff
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <memariani.adel@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
@@ -76,7 +76,7 @@ License: MIT
 Files: tox.ini
 Copyright: MGlauer <martinglauer89@gmail.com>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
@@ -93,7 +93,7 @@ License: MIT
 Files: .pre-commit-config.yaml
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: c.winger <c.winger@oeko.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docker/apache2.conf
@@ -134,12 +134,12 @@ License: MIT
 
 Files: oeo_ext/templates/oeo_ext/partials/unit_element.html
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/img/OEP-Datasets-System-2023-06-15-1708.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: docs/img/draft-infrastructure-oep-2023-10-24-1338.png
@@ -147,59 +147,59 @@ Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: docs/oeplatform-code/web-api/oekg-api/oekg.yaml
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/oauth2-redirect.html
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle-core.js.map
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/swagger-ui.js.map
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/swagger-ui.css
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle.js.map
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/favicon-32x32.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: docs/oeplatform-code/web-api/dist/swagger-ui.css.map
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/swagger-ui-standalone-preset.js.map
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/index.html
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/index.css
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/swagger-ui-bundle.js.map
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/oeplatform-code/web-api/dist/favicon-16x16.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: docs/oeplatform-code/web-api/oedb-rest-api/schema.json
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: docs/css/extra.css
@@ -236,7 +236,7 @@ Copyright: MGlauer <martinglauer89@gmail.com>
 Copyright: Martin Glauer <glauer@iws.cs.ovgu.de>
 Copyright: solar-c <@>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
@@ -294,7 +294,7 @@ Copyright: MGlauer <martinglauer89@gmail.com>
 Copyright: Martin Glauer <glauer@iws.cs.ovgu.de>
 Copyright: solar-c <@>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
@@ -330,7 +330,7 @@ Copyright: quentinpeyras <quentinpey@hotmail.fr>
 Copyright: MGlauer <martinglauer89@gmail.com>
 Copyright: solar-c <@>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
@@ -363,7 +363,7 @@ Copyright: quentinpeyras <quentinpey@hotmail.fr>
 Copyright: MGlauer <martinglauer89@gmail.com>
 Copyright: solar-c <@>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
@@ -423,7 +423,7 @@ Copyright: daryna <Daryna.Martymianova@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 License: MIT
 
 Files: login/templates/login/oepuser_create_form.html
@@ -443,11 +443,11 @@ License: MIT
 
 Files: login/templates/login/user_tables.html
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: user <martimanovadarina@gmail.com>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 License: MIT
 
 Files: login/templates/login/user_groups.html
@@ -469,7 +469,7 @@ License: MIT
 
 Files: login/templates/login/user_nav.html
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
@@ -477,11 +477,11 @@ License: MIT
 Files: login/templates/login/user_review.html
 Copyright: daryna <Daryna.Martymianova@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <Jonas.Huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Darynarli <“Daryna.Barabanova@rl-institut.de”>
 License: MIT
 
@@ -572,16 +572,16 @@ Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: oekg/static/sparql_ui/vendor/yasgui-4.2.28/js/yasgui.min.js.map
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: oekg/static/sparql_ui/vendor/yasgui-4.2.28/css/yasgui.min.css
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: oekg/templates/oekg/main.html
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg
@@ -620,79 +620,79 @@ Copyright: MGlauer <martinglauer89@gmail.com>
 License: CC-BY-4.0
 
 Files: base/static/project_detail_pages_content/szenarien_db.json
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: base/static/project_detail_pages_content/sirop.json
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: base/static/project_detail_pages_content/lod_geoss.json
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: base/static/project_detail_pages_content/open_fred.json
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: base/static/project_detail_pages_content/.PROJECT_TEMPLATE.jsonc
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Eike Broda <git@ebroda.de>
 License: MIT
 
 Files: base/static/project_detail_pages_content/open_modex.json
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: base/static/project_detail_pages_content/open_ego.json
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Maja Zimmermann <Maja.Zimmermann@rl-institut.de>
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: base/static/logos/project/open_MODEX_Header.jpg
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/project/open_FRED_Header.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/project/SzenarienDB_Header.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/project/LOD-GEOSS_Header.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/project/open_ego_logo.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/project/SIROP_logo.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/project/open_eGo_Header.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/funder/BMWK.png
@@ -700,59 +700,59 @@ Copyright: christian-rli <christian.hofmann@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/HZG.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/ZNES.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/pik_logo.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/Logo_IER_UniStuttgart-1200x386.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/OvGU.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/partner_logo_fortiss.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/RLI.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/partner_logo_hereon.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/IEE.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/DLR-VE.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/FZJuelich-1.jpg
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/NE.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/OEI.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/EUF.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/partner_logo_nfdi4energy.png
@@ -760,7 +760,7 @@ Copyright: SMutyala18 <santosh.mutyala@uni-oldenburg.de>
 License: CC-BY-4.0
 
 Files: base/static/logos/partner/InfAI-Logo.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: base/static/img/selector-icons.svg
@@ -932,9 +932,9 @@ Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
-Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Eike Broda <git@ebroda.de>
 License: MIT
 
@@ -946,7 +946,7 @@ Files: base/templates/base/base-full.html
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Eike Broda <git@ebroda.de>
 License: MIT
 
@@ -958,7 +958,7 @@ Files: base/templates/base/base-wide-react.html
 Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
 Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Eike Broda <git@ebroda.de>
 License: MIT
@@ -975,7 +975,7 @@ License: MIT
 Files: base/templates/base/base-profile.html
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Eike Broda <git@ebroda.de>
 License: MIT
 
@@ -996,7 +996,7 @@ Copyright: christian-rli <christian.hofmann@rl-institut.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: wingechr <wingechr@users.noreply.github.com>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
@@ -1030,7 +1030,7 @@ License: MIT
 Files: base/templates/base/base-sidebar.html
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Eike Broda <git@ebroda.de>
 License: MIT
 
@@ -1057,7 +1057,7 @@ Copyright: Eike Broda <git@ebroda.de>
 License: MIT
 
 Files: base/templates/base/project-detail.html
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
@@ -1070,8 +1070,8 @@ Copyright: EdithaK <editha.koetter@rl-institut.de>
 Copyright: Berit Müller <berit.mueller@rl-institut.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
-Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: christian-rli <christian.hofmann@rl-institut.de>
@@ -1097,7 +1097,7 @@ Copyright: Christian Winger <c@wingechr.de>
 Copyright: Johann Wagner <wagner@creatdev-solutions.com>
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: christian-rli <christian.hofmann@rl-institut.de>
 Copyright: christian-rli <42000429+christian-rli@users.noreply.github.com>
 Copyright: Kirann Bhavaraju <kirann9999@hotmail.com>
@@ -1122,7 +1122,7 @@ Copyright: Adel Memariani <memarian@winadms-mbp.speedport.ip>
 Copyright: Adel Memariani <memariani.adel@gmail.com>
 Copyright: Adel Memariani <adel.memariani@ovgu.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 License: MIT
 
 Files: factsheet/templates/partials/related_oekg_scenarios.html
@@ -1135,7 +1135,7 @@ Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
 Copyright: Adel Memariani <memariani.adel@gmail.com>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <adel.memariani@ovgu.de>
 License: MIT
@@ -1182,7 +1182,7 @@ Copyright: Adel Memariani <memariani.adel@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <adel.memariani@ovgu.de>
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: factsheet/frontend/src/data/countries.json
@@ -1220,7 +1220,7 @@ Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: ontology/templates/ontology/oeo-steering-committee.html
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Ludee <Ludwig.Huelk@rl-institut.de>
 Copyright: christian-rli <christian.hofmann@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
@@ -1231,7 +1231,7 @@ Files: ontology/templates/ontology/about.html
 Copyright: MGlauer <martinglauer89@gmail.com>
 Copyright: Janna Hastings <janna.hastings@gmail.com>
 Copyright: stap-m <38690039+stap-m@users.noreply.github.com>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
 Copyright: christian-rli <christian.hofmann@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
@@ -1282,7 +1282,7 @@ License: CC-BY-4.0
 
 Files: dataedit/static/metaedit/schema.json
 Copyright: Christian Winger <c@wingechr.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Hendrik Huyskens <hendrik.huyskens@rl-institut.de>
@@ -1300,17 +1300,17 @@ Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: dataedit/static/peer_review/example_datenmodell.json
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: dataedit/static/peer_review/template_datenmodell.json
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: dataedit/static/peer_review/img/opr-process-bpmn.png
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: CC-BY-4.0
 
 Files: dataedit/static/dataedit/dataview.png
@@ -1356,7 +1356,7 @@ Copyright: Christian Winger <c@wingechr.de>
 License: CC-BY-4.0
 
 Files: dataedit/static/metadata-viewer/metadata-viewer.css
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: dataedit/static/images/sort_asc.png
@@ -1388,7 +1388,7 @@ Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: dataedit/templates/messages.html
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Eike Broda <git@ebroda.de>
@@ -1399,7 +1399,7 @@ Copyright: MGlauer <martinglauer89@googlemail.com>
 Copyright: MGlauer <martinglauer89@gmail.com>
 Copyright: Lukas Emele <l.emele@oeko.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
@@ -1422,7 +1422,7 @@ License: MIT
 Files: dataedit/templates/dataedit/wizard.html
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: user <martimanovadarina@gmail.com>
 Copyright: c.winger <c.winger@oeko.de>
@@ -1435,7 +1435,7 @@ Copyright: Jonas H <jonas.huber@rl-institut.de>
 Copyright: Dhruvin1412 <48323399+Dhruvin1412@users.noreply.github.com>
 Copyright: Pierre Francois <pierre-francois.duc@rl-institut.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
@@ -1450,12 +1450,12 @@ License: MIT
 
 Files: dataedit/templates/dataedit/opr_contributor.html
 Copyright: steull <stephanuller.su@gmail.com>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: user <martimanovadarina@gmail.com>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Darynarli <“Daryna.Barabanova@rl-institut.de”>
 License: MIT
 
@@ -1478,13 +1478,13 @@ License: MIT
 Files: dataedit/templates/dataedit/opr_review.html
 Copyright: steull <stephanuller.su@gmail.com>
 Copyright: christian-rli <christian.hofmann@rl-institut.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: daryna <Daryna.Martymianova@rl-institut.de>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: user <martimanovadarina@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Darynarli <martimanovadarina@gmail.com>
 Copyright: Darynarli <“Daryna.Barabanova@rl-institut.de”>
 License: MIT
@@ -1505,7 +1505,7 @@ Copyright: Johann Wagner <johann.wagner@st.ovgu.de>
 Copyright: MGlauer <martinglauer89@gmail.com>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
@@ -1515,7 +1515,7 @@ License: MIT
 
 Files: dataedit/templates/dataedit/base_fullwidth.html
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
@@ -1527,7 +1527,7 @@ Copyright: Bachibouzouk <pierre-francois.duc@rl-institute.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
@@ -1546,17 +1546,17 @@ Copyright: Bachibouzouk <pierre-francois.duc@rl-institut.de>
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Hannah <36844029+han-f@users.noreply.github.com>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: wingechr <wingechr@users.noreply.github.com>
 Copyright: Kirann Bhavaraju <kirann9999@hotmail.com>
 Copyright: steull <stephanuller.su@gmail.com>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
-Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: user <martimanovadarina@gmail.com>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Eike Broda <git@ebroda.de>
 Copyright: Darynarli <“Daryna.Barabanova@rl-institut.de”>
 License: MIT
@@ -1569,10 +1569,10 @@ License: MIT
 
 Files: dataedit/templates/dataedit/filter.html
 Copyright: Johann Wagner <johann@wagnerdevelopment.de>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: MGlauer <martinglauer89@gmail.com>
-Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: steull <stephanuller.su@gmail.com>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
@@ -1596,7 +1596,7 @@ Copyright: Christian Winger <c@wingechr.de>
 License: MIT
 
 Files: dataedit/templates/partials/metadata_viewer.html
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
 Files: oedb_datamodels/script.py.mako
@@ -1619,7 +1619,7 @@ Copyright: Adel Memariani <memarian@winadms-MacBook-Pro.local>
 Copyright: christian-rli <42000429+christian-rli@users.noreply.github.com>
 Copyright: Christian Winger <c@wingechr.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 License: MIT
 
 Files: script/setup_and_migrate_db
@@ -1653,8 +1653,8 @@ Files: oeo_viewer/client/package-lock.json
 Copyright: Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
 Copyright: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
 Copyright: wingechr <wingechr@users.noreply.github.com>
-Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 Copyright: Adel Memariani <adel.memariani@ovgu.de>
 License: MIT
@@ -1799,7 +1799,7 @@ Copyright: Christian Winger <c@wingechr.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 License: MIT
 
 Files: theming/.dockerignore
@@ -1813,7 +1813,7 @@ Copyright: Christian Winger <c@wingechr.de>
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 License: MIT
 
 Files: theming/.gitignore
@@ -1834,7 +1834,7 @@ Files: theming/scss/layouts/_database.scss
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: c.winger <c.winger@oeko.de>
 License: MIT
 
@@ -1846,8 +1846,8 @@ License: MIT
 
 Files: theming/scss/layouts/_review.scss
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
-Copyright: jh-RLI <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
@@ -1855,7 +1855,7 @@ Files: theming/scss/layouts/_main.scss
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: c.winger <c.winger@oeko.de>
 License: MIT
 
@@ -1868,14 +1868,14 @@ Files: theming/scss/base/_index.scss
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 License: MIT
 
 Files: theming/scss/base/_custom_variables.scss
 Copyright: Bryan Lancien <bryanlancien@yahoo.fr>
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 License: MIT
 
 Files: theming/scss/base/_mixins.scss
@@ -1886,9 +1886,9 @@ License: MIT
 
 Files: theming/scss/components/_tabs.scss
 Copyright: Bryan Lancien <bryanlancien.ui@gmail.com>
-Copyright: jh-RLI <jonas.huber@rl-institut.de>
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-Copyright: Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+Copyright: Jonas Huber <jonas.huber@rl-institut.de>
+Copyright: Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 Copyright: c.winger <c.winger@oeko.de>
 License: MIT
 

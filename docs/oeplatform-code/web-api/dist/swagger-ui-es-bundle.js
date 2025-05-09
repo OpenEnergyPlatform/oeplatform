@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 //
 // SPDX-License-Identifier: MIT
 

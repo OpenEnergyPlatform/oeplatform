@@ -6,7 +6,7 @@
 # SPDX-FileCopyrightText: 2025 Hendrik Huyskens <hendrik.huyskens@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <kirann9999@hotmail.com>
 # SPDX-FileCopyrightText: 2025 Ludee <Ludwig.Huelk@rl-institut.de>
@@ -19,8 +19,8 @@
 # SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
 # SPDX-FileCopyrightText: 2025 christian-rli <christian.hofmann@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 daryna <Daryna.Martymianova@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 jh-RLI <38939526+jh-RLI@users.noreply.github.com>
-# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 shara <sharanya.ramya@gmail.com>
 # SPDX-FileCopyrightText: 2025 steull <stephanuller.su@gmail.com>
 # SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>

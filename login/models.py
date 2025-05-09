@@ -7,7 +7,7 @@
 # SPDX-FileCopyrightText: 2025 MGlauer <martinglauer89@googlemail.com>
 # SPDX-FileCopyrightText: 2025 c.winger <c.winger@oeko.de>
 # SPDX-FileCopyrightText: 2025 daryna <Daryna.Martymianova@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 jh-RLI <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 solar-c <>
 # SPDX-FileCopyrightText: 2025 solar-c <@>
 #
@@ -168,7 +168,7 @@ class UserGroup(Group, PermissionHolder):
             )
         )
 
-    # TODO @jh-RLI: Check later - keep for now
+    # TODO @Jonas Huber: Check later - keep for now
     # def get_table_group_memberships(self):
     #     return GroupPermission.objects.filter(holder__in=self).prefetch_related('table') # noqa
 

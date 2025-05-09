@@ -3,7 +3,7 @@ Path = ".gitmodules"
 Licenses = [ "MIT",]
 Copyright = [
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 jh-RLI <jonas.huber@rl-institut.de>",
+  "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Christian Winger <c@wingechr.de>",
 ]
 
@@ -34,7 +34,7 @@ Path = ".bumpversion.cfg"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Christian Winger <c@wingechr.de>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Adel Memariani <memariani.adel@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
@@ -43,7 +43,7 @@ Copyright = [
 Path = "mkdocs.yml"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 user <martimanovadarina@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
@@ -55,7 +55,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2024 Christian Winger <c@wingechr.de>",
   "2024 c.winger <c.winger@oeko.de>",
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -72,10 +72,10 @@ Copyright = [
   "2021 Christian Winger <c@wingechr.de>",
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2023 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
 ]
 
 [[File]]
@@ -84,7 +84,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2023 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2023 Christian Winger <c@wingechr.de>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Adel Memariani <memariani.adel@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
@@ -95,7 +95,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2019 MGlauer <martinglauer89@gmail.com>",
   "2021 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Christian Winger <c@wingechr.de>",
 ]
 
@@ -121,7 +121,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Christian Winger <c@wingechr.de>",
   "2024 c.winger <c.winger@oeko.de>",
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -186,15 +186,15 @@ Path = "oeo_ext/templates/oeo_ext/partials/unit_element.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
-  "2025 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
+  "2025 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/img/OEP-Datasets-System-2023-06-15-1708.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2025 jh-RLI <jonas.huber@rl-institut.de>",
+  "2025 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -208,98 +208,98 @@ Copyright = [
 Path = "docs/oeplatform-code/web-api/oekg-api/oekg.yaml"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/oauth2-redirect.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle-core.js.map"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/swagger-ui.js.map"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/swagger-ui.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle.js.map"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/favicon-32x32.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/swagger-ui.css.map"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/swagger-ui-standalone-preset.js.map"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/index.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/index.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/swagger-ui-bundle.js.map"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/dist/favicon-16x16.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "docs/oeplatform-code/web-api/oedb-rest-api/schema.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -351,7 +351,7 @@ Copyright = [
   "2017 Martin Glauer <glauer@iws.cs.ovgu.de>",
   "2019 solar-c <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 jh-RLI <jonas.huber@rl-institut.de>",
+  "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2021 Adel Memariani <memarian@winadms-MacBook-Pro.local>",
   "2022 Christian Winger <c@wingechr.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -430,7 +430,7 @@ Copyright = [
   "2017 Martin Glauer <glauer@iws.cs.ovgu.de>",
   "2019 solar-c <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2021 jh-RLI <jonas.huber@rl-institut.de>",
+  "2021 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -478,7 +478,7 @@ Copyright = [
   "2017 MGlauer <martinglauer89@gmail.com>",
   "2019 solar-c <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2021 jh-RLI <jonas.huber@rl-institut.de>",
+  "2021 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -523,7 +523,7 @@ Copyright = [
   "2017 MGlauer <martinglauer89@gmail.com>",
   "2019 solar-c <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 jh-RLI <jonas.huber@rl-institut.de>",
+  "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2021 Adel Memariani <memarian@winadms-MacBook-Pro.local>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -610,7 +610,7 @@ Copyright = [
   "2023 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
 ]
 
 [[File]]
@@ -639,11 +639,11 @@ Path = "login/templates/login/user_tables.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Christian Winger <c@wingechr.de>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 user <martimanovadarina@gmail.com>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
 ]
 
 [[File]]
@@ -677,7 +677,7 @@ Path = "login/templates/login/user_nav.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Christian Winger <c@wingechr.de>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
@@ -688,11 +688,11 @@ Licenses = [ "MIT",]
 Copyright = [
   "2023 daryna <Daryna.Martymianova@rl-institut.de>",
   "2023 Christian Winger <c@wingechr.de>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 Jonas Huber <Jonas.Huber@rl-institut.de>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>",
 ]
 
@@ -840,14 +840,14 @@ Copyright = [
 Path = "oekg/static/sparql_ui/vendor/yasgui-4.2.28/js/yasgui.min.js.map"
 Licenses = [ "MIT",]
 Copyright = [
-  "2025 jh-RLI <jonas.huber@rl-institut.de>",
+  "2025 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "oekg/static/sparql_ui/vendor/yasgui-4.2.28/css/yasgui.min.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2025 jh-RLI <jonas.huber@rl-institut.de>",
+  "2025 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -855,7 +855,7 @@ Path = "oekg/templates/oekg/main.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2025 jh-RLI <jonas.huber@rl-institut.de>",
+  "2025 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -921,7 +921,7 @@ Copyright = [
 Path = "base/static/project_detail_pages_content/szenarien_db.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
   "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -931,7 +931,7 @@ Copyright = [
 Path = "base/static/project_detail_pages_content/sirop.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
   "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -941,7 +941,7 @@ Copyright = [
 Path = "base/static/project_detail_pages_content/lod_geoss.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
   "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -951,7 +951,7 @@ Copyright = [
 Path = "base/static/project_detail_pages_content/open_fred.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
   "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -961,7 +961,7 @@ Copyright = [
 Path = "base/static/project_detail_pages_content/.PROJECT_TEMPLATE.jsonc"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
   "2024 Eike Broda <git@ebroda.de>",
 ]
@@ -970,7 +970,7 @@ Copyright = [
 Path = "base/static/project_detail_pages_content/open_modex.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
   "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -980,7 +980,7 @@ Copyright = [
 Path = "base/static/project_detail_pages_content/open_ego.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de>",
   "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -990,49 +990,49 @@ Copyright = [
 Path = "base/static/logos/project/open_MODEX_Header.jpg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/project/open_FRED_Header.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/project/SzenarienDB_Header.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/project/LOD-GEOSS_Header.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/project/open_ego_logo.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/project/SIROP_logo.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/project/open_eGo_Header.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -1046,98 +1046,98 @@ Copyright = [
 Path = "base/static/logos/partner/HZG.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/ZNES.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/pik_logo.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/Logo_IER_UniStuttgart-1200x386.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/OvGU.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/partner_logo_fortiss.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/RLI.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/partner_logo_hereon.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/IEE.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/DLR-VE.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/FZJuelich-1.jpg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/NE.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/OEI.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
 Path = "base/static/logos/partner/EUF.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -1151,7 +1151,7 @@ Copyright = [
 Path = "base/static/logos/partner/InfAI-Logo.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -1437,9 +1437,9 @@ Copyright = [
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
-  "2023 jh-RLI <38939526+jh-RLI@users.noreply.github.com>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2024 Eike Broda <git@ebroda.de>",
 ]
 
@@ -1458,7 +1458,7 @@ Copyright = [
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Eike Broda <git@ebroda.de>",
 ]
 
@@ -1476,7 +1476,7 @@ Copyright = [
   "2022 Adel Memariani <memarian@winadms-MacBook-Pro.local>",
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Eike Broda <git@ebroda.de>",
 ]
@@ -1499,7 +1499,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Eike Broda <git@ebroda.de>",
 ]
 
@@ -1523,7 +1523,7 @@ Copyright = [
   "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2021 Christian Winger <c@wingechr.de>",
   "2022 wingechr <wingechr@users.noreply.github.com>",
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -1570,7 +1570,7 @@ Copyright = [
     "Copyright (c) 2011-2024 The Bootstrap Authors",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 jh-RLI <jonas.huber@rl-institut.de>",
+  "2024 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Eike Broda <git@ebroda.de>",
 ]
 
@@ -1606,7 +1606,7 @@ Copyright = [
 Path = "base/templates/base/project-detail.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -1622,8 +1622,8 @@ Copyright = [
   "2017 Berit Müller <berit.mueller@rl-institut.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Ludee <Ludwig.Huelk@rl-institut.de>",
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
-  "2022 jh-RLI <38939526+jh-RLI@users.noreply.github.com>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
   "2023 christian-rli <christian.hofmann@rl-institut.de>",
@@ -1655,7 +1655,7 @@ Copyright = [
   "2019 Johann Wagner <wagner@creatdev-solutions.com>",
   "2019 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 jh-RLI <jonas.huber@rl-institut.de>",
+  "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2020 christian-rli <christian.hofmann@rl-institut.de>",
   "2020 christian-rli <42000429+christian-rli@users.noreply.github.com>",
   "2020 Kirann Bhavaraju <kirann9999@hotmail.com>",
@@ -1686,7 +1686,7 @@ Copyright = [
   "2023 Adel Memariani <memariani.adel@gmail.com>",
   "2023 Adel Memariani <adel.memariani@ovgu.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2023 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
 ]
 
 [[File]]
@@ -1763,7 +1763,7 @@ Copyright = [
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Adel Memariani <adel.memariani@ovgu.de>",
   "2024 Christian Winger <c@wingechr.de>",
-  "2025 jh-RLI <jonas.huber@rl-institut.de>",
+  "2025 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -1825,7 +1825,7 @@ Copyright = [
 Path = "ontology/templates/ontology/oeo-steering-committee.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 jh-RLI <jonas.huber@rl-institut.de>",
+  "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2020 Ludee <Ludwig.Huelk@rl-institut.de>",
   "2021 christian-rli <christian.hofmann@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -1839,7 +1839,7 @@ Copyright = [
   "2020 MGlauer <martinglauer89@gmail.com>",
   "2020 Janna Hastings <janna.hastings@gmail.com>",
   "2020 stap-m <38690039+stap-m@users.noreply.github.com>",
-  "2020 jh-RLI <jonas.huber@rl-institut.de>",
+  "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2021 Adel Memariani <memarian@winadms-MacBook-Pro.local>",
   "2023 christian-rli <christian.hofmann@rl-institut.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -1917,7 +1917,7 @@ Path = "dataedit/static/metaedit/schema.json"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Christian Winger <c@wingechr.de>",
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Hendrik Huyskens <hendrik.huyskens@rl-institut.de>",
@@ -1944,7 +1944,7 @@ Copyright = [
 Path = "dataedit/static/peer_review/example_datenmodell.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
@@ -1952,7 +1952,7 @@ Copyright = [
 Path = "dataedit/static/peer_review/template_datenmodell.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
@@ -1960,7 +1960,7 @@ Copyright = [
 Path = "dataedit/static/peer_review/img/opr-process-bpmn.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -2037,7 +2037,7 @@ Copyright = [
 Path = "dataedit/static/metadata-viewer/metadata-viewer.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2025 jh-RLI <jonas.huber@rl-institut.de>",
+  "2025 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -2093,7 +2093,7 @@ Copyright = [
 Path = "dataedit/templates/messages.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
   "2024 Eike Broda <git@ebroda.de>",
@@ -2107,7 +2107,7 @@ Copyright = [
   "2017 MGlauer <martinglauer89@gmail.com>",
   "2018 Lukas Emele <l.emele@oeko.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 jh-RLI <jonas.huber@rl-institut.de>",
+  "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
@@ -2139,7 +2139,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2020 Christian Winger <c@wingechr.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 user <martimanovadarina@gmail.com>",
   "2024 c.winger <c.winger@oeko.de>",
@@ -2155,7 +2155,7 @@ Copyright = [
   "2019 Dhruvin1412 <48323399+Dhruvin1412@users.noreply.github.com>",
   "2019 Pierre Francois <pierre-francois.duc@rl-institut.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 jh-RLI <jonas.huber@rl-institut.de>",
+  "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2022 Christian Winger <c@wingechr.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
@@ -2176,12 +2176,12 @@ Path = "dataedit/templates/dataedit/opr_contributor.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 steull <stephanuller.su@gmail.com>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 user <martimanovadarina@gmail.com>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2023 jh-RLI <38939526+jh-RLI@users.noreply.github.com>",
-  "2023 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
+  "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>",
 ]
 
@@ -2213,13 +2213,13 @@ Licenses = [ "MIT",]
 Copyright = [
   "2023 steull <stephanuller.su@gmail.com>",
   "2023 christian-rli <christian.hofmann@rl-institut.de>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 daryna <Daryna.Martymianova@rl-institut.de>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 user <martimanovadarina@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2023 jh-RLI <38939526+jh-RLI@users.noreply.github.com>",
-  "2023 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
+  "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2025 Darynarli <martimanovadarina@gmail.com>",
   "2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>",
 ]
@@ -2246,7 +2246,7 @@ Copyright = [
   "2017 MGlauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
@@ -2262,7 +2262,7 @@ Path = "dataedit/templates/dataedit/base_fullwidth.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
@@ -2277,7 +2277,7 @@ Copyright = [
   "2020 Christian Winger <c@wingechr.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
-  "2022 jh-RLI <jonas.huber@rl-institut.de>",
+  "2022 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
@@ -2302,17 +2302,17 @@ Copyright = [
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Christian Winger <c@wingechr.de>",
   "2020 Hannah <36844029+han-f@users.noreply.github.com>",
-  "2020 jh-RLI <jonas.huber@rl-institut.de>",
+  "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2020 wingechr <wingechr@users.noreply.github.com>",
   "2020 Kirann Bhavaraju <kirann9999@hotmail.com>",
   "2022 steull <stephanuller.su@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
-  "2022 jh-RLI <38939526+jh-RLI@users.noreply.github.com>",
+  "2022 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2023 user <martimanovadarina@gmail.com>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2024 Eike Broda <git@ebroda.de>",
   "2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>",
 ]
@@ -2331,10 +2331,10 @@ Path = "dataedit/templates/dataedit/filter.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 jh-RLI <jonas.huber@rl-institut.de>",
+  "2020 Jonas Huber <jonas.huber@rl-institut.de>",
   "2020 Christian Winger <c@wingechr.de>",
   "2020 MGlauer <martinglauer89@gmail.com>",
-  "2022 jh-RLI <38939526+jh-RLI@users.noreply.github.com>",
+  "2022 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2022 steull <stephanuller.su@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
@@ -2367,7 +2367,7 @@ Copyright = [
 Path = "dataedit/templates/partials/metadata_viewer.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2025 jh-RLI <jonas.huber@rl-institut.de>",
+  "2025 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
 [[File]]
@@ -2399,7 +2399,7 @@ Copyright = [
   "2021 christian-rli <42000429+christian-rli@users.noreply.github.com>",
   "2023 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
 ]
 
 [[File]]
@@ -2450,7 +2450,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
   "2022 wingechr <wingechr@users.noreply.github.com>", 
-  "2022 Jonas Hiber <38939526+jh-RLI@users.noreply.github.com>",
+  "2022 Jonas Hiber <38939526+Jonas Huber@users.noreply.github.com>",
   ]
 
 [[File]]
@@ -2686,7 +2686,7 @@ Copyright = [
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
 ]
 
 [[File]]
@@ -2706,7 +2706,7 @@ Copyright = [
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
 ]
 
 [[File]]
@@ -2739,7 +2739,7 @@ Copyright = [
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2024 c.winger <c.winger@oeko.de>",
 ]
 
@@ -2757,8 +2757,8 @@ Path = "theming/scss/layouts/_review.scss"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
-  "2023 jh-RLI <38939526+jh-RLI@users.noreply.github.com>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
 ]
 
@@ -2769,7 +2769,7 @@ Copyright = [
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2024 c.winger <c.winger@oeko.de>",
 ]
 
@@ -2788,7 +2788,7 @@ Copyright = [
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
 ]
 
 [[File]]
@@ -2798,7 +2798,7 @@ Copyright = [
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
 ]
 
 [[File]]
@@ -2815,9 +2815,9 @@ Path = "theming/scss/components/_tabs.scss"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
-  "2023 jh-RLI <jonas.huber@rl-institut.de>",
+  "2023 Jonas Huber <jonas.huber@rl-institut.de>",
   "2024 Jonas Huber <jonas.huber@rl-institut.de>",
-  "2024 Jonas Huber <38939526+jh-RLI@users.noreply.github.com>",
+  "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2024 c.winger <c.winger@oeko.de>",
 ]
 
