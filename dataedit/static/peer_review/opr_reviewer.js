@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
-// SPDX-FileCopyrightText: 2025 Darynarli <martimanovadarina@gmail.com>
-// SPDX-FileCopyrightText: 2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>
+// SPDX-FileCopyrightText: 2025 Daryna Barabanova <martimanovadarina@gmail.com>
+// SPDX-FileCopyrightText: 2025 Daryna Barabanova <“Daryna.Barabanova@rl-institut.de”>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 // SPDX-FileCopyrightText: 2025 Christian Hofmann <christian.hofmann@rl-institut.de>

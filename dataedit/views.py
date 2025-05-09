@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institute.de>
 # SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Darynarli <“Daryna.Barabanova@rl-institut.de”>
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <“Daryna.Barabanova@rl-institut.de”>
 # SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
 # SPDX-FileCopyrightText: 2025 Hendrik Huyskens <hendrik.huyskens@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>

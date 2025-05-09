@@ -19,7 +19,7 @@
 # SPDX-FileCopyrightText: 2025 dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 pietro <peter.zamb@gmail.com>
+# SPDX-FileCopyrightText: 2025 Pietro Zambelli <peter.zamb@gmail.com>
 # SPDX-FileCopyrightText: 2025 solar-c <@>
 # SPDX-FileCopyrightText: 2025 Christian Winger<wingechr@users.noreply.github.com>
 #
