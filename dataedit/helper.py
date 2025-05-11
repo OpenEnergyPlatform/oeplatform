@@ -3,7 +3,9 @@ Provide helper functionality for views to reduce code lines in views.py
 make the codebase more modular.
 """
 
-from dataedit.models import Table
+from django.http import JsonResponse
+
+from dataedit.models import PeerReview, Table
 
 ##############################################
 #          Table view related                #
@@ -25,10 +27,10 @@ def read_label(table, oemetadata) -> str:
     :return: Readable name appended by the true table name as string or None
     """
     try:
-        if oemetadata.get("title"):
-            return oemetadata["title"].strip() + " (" + table + ")"
-        elif oemetadata.get("Title"):
-            return oemetadata["Title"].strip() + " (" + table + ")"
+        if oemetadata.get("resources"):
+            return oemetadata.get("resources", {})["title"].strip() + " (" + table + ")"
+        # elif oemetadata.get("Title"):
+        #     return oemetadata["Title"].strip() + " (" + table + ")"
 
         else:
             return None
@@ -134,30 +136,78 @@ def get_review_for_key(key, review_data):
 
 def recursive_update(metadata, review_data):
     """
-    Recursively update the metadata with new values from the review data.
+    Recursively updates metadata with new values from review_data,
+    skipping or removing fields with status 'rejected'.
 
     Args:
-        metadata (dict): The original metadata dictionary to be updated.
-        review_data (dict): The review data containing new values for various keys.
+    metadata (dict): The original metadata dictionary to update.
+    review_data (dict): The review data containing the new values
+    for various keys.
 
     Note:
-        The function traverses the review data, and for each key, it updates the
-        corresponding value in the metadata if a new value is present and is not
-        an empty string.
+    The function iterates through the review data and for each key
+    updates the corresponding value in metadata if the new value is
+    present and is not an empty string, and if the field status is
+    not 'rejected'.
     """
+
+    def delete_nested_field(data, keys):
+        """
+        Removes a nested field from a dictionary based on a list of keys.
+
+        Args:
+            data (dict or list): The dictionary or list from which
+            to remove the field.
+            keys (list): A list of keys pointing to the field to remove.
+        """
+        for key in keys[:-1]:
+            if isinstance(data, list):
+                key = int(key)
+            data = data.get(key) if isinstance(data, dict) else data[key]
+
+        last_key = keys[-1]
+        if isinstance(data, list) and last_key.isdigit():
+            index = int(last_key)
+            if 0 <= index < len(data):
+                data.pop(index)
+        elif isinstance(data, dict):
+            data.pop(last_key, None)
 
     for review_key in review_data["reviewData"]["reviews"]:
         keys = review_key["key"].split(".")
 
-        if isinstance(review_key["fieldReview"], list):
-            for field_review in review_key["fieldReview"]:
-                new_value = field_review.get("newValue", None)
+        field_review = review_key.get("fieldReview")
+        if isinstance(field_review, list):
+            field_rejected = False
+            for fr in field_review:
+                state = fr.get("state")
+                if state == "rejected":
+                    # If a field is rejected, delete it and move on to the next one.
+                    delete_nested_field(metadata, keys)
+                    field_rejected = True
+                    break
+            if field_rejected:
+                continue
+
+            # If the field is not rejected, apply the new value
+            for fr in field_review:
+                new_value = fr.get("newValue", None)
                 if new_value is not None and new_value != "":
                     set_nested_value(metadata, keys, new_value)
-        else:
-            new_value = review_key["fieldReview"].get("newValue", None)
+
+        elif isinstance(field_review, dict):
+            state = field_review.get("state")
+            if state == "rejected":
+                # If a field is rejected, delete it and move on to the next one.
+                delete_nested_field(metadata, keys)
+                continue
+
+            # If the field is not rejected, apply the new value
+            new_value = field_review.get("newValue", None)
             if new_value is not None and new_value != "":
                 set_nested_value(metadata, keys, new_value)
+
+    return metadata
 
 
 def set_nested_value(metadata, keys, value):
@@ -170,8 +220,8 @@ def set_nested_value(metadata, keys, value):
         value (Any): The value to set.
 
     Note:
-        The function navigates through the dictionary using the keys and sets the value
-        at the position indicated by the last key in the list.
+        The function navigates through the dictionary using the keys
+        and sets the value at the position indicated by the last key in the list.
     """
 
     for key in keys[:-1]:
@@ -185,34 +235,23 @@ def set_nested_value(metadata, keys, value):
 
 
 def process_review_data(review_data, metadata, categories):
-    """
-    Process the review data and update the metadata with the latest reviews
-    and suggestions.
-
-    Args:
-        review_data (list): A list of dictionaries containing review data for
-                            each field.
-        metadata (dict): The original metadata object that needs to be updated.
-        categories (list): A list of categories in the metadata.
-
-    Returns:
-        dict: A state dictionary containing the state of each field
-            after processing the review data.
-
-    Note:
-        The function sorts the fieldReview entries by timestamp (newest first)
-        and updates the metadata with the latest reviewer suggestions,
-        comments, and new values. The resulting state dictionary indicates
-        the state of each field after processing.
-    """
     state_dict = {}
+
+    # Initialize fields
+    for category in categories:
+        for item in metadata[category]:
+            item["reviewer_suggestion"] = ""
+            item["suggestion_comment"] = ""
+            item["additional_comment"] = ""
+            item["newValue"] = ""
 
     for review in review_data:
         field_key = review.get("key")
         field_review = review.get("fieldReview")
+        category = review.get("category")  # Get the category from the review
 
         if isinstance(field_review, list):
-            # Sortiere die fieldReview-Einträge nach dem timestamp (neueste zuerst)
+            # Sort and get the latest field review
             sorted_field_review = sorted(
                 field_review, key=lambda x: x.get("timestamp"), reverse=True
             )
@@ -225,32 +264,50 @@ def process_review_data(review_data, metadata, categories):
                 reviewer_suggestion = latest_field_review.get("reviewerSuggestion")
                 reviewer_suggestion_comment = latest_field_review.get("comment")
                 newValue = latest_field_review.get("newValue")
+                additional_comment = latest_field_review.get("additionalComment")
             else:
                 state = None
-                reviewer_suggestion = None
-                reviewer_suggestion_comment = None
-                newValue = None
+                reviewer_suggestion = ""
+                reviewer_suggestion_comment = ""
+                newValue = ""
+                additional_comment = ""
         else:
             state = field_review.get("state")
             reviewer_suggestion = field_review.get("reviewerSuggestion")
             reviewer_suggestion_comment = field_review.get("comment")
             newValue = field_review.get("newValue")
+            additional_comment = field_review.get("additionalComment")
 
-        if reviewer_suggestion is not None and reviewer_suggestion_comment is not None:
-            for category in categories:
-                for item in metadata[category]:
-                    if item["field"] == field_key:
-                        item["reviewer_suggestion"] = reviewer_suggestion
-                        item["suggestion_comment"] = reviewer_suggestion_comment
-                        break
-
-        if newValue is not None:
-            for category in categories:
-                for item in metadata[category]:
-                    if item["field"] == field_key:
-                        item["newValue"] = newValue
-                        break
+        # Update the item in the correct category
+        if category in metadata:
+            for item in metadata[category]:
+                if item["field"] == field_key:
+                    item["reviewer_suggestion"] = reviewer_suggestion or ""
+                    item["suggestion_comment"] = reviewer_suggestion_comment or ""
+                    item["additional_comment"] = additional_comment or ""
+                    item["newValue"] = newValue or ""
+                    break
 
         state_dict[field_key] = state
 
     return state_dict
+
+
+def delete_peer_review(review_id):
+    """
+    Remove Peer Review by review_id.
+    Args:
+        review_id (int): ID review.
+
+    Returns:
+        JsonResponse: JSON response about successful deletion or error.
+    """
+    if review_id:
+        peer_review = PeerReview.objects.filter(id=review_id).first()
+        if peer_review:
+            peer_review.delete()
+            return JsonResponse({"message": "PeerReview successfully deleted."})
+        else:
+            return JsonResponse({"error": "PeerReview not found."}, status=404)
+    else:
+        return JsonResponse({"error": "Review ID is required."}, status=400)

@@ -150,7 +150,7 @@ class APITestCase(TestCase):
 
 
 class APITestCaseWithTable(APITestCase):
-    """Test class with that creates/deletes the table alreadyon setup/teardown"""
+    """Test class with that creates/deletes the table already on setup/teardown"""
 
     test_structure = {
         "constraints": [

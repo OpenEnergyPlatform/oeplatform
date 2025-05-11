@@ -1,5 +1,4 @@
-
-Django==5.1.1
+Django==5.1.4
 django-allauth[socialaccount]==65.2.0
 matplotlib==3.8.3
 urllib3==1.26.19
@@ -20,15 +19,16 @@ alembic==1.13.1
 django-simple-captcha==0.5.20
 django-bootstrap5==21.3
 django-fontawesome-5==1.0.18
-omi==0.2.1
+omi==1.1.0
 zipstream-new==1.1.8
 rdflib==7.0.0
 pyparsing==2.4.7 # <3 otherwise: sparql queries as text cannot be parsed
 django-better-admin-arrayfield==1.4.2
 SPARQLWrapper==1.8.5
 GeoAlchemy2==0.11.1
-jsonschema==3.2.0
-oemetadata==1.6.0
+jsonschema==4.22.0 # Mainly required by omi / oemetadata
+oemetadata==2.0.4
 django-compressor==4.5.1
 django-cors-headers==4.3.1
 owlready2==0.45
+django_vite==3.1.0

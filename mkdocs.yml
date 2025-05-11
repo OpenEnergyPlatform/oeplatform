@@ -116,14 +116,21 @@ nav:
         # - Draft open-API schema: oeplatform-code/web-api/oedb-rest-api/swagger-ui.html
       - OEKG API:
         - oeplatform-code/web-api/oekg-api/index.md
+    - Edit scenario datasets: oeplatform-code/web-api/oekg-api/scenario-dataset.md
     - Django Apps:
       - oeplatform-code/apps/index.md
       - oeplatform-code/apps/login.md
+
     - Features:
       - oeplatform-code/features/index.md
-      - metaBuilder Metadata creation:
+      - 🚧 OEP-Datasets:
+        - oeplatform-code/features/oep-datasets/datasets.md
+        - oeplatform-code/features/oep-datasets/tech-stack.md
+      - 🚧🔄 Upload-Wizard:
+        - oeplatform-code/features/upload-wizard/tabular-data-upload.md
+      - metaBuilder (Metadata creation):
         - oeplatform-code/features/metaBuilder/index.md
-      - Open Peer Review Process:
+      - 🚧 Open Peer Review:
         - oeplatform-code/features/open-peer-review-process/index.md
         - Technical docs: oeplatform-code/features/open-peer-review-process/technical-docs.md
       - Scenario Bundles:

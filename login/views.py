@@ -1,5 +1,7 @@
+import json
 from itertools import groupby
 
+from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
@@ -14,11 +16,15 @@ from django.http import (
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import RedirectView, View
+from django.views.decorators.http import require_POST
+from django.views.generic import FormView, View
+
 from django.views.generic.edit import DeleteView, UpdateView
 from rest_framework.authtoken.models import Token
 
 import login.models as models
-from dataedit.models import PeerReviewManager
+from dataedit.helper import delete_peer_review
+from dataedit.models import PeerReviewManager, PeerReview
 from dataedit.views import schema_whitelist
 from login.utils import (
     get_badge_icon_path,
@@ -40,7 +46,6 @@ from .forms import (
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
 from .models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
-
 ###########################################################################
 #            User Tables related views & partial views for htmx           #
 ###########################################################################
@@ -300,6 +305,7 @@ class ReviewsView(View):
         grouped_contributions = {
             k: list(v) for k, v in groupby(sorted_contributions, key=lambda x: x.table)
         }
+        latest_review_id = latest_review.id if latest_review is not None else None
 
         return render(
             request,
@@ -310,9 +316,29 @@ class ReviewsView(View):
                 "reviewer_reviewed_grouped": grouped_reviews,
                 "contributor_reviewed": reviewed_contributions_context,
                 "contributor_reviewed_grouped": grouped_contributions,
+                "latest_review_id": latest_review_id,
             },
         )
 
+
+@require_POST
+def delete_peer_review_simple(request):
+    """
+    Удаление Peer Review по review_id (упрощённый вариант),
+    считывая review_id из тела запроса (JSON).
+    """
+    data = json.loads(request.body)
+    review_id = data.get("review_id")  # берем из POST
+
+    if not review_id:
+        return JsonResponse({"error": "No review_id in request."}, status=400)
+
+    peer_review = PeerReview.objects.filter(id=review_id).first()
+    if peer_review:
+        peer_review.delete()
+        return JsonResponse({"message": "PeerReview successfully deleted."})
+    else:
+        return JsonResponse({"error": "PeerReview not found."}, status=404)
 
 class SettingsView(View):
     def get(self, request, user_id):

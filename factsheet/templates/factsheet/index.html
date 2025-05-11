@@ -1,8 +1,13 @@
 {% extends "base/base-wide-react.html" %}
 {% load static %}
+{% load django_vite %}
 
 {% block after-head %}
-<link rel="stylesheet" href="{% static 'factsheet/css/main.feb81c07.css' %}">
+<!-- The following must stay before the vite_asset tag -->
+{% vite_react_refresh nonce="{{ request.csp_nonce }}" %}
+{% vite_asset "factsheet/frontend/src/index.jsx" %}
+
+<!-- <script src="factsheet/frontend/src/index.jsx"></script> -->
 {% endblock after-head %}
 
 {% block main-content-body %}
@@ -12,5 +17,6 @@
 {% endblock main-content-body %}
 
 {% block after-body-bottom-js %}
-<script src="{% static 'factsheet/js/main.bd05df3b.js' %}"></script>
+
+
 {% endblock after-body-bottom-js %}

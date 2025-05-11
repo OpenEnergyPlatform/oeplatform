@@ -30,7 +30,7 @@
   <br>
   <div>
     Find a detailed description for all fields of the OEMetaData visible on <a href="{{oem_key_desc}}" target="_blank">GitHub</a>.
-    For a brief introduction on how to work with the oemetadata and the OEMetaBuilder tool find our <a href="{{oemetadata_tutorial}}" target="_blank">tutorial</a> in the academy.
+    For a brief introduction on how to work with the oemetadata and the <a href="{{oemetabuilder_tutorial}}" target="_blank">OEMetaBuilder</a> tool find our <a href="{{oemetadata_tutorial}}" target="_blank">tutorial</a> in the academy.
   </div>
 </div>
 <div class=" d-flex justify-content-center">
@@ -118,5 +118,30 @@
             trigger: 'focus'
             })
         })
+        function hideTabsFilter(tabIdsToRemove) {
+          const observer = new MutationObserver(() => {
+            document.querySelectorAll('.nav-item a.nav-link').forEach(link => {
+              const href = link.getAttribute('href');
+              const label = link.querySelector('span')?.textContent.trim();
+
+              if (tabIdsToRemove.includes(href?.replace('#', '')) || tabIdsToRemove.includes(label)) {
+                const item = link.closest('.nav-item');
+                if (item) item.remove();
+              }
+            });
+          });
+
+          // Observe the form for any new child elements
+          const target = document.querySelector('#metaedit-form');
+          if (target) {
+            observer.observe(target, {
+              childList: true,
+              subtree: true,
+            });
+          }
+        }
+
+        // Set up tab filtering
+        hideTabsFilter(['Meta Metadata', 'Embargo Period', 'Dialect', 'Review']);
     </script>
 {% endblock after-body-bottom-js %}

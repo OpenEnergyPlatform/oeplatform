@@ -1,3 +1,5 @@
+from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
+
 from api.tests import APITestCase, APITestCaseWithTable
 
 _TYPES = [
@@ -226,7 +228,7 @@ class TestPut(APITestCase):
 
         self.test_table = "table_anonymous"
         self.api_req(
-            "put", data={"query": self._structure_data}, auth=False, exp_code=403
+            "put", data={"query": self._structure_data}, auth=False, exp_code=401
         )
         self.api_req("get", exp_code=404)
 
@@ -270,13 +272,13 @@ class TestPut(APITestCase):
         }
         self.test_table = "table_all_columns"
         self.api_req(
-            "put", data={"query": self._structure_data}, auth=False, exp_code=403
+            "put", data={"query": self._structure_data}, auth=False, exp_code=401
         )
 
 
 class TestDelete(APITestCaseWithTable):
     def test_anonymous(self):
-        self.api_req("delete", auth=False, exp_code=403)
+        self.api_req("delete", auth=False, exp_code=401)
 
     def test_wrong_user(self):
         self.api_req("delete", auth=self.other_token, exp_code=403)
@@ -328,7 +330,7 @@ class TestMovePublish(APITestCaseWithTable):
         self.api_req(
             "post",
             path="meta/",
-            data={"id": self.test_table, "licenses": [{"name": "CC-BY-4.0"}]},
+            data=OEMETADATA_V20_EXAMPLE,
             exp_code=200,
         )
 
