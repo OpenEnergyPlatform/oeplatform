@@ -34,6 +34,10 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    user: "${USER_ID}:${GROUP_ID}"
     image: oeplatform-dev
     container_name: oeplatform-web-dev
     working_dir: /home/appuser/app # match the WORKDIR in your Dockerfile.dev
@@ -75,23 +79,29 @@ services:
     build:
       context: .. # same root context
       dockerfile: docker/Dockerfile.vite
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    # user: "${USER_ID}:${GROUP_ID}"
     image: oeplatform-vite-dev
     container_name: vite-js-dev
     working_dir: /home/appuser/app # same path inside container
     volumes:
-      - type: bind
-        source: ..
-        target: /home/appuser/app
 
-      # 2) keep dependencies in a named volume *inside* /app
+      # 1) keep dependencies in a named volume *inside* /app
       - type: volume
         source: vite_node_modules
         target: /home/appuser/app/node_modules
 
-      # 3) Vite’s own cache directories in named volumes
+      # 2) Vite’s own cache directories in named volumes
       - type: volume
         source: vite_cache
         target: /home/appuser/app/.vite_cache
+
+      # 3) Bind mount the app source code to have live reload for development
+      - type: bind
+        source: ..
+        target: /home/appuser/app
     ports:
       - "5173:5173"
     environment:
@@ -99,3 +109,17 @@ services:
       HOST: "0.0.0.0"
     depends_on:
       - web
+
+  # ontop:
+  #   image: ontop/ontop-endpoint:latest
+  #   container_name: ontop
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     ONTOP_MAPPING_FILE: "/opt/ontop/mapping.obda"
+  #     ONTOP_OWL_FILE: "/opt/ontop/ontology.owl"
+  #     ONTOP_PROPERTIES_FILE: "/opt/ontop/ontop.properties"
+  #   volumes:
+  #     - ./ontop:/opt/ontop  # Mount your .obda, .owl, and .properties files here
+  #   depends_on:
+  #     - postgres

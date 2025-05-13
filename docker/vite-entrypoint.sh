@@ -5,6 +5,7 @@ STAMP=".node_modules_stamp"
 # compute the current lockfile checksum
 checksum=$(md5sum package-lock.json | awk '{print $1}')
 
+
 # if modules missing/empty, or stamp missing, or deps changed → reinstall
 if [ ! -d node_modules ] \
    || [ -z "$(ls -A node_modules)" ] \
