@@ -44,7 +44,7 @@ Path = "mkdocs.yml"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
-  "2023 user <martimanovadarina@gmail.com>",
+  "2023 Daryna Barabanova <martimanovadarina@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2024 Bryan Lancien <bryanlancien.ui@gmail.com>",
 ]
@@ -316,7 +316,7 @@ Path = "modelview/static/css/form-style.css"
 Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
-  "2019 solar-c <@>",
+  "2019 Lara Christmann <@>",
   "2021 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -349,7 +349,7 @@ Copyright = [
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Martin Glauer <glauer@iws.cs.ovgu.de>",
-  "2019 solar-c <@>",
+  "2019 Lara Christmann <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2021 Adel Memariani <memarian@winadms-MacBook-Pro.local>",
@@ -371,7 +371,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
-  "2019 solar-c <@>",
+  "2019 Lara Christmann <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -428,7 +428,7 @@ Copyright = [
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Martin Glauer <glauer@iws.cs.ovgu.de>",
-  "2019 solar-c <@>",
+  "2019 Lara Christmann <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2021 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Christian Winger <c@wingechr.de>",
@@ -476,7 +476,7 @@ Copyright = [
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
-  "2019 solar-c <@>",
+  "2019 Lara Christmann <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2021 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -508,7 +508,7 @@ Copyright = [
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
-  "2019 solar-c <@>",
+  "2019 Lara Christmann <@>",
   "2020 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
@@ -521,7 +521,7 @@ Copyright = [
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
-  "2019 solar-c <@>",
+  "2019 Lara Christmann <@>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2021 Adel Memariani <memarian@winadms-MacBook-Pro.local>",
@@ -598,15 +598,15 @@ Copyright = [
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
-  "2023 Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>",
-  "2023 Daryna Martymianova <Daryna.Martymianova@rl-institut.de> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <daryna@rli-nb-54.rl-institut.local>",
+  "2023 Daryna Barabanova <Daryna.Martymianova@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "login/templates/login/user_settings.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Daryna Martymianova <Daryna.Martymianova@rl-institut.de> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <Daryna.Martymianova@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
@@ -621,7 +621,7 @@ Copyright = [
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Christian Hofmann <christian.hofmann@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
-  "2023 Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>",
+  "2023 Daryna Barabanova <daryna@rli-nb-54.rl-institut.local>",
 ]
 
 [[File]]
@@ -642,7 +642,7 @@ Copyright = [
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
-  "2023 user <martimanovadarina@gmail.com>",
+  "2023 Daryna Barabanova <martimanovadarina@gmail.com>",
   "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
 ]
 
@@ -686,7 +686,7 @@ Copyright = [
 Path = "login/templates/login/user_review.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Daryna Martymianova <Daryna.Martymianova@rl-institut.de> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <Daryna.Martymianova@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Jonas Huber <Jonas.Huber@rl-institut.de> © Reiner Lemoine Institut",
@@ -700,7 +700,7 @@ Copyright = [
 Path = "login/templates/login/delete_account.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Daryna Martymianova <Daryna.Martymianova@rl-institut.de> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <Daryna.Martymianova@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Christian Winger <c@wingechr.de>",
 ]
 
@@ -1396,7 +1396,7 @@ Path = "base/static/css/base-style.css"
 Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
-  "2016 Till I <thsstll@users.noreply.github.com>",
+  "2016 Till Isenhuth <thsstll@users.noreply.github.com>",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Martin Glauer <martinglauer89@googlemail.com>",
   "2019 Johann Wagner <wagner@creatdev-solutions.com>",
@@ -1510,7 +1510,7 @@ Copyright = [
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2016 quentinpeyras <quentinpey@hotmail.fr>",
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
-  "2016 Till I <thsstll@users.noreply.github.com>",
+  "2016 Till Isenhuth <thsstll@users.noreply.github.com>",
   "2017 Marco Finkendei <anubis-mf@web.de>",
   "2017 Johann Wagner <johann.wagner@st.ovgu.de>",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
@@ -1643,7 +1643,7 @@ Path = "base/templates/base/index.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
-  "2016 Till I <thsstll@users.noreply.github.com>",
+  "2016 Till Isenhuth <thsstll@users.noreply.github.com>",
   "2016 Berit Müller <berit.mueller@rl-institut.de> © Reiner Lemoine Institut",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Editha Koetter <editha.koetter@rl-institut.de> © Reiner Lemoine Institut",
@@ -2141,7 +2141,7 @@ Copyright = [
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2024 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
-  "2024 user <martimanovadarina@gmail.com>",
+  "2024 Daryna Barabanova <martimanovadarina@gmail.com>",
   "2024 Christian Winger <Christian Winger@oeko.de>",
 ]
 
@@ -2177,7 +2177,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2023 Stephan Uller <stephanuller.su@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
-  "2023 user <martimanovadarina@gmail.com>",
+  "2023 Daryna Barabanova <martimanovadarina@gmail.com>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
@@ -2214,9 +2214,9 @@ Copyright = [
   "2023 Stephan Uller <stephanuller.su@gmail.com>",
   "2023 Christian Hofmann <christian.hofmann@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
-  "2023 Daryna Martymianova <Daryna.Martymianova@rl-institut.de> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <Daryna.Martymianova@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
-  "2023 user <martimanovadarina@gmail.com>",
+  "2023 Daryna Barabanova <martimanovadarina@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2023 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
@@ -2311,7 +2311,7 @@ Copyright = [
   "2022 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2023 Bryan Lancien <bryanlancien.ui@gmail.com>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
-  "2023 user <martimanovadarina@gmail.com>",
+  "2023 Daryna Barabanova <martimanovadarina@gmail.com>",
   "2024 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2024 Eike Broda <git@ebroda.de>",
   "2025 Daryna Barabanova <“Daryna.Barabanova@rl-institut.de”>",

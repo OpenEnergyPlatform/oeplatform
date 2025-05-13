@@ -19,7 +19,7 @@ SPDX-FileCopyrightText: 2025 RL-INSTITUT\hendrik.huyskens <hendrik.huyskens@rl-i
 SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
 SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-SPDX-FileCopyrightText: 2025 solar-c <@>
+SPDX-FileCopyrightText: 2025 Lara Christmann <@>
 SPDX-FileCopyrightText: 2025 Mirjam Stappel <38690039+stap-m@users.noreply.github.com>
 SPDX-FileCopyrightText: 2025 Christian Winger<wingechr@users.noreply.github.com>
 

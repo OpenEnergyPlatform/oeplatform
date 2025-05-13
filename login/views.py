@@ -1,14 +1,14 @@
 # SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
 # SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
 # SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <daryna@rli-nb-54.rl-institut.local>
 # SPDX-FileCopyrightText: 2025 Daryna Barabanova <“Daryna.Barabanova@rl-institut.de”>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Marco Finkendei <anubis-mf@web.de>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <Daryna.Martymianova@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
 #

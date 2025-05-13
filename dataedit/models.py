@@ -8,7 +8,7 @@
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 # SPDX-FileCopyrightText: 2025 Tom Heimbrodt <heimbrodt@posteo.de>
 # SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
-# SPDX-FileCopyrightText: 2025 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <Daryna.Martymianova@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Stephan Uller <stephanuller.su@gmail.com>
 # SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>

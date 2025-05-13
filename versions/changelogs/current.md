@@ -25,7 +25,7 @@ SPDX-FileCopyrightText: 2025 Christian Hofmann <christian.hofmann@rl-institut.de
 SPDX-FileCopyrightText: 2025 chrwm <christoph.muschner@rl-institut.de>
 SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-SPDX-FileCopyrightText: 2025 solar-c <5002008+solar-c@users.noreply.github.com>
+SPDX-FileCopyrightText: 2025 Lara Christmann <5002008+solar-c@users.noreply.github.com>
 SPDX-FileCopyrightText: 2025 Mirjam Stappel <38690039+stap-m@users.noreply.github.com>
 SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
 SPDX-FileCopyrightText: 2025 Christian Winger<wingechr@users.noreply.github.com>

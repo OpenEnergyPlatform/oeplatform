@@ -10,7 +10,7 @@
 # SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 quentinpeyras <quentinpey@hotmail.fr>
-# SPDX-FileCopyrightText: 2025 solar-c <@>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <@>
 #
 # SPDX-License-Identifier: MIT
 

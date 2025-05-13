@@ -3,8 +3,8 @@
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 # SPDX-FileCopyrightText: 2025 quentinpeyras <quentinpey@hotmail.fr>
-# SPDX-FileCopyrightText: 2025 solar-c <>
-# SPDX-FileCopyrightText: 2025 solar-c <@>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <@>
 #
 # SPDX-License-Identifier: MIT
 

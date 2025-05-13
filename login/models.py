@@ -1,15 +1,15 @@
 # SPDX-FileCopyrightText: 2025 AemanMalik <aemannawaz@live.com>
 # SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Daryna Martymianova <daryna@rli-nb-54.rl-institut.local>
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <daryna@rli-nb-54.rl-institut.local>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Marco Finkendei <anubis-mf@web.de>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 # SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
-# SPDX-FileCopyrightText: 2025 Daryna Martymianova <Daryna.Martymianova@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <Daryna.Martymianova@rl-institut.de>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 solar-c <>
-# SPDX-FileCopyrightText: 2025 solar-c <@>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <@>
 #
 # SPDX-License-Identifier: MIT
 
