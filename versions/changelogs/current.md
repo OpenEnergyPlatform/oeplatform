@@ -11,7 +11,7 @@ SPDX-FileCopyrightText: 2025 Jonas H <jonas.huber@rl-institut.de>
 SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
 SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
 SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <kirann9999@hotmail.com>
-SPDX-FileCopyrightText: 2025 Ludwig Huelk <Ludwig.Huelk@rl-institut.de>
+SPDX-FileCopyrightText: 2025 Ludwig Hülk <Ludwig.Huelk@rl-institut.de>
 SPDX-FileCopyrightText: 2025 Ludwig Hülk <ludwig.huelk@rl-institut.de>
 SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>

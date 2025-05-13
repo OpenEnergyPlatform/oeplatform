@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien@yahoo.fr>
 // SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
 // SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
-// SPDX-FileCopyrightText: 2025 Ludwig Huelk <ludwig.huelk@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 Ludwig Hülk <ludwig.huelk@rl-institut.de>
 // SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
 // SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
 //

@@ -82,7 +82,7 @@ Copyright = [
 Path = "CITATION.cff"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2023 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2023 Adel Memariani <memariani.adel@gmail.com>",
@@ -453,7 +453,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
   "2023 Christian Hofmann <christian.hofmann@rl-institut.de> © Reiner Lemoine Institut",
@@ -862,7 +862,7 @@ Copyright = [
 Path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -870,7 +870,7 @@ Path = "base/static/favicon.ico"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
   "2017 Martin Glauer <martinglauer89@gmail.com>",
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -885,7 +885,7 @@ Copyright = [
 Path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -907,7 +907,7 @@ Copyright = [
 Path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -923,7 +923,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de> © Reiner Lemoine Institut",
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -933,7 +933,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de> © Reiner Lemoine Institut",
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -943,7 +943,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de> © Reiner Lemoine Institut",
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -953,7 +953,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de> © Reiner Lemoine Institut",
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -972,7 +972,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de> © Reiner Lemoine Institut",
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -982,7 +982,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <Maja.Zimmermann@rl-institut.de> © Reiner Lemoine Institut",
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Christian Winger <c@wingechr.de>",
 ]
 
@@ -1179,14 +1179,14 @@ Copyright = [
 Path = "base/static/img/OpenEnergyFamily_OEPlatypus.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "base/static/img/OpenEnergyFamily_modules_trans.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2020 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2020 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1200,21 +1200,21 @@ Copyright = [
 Path = "base/static/img/about/OpenEnergyFamily_modeling-cycle.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "base/static/img/about/OpenEnergyFamily_modeling-open-science.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "base/static/img/about/OpenEnergyFamily_GroupPhoto.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1280,7 +1280,7 @@ Copyright = [
 Path = "base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1294,14 +1294,14 @@ Copyright = [
 Path = "base/static/img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "base/static/img/welcome/OEP_Documentation.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1315,14 +1315,14 @@ Copyright = [
 Path = "base/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2021 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2021 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1490,7 +1490,7 @@ Copyright = [
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1518,7 +1518,7 @@ Copyright = [
   "2019 Johann Wagner <wagner@creatdev-solutions.com>",
   "2019 Pierre Francois <pierre-francois.duc@rl-institut.de> © Reiner Lemoine Institut",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2020 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2020 Christian Hofmann <christian.hofmann@rl-institut.de> © Reiner Lemoine Institut",
   "2020 Martin Glauer <martinglauer89@gmail.com>",
   "2021 Christian Winger <c@wingechr.de>",
@@ -1607,7 +1607,7 @@ Path = "base/templates/base/project-detail.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -1621,7 +1621,7 @@ Copyright = [
   "2017 Editha Koetter <editha.koetter@rl-institut.de> © Reiner Lemoine Institut",
   "2017 Berit Müller <berit.mueller@rl-institut.de> © Reiner Lemoine Institut",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
-  "2020 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2020 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -1653,7 +1653,7 @@ Copyright = [
   "2018 Klara Reder <klara.reder@iee.fraunhofer.de>",
   "2018 Christian Winger <c@wingechr.de>",
   "2019 Johann Wagner <wagner@creatdev-solutions.com>",
-  "2019 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2019 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2020 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
   "2020 Christian Hofmann <christian.hofmann@rl-institut.de> © Reiner Lemoine Institut",
@@ -1671,7 +1671,7 @@ Copyright = [
   "2019 Klara Reder <klara.reder@iee.fraunhofer.de>",
   "2019 Johann Wagner <johann@wagnerdevelopment.de>",
   "2019 Martin Glauer <martinglauer89@gmail.com>",
-  "2022 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
   "2022 Christian Winger <c@wingechr.de>",
 ]
@@ -1826,7 +1826,7 @@ Path = "ontology/templates/ontology/oeo-steering-committee.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
-  "2020 Ludwig Huelk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2020 Ludwig Hülk <Ludwig.Huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2021 Christian Hofmann <christian.hofmann@rl-institut.de> © Reiner Lemoine Institut",
   "2022 Christian Winger <c@wingechr.de>",
   "2023 Jonas Huber <jonas.huber@rl-institut.de> © Reiner Lemoine Institut",
@@ -2272,7 +2272,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
-  "2017 Ludwig Huelk <ludwig.huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2017 Ludwig Hülk <ludwig.huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2019 Pierre Francois <pierre-francois.duc@rl-institute.de>",
   "2020 Christian Winger <c@wingechr.de>",
   "2022 Bryan Lancien <bryanlancien@yahoo.fr>",
@@ -2295,7 +2295,7 @@ Copyright = [
   "2016 Martin Glauer <martinglauer89@googlemail.com>",
   "2017 Martin Glauer <martinglauer89@gmail.com>",
   "2017 Martin Glauer <martinglauer89@googlemail.com>",
-  "2017 Ludwig Huelk <ludwig.huelk@rl-institut.de> © Reiner Lemoine Institut",
+  "2017 Ludwig Hülk <ludwig.huelk@rl-institut.de> © Reiner Lemoine Institut",
   "2018 Tom Heimbrodt <heimbrodt@posteo.de>",
   "2019 Pierre Francois <pierre-francois.duc@rl-institute.de>",
   "2019 Pierre Francois <pierre-francois.duc@rl-institut.de> © Reiner Lemoine Institut",
