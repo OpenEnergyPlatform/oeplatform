@@ -20,10 +20,21 @@ export default defineConfig({
       failOnError:   true,
     }),
   ],
+  resolve: {
+    alias: {
+      '@emotion/react': resolve('./node_modules/@emotion/react'),
+      '@emotion/styled': resolve('./node_modules/@emotion/styled'),
+      '@emotion/cache': resolve('./node_modules/@emotion/cache'),
+      '@emotion/utils': resolve('./node_modules/@emotion/utils'),
+      '@emotion/serialize': resolve('./node_modules/@emotion/serialize'),
+      '@emotion/css': resolve('./node_modules/@emotion/css'),
+    },
+  },
   optimizeDeps: {
     include: [
       '@emotion/react',
       '@emotion/styled',
+      '@emotion/cache',
       '@mui/material',
       '@mui/material/styles',
       '@mui/system',
