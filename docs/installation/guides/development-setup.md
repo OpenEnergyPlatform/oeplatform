@@ -1,5 +1,11 @@
 # Development setup
 
+!!! Note "Recent updates"
+
+    As we shift the development support towards a docker based setup which sets up the oeplatform infrastructure and deploys it locally most of the commands below are are already included in the automated docker compose setup. For example there is dummy data and a test user pre "installed" and ready to use. Also note that if you use the docker based setup you must run the commands below inside the oeplatform web container to gain any effect.
+
+    Available information which effect your host environment like your IDE and your operating system stay the same.
+
 See our [developer guidelines](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) and get in touch with our [developer team](https://openenergyplatform.github.io/organisation/family_community/contact/).
 Have a look at the official [git-Book](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup) instructions on how to setup your git on a new system to be able to contribute to our GitHub repository.
 

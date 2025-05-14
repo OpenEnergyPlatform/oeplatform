@@ -74,13 +74,17 @@ var MetaEdit = function(config) {
 
     // make some readonly
     if (config.standalone == false) {
-      json.properties["@id"].readonly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
+      json.properties["@id"].readOnly = false;
+      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readOnly = true;
+      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readOnly = true;
     } else {
-      json.properties["@id"].readonly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = false;
+      json.properties["@context"].options = {hidden: true};
+      json.properties["@id"].readOnly = false;
+      json.properties.resources.items.properties["@id"].readOnly = false;
+      json.properties.resources.items.properties.path.readOnly = false;
+      json.properties.resources.items.properties.schema.properties.fields.items.properties.nullable.readOnly = false;
+      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readOnly = false;
+      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readOnly = false;
     }
 
     // remove some: TODO: but make sure fields are not lost
@@ -107,6 +111,8 @@ var MetaEdit = function(config) {
       json["title"] = "Create new Metadata for your Dataset";
     }
 
+    // add names to resources categories
+    json.properties.resources.items.basicCategoryTitle = "General"
 
     return json;
   }
@@ -140,7 +146,7 @@ var MetaEdit = function(config) {
     json["resources"][0]["schema"]["fields"].map(function(field) {
       fieldsByName[field.name] = field;
     });
-
+    
     json["resources"][0]["schema"]["fields"] = [];
     config.columns.map(function(column) {
       var field = fieldsByName[column.name] || {name: column.name};
@@ -156,7 +162,6 @@ var MetaEdit = function(config) {
       if (typeof elemObject != 'object' || $.isArray(elemObject)) {
         return;
       }
-      console.log(schemaProps, elemObject, path);
       // for each key: fill missing (recursively)
       Object.keys(schemaProps).map(function(key) {
         var prop = schemaProps[key];
@@ -401,6 +406,7 @@ var MetaEdit = function(config) {
 
         standalone_options = {
           schema: config.schema,
+          // startval: {"@context": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json"},
           theme: 'bootstrap5',
           iconlib: 'fontawesome5',
           mode: 'form',
@@ -489,7 +495,6 @@ var MetaEdit = function(config) {
       });
     }
   })();
-
 
   return config;
 };
