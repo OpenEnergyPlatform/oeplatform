@@ -24,9 +24,6 @@ RUN npm ci
 COPY docker/vite-entrypoint.sh /usr/local/bin/vite-entrypoint.sh
 RUN chmod +x /usr/local/bin/vite-entrypoint.sh
 
-# # Create and pre-own node_modules dir (so volume inherits permissions)
-# RUN mkdir -p node_modules && chmod -R u+rwX,g+rwX,o+rX  node_modules
-
 # USER appuser
 
 # expose dev port
