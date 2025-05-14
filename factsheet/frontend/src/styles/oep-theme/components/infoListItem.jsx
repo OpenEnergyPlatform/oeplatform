@@ -5,7 +5,7 @@ import variables from '../variables';
 const InfoListItemContainer = styled(Grid)(({ theme }) => ({
   padding: `${theme.spacing(1)} ${theme.spacing(0)}`,
 
-  '& > :first-child span:first-of-type': {
+  '& > :first-of-type span:first-of-type': {
     fontWeight: theme.typography.fontWeightBold,
     marginRight: `${theme.spacing(1)}`,
     verticalAlign: 'top'
@@ -17,7 +17,7 @@ const InfoListItemContainer = styled(Grid)(({ theme }) => ({
 }));
 
 const InfoListItem = (props) => {
-  const { fullWidth, ...safeProps } = props;
+  const { fullwidth, ...safeProps } = props;
   return <InfoListItemContainer container {...safeProps} />;
 };
 
