@@ -215,7 +215,7 @@ def process_reuse_toml(path="REUSE.toml"):
             if match:
                 email = match.group(1)
                 if email in email_map:
-                    handle = f"@{email_map[email]}"
+                    handle = f"{email_map[email]}"
                     newline = re.sub(r"<[^>]+>", f"<{handle}>", line)
                     lines.append(newline)
                     changed = True
@@ -228,7 +228,7 @@ def process_reuse_toml(path="REUSE.toml"):
         print(f"✅ REUSE.toml angepasst.")
     else:
         print("ℹ️ REUSE.toml unverändert.")
-        
+
 # --- Alle Dateien im Repo durchgehen ---
 for root, dirs, files in os.walk("."):
     for filename in files:
