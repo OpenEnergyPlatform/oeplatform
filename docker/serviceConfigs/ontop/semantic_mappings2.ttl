@@ -1,0 +1,63 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix oeo: <http://openenergy-platform.org/ontology/oeo/>.
+@prefix oekg: <http://openenergy-platform.org/ontology/oeo/oekg/>.
+@prefix schema: <http://schema.org/> .
+
+<#Country_map>
+    rr:logicalTable [ rr:tableName "eu_leg_dim_country" ];
+    rr:subjectMap [
+        rr:template "http://openenergy-platform.org/ontology/oeo/oekg/data_descriptor/eu_leg_dim_country/{country_name}";
+        rr:class oeo:BFO_0000006;
+    ];
+    rr:predicateObjectMap [
+        rr:predicate oeo:IAO_0000136;
+        rr:objectMap [ rr:column "country_code" ];
+    ];
+	rr:predicateObjectMap [
+        rr:predicate schema:name;
+        rr:objectMap [ rr:column "country_name" ];
+    ]
+	.
+
+<#eu_leg_data_2016_eea_map>
+    rr:logicalTable [ rr:tableName "eu_leg_data_2016_eea"];
+    rr:subjectMap [
+        rr:template "http://openenergy-platform.org/ontology/oeo/oekg/data_descriptor/eu_leg_data_2016_eea/{id}";
+        rr:class oeo:IAO_0000027;
+    ];
+
+	rr:predicateObjectMap [
+        rr:predicate oeo:OEO_00140178;
+        rr:objectMap [ rr:column "value_reported" ];
+    ];
+
+	rr:predicateObjectMap [
+        rr:predicate oeo:has_year;
+        rr:objectMap [ rr:column "year" ];
+    ];
+
+	rr:predicateObjectMap [
+        rr:predicate oeo:has_sector;
+        rr:objectMap [ rr:column "category" ];
+    ];
+
+	rr:predicateObjectMap [
+          rr:predicate oeo:OEO_00020226;
+          rr:objectMap [ rr:column "scenario" ];
+      ];
+
+	rr:predicateObjectMap [
+          rr:predicate oeo:has_gas;
+          rr:objectMap [ rr:column "gas" ];
+      ];
+
+	rr:predicateObjectMap [
+		rr:predicate oeo:has_region;
+			rr:objectMap [
+            	rr:parentTriplesMap <#Country_map>;
+            	rr:joinCondition [
+                	rr:child "country_code";
+                	rr:parent "country_code";
+            	];
+        	];
+    ].
