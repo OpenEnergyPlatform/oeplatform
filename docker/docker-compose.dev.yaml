@@ -4,6 +4,8 @@ volumes:
   vite_node_modules:
   vite_cache:
   vite_temp:
+  ontop_config:
+  jdbc:
 
 
 services:
@@ -110,16 +112,32 @@ services:
     depends_on:
       - web
 
-  # ontop:
-  #   image: ontop/ontop-endpoint:latest
-  #   container_name: ontop
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #     ONTOP_MAPPING_FILE: "/opt/ontop/mapping.obda"
-  #     ONTOP_OWL_FILE: "/opt/ontop/ontology.owl"
-  #     ONTOP_PROPERTIES_FILE: "/opt/ontop/ontop.properties"
-  #   volumes:
-  #     - ./ontop:/opt/ontop  # Mount your .obda, .owl, and .properties files here
-  #   depends_on:
-  #     - postgres
+  ontop-init:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ontop-init
+    volumes:
+      - ontop_config:/opt/ontop/input
+      - ./serviceConfigs/ontop:/source
+      - jdbc:/opt/ontop/jdbc
+    depends_on:
+      - postgres
+
+  ontop:
+    image: ontop/ontop:latest
+    ports:
+      - "8080:8080"
+    environment:
+      ONTOP_ONTOLOGY_FILE: /opt/ontop/input/oeo_labels.owl
+      ONTOP_MAPPING_FILE: /opt/ontop/input/sm_2.obda
+      ONTOP_PROPERTIES_FILE: /opt/ontop/input/postgres.properties
+      ONTOP_DB_DRIVER: org.postgresql.Driver
+      ONTOP_CORS_ALLOWED_ORIGINS: "*"
+      ONTOP_DEV_MODE: "true"
+      ONTOP_LAZY_INIT: "true"
+      ONTOP_JAVA_ARGS: "-cp /opt/ontop/lib/*:/opt/ontop/jdbc/postgresql.jar"
+    volumes:
+      - ontop_config:/opt/ontop/input
+      - jdbc:/opt/ontop/jdbc
+    depends_on:
+      - ontop-init

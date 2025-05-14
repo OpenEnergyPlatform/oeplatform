@@ -1,0 +1,8 @@
+FROM alpine
+
+RUN apk add --no-cache curl
+
+COPY docker/ontop-entrypoint.sh /ontop-entrypoint.sh
+RUN chmod +x /ontop-entrypoint.sh
+
+ENTRYPOINT ["/ontop-entrypoint.sh"]
