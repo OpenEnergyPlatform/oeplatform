@@ -10,6 +10,8 @@
 
 - Update test related to oekg queries and avoide using Mocks to keep tests simpler and more realistic by using actual rdflib Graph [(#1980)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1980)
 
+- Enhance the docker developer setup by adding the missing ontop service which is the backend for the scenario comparison on the oeplatform [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+
 ## Features
 
 ## Bugs
