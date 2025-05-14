@@ -101,7 +101,7 @@ function Factsheet(props) {
 
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = React.useState(0);
-  const steps = getSteps();
+
 
   const { id, fsData } = props;
 
@@ -1478,16 +1478,7 @@ function Factsheet(props) {
               <AddIcon />
             </IconButton>
           </Box>
-          <AddTabWrapper>
-            <IconButton
-              color="primary"
-              aria-label="add"
-              size="small"
-              onClick={handleAddScenario}
-            >
-              <AddIcon />
-            </IconButton>
-          </AddTabWrapper>
+
         </Tabs>
         {scenarios.map((item, i) =>
           <TabPanel
@@ -1559,16 +1550,6 @@ function Factsheet(props) {
               <AddIcon />
             </IconButton>
           </Box>
-          <AddTabWrapper>
-            <IconButton
-              color="primary"
-              aria-label="add"
-              size="small"
-              onClick={handleAddScenario}
-            >
-              <AddIcon />
-            </IconButton>
-          </AddTabWrapper>
         </Tabs>
         {publications.map((item, i) =>
           <TabPanel
@@ -2494,10 +2475,10 @@ const renderScenariosOverview = () => (
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-             {/*  {selectedTechnologies.map((v, i) => (
+              {selectedTechnologies.map((v, i) => (
                 <span> <span> <Chip label={v.value} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-              ))} */}
-              <RichTreeView items={selectedTechnologiesTree} expandedItems={allNodeIds} />
+              ))}
+              {/* <RichTreeView items={selectedTechnologiesTree} expandedItems={allNodeIds} /> */}
             </ContentTableCell>
           </TableRow>
         </TableBody>
@@ -2601,18 +2582,6 @@ const renderScenariosOverview = () => (
     }
     setOpenUpdatedDialog(false);
   };
-
-  function getSteps() {
-    return ['Basic information',
-      'Study details',
-      'Publication',
-      'Sectors',
-      'Technologies',
-      'Scenarios',
-      'Models',
-      'Frameworks',
-    ];
-  }
 
   const handleNonFittingLabelFn = ((label, availablePx) => {
     const numFitChars = Math.round(availablePx / 7); // ~7px per char
@@ -2789,7 +2758,7 @@ const renderScenariosOverview = () => (
             </Dialog>
 
             <Dialog
-              fullWidth
+              fullwidth
               maxWidth="md"
               open={openRemoveddDialog}
               onClose={handleClickOpenRemovedDialog}
@@ -2829,38 +2798,7 @@ const renderScenariosOverview = () => (
                     <CustomTabs
                       items={items}
                     />
-                    {/* <Stepper activeStep={activeStep}  >
-                      {steps.map((label, index) => (
-                      <Step key={label} >
-                        <StepLabel onClick={() => handleStepClick(index)}><b>{label}</b></StepLabel>
-                        <StepContent>
-                        <Typography>{getStepContent(index)}</Typography>
-                        <div >
-                          <div>
-                          <Button
-                              style={{ marginTop: '20px', marginRight: '5px' }}
-                              disabled={activeStep === 0}
-                              onClick={handleBack}
-                              variant="outlined"
-                              size="small"
-                          >
-                            Back
-                          </Button>
-                          <Button
-                            style={{ marginTop: '20px' }}
-                            variant="contained"
-                            color="primary"
-                            onClick={handleNext}
-                            size="small"
-                          >
-                            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                          </Button>
-                          </div>
-                        </div>
-                        </StepContent>
-                      </Step>
-                      ))}
-                    </Stepper> */}
+
                   </Grid>
                 </Grid>
               </div>
