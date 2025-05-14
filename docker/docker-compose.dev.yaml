@@ -42,6 +42,7 @@ services:
         source: ..
         target: /home/appuser/app
     ports:
+      - "8000:8000" # expose web
       - "5678:5678" # add debugpy port
     command:
       - python
