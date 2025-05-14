@@ -13,9 +13,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - pgdata:/var/lib/postgresql/data    
 
   fuseki:
     image: stain/jena-fuseki:5.1.0
@@ -26,8 +24,6 @@ services:
     volumes:
       - fuseki_databases:/home/fuseki/databases
       # - ./fuseki/config:/home/fuseki/configuration
-    ports:
-      - "3030:3030"
     restart: unless-stopped
 
   web:
@@ -46,7 +42,6 @@ services:
         source: ..
         target: /home/appuser/app
     ports:
-      - "8000:8000"
       - "5678:5678" # add debugpy port
     command:
       - python
@@ -102,8 +97,6 @@ services:
       - type: bind
         source: ..
         target: /home/appuser/app
-    ports:
-      - "5173:5173"
     environment:
       CHOKIDAR_USEPOLLING: "false"
       HOST: "0.0.0.0"
