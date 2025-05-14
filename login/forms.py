@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <daryna@rli-nb-54.rl-institut.local>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Marco Finkendei <anubis-mf@web.de>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <Daryna.Martymianova@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+# SPDX-FileCopyrightText: 2025 Marco Finkendei <https://github.com/MFinkendei>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli>
 #
 # SPDX-License-Identifier: MIT
 

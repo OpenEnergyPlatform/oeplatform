@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 #
 # SPDX-License-Identifier: MIT
 

@@ -1,6 +1,6 @@
 <!--
-SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 
 SPDX-License-Identifier: CC0-1.0
 -->

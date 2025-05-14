@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
-# SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 #
 # SPDX-License-Identifier: MIT
 

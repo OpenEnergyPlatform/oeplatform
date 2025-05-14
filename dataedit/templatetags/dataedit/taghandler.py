@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <heimbrodt@posteo.de>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
 #
 # SPDX-License-Identifier: MIT
 

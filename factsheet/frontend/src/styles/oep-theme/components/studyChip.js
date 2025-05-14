@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
-// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 //
 // SPDX-License-Identifier: MIT
 

@@ -1,3 +1,3 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@winadms-MacBook-Pro.local>
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 #
 # SPDX-License-Identifier: MIT

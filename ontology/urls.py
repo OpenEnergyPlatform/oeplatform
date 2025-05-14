@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@winadms-MacBook-Pro.local>
-# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 #
 # SPDX-License-Identifier: MIT
 

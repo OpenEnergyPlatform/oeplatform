@@ -1,30 +1,30 @@
 # SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institute.de>
-# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <“Daryna.Barabanova@rl-institut.de”>
-# SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
-# SPDX-FileCopyrightText: 2025 Hendrik Huyskens <hendrik.huyskens@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli>
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+# SPDX-FileCopyrightText: 2025 Hendrik Huyskens <https://github.com/henhuy>
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
-# SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <kirann9999@hotmail.com>
-# SPDX-FileCopyrightText: 2025 Ludwig Hülk <Ludwig.Huelk@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+# SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju>
+# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee>
 # SPDX-FileCopyrightText: 2025 Ludwig Hülk <ludwig.huelk@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <heimbrodt@posteo.de>
-# SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
-# SPDX-FileCopyrightText: 2025 Christian Hofmann <christian.hofmann@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <Daryna.Martymianova@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli>
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 shara <sharanya.ramya@gmail.com>
-# SPDX-FileCopyrightText: 2025 Stephan Uller <stephanuller.su@gmail.com>
+# SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull>
 # SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
-# SPDX-FileCopyrightText: 2025 Christian Winger<wingechr@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Christian Winger<https://github.com/wingechr>
 #
 # SPDX-License-Identifier: MIT
 

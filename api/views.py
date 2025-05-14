@@ -1,20 +1,20 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
-# SPDX-FileCopyrightText: 2025 Adel Memariani <memarian@haskell2go.iks.cs.ovgu.de>
-# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 Christian Winger <Christian Winger@oeko.de>
-# SPDX-FileCopyrightText: 2025 Christian Hofmann <42000429+Christian Hofmann@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli>
 # SPDX-FileCopyrightText: 2025 chrwm <christoph.muschner@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
-# SPDX-FileCopyrightText: 2025 Christian Winger<wingechr@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Christian Winger<https://github.com/wingechr>
 #
 # SPDX-License-Identifier: MIT
 

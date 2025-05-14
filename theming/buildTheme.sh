@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>
 #
 # SPDX-License-Identifier: MIT
 

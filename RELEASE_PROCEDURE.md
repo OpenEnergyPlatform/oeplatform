@@ -1,11 +1,11 @@
 <!--
-SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-SPDX-FileCopyrightText: 2025 Jonas H <jonas.huber@rl-institut.de>
-SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
-SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-SPDX-FileCopyrightText: 2025 Christian Hofmann <christian.hofmann@rl-institut.de>
-SPDX-FileCopyrightText: 2025 Jonas Huber <38939526+Jonas Huber@users.noreply.github.com>
-SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+SPDX-FileCopyrightText: 2025 Jonas H <https://github.com/jh-RLI>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 
 SPDX-License-Identifier: CC0-1.0
 -->

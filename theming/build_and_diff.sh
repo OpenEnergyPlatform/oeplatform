@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
 #
 # SPDX-License-Identifier: MIT
 

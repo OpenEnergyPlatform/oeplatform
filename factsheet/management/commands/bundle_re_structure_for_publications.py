@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <adel.memariani@ovgu.de>
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 #
 # SPDX-License-Identifier: MIT
 

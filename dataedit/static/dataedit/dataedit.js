@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
-// SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 //
 // SPDX-License-Identifier: MIT
 

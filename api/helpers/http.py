@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2025 Eike Broda <git@ebroda.de>
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
 # SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <jonas.huber@rl-institut.de>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
 #
 # SPDX-License-Identifier: MIT
 

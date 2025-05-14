@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2025 Bryan Lancien <bryanlancien.ui@gmail.com>
+SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien>
 
 SPDX-License-Identifier: CC0-1.0
 -->

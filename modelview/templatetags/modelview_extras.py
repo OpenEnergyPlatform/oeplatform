@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <c@wingechr.de>
-# SPDX-FileCopyrightText: 2025 Johann Wagner <johann@wagnerdevelopment.de>
-# SPDX-FileCopyrightText: 2025 Johann Wagner <wagner@creatdev-solutions.com>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@gmail.com>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <martinglauer89@googlemail.com>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <glauer@iws.cs.ovgu.de>
-# SPDX-FileCopyrightText: 2025 quentinpeyras <quentinpey@hotmail.fr>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 quentinpeyras <https://github.com/quentinpeyras>
 # SPDX-FileCopyrightText: 2025 Lara Christmann <@>
 #
 # SPDX-License-Identifier: MIT
