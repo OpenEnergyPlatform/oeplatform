@@ -15,8 +15,7 @@ from factsheet.oekg.connection import oekg, oeo, oeo_owl, sparql
 from factsheet.oekg.filters import OekgQuery
 from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
-from factsheet.utils import serialize_publication_date
-from factsheet.utils import remove_non_printable
+from factsheet.utils import remove_non_printable, serialize_publication_date
 from login import models as login_models
 from modelview.utils import get_framework_metadata_by_id, get_model_metadata_by_id
 
@@ -165,7 +164,7 @@ def create_factsheet(request, *args, **kwargs):
     request_body = json.loads(request.body)
     name = request_body["name"]  # noqa
     uid = request_body["uid"]
-    acronym = (request_body["acronym"])
+    acronym = request_body["acronym"]
     study_name = request_body["study_name"]
     abstract = request_body["abstract"]
     institution = request_body["institution"]
@@ -207,9 +206,17 @@ def create_factsheet(request, *args, **kwargs):
         if acronym != "":
             bundle.add((study_URI, DC.acronym, Literal(remove_non_printable(acronym))))
         if study_name != "":
-            bundle.add((study_URI, OEKG["has_full_name"], Literal(remove_non_printable(study_name))))
+            bundle.add(
+                (
+                    study_URI,
+                    OEKG["has_full_name"],
+                    Literal(remove_non_printable(study_name)),
+                )
+            )
         if abstract != "":
-            bundle.add((study_URI, DC.abstract, Literal(remove_non_printable(abstract))))
+            bundle.add(
+                (study_URI, DC.abstract, Literal(remove_non_printable(abstract)))
+            )
 
         _publications = json.loads(publications) if publications is not None else []
         for item in _publications:
@@ -223,7 +230,11 @@ def create_factsheet(request, *args, **kwargs):
             bundle.add((study_URI, OEKG["has_publication"], publications_URI))
             if item["report_title"] != "":
                 bundle.add(
-                    (publications_URI, RDFS.label, Literal(remove_non_printable(item["report_title"])))
+                    (
+                        publications_URI,
+                        RDFS.label,
+                        Literal(remove_non_printable(item["report_title"])),
+                    )
                 )
 
             _authors = item["authors"]
@@ -268,14 +279,30 @@ def create_factsheet(request, *args, **kwargs):
                     + item["id"]
                 )
                 bundle.add((study_URI, OEKG["has_scenario"], scenario_URI))
-                bundle.add((scenario_URI, RDFS.label, Literal(remove_non_printable(item["acronym"]))))
+                bundle.add(
+                    (
+                        scenario_URI,
+                        RDFS.label,
+                        Literal(remove_non_printable(item["acronym"])),
+                    )
+                )
                 if item["name"] != "":
                     bundle.add(
-                        (scenario_URI, OEKG["has_full_name"], Literal(remove_non_printable(item["name"])))
+                        (
+                            scenario_URI,
+                            OEKG["has_full_name"],
+                            Literal(remove_non_printable(item["name"])),
+                        )
                     )
                     bundle.add((scenario_URI, RDF.type, OEO.OEO_00000365))
                 if item["abstract"] != "":
-                    bundle.add((scenario_URI, DC.abstract, Literal(remove_non_printable(item["abstract"]))))
+                    bundle.add(
+                        (
+                            scenario_URI,
+                            DC.abstract,
+                            Literal(remove_non_printable(item["abstract"])),
+                        )
+                    )
 
                 bundle.add((scenario_URI, OEKG["scenario_uuid"], Literal(item["id"])))
 
@@ -356,7 +383,11 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 input_dataset_URI,
                                 RDFS.label,
-                                Literal(remove_non_printable(input_dataset["value"]["label"])),
+                                Literal(
+                                    remove_non_printable(
+                                        input_dataset["value"]["label"]
+                                    )
+                                ),
                             )
                         )
                         bundle.add(
@@ -395,7 +426,11 @@ def create_factsheet(request, *args, **kwargs):
                             (
                                 output_dataset_URI,
                                 RDFS.label,
-                                Literal(remove_non_printable(output_dataset["value"]["label"])),
+                                Literal(
+                                    remove_non_printable(
+                                        output_dataset["value"]["label"]
+                                    )
+                                ),
                             )
                         )
                         bundle.add(
@@ -718,11 +753,19 @@ def update_factsheet(request, *args, **kwargs):
                 new_bundle.add((scenario_URI, RDFS.label, Literal((item["acronym"]))))
                 if item["name"] != "":
                     new_bundle.add(
-                        (scenario_URI, OEKG["has_full_name"], Literal(remove_non_printable(item["name"])))
+                        (
+                            scenario_URI,
+                            OEKG["has_full_name"],
+                            Literal(remove_non_printable(item["name"])),
+                        )
                     )
                 if item["abstract"] != "" and item["abstract"] != None:  # noqa
                     new_bundle.add(
-                        (scenario_URI, DC.abstract, Literal(remove_non_printable(item["abstract"])))
+                        (
+                            scenario_URI,
+                            DC.abstract,
+                            Literal(remove_non_printable(item["abstract"])),
+                        )
                     )
                 if "regions" in item:
                     for region in item["regions"]:
@@ -733,7 +776,11 @@ def update_factsheet(request, *args, **kwargs):
                         )
                         new_bundle.add((scenario_region, RDF.type, OEO.OEO_00020032))
                         new_bundle.add(
-                            (scenario_region, RDFS.label, Literal(remove_non_printable(region["name"])))
+                            (
+                                scenario_region,
+                                RDFS.label,
+                                Literal(remove_non_printable(region["name"])),
+                            )
                         )
                         new_bundle.add(
                             (
@@ -884,9 +931,13 @@ def update_factsheet(request, *args, **kwargs):
                 new_bundle.add((study_URI, OEKG["has_scenario"], scenario_URI))
 
         if acronym != "":
-            new_bundle.add((study_URI, DC.acronym, Literal(remove_non_printable(acronym))))
+            new_bundle.add(
+                (study_URI, DC.acronym, Literal(remove_non_printable(acronym)))
+            )
 
-        new_bundle.add((study_URI, OEKG["has_full_name"], Literal(remove_non_printable(studyName))))
+        new_bundle.add(
+            (study_URI, OEKG["has_full_name"], Literal(remove_non_printable(studyName)))
+        )
 
         institutions = json.loads(institution) if institution is not None else []
         for item in institutions:
@@ -905,7 +956,9 @@ def update_factsheet(request, *args, **kwargs):
             new_bundle.add((study_URI, OEO.OEO_00000509, funding_source_URI))
 
         if abstract != "":
-            new_bundle.add((study_URI, DC.abstract, Literal(remove_non_printable(abstract))))
+            new_bundle.add(
+                (study_URI, DC.abstract, Literal(remove_non_printable(abstract)))
+            )
 
         contact_persons = (
             json.loads(contact_person) if contact_person is not None else []
@@ -1166,7 +1219,7 @@ def factsheet_by_id(request, *args, **kwargs):
         class_iri = o
         if label != None:  # noqa
             factsheet["sectors"].append(
-                {"value": label, "label": label, "class": class_iri}
+                {"value": label, "label": label, "class": class_iri, "id": class_iri}
             )
 
     # factsheet['energy_carriers'] = []
@@ -1187,7 +1240,7 @@ def factsheet_by_id(request, *args, **kwargs):
         label = oeo.value(o, RDFS.label)
         if label != None:  # noqa
             factsheet["technologies"].append(
-                {"value": label, "label": label, "class": o}
+                {"value": label, "label": label, "class": o, "id": class_iri}
             )
 
     factsheet["study_keywords"] = []
@@ -1379,7 +1432,7 @@ def query_oekg(request, *args, **kwargs):
         WHERE
         {{
         ?s  DC:acronym ?study_acronym .
-        
+
         {funding_sources_exp}
         {study_descriptors_exp}
         {institutes_exp}
@@ -1396,11 +1449,21 @@ def query_oekg(request, *args, **kwargs):
         || (?study_keywords IN ({study_keywords}) ) )
 
         }}"""  # noqa: E501
-    
-    authors_exp = '?publication OEO:OEO_00000506 ?authors .' if authors_list != [] else ''
-    funding_sources_exp = '?s OEO:OEO_00000509 ?funding_sources .' if funding_sources_list != [] else ''
-    study_descriptors_exp = '?s OEO:has_study_keyword ?study_keywords .' if study_keywords_list != [] else ''
-    institutes_exp = '?s OEO:OEO_00000510 ?institutes .' if institutes_list != [] else ''
+
+    authors_exp = (
+        "?publication OEO:OEO_00000506 ?authors ." if authors_list != [] else ""
+    )
+    funding_sources_exp = (
+        "?s OEO:OEO_00000509 ?funding_sources ." if funding_sources_list != [] else ""
+    )
+    study_descriptors_exp = (
+        "?s OEO:has_study_keyword ?study_keywords ."
+        if study_keywords_list != []
+        else ""
+    )
+    institutes_exp = (
+        "?s OEO:OEO_00000510 ?institutes ." if institutes_list != [] else ""
+    )
 
     final_query = query_structure.format(
         institutes=str(institutes_list)
@@ -1417,7 +1480,7 @@ def query_oekg(request, *args, **kwargs):
         study_keywords=str(study_keywords_list).replace("[", "").replace("]", ""),
         scenario_year_start=scenario_year_start_value,
         scenario_year_end=scenario_year_end_value,
-        funding_sources_exp= funding_sources_exp,
+        funding_sources_exp=funding_sources_exp,
         study_descriptors_exp=study_descriptors_exp,
         institutes_exp=institutes_exp,
         authors_exp=authors_exp,
@@ -1648,9 +1711,15 @@ def get_all_factsheets(request, *args, **kwargs):
         study_name = remove_non_printable(oekg.value(s, OEKG["has_full_name"]))
         abstract = oekg.value(s, DC.abstract)
         element["uid"] = uid
-        element["acronym"] = remove_non_printable(acronym) if acronym != None else ""  # noqa
-        element["study_name"] = remove_non_printable(study_name) if study_name != None else ""  # noqa
-        element["abstract"] = remove_non_printable(abstract) if abstract != None else ""  # noqa
+        element["acronym"] = (
+            remove_non_printable(acronym) if acronym != None else ""  # noqa
+        )
+        element["study_name"] = (
+            remove_non_printable(study_name) if study_name != None else ""  # noqa
+        )
+        element["abstract"] = (
+            remove_non_printable(abstract) if abstract != None else ""  # noqa
+        )
         study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
         element["institutions"] = []
         for s, p, o in oekg.triples((study_URI, OEO.OEO_00000510, None)):
@@ -1685,7 +1754,9 @@ def get_all_factsheets(request, *args, **kwargs):
             pubs_per_bundle = []
             for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
                 if o1:
-                    pubs_per_bundle.append(serialize_publication_date(str(remove_non_printable(o1))))
+                    pubs_per_bundle.append(
+                        serialize_publication_date(str(remove_non_printable(o1)))
+                    )
 
             if pubs_per_bundle:
                 temp.update(pubs_per_bundle)
@@ -1894,12 +1965,12 @@ def get_all_sub_classes(cls, visited=None):
 # @login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     scenario_class = oeo_owl.search_one(
-        iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
+        iri="https://openenergyplatform.org/ontology/oeo/OEO_00000364"
     )
     scenario_subclasses = get_all_sub_classes(scenario_class)
 
     technology_class = oeo_owl.search_one(
-        iri="http://openenergy-platform.org/ontology/oeo/OEO_00000407"
+        iri="https://openenergyplatform.org/ontology/oeo/OEO_00000407"
     )
     technology_subclasses = get_all_sub_classes(technology_class)
 
@@ -1915,7 +1986,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
     sectors_list = []
     for sd in sector_divisions:
         sector_division_URI = URIRef(
-            "http://openenergy-platform.org/ontology/oeo/" + sd
+            "https://openenergyplatform.org/ontology/oeo/" + sd
         )
         sector_division_label = oeo.value(sector_division_URI, RDFS.label)
         sector_divisions_list.append(

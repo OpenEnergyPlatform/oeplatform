@@ -1,0 +1,37 @@
+# We currently stick to this python version
+FROM python:3.10.14
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      build-essential libpq-dev wget unzip \
+ && rm -rf /var/lib/apt/lists/*
+
+# Set defaults in case no build args are provided
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+# RUN echo "Building with UID: $USER_ID and GID: $GROUP_ID"
+
+# Create user and group dynamically
+RUN groupadd -g ${GROUP_ID} appgroup \
+ && useradd -m -u ${USER_ID} -g appgroup --shell /bin/bash appuser
+
+
+WORKDIR /home/appuser/app
+# USER appuser
+
+# install your Python deps
+COPY requirements.txt ./requirements.txt
+COPY requirements-dev.txt ./requirements-dev.txt
+RUN pip install --upgrade pip \
+ && pip install --no-cache-dir -r requirements-dev.txt
+
+# bring in your dev-entrypoint (in docker/)
+COPY docker/docker-entrypoint.dev.sh .
+RUN chmod +x ./docker-entrypoint.dev.sh
+
+USER appuser
+
+EXPOSE 8000 5678
+ENTRYPOINT ["./docker/docker-entrypoint.dev.sh"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
