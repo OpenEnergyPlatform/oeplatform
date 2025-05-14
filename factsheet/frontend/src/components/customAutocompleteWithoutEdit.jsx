@@ -42,7 +42,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 
 function stripInvalidProps(props) {
   const {
-    fullWidth,
+    fullwidth,
     textColor,
     indicator,
     selectionFollowsFocus,
@@ -176,7 +176,7 @@ export default function CustomAutocompleteWithoutEdit(props) {
             You are about to add <b><i>{dialogValue.name}</i></b> as a new <b><i>{type}</i></b> in OEKG
           </DialogContentText>
           <TextField
-            fullWidth
+            fullwidth
             size="small"
             variant="standard"
             label="Label"
@@ -205,7 +205,7 @@ export default function CustomAutocompleteWithoutEdit(props) {
             You are about to edit <b><i>{editLabel}</i></b> as a new <b><i>{type}</i></b> in OEKG
           </DialogContentText>
           <TextField
-            fullWidth
+            fullwidth
             size="small"
             variant="standard"
             label="New label"

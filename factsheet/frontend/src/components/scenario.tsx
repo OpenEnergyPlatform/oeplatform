@@ -359,7 +359,7 @@ export default function Scenario(props) {
                         label="Name"
                         size="small"
                         variant="outlined"
-                        fullWidth
+                        fullwidth
                       />
                     )}
                   />
@@ -416,7 +416,7 @@ export default function Scenario(props) {
                         label="Name"
                         size="small"
                         variant="outlined"
-                        fullWidth
+                        fullwidth
                       />
                     )}
                   />

@@ -139,7 +139,7 @@ export default function CustomAutocomplete({
             You’re about to add <b><i>{dialogValue.name}</i></b> as a new <b><i>{type}</i></b>.
           </DialogContentText>
           <TextField
-            fullWidth
+            fullwidth
             size="small"
             variant="standard"
             label="Label"
@@ -167,7 +167,7 @@ export default function CustomAutocomplete({
             You’re about to edit <b><i>{editLabel}</i></b> as a new <b><i>{type}</i></b>.
           </DialogContentText>
           <TextField
-            fullWidth
+            fullwidth
             size="small"
             variant="standard"
             label="New label"
