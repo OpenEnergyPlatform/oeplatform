@@ -33,8 +33,10 @@
 
 <body class="h-100 d-flex flex-column">
 {% block header %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-        {% include 'base/_header.html' %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">^
+        <div class="container-fluid">
+            {% include 'base/_header.html' %}
+        </div>
     </nav>
 {% endblock header %}
 <main class="main" style="flex: 1">

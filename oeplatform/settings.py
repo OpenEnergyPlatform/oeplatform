@@ -23,6 +23,7 @@ except ImportError:
     SECRET_KEY = os.environ.get("SECRET_KEY", "0")
     DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
     URL = os.environ.get("URL")
+    DEBUG = os.environ.get("DEBUG", "True")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -231,3 +232,36 @@ COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
+
+COMPRESS_FILTERS = {
+    # do not minify js, we do it with parcel
+    # and it can create problems with react
+    "js": [],
+    # we minify with parcel, but we need to pass it
+    # through CssAbsoluteFilter to resolve linked fonts
+    "css": [
+        "compressor.filters.css_default.CssAbsoluteFilter",
+    ],
+}
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "[{levelname}] {asctime} {name}: {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
+    },
+}

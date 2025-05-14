@@ -13,6 +13,8 @@ URL = '127.0.0.1'
 # This token is the token the test user is identified with during API-tests
 token_test_user = None
 
+USE_DOCKER = True
+
 # Setting of your django database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {
@@ -71,12 +73,14 @@ ONTOLOGY_ROOT = Path(BASE_DIR, ONTOLOGY_FOLDER)
 # In OEP this is used to store and read triple data on the OEKG
 # For example scenario bundle data is stored there
 RDF_DATABASES = {
-    'knowledge': {
-        'host': 'host',
-        'port': 'port',
-        'name': 'your_rdf_dataset'
+    "knowledge": {
+        "host": os.environ.get("RDF_DATABASE_HOST", "fuseki"),
+        "port": os.environ.get("RDF_DATABASE_PORT", "3030"),
+        "name": os.environ.get("RDF_DATABASE_NAME", "ds"),
+        "user": os.getenv("RDF_DATABASE_USER", "admin"),
+        "password": os.getenv("RDF_DATABASE_PASSWORD", "admin"),
     },
-    "oeo_ext": {"host": "localhost", "port": "3030", "name": "oeo_ext"}
+    "oeo_ext": {"host": "localhost", "port": "3030", "name": "oeo_ext"},
 }
 
 # The RDF database brings a server that provides a web api.
@@ -115,3 +119,6 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 CORS_ORIGIN_ALLOW_ALL = True
 
 OEKG_SPARQL_ENDPOINT_URL = "http://localhost:3030/ds/sparql"
+
+DJANGO_VITE = {"default": {"dev_mode": os.environ.get("VITE_DEV_MODE", DEBUG)}}
+VITE_DEV_SERVER_URL = os.environ.get("VITE_DEV_SERVER_URL" "http://vite:5173")
