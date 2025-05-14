@@ -17,7 +17,7 @@ function TabPanel({
   ...other
 }: TabPanelProps & { [key: string]: any }) {
   const {
-    fullWidth,
+    fullwidth,
     selectionFollowsFocus,
     indicator,
     textColor,
