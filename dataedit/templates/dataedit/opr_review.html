@@ -1,11 +1,14 @@
 {% extends "dataedit/filter.html" %}
-{% load static %}
 {% load django_vite %}
+{% load static %}
 {% load django_bootstrap5 %}
 {% load compress %}
 {% block after-head %}
 <!-- <link href="/static/peer_review/peer_review.css" rel="stylesheet"> -->
-{% vite_asset "dataedit/static/peer_review/peer_review.js" %}
+{#{% vite_asset "dataedit/static/peer_review/peer_review.js" %}#}
+{#    {% vite_asset "dataedit/static/peer_review/peer_review.js" %}#}
+{#{% vite_asset "dataedit/static/peer_review/opr_reviewer.js" %}#}
+{% vite_asset "dataedit/static/peer_review/main.js" %}
 {% endblock after-head %}
 
 
@@ -404,9 +407,9 @@
 }
 </script>
 
-{% compress js %}
-    <script type="module" src="{% static '/peer_review/opr_reviewer.js' %}"></script>
-    <script type="module" src="{% static '/peer_review/peer_review.js' %}"></script>
-    <script type="module" src="{% static '/peer_review/main.js' %}"></script>
-{% endcompress %}
+{#{% compress js %}#}
+{#    <script type="module" src="{% static '/peer_review/opr_reviewer.js' %}"></script>#}
+{#    <script type="module" src="{% static '/peer_review/peer_review.js' %}"></script>#}
+{#    <script type="module" src="{% static '/peer_review/main.js' %}"></script>#}
+{#{% endcompress %}#}
 {% endblock after-body-bottom-js %}

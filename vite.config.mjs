@@ -12,7 +12,7 @@ export default defineConfig({
     manifest: true,
     rollupOptions: {
       input: {
-        opr_review: resolve('./dataedit/static/peer_review/peer_review.js'),
+        opr_review: resolve('./dataedit/static/peer_review/main.js'),
       },
     },
   }
