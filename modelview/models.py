@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 # SPDX-FileCopyrightText: 2025 Alexis Michaltsis <https://github.com/4lm>
-# SPDX-FileCopyrightText: 2025 Berit Müller <berit.mueller@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Berit Müller <https://github.com/beritRLI>
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>

@@ -1545,7 +1545,7 @@ Path = "base/templates/base/terms_of_use.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de> © Uni Flensburg",
+  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Uni Flensburg",
   "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>",
   "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
@@ -1579,7 +1579,7 @@ Path = "base/templates/base/discussion.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Berit Müller <berit.mueller@rl-institut.de> © Reiner Lemoine Institut",
+  "2017 Berit Müller <https://github.com/beritRLI> © Reiner Lemoine Institut",
   "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
   "2018 Hannah Förster <https://github.com/han-f>",
   "2019 Johann Wagner <https://github.com/johannwagner>",
@@ -1593,7 +1593,7 @@ Path = "base/templates/base/contact.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de> © Uni Flensburg",
+  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Uni Flensburg",
   "2017 Martin Glauer <https://github.com/MGlauer>",
   "2019 Lukas Emele <https://github.com/l-emele>",
   "2019 Johann Wagner <https://github.com/johannwagner>",
@@ -1619,7 +1619,7 @@ Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer>",
   "2017 Martin Glauer <https://github.com/MGlauer>",
   "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
-  "2017 Berit Müller <berit.mueller@rl-institut.de> © Reiner Lemoine Institut",
+  "2017 Berit Müller <https://github.com/beritRLI> © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>",
   "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1644,10 +1644,10 @@ Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer>",
   "2016 Till Isenhuth <https://github.com/thsstll>",
-  "2016 Berit Müller <berit.mueller@rl-institut.de> © Reiner Lemoine Institut",
+  "2016 Berit Müller <https://github.com/beritRLI> © Reiner Lemoine Institut",
   "2017 Martin Glauer <https://github.com/MGlauer>",
   "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
-  "2017 Wolf-Dieter Bunke <wolf-dieter.bunke@uni-flensburg.de> © Uni Flensburg",
+  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Uni Flensburg",
   "2017 Martin Glauer <https://github.com/MGlauer>",
   "2017 Stephan Günther <https://github.com/gnn>",
   "2018 Klara Reder <https://github.com/klarareder>",
