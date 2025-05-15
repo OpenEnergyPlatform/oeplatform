@@ -46,13 +46,19 @@ The docker setup is created based on several configuration files and scripts. To
     - [Git](https://git-scm.com/downloads)
     - [Docker](https://docs.docker.com/compose/install/)
 
+    On windows we recommend using WSL2 or a Linux VM as the windows based installation is not tested regularly and often requires additional steps.
+
 Add the following commands into your terminal which supports git and docker compose commands.
 
     # first close the oeplatform repository
-    git clone https://github.com/OpenEnergyPlatform/oeplatform.git
+    > git clone https://github.com/OpenEnergyPlatform/oeplatform.git
 
-    # navigate into the cloned directory
-    docker compose -f docker/docker-compose.dev.yaml
+    # navigate into the cloned directory, on build runs you need to provide you hosts user and group id´s
+    > USER_ID=$(id -u) GROUP_ID=$(id -g) docker compose -f docker/docker-compose.dev.yaml up --build
+
+    # From now on you use the command below to startup the setup, but you will have to rebuild
+    # the container regularly to pick up latest changes e.g. if a new npm oder pip package was installed.
+    > docker compose -f docker/docker-compose.dev.yaml up
 
 #### Using a existing repository
 
@@ -99,8 +105,9 @@ While developing and adding changes you might want to rebuild your docker contai
 
     # Remove everything, assuming you have a terminal which is at the oeplatform root directory
     docker compose -f docker/docker-compose.dev.yaml down -v
-    # Install everything again
-    docker compose -f docker/docker-compose.dev.yaml up --build
+
+    # Install everything again, don't forget the user id args
+    USER_ID=$(id -u) GROUP_ID=$(id -g) docker compose -f docker/docker-compose.dev.yaml up --build
 
     # Just apply changes to a specific container (see vite as ref to the container name)
     docker compose -f docker/docker-compose.dev.yaml vite down -v
