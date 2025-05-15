@@ -3,6 +3,9 @@
 !!! Warning "🚧"
     This section is still new and might change. The information presented here is tested by the developer and is currently rolled out within our team and close collaborators. Any suggestions are welcome and can be added in this GitHub discussion.
 
+!!! Info "Manual installation"
+    If you prefer not to use docker or want to get insights into each step of the installation and setup process for the oeplatform please have a look at the [manual installation guide](./installation.md) which also links the [detailed database setup](./manual-db-setup.md).
+
 ## Introduction
 
 Installing the oeplatform and its infrastructure is a tedious when one wants to setup all the involved components and use them either for development or to deploy them with the goal of operating a dedicated instance for organizations internally or open to the internet. The concept of containerized software helps a lot when developing and also deploying software or even whole infrastructures which may contain several software containers. THe essence of the benefit this brings is the reproducibility due to the container concept. All dependencies which have been installed once successfully can be installed again and any system that supports the container concept which was used will be able to reproduce the build process.
@@ -117,8 +120,11 @@ This includes python and javascript sourcecode files.
 
 ### Working with node/npm (javaScript)
 
-You might want to use node and its package manager npm to install or update package in the package.json file. To do so you should have node installed locally (using node-version-manager "nvm") and install new packages using the npm cli.
+You might want to use node and its package manager npm to install or update package in the package.json file. To do so you should have node installed locally (using node-version-manager "nvm") and install new packages using the npm cli. You can also install them directly in the docker container using the "excec" option.
 
-- npm install "package-name" --save
+    npm install "package-name" --save
 
-Then you can restart the vite container, it will pickup the changes in the package.json / package-lock.json and update the container node_modules.
+
+Then you build the vite container, it will pickup the changes in the package.json / package-lock.json and update the container node_modules. See also more info on the [node.js aka JavaScript setup](./nodejs.md).
+
+    docker compose -f docker/docker-compose.dev.yaml vite up --build
