@@ -21,7 +21,7 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 SPDX-FileCopyrightText: 2025 Lara Christmann <@>
 SPDX-FileCopyrightText: 2025 Mirjam Stappel <https://github.com/stap-m>
-SPDX-FileCopyrightText: 2025 Christian Winger<https://github.com/wingechr>
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 
 SPDX-License-Identifier: CC0-1.0
 -->
