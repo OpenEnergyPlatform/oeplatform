@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 AemanMalik <aemannawaz@live.com>
+# SPDX-FileCopyrightText: 2025 AemanMalik <https://github.com/AemanMalik>
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 # SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>

@@ -10,7 +10,7 @@
 # SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 # SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli>
-# SPDX-FileCopyrightText: 2025 chrwm <christoph.muschner@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm>
 # SPDX-FileCopyrightText: 2025 henhuy <https://github.com/henhuy>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
