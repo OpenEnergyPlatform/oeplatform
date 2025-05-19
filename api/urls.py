@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
-# SPDX-FileCopyrightText: 2025 Johann Wagner <johann.wagner@st.ovgu.de>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
@@ -8,7 +8,7 @@
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
-# SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
+# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli>
 #
 # SPDX-License-Identifier: MIT
 

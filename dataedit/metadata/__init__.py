@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
 # SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
@@ -8,7 +8,7 @@
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 shara <sharanya.ramya@gmail.com>
-# SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
+# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli>
 #
 # SPDX-License-Identifier: MIT
 

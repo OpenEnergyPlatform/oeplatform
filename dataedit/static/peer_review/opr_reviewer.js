@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien>
-// SPDX-FileCopyrightText: 2025 Daryna Barabanova <martimanovadarina@gmail.com>
+// SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli>
 // SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
@@ -8,7 +8,7 @@
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 // SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull>
-// SPDX-FileCopyrightText: 2025 user <martimanovadarina@gmail.com>
+// SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli>
 //
 // SPDX-License-Identifier: MIT
 

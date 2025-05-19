@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
 // SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
 // SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien>
 // SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 // SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>
-// SPDX-FileCopyrightText: 2025 Ludwig Hülk <ludwig.huelk@rl-institut.de>
+// SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee>
 // SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
 // SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
 //

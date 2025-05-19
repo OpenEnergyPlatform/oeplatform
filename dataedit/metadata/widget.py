@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Alexis Michaltsis <https://github.com/4lm>
-# SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institut.de>
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
 # SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 # SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>
