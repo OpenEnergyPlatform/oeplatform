@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 # SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
-# SPDX-FileCopyrightText: 2025 Webmaster <webadm@toep.iks.cs.ovgu.de>
+# SPDX-FileCopyrightText: 2025 Webmaster <https://github.com/adelmemariani>
 #
 # SPDX-License-Identifier: MIT
 

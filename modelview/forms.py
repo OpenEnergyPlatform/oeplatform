@@ -3,8 +3,8 @@
 # SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
 # SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
 # SPDX-FileCopyrightText: 2025 quentinpeyras <https://github.com/quentinpeyras>
-# SPDX-FileCopyrightText: 2025 Lara Christmann <>
-# SPDX-FileCopyrightText: 2025 Lara Christmann <@>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c>
 #
 # SPDX-License-Identifier: MIT
 

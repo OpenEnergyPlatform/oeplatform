@@ -11,7 +11,7 @@
 # SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 # SPDX-FileCopyrightText: 2025 quentinpeyras <https://github.com/quentinpeyras>
-# SPDX-FileCopyrightText: 2025 Lara Christmann <@>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c>
 #
 # SPDX-License-Identifier: MIT
 

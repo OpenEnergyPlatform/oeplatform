@@ -8,8 +8,8 @@
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 # SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
-# SPDX-FileCopyrightText: 2025 Lara Christmann <>
-# SPDX-FileCopyrightText: 2025 Lara Christmann <@>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c>
 #
 # SPDX-License-Identifier: MIT
 

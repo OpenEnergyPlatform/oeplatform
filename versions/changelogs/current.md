@@ -25,7 +25,7 @@ SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli
 SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm>
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
-SPDX-FileCopyrightText: 2025 Lara Christmann <5002008+solar-c@users.noreply.github.com>
+SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c>
 SPDX-FileCopyrightText: 2025 Mirjam Stappel <https://github.com/stap-m>
 SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli>
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>

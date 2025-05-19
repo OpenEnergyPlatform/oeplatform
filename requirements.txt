@@ -20,7 +20,7 @@
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 Pietro Zambelli <https://github.com/zarch>
-# SPDX-FileCopyrightText: 2025 Lara Christmann <@>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c>
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 #
 # SPDX-License-Identifier: CC0-1.0
