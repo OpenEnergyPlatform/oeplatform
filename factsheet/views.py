@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 # SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 # SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
-# SPDX-FileCopyrightText: 2025 Adel Memariani <memariani.adel@gmail.com>
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 # SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien>
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>

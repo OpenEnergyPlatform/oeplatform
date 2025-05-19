@@ -1,6 +1,6 @@
 <!--
 SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
-SPDX-FileCopyrightText: 2025 Adel Memariani <memariani.adel@gmail.com>
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 SPDX-FileCopyrightText: 2025 Pierre Francois <pierre-francois.duc@rl-institut.de>
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
 SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien>
