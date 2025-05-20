@@ -38,6 +38,14 @@ For development this also offers great tooling as you want to be able to use the
 
 The docker setup is created based on several configuration files and scripts. Together they enable us to install every module of the infrastructure with one single command. This section will give an overview of the setup and also provide commands and any pre-installation steps which will lead to a successful installation of the oeplatform especially and only for development purposes.
 
+#### Docker compose (optional) environment variables
+
+You can set these environment variablesto override defaults:
+
+- `OEP_DEV_PORT_POSTGRES`: public port to postgres database, defaults to 5432
+- `OEP_DEV_PORT_WEB`: public port to web interface, defaults to 8000
+- `OEP_DEV_PORT_DEBUGPY`: public port to python debugger, defaults to 5678
+
 #### Docker compose command
 
 !!! Info
