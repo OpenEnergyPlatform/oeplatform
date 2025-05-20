@@ -74,7 +74,7 @@ ONTOLOGY_ROOT = Path(BASE_DIR, ONTOLOGY_FOLDER)
 # For example scenario bundle data is stored there
 RDF_DATABASES = {
     "knowledge": {
-        "host": os.environ.get("RDF_DATABASE_HOST", "fuseki"),
+        "host": os.environ.get("RDF_DATABASE_HOST", "localhost"),
         "port": os.environ.get("RDF_DATABASE_PORT", "3030"),
         "name": os.environ.get("RDF_DATABASE_NAME", "ds"),
         "user": os.getenv("RDF_DATABASE_USER", "admin"),
