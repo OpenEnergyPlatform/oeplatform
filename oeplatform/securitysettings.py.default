@@ -118,7 +118,5 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-OEKG_SPARQL_ENDPOINT_URL = "http://localhost:3030/ds/sparql"
-
 DJANGO_VITE = {"default": {"dev_mode": os.environ.get("VITE_DEV_MODE", DEBUG)}}
 VITE_DEV_SERVER_URL = os.environ.get("VITE_DEV_SERVER_URL" "http://vite:5173")
