@@ -449,6 +449,24 @@ class Table(APIView):
         """
         Creates a new table: physical table first, then metadata row.
         Applies embargo and permissions, and sets metadata if provided.
+        
+        REST-API endpoint used to create a new table in the database.
+        The table is created with the columns and constraints specified in the
+        request body. The request body must contain a JSON object with the following
+        keys: 'columns', 'constraints' and 'metadata'.
+        The payload must be a  groped in a 'query' key.
+
+        For authentication, the request must contain a valid token in the
+        Authentication header.
+
+        Args:
+            request: The request object
+            schema: The schema in which the table should be created
+            table: The name of the table to be created
+
+        Returns:
+            JsonResponse: A JSON response with the status code 201 CREATED
+
         """
         # 1) Basic schema checks
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
