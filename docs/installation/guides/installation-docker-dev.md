@@ -45,6 +45,8 @@ You can set these environment variablesto override defaults:
 - `OEP_DEV_PORT_POSTGRES`: public port to postgres database, defaults to 5432
 - `OEP_DEV_PORT_WEB`: public port to web interface, defaults to 8000
 - `OEP_DEV_PORT_DEBUGPY`: public port to python debugger, defaults to 5678
+- `OEP_DEV_PORT_FUSEKI`: public port to fuseki server, defaults to 3030
+
 
 #### Docker compose command
 

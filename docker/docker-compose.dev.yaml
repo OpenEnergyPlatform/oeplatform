@@ -27,6 +27,8 @@ services:
       - fuseki_databases:/home/fuseki/databases
       # - ./fuseki/config:/home/fuseki/configuration
     restart: unless-stopped
+    ports:
+      - "${OEP_DEV_PORT_FUSEKI:-3030}:3030"
 
   web:
     build:
