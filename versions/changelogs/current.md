@@ -10,6 +10,8 @@
 
 - Update test related to oekg queries and avoide using Mocks to keep tests simpler and more realistic by using actual rdflib Graph [(#1980)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1980)
 
+- Enhance docker based dev setup by adding loep (lookup) service which enables the annotation feature in the oemetabuilder [(#2014)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2014)
+
 ## Features
 
 ## Bugs
