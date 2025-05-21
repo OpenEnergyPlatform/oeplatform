@@ -67,6 +67,8 @@ import variables from '../styles/oep-theme/variables.js';
 // import palette from '../styles/oep-theme/palette.js';
 import CSRFToken from './csrfToken.js';
 import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
+import FactsheetFilterDialog from './FactsheetFilterDialog.jsx';
+import FilterFeedbackBanner from './filterFeedbackBanner';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -360,12 +362,15 @@ export default function CustomTable(props) {
   const [selectedFundingSource, setSelectedFundingSource] = useState([]);
   const [startDateOfPublication, setStartDateOfPublication] = useState('2000');
   const [endDateOfPublication, setEndDateOfPublication] = useState('2050');
-  const [selectedStudyKewords, setSelectedStudyKewords] = useState([]);
+  const [selectedStudyKeywords, setSelectedStudyKewords] = useState([]);
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
   const [selectedAspects, setSelectedAspects] = useState([]);
   const [alignment, setAlignment] = React.useState('list');
   const [filteredFactsheets, setFilteredFactsheets] = useState([]);
   const [logged_in, setLogged_in] = React.useState('');
+
+  const [scenarioYearTouched, setScenarioYearTouched] = useState(false);
+  const [publicationDateTouched, setPublicationDateTouched] = useState(false);
 
  const handleChangeView = (event, newAlignment) => {
     if (newAlignment !== null) {
@@ -471,11 +476,11 @@ export default function CustomTable(props) {
 
   const handleStudyKeywords = (event) => {
     if (event.target.checked) {
-      if (!selectedStudyKewords.includes(event.target.name)) {
-        setSelectedStudyKewords([...selectedStudyKewords, event.target.name]);
+      if (!selectedStudyKeywords.includes(event.target.name)) {
+        setSelectedStudyKewords([...selectedStudyKeywords, event.target.name]);
       }
     } else {
-      const filteredStudyKeywords = selectedStudyKewords.filter(i => i !== event.target.name);
+      const filteredStudyKeywords = selectedStudyKeywords.filter(i => i !== event.target.name);
       setSelectedStudyKewords(filteredStudyKeywords);
     }
   }
@@ -540,34 +545,62 @@ export default function CustomTable(props) {
   const fundingSourceHandler = (fundingSourceList) => {
     setSelectedFundingSource(fundingSourceList);
   };
-
-  const handleConfirmQuery = (event) => {
-    setOpenQuery(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackType, setFeedbackType] = useState(''); // 'noFilters' or 'noResults'
+  const handleConfirmQuery = () => {
     setOpenBackDrop(true);
-    const criteria = {
-      'institutions': selectedInstitution.map(i => 'OEKG:' + i.iri),
-      'authors': selectedAuthors.map(i => 'OEKG:' + i.iri),
-      'fundingSource': selectedFundingSource.map(i => 'OEKG:' + i.iri),
-      'startDateOfPublication': startDateOfPublication,
-      'endDateOfPublication': endDateOfPublication,
-      'studyKewords': selectedStudyKewords,
-      'scenarioYearValue': scenarioYearValue,
+
+    const criteria = {};
+
+    if (selectedInstitution.length > 0) {
+      criteria.institutions = selectedInstitution.map(i => 'OEKG:' + i.iri);
     }
-    axios.post(conf.toep + 'scenario-bundles/query/',
-      {
-        'criteria': criteria,
-      },
-      {
-        headers: { 'X-CSRFToken': CSRFToken() }
-      }
+    if (selectedAuthors.length > 0) {
+      criteria.authors = selectedAuthors.map(i => 'OEKG:' + i.iri);
+    }
+    if (selectedFundingSource.length > 0) {
+      criteria.fundingSource = selectedFundingSource.map(i => 'OEKG:' + i.iri);
+    }
+    if (selectedStudyKeywords.length > 0) {
+      criteria.studyKeywords = selectedStudyKeywords;
+    }
+    if (scenarioYearTouched) {
+      criteria.scenarioYearValue = scenarioYearValue;
+    }
+    if (publicationDateTouched) {
+      criteria.startDateOfPublication = startDateOfPublication;
+      criteria.endDateOfPublication = endDateOfPublication;
+    }
+
+    axios.post(conf.toep + conf.oekgQueryFilter,
+      { criteria },
+      { headers: { 'X-CSRFToken': CSRFToken() } }
     ).then(response => {
       const filteredResultList = response.data;
-      const filteredStudyAcronyms = filteredResultList.map(i => i.study_acronym).map(j => j.value);
+      const filteredStudyAcronyms = filteredResultList.map(i => i.study_acronym?.value);
       const newFactsheetsList = factsheets.filter(item => filteredStudyAcronyms.includes(item.acronym));
+
+      if (newFactsheetsList.length === 0) {
+        // ❌ Don't close the dialog — show feedback instead
+        setFeedbackType('noResults');
+        setFeedbackOpen(true);
+        setOpenBackDrop(false);
+        return;
+      }
+
+      // ✅ Only update and close if there's something to show
       setFilteredFactsheets(newFactsheetsList);
+      setOpenQuery(false);
+      setFeedbackOpen(false);
+      setOpenBackDrop(false);
+    }).catch(err => {
+      console.error("Query failed:", err);
       setOpenBackDrop(false);
     });
   };
+
+
+
 
 
   const isSelected = (name) => selected.has(name);
@@ -669,7 +702,7 @@ export default function CustomTable(props) {
                   row.collected_scenario_publication_dates.map(
                     (date_of_publication, idx) => (
                       <Typography
-                        key={date_of_publication ?? idx}           // ← add key here
+                        key={date_of_publication ?? idx}
                         variant="subtitle1"
                         gutterBottom
                         style={{ marginTop: '2px' }}
@@ -902,92 +935,54 @@ export default function CustomTable(props) {
       </Dialog>
 
 
-      <Dialog
-        maxWidth="md"
+      <FactsheetFilterDialog
         open={openQuery}
-        aria-labelledby="responsive-dialog-title"
-        style={{ height: '85vh', overflow: 'auto' }}
-      >
-        <DialogTitle id="responsive-dialog-title">
-          <b>Please define the criteria for selecting factsheets.</b>
-        </DialogTitle >
-        <DialogContent>
-          <DialogContentText>
-            <div>
-               <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="institution" showSelectedElements={true} manyItems optionsSet={institutions} kind='Which institutions are you interested in?' handler={institutionHandler} selectedElements={selectedInstitution} />
-              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="author" showSelectedElements={true} manyItems optionsSet={authors} kind='Which authors are you interested in?' handler={authorsHandler} selectedElements={selectedAuthors} />
-              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="Funding source" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Which funding sources are you interested in?' handler={fundingSourceHandler} selectedElements={selectedFundingSource} />
-              <div>Date of publication:</div>
-              <div style={{ display: 'flex', marginTop: "10px" }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <Stack spacing={3} style={{ width: '90%' }}>
-                    <DesktopDatePicker
-                      label='Start'
-                      views={['year']}
-                      value={startDateOfPublication.split('-')[0]}
-                      renderInput={(params) => <TextField {...params} />}
-                      onChange={(newValue) => {
-                        const dateObj = new Date(newValue);
-                        const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate())
-                        setStartDateOfPublication(dateString.split('-')[0]);
-                      }}
-                    />
-                  </Stack>
-                </LocalizationProvider>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <Stack spacing={3} style={{ width: '90%', marginLeft: '10px' }}>
-                    <DesktopDatePicker
-                      label='End'
-                      views={['year']}
-                      value={endDateOfPublication.split('-')[0]}
-                      renderInput={(params) => <TextField {...params} />}
-                      onChange={(newValue) => {
-                        const dateObj = new Date(newValue);
-                        const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate())
-                        setEndDateOfPublication(dateString.split('-')[0]);
-                      }}
-                    />
-                  </Stack>
-                </LocalizationProvider>
-              </div>
-              <div style={{ marginTop: "20px" }}>
-                <div>Study descriptors:</div>
-                <FormGroup>
-                  <div >
-                    {
-                      StudyKeywords.map((item) => <FormControlLabel key={item[0]} control={
-                        <Checkbox size="small" color="default" />
-                      } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]} />)
-                    }
-                  </div>
-                </FormGroup>
-              </div>
+        onClose={handleCloseQuery}
+        onConfirm={handleConfirmQuery}
+        institutions={institutions}
+        authors={authors}
+        fundingSources={fundingSources}
+        selectedInstitution={selectedInstitution}
+        selectedAuthors={selectedAuthors}
+        selectedFundingSource={selectedFundingSource}
+        startDateOfPublication={startDateOfPublication}
+        endDateOfPublication={endDateOfPublication}
+        scenarioYearValue={scenarioYearValue}
+        selectedStudyKeywords={selectedStudyKeywords}
+        setSelectedInstitution={setSelectedInstitution}
+        setSelectedAuthors={setSelectedAuthors}
+        setSelectedFundingSource={setSelectedFundingSource}
+        setStartDateOfPublication={(val) => {
+          setStartDateOfPublication(val);
+          setPublicationDateTouched(true);
+        }}
+        setEndDateOfPublication={(val) => {
+          setEndDateOfPublication(val);
+          setPublicationDateTouched(true);
+        }}
+        setScenarioYearValue={(val) => {
+          setScenarioYearValue(val);
+          setScenarioYearTouched(true);
+        }}
+        setSelectedStudyKewords={setSelectedStudyKewords}
+        defaultStartDate="2000"
+        defaultEndDate="2050"
+        defaultScenarioYearRange={[2000, 2200]}
+      />
 
-              <div style={{ marginTop: "20px" }}>
-                <div>Scenario years:</div>
-                <Slider
-                  value={scenarioYearValue}
-                  onChange={handleScenarioYearChange}
-                  valueLabelDisplay="auto"
-                  min={2000}
-                  max={2200}
-                />
-              </div>
-            </div>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="contained" onClick={handleConfirmQuery} >
-            Confirm
-          </Button>
-          <Button variant="outlined" onClick={handleCloseQuery}  >
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Container maxWidth="xl">
         <EnhancedTableToolbar logged_in={logged_in} numSelected={selected.size} selected={selected} alignment={alignment} handleChangeView={handleChangeView} handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison} />
+        {feedbackOpen && (
+          <Box sx={{ mx: 2, mb: 2 }}>
+            <FilterFeedbackBanner
+              open={feedbackOpen}
+              onClose={() => setFeedbackOpen(false)}
+              type={feedbackType}
+            />
+          </Box>
+        )}
+
         {alignment == "list" && <TableContainer>
           <Table
             sx={{ minWidth: 1400 }}
