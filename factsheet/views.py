@@ -9,9 +9,8 @@ from django.utils.cache import patch_response_headers
 from django.views.decorators.cache import never_cache
 from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.compare import graph_diff, to_isomorphic
-from SPARQLWrapper import JSON
 
-from factsheet.oekg.connection import oekg, oeo, oeo_owl, sparql
+from factsheet.oekg.connection import oekg, oeo, oeo_owl
 from factsheet.oekg.filters import OekgQuery
 from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
@@ -1389,111 +1388,6 @@ def factsheet_by_id(request, *args, **kwargs):
             oekg.remove((s, p, o))
             oekg.add((s, p, Literal("Germany")))
 
-    return response
-
-
-# @login_required
-def query_oekg(request, *args, **kwargs):
-    """
-    This function takes filter objects provided by the user and utilises
-    them to construct a SPARQL query.
-
-    Args:
-        request (HttpRequest): The incoming HTTP GET request.
-        criteria (str): An object that contains institutions, authors,
-        funding sources, start date of the publications, end date of publications
-        study descriptors, and a range for scenario years. All of these fields
-        are utilised to construct a SPARQL query for execution on the OEKG.
-
-    """
-    request_body = json.loads(request.body)
-    criteria = request_body["criteria"]
-
-    institutes_list = criteria["institutions"]
-    authors_list = criteria["authors"]
-    funding_sources_list = criteria["fundingSource"]
-    publication_date_start_value = criteria["startDateOfPublication"]
-    publication_date_end_value = criteria["endDateOfPublication"]
-    study_keywords_list = criteria["studyKewords"]
-    scenario_year_start_value = criteria["scenarioYearValue"][0]
-    scenario_year_end_value = criteria["scenarioYearValue"][1]
-
-    query_structure = """
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
-        PREFIX OEO: <http://openenergy-platform.org/ontology/oeo/>
-        PREFIX OEKG: <http://openenergy-platform.org/ontology/oekg/>
-        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-        PREFIX DC: <http://purl.org/dc/terms/>
-
-        SELECT DISTINCT ?study_acronym
-        WHERE
-        {{
-        ?s  DC:acronym ?study_acronym .
-
-        {funding_sources_exp}
-        {study_descriptors_exp}
-        {institutes_exp}
-
-        ?s OEKG:has_publication ?publication .
-        ?publication OEKG:date_of_publication ?publication_date .
-
-        {authors_exp}
-
-        FILTER ((?institutes IN ({institutes}) )
-        || (?authors IN ({authors}) )
-        || (?funding_sources IN ({funding_sources}) )
-        || (?publication_date >= "{publication_date_start}" && ?publication_date <= "{publication_date_end}")
-        || (?study_keywords IN ({study_keywords}) ) )
-
-        }}"""  # noqa: E501
-
-    authors_exp = (
-        "?publication OEO:OEO_00000506 ?authors ." if authors_list != [] else ""
-    )
-    funding_sources_exp = (
-        "?s OEO:OEO_00000509 ?funding_sources ." if funding_sources_list != [] else ""
-    )
-    study_descriptors_exp = (
-        "?s OEO:has_study_keyword ?study_keywords ."
-        if study_keywords_list != []
-        else ""
-    )
-    institutes_exp = (
-        "?s OEO:OEO_00000510 ?institutes ." if institutes_list != [] else ""
-    )
-
-    final_query = query_structure.format(
-        institutes=str(institutes_list)
-        .replace("[", "")
-        .replace("]", "")
-        .replace("'", ""),
-        authors=str(authors_list).replace("[", "").replace("]", "").replace("'", ""),
-        funding_sources=str(funding_sources_list)
-        .replace("[", "")
-        .replace("]", "")
-        .replace("'", ""),
-        publication_date_start=publication_date_start_value,
-        publication_date_end=publication_date_end_value,
-        study_keywords=str(study_keywords_list).replace("[", "").replace("]", ""),
-        scenario_year_start=scenario_year_start_value,
-        scenario_year_end=scenario_year_end_value,
-        funding_sources_exp=funding_sources_exp,
-        study_descriptors_exp=study_descriptors_exp,
-        institutes_exp=institutes_exp,
-        authors_exp=authors_exp,
-    )
-
-    print(final_query)
-    sparql.setReturnFormat(JSON)
-    sparql.setQuery(final_query)
-    results = sparql.query().convert()
-
-    response = JsonResponse(
-        results["results"]["bindings"],
-        safe=False,
-        content_type="application/json",
-    )
     return response
 
 
