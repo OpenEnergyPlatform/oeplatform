@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - pgdata:/var/lib/postgresql/data    
+      - pgdata:/var/lib/postgresql/data
     ports:
       - "${OEP_DEV_PORT_POSTGRES:-5432}:5432"
 
@@ -121,3 +121,13 @@ services:
   #     - ./ontop:/opt/ontop  # Mount your .obda, .owl, and .properties files here
   #   depends_on:
   #     - postgres
+
+  lookup:
+    restart: unless-stopped
+    image: dbpedia/lookup:dev
+    container_name: loep_lookup_dev
+    ports:
+      - "3004:8082"
+    volumes:
+      - ./data/index/:/index
+      - ./serviceConfigs/lookup/config.yaml:/resources/config.yml
