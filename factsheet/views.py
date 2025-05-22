@@ -776,7 +776,7 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 scenario_region,
                                 RDFS.label,
-                                Literal(remove_non_printable(region["name"])),
+                                Literal(region["name"]),
                             )
                         )
                         new_bundle.add(
@@ -1646,9 +1646,7 @@ def get_all_factsheets(request, *args, **kwargs):
             pubs_per_bundle = []
             for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
                 if o1:
-                    pubs_per_bundle.append(
-                        serialize_publication_date(str(remove_non_printable(o1)))
-                    )
+                    pubs_per_bundle.append(serialize_publication_date(str(o1)))
 
             if pubs_per_bundle:
                 temp.update(pubs_per_bundle)
