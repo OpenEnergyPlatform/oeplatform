@@ -30,9 +30,12 @@ export default function FactsheetFilterDialog({
   setEndDateOfPublication,
   setScenarioYearValue,
   setSelectedStudyKewords,
+  feedbackOpen,
+  feedbackType,
+  setFeedbackOpen,
+  setFeedbackType,
+
 }) {
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [feedbackType, setFeedbackType] = useState('');
   const [scenarioYearTouched, setScenarioYearTouched] = useState(false);
   const [publicationDateTouched, setPublicationDateTouched] = useState(false);
 
@@ -60,12 +63,12 @@ export default function FactsheetFilterDialog({
     <Dialog maxWidth="md" open={open} style={{ height: '85vh', overflow: 'auto' }}>
       <DialogTitle><b>Please define the criteria for selecting factsheets.</b></DialogTitle>
       <DialogContent>
-        {feedbackOpen && (
-            <FilterFeedbackBanner
+        {feedbackType === 'noFilters' && feedbackOpen && (
+          <FilterFeedbackBanner
             open={feedbackOpen}
-            onClose={() => setFeedbackOpen(false)}
+            onClose={() => setFeedbackOpen()}
             type={feedbackType}
-            />
+          />
         )}
 
         <CustomAutocompleteWithoutAddNew
