@@ -584,28 +584,25 @@ export default function CustomTable(props) {
       const filteredResultList = response.data;
       const filteredStudyAcronyms = filteredResultList.map(i => i.study_acronym?.value);
       const newFactsheetsList = factsheets.filter(item => filteredStudyAcronyms.includes(item.acronym));
+      setFilteredFactsheets(newFactsheetsList);
 
       if (newFactsheetsList.length === 0) {
-        // ❌ Don't close the dialog — show feedback instead
+        // Case B: Filters were set but no results → close dialog + show banner outside
         setFeedbackType('noResults');
         setFeedbackOpen(true);
-        setOpenBackDrop(false);
-        return;
+        setOpenQuery(false);
+      } else {
+        // Case C: Results found → update + close dialog
+        setFeedbackOpen(false);
+        setOpenQuery(false);
       }
 
-      // ✅ Only update and close if there's something to show
-      setFilteredFactsheets(newFactsheetsList);
-      setOpenQuery(false);
-      setFeedbackOpen(false);
       setOpenBackDrop(false);
     }).catch(err => {
       console.error("Query failed:", err);
       setOpenBackDrop(false);
     });
   };
-
-
-
 
 
   const isSelected = (name) => selected.has(name);
@@ -973,12 +970,16 @@ export default function CustomTable(props) {
         defaultStartDate="2000"
         defaultEndDate="2050"
         defaultScenarioYearRange={[2000, 2200]}
+        feedbackOpen={feedbackType === 'noFilters' && feedbackOpen}
+        feedbackType={feedbackType}
+        setFeedbackOpen={setFeedbackOpen}
+        setFeedbackType={setFeedbackType}
       />
 
 
       <Container maxWidth="xl">
         <EnhancedTableToolbar logged_in={logged_in} numSelected={selected.size} selected={selected} alignment={alignment} handleChangeView={handleChangeView} handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison} />
-        {feedbackOpen && (
+        {feedbackType === 'noResults' && feedbackOpen && (
           <Box sx={{ mx: 2, mb: 2 }}>
             <FilterFeedbackBanner
               open={feedbackOpen}
