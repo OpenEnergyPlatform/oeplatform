@@ -56,10 +56,6 @@ Some of the information on this page may be changed in the future. To review the
 
 #### ::: factsheet.views.update_an_entity
 
-`def query_oekg(request, *args, **kwargs):`
-
-#### ::: factsheet.views.query_oekg
-
 `def get_entities_by_type(request, *args, **kwargs):`
 
 #### ::: factsheet.views.get_entities_by_type
