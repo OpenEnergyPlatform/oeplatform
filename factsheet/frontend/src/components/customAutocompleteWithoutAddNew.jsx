@@ -56,33 +56,36 @@ export default function CustomAutocompleteWithoutAddNew({
         onChange={handleChange}
         renderTags={() => null}
         filterOptions={(opts, params) => filter(opts, params)}
-        renderOption={(props, option, { selected }) => (
-          <li {...props}>
-            {!option.inputValue && (
-              <Checkbox
-                icon={icon}
-                checkedIcon={checkedIcon}
-                sx={{ mr: 1 }}
-                checked={selected}
-              />
-            )}
-            {!noTooltip && !option.inputValue && (
-              <HtmlTooltip
-                placement="top"
-                title={
-                  <Typography variant="caption" color="inherit">
-                    Description of <b>{option.name}</b>: TDB…
-                    <br />
-                    <a href="#">More info from OEKG…</a>
-                  </Typography>
-                }
-              >
-                <HelpOutlineIcon sx={{ color: 'text.secondary', mr: 1 }} />
-              </HtmlTooltip>
-            )}
-            {option.name}
-          </li>
-        )}
+        renderOption={(props, option, { selected }) => {
+          const { key, ...rest } = props;
+          return (
+            <li key={key} {...rest}>
+              {!option.inputValue && (
+                <Checkbox
+                  icon={icon}
+                  checkedIcon={checkedIcon}
+                  sx={{ mr: 1 }}
+                  checked={selected}
+                />
+              )}
+              {!noTooltip && !option.inputValue && (
+                <HtmlTooltip
+                  placement="top"
+                  title={
+                    <Typography variant="caption" color="inherit">
+                      Description of <b>{option.name}</b>: TDB…
+                      <br />
+                      <a href="#">More info from OEKG…</a>
+                    </Typography>
+                  }
+                >
+                  <HelpOutlineIcon sx={{ color: 'text.secondary', mr: 1 }} />
+                </HtmlTooltip>
+              )}
+              {option.name}
+            </li>
+          );
+        }}
         renderInput={(params) => (
           <StyledTextField
             {...params}
