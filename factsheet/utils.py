@@ -36,6 +36,12 @@ def serialize_publication_date(triple_object_pub_year: str):
 
 
 def remove_non_printable(text):
+    """
+    This function removes non-printable characters from a string which cause the
+    app to break. Mostly relevant for free text fields.
+
+    Do not use this on date fields, as it will remove the date format.
+    """
     if text is not None:
         allowed_chars = re.compile(r'[a-zA-Z0-9äöüÄÖÜß.,;:!?\'"()\-\s_]')
         return "".join(char if allowed_chars.match(char) else "" for char in text)
