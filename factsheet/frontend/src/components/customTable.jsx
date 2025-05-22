@@ -538,10 +538,25 @@ export default function CustomTable(props) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackType, setFeedbackType] = useState(''); // 'noFilters' or 'noResults'
   const handleConfirmQuery = () => {
+    const isFilterEmpty =
+      selectedInstitution.length === 0 &&
+      selectedAuthors.length === 0 &&
+      selectedFundingSource.length === 0 &&
+      selectedStudyKeywords.length === 0 &&
+      !scenarioYearTouched &&
+      !publicationDateTouched;
+
+    if (isFilterEmpty) {
+      // Case A: No filters selected → show banner inside dialog
+      setFeedbackType('noFilters');
+      setFeedbackOpen(true);
+      return;
+    }
+
+    // Filters selected – proceed to query
     setOpenBackDrop(true);
 
     const criteria = {};
-
     if (selectedInstitution.length > 0) {
       criteria.institutions = selectedInstitution.map(i => 'OEKG:' + i.iri);
     }
