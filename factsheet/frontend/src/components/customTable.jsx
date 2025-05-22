@@ -213,6 +213,9 @@ function EnhancedTableHead(props) {
 
 EnhancedTableHead.propTypes = {
   numSelected: PropTypes.number.isRequired,
+  handleOpenQuery: PropTypes.func.isRequired,
+  handleReset: PropTypes.func.isRequired,
+  filterApplied: PropTypes.bool.isRequired,
   onRequestSort: PropTypes.func.isRequired,
   onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
@@ -221,7 +224,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected, logged_in } = props;
+  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected, logged_in, filterApplied, handleReset } = props;
   const [isDisabled, setIsDisabled] = useState(true);
   return (
     <div>
@@ -262,7 +265,13 @@ function EnhancedTableToolbar(props) {
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
             </Tooltip> */}
             <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
-            <Button disabled={true}size="small" key="resetFilterButton" sx={{ marginLeft: '8px' }} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
+            <Button
+              disabled={!filterApplied}
+              size="small"
+              key="resetFilterButton"
+              sx={{ marginLeft: '8px' }}
+              startIcon={<ReplayIcon />}
+              onClick={handleReset}>Reset</Button>
             <Tooltip title="Compare">
 
               {numSelected > 1 ? <Link to={`scenario-bundles/compare/${[...selected].join('#')}`} onClick={() => this.forceUpdate} style={{ color: 'white' }}>
@@ -350,8 +359,8 @@ export default function CustomTable(props) {
   const [authors, setAuthors] = useState([]);
   const [fundingSources, setFundingSources] = useState([]);
   const [selectedFundingSource, setSelectedFundingSource] = useState([]);
-  const [startDateOfPublication, setStartDateOfPublication] = useState('2000');
-  const [endDateOfPublication, setEndDateOfPublication] = useState('2050');
+  const [startDateOfPublication, setStartDateOfPublication] = useState(null);
+  const [endDateOfPublication, setEndDateOfPublication] = useState(null);
   const [selectedStudyKeywords, setSelectedStudyKewords] = useState([]);
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
   const [selectedAspects, setSelectedAspects] = useState([]);
@@ -458,10 +467,20 @@ export default function CustomTable(props) {
     setOpenQuery(false);
   };
 
-  const handleReset = (event) => {
+  const handleReset = () => {
     setOpenQuery(false);
     setSelectedAuthors([]);
     setSelectedInstitution([]);
+    setSelectedFundingSource([]);
+    setSelectedStudyKewords([]);
+    setScenarioYearValue([2000, 2200]);
+    setStartDateOfPublication(null);
+    setEndDateOfPublication(null);
+    setScenarioYearTouched(false);
+    setPublicationDateTouched(false);
+    setFilteredFactsheets([]);
+    setFilterApplied(false);
+    setFeedbackOpen(false);
   };
 
   const handleStudyKeywords = (event) => {
@@ -537,6 +556,8 @@ export default function CustomTable(props) {
   };
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackType, setFeedbackType] = useState(''); // 'noFilters' or 'noResults'
+  const [filterApplied, setFilterApplied] = useState(false);
+
   const handleConfirmQuery = () => {
     const isFilterEmpty =
       selectedInstitution.length === 0 &&
@@ -591,10 +612,12 @@ export default function CustomTable(props) {
         setFeedbackType('noResults');
         setFeedbackOpen(true);
         setOpenQuery(false);
+        setFilterApplied(true);
       } else {
         // Case C: Results found → update + close dialog
         setFeedbackOpen(false);
         setOpenQuery(false);
+        setFilterApplied(true);
       }
 
       setOpenBackDrop(false);
@@ -978,7 +1001,18 @@ export default function CustomTable(props) {
 
 
       <Container maxWidth="xl">
-        <EnhancedTableToolbar logged_in={logged_in} numSelected={selected.size} selected={selected} alignment={alignment} handleChangeView={handleChangeView} handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison} />
+        <EnhancedTableToolbar
+          logged_in={logged_in}
+          numSelected={selected.size}
+          selected={selected}
+          alignment={alignment}
+          handleChangeView={handleChangeView}
+          handleOpenQuery={handleOpenQuery}
+          handleShowAll={handleShowAll}
+          handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}
+          filterApplied={filterApplied}
+          handleReset={handleReset}
+        />
         {feedbackType === 'noResults' && feedbackOpen && (
           <Box sx={{ mx: 2, mb: 2 }}>
             <FilterFeedbackBanner
