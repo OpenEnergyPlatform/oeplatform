@@ -148,6 +148,12 @@ def build_filter_block(var, predicate, values):
     """
 
 
+def build_filter_block_string_values(predicate: str, values: list[str]) -> str:
+    if not values:
+        return ""
+    return "\n".join(f'?s {predicate} "{v}" .' for v in values)
+
+
 def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
     """
     Function to filter scenario bundles in the OEKG based on various criteria.
@@ -180,8 +186,8 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
     funding_sources_exp = build_filter_block(
         "funding_sources", "OEO:OEO_00000509", funding_sources
     )
-    study_keywords_exp = build_filter_block(
-        "study_keywords", "OEO:has_study_keyword", study_keywords
+    study_keywords_exp = build_filter_block_string_values(
+        "OEO:has_study_keyword", study_keywords
     )
 
     # Scenario year clause
@@ -210,10 +216,8 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
             pub_date_exp = f"""
                 ?s OEKG:has_publication ?publication .
                 ?publication OEKG:date_of_publication ?publication_date .
-                FILTER (
-                    xsd:integer(?publication_date) >= {pub_date_start} &&
-                    xsd:integer(?publication_date) <= {pub_date_end}
-                )
+                BIND(xsd:integer(SUBSTR(STR(?publication_date), 1, 4)) AS ?pub_year)
+                FILTER (?pub_year >= {pub_date_start} && ?pub_year <= {pub_date_end})
             """
         else:
             # Still need to bind ?publication if no date filtering is applied
