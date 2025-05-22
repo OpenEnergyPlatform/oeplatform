@@ -1,0 +1,39 @@
+version: "1.0"
+indexMode: INDEX_SPARQL_ENDPOINT
+sparqlEndpoint: http://fuseki:3030/oeo/sparql
+indexFields:
+  - fieldName: label
+    documentVariable: class
+    query: >
+      SELECT ?class ?label WHERE {
+        #GRAPH#
+        {
+          ?class a <http://www.w3.org/2002/07/owl#Class> .
+          ?class <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+          FILTER(lang(?label) = 'en')
+        }
+        #VALUES#
+      }
+  - fieldName: type
+    documentVariable: class
+    query: >
+      SELECT ?class ?type WHERE {
+        #GRAPH#
+        {
+          ?class a <http://www.w3.org/2002/07/owl#Class> .
+          BIND("class" AS ?type)
+        }
+      }
+  - fieldName: definition
+    documentVariable: class
+    query: >
+      SELECT ?class ?definition WHERE {
+        #GRAPH#
+        {
+          ?class a <http://www.w3.org/2002/07/owl#Class> .
+          ?class <http://purl.obolibrary.org/obo/IAO_0000115> ?definition .
+          FILTER isIri(?class)
+          FILTER(lang(?definition) = 'en')
+        }
+        #VALUES#
+      }
