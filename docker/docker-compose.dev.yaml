@@ -15,7 +15,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${OEP_DEV_PORT_POSTGRES:-5432}:5432"
 
   fuseki:
     image: stain/jena-fuseki:5.1.0
@@ -26,9 +26,9 @@ services:
     volumes:
       - fuseki_databases:/home/fuseki/databases
       # - ./fuseki/config:/home/fuseki/configuration
-    ports:
-      - "3030:3030"
     restart: unless-stopped
+    ports:
+      - "${OEP_DEV_PORT_FUSEKI:-3030}:3030"
 
   web:
     build:
@@ -46,8 +46,8 @@ services:
         source: ..
         target: /home/appuser/app
     ports:
-      - "8000:8000"
-      - "5678:5678" # add debugpy port
+      - "${OEP_DEV_PORT_WEB:-8000}:8000" # expose web
+      - "${OEP_DEV_PORT_DEBUGPY:-5678}:5678" # add debugpy port
     command:
       - python
       - -m
@@ -102,8 +102,6 @@ services:
       - type: bind
         source: ..
         target: /home/appuser/app
-    ports:
-      - "5173:5173"
     environment:
       CHOKIDAR_USEPOLLING: "false"
       HOST: "0.0.0.0"
@@ -123,3 +121,13 @@ services:
   #     - ./ontop:/opt/ontop  # Mount your .obda, .owl, and .properties files here
   #   depends_on:
   #     - postgres
+
+  lookup:
+    restart: unless-stopped
+    image: dbpedia/lookup:dev
+    container_name: loep_lookup_dev
+    ports:
+      - "3004:8082"
+    volumes:
+      - ./data/index/:/index
+      - ./serviceConfigs/lookup/config.yaml:/resources/config.yml

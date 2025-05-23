@@ -109,19 +109,22 @@ export default function CustomAutocomplete({
           }
           return filtered;
         }}
-        renderOption={(props, option, { selected }) => (
-          <li {...props}>
-            {!option.inputValue && (
-              <Checkbox
-                icon={icon}
-                checkedIcon={checkedIcon}
-                sx={{ mr: 1 }}
-                checked={selected}
-              />
-            )}
-            {option.name}
-          </li>
-        )}
+        renderOption={(props, option, { selected }) => {
+          const { key, ...rest } = props;
+          return (
+            <li key={key} {...rest}>
+              {!option.inputValue && (
+                <Checkbox
+                  icon={icon}
+                  checkedIcon={checkedIcon}
+                  sx={{ mr: 1 }}
+                  checked={selected}
+                />
+              )}
+              {option.name}
+            </li>
+          );
+        }}
         renderInput={params => (
           <StyledTextField
             {...params}

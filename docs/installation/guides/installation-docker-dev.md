@@ -3,6 +3,9 @@
 !!! Warning "🚧"
     This section is still new and might change. The information presented here is tested by the developer and is currently rolled out within our team and close collaborators. Any suggestions are welcome and can be added in this GitHub discussion.
 
+!!! Info "Manual installation"
+    If you prefer not to use docker or want to get insights into each step of the installation and setup process for the oeplatform please have a look at the [manual installation guide](./installation.md) which also links the [detailed database setup](./manual-db-setup.md).
+
 ## Introduction
 
 Installing the oeplatform and its infrastructure is a tedious when one wants to setup all the involved components and use them either for development or to deploy them with the goal of operating a dedicated instance for organizations internally or open to the internet. The concept of containerized software helps a lot when developing and also deploying software or even whole infrastructures which may contain several software containers. THe essence of the benefit this brings is the reproducibility due to the container concept. All dependencies which have been installed once successfully can be installed again and any system that supports the container concept which was used will be able to reproduce the build process.
@@ -35,6 +38,16 @@ For development this also offers great tooling as you want to be able to use the
 
 The docker setup is created based on several configuration files and scripts. Together they enable us to install every module of the infrastructure with one single command. This section will give an overview of the setup and also provide commands and any pre-installation steps which will lead to a successful installation of the oeplatform especially and only for development purposes.
 
+#### Docker compose (optional) environment variables
+
+You can set these environment variablesto override defaults:
+
+- `OEP_DEV_PORT_POSTGRES`: public port to postgres database, defaults to 5432
+- `OEP_DEV_PORT_WEB`: public port to web interface, defaults to 8000
+- `OEP_DEV_PORT_DEBUGPY`: public port to python debugger, defaults to 5678
+- `OEP_DEV_PORT_FUSEKI`: public port to fuseki server, defaults to 3030
+
+
 #### Docker compose command
 
 !!! Info
@@ -43,13 +56,19 @@ The docker setup is created based on several configuration files and scripts. To
     - [Git](https://git-scm.com/downloads)
     - [Docker](https://docs.docker.com/compose/install/)
 
+    On windows we recommend using WSL2 or a Linux VM as the windows based installation is not tested regularly and often requires additional steps.
+
 Add the following commands into your terminal which supports git and docker compose commands.
 
     # first close the oeplatform repository
-    git clone https://github.com/OpenEnergyPlatform/oeplatform.git
+    > git clone https://github.com/OpenEnergyPlatform/oeplatform.git
 
-    # navigate into the cloned directory
-    docker compose -f docker/docker-compose.dev.yaml
+    # navigate into the cloned directory, on build runs you need to provide you hosts user and group id´s
+    > USER_ID=$(id -u) GROUP_ID=$(id -g) docker compose -f docker/docker-compose.dev.yaml up --build
+
+    # From now on you use the command below to startup the setup, but you will have to rebuild
+    # the container regularly to pick up latest changes e.g. if a new npm oder pip package was installed.
+    > docker compose -f docker/docker-compose.dev.yaml up
 
 #### Using a existing repository
 
@@ -96,8 +115,9 @@ While developing and adding changes you might want to rebuild your docker contai
 
     # Remove everything, assuming you have a terminal which is at the oeplatform root directory
     docker compose -f docker/docker-compose.dev.yaml down -v
-    # Install everything again
-    docker compose -f docker/docker-compose.dev.yaml up --build
+
+    # Install everything again, don't forget the user id args
+    USER_ID=$(id -u) GROUP_ID=$(id -g) docker compose -f docker/docker-compose.dev.yaml up --build
 
     # Just apply changes to a specific container (see vite as ref to the container name)
     docker compose -f docker/docker-compose.dev.yaml vite down -v
@@ -117,8 +137,11 @@ This includes python and javascript sourcecode files.
 
 ### Working with node/npm (javaScript)
 
-You might want to use node and its package manager npm to install or update package in the package.json file. To do so you should have node installed locally (using node-version-manager "nvm") and install new packages using the npm cli.
+You might want to use node and its package manager npm to install or update package in the package.json file. To do so you should have node installed locally (using node-version-manager "nvm") and install new packages using the npm cli. You can also install them directly in the docker container using the "excec" option.
 
-- npm install "package-name" --save
+    npm install "package-name" --save
 
-Then you can restart the vite container, it will pickup the changes in the package.json / package-lock.json and update the container node_modules.
+
+Then you build the vite container, it will pickup the changes in the package.json / package-lock.json and update the container node_modules. See also more info on the [node.js aka JavaScript setup](./nodejs.md).
+
+    docker compose -f docker/docker-compose.dev.yaml vite up --build

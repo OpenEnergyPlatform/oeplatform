@@ -93,6 +93,7 @@ apache*
 
 # Deployment files
 docker/oeplatform_data
+docker/data
 
 **/node_modules
 oep-website/oeo_viewer/client/node_modules

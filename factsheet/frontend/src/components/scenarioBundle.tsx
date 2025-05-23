@@ -2338,7 +2338,7 @@ const renderScenariosOverview = () => (
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    <span> <span> {v.date_of_publication.split('/')[0]} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                    <span> <span> {v.date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
                   </ContentTableCell>
                 </TableRow>
 

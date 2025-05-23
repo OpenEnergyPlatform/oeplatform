@@ -10,11 +10,15 @@
 
 - Update test related to oekg queries and avoide using Mocks to keep tests simpler and more realistic by using actual rdflib Graph [(#1980)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1980)
 
+- Enhance docker based dev setup by adding loep (lookup) service which enables the annotation feature in the oemetabuilder [(#2014)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2014)
+
 ## Features
 
 ## Bugs
 
 - Fix the table iri serialized, which now supports external urls stored in the oekg (e.g. When scenarios link to external datasets). External datasets are ignored and return a empty string to avoid exceptions [(#1980)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1980)
+
+- Fix the scenario bundles filter feature and add info banner with additional information in case no filters where set or no results where found with the current filter options. Additionally add a state to the filter options to avoid setting filters the user did not select and implement the reset filter button. [(#2015)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2015)
 
 ## Documentation updates
 
