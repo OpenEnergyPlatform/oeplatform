@@ -1,15 +1,8 @@
 {% if messages %}
   {% for message in messages %}
-    <div class="alert alert-dismissible alert-success">
-      <h4>
-        Success!!!!
-      </h4>
-      <button type="button" class="btn-close" data-bs-dismiss="alert">
-      
-      </button>
-      <p class="mb-0">
-      {{message}}
-      </p>
+    <!-- Alert out of main block, e.g. for successful log out info -->
+    <div class="login__alert login__alert--success login__alert--100">
+        <p>{{message}}</p>
     </div>
- {% endfor %}
+  {% endfor %}
 {% endif %}
