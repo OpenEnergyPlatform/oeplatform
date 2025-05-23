@@ -4,62 +4,94 @@
 {% load account socialaccount %}
 
 {% block head_title %}
-  {% translate "Sign In" %}
+  {% translate "" %}
 {% endblock head_title %}
 
 {% block content %}
 
 {% block inner %}
   {% include 'account/messages/messages.html' %}
-  <h1>{% translate "Sign In" %}</h1>
-  {% get_providers as socialaccount_providers %}
-  {% if socialaccount_providers %}
-    <p>
-      {% translate "Please sign in with one of your existing third party accounts:" %}
-      {% if ACCOUNT_ALLOW_REGISTRATION %}
-        {% blocktranslate trimmed %}
-          Or, <a href="{{ signup_url }}">sign up</a>
-          for a {{ site_name }} account and sign in below:
-        {% endblocktranslate %}
-      {% endif %}
-    </p>
-    
-    {% include "socialaccount/snippets/login_extra.html" %}
-  {% else %}
-    {% if ACCOUNT_ALLOW_REGISTRATION %}
-      <p>
-        {% blocktranslate trimmed %}
-          If you have not created an account yet, then please
-          <a href="{{ signup_url }}">sign up</a> first.
-        {% endblocktranslate %}
-      </p>
-    {% endif %}
-  {% endif %}
-  <form class="login" method="post" action="{% url 'account_login' %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    {% if redirect_field_value %}
-      <input type="hidden"
-             name="{{ redirect_field_name }}"
-             value="{{ redirect_field_value }}" />
-    {% endif %}
-    <button class="primaryAction btn btn-primary" type="submit">{% translate "Sign In" %}</button>
-  </form>
-  <span>---------</span>
-  <div class="socialaccount_ballot">
-    
-      <div class="provider-buttons">
-        {% providers_media_js %}
-        {% for provider in socialaccount_providers %}
-            <form method="post" action="{% provider_login_url provider.id %}" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">
-                  Sign In through your institution
-                </button>
-            </form>
-        {% endfor %}
-    </div>
+  <div class="login">
+    <div class="login__wrap">
+       <!-- Logo -->
+      <div class="login__logo">
+          <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo">
+      </div>
+       <!-- Be sure to use h1 for the heading -->
+      <h1 class="login__heading">{% translate "Log in to the Open Energy Platform" %}</h1>
 
+      {% get_providers as socialaccount_providers %}
+      {% if socialaccount_providers %}
+        {% comment %}  
+        <p>
+            {% translate "Please sign in with one of your existing third party accounts:" %}
+            {% if ACCOUNT_ALLOW_REGISTRATION %}
+              {% blocktranslate trimmed %}
+                Or, <a href="{{ signup_url }}">sign up</a>
+                for a {{ site_name }} account and sign in below:
+              {% endblocktranslate %}
+            {% endif %}
+          </p>
+          {% endcomment %}
+          {% include "socialaccount/snippets/login_extra.html" %}
+      {% else %}
+        {% if ACCOUNT_ALLOW_REGISTRATION %}
+          <p>
+            {% blocktranslate trimmed %}
+              If you have not created an account yet, then please
+              <a href="{{ signup_url }}">sign up</a> first.
+            {% endblocktranslate %}
+          </p>
+        {% endif %}
+      {% endif %}
+
+      <form class="login" method="post" action="{% url 'account_login' %}">
+        {% csrf_token %}
+
+        <!-- Text field -->
+        <div class="login__field">
+          <label for="{{ form.login.id_for_label }}">User name</label>
+          {{ form.login }}
+          {% if form.login.errors %}
+            <div class="error">{{ form.login.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Password field -->
+        <div class="login__field">
+          <label for="{{ form.password.id_for_label }}">Password</label>
+          {{ form.password }}
+          {% if form.password.errors %}
+            <div class="error">{{ form.password.errors }}</div>
+          {% endif %}
+          <div class="login__hint login__hint--password">
+            <a href="{% url 'account_reset_password' %}">Forgot your password?</a>
+          </div>
+        </div>
+
+        {% if redirect_field_value %}
+          <input type="hidden"
+                name="{{ redirect_field_name }}"
+                value="{{ redirect_field_value }}" />
+        {% endif %}
+
+        <!-- Blue button (main CTA) -->
+        <button type="submit" class="login__button">
+          Log in
+        </button>
+      </form>
+      
+      {% if SOCIALACCOUNT_ENABLED %}
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+      {% endif %}
+      
+      <!-- Use for less important text -->
+      <div class="login__alternative">
+          <p>New to the Open Energy Platform?</p>
+          <a href="{{ signup_url }}">Sign up</a>
+      </div>
+
+    </div>
   </div>
 {% endblock inner %}
 {% endblock %}
