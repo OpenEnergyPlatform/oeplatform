@@ -1,28 +1,79 @@
 {% extends "account/base.html" %}
 {% load i18n %}
+{% load account socialaccount %}
 
 {% block head_title %}
-  {% translate "Signup" %}
+  {% translate "" %}
 {% endblock head_title %}
+
 {% block inner %}
-  <h1>{% translate "Sign Up" %}</h1>
-  <p>
-    {% blocktranslate %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktranslate %}
-  </p>
-  <form class="signup"
-        id="signup_form"
-        method="post"
-        action="{% url 'account_signup' %}">
-    {% csrf_token %}
-    {{ form }}
-    {% if redirect_field_value %}
-      <input type="hidden"
-             name="{{ redirect_field_name }}"
-             value="{{ redirect_field_value }}" />
-    {% endif %}
-    <button class="btn btn-primary" type="submit">{% translate "Sign Up" %} »</button>
-  </form>
-    {% if SOCIALACCOUNT_ENABLED %}
+  {% include 'account/messages/messages.html' %}
+  <div class="login">
+    <div class="login__wrap">
+
+      <!-- Logo -->
+      <div class="login__logo">
+        <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo">
+      </div>
+
+      <!-- Heading -->
+      <h1 class="login__heading">{% translate "Create your Open Energy Platform account" %}</h1>
+
+      {% get_providers as socialaccount_providers %}
+      <p>
+        {% blocktranslate %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktranslate %}
+      </p>
+
+      <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+        {% csrf_token %}
+
+        <!-- Email field -->
+        <div class="login__field">
+          <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="error">{{ form.email.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Password field -->
+        <div class="login__field">
+          <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+          {{ form.password1 }}
+          {% if form.password1.errors %}
+            <div class="error">{{ form.password1.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Confirm password field -->
+        <div class="login__field">
+          <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+          {{ form.password2 }}
+          {% if form.password2.errors %}
+            <div class="error">{{ form.password2.errors }}</div>
+          {% endif %}
+        </div>
+
+        {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+
+        <!-- Submit -->
+        <button type="submit" class="login__button">
+          {% translate "Sign Up" %}
+        </button>
+      </form>
+
+      {% if SOCIALACCOUNT_ENABLED %}
         {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
-    {% endif %}
+      {% endif %}
+
+      <!-- Alternative navigation -->
+      <div class="login__alternative">
+        <p>Already have an account?</p>
+        <a href="{{ login_url }}">Log in</a>
+      </div>
+
+    </div>
+  </div>
 {% endblock inner %}
