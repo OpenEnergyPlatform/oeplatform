@@ -95,6 +95,7 @@ apache*
 # Deployment files
 docker/oeplatform_data
 docker/data
+assets/
 
 **/node_modules
 oep-website/oeo_viewer/client/node_modules
