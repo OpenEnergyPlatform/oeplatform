@@ -10,7 +10,6 @@
 {% block content %}
 
 {% block inner %}
-  {% include 'account/messages/messages.html' %}
   <div class="login">
     <div class="login__wrap">
        <!-- Logo -->
@@ -45,29 +44,40 @@
         {% endif %}
       {% endif %}
 
-      <form class="login" method="post" action="{% url 'account_login' %}">
+      <form class="signup" id="signup_form" method="post" action="{% url 'account_login' %}">
         {% csrf_token %}
-
+        
         <!-- Text field -->
         <div class="login__field">
           <label for="{{ form.login.id_for_label }}">User name</label>
           {{ form.login }}
-          {% if form.login.errors %}
-            <div class="error">{{ form.login.errors }}</div>
-          {% endif %}
+
         </div>
 
         <!-- Password field -->
         <div class="login__field">
           <label for="{{ form.password.id_for_label }}">Password</label>
           {{ form.password }}
-          {% if form.password.errors %}
-            <div class="error">{{ form.password.errors }}</div>
-          {% endif %}
+          
           <div class="login__hint login__hint--password">
             <a href="{% url 'account_reset_password' %}">Forgot your password?</a>
           </div>
         </div>
+
+        {% if form.errors %}
+          {% for field in form %}
+              {% for error in field.errors %}
+                  <div class="login__alert login__alert--danger">
+                      <strong>{{ error|escape }}</strong>
+                  </div>
+              {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+               <div class="login__alert login__alert--danger">
+                  <strong>{{ error|escape }}</strong>
+              </div>
+          {% endfor %}
+        {% endif %}
 
         {% if redirect_field_value %}
           <input type="hidden"
@@ -79,8 +89,7 @@
         <button type="submit" class="login__button">
           Log in
         </button>
-      </form>
-      
+      </form>      
       {% if SOCIALACCOUNT_ENABLED %}
         {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
       {% endif %}

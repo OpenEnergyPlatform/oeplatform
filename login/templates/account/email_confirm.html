@@ -6,9 +6,17 @@
     {% trans "Confirm Email Address" %}
 {% endblock head_title %}
 {% block content %}
-    {% element h1 %}
+    <div class="login">
+    <div class="login__wrap" class="signup" id="logout_form">
+        <!-- Logo -->
+        <div class="login__logo">
+            <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo">
+        </div>
+        <!-- Be sure to use h1 for the heading -->
+        <h1 class="login__heading">
         {% trans "Confirm Email Address" %}
-    {% endelement %}
+        </h1>
+
     {% if confirmation %}
         {% user_display confirmation.email_address.user as user_display %}
         {% if can_confirm %}
@@ -20,9 +28,9 @@
                 {% slot actions %}
                     {% csrf_token %}
                     {{ redirect_field }}
-                    {% element button type="submit" %}
+                    <button type="submit" class="login__button">
                         {% trans 'Confirm' %}
-                    {% endelement %}
+                    </button>
                 {% endslot %}
             {% endelement %}
         {% else %}
@@ -36,4 +44,6 @@
             {% blocktrans %}This email confirmation link expired or is invalid. Please <a href="{{ email_url }}">issue a new email confirmation request</a>.{% endblocktrans %}
         {% endelement %}
     {% endif %}
+    </div>
+</div>
 {% endblock content %}

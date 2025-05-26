@@ -2,13 +2,25 @@
 {% load i18n %}
 {% load allauth %}
 {% block head_title %}
-    {% trans "Verify Your Email Address" %}
+    {% trans "" %}
 {% endblock head_title %}
+
 {% block content %}
-    {% element h1 %}
-        {% trans "Verify Your Email Address" %}
-    {% endelement %}
-    {% element p %}
-        {% blocktrans %}We have sent an email to you for verification. Follow the link provided to finalize the signup process. If you do not see the verification email in your main inbox, check your spam folder. Please contact us if you do not receive the verification email within a few minutes.{% endblocktrans %}
-    {% endelement %}
+
+    <!-- Add .login as as main block and then elements & modifiers -->
+    <div class="login">
+        <div class="login__wrap">
+
+            <!-- Logo -->
+            <div class="login__logo">
+                <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo">
+            </div>
+
+            <!-- Be sure to use h1 for the heading -->
+            <h1 class="login__heading">{% trans "Verify Your Email Address" %}</h1>
+            {% element p %}
+                {% blocktrans %}We have sent an email to you for verification. Follow the link provided to finalize the signup process. If you do not see the verification email in your main inbox, check your spam folder. Please contact us if you do not receive the verification email within a few minutes.{% endblocktrans %}
+            {% endelement %}
+        </div>
+    </div>
 {% endblock content %}
