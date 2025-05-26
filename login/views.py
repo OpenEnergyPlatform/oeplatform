@@ -1,7 +1,6 @@
 import json
 from itertools import groupby
 
-from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
@@ -15,16 +14,15 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import RedirectView, View
 from django.views.decorators.http import require_POST
-from django.views.generic import FormView, View
-
+from django.views.generic import RedirectView, View
 from django.views.generic.edit import DeleteView, UpdateView
 from rest_framework.authtoken.models import Token
 
 import login.models as models
-from dataedit.helper import delete_peer_review
-from dataedit.models import PeerReviewManager, PeerReview
+
+# from dataedit.helper import delete_peer_review
+from dataedit.models import PeerReview, PeerReviewManager
 from dataedit.views import schema_whitelist
 from login.utils import (
     get_badge_icon_path,
@@ -46,6 +44,7 @@ from .forms import (
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
 from .models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
+
 ###########################################################################
 #            User Tables related views & partial views for htmx           #
 ###########################################################################
@@ -339,6 +338,7 @@ def delete_peer_review_simple(request):
         return JsonResponse({"message": "PeerReview successfully deleted."})
     else:
         return JsonResponse({"error": "PeerReview not found."}, status=404)
+
 
 class SettingsView(View):
     def get(self, request, user_id):
