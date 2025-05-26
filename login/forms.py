@@ -45,7 +45,7 @@ class EditUserForm(UserChangeForm):
         model = OepUser
         fields = (
             "profile_img",
-            "email",
+            # "email",
             "fullname",
             "location",
             "work",
