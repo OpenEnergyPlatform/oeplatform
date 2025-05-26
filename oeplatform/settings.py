@@ -280,10 +280,13 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 # axes login throttling
-AXES_ENABLED = True
+AXES_ENABLED = not DEBUG
 AXES_FAILURE_LIMIT = 5  # Number of allowed attempts
 AXES_COOLOFF_TIME = 1  # Lockout period in hours
 AXES_ONLY_USER_FAILURES = True  # Only track failures per user
+
+CAPTCHA_IMAGE_SIZE = (150, 60)  # width, height in pixels
+CAPTCHA_FONT_SIZE = 42
 
 LOGGING = {
     "version": 1,
