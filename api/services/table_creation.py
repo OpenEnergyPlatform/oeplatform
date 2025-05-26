@@ -16,6 +16,8 @@ class DjangoTableService:
 
 class OEDBTableService:
     def create(self, schema, table, columns, constraints):
+        if actions.has_table({"schema": schema, "table": table}):
+            return
         actions.table_create(schema, table, columns, constraints)
 
     def drop(self, schema, table):
@@ -45,24 +47,37 @@ class TableCreationOrchestrator:
         column_defs: list,
         constraint_defs: list,
     ):
-        # ensure the Django-side schema row exists
         schema_obj, _ = DBSchema.objects.get_or_create(name=schema_name)
 
+        if actions.has_table({"schema": schema_name, "table": table_name}):
+            raise APIError(f"Table {schema_name}.{table_name} already exists.", 409)
+
+        physical_created = False
+        metadata_created = False
+        table_obj = None
+
         try:
-            # both steps live inside one try/except
             with transaction.atomic():
-                # 1) create the physical table first
                 self.oedb_svc.create(
                     schema_name, table_name, column_defs, constraint_defs
                 )
+                physical_created = True
 
-                # 2) only once the physical table is up, create our metadata row
                 table_obj = self.django_svc.create(schema_obj, table_name)
+                metadata_created = True
+
+            return table_obj
 
         except Exception as e:
-            # if anything failed above, drop whatever physical table was made
-            self.oedb_svc.drop(schema_name, table_name)
-            # the atomic block will have rolled back any DBTable row
+            self._cleanup(
+                schema_name, table_name, schema_obj, physical_created, metadata_created
+            )
             raise APIError(f"Could not create table {schema_name}.{table_name}: {e}")
 
-        return table_obj
+    def _cleanup(
+        self, schema_name, table_name, schema_obj, physical_created, metadata_created
+    ):
+        if physical_created:
+            self.oedb_svc.drop(schema_name, table_name)
+        if metadata_created:
+            self.django_svc.delete(schema_obj, table_name)
