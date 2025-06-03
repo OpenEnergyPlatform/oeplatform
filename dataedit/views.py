@@ -1774,6 +1774,8 @@ def get_column_description(schema, table):
                 "data_type": get_datatype_str(col),
                 "is_nullable": col["is_nullable"],
                 "is_pk": name in pk_fields,
+                "unit": None,
+                "description": None,
             }
         )
     return columns
