@@ -22,8 +22,6 @@ from .models import OEKG_Modifications, ScenarioBundleAccessControl
 
 oekg = bind_all_namespaces(graph=oekg)
 
-query_endpoint = "http://localhost:3030/ds/query"
-update_endpoint = "http://localhost:3030/ds/update"
 
 def clean_name(name):
     return (
@@ -1237,6 +1235,7 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["technologies"] = []
     for s, p, o in oekg.triples((study_URI, OEO.OEO_00000522, None)):
         label = oeo.value(o, RDFS.label)
+        class_iri = o
         if label != None:  # noqa
             factsheet["technologies"].append(
                 {"value": label, "label": label, "class": o, "id": class_iri}
