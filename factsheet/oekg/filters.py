@@ -60,7 +60,7 @@ class OekgQuery:
             for s1, p1, o1 in self.oekg.triples(
                 (s, namespaces.OEKG["has_scenario"], None)
             ):
-                # # Find scenarios where the given table is the input dataset
+                # Find scenarios where the given table is the input dataset
                 for s2, p2, o1_input_ds_uid in self.oekg.triples(
                     (o1, namespaces.OEO.RO_0002233, None)
                 ):
@@ -70,7 +70,7 @@ class OekgQuery:
                         ):
                             if (
                                 self.serialize_table_iri(str(o3_input_ds_iri))
-                                in table_iri
+                                == table_iri
                             ):
                                 related_scenarios.add(s2)
 
@@ -111,7 +111,7 @@ class OekgQuery:
                         ):
                             if (
                                 self.serialize_table_iri(str(o3_output_ds_iri))
-                                in table_iri
+                                == table_iri
                             ):
                                 related_scenarios.add(s2)
 
@@ -150,7 +150,6 @@ class OekgQuery:
             for i in related_scenarios_input:
                 for s1, p1, o1 in oekg.triples((s, namespaces.OEKG["has_scenario"], i)):
                     if s1:
-                        print("s1", s1)
                         scenario_bundles_input.add((s1, s))
 
         return scenario_bundles_input
@@ -180,7 +179,6 @@ class OekgQuery:
             for i in related_scenarios_output:
                 for s1, p1, o1 in oekg.triples((s, namespaces.OEKG["has_scenario"], i)):
                     if s1:
-                        print("s1", s1)
                         scenario_bundles_output.add((s1, s))
 
         return scenario_bundles_output
@@ -196,11 +194,6 @@ class OekgQuery:
         Note: Currently the OEKG does not contain a relation between uid
         and bundle iri. That is why we have to strip it from the url.
         """
-
-        # for s, p, o in oekg.triples((bundle, namespaces.OEKG["scenario_uuid"], None)):
-        #     if o:
-        #         print("o", o)
-        #         return o
 
         uid = bundle.split("/")[-1]
         return uid
