@@ -30,6 +30,8 @@
 
 - Fixed a bug in the OEMetaBuilder tool which lead to incomplete editable metadata properties in the editor and incomplete auto-added values in the data schema section [(#1896)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1896)
 
+- Fix previously working functionality which extracts and show the table title form metadata instead of the filename when browsing table data. [(#2022)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2022)
+
 ## Documentation updates
 
 - Add documentation on how to use docker for development [(#1988)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1988)
