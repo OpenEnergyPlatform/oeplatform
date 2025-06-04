@@ -12,7 +12,7 @@
 
 - Enhance docker based dev setup by adding loep (lookup) service which enables the annotation feature in the oemetabuilder [(#2014)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2014)
 
-- Refactor plain django based login system and replace its core by django allauth with custom OEP-styles thanks to @@bmlancien [(#1896)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1896)
+- Refactor plain django based login system and replace its core by django allauth with custom OEP-styles thanks to @bmlancien [(#1896)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1896)
 
 ## Features
 
@@ -25,6 +25,8 @@
 - Fix the scenario bundles filter feature and add info banner with additional information in case no filters where set or no results where found with the current filter options. Additionally add a state to the filter options to avoid setting filters the user did not select and implement the reset filter button. [(#2015)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2015)
 
 - Fix bugs in the table creation which left table artifacts hanging & a bug which occurred when user add a tag to a table without existing metadata[(#1896)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1896)
+
+- Fixed a bug in the OEMetaBuilder tool which lead to incomplete editable metadata properties in the editor and incomplete auto-added values in the data schema section [(#1896)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1896)
 
 ## Documentation updates
 
