@@ -195,6 +195,17 @@ var MetaEdit = function(config) {
     }
 
     fillMissingFromSchema(config.schema.properties, json);
+    // Fix boundingBox in each resource if needed
+    if (Array.isArray(json.resources)) {
+      json.resources.forEach(resource => {
+        const bboxPath = resource?.spatial?.extent?.boundingBox;
+        if (!Array.isArray(bboxPath) || bboxPath.length !== 4 || bboxPath.some(val => typeof val !== 'number')) {
+          if (!resource.spatial) resource.spatial = {};
+          if (!resource.spatial.extent) resource.spatial.extent = {};
+          resource.spatial.extent.boundingBox = [0, 0, 0, 0]; // fallback valid default
+        }
+      });
+    }
 
     return json;
   }
