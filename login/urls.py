@@ -4,17 +4,13 @@ from django.contrib.auth.views import (
     PasswordResetDoneView,
     PasswordResetView,
 )
-from django.urls import re_path, path
+from django.urls import path, re_path
 
 from login import partial_views, views
 from login.views import delete_peer_review_simple
 
-# from login.views import AccountDeleteView
-
 app_name = "login"
 urlpatterns = [
-    ###############################################################
-    # Might be deprecated as django allauth is implemented
     re_path(
         "password_reset/",
         PasswordResetView.as_view(
@@ -45,7 +41,6 @@ urlpatterns = [
         ),
         name="password_reset_complete",
     ),
-    #################################################################
     re_path(
         r"^profile/(?P<user_id>[\d]+)$",
         views.TablesView.as_view(),
@@ -76,11 +71,6 @@ urlpatterns = [
         views.SettingsView.as_view(),
         name="settings",
     ),
-    # re_path(
-    #     r"^profile/(?P<user_id>[\d]+)/password_change$",
-    #     views.OEPPasswordChangeView.as_view(),
-    #     name="input",
-    # ),
     # TODO: implement tests before we allow user deletion
     # re_path(
     #    r"^profile/(?P<user_id>[\d]+)/delete_acc$",
@@ -139,8 +129,8 @@ urlpatterns = [
     re_path(r"^reset/token$", views.token_reset, name="reset-token"),
     path("~redirect/", view=views.user_redirect_view, name="redirect"),
     path(
-        'delete_peer_review/',
+        "delete_peer_review/",
         delete_peer_review_simple,
-        name='delete_peer_review_simple'
+        name="delete_peer_review_simple",
     ),
 ]
