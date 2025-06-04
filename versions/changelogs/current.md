@@ -18,6 +18,8 @@
 
 - Add NFDI AAI based login system enabled by KIT´s RegApp for Single Sign on. This enables institutional and ORCID based social login additionally to the oeplatform internal login system [(#1896)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1896)
 
+- Avoid caching scenario bundle related http-api endpoints to keep data up to date. This effects the scenario top tables list as well as the model & framework factsheet list endpoints [(#2021)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2021)
+
 ## Bugs
 
 - Fix the table iri serialized, which now supports external urls stored in the oekg (e.g. When scenarios link to external datasets). External datasets are ignored and return a empty string to avoid exceptions [(#1980)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1980)

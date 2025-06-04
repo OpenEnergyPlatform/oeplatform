@@ -449,7 +449,7 @@ class Table(APIView):
         """
         Creates a new table: physical table first, then metadata row.
         Applies embargo and permissions, and sets metadata if provided.
-        
+
         REST-API endpoint used to create a new table in the database.
         The table is created with the columns and constraints specified in the
         request body. The request body must contain a JSON object with the following
@@ -1644,6 +1644,7 @@ def oevkg_search(request):
 
 
 # Energyframework, Energymodel
+@method_decorator(never_cache, name="dispatch")
 class EnergyframeworkFactsheetListAPIView(generics.ListAPIView):
     """
     Used for the scenario bundles react app to be able to select a existing
@@ -1654,6 +1655,7 @@ class EnergyframeworkFactsheetListAPIView(generics.ListAPIView):
     serializer_class = EnergyframeworkSerializer
 
 
+@method_decorator(never_cache, name="dispatch")
 class EnergymodelFactsheetListAPIView(generics.ListAPIView):
     """
     Used for the scenario bundles react app to be able to select a existing
@@ -1664,6 +1666,7 @@ class EnergymodelFactsheetListAPIView(generics.ListAPIView):
     serializer_class = EnergymodelSerializer
 
 
+@method_decorator(never_cache, name="dispatch")
 class ScenarioDataTablesListAPIView(generics.ListAPIView):
     """
     Used for the scenario bundles react app to be able to populate
