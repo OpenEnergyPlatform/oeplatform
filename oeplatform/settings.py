@@ -46,6 +46,10 @@ INSTALLED_APPS = (
     "modelview",
     "modelview.templatetags.modelview_extras",
     "login",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.openid_connect",
     "base",
     "base.templatetags.base_tags",
     "widget_tweaks",
@@ -76,10 +80,10 @@ MIDDLEWARE = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 )
 
 ROOT_URLCONF = "oeplatform.urls"
@@ -135,6 +139,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "oeplatform.settings.external_urls_context_processor",
+                "oeplatform.context_processors.allauth_settings",
             ]
         },
     }
@@ -200,8 +205,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 AUTH_USER_MODEL = "login.myuser"
-LOGIN_URL = "/user/login"
-LOGIN_REDIRECT_URL = "/"
+# https://docs.djangoproject.com/en/dev/ref/settings/#login-url
+LOGIN_URL = "account_login"
+# https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
+LOGIN_REDIRECT_URL = "login:redirect"
+# LOGIN_REDIRECT_URL = "/"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -214,8 +222,10 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
     "axes.backends.AxesBackend",
-    # custom class extenging Django ModelBackend for login with username OR email
+    "django.contrib.auth.backends.ModelBackend",
+    # custom class extending Django ModelBackend for login with username OR email
     "login.backends.ModelBackendWithEmail",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
@@ -232,7 +242,6 @@ COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
-
 COMPRESS_FILTERS = {
     # do not minify js, we do it with parcel
     # and it can create problems with react
@@ -244,6 +253,40 @@ COMPRESS_FILTERS = {
     ],
 }
 
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "name"
+ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # requires ACCOUNT_EMAIL_REQUIRED = True
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+ACCOUNT_ADAPTER = "login.adapters.AccountAdapter"
+# https://django-allauth.readthedocs.io/en/latest/forms.html
+ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
+ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_ALLOW_REGISTRATION = True
+ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
+# ACCOUNT_SIGNUP_FORM_CLASS = {"login.forms.CreateUserForm"}
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+
+
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+SOCIALACCOUNT_ADAPTER = "login.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_EMAIL_VERIFICATION = "optional"
+# https://django-allauth.readthedocs.io/en/latest/forms.html
+# SOCIALACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+# axes login throttling
+AXES_ENABLED = not DEBUG
+AXES_FAILURE_LIMIT = 5  # Number of allowed attempts
+AXES_COOLOFF_TIME = 1  # Lockout period in hours
+AXES_ONLY_USER_FAILURES = True  # Only track failures per user
+
+CAPTCHA_IMAGE_SIZE = (150, 60)  # width, height in pixels
+CAPTCHA_FONT_SIZE = 42
 
 LOGGING = {
     "version": 1,

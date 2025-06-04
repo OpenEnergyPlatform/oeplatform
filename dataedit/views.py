@@ -27,8 +27,9 @@ from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
 
 # from oemetadata.v1.v160.template import OEMETADATA_V160_TEMPLATE
 # from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
-# from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
-from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
+from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
+
+# from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -1562,7 +1563,7 @@ def update_table_tags(request):
                 actions.set_table_metadata(
                     table=table,
                     schema=schema,
-                    metadata=OEMETADATA_V20_EXAMPLE,
+                    metadata=OEMETADATA_V20_TEMPLATE,
                     cursor=con,
                 )
                 # update tags in db and harmonize metadata
@@ -1773,6 +1774,8 @@ def get_column_description(schema, table):
                 "data_type": get_datatype_str(col),
                 "is_nullable": col["is_nullable"],
                 "is_pk": name in pk_fields,
+                "unit": None,
+                "description": None,
             }
         )
     return columns

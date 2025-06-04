@@ -1,5 +1,4 @@
-{% load static %}
-{% load fontawesome_5 %}
+{% load static i18n fontawesome_5 django_bootstrap5 %}
 
 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -57,25 +56,20 @@
         </li>
     </ul>
 </div>
-{% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
-
-    <div class="d-flex align-items-center gap-3">
-        <!-- Profile Link -->
-        <a class="btn btn-link text-white p-0" href="/user/profile/{{ user.pk }}/settings">
-            {% fa5_icon 'user' 'fas' %} {{ user }}
-        </a>
-
-        <!-- Logout Form -->
-        <form method="post" action="{% url 'logout' %}" class="m-0">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="/">
-            <button type="submit" class="btn btn-danger btn-sm">
-                {% fa5_icon 'arrow-right' 'fas' %} Logout
-            </button>
-        </form>
-    </div>
-
+{% if request.user.is_authenticated %}
+    <!-- Profile Link -->
+    <a class="btn btn-link text-white p-0" href="{% url 'login:settings' user.pk %} ">
+        {% fa5_icon 'user' 'fas' %} {{ user }}
+    </a>
+    {# URL provided by django-allauth/account/urls.py #}
+    <a href="{% url 'account_logout' %}"
+        class="btn btn-danger btn-sm m-1">  {% fa5_icon 'arrow-right' 'fas' %} {% translate "Sign Out" %}</a>
 {% else %}
-    <a class="btn btn-info" style="float: right;margin:5px"
-       href="/user/login/?next={{ request.get_full_path|urlencode }}">{% fa5_icon 'log-in' 'fas' %} Login</a>
+    {% if ACCOUNT_ALLOW_REGISTRATION %}
+        {# URL provided by django-allauth/account/urls.py #}
+        <a href="{% url 'account_signup' %}"
+        class="btn btn-info btn-sm m-1">{% translate "Sign Up" %}</a>
+    {% endif %}
+    {# URL provided by django-allauth/account/urls.py #}
+    <a class="btn btn-info btn-sm m-1" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
 {% endif %}

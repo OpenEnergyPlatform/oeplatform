@@ -470,7 +470,7 @@ function Factsheet(props) {
             // Handle successful response
 
             if (response.data === 'Factsheet saved') {
-              navigate('/factsheet/fs/' + new_uid);
+              navigate('/scenario-bundles/id/' + new_uid);
               setIsCreated(true);
               setOpenSavedDialog(true);
               setUID(new_uid);

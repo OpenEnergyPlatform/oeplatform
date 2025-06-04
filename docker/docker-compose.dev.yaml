@@ -86,6 +86,8 @@ services:
     image: oeplatform-vite-dev
     container_name: vite-js-dev
     working_dir: /home/appuser/app # same path inside container
+    ports:
+      - "${OEP_DEV_PORT_VITE:-5173}:5173"
     volumes:
 
       # 1) keep dependencies in a named volume *inside* /app
