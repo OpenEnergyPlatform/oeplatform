@@ -11,18 +11,37 @@
         <li class="nav-item">
             <a class="nav-link" href="/dataedit/schemas">Database</a>
         </li>
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMeta" role="button"
+               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Metadata
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMeta">
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.oemetadata_key_description }}" target="_blank"><i class="fas fa-external-link-alt"></i> OEMetadata standard</a>
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.oedatamodel }}" target="_blank"><i class="fas fa-external-link-alt"></i> OEDataModel </a>
+                <a class="dropdown-item" href="{% url 'dataedit:oemetabuilder' %}">OEMetaBuilder Tool</a>
+            </div>
+        </li>
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFS" role="button"
                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Scenario Bundles
+                Factsheets
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdownFS">
-                <!-- <a class="dropdown-item" href="/factsheets/overview/">Overview</a> -->
-                <!-- <sup class="small text-muted">Early Access</sup> -->
-                <a class="dropdown-item" href="/scenario-bundles/main">Scenario Bundle</a>
                 <a class="dropdown-item" href="/factsheets/frameworks/">Framework Factsheet</a>
                 <a class="dropdown-item" href="/factsheets/models/">Model Factsheet</a>
-                <!-- <a class="dropdown-item" href="/factsheets/scenarios/">Scenario Factsheet</a> -->
+            </div>
+        </li>
+        
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSB" role="button"
+               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Scenario Bundles
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownSB">
+                <a class="dropdown-item" href="{% url 'factsheet:factsheets_index' %}">Scenario Bundle</a>
+                <a class="dropdown-item" href="/oekg/gui/">OEKG SPARQL-Query</a>
             </div>
         </li>
         <li class="nav-item dropdown">
@@ -38,8 +57,26 @@
                 <a class="dropdown-item" href="{{ EXTERNAL_URLS.tib_terminology_service }}" target="_blank" data-toggle="tooltip" data-placement="top" title="We want to combine our efforts in ontology development with the TIB as part of the NFDI4Energy project."><i class="fas fa-external-link-alt"></i> TIB Terminology Service</a>
             </div>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ EXTERNAL_URLS.tutorials_index }}" target="_blank">Academy <i class="fas fa-external-link-alt"></i></a>
+        <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAcademy" role="button"
+               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Academy
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownAcademy">
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.tutorials_index }}" target="_blank"><i class="fas fa-external-link-alt"></i> Getting Started </a>
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.tutorials_faq }}" target="_blank"><i class="fas fa-external-link-alt"></i> Questions </a>
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.ORKG }}" target="_blank"><i class="fas fa-external-link-alt"></i> ORKG </a>
+            </div>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownTools" role="button"
+               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Open Data Tools
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownTools">
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.open_plan }}" target="_blank"><i class="fas fa-external-link-alt"></i> Open Plan</a>
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.open_mastr }}" target="_blank"><i class="fas fa-external-link-alt"></i> Open MaStR</a>
+            </div>
         </li>
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAbout" role="button"
@@ -51,7 +88,6 @@
                 <a class="dropdown-item" href="{{ EXTERNAL_URLS.compendium }}" target="_blank"><i class="fas fa-external-link-alt"></i> Compendium</a>
                 <a class="dropdown-item" href="{{ EXTERNAL_URLS.mkdocs }}" target="_blank"><i class="fas fa-external-link-alt"></i> Developer Documentation</a>
                 <a class="dropdown-item" href="{{ EXTERNAL_URLS.readthedocs }}" target="_blank"><i class="fas fa-external-link-alt"></i> REST-API Documentation</a>
-                <a class="dropdown-item" href="{{ EXTERNAL_URLS.tutorials_faq }}" target="_blank"><i class="fas fa-external-link-alt"></i> FAQ</a>
             </div>
         </li>
     </ul>
