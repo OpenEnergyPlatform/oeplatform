@@ -5,7 +5,7 @@ from factsheet import views
 app_name = "factsheet"
 urlpatterns = [
     path(r"", views.factsheets_index),
-    path(r"main", views.factsheets_index),
+    path(r"main", views.factsheets_index, name="factsheets_index"),
     re_path(r"^id/*", views.factsheets_index, name="bundle-id-page"),
     re_path(r"^compare/*", views.factsheets_index),
     re_path(r"^oekg_history/*", views.factsheets_index),
