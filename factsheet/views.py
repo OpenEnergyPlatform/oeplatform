@@ -1443,7 +1443,7 @@ def get_entities_by_type(request, *args, **kwargs):
     classId = entity_type.split(".")[1]
     prefix = ""
     if vocab == "OEO":
-        prefix = "http://openenergy-platform.org/ontology/oeo/"
+        prefix = "https://openenergyplatform.org/ontology/oeo/"
     if vocab == "OBO":
         prefix = "http://purl.obolibrary.org/obo/"
 
@@ -1480,7 +1480,7 @@ def add_entities(request, *args, **kwargs):
     classId = entity_type.split(".")[1]
     prefix = ""
     if vocab == "OEO":
-        prefix = "http://openenergy-platform.org/ontology/oeo/"
+        prefix = "https://openenergyplatform.org/ontology/oeo/"
     if vocab == "OBO":
         prefix = "http://purl.obolibrary.org/obo/"
 
@@ -1509,7 +1509,7 @@ def add_a_fact(request, *args, **kwargs):
         "http://openenergy-platform.org/ontology/oekg/" + clean_name(_subject)
     )
     _predicate_URI = URIRef(
-        "http://openenergy-platform.org/ontology/oeo/" + clean_name(_predicate)
+        "https://openenergyplatform.org/ontology/oeo/" + clean_name(_predicate)
     )
     _object_URI = URIRef(
         "http://openenergy-platform.org/ontology/oekg/" + clean_name(_object)
@@ -1578,7 +1578,7 @@ def update_an_entity(request, *args, **kwargs):
     classId = entity_type.split(".")[1]
     prefix = ""
     if vocab == "OEO":
-        prefix = "http://openenergy-platform.org/ontology/oeo/"
+        prefix = "https://openenergyplatform.org/ontology/oeo/"
     if vocab == "OBO":
         prefix = "http://purl.obolibrary.org/obo/"
 
@@ -1696,7 +1696,7 @@ def search_scenario_type_iris_by_label(label, input):
 
 def get_scenario_type_iri(scenario_type_label: str):
     scenario_class = oeo_owl.search_one(
-        iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
+        iri="https://openenergyplatform.org/ontology/oeo/OEO_00000364"
     )
     scenario_subclasses = get_all_sub_classes(scenario_class)
 
