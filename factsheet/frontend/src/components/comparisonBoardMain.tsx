@@ -525,7 +525,7 @@ const ComparisonBoardMain = (props) => {
   const sendGetScenariosQuery = async () => {
     setLoading(true);
 
-    const get_scenarios_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    const get_scenarios_query = `PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
               SELECT DISTINCT ?scenario WHERE {
               ?s oeo:OEO_00020226 ?scenario .
     }`
@@ -569,7 +569,7 @@ const ComparisonBoardMain = (props) => {
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
 
-    const get_categories_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    const get_categories_query = `PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     SELECT DISTINCT ?category ?table_name WHERE {
       ?s oeo:has_sector_division ?category .
       ?s oeo:OEO_00000504 ?table_name .
@@ -634,7 +634,7 @@ const ComparisonBoardMain = (props) => {
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
 
-    const get_gas_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    const get_gas_query = `PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     SELECT DISTINCT ?gas ?table_name WHERE {
       ?s oeo:OEO_00010121 ?gas .
       ?s oeo:OEO_00000504 ?table_name .
@@ -786,7 +786,7 @@ const sendQuery = async (index) => {
     PREFIX ou: <http://opendata.unex.es/def/ontouniversidad#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
 
     SELECT DISTINCT ?s ?value ?country_code ?year ?category ?gas ?table_name ?unit WHERE {
