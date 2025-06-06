@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+from collections import defaultdict
 from functools import reduce
 from io import TextIOWrapper
 from itertools import chain
@@ -1022,7 +1023,7 @@ class DataView(View):
                 schema=schema, table=table
             ),
             "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
-            "opr_enabled": False,
+            "opr_enabled": True,
             # oemetadata
             # is not None,  # check if the table has the metadata
         }
@@ -1977,82 +1978,67 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def sort_in_category(self, schema, table, oemetadata):
         """
-        Sorts the metadata of a table into categories and adds the value
-        suggestion and comment that were added during the review, to facilitate
-        Further processing easier.
-
-        Note:
-            The categories spatial & temporal are often combined during visualization.
-
-        Args:
-            schema (str): The schema of the table.
-            table (str): The name of the table.
-
-        Returns:
-
-
-        Examples:
-            A return value can look like the below dictionary:
-
-            >>>
-            {
-                "general": [
-                    {
-                    "field": "id",
-                    "value": "http: //127.0.0.1:8000/dataedit/view/model_draft/test2",
-                    "newValue": "",
-                    "reviewer_suggestion": "",
-                    "suggestion_comment": ""
-                    }
-                ],
-                "spatial": [...],
-                "temporal": [...],
-                "source": [...],
-                "license": [...],
-            }
-
+        Groups metadata fields by top-level categories and subgroups within them.
+        If a field has no dot (.), it's considered flat and shown directly.
+        If a field has a dot, it's grouped into sub-sections by prefix.
         """
-
         val = self.parse_keys(oemetadata)
-        gen_key_list = []
-        spatial_key_list = []
-        temporal_key_list = []
-        source_key_list = []
-        license_key_list = []
 
-        for i in val:
-            fieldKey = list(i.values())[0]
-            if fieldKey.split(".")[0] == "spatial":
-                spatial_key_list.append(i)
-            elif fieldKey.split(".")[0] == "temporal":
-                temporal_key_list.append(i)
-            elif fieldKey.split(".")[0] == "sources":
-                source_key_list.append(i)
-            elif fieldKey.split(".")[0] == "licenses":
-                license_key_list.append(i)
-
-            elif (
-                fieldKey.split(".")[0] == "name"
-                or fieldKey.split(".")[0] == "title"
-                or fieldKey.split(".")[0] == "id"
-                or fieldKey.split(".")[0] == "description"
-                or fieldKey.split(".")[0] == "language"
-                or fieldKey.split(".")[0] == "subject"
-                or fieldKey.split(".")[0] == "keywords"
-                or fieldKey.split(".")[0] == "publicationDate"
-                or fieldKey.split(".")[0] == "context"
-            ):
-                gen_key_list.append(i)
-
-        meta = {
-            "general": gen_key_list,
-            "spatial": spatial_key_list,
-            "temporal": temporal_key_list,
-            "source": source_key_list,
-            "license": license_key_list,
+        main_categories = {
+            "general": [],
+            "spatial": [],
+            "temporal": [],
+            "source": [],
+            "license": [],
+            "resource": [],
         }
 
-        return meta
+        for item in val:
+            field = item["field"]
+            top_key = field.split(".")[0]
+
+            if top_key in {
+                "name",
+                "title",
+                "id",
+                "description",
+                "language",
+                "subject",
+                "keywords",
+                "publicationDate",
+                "context",
+            }:
+                main_categories["general"].append(item)
+            elif top_key == "spatial":
+                main_categories["spatial"].append(item)
+            elif top_key == "temporal":
+                main_categories["temporal"].append(item)
+            elif top_key == "sources":
+                main_categories["source"].append(item)
+            elif top_key == "licenses":
+                main_categories["license"].append(item)
+            elif top_key == "resources":
+                main_categories["resource"].append(item)
+
+        def group_by_prefix(items):
+            result = {"flat": [], "grouped": defaultdict(list)}
+            for item in items:
+                if "." in item["field"]:
+                    prefix = item["field"].split(".")[0]
+                    result["grouped"][prefix].append(item)
+                else:
+                    result["flat"].append(item)
+            return result
+
+        grouped_meta = {}
+        for cat, items in main_categories.items():
+            grouped = group_by_prefix(items)
+            grouped_meta[cat] = {
+                "flat": grouped["flat"],
+                "grouped": dict(grouped["grouped"]),
+            }
+
+        return grouped_meta
 
     def get_all_field_descriptions(self, json_schema, prefix=""):
         """
