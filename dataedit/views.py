@@ -1980,9 +1980,11 @@ class PeerReviewView(LoginRequiredMixin, View):
         """
         Groups metadata fields by top-level categories and subgroups within them.
         If a field has no dot (.), it's considered flat and shown directly.
-        If a field has a dot, it's grouped
-         by the prefix and displayed without the prefix.
+        If a field has a dot and includes an index (e.g., sources.0.name),
+        then all fields with the same index are grouped together and shown in order.
         """
+        import re
+
         val = self.parse_keys(oemetadata)
 
         main_categories = {
@@ -2021,29 +2023,42 @@ class PeerReviewView(LoginRequiredMixin, View):
             elif top_key == "resources":
                 main_categories["resource"].append(item)
 
-        def group_by_prefix(items):
+        def extract_index(prefix):
+            match = re.match(r".*?\.([0-9]+)", prefix)
+            return int(match.group(1)) if match else -1
+
+        def group_by_index(items):
             result = {"flat": [], "grouped": defaultdict(list)}
             for item in items:
-                if "." in item["field"]:
-                    parts = item["field"].split(".")
-                    prefix = parts[0]
-                    short_field = ".".join(parts[1:])  # remove the prefix for display
+                field = item["field"]
+                parts = field.split(".")
+
+                if len(parts) >= 3 and parts[1].isdigit():
+                    index_prefix = f"{parts[0]}.{parts[1]}"  # e.g., sources.0
+                    display_field = ".".join(parts[2:])
                     item = item.copy()
-                    item[
-                        "display_field"
-                    ] = short_field  # use this in template instead of full field
-                    result["grouped"][prefix].append(item)
+                    item["display_field"] = display_field
+                    result["grouped"][index_prefix].append(item)
+                elif "." in field:
+                    group = field.split(".")[0]
+                    item = item.copy()
+                    item["display_field"] = ".".join(field.split(".")[1:])
+                    result["grouped"][group].append(item)
                 else:
-                    item["display_field"] = item["field"]
+                    item["display_field"] = field
                     result["flat"].append(item)
-            return result
+
+            sorted_grouped = dict(
+                sorted(result["grouped"].items(), key=lambda kv: extract_index(kv[0]))
+            )
+            return {"flat": result["flat"], "grouped": sorted_grouped}
 
         grouped_meta = {}
         for cat, items in main_categories.items():
-            grouped = group_by_prefix(items)
+            grouped = group_by_index(items)
             grouped_meta[cat] = {
                 "flat": grouped["flat"],
-                "grouped": dict(grouped["grouped"]),
+                "grouped": grouped["grouped"],
             }
 
         return grouped_meta
