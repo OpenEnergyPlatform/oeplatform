@@ -1980,7 +1980,8 @@ class PeerReviewView(LoginRequiredMixin, View):
         """
         Groups metadata fields by top-level categories and subgroups within them.
         If a field has no dot (.), it's considered flat and shown directly.
-        If a field has a dot, it's grouped into sub-sections by prefix.
+        If a field has a dot, it's grouped
+         by the prefix and displayed without the prefix.
         """
         val = self.parse_keys(oemetadata)
 
@@ -2024,9 +2025,16 @@ class PeerReviewView(LoginRequiredMixin, View):
             result = {"flat": [], "grouped": defaultdict(list)}
             for item in items:
                 if "." in item["field"]:
-                    prefix = item["field"].split(".")[0]
+                    parts = item["field"].split(".")
+                    prefix = parts[0]
+                    short_field = ".".join(parts[1:])  # remove the prefix for display
+                    item = item.copy()
+                    item[
+                        "display_field"
+                    ] = short_field  # use this in template instead of full field
                     result["grouped"][prefix].append(item)
                 else:
+                    item["display_field"] = item["field"]
                     result["flat"].append(item)
             return result
 
