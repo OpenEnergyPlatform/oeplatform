@@ -35,6 +35,10 @@ You can set these environment variablesto override defaults:
 - `OEP_DEV_PORT_FUSEKI`: public port to fuseki server, defaults to 3030
 - `OEP_DEV_PORT_VITE`: public vite JavaScript server port, defaults to 5173
 
+#### Setup ontop service
+
+The ontop service requires a special database driver which must be [downloaded manually first](./setuo-ontop.md).
+
 #### Docker compose command
 
 !!! Info
