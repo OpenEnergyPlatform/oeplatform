@@ -4,6 +4,7 @@
 {% block after-head %}
     <!-- Latest compiled and minified CSS -->
     <link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet" ><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+    <link href="{% static 'database/css/database-enhancements.css' %}" rel="stylesheet">
 {% endblock after-head %}
 
 {% block main-top-bar-filter %}
@@ -88,6 +89,82 @@
     </div>
 </div>
 
+<!-- Enhanced Info Section -->
+<div class="database-info-section mb-4">
+    <div class="info-banner" id="infoBanner">
+        <div class="info-banner__content">
+            <div class="info-banner__header">
+                <div class="info-banner__title">
+                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                    Database Overview & Guidelines
+                </div>
+                <button class="info-banner__toggle" onclick="toggleInfoSection()" id="infoToggle">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" id="toggleIcon">
+                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="info-banner__body" id="infoContent" style="display: none;">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="info-section__subtitle">About the Open Energy Platform Database</h5>
+                        <p class="info-section__text">
+                            The Open Energy Platform provides a comprehensive collection of energy-related datasets organized into thematic topics. 
+                            Each topic contains multiple datasets with structured data that supports energy system analysis, modeling, and research.
+
+                            We build on linked data technologies and semantic web standards to ensure data is discoverable, reusable, and interoperable.
+                            Datasets are enriched with metadata, including tags, descriptions, and quality indicators to facilitate easy navigation and understanding.
+                            We build applications and tools to help users explore, visualize, and analyze the data effectively.
+                        </p>
+                        <h6 class="info-section__subtitle">How to Navigate:</h6>
+                        <ul class="info-section__list">
+                            <li><strong>Browse Topics:</strong> Click on any topic card below to explore available datasets</li>
+                            <li><strong>Use Filters:</strong> Utilize the search and tag filters above to find specific data</li>
+                            <li><strong>Draft Data:</strong> The model_draft section contains user-contributed data awaiting review</li>
+                            <li><strong>Publish Data:</strong> Once the license of a dataset qualifies as open data you can publish your data into any topic suitable for the data</li>
+                            <li><strong>Scenario Data:</strong> The scenario section contains reviewed input or output data stemming from modelling work. These datasets can be linked in the scenario bundles section and they are used to enable quantitative comparisons across bundles.</li>
+                            <li><strong>Quality Indicators:</strong> Tags enhance data findability, source type, and review status</li>
+                        </ul>
+                    </div>
+                    {% if not schema %}
+                    <div class="col-md-4">
+                        <div class="info-section__stats">
+                            <h6 class="info-section__subtitle">Database Statistics</h6>
+                            <div class="stat-item">
+                                <span class="stat-number">{{ schemas|length }}</span>
+                                <span class="stat-label">Topics Available</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">{{ total_table_count|default:"None" }}</span>
+                                <span class="stat-label">Total Tables</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %} 
+                </div>
+                <div class="info-section__actions mt-3">
+                    <a href="{% url 'dataedit:wizard_create' %}" class="btn btn-success btn-sm">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                        Contribute Data
+                    </a>
+                    <a href="{{ EXTERNAL_URLS.tutorials_api_upload }}" class="btn btn-outline-secondary btn-sm me-2">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+                            <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z"/>
+                        </svg>
+                        API Access
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock main-top-bar-filter %}
 
 {% block after-body-bottom-js %}
@@ -127,6 +204,22 @@
 
     function redirectToLink(link) {
         window.location.href = link;
+    }
+
+    function toggleInfoSection() {
+    const content = document.getElementById('infoContent');
+    const toggle = document.getElementById('infoToggle');
+    const icon = document.getElementById('toggleIcon');
+    
+    if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggle.classList.add('info-banner__toggle--active');
+            icon.innerHTML = '<path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>';
+        } else {
+            content.style.display = 'none';
+            toggle.classList.remove('info-banner__toggle--active');
+            icon.innerHTML = '<path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>';
+        }
     }
 
 </script>
