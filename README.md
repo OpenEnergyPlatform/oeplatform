@@ -1,27 +1,27 @@
 <!--
-SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
-SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
-SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
-SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
 SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
-SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
-SPDX-FileCopyrightText: 2025 RL-INSTITUT\hendrik.huyskens <https://github.com/henhuy>
-SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
-SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c>
-SPDX-FileCopyrightText: 2025 Mirjam Stappel <https://github.com/stap-m>
-SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 RL-INSTITUT\hendrik.huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Mirjam Stappel <https://github.com/stap-m> © Fraunhofer IEE
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 
 SPDX-License-Identifier: CC0-1.0
 -->

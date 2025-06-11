@@ -1,6 +1,6 @@
-// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
-// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
-// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 //
 // SPDX-License-Identifier: MIT
 

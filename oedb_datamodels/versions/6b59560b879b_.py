@@ -1,5 +1,5 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 #
 # SPDX-License-Identifier: MIT
 

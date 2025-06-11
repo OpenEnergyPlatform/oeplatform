@@ -4,7 +4,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -12,7 +12,7 @@ Path = ".dockerignore"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -26,16 +26,16 @@ Copyright = [
 Path = ".eslintrc.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = ".bumpversion.cfg"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -44,17 +44,17 @@ Path = "mkdocs.yml"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Daryna Barabanova <https://github.com/Darynarli>",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = ".prettierignore"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 Christian Winger <https://github.com/wingechr>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -68,12 +68,12 @@ Copyright = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Alexis Michaltsis <https://github.com/4lm> © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2021 Adel Memariani <https://github.com/adelmemariani>",
-  "2021 Christian Winger <https://github.com/wingechr>",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -82,9 +82,9 @@ Path = "CITATION.cff"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -95,7 +95,7 @@ Copyright = [
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -109,17 +109,17 @@ Copyright = [
 Path = "environment.yml"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 Pierre Francois <https://github.com/Bachibouzouk>",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2022 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = ".pre-commit-config.yaml"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -128,7 +128,7 @@ Path = "docker/apache2.conf"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
@@ -137,7 +137,7 @@ Path = "docker/Dockerfile"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Eike Broda <https://github.com/ebroda>",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
@@ -147,7 +147,7 @@ Path = "docker/docker-compose.yaml"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
@@ -185,7 +185,7 @@ Path = "oeo_ext/templates/oeo_ext/partials/unit_element.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -306,8 +306,8 @@ Path = "docs/css/extra.css"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Christian Winger <https://github.com/wingechr>",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -315,10 +315,10 @@ Path = "modelview/static/css/form-style.css"
 Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Lara Christmann <https://github.com/solar-c>",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -328,16 +328,16 @@ Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "modelview/static/css/custom_alert.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -348,12 +348,12 @@ Copyright = [
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Lara Christmann <https://github.com/solar-c>",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2021 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -370,11 +370,11 @@ Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
-  "2019 Lara Christmann <https://github.com/solar-c>",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -389,10 +389,10 @@ Path = "modelview/templates/modelview/detail_view.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -402,7 +402,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -414,8 +414,8 @@ Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -427,11 +427,11 @@ Copyright = [
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Lara Christmann <https://github.com/solar-c>",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2021 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -442,8 +442,8 @@ Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -453,9 +453,9 @@ Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -464,8 +464,8 @@ Path = "modelview/templates/modelview/form_element_factory.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -475,11 +475,11 @@ Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Lara Christmann <https://github.com/solar-c>",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2021 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -488,7 +488,7 @@ Path = "modelview/templates/modelview/error_snipet.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -496,8 +496,8 @@ Path = "modelview/templates/modelview/tag_selector.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -507,10 +507,10 @@ Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Lara Christmann <https://github.com/solar-c>",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -520,12 +520,12 @@ Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Lara Christmann <https://github.com/solar-c>",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2021 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -534,7 +534,7 @@ Path = "modelview/templates/modelview/FactSheets_schema.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -542,7 +542,7 @@ Path = "modelview/templates/modelview/widgets/dynamic_edit.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -557,7 +557,7 @@ Path = "modelview/templates/modelview/widgets/dynamic_array.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -566,8 +566,8 @@ Licenses = [ "MIT",]
 Copyright = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -576,7 +576,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -585,8 +585,8 @@ Licenses = [ "MIT",]
 Copyright = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -595,21 +595,21 @@ Licenses = [ "MIT",]
 Copyright = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2023 Daryna Barabanova <https://github.com/Darynarli>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "login/templates/login/user_settings.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -618,9 +618,9 @@ Licenses = [ "MIT",]
 Copyright = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Daryna Barabanova <https://github.com/Darynarli>",
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -629,20 +629,20 @@ Licenses = [ "MIT",]
 Copyright = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "login/templates/login/user_tables.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Daryna Barabanova <https://github.com/Darynarli>",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -650,7 +650,7 @@ Path = "login/templates/login/user_groups.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -660,8 +660,8 @@ Copyright = [
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -675,9 +675,9 @@ Copyright = [
 Path = "login/templates/login/user_nav.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -685,22 +685,22 @@ Copyright = [
 Path = "login/templates/login/user_review.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
-  "2025 Daryna Barabanova <https://github.com/Darynarli>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "login/templates/login/delete_account.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -750,7 +750,7 @@ Path = "login/templates/login/partials/groups.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -772,7 +772,7 @@ Path = "login/templates/registration/custom_password_reset_done.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -780,7 +780,7 @@ Path = "login/templates/registration/custom_password_reset_form.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -788,7 +788,7 @@ Path = "login/templates/registration/password_reset_email.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -798,8 +798,8 @@ Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -807,8 +807,8 @@ Path = "login/templates/registration/custom_password_reset_confirm.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -816,7 +816,7 @@ Path = "login/templates/registration/custom_password_reset_complete.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -824,7 +824,7 @@ Path = "login/templates/mails/base.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -832,7 +832,7 @@ Path = "login/templates/mails/verification_mail.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -877,7 +877,7 @@ Path = "base/static/OEP_logo_2_no_text.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -892,7 +892,7 @@ Path = "base/static/oeplogo.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -923,7 +923,7 @@ Copyright = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -933,7 +933,7 @@ Copyright = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -943,7 +943,7 @@ Copyright = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -953,7 +953,7 @@ Copyright = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -961,7 +961,7 @@ Path = "base/static/project_detail_pages_content/.PROJECT_TEMPLATE.jsonc"
 Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
@@ -972,7 +972,7 @@ Copyright = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -982,7 +982,7 @@ Copyright = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1038,7 +1038,7 @@ Copyright = [
 Path = "base/static/logos/funder/BMWK.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1220,7 +1220,7 @@ Copyright = [
 Path = "base/static/img/about/OpenEnergyFamily_GroupPhoto2.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2024 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2024 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1228,7 +1228,7 @@ Path = "base/static/img/welcome/about-community.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1236,7 +1236,7 @@ Path = "base/static/img/welcome/ontology.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1258,7 +1258,7 @@ Path = "base/static/img/welcome/beginners.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1329,7 +1329,7 @@ Path = "base/static/img/welcome/about-openscience.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1344,42 +1344,42 @@ Path = "base/static/img/welcome/about-process-modelling.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "base/static/img/badges/badge_iron.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "base/static/img/badges/badge_silver.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "base/static/img/badges/badge_bronze.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "base/static/img/badges/badge_platinum.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "base/static/img/badges/badge_gold.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1387,7 +1387,7 @@ Path = "base/static/css/jquery-ui.min.css"
 Licenses = [ "MIT",]
 Copyright = [
     "Copyright 2014 jQuery Foundation and other contributors",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1400,8 +1400,8 @@ Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1410,8 +1410,8 @@ Path = "base/static/css/filterform.css"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1420,10 +1420,10 @@ Licenses = [ "MIT",]
 Copyright = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju>",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1433,12 +1433,12 @@ Copyright = [
     "Copyright 2011-2022 The Bootstrap Authors",
     "Copyright 2011-2022 Twitter, Inc.",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Jonas Huber <https://github.com/jh-RLI>",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
@@ -1447,15 +1447,15 @@ Path = "base/static/css/bootstrap-select.min.css"
 Licenses = [ "MIT",]
 Copyright = [
     "Copyright 2012-2021 SnapAppointments, LLC",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "base/templates/base/base-full.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
@@ -1472,11 +1472,11 @@ Copyright = [
 Path = "base/templates/base/base-wide-react.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
@@ -1485,10 +1485,10 @@ Path = "base/templates/base/500.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Klara Reder <https://github.com/klarareder>",
+  "2019 Klara Reder <https://github.com/klarareder> © Fraunhofer IEE",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
@@ -1496,7 +1496,7 @@ Copyright = [
 Path = "base/templates/base/base-profile.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
@@ -1513,18 +1513,18 @@ Copyright = [
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
   "2017 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Dhruvin1412 <Dhruvin1412>",
+  "2019 Dhruvin1412 <Dhruvin1412> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2021 Christian Winger <https://github.com/wingechr>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2021 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
@@ -1533,10 +1533,10 @@ Copyright = [
 Path = "base/templates/base/privacy_policy.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1547,8 +1547,8 @@ Copyright = [
   "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Europa-Universität Flensburg (EUF)",
   "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
@@ -1558,8 +1558,8 @@ Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1567,7 +1567,7 @@ Path = "base/templates/base/base-sidebar.html"
 Licenses = [ "MIT",]
 Copyright = [
     "Copyright (c) 2011-2024 The Bootstrap Authors",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
@@ -1582,8 +1582,8 @@ Copyright = [
   "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
   "2018 Hannah Förster <https://github.com/han-f> © Öko-Institut e.V.",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
@@ -1596,8 +1596,8 @@ Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Lukas Emele <https://github.com/l-emele> © Öko-Institut e.V.",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
@@ -1607,8 +1607,8 @@ Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1622,10 +1622,10 @@ Copyright = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2022 Jonas Huber <https://github.com/jh-RLI>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2024 Santosch Mutyala <https://github.com/smutyala1at> © Uni Oldenburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
@@ -1649,17 +1649,17 @@ Copyright = [
   "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Europa-Universität Flensburg (EUF)",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Stephan Günther <https://github.com/gnn> © Otto-von-Guericke-Universität Magdeburg",
-  "2018 Klara Reder <https://github.com/klarareder>",
-  "2018 Christian Winger <https://github.com/wingechr>",
+  "2018 Klara Reder <https://github.com/klarareder> © Fraunhofer IEE",
+  "2018 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
-  "2020 Christian Hofmann <https://github.com/christian-rli>",
-  "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1667,25 +1667,25 @@ Copyright = [
 Path = "base/templates/base/404.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 Klara Reder <https://github.com/klarareder>",
+  "2019 Klara Reder <https://github.com/klarareder> © Fraunhofer IEE",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "factsheet/templates/factsheet/index.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Jonas Huber <https://github.com/jh-RLI>",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1699,47 +1699,47 @@ Copyright = [
 Path = "factsheet/frontend/package-lock.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "factsheet/frontend/.gitignore"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "factsheet/frontend/package.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "factsheet/frontend/public/manifest.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "factsheet/frontend/public/index.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "factsheet/frontend/src/app.less"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1747,7 +1747,7 @@ Copyright = [
 Path = "factsheet/frontend/src/index.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1755,13 +1755,13 @@ Copyright = [
 Path = "factsheet/frontend/src/conf.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Adel Memariani <https://github.com/adelmemariani>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2024 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1769,7 +1769,7 @@ Copyright = [
 Path = "factsheet/frontend/src/data/countries.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1777,9 +1777,9 @@ Copyright = [
 Path = "factsheet/frontend/src/styles/App.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1787,7 +1787,7 @@ Copyright = [
 Path = "factsheet/frontend/src/styles/react-checkbox-tree.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1795,7 +1795,7 @@ Copyright = [
 Path = "factsheet/frontend/src/styles/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -1803,7 +1803,7 @@ Path = "ontology/templates/ontology/partial_ontology_sidebar_content.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1826,8 +1826,8 @@ Licenses = [ "MIT",]
 Copyright = [
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2021 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2021 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1836,13 +1836,13 @@ Path = "ontology/templates/ontology/about.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2020 Janna Hastings <https://github.com/jannahastings>",
-  "2020 Mirjam Stappel <https://github.com/stap-m>",
+  "2020 Janna Hastings <https://github.com/jannahastings> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Mirjam Stappel <https://github.com/stap-m> © Fraunhofer IEE",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2021 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1850,10 +1850,10 @@ Path = "ontology/templates/ontology/oeo.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2021 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1861,12 +1861,12 @@ Copyright = [
 Path = "ontology/templates/ontology/class.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -1915,27 +1915,27 @@ Copyright = [
 Path = "dataedit/static/metaedit/schema.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Christian Winger <https://github.com/wingechr>",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut",
+  "2024 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "dataedit/static/metaedit/metaedit.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "dataedit/static/peer_review/schema.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Stephan Uller <https://github.com/steull>",
-  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2022 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -1976,7 +1976,7 @@ Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2021 Christian Winger <https://github.com/wingechr>",
+  "2021 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -1991,15 +1991,15 @@ Path = "dataedit/static/dataedit/metadata.css"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/static/dataedit/jquery.dataTables.min.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -2008,28 +2008,28 @@ Licenses = [ "MIT",]
 Copyright = [
     "Copyright 2014-2018 Damien 'Mistic' Sorel (http://www.strangeplanet.fr)",
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/static/dataedit/leaflet.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/static/dataedit/images/marker-shadow.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/static/dataedit/images/marker-icon.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -2043,49 +2043,49 @@ Copyright = [
 Path = "dataedit/static/images/sort_asc.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/static/images/sort_asc_disabled.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/static/images/sort_desc_disabled.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/static/images/sort_both.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/static/images/sort_desc.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/static/wizard/wizard.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Christian Winger <https://github.com/wingechr>",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/static/wizard/.gitignore"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Christian Winger <https://github.com/wingechr>",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -2093,8 +2093,8 @@ Path = "dataedit/templates/messages.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
@@ -2107,8 +2107,8 @@ Copyright = [
   "2018 Lukas Emele <https://github.com/l-emele> © Öko-Institut e.V.",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2119,7 +2119,7 @@ Copyright = [
   "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -2128,20 +2128,20 @@ Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/templates/dataedit/wizard.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Daryna Barabanova <https://github.com/Darynarli>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2024 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -2151,13 +2151,13 @@ Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Jonas H <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2019 Dhruvin1412 <Dhruvin1412>",
-  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
+  "2019 Dhruvin1412 <Dhruvin1412> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -2166,33 +2166,33 @@ Licenses = [ "MIT",]
 Copyright = [
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "dataedit/templates/dataedit/opr_contributor.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Stephan Uller <https://github.com/steull>",
+  "2023 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Daryna Barabanova <https://github.com/Darynarli>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Jonas Huber <https://github.com/jh-RLI>",
-  "2023 Jonas Huber <https://github.com/jh-RLI>",
-  "2025 Daryna Barabanova <https://github.com/Darynarli>",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "dataedit/templates/dataedit/tablegraph_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -2201,8 +2201,8 @@ Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2210,17 +2210,17 @@ Copyright = [
 Path = "dataedit/templates/dataedit/opr_review.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Stephan Uller <https://github.com/steull>",
-  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2023 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Daryna Barabanova <https://github.com/Darynarli>",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Jonas Huber <https://github.com/jh-RLI>",
-  "2023 Jonas Huber <https://github.com/jh-RLI>",
-  "2025 Daryna Barabanova <https://github.com/Darynarli>",
-  "2025 Daryna Barabanova <https://github.com/Darynarli>",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -2230,8 +2230,8 @@ Copyright = [
   "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2244,7 +2244,7 @@ Copyright = [
   "2017 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
@@ -2253,14 +2253,14 @@ Copyright = [
 Path = "dataedit/templates/dataedit/base-sidebar.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "dataedit/templates/dataedit/base_fullwidth.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
@@ -2272,10 +2272,10 @@ Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2019 Pierre Francois <https://github.com/Bachibouzouk>",
-  "2020 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
@@ -2296,24 +2296,24 @@ Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2018 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
-  "2019 Pierre Francois <https://github.com/Bachibouzouk>",
   "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2020 Christian Winger <https://github.com/wingechr>",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2020 Hannah Förster <https://github.com/han-f> © Öko-Institut e.V.",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2020 Christian Winger <https://github.com/wingechr>",
-  "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju>",
-  "2022 Stephan Uller <https://github.com/steull>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Jonas Huber <https://github.com/jh-RLI>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Daryna Barabanova <https://github.com/Darynarli>",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
-  "2025 Daryna Barabanova <https://github.com/Darynarli>",
+  "2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -2322,7 +2322,7 @@ Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -2331,13 +2331,13 @@ Licenses = [ "MIT",]
 Copyright = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2020 Christian Winger <https://github.com/wingechr>",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Jonas Huber <https://github.com/jh-RLI>",
-  "2022 Stephan Uller <https://github.com/steull>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2347,8 +2347,8 @@ Licenses = [ "MIT",]
 Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2358,8 +2358,8 @@ Licenses = [ "MIT",]
 Copyright = [
   "2017 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -2381,7 +2381,7 @@ Path = "oedb_datamodels/README"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -2392,13 +2392,13 @@ Copyright = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 Pietro Zambelli <https://github.com/zarch>",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Pierre Francois <https://github.com/Bachibouzouk>",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2021 Adel Memariani <https://github.com/adelmemariani>",
-  "2021 Christian Hofmann <https://github.com/christian-rli>",
-  "2023 Christian Winger <https://github.com/wingechr>",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -2412,7 +2412,7 @@ Copyright = [
 Path = "oeo_viewer/.gitignore"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2420,19 +2420,19 @@ Copyright = [
 Path = "oeo_viewer/data/oeo_viewer_json_data.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "oeo_viewer/templates/index.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Adel Memariani <https://github.com/adelmemariani>",
-  "2021 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2440,24 +2440,24 @@ Copyright = [
 Path = "oeo_viewer/client/.babelrc"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/package-lock.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Christian Winger <https://github.com/wingechr>", 
-  "2022 Jonas Hiber <https://github.com/jh-RLI>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.", 
+  "2022 Jonas Hiber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   ]
 
 [[File]]
 Path = "oeo_viewer/client/package.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2465,38 +2465,38 @@ Copyright = [
 Path = "oeo_viewer/client/source-code/index.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/source-code/statics/oep.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/source-code/statics/network.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/source-code/statics/oeo_info.json"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/source-code/statics/d3-dependencies.csv"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2504,49 +2504,49 @@ Copyright = [
 Path = "oeo_viewer/client/source-code/styles/index.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Adel Memariani <https://github.com/adelmemariani>",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/oep.fa81489f.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/flags.c284a657.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/icons.c653e3a9.woff2"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/brand-icons.a1ff5e2a.woff2"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/outline-icons.73dd3248.woff2"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/outline-icons.1bbd56ed.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2554,64 +2554,64 @@ Copyright = [
 Path = "oeo_viewer/client/dist/brand-icons.eb08bf9d.ttf"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/brand-icons.e4ffb4d8.eot"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/outline-icons.585fe6ab.ttf"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/outline-icons.00440017.woff"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/icons.f15da7ef.ttf"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/brand-icons.85906eb5.woff"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/network.2770f24c.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/scripts.bcf3243b.js.map"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/icons.69098388.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2619,29 +2619,29 @@ Copyright = [
 Path = "oeo_viewer/client/dist/scripts.bcf3243b.css.map"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/outline-icons.5d6254f9.eot"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/index.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/brand-icons.ea4bcc5e.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2649,14 +2649,14 @@ Copyright = [
 Path = "oeo_viewer/client/dist/icons.6f55393b.woff"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/icons.1164acc1.eot"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -2665,15 +2665,15 @@ Licenses = [ "MIT",]
 Copyright = [
     "Copyright 2014 Contributors",
     "Copyright 2013 Contributors",
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "oeo_viewer/client/dist/bezier.c0025d7c.cjs"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Adel Memariani <https://github.com/adelmemariani>",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -2681,11 +2681,11 @@ Path = "theming/_variables.scss"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[File]]
@@ -2693,7 +2693,7 @@ Path = "theming/.dockerignore"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -2701,18 +2701,18 @@ Path = "theming/oepstrap.scss"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "theming/.gitignore"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
@@ -2720,7 +2720,7 @@ Path = "theming/Dockerfile"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr>",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
@@ -2728,25 +2728,25 @@ Copyright = [
 Path = "theming/scss/layouts/_ontology.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "theming/scss/layouts/_database.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "theming/scss/layouts/_profile.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
@@ -2755,9 +2755,9 @@ Copyright = [
 Path = "theming/scss/layouts/_review.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Jonas Huber <https://github.com/jh-RLI>",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2765,18 +2765,18 @@ Copyright = [
 Path = "theming/scss/layouts/_main.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "theming/scss/layouts/_topics.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2784,28 +2784,28 @@ Copyright = [
 Path = "theming/scss/base/_index.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "theming/scss/base/_custom_variables.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "theming/scss/base/_mixins.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2813,18 +2813,18 @@ Copyright = [
 Path = "theming/scss/components/_tabs.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "theming/scss/components/_paginations.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2832,7 +2832,7 @@ Copyright = [
 Path = "theming/scss/components/_buttons.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2840,8 +2840,8 @@ Copyright = [
 Path = "theming/scss/components/_headers.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2849,16 +2849,16 @@ Copyright = [
 Path = "theming/scss/components/_alerts.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[File]]
 Path = "theming/scss/components/_sidebars.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
-  "2024 Christian Winger <https://github.com/wingechr>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
@@ -2866,22 +2866,22 @@ Copyright = [
 Path = "theming/scss/components/_empty_states.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "theming/scss/components/_tables.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2022 Bryan Lancien <https://github.com/bmlancien>",
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[File]]
 Path = "theming/scss/components/_cards.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2889,7 +2889,7 @@ Copyright = [
 Path = "theming/scss/components/_tags.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2897,7 +2897,7 @@ Copyright = [
 Path = "theming/scss/components/_controls.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2023 Bryan Lancien <https://github.com/bmlancien>",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
@@ -2905,7 +2905,7 @@ Copyright = [
 Path = "theming/scss/components/_collapses.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2024 Bryan Lancien <https://github.com/bmlancien>",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
