@@ -118,77 +118,94 @@ var MetaEdit = function(config) {
   }
 
   function fixData(json) {
-    // Ensure the metaMetadata object exists
-    if (!json.metaMetadata) {
-      json.metaMetadata = {};
-    }
+    json = json || {};
 
-    // Only update metadataVersion if the OEM metadata field exists
-    // and the metaMetadata.metadataVersion is currently empty
-    if (json && !json.metaMetadata.metadataVersion) {
-      // Add or update the metadataVersion property
-      // Variations: OEMetadata-2.0.X OEP-1.6.0
+    // Required top-level fields
+    json["@context"] = json["@context"] || "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json";
+
+    json.metaMetadata = json.metaMetadata || {};
+    if (!json.metaMetadata.metadataVersion) {
       json.metaMetadata.metadataVersion = "OEMetadata-2.0.4";
     }
-    // MUST have ID
-    // json["id"] = config["url_table_id"];
 
-    // MUST have one resource with name == id == tablename
-    json["resources"] = json["resources"] || [{}];
-    json["@context"] = "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json";
-    json["resources"][0]["name"] = json["resources"][0]["name"] || config.table;
-    json["resources"][0]["path"] = json["resources"][0]["path"] || config.url_table_id;
+    // Ensure one resource
+    json.resources = json.resources || [{}];
+    const resource = json.resources[0];
+    resource.name = resource.name || config.table;
+    resource.path = resource.path || config.url_table_id;
 
-    // auto set / correct columns
-    json["resources"][0]["schema"] = json["resources"][0]["schema"] || {};
-    json["resources"][0]["schema"]["fields"] = json["resources"][0]["schema"]["fields"] || [];
-    var fieldsByName = {};
-    json["resources"][0]["schema"]["fields"].map(function(field) {
-      fieldsByName[field.name] = field;
-    });
-    
-    json["resources"][0]["schema"]["fields"] = [];
-    config.columns.map(function(column) {
-      var field = fieldsByName[column.name] || {name: column.name};
-      field.type = field.type || column.data_type;
-      json["resources"][0]["schema"]["fields"].push(field);
+    // Ensure schema object exists
+    resource.schema = resource.schema || {};
+    resource.schema.fields = resource.schema.fields || [];
+
+    // Rebuild fields with merging and renaming
+    const existingFields = resource.schema.fields;
+    const fieldMap = new Map();
+
+    // Add existing fields to a map for quick lookup
+    existingFields.forEach(field => {
+      if (field.name) fieldMap.set(field.name, field);
     });
 
+    // Prepare updated fields array
+    const updatedFields = config.columns.map(col => {
+      const existing = fieldMap.get(col.name) || {};
 
-    // add empty value for all missing so they show up in editor
-    // these will be removed at the end
-    function fixRecursive(schemaProps, elemObject, path) {
-      // is object ?
-      if (typeof elemObject != 'object' || $.isArray(elemObject)) {
-        return;
-      }
-      // for each key: fill missing (recursively)
-      Object.keys(schemaProps).map(function(key) {
-        var prop = schemaProps[key];
-        // console.log(path + '.' + key, prop.type)
-        if (prop.type == 'object') {
-          elemObject[key] = elemObject[key] || {};
-          fixRecursive(prop.properties, elemObject[key], path + '.' + key);
-        } else if (prop.type == 'array') {
-          elemObject[key] = elemObject[key] || [];
-          // if non empty array
-          if ($.isArray(elemObject[key]) && elemObject[key].length > 0 && elemObject[key] === undefined ) {
-            elemObject[key].map(function(elem, i) {
-              fixRecursive(prop.items.properties, elem, path + '.' + key + '.' + i);
-            });
-          }
+      return {
+        name: col.name,
+        type: col.data_type || existing.type || null,
+        description: existing.description ?? null,
+        unit: existing.unit ?? null,
+        nullable: existing.nullable !== undefined ? existing.nullable : true,
+      };
+    });
 
-         
-        } else { // value
-          if (elemObject[key] === undefined) {
-            // console.log('adding empty value: ' + path + '.' + key)
-            elemObject[key] = null;
+    // Set updated field list (removes stale fields)
+    resource.schema.fields = updatedFields;
+
+    // Fill missing top-level fields recursively based on schema
+    function fillMissingFromSchema(schemaProps, target) {
+      Object.entries(schemaProps).forEach(([key, prop]) => {
+        if (target[key] === undefined) {
+          if (prop.type === 'object') {
+            target[key] = {};
+            if (prop.properties) {
+              fillMissingFromSchema(prop.properties, target[key]);
+            }
+          } else if (prop.type === 'array') {
+            target[key] = [];
+            if (prop.items?.type === 'object' && prop.items.properties) {
+              const obj = {};
+              fillMissingFromSchema(prop.items.properties, obj);
+              target[key].push(obj);
+            }
+          } else {
+            target[key] = null;
           }
+        } else if (prop.type === 'object' && typeof target[key] === 'object' && prop.properties) {
+          fillMissingFromSchema(prop.properties, target[key]);
+        } else if (prop.type === 'array' && Array.isArray(target[key]) && prop.items?.properties) {
+          target[key].forEach(item => {
+            if (typeof item === 'object') {
+              fillMissingFromSchema(prop.items.properties, item);
+            }
+          });
         }
       });
     }
 
-    fixRecursive(config.schema.properties, json, 'root');
+    fillMissingFromSchema(config.schema.properties, json);
+    // Fix boundingBox in each resource if needed
+    if (Array.isArray(json.resources)) {
+      json.resources.forEach(resource => {
+        const bboxPath = resource?.spatial?.extent?.boundingBox;
+        if (!Array.isArray(bboxPath) || bboxPath.length !== 4 || bboxPath.some(val => typeof val !== 'number')) {
+          if (!resource.spatial) resource.spatial = {};
+          if (!resource.spatial.extent) resource.spatial.extent = {};
+          resource.spatial.extent.boundingBox = [0, 0, 0, 0]; // fallback valid default
+        }
+      });
+    }
 
     return json;
   }
@@ -200,37 +217,6 @@ var MetaEdit = function(config) {
       x = x.statusText;
     }
     return x;
-  }
-
-  function convertDescriptionIntoPopover() {
-    function convert(descr, label) {
-      var description = $(descr).text(); // get description text
-      if (description && label) {
-        label
-            .attr('data-bs-content', description)
-            .attr('title', label.text())
-            .attr('data-bs-toggle', 'popover')
-            .popover({
-              placement: 'top',
-              trigger: 'hover',
-              template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>',
-            });
-        descr.addClass('d-none');
-      }
-    }
-
-    // headings
-    config.form.find('.card-title').parent().find('>p').not('.d-none').each(function(i, e) {
-      convert($(e), $(e).parent().find('>.card-title>label'));
-    });
-
-    // inputs
-    config.form.find('.form-group>.form-text').not('.d-none').each(function(_i, e) {
-      convert($(e), $(e).parent().find('>label'));
-    });
-
-    // remove button groups
-    config.form.find('.btn-group').removeClass('btn-group');
   }
 
   // Function to recursively convert empty strings to null

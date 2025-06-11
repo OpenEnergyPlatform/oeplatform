@@ -1,7 +1,7 @@
 from rdflib.namespace import OWL, RDF, XSD, Namespace
 
 # TODO- Alot of hardcoded URL, transfer to settings or other config
-OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
+OEO = Namespace("https://openenergyplatform.org/ontology/oeo/")
 OEOX = Namespace("http://openenergy-platform.org/ontology/oeox/")
 OBO = Namespace("http://purl.obolibrary.org/obo/")
 DC = Namespace("http://purl.org/dc/terms/")

@@ -10,20 +10,32 @@ class OekgQuery:
 
     def serialize_table_iri(self, table_iri: str):
         """
-        The OEKG stores the full iri to link its resources.
-        Due to structural changes it also stores the iri:urn instead.
-        the serialization will function als a validation preprocessing
-        step.
+        The OEKG stores the full iri to link its resources in the OEP.
+        External IRI can occur in the OEKG but they are ignored here.
 
-        IRI Like 'dataedit/view/scenario/abbb_emob' or '
-        https://openenergyplatform.org/dataedit/view/scenario/abbb_emob'
-        becomes comparable even with more variation options.
+        Note:
+            Due to structural changes it also stores the iri:urn instead.
+            the serialization will function als a validation preprocessing
+            step.
+
+        Supported IRI formats:
+            IRI Like 'dataedit/view/scenario/abbb_emob' or '
+            https://openenergyplatform.org/dataedit/view/scenario/abbb_emob'
+            becomes comparable even with more variation options.
+
+
         """
 
         # Trim down variations of table iri´s down to harmonized part.
         id_from_url = table_iri.split("view/")
+        # check if the table_iri contains expected part
+        if len(id_from_url) == 2:
+            result = id_from_url[1]
+        else:
+            # return empty string to keep the return value consistent
+            result = ""
 
-        return id_from_url[1]
+        return result
 
     def get_related_scenarios_where_table_is_input_dataset(self, table_iri):
         """
@@ -45,18 +57,20 @@ class OekgQuery:
         # Find all scenario bundles
         for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
             # find all scenarios in any bundle
-            for s1, p1, o1 in oekg.triples((s, namespaces.OEKG["has_scenario"], None)):
-                # # Find scenarios where the given table is the input dataset
+            for s1, p1, o1 in self.oekg.triples(
+                (s, namespaces.OEKG["has_scenario"], None)
+            ):
+                # Find scenarios where the given table is the input dataset
                 for s2, p2, o1_input_ds_uid in self.oekg.triples(
                     (o1, namespaces.OEO.RO_0002233, None)
                 ):
                     if o1_input_ds_uid is not None:
-                        for s3, p3, o3_input_ds_iri in oekg.triples(
+                        for s3, p3, o3_input_ds_iri in self.oekg.triples(
                             (o1_input_ds_uid, namespaces.OEO["has_iri"], None)
                         ):
                             if (
                                 self.serialize_table_iri(str(o3_input_ds_iri))
-                                in table_iri
+                                == table_iri
                             ):
                                 related_scenarios.add(s2)
 
@@ -97,7 +111,7 @@ class OekgQuery:
                         ):
                             if (
                                 self.serialize_table_iri(str(o3_output_ds_iri))
-                                in table_iri
+                                == table_iri
                             ):
                                 related_scenarios.add(s2)
 
@@ -136,7 +150,6 @@ class OekgQuery:
             for i in related_scenarios_input:
                 for s1, p1, o1 in oekg.triples((s, namespaces.OEKG["has_scenario"], i)):
                     if s1:
-                        print("s1", s1)
                         scenario_bundles_input.add((s1, s))
 
         return scenario_bundles_input
@@ -166,7 +179,6 @@ class OekgQuery:
             for i in related_scenarios_output:
                 for s1, p1, o1 in oekg.triples((s, namespaces.OEKG["has_scenario"], i)):
                     if s1:
-                        print("s1", s1)
                         scenario_bundles_output.add((s1, s))
 
         return scenario_bundles_output
@@ -182,11 +194,6 @@ class OekgQuery:
         Note: Currently the OEKG does not contain a relation between uid
         and bundle iri. That is why we have to strip it from the url.
         """
-
-        # for s, p, o in oekg.triples((bundle, namespaces.OEKG["scenario_uuid"], None)):
-        #     if o:
-        #         print("o", o)
-        #         return o
 
         uid = bundle.split("/")[-1]
         return uid

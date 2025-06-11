@@ -1,0 +1,8 @@
+{% if messages %}
+  {% for message in messages %}
+    <!-- Alert out of main block, e.g. for successful log out info -->
+    <div class="login__alert login__alert--success login__alert--100">
+        <p>{{message}}</p>
+    </div>
+  {% endfor %}
+{% endif %}

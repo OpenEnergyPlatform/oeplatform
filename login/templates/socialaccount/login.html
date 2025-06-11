@@ -1,0 +1,47 @@
+
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load allauth %}
+{% load account socialaccount %}
+
+{% block head_title %}
+    {% trans "" %}
+{% endblock head_title %}
+{% block content %}
+    <div class="login">
+        <div class="login__wrap">
+
+            <!-- Logo -->
+            <div class="login__logo">
+                <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo">
+            </div>
+            {% if process == "connect" %}
+                <!-- Heading -->
+                <h1 class="login__heading">
+                    {% blocktrans with provider.name as provider %}Connect {{ provider }}{% endblocktrans %}
+                </h1>
+                {% element p %}
+                    {% blocktrans with provider.name as provider %}You are about to connect a new third-party account from {{ provider }}.{% endblocktrans %}
+                {% endelement %}
+            {% else %}
+                <!-- Heading -->
+                <h1 class="login__heading">
+                    {% blocktrans with provider.name as provider %}Sign In Via {{ provider }}{% endblocktrans %}
+                </h1>
+                {% element p %}
+                    {% blocktrans with provider.name as provider %}You are about to sign in using a third-party account from {{ provider }}.{% endblocktrans %}
+                {% endelement %}
+            {% endif %}
+            {% element form method="post" no_visible_fields=True %}
+                {% slot actions %}
+                    {% csrf_token %}
+                    <!-- Submit -->
+                    <button type="submit" class="login__button">
+                        {% trans "Continue" %}
+                    </button>
+                {% endslot %}
+            {% endelement %}
+        </div>
+    </div>
+{% endblock content %}
