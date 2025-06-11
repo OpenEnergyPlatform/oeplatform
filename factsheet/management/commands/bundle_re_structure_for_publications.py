@@ -2,34 +2,18 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
 import subprocess as sp
-from rdflib import Graph, RDFS, URIRef
-import json
-from rdflib.namespace import XSD, Namespace
-from collections import defaultdict
+import uuid
 
 from django.core.management.base import BaseCommand
-from django.conf import settings
-from django.apps import apps
-
-import json
-import os
-import sys
-import uuid
-from pathlib import Path
-
-from rdflib import RDF, XSD, BNode, ConjunctiveGraph, Graph, Literal, URIRef
+from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
-from rdflib.namespace import XSD, Namespace
+from rdflib.namespace import Namespace
 from rdflib.plugins.stores import sparqlstore
-from rest_framework import status
+from SPARQLWrapper import SPARQLWrapper
 
-from SPARQLWrapper import JSON, SPARQLWrapper
-
-
-#query_endpoint = "http://oekb.iks.cs.ovgu.de:3030/oekg_main/query"
-#update_endpoint = "http://oekb.iks.cs.ovgu.de:3030/oekg_main/update"
+# query_endpoint = "http://oekb.iks.cs.ovgu.de:3030/oekg_main/query"
+# update_endpoint = "http://oekb.iks.cs.ovgu.de:3030/oekg_main/update"
 
 query_endpoint = "http://localhost:3030/ds/query"
 update_endpoint = "http://localhost:3030/ds/update"
@@ -41,7 +25,7 @@ store.open((query_endpoint, update_endpoint))
 oekg = Graph(store, identifier=default)
 
 
-OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
+OEO = Namespace("https://openenergyplatform.org/ontology/oeo/")
 OBO = Namespace("http://purl.obolibrary.org/obo/")
 DC = Namespace("http://purl.org/dc/terms/")
 RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
@@ -80,17 +64,24 @@ class Command(BaseCommand):
 
                 publication_uuid = str(uuid.uuid4())
                 publications_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/publication/" + publication_uuid
-                            )
+                    "http://openenergy-platform.org/ontology/oekg/publication/"
+                    + publication_uuid
+                )
 
-                oekg.add((publications_URI, OEKG["publication_uuid"], Literal(publication_uuid)))
+                oekg.add(
+                    (
+                        publications_URI,
+                        OEKG["publication_uuid"],
+                        Literal(publication_uuid),
+                    )
+                )
 
                 for s, p, o in oekg.triples((bundle_URI, OEKG["report_title"], None)):
-                    oekg.add(
-                        (publications_URI, RDFS.label, o)
-                        )
+                    oekg.add((publications_URI, RDFS.label, o))
 
-                for s, p, o in oekg.triples((bundle_URI, OEKG["date_of_publication"], None)):
+                for s, p, o in oekg.triples(
+                    (bundle_URI, OEKG["date_of_publication"], None)
+                ):
                     oekg.add(
                         (
                             publications_URI,
@@ -99,7 +90,9 @@ class Command(BaseCommand):
                         )
                     )
 
-                for s, p, o in oekg.triples((bundle_URI, OEKG["place_of_publication"], None)):
+                for s, p, o in oekg.triples(
+                    (bundle_URI, OEKG["place_of_publication"], None)
+                ):
                     oekg.add(
                         (
                             publications_URI,
@@ -125,6 +118,14 @@ class Command(BaseCommand):
 
                 oekg.add((bundle_URI, OEKG["has_publication"], publications_URI))
 
-                print("The bundle with id {id} has been updated to handle multiple publications!".format(id = uid))
+                print(
+                    "The bundle with id {id} has been updated to handle multiple publications!".format(  # noqa:E501
+                        id=uid
+                    )
+                )
             else:
-                print("The bundle with id {id} did not have any publication!".format(id = uid))
+                print(
+                    "The bundle with id {id} did not have any publication!".format(
+                        id=uid
+                    )
+                )

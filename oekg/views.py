@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_POST
 
-from oekg.utils import execute_sparql_query
+from oekg.utils import execute_filter_sparql_query, execute_sparql_query
 from oeplatform.settings import DOCUMENTATION_LINKS
 
 
@@ -65,3 +65,30 @@ def sparql_metadata(request):
             "supported_formats": supported_formats,
         }
     )
+
+
+# @login_required
+def filter_oekg_by_scenario_bundles_attributes(request):
+    """
+    This function takes filter objects provided by the user and utilises
+    them to construct a SPARQL query.
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+        criteria (str): An object that contains institutions, authors,
+        funding sources, start date of the publications, end date of publications
+        study descriptors, and a range for scenario years. All of these fields
+        are utilised to construct a SPARQL query for execution on the OEKG.
+
+    """
+    request_body = json.loads(request.body)
+
+    criteria = request_body.get("criteria", {})
+    results = execute_filter_sparql_query(criteria)
+
+    response = JsonResponse(
+        results.get("results", [])["bindings"],
+        safe=False,
+        content_type="application/json",
+    )
+    return response

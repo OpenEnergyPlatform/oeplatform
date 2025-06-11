@@ -6,20 +6,21 @@
 from __future__ import with_statement
 
 import os
-import sys
-from logging.config import fileConfig
 
-import django
-from alembic import context
-from alembic.config import Config
-
-from api.connection import _get_engine, get_connection_string
-from base.structures import metadata as target_metadata
-
-sys.path.append(".")
+# sys.path.append(".")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "oeplatform.settings")
+
+import django  # noqa
+
 django.setup()
 
+from logging.config import fileConfig  # noqa
+
+from alembic import context  # noqa
+from alembic.config import Config  # noqa
+
+from api.connection import _get_engine, get_connection_string  # noqa
+from base.structures import metadata as target_metadata  # noqa
 
 alembic_cfg = Config()
 db_url = get_connection_string()
@@ -32,7 +33,7 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name)
+fileConfig(config.config_file_name)  # noqa
 
 # add your model's MetaData object here
 # for 'autogenerate' support

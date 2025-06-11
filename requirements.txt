@@ -26,6 +26,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 Django==5.1.4
+django-allauth[socialaccount]==65.2.0
 matplotlib==3.8.3
 urllib3==1.26.19
 # scipy==1.12.0 # big package, only used when attemping to get the github activity graph -> not implemented ATM
@@ -57,3 +58,4 @@ oemetadata==2.0.4
 django-compressor==4.5.1
 django-cors-headers==4.3.1
 owlready2==0.45
+django_vite==3.1.0

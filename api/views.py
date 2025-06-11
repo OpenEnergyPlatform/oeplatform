@@ -59,7 +59,8 @@ from rest_framework.views import APIView
 import api.parser
 import login.models as login_models
 from api import actions, parser, sessions
-from api.actions import assert_valid_identifier_name
+
+# from api.actions import assert_valid_identifier_name
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
@@ -69,7 +70,16 @@ from api.serializers import (
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
+from api.services.embargo import (
+    EmbargoValidationError,
+    apply_embargo,
+    parse_embargo_payload,
+)
+from api.services.permissions import assign_table_holder
+from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs
+from api.validators.column import validate_column_names
+from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
@@ -457,50 +467,88 @@ class Table(APIView):
     @api_exception
     def put(self, request, schema, table):
         """
-        Every request to unsave http methods have to contain a "csrftoken".
-        This token is used to deny cross site reference forwarding.
-        In every request the header had to contain "X-CSRFToken"
-        with the actual csrftoken.
-        The token can be requested at / and will be returned as cookie.
+        Creates a new table: physical table first, then metadata row.
+        Applies embargo and permissions, and sets metadata if provided.
 
-        :param request:
-        :return:
+        REST-API endpoint used to create a new table in the database.
+        The table is created with the columns and constraints specified in the
+        request body. The request body must contain a JSON object with the following
+        keys: 'columns', 'constraints' and 'metadata'.
+        The payload must be a  groped in a 'query' key.
+
+        For authentication, the request must contain a valid token in the
+        Authentication header.
+
+        Args:
+            request: The request object
+            schema: The schema in which the table should be created
+            table: The name of the table to be created
+
+        Returns:
+            JsonResponse: A JSON response with the status code 201 CREATED
+
         """
+        # 1) Basic schema checks
         if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
-        if actions.has_table(dict(schema=schema, table=table), {}):
+        if actions.has_table({"schema": schema, "table": table}, {}):
             raise APIError("Table already exists", 409)
-        json_data = request.data.get("query", {})
-        embargo_data = request.data.get("embargo") or json_data.get("embargo", {})
-        constraint_definitions = []
-        column_definitions = []
 
-        for constraint_definition in json_data.get("constraints", []):
-            constraint_definition.update(
-                {"action": "ADD", "c_table": table, "c_schema": schema}
-            )
-            constraint_definitions.append(constraint_definition)
+        # 2) Validate identifiers
+        assert_valid_identifier_name(schema)
+        assert_valid_identifier_name(table)
 
-        if "columns" not in json_data:
-            raise actions.APIError("Table contains no columns")
-        for column_definition in json_data["columns"]:
-            column_definition.update({"c_table": table, "c_schema": schema})
-            column_definitions.append(column_definition)
-        metadata = json_data.get("metadata")
+        # 3) Parse and validate payload
+        payload = request.data.get("query", {})
+        columns = payload.get("columns")
+        if not columns:
+            raise APIError("Table contains no columns")
+        for col in columns:
+            col.update({"c_schema": schema, "c_table": table})
+        validate_column_names(columns)
 
-        self.__create_table(
-            request,
-            schema,
-            table,
-            column_definitions,
-            constraint_definitions,
-            metadata=metadata,
-            embargo_data=embargo_data,
+        constraints = payload.get("constraints", [])
+        for cons in constraints:
+            cons.update({"action": "ADD", "c_schema": schema, "c_table": table})
+
+        embargo_data = request.data.get("embargo") or payload.get("embargo", {})
+        try:
+            embargo_required = parse_embargo_payload(embargo_data)
+        except EmbargoValidationError as e:
+            raise APIError(str(e))
+
+        # 4) Create the table (physical → metadata) atomically
+        orchestrator = TableCreationOrchestrator()
+        table_obj = orchestrator.create_table(
+            schema_name=schema,
+            table_name=table,
+            column_defs=columns,
+            constraint_defs=constraints,
         )
+
+        # 5) Post-creation hooks
+        if embargo_required:
+            apply_embargo(table_obj, embargo_data)
+
+        assign_table_holder(request.user, schema, table)
+
+        metadata = payload.get("metadata")
+        if metadata:
+            ctx = {
+                "connection_id": actions.get_or_403(request.data, "connection_id"),
+                "cursor_id": actions.get_or_403(request.data, "cursor_id"),
+            }
+            cursor = sessions.load_cursor_from_context(ctx)
+            actions.set_table_metadata(
+                table=table,
+                schema=schema,
+                metadata=metadata,
+                cursor=cursor,
+            )
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
@@ -1616,6 +1664,7 @@ def oevkg_search(request):
 
 
 # Energyframework, Energymodel
+@method_decorator(never_cache, name="dispatch")
 class EnergyframeworkFactsheetListAPIView(generics.ListAPIView):
     """
     Used for the scenario bundles react app to be able to select a existing
@@ -1626,6 +1675,7 @@ class EnergyframeworkFactsheetListAPIView(generics.ListAPIView):
     serializer_class = EnergyframeworkSerializer
 
 
+@method_decorator(never_cache, name="dispatch")
 class EnergymodelFactsheetListAPIView(generics.ListAPIView):
     """
     Used for the scenario bundles react app to be able to select a existing
@@ -1636,6 +1686,7 @@ class EnergymodelFactsheetListAPIView(generics.ListAPIView):
     serializer_class = EnergymodelSerializer
 
 
+@method_decorator(never_cache, name="dispatch")
 class ScenarioDataTablesListAPIView(generics.ListAPIView):
     """
     Used for the scenario bundles react app to be able to populate

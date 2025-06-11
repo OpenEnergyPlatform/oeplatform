@@ -118,5 +118,30 @@
             trigger: 'focus'
             })
         })
+        function hideTabsFilter(tabIdsToRemove) {
+          const observer = new MutationObserver(() => {
+            document.querySelectorAll('.nav-item a.nav-link').forEach(link => {
+              const href = link.getAttribute('href');
+              const label = link.querySelector('span')?.textContent.trim();
+
+              if (tabIdsToRemove.includes(href?.replace('#', '')) || tabIdsToRemove.includes(label)) {
+                const item = link.closest('.nav-item');
+                if (item) item.remove();
+              }
+            });
+          });
+
+          // Observe the form for any new child elements
+          const target = document.querySelector('#metaedit-form');
+          if (target) {
+            observer.observe(target, {
+              childList: true,
+              subtree: true,
+            });
+          }
+        }
+
+        // Set up tab filtering
+        hideTabsFilter(['Meta Metadata', 'Embargo Period', 'Dialect', 'Review']);
     </script>
 {% endblock after-body-bottom-js %}

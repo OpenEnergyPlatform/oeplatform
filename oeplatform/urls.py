@@ -44,6 +44,7 @@ urlpatterns = [
     re_path(r"^api/", include("api.urls")),
     path("", include("base.urls")),
     re_path(r"^user/", include("login.urls")),
+    path("accounts/", include("allauth.urls")),
     re_path(r"^oeo_ext/", include("oeo_ext.urls")),
     re_path(r"^factsheets/", include("modelview.urls")),
     re_path(r"^dataedit/", include("dataedit.urls")),

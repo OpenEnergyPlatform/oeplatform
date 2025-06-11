@@ -2,6 +2,7 @@
 {% load django_bootstrap5 %}
 {% load fontawesome_5 %}
 {% load compress %}
+{% load django_vite %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -23,6 +24,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"><!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}?md5=d4e024ac45daad057d0191a8f6266156">
     {% endcompress %}
+    {% vite_hmr_client %}
+
     {% block after-head %}{% endblock after-head %}
 </head>
 
@@ -36,6 +39,7 @@
 {% block main %}
 <main class="main">
     {% block site-header %}
+        {% include 'account/messages/messages.html' %}
     {% endblock site-header %}
         <div class="content">
             <div class="content__container">

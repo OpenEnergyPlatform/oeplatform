@@ -287,7 +287,7 @@ function load_view(schema, table, csrftoken, current_view) {
   };
   $.when(
       $.ajax({
-        url: '/api/v0/schema/' + schema + '/tables/' + table + '/columns',
+        url: '/api/v0/schema/' + schema + '/tables/' + table + '/columns/',
       }), $.ajax({
         type: 'POST',
         url: '/api/v0/advanced/search',
