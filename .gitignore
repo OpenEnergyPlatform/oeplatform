@@ -91,6 +91,7 @@ apache*
 # Docker
 .node_modules_stamp
 .vite
+docker/serviceConfigs/ontop/postgresql.jar
 
 # Deployment files
 docker/oeplatform_data
