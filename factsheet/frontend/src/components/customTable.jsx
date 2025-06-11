@@ -274,7 +274,7 @@ function EnhancedTableToolbar(props) {
               onClick={handleReset}>Reset</Button>
             <Tooltip title="Compare">
 
-              {numSelected > 1 ? <Link to={`scenario-bundles/compare/${[...selected].join('#')}`} onClick={() => this.forceUpdate} style={{ color: 'white' }}>
+              {numSelected > 1 ? <Link to={`scenario-bundles/compare/${[...selected].join('&')}`} onClick={() => this.forceUpdate} style={{ color: 'white' }}>
                 <Button size="small"
                   style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }}
                   variant="contained"
@@ -645,14 +645,14 @@ export default function CustomTable(props) {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-  const visibleRows = React.useMemo(
-    () =>
-      stableSort(rows, getComparator(order, orderBy)).slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage,
-      ),
-    [order, orderBy, page, rowsPerPage],
-  );
+  const visibleRows = React.useMemo(() => {
+    const finalRows = filteredFactsheets.length === 0 ? factsheets : filteredFactsheets;
+    return stableSort(finalRows, getComparator(order, orderBy)).slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage,
+    );
+  }, [filteredFactsheets, factsheets, order, orderBy, page, rowsPerPage]);
+
 
 
   const scenarioAspects = [
@@ -665,13 +665,13 @@ export default function CustomTable(props) {
   ];
 
   const renderRows = (rs) => {
-    const rowsToRender = filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
+    // const rowsToRender = filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
     return <TableBody >
-      {rowsToRender.map((row, index) => {
+      {rs.map((row, index) => {
         const isItemSelected = isSelected(row.study_name);
         const labelId = `enhanced-table-checkbox-${index}`;
         return (
-          <React.Fragment key={row.study_name}>
+          <React.Fragment key={row.uid}>
             <StyledTableRow
               hover
               role="checkbox"

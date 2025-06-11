@@ -55,8 +55,10 @@ const ComparisonBoardMain = (props) => {
 
   const { params } = props;
   const [scenarios, setScenarios] = useState([]);
-  const scenarios_uid = params.split('#');
+  const scenarios_uid = params;
+  // console.log(scenarios_uid);
   const scenarios_uid_json = JSON.stringify(scenarios_uid);
+  // console.log(scenarios_uid_json);
   const [selectedCriteria, setselectedCriteria] = useState(['Study descriptors', 'Scenario types', 'Study name']);
   const [alignment, setAlignment] = React.useState('Qualitative');
   const [sparqOutput, setSparqlOutput] = useState([]);
@@ -198,11 +200,12 @@ const ComparisonBoardMain = (props) => {
     });
   }, []);
 
-  const handleChangeView = (
-    newAlignment,
-  ) => {
-    newAlignment !== null && setAlignment(newAlignment);
+  const handleChangeView = (event, newAlignment) => {
+    if (newAlignment !== null) {
+      setAlignment(newAlignment);
+    }
   };
+
 
   // 'http://oevkg:8080/sparql'
 
@@ -259,7 +262,7 @@ const ComparisonBoardMain = (props) => {
       const categorieIDs = [];
       for (let key in category_disctionary) {
           if (selectedCategories.includes(category_disctionary[key])) {
-            categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
+            categorieIDs.push('https://openenergyplatform.org/ontology/oeo/' + key);
           }
       }
 
@@ -837,7 +840,7 @@ const sendQuery = async (index) => {
         const categorieIDs = [];
         for (let key in category_disctionary) {
             if (selectedCategories.includes(category_disctionary[key])) {
-              categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
+              categorieIDs.push('https://openenergyplatform.org/ontology/oeo/' + key);
             }
         }
 
@@ -1171,29 +1174,34 @@ const sendQuery = async (index) => {
         </Toolbar>
         {/* <ComparisonControl /> */}
 
-        {alignment == "Qualitative" &&
+        {alignment === "Qualitative" && scenarios.length > 0 && (
         <Grid item xs={12}>
           <OptionBox>
             <h2>Criteria</h2>
             <FormGroup>
-              <div >
-                {
-                  Criteria.map((item) => <FormControlLabel control={<Checkbox size="medium" color="primary" />} checked={selectedCriteria.includes(item)} onChange={handleCriteria} label={item} name={item} />)
-                }
+              <div>
+                {Criteria.map((item) => (
+                  <FormControlLabel
+                    key={item}
+                    control={<Checkbox size="medium" color="primary" />}
+                    checked={selectedCriteria.includes(item)}
+                    onChange={handleCriteria}
+                    label={item}
+                    name={item}
+                  />
+                ))}
               </div>
             </FormGroup>
-            {/* <MultipleSelectChip
-              sx={{ mt: 2, width: "100%" }}
-              options={['Scenario 1', 'Scenario 2', 'Scenario 3']}
-              label="Scenarios to be compared"
-              disabled={true}
-            /> */}
           </OptionBox>
-          <ComparisonBoardItems elements={scenarios} c_aspects={selectedCriteria} />
+            <ComparisonBoardItems
+              key={`qualitative-${scenarios.map(s => s.data.uid).join(',')}`}
+              elements={scenarios}
+              c_aspects={selectedCriteria}
+            />
         </Grid>
-        }
-        {alignment == "Quantitative" &&
+      )}
 
+      {alignment === "Quantitative" &&
         <Grid container spacing={2}>
           <Grid item lg={6} sx={{ borderLeft: variables.border.light, px: 2 }}>
 
