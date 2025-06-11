@@ -15,7 +15,7 @@ def scenario_in_bundle(bundle_uuid: UUID, scenario_uuid: UUID) -> bool:
     Check if a scenario is part of a scenario bundle in the KG.
     """
     sparql_query = f"""
-    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
 
     ASK {{
         <http://openenergy-platform.org/ontology/oekg/{bundle_uuid}> ?p
@@ -38,7 +38,7 @@ def dataset_exists(scenario_uuid: UUID, dataset_url: str) -> bool:
     """
 
     sparql_query = f"""
-    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
     ASK {{
@@ -77,7 +77,7 @@ def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig):
     # oeo:has_id "{oekgDatasetConfig.dataset_id}" ;
     # The above seems to be deprecated in the OEKG
     sparql_query = f"""
-    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
     INSERT DATA {{
@@ -113,7 +113,7 @@ def remove_datasets_from_scenario(scenario_uuid, dataset_name, dataset_type):
     Function to remove datasets from a scenario bundle in Jena Fuseki.
     """
     sparql_query = f"""
-    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     DELETE DATA {{
         GRAPH <http://openenergy-platform.org/ontology/oekg/{scenario_uuid}> {{
             oeo:{dataset_name} a oeo:{dataset_type}Dataset .
