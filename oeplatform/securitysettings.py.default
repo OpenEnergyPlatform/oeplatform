@@ -96,7 +96,7 @@ if RDF_DATABASES:
 # We use it to implement quantitative scenario comparison
 USE_ONTOP = False
 if USE_ONTOP:
-    ONTOP_SPARQL_ENDPOINT_URL = "http://localhost:8080/sparql"
+    ONTOP_SPARQL_ENDPOINT_URL = "http://ontop:8080/sparql
 
 # The LOEP provides lookup (autocomplete search) functionality implemented
 # using Apache Lucene.
