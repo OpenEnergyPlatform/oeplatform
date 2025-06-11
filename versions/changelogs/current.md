@@ -11,11 +11,11 @@ SPDX-FileCopyrightText: 2025 Jonas H <https://github.com/jh-RLI>
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju>
-SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee>
-SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee>
-SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
-SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
-SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk>
 SPDX-FileCopyrightText: 2025 Santosch Mutyala <https://github.com/smutyala1at>
 SPDX-FileCopyrightText: 2025 Tu Phan Ngoc <RL-INSTITUT\tuphan.ngoc@rli-nb-65.rl-institut.local>

@@ -2,7 +2,7 @@
 Path = ".gitmodules"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2023 Christian Winger <https://github.com/wingechr>",
 ]
@@ -11,7 +11,7 @@ Copyright = [
 Path = ".dockerignore"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Johann Wagner <https://github.com/johannwagner>",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -19,7 +19,7 @@ Copyright = [
 Path = "LICENSE"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -62,12 +62,12 @@ Copyright = [
 Path = ".gitignore"
 Licenses = [ "MIT",]
 Copyright = [
-  "2015 Martin Glauer <https://github.com/MGlauer>",
-  "2015 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2015 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2015 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Alexis Michaltsis <https://github.com/4lm> © Reiner Lemoine Institut",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2021 Adel Memariani <https://github.com/adelmemariani>",
   "2021 Christian Winger <https://github.com/wingechr>",
   "2022 Adel Memariani <https://github.com/adelmemariani>",
@@ -75,7 +75,6 @@ Copyright = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2023 Bryan Lancien <https://github.com/bmlancien>",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2023 Jonas Huber <https://github.com/jh-RLI>",
 ]
 
 [[File]]
@@ -93,8 +92,8 @@ Copyright = [
 Path = "tox.ini"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 Martin Glauer <https://github.com/MGlauer>",
-  "2021 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2023 Christian Winger <https://github.com/wingechr>",
 ]
@@ -103,7 +102,7 @@ Copyright = [
 Path = "alembic.ini"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -128,7 +127,7 @@ Copyright = [
 Path = "docker/apache2.conf"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Johann Wagner <https://github.com/johannwagner>",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
@@ -137,7 +136,7 @@ Copyright = [
 Path = "docker/Dockerfile"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Johann Wagner <https://github.com/johannwagner>",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Eike Broda <https://github.com/ebroda>",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -147,7 +146,7 @@ Copyright = [
 Path = "docker/docker-compose.yaml"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Johann Wagner <https://github.com/johannwagner>",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
@@ -315,9 +314,9 @@ Copyright = [
 Path = "modelview/static/css/form-style.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Lara Christmann <https://github.com/solar-c>",
-  "2021 Johann Wagner <https://github.com/johannwagner>",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Adel Memariani <https://github.com/adelmemariani>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -326,9 +325,9 @@ Copyright = [
 Path = "modelview/static/css/mv-style.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Adel Memariani <https://github.com/adelmemariani>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -345,12 +344,12 @@ Copyright = [
 Path = "modelview/templates/modelview/editframework.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Lara Christmann <https://github.com/solar-c>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2021 Adel Memariani <https://github.com/adelmemariani>",
   "2022 Christian Winger <https://github.com/wingechr>",
@@ -362,18 +361,18 @@ Copyright = [
 Path = "modelview/templates/modelview/editmodel_snippet_depend.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "modelview/templates/modelview/editmodel_snippet.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
   "2019 Lara Christmann <https://github.com/solar-c>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
-  "2020 Martin Glauer <https://github.com/MGlauer>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -389,7 +388,7 @@ Copyright = [
 Path = "modelview/templates/modelview/detail_view.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Adel Memariani <https://github.com/adelmemariani>",
   "2022 Adel Memariani <https://github.com/adelmemariani>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
@@ -401,8 +400,8 @@ Copyright = [
 Path = "modelview/templates/modelview/array_snippet.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -410,11 +409,11 @@ Copyright = [
 Path = "modelview/templates/modelview/modellist.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -424,12 +423,12 @@ Copyright = [
 Path = "modelview/templates/modelview/editmodel.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Lara Christmann <https://github.com/solar-c>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2021 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
@@ -440,9 +439,9 @@ Copyright = [
 Path = "modelview/templates/modelview/base.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -451,8 +450,8 @@ Copyright = [
 Path = "modelview/templates/modelview/overview.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
@@ -464,7 +463,7 @@ Copyright = [
 Path = "modelview/templates/modelview/form_element_factory.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Martin Glauer <https://github.com/MGlauer>",
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -473,11 +472,11 @@ Copyright = [
 Path = "modelview/templates/modelview/model.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Lara Christmann <https://github.com/solar-c>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2021 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
@@ -488,7 +487,7 @@ Copyright = [
 Path = "modelview/templates/modelview/error_snipet.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Johann Wagner <https://github.com/johannwagner>",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -496,7 +495,7 @@ Copyright = [
 Path = "modelview/templates/modelview/tag_selector.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -505,11 +504,11 @@ Copyright = [
 Path = "modelview/templates/modelview/model_snippet.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Lara Christmann <https://github.com/solar-c>",
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -518,11 +517,11 @@ Copyright = [
 Path = "modelview/templates/modelview/framework.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Lara Christmann <https://github.com/solar-c>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2021 Adel Memariani <https://github.com/adelmemariani>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
@@ -534,7 +533,7 @@ Copyright = [
 Path = "modelview/templates/modelview/FactSheets_schema.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -542,7 +541,7 @@ Copyright = [
 Path = "modelview/templates/modelview/widgets/dynamic_edit.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Martin Glauer <https://github.com/MGlauer>",
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -550,14 +549,14 @@ Copyright = [
 Path = "modelview/templates/modelview/widgets/multiwidget.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Martin Glauer <https://github.com/MGlauer>",
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "modelview/templates/modelview/widgets/dynamic_array.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Martin Glauer <https://github.com/MGlauer>",
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
 ]
 
@@ -565,8 +564,8 @@ Copyright = [
 Path = "login/templates/login/generic_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -575,8 +574,8 @@ Copyright = [
 Path = "login/templates/login/list_memberships.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -584,8 +583,8 @@ Copyright = [
 Path = "login/templates/login/detach.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -594,8 +593,8 @@ Copyright = [
 Path = "login/templates/login/oepuser_edit_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2023 Daryna Barabanova <https://github.com/Darynarli>",
@@ -617,8 +616,8 @@ Copyright = [
 Path = "login/templates/login/oepuser_create_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2023 Daryna Barabanova <https://github.com/Darynarli>",
@@ -628,8 +627,8 @@ Copyright = [
 Path = "login/templates/login/activate.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -659,8 +658,8 @@ Path = "login/templates/login/admin_group.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Bryan Lancien <https://github.com/bmlancien>",
 ]
@@ -772,7 +771,7 @@ Copyright = [
 Path = "login/templates/registration/custom_password_reset_done.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Martin Glauer <https://github.com/MGlauer>",
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -780,7 +779,7 @@ Copyright = [
 Path = "login/templates/registration/custom_password_reset_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Martin Glauer <https://github.com/MGlauer>",
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
 ]
 
@@ -788,7 +787,7 @@ Copyright = [
 Path = "login/templates/registration/password_reset_email.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 Martin Glauer <https://github.com/MGlauer>",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -796,9 +795,9 @@ Copyright = [
 Path = "login/templates/registration/login.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2018 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2024 Bryan Lancien <https://github.com/bmlancien>",
 ]
@@ -807,7 +806,7 @@ Copyright = [
 Path = "login/templates/registration/custom_password_reset_confirm.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Martin Glauer <https://github.com/MGlauer>",
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -816,7 +815,7 @@ Copyright = [
 Path = "login/templates/registration/custom_password_reset_complete.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2021 Martin Glauer <https://github.com/MGlauer>",
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -824,7 +823,7 @@ Copyright = [
 Path = "login/templates/mails/base.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 Martin Glauer <https://github.com/MGlauer>",
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -832,7 +831,7 @@ Copyright = [
 Path = "login/templates/mails/verification_mail.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2018 Martin Glauer <https://github.com/MGlauer>",
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -869,7 +868,7 @@ Copyright = [
 Path = "base/static/favicon.ico"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
@@ -877,7 +876,7 @@ Copyright = [
 Path = "base/static/OEP_logo_2_no_text.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -892,7 +891,7 @@ Copyright = [
 Path = "base/static/oeplogo.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -900,7 +899,7 @@ Copyright = [
 Path = "base/static/open_ego_logo_breit.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -914,7 +913,7 @@ Copyright = [
 Path = "base/static/OEP_logo_2.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -1228,7 +1227,7 @@ Copyright = [
 Path = "base/static/img/welcome/about-community.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -1236,7 +1235,7 @@ Copyright = [
 Path = "base/static/img/welcome/ontology.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -1244,21 +1243,21 @@ Copyright = [
 Path = "base/static/img/welcome/videos.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "base/static/img/welcome/documentation.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "base/static/img/welcome/beginners.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -1266,14 +1265,14 @@ Copyright = [
 Path = "base/static/img/welcome/bundles.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "base/static/img/welcome/api.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -1287,7 +1286,7 @@ Copyright = [
 Path = "base/static/img/welcome/database.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -1308,7 +1307,7 @@ Copyright = [
 Path = "base/static/img/welcome/factsheets.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -1329,7 +1328,7 @@ Copyright = [
 Path = "base/static/img/welcome/about-openscience.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -1337,14 +1336,14 @@ Copyright = [
 Path = "base/static/img/welcome/concept.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "base/static/img/welcome/about-process-modelling.svg"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -1395,12 +1394,12 @@ Copyright = [
 Path = "base/static/css/base-style.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 Till Isenhuth <https://github.com/thsstll>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1419,8 +1418,8 @@ Copyright = [
 Path = "base/static/css/index-style.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 Johann Wagner <https://github.com/johannwagner>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju>",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
@@ -1433,7 +1432,7 @@ Licenses = [ "MIT",]
 Copyright = [ 
     "Copyright 2011-2022 The Bootstrap Authors",
     "Copyright 2011-2022 Twitter, Inc.",
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2023 Bryan Lancien <https://github.com/bmlancien>",
@@ -1485,9 +1484,9 @@ Copyright = [
 Path = "base/templates/base/500.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Klara Reder <https://github.com/klarareder>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
@@ -1507,20 +1506,20 @@ Copyright = [
 Path = "base/templates/base/base.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 Till Isenhuth <https://github.com/thsstll>",
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
-  "2017 Johann Wagner <https://github.com/johannwagner>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Dhruvin1412 <Dhruvin1412>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
-  "2020 Martin Glauer <https://github.com/MGlauer>",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2021 Christian Winger <https://github.com/wingechr>",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1535,7 +1534,7 @@ Path = "base/templates/base/privacy_policy.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
-  "2020 Martin Glauer <https://github.com/MGlauer>",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -1544,10 +1543,10 @@ Copyright = [
 Path = "base/templates/base/terms_of_use.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Uni Flensburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Europa-Universität Flensburg (EUF)",
   "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Eike Broda <https://github.com/ebroda>",
@@ -1557,8 +1556,8 @@ Copyright = [
 Path = "base/templates/base/faq.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -1578,11 +1577,11 @@ Copyright = [
 Path = "base/templates/base/discussion.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Berit Müller <https://github.com/beritRLI> © Reiner Lemoine Institut",
   "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
-  "2018 Hannah Förster <https://github.com/han-f>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2018 Hannah Förster <https://github.com/han-f> © Öko-Institut e.V.",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Eike Broda <https://github.com/ebroda>",
@@ -1592,11 +1591,11 @@ Copyright = [
 Path = "base/templates/base/contact.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Uni Flensburg",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Lukas Emele <https://github.com/l-emele>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Europa-Universität Flensburg (EUF)",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Lukas Emele <https://github.com/l-emele> © Öko-Institut e.V.",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Eike Broda <https://github.com/ebroda>",
@@ -1616,11 +1615,11 @@ Copyright = [
 Path = "base/templates/base/about.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
   "2017 Berit Müller <https://github.com/beritRLI> © Reiner Lemoine Institut",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Jonas Huber <https://github.com/jh-RLI>",
@@ -1642,19 +1641,19 @@ Copyright = [
 Path = "base/templates/base/index.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 Till Isenhuth <https://github.com/thsstll>",
   "2016 Berit Müller <https://github.com/beritRLI> © Reiner Lemoine Institut",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
-  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Uni Flensburg",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Stephan Günther <https://github.com/gnn>",
+  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Europa-Universität Flensburg (EUF)",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Stephan Günther <https://github.com/gnn> © Otto-von-Guericke-Universität Magdeburg",
   "2018 Klara Reder <https://github.com/klarareder>",
   "2018 Christian Winger <https://github.com/wingechr>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
   "2020 Christian Hofmann <https://github.com/christian-rli>",
@@ -1669,8 +1668,8 @@ Path = "base/templates/base/404.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2019 Klara Reder <https://github.com/klarareder>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
-  "2019 Martin Glauer <https://github.com/MGlauer>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
@@ -1836,7 +1835,7 @@ Copyright = [
 Path = "ontology/templates/ontology/about.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Martin Glauer <https://github.com/MGlauer>",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Janna Hastings <https://github.com/jannahastings>",
   "2020 Mirjam Stappel <https://github.com/stap-m>",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1850,7 +1849,7 @@ Copyright = [
 Path = "ontology/templates/ontology/oeo.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Martin Glauer <https://github.com/MGlauer>",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2021 Adel Memariani <https://github.com/adelmemariani>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
@@ -1881,35 +1880,35 @@ Copyright = [
 Path = "dataedit/static/colorfield/jscolor/hv.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "dataedit/static/colorfield/jscolor/arrow.gif"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "dataedit/static/colorfield/jscolor/demo.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "dataedit/static/colorfield/jscolor/hs.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "dataedit/static/colorfield/jscolor/cross.gif"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
@@ -1967,16 +1966,16 @@ Copyright = [
 Path = "dataedit/static/dataedit/dataview.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "dataedit/static/dataedit/dataedit.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2021 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -1984,14 +1983,14 @@ Copyright = [
 Path = "dataedit/static/dataedit/api.png"
 Licenses = [ "CC-BY-4.0",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "dataedit/static/dataedit/metadata.css"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -2008,7 +2007,7 @@ Path = "dataedit/static/dataedit/query-builder.default.min.css"
 Licenses = [ "MIT",]
 Copyright = [
     "Copyright 2014-2018 Damien 'Mistic' Sorel (http://www.strangeplanet.fr)",
-  "2019 Martin Glauer <https://github.com/MGlauer>",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -2103,10 +2102,10 @@ Copyright = [
 Path = "dataedit/templates/dataedit/dataedit_tablelist.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2018 Lukas Emele <https://github.com/l-emele>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2018 Lukas Emele <https://github.com/l-emele> © Öko-Institut e.V.",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
@@ -2118,8 +2117,8 @@ Path = "dataedit/templates/dataedit/tag_editor.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2024 Bryan Lancien <https://github.com/bmlancien>",
 ]
 
@@ -2127,8 +2126,8 @@ Copyright = [
 Path = "dataedit/templates/dataedit/url_list_field.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -2149,12 +2148,12 @@ Copyright = [
 Path = "dataedit/templates/dataedit/dataedit_schemalist.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Jonas H <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2019 Dhruvin1412 <Dhruvin1412>",
   "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
@@ -2165,8 +2164,8 @@ Copyright = [
 Path = "dataedit/templates/dataedit/tablemap_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2019 Martin Glauer <https://github.com/MGlauer>",
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -2190,8 +2189,8 @@ Path = "dataedit/templates/dataedit/tablegraph_form.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
-  "2020 Martin Glauer <https://github.com/MGlauer>",
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -2200,8 +2199,8 @@ Copyright = [
 Path = "dataedit/templates/dataedit/table_permissions.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2229,8 +2228,8 @@ Path = "dataedit/templates/dataedit/tag_overview.html"
 Licenses = [ "MIT",]
 Copyright = [
   "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
-  "2019 Martin Glauer <https://github.com/MGlauer>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Bryan Lancien <https://github.com/bmlancien>",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2240,11 +2239,11 @@ Copyright = [
 Path = "dataedit/templates/dataedit/base.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
-  "2017 Johann Wagner <https://github.com/johannwagner>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Adel Memariani <https://github.com/adelmemariani>",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2270,8 +2269,8 @@ Copyright = [
 Path = "dataedit/templates/dataedit/meta_edit.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2019 Pierre Francois <https://github.com/Bachibouzouk>",
   "2020 Christian Winger <https://github.com/wingechr>",
@@ -2285,25 +2284,25 @@ Copyright = [
 Path = "dataedit/templates/dataedit/tagged_field.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "dataedit/templates/dataedit/dataview.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2018 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
   "2019 Pierre Francois <https://github.com/Bachibouzouk>",
   "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Christian Winger <https://github.com/wingechr>",
-  "2020 Hannah Förster <https://github.com/han-f>",
+  "2020 Hannah Förster <https://github.com/han-f> © Öko-Institut e.V.",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2020 Martin Glauer <https://github.com/MGlauer>",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Christian Winger <https://github.com/wingechr>",
   "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju>",
   "2022 Stephan Uller <https://github.com/steull>",
@@ -2321,8 +2320,8 @@ Copyright = [
 Path = "dataedit/templates/dataedit/tag_form.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2019 Martin Glauer <https://github.com/MGlauer>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -2330,10 +2329,10 @@ Copyright = [
 Path = "dataedit/templates/dataedit/filter.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2020 Christian Winger <https://github.com/wingechr>",
-  "2020 Martin Glauer <https://github.com/MGlauer>",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Jonas Huber <https://github.com/jh-RLI>",
   "2022 Stephan Uller <https://github.com/steull>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
@@ -2346,8 +2345,8 @@ Copyright = [
 Path = "dataedit/templates/dataedit/taggable_setting.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2016 Martin Glauer <https://github.com/MGlauer>",
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2357,8 +2356,8 @@ Copyright = [
 Path = "dataedit/templates/dataedit/admin.html"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Johann Wagner <https://github.com/johannwagner>",
-  "2019 Johann Wagner <https://github.com/johannwagner>",
+  "2017 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
@@ -2374,14 +2373,14 @@ Copyright = [
 Path = "oedb_datamodels/script.py.mako"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[File]]
 Path = "oedb_datamodels/README"
 Licenses = [ "MIT",]
 Copyright = [
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -2389,12 +2388,12 @@ Copyright = [
 Path = "oeplatform/securitysettings.py.default"
 Licenses = [ "MIT",]
 Copyright = [
-  "2015 Martin Glauer <https://github.com/MGlauer>",
-  "2016 Martin Glauer <https://github.com/MGlauer>",
+  "2015 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 Pietro Zambelli <https://github.com/zarch>",
-  "2017 Martin Glauer <https://github.com/MGlauer>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Pierre Francois <https://github.com/Bachibouzouk>",
-  "2021 Johann Wagner <https://github.com/johannwagner>",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2021 Adel Memariani <https://github.com/adelmemariani>",
   "2021 Christian Hofmann <https://github.com/christian-rli>",
   "2023 Christian Winger <https://github.com/wingechr>",
@@ -2681,7 +2680,7 @@ Copyright = [
 Path = "theming/_variables.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2023 Bryan Lancien <https://github.com/bmlancien>",
@@ -2693,7 +2692,7 @@ Copyright = [
 Path = "theming/.dockerignore"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
 ]
 
@@ -2701,7 +2700,7 @@ Copyright = [
 Path = "theming/oepstrap.scss"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2022 Bryan Lancien <https://github.com/bmlancien>",
   "2023 Bryan Lancien <https://github.com/bmlancien>",
@@ -2720,7 +2719,7 @@ Copyright = [
 Path = "theming/Dockerfile"
 Licenses = [ "MIT",]
 Copyright = [
-  "2020 Johann Wagner <https://github.com/johannwagner>",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr>",
   "2024 Eike Broda <https://github.com/ebroda>",
 ]

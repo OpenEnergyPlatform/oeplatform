@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli>
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 # SPDX-FileCopyrightText: 2025 Marco Finkendei <https://github.com/MFinkendei>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 # SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli>
 #
 # SPDX-License-Identifier: MIT

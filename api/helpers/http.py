@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
 # SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 #
 # SPDX-License-Identifier: MIT
 

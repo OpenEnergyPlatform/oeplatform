@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2014-2016 Damien "Mistic" Sorel (http://www.strangeplanet.fr)
 // SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien>
 // SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
-// SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer>
+// SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 //
 // SPDX-License-Identifier: MIT
 
