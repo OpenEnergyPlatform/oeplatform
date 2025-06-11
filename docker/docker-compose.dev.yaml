@@ -110,19 +110,21 @@ services:
     depends_on:
       - web
 
-  # ontop:
-  #   image: ontop/ontop-endpoint:latest
-  #   container_name: ontop
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #     ONTOP_MAPPING_FILE: "/opt/ontop/mapping.obda"
-  #     ONTOP_OWL_FILE: "/opt/ontop/ontology.owl"
-  #     ONTOP_PROPERTIES_FILE: "/opt/ontop/ontop.properties"
-  #   volumes:
-  #     - ./ontop:/opt/ontop  # Mount your .obda, .owl, and .properties files here
-  #   depends_on:
-  #     - postgres
+  ontop:
+    build:
+      context: .
+      dockerfile: Dockerfile.ontop
+    container_name: ontop
+    ports:
+      - "8080:8080"
+    environment:
+      ONTOP_MAPPING_FILE: "/opt/ontop-config/mapping.obda"
+      ONTOP_OWL_FILE: "/opt/ontop-config/ontology.owl"
+      ONTOP_PROPERTIES_FILE: "/opt/ontop-config/ontop.properties"
+    volumes:
+      - ./serviceConfigs/ontop:/opt/ontop-config
+    depends_on:
+      - postgres
 
   lookup:
     restart: unless-stopped
