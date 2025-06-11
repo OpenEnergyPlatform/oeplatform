@@ -16,6 +16,8 @@
 
 - Rework the navigation bar and promote each section and feature which can be linked individually as well as link to more external content which is close to the OEP. This change should help users to find specific features [(#2024)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2024)
 
+- Add descriptive element to the database section describing the contents of the section and adding quick links [#2029](https://github.com/OpenEnergyPlatform/oeplatform/pull/2029)
+
 ## Features
 
 - Add NFDI AAI based login system enabled by KIT´s RegApp for Single Sign on. This enables institutional and ORCID based social login additionally to the oeplatform internal login system [(#1896)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1896)
@@ -37,3 +39,5 @@
 ## Documentation updates
 
 - Add documentation on how to use docker for development [(#1988)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1988)
+
+- Add documentation on how to setup ontop-vkg service [](https://github.com/OpenEnergyPlatform/oeplatform/pull/)

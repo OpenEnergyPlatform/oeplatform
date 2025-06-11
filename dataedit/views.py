@@ -298,12 +298,16 @@ def listschemas(request):
         for row in response
     ]
 
+    # Count all tables
+    total_table_count = tables.aggregate(total=Count("name"))["total"]
+
     # sort by name
     schemas = sorted(schemas, key=lambda x: x[0])
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
         {
+            "total_table_count": total_table_count,
             "schemas": schemas,
             "query": searched_query_string,
             "tags": searched_tag_ids,
