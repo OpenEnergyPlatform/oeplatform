@@ -9,9 +9,10 @@ SPDX-PackageDownloadLocation = "https://github.com/OpenEnergyPlatform/oeplatform
 SPDX-PackageComment = "The code of this repository is licensed under the GNU Affero General Public License v3.0 or later License (AGPL-3.0-or-later)."
 
 
-[[File]]
+[[annotations]]
 path = ".gitmodules"
-Licenses = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -28,21 +29,24 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "LICENSE"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = ".eslintrc.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = ".bumpversion.cfg"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -52,7 +56,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "mkdocs.yml"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
@@ -62,7 +67,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = ".prettierignore"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -71,7 +77,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = ".gitignore"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2015 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2015 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -90,7 +97,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "CITATION.cff"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
   "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -101,7 +109,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "tox.ini"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -111,14 +120,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "alembic.ini"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "environment.yml"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -127,7 +138,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = ".pre-commit-config.yaml"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -136,7 +148,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "docker/apache2.conf"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -145,7 +158,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "docker/Dockerfile"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -155,7 +169,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "docker/docker-compose.yaml"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -165,35 +180,40 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "oeo_ext/oeo_extended_store/test/data/expected_composedUnit.owl"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "oeo_ext/templates/oeo_ext/partials/oeo-ext-plugin-ui.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "oeo_ext/templates/oeo_ext/partials/success.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "oeo_ext/templates/oeo_ext/partials/unit_element.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -202,119 +222,136 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "docs/img/OEP-Datasets-System-2023-06-15-1708.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/img/draft-infrastructure-oep-2023-10-24-1338.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/oekg-api/oekg.yaml"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/oauth2-redirect.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle-core.js.map"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/swagger-ui.js.map"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/swagger-ui.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle.js.map"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/favicon-32x32.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/swagger-ui.css.map"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/swagger-ui-standalone-preset.js.map"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/index.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/index.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/swagger-ui-bundle.js.map"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/dist/favicon-16x16.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/oeplatform-code/web-api/oedb-rest-api/schema.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "docs/css/extra.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -323,7 +360,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/static/css/form-style.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
@@ -334,7 +372,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/static/css/mv-style.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -345,7 +384,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/static/css/custom_alert.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -353,7 +393,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/editframework.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
@@ -370,14 +411,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/editmodel_snippet_depend.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "modelview/templates/modelview/editmodel_snippet.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
@@ -390,14 +433,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/error_template.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "modelview/templates/modelview/detail_view.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
@@ -409,7 +454,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/array_snippet.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -418,7 +464,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/modellist.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -432,7 +479,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/editmodel.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
@@ -448,7 +496,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/base.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -459,7 +508,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/overview.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -472,7 +522,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/form_element_factory.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -481,7 +532,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/model.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
@@ -496,7 +548,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/error_snipet.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -504,7 +557,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/tag_selector.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -513,7 +567,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/model_snippet.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
@@ -526,7 +581,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/framework.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
@@ -542,7 +598,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/FactSheets_schema.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -550,7 +607,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/widgets/dynamic_edit.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -558,14 +616,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "modelview/templates/modelview/widgets/multiwidget.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "modelview/templates/modelview/widgets/dynamic_array.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -573,7 +633,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/generic_form.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -583,7 +644,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/list_memberships.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -592,7 +654,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/detach.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -602,7 +665,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/oepuser_edit_form.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -614,7 +678,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/user_settings.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -625,7 +690,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/oepuser_create_form.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -636,7 +702,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/activate.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -646,7 +713,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/user_tables.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -658,7 +726,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/user_groups.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -666,7 +735,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/admin_group.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -677,14 +747,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/sidebar_user.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "login/templates/login/user_nav.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -694,7 +766,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/user_review.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -708,7 +781,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/delete_account.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -716,49 +790,56 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/modals/table_publish.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "login/templates/login/partials/group_component_tables.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "login/templates/login/partials/group_component_form_edit.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "login/templates/login/partials/user_partial_tables.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "login/templates/login/partials/group_component_invite_user.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "login/templates/login/partials/badge_icon.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "login/templates/login/partials/groups.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -766,21 +847,24 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/login/partials/group_component_membership.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "login/templates/login/partials/group_management.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "login/templates/registration/custom_password_reset_done.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -788,7 +872,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/registration/custom_password_reset_form.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -796,7 +881,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/registration/password_reset_email.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -804,7 +890,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/registration/login.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -815,7 +902,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/registration/custom_password_reset_confirm.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -824,7 +912,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/registration/custom_password_reset_complete.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -832,7 +921,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/mails/base.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -840,7 +930,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "login/templates/mails/verification_mail.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -848,21 +939,24 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oekg/static/sparql_ui/vendor/yasgui-4.2.28/js/yasgui.min.js.map"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "oekg/static/sparql_ui/vendor/yasgui-4.2.28/css/yasgui.min.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "oekg/templates/oekg/main.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -870,14 +964,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/favicon.ico"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
@@ -885,7 +981,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/OEP_logo_2_no_text.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -893,14 +990,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/oeplogo.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -908,28 +1007,32 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/open_ego_logo_breit.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/OEP_logo_2.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "base/static/project_detail_pages_content/szenarien_db.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
@@ -939,7 +1042,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/project_detail_pages_content/sirop.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
@@ -949,7 +1053,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/project_detail_pages_content/lod_geoss.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
@@ -959,7 +1064,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/project_detail_pages_content/open_fred.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
@@ -969,7 +1075,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/project_detail_pages_content/.PROJECT_TEMPLATE.jsonc"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -978,7 +1085,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/project_detail_pages_content/open_modex.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
@@ -988,7 +1096,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/project_detail_pages_content/open_ego.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
@@ -998,245 +1107,280 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/logos/project/open_MODEX_Header.jpg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/project/open_FRED_Header.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/project/SzenarienDB_Header.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/project/LOD-GEOSS_Header.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/project/open_ego_logo.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/project/SIROP_logo.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/project/open_eGo_Header.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/funder/BMWK.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/HZG.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/ZNES.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/pik_logo.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/Logo_IER_UniStuttgart-1200x386.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/OvGU.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/partner_logo_fortiss.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/RLI.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/partner_logo_hereon.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/IEE.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/DLR-VE.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/FZJuelich-1.jpg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/NE.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/OEI.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/EUF.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/partner_logo_nfdi4energy.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2024 Santosch Mutyala <https://github.com/smutyala1at> © Uni Oldenburg",
 ]
 
 [[annotations]]
 path = "base/static/logos/partner/InfAI-Logo.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/selector-icons.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
 ]
 
 [[annotations]]
 path = "base/static/img/icon-unknown.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
 ]
 
 [[annotations]]
 path = "base/static/img/search.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
 ]
 
 [[annotations]]
 path = "base/static/img/OpenEnergyFamily_OEPlatypus.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/OpenEnergyFamily_modules_trans.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/icon-unknown-alt.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
 ]
 
 [[annotations]]
 path = "base/static/img/about/OpenEnergyFamily_modeling-cycle.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/about/OpenEnergyFamily_modeling-open-science.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/about/OpenEnergyFamily_GroupPhoto.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/about/OpenEnergyFamily_GroupPhoto2.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2024 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/about-community.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -1244,7 +1388,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/img/welcome/ontology.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -1252,21 +1397,24 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/img/welcome/videos.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/documentation.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/beginners.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -1274,70 +1422,80 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/img/welcome/bundles.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/api.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/database.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/OEP_Documentation.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/factsheets.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/about-openscience.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -1345,14 +1503,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/img/welcome/concept.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "base/static/img/welcome/about-process-modelling.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -1360,42 +1520,48 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/img/badges/badge_iron.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/badges/badge_silver.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/badges/badge_bronze.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/badges/badge_platinum.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/img/badges/badge_gold.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "base/static/css/jquery-ui.min.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
     "Copyright 2014 jQuery Foundation and other contributors",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -1403,7 +1569,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/css/base-style.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 Till Isenhuth <https://github.com/thsstll>",
@@ -1418,7 +1585,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/css/filterform.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Marco Finkendei <https://github.com/MFinkendei>",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -1427,7 +1595,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/css/index-style.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -1439,7 +1608,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/css/bootstrap.min.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [ 
     "Copyright 2011-2022 The Bootstrap Authors",
     "Copyright 2011-2022 Twitter, Inc.",
@@ -1455,7 +1625,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/static/css/bootstrap-select.min.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
     "Copyright 2012-2021 SnapAppointments, LLC",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -1463,7 +1634,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/base-full.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -1474,14 +1646,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/_footer.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
 [[annotations]]
 path = "base/templates/base/base-wide-react.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
@@ -1493,7 +1667,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/500.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Klara Reder <https://github.com/klarareder> © Fraunhofer IEE",
@@ -1505,7 +1680,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/base-profile.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1515,7 +1691,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/base.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 quentinpeyras <https://github.com/quentinpeyras>",
@@ -1542,7 +1719,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/privacy_policy.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -1552,7 +1730,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/terms_of_use.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Europa-Universität Flensburg (EUF)",
@@ -1565,7 +1744,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/faq.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -1575,7 +1755,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/base-sidebar.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
     "Copyright (c) 2011-2024 The Bootstrap Authors",
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -1586,7 +1767,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/discussion.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Berit Müller <https://github.com/beritRLI> © Reiner Lemoine Institut",
@@ -1600,7 +1782,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/contact.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Europa-Universität Flensburg (EUF)",
@@ -1614,7 +1797,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/project-detail.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
@@ -1624,7 +1808,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/about.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -1643,14 +1828,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/_header.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
 [[annotations]]
 path = "base/templates/base/index.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 Till Isenhuth <https://github.com/thsstll>",
@@ -1676,7 +1863,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "base/templates/base/404.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2019 Klara Reder <https://github.com/klarareder> © Fraunhofer IEE",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -1688,7 +1876,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "factsheet/templates/factsheet/index.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
@@ -1701,14 +1890,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "factsheet/templates/partials/related_oekg_scenarios.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "factsheet/frontend/package-lock.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
@@ -1717,14 +1908,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "factsheet/frontend/.gitignore"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "factsheet/frontend/package.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -1734,21 +1927,24 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "factsheet/frontend/public/manifest.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "factsheet/frontend/public/index.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "factsheet/frontend/src/app.less"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1756,7 +1952,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "factsheet/frontend/src/index.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1764,7 +1961,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "factsheet/frontend/src/conf.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -1778,7 +1976,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "factsheet/frontend/src/data/countries.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1786,7 +1985,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "factsheet/frontend/src/styles/App.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
@@ -1796,7 +1996,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "factsheet/frontend/src/styles/react-checkbox-tree.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1804,14 +2005,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "factsheet/frontend/src/styles/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "ontology/templates/ontology/partial_ontology_sidebar_content.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -1819,21 +2022,24 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "ontology/templates/ontology/partial_ontology_full.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "ontology/templates/ontology/partial_ontology_content.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "ontology/templates/ontology/oeo-steering-committee.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
@@ -1844,7 +2050,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "ontology/templates/ontology/about.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Janna Hastings <https://github.com/jannahastings> © Otto-von-Guericke-Universität Magdeburg",
@@ -1858,7 +2065,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "ontology/templates/ontology/oeo.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
@@ -1870,7 +2078,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "ontology/templates/ontology/class.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -1882,49 +2091,56 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/fixtures/topics.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "dataedit/static/colorfield/jscolor/hv.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "dataedit/static/colorfield/jscolor/arrow.gif"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "dataedit/static/colorfield/jscolor/demo.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "dataedit/static/colorfield/jscolor/hs.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "dataedit/static/colorfield/jscolor/cross.gif"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "dataedit/static/metaedit/schema.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1935,7 +2151,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/static/metaedit/metaedit.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -1943,7 +2160,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/static/peer_review/schema.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
   "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
@@ -1952,7 +2170,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/static/peer_review/example_datenmodell.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1960,7 +2179,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/static/peer_review/template_datenmodell.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -1968,21 +2188,24 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/static/peer_review/img/opr-process-bpmn.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "dataedit/static/dataedit/dataview.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "dataedit/static/dataedit/dataedit.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -1992,14 +2215,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/static/dataedit/api.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "dataedit/static/dataedit/metadata.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
@@ -2008,14 +2233,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/static/dataedit/jquery.dataTables.min.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/static/dataedit/query-builder.default.min.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
     "Copyright 2014-2018 Damien 'Mistic' Sorel (http://www.strangeplanet.fr)",
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -2024,84 +2251,96 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/static/dataedit/leaflet.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/static/dataedit/images/marker-shadow.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/static/dataedit/images/marker-icon.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/static/metadata-viewer/metadata-viewer.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "dataedit/static/images/sort_asc.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/static/images/sort_asc_disabled.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/static/images/sort_desc_disabled.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/static/images/sort_both.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/static/images/sort_desc.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/static/wizard/wizard.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/static/wizard/.gitignore"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "dataedit/templates/messages.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -2111,7 +2350,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/dataedit_tablelist.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -2125,7 +2365,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/tag_editor.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -2135,7 +2376,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/url_list_field.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -2145,7 +2387,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/wizard.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -2157,7 +2400,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/dataedit_schemalist.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -2173,7 +2417,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/tablemap_form.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -2183,7 +2428,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/opr_contributor.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2197,7 +2443,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/tablegraph_form.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
   "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -2208,7 +2455,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/table_permissions.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -2219,7 +2467,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/opr_review.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
   "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
@@ -2236,7 +2485,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/tag_overview.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -2248,7 +2498,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/base.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
@@ -2262,14 +2513,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/base-sidebar.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "dataedit/templates/dataedit/base_fullwidth.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2278,7 +2531,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/meta_edit.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -2293,14 +2547,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/tagged_field.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "dataedit/templates/dataedit/dataview.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -2329,7 +2585,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/tag_form.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -2338,7 +2595,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/filter.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2354,7 +2612,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/taggable_setting.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -2365,7 +2624,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/dataedit/admin.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -2375,21 +2635,24 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "dataedit/templates/partials/metadata_viewer.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "oedb_datamodels/script.py.mako"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oedb_datamodels/README"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -2397,7 +2660,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeplatform/securitysettings.py.default"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2015 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
@@ -2414,14 +2678,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "script/setup_and_migrate_db"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "oeo_viewer/.gitignore"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2429,7 +2695,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/data/oeo_viewer_json_data.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
@@ -2438,7 +2705,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/templates/index.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
@@ -2449,14 +2717,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/.babelrc"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/package-lock.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.", 
@@ -2465,7 +2735,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/package.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -2474,28 +2745,32 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/source-code/index.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/source-code/statics/oep.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/source-code/statics/network.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/source-code/statics/oeo_info.json"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
@@ -2504,7 +2779,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/source-code/statics/d3-dependencies.csv"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -2513,49 +2789,56 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/source-code/styles/index.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/oep.fa81489f.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/flags.c284a657.png"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/icons.c653e3a9.woff2"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/brand-icons.a1ff5e2a.woff2"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/outline-icons.73dd3248.woff2"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/outline-icons.1bbd56ed.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2563,56 +2846,64 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/dist/brand-icons.eb08bf9d.ttf"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/brand-icons.e4ffb4d8.eot"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/outline-icons.585fe6ab.ttf"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/outline-icons.00440017.woff"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/icons.f15da7ef.ttf"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/brand-icons.85906eb5.woff"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/network.2770f24c.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/scripts.bcf3243b.js.map"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
@@ -2620,7 +2911,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/dist/icons.69098388.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2628,7 +2920,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/dist/scripts.bcf3243b.css.map"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -2636,21 +2929,24 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/dist/outline-icons.5d6254f9.eot"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/index.html"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/brand-icons.ea4bcc5e.svg"
-SPDX-License-Identifier = [ "CC-BY-4.0",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "CC-BY-4.0",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2658,21 +2954,24 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/dist/icons.6f55393b.woff"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/icons.1164acc1.eot"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "oeo_viewer/client/dist/scripts.bcf3243b.css"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
     "Copyright 2014 Contributors",
     "Copyright 2013 Contributors",
@@ -2682,14 +2981,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "oeo_viewer/client/dist/bezier.c0025d7c.cjs"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
 ]
 
 [[annotations]]
 path = "theming/_variables.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -2701,7 +3002,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/.dockerignore"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -2709,7 +3011,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/oepstrap.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -2721,14 +3024,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/.gitignore"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
 [[annotations]]
 path = "theming/Dockerfile"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -2737,14 +3042,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/layouts/_ontology.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "theming/scss/layouts/_database.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -2755,7 +3062,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/layouts/_profile.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2764,7 +3072,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/layouts/_review.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2774,7 +3083,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/layouts/_main.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -2785,7 +3095,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/layouts/_topics.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2793,7 +3104,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/base/_index.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -2803,7 +3115,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/base/_custom_variables.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -2813,7 +3126,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/base/_mixins.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -2822,7 +3136,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_tabs.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2833,7 +3148,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_paginations.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2841,7 +3157,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_buttons.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2849,7 +3166,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_headers.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -2858,7 +3176,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_alerts.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -2866,7 +3185,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_sidebars.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
@@ -2875,14 +3195,16 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_empty_states.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
 path = "theming/scss/components/_tables.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
@@ -2890,7 +3212,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_cards.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2898,7 +3221,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_tags.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2906,7 +3230,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_controls.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
@@ -2914,7 +3239,8 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/components/_collapses.scss"
-SPDX-License-Identifier = [ "MIT",]
+precedence = "override"
+SPDX-FileCopyrightText = = [ "MIT",]
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
