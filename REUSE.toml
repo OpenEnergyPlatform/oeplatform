@@ -10,6 +10,28 @@ SPDX-PackageComment = "The code of this repository is licensed under the GNU Aff
 
 
 [[annotations]]
+path = ".devcontainer/devcontainer.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = ".github/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "VERSION"
+precedence = "override"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
 path = ".gitmodules"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
