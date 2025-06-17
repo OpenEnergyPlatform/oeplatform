@@ -1,3 +1,14 @@
+# SPDX-FileCopyrightText: 2024 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+version = 1
+SPDX-PackageName = "oeplatform"
+SPDX-PackageSupplier = "Ludwig Hülk <https://github.com/Ludee>"
+SPDX-PackageDownloadLocation = "https://github.com/OpenEnergyPlatform/oeplatform/"
+SPDX-PackageComment = "The code of this repository is licensed under the GNU Affero General Public License v3.0 or later License (AGPL-3.0-or-later)."
+
+
 [[File]]
 Path = ".gitmodules"
 Licenses = [ "MIT",]
