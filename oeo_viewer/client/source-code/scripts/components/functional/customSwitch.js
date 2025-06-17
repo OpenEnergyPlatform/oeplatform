@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
 //
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';

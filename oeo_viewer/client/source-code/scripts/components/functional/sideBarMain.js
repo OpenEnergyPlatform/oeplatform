@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
 //
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React from "react";
 import { Header, Icon, Image, Menu, Segment, Sidebar } from "semantic-ui-react";

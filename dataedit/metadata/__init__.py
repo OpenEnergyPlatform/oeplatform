@@ -10,7 +10,7 @@
 # SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
 # SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
 #
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # TODO: This might have t be removed fully
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE

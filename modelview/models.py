@@ -12,7 +12,7 @@
 # SPDX-FileCopyrightText: 2025 quentinpeyras <https://github.com/quentinpeyras>
 # SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut
 #
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 from django import forms
 from django.contrib.postgres.fields import ArrayField

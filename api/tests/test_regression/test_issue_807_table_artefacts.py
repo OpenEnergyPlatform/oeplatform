@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 #
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 """Some api actions run `assert_permission`, which calls
 DBTable.load(schema, table), which used get_or_create().

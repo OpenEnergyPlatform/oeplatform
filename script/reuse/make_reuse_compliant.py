@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2025 vismayajochem <vismayajochem>
 #
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 import os
 import subprocess
