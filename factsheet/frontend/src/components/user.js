@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+//
+// SPDX-License-Identifier: MIT
+
 import React from 'react';
 import { useQuery } from 'react-apollo';
 import { gql } from 'apollo-boost';

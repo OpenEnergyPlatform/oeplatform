@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+//
+// SPDX-License-Identifier: MIT
 
 (function(globals) {
   var django = globals.django || (globals.django = {});

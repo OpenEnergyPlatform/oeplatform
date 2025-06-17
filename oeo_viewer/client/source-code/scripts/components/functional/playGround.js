@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+//
+// SPDX-License-Identifier: MIT
+
 import React, { Component } from "react";
 import Layout from "./layout";
 

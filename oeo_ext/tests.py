@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: MIT
+
 # from pathlib import Path
 
 # from django.test import TestCase  # noqa:F401

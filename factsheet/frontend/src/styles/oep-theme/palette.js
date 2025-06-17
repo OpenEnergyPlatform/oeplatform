@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: MIT
+
 const primaryPalette = {
   50: '#F6FBFF',
   100: '#E5EFF6',

@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: MIT
+
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 

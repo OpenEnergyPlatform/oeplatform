@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2025 Administrator <admin+git@iks.cs.uni-magdeburg.de>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+#
+# SPDX-License-Identifier: MIT
+
 import sqlalchemy as sqla
 from django.core.management.base import BaseCommand
 

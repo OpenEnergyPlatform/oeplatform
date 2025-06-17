@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: MIT
+
 from api import actions
 from api.actions import has_table
 from api.tests import APITestCase

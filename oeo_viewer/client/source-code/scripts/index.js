@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+//
+// SPDX-License-Identifier: MIT
+
 import ReactDOM from "react-dom";
 import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";

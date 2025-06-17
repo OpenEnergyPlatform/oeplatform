@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+// SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
+//
+// SPDX-License-Identifier: MIT
+
 var getMapData = function(schema, table, column, bounds, callback) {
   let left = bounds.getEast();
   let right = bounds.getWest();

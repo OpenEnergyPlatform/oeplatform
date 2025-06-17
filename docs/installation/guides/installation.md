@@ -1,3 +1,10 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Install and setup the OpenEnergyPlatform Application
 
 Below we describe the manual installation of the oeplatform code and infrastructure.

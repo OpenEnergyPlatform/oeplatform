@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+#
+# SPDX-License-Identifier: MIT
+
 """empty message
 
 Revision ID: 3c2369dfcc55

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+#
+# SPDX-License-Identifier: MIT
+
 echo -n "Build current minimized bootstrap.min.css ... "
 docker run -v $(pwd)/_variables.scss:/_variables.scss -v $(pwd)/scss:/scss bootstrap-build > bootstrap.min.css  2>/dev/null
 

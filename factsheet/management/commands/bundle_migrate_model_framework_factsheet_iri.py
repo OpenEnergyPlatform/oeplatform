@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: MIT
+
 from django.core.management.base import BaseCommand
 from rdflib import RDF, Literal, URIRef
 

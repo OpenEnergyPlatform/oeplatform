@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+//
+// SPDX-License-Identifier: MIT
+
 import React, { Component } from "react";
 import "babel-polyfill";
 import { styled } from "@material-ui/styles";

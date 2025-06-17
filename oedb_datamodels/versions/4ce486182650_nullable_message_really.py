@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+#
+# SPDX-License-Identifier: MIT
+
 """Make message nullable
 
 Revision ID: 4ce486182650

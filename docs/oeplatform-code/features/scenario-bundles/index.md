@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Scenario Bundles feature
 
 The scenario bundles feature is a response to the complex requirements for the transparent publication of scenarios in a complete and comprehensible manner. Various technologies are used to enable researchers to publish scenarios and any additional information. In addition, existing resources from the open energy platform are used and bundled together. This is intended to increase the visibility of available research work and enable comparability of the scenarios.

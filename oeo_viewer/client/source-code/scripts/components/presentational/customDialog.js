@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+//
+// SPDX-License-Identifier: MIT
+
 import React from "react";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";

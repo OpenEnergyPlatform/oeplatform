@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: MIT
+
 import React from 'react';
 import { styled } from '@mui/system';
 import Grid from '@mui/material/Grid';

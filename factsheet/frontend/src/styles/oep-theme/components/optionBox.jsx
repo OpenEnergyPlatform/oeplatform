@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: MIT
+
 import { styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import palette from '../palette';

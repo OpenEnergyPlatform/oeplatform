@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: MIT
+
 // See https://github.com/OpenEnergyPlatform/oekg/issues/19
 export const StudyKeywords = [
     ['resilience', 'https://openenergy-platform.org/ontology/oeo/OEO_00360015', 'Resilience is a disposition of a system that represents the capacity of a system to absorb disturbance and reorganize so as to retain essentially the same function, structure, and feedbacks.'],

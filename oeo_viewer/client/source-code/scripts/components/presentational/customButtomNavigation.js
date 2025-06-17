@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+//
+// SPDX-License-Identifier: MIT
+
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import BottomNavigation from "@material-ui/core/BottomNavigation";

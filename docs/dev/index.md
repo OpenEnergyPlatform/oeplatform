@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Getting started with development
 
 This section gets you started with contribution to the development of the oeplatform software which is part of the OpenEnergyFamily. The development takes place on GitHub and most communication is handled in GitHub Issues, Pull Requests and discussions. Additionally developer meetings are used to talk about latest developments. E-Mails and Matrix/Element chat can be added to the pool once one commits to regular contributions.

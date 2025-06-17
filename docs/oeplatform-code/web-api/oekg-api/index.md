@@ -1,3 +1,10 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 ## OEKG web based access
 
 In this document we describe how you can access the contents of the OEKG via Web based Requests using HTTP

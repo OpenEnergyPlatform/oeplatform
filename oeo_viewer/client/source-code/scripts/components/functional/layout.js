@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+//
+// SPDX-License-Identifier: MIT
+
 import React, { Component, useEffect } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import GraphData from "../../../../../data/oeo_viewer_json_data.json";

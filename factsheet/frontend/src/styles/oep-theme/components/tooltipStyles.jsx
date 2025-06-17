@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: MIT
+
 import React from 'react';
 import { styled, Tooltip, tooltipClasses } from '@mui/material';
 // import { TooltipProps } from '@mui/material/Tooltip';

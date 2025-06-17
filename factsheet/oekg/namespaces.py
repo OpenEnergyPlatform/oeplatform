@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: MIT
+
 from rdflib.namespace import Namespace
 
 # TODO- Alot of hardcoded URL, transfer to settings or other config
