@@ -112,7 +112,7 @@
       <div class="review">
         <div class="review__content">
           <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                        <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
   <div class="review__items accordion" id="accordion-general">
 
     {% for item in meta.general.flat %}
@@ -138,7 +138,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="heading-{{ safe_id }}">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ safe_id }}" aria-expanded="false" aria-controls="collapse-{{ safe_id }}">
-              {{ prefix }}
+              {{ items.0.display_prefix|default:prefix|title }}
             </button>
           </h2>
           <div id="collapse-{{ safe_id }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ safe_id }}" data-bs-parent="#accordion-general">
@@ -197,7 +197,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="heading-spatial-{{ safe_id }}">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-spatial-{{ safe_id }}" aria-expanded="false" aria-controls="collapse-spatial-{{ safe_id }}">
-              {{ prefix }}
+              {{ items.0.display_prefix|default:prefix|title }}
             </button>
           </h2>
           <div id="collapse-spatial-{{ safe_id }}" class="accordion-collapse collapse" aria-labelledby="heading-spatial-{{ safe_id }}" data-bs-parent="#accordion-spatiotemporal">
@@ -250,7 +250,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="heading-temporal-{{ safe_id }}">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-temporal-{{ safe_id }}" aria-expanded="false" aria-controls="collapse-temporal-{{ safe_id }}">
-              {{ prefix }}
+              {{ items.0.display_prefix|default:prefix|title }}
             </button>
           </h2>
           <div id="collapse-temporal-{{ safe_id }}" class="accordion-collapse collapse" aria-labelledby="heading-temporal-{{ safe_id }}" data-bs-parent="#accordion-spatiotemporal">
@@ -307,7 +307,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="heading-source-{{ safe_id }}">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-source-{{ safe_id }}" aria-expanded="false" aria-controls="collapse-source-{{ safe_id }}">
-              {{ prefix }}
+              {{ items.0.display_prefix|default:prefix|title }}
             </button>
           </h2>
           <div id="collapse-source-{{ safe_id }}" class="accordion-collapse collapse" aria-labelledby="heading-source-{{ safe_id }}" data-bs-parent="#accordion-source">
@@ -364,7 +364,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="heading-license-{{ safe_id }}">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-license-{{ safe_id }}" aria-expanded="false" aria-controls="collapse-license-{{ safe_id }}">
-              {{ prefix }}
+              {{ items.0.display_prefix|default:prefix|title }}
             </button>
           </h2>
           <div id="collapse-license-{{ safe_id }}" class="accordion-collapse collapse" aria-labelledby="heading-license-{{ safe_id }}" data-bs-parent="#accordion-license">

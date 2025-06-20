@@ -1982,6 +1982,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         If a field has no dot (.), it's considered flat and shown directly.
         If a field has a dot and includes an index (e.g., sources.0.name),
         then all fields with the same index are grouped together and shown in order.
+        Adds display_prefix for human-readable (1-based) indexing.
         """
         import re
 
@@ -2027,6 +2028,14 @@ class PeerReviewView(LoginRequiredMixin, View):
             match = re.match(r".*?\.([0-9]+)", prefix)
             return int(match.group(1)) if match else -1
 
+        def adjust_display_prefix(prefix):
+            match = re.match(r"^(.*?\.)([0-9]+)", prefix)
+            if match:
+                base = match.group(1).rstrip(".")  # 'sources.'
+                index = int(match.group(2)) + 1  # 0 → 1
+                return f"{base.capitalize()} {index}"  # → 'Sources 1'
+            return prefix
+
         def group_by_index(items):
             result = {"flat": [], "grouped": defaultdict(list)}
             for item in items:
@@ -2038,14 +2047,27 @@ class PeerReviewView(LoginRequiredMixin, View):
                     display_field = ".".join(parts[2:])
                     item = item.copy()
                     item["display_field"] = display_field
+                    # Use human-readable 1-based index format for display_prefix
+                    item[
+                        "display_prefix"
+                    ] = f"{parts[0].capitalize()} {int(parts[1]) + 1}"
+                    # Add display_index for UI-friendly index label
+                    item["display_index"] = str(int(parts[1]) + 1)
                     result["grouped"][index_prefix].append(item)
                 elif "." in field:
                     group = field.split(".")[0]
                     item = item.copy()
                     item["display_field"] = ".".join(field.split(".")[1:])
+                    item["display_prefix"] = group
+                    # Remove display_index if present for non-indexed fields
+                    if "display_index" in item:
+                        del item["display_index"]
                     result["grouped"][group].append(item)
                 else:
                     item["display_field"] = field
+                    # Remove display_index if present for flat fields
+                    if "display_index" in item:
+                        del item["display_index"]
                     result["flat"].append(item)
 
             sorted_grouped = dict(
