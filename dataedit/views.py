@@ -2025,51 +2025,105 @@ class PeerReviewView(LoginRequiredMixin, View):
                 main_categories["resource"].append(item)
 
         def extract_index(prefix):
-            match = re.match(r".*?\.([0-9]+)", prefix)
+            """
+            Return the numeric list index found at the end of *prefix*.
+
+            Works for both  'sources.0'  *and* 'Sources 0'.
+            If no trailing index exists, ``-1`` is returned to keep such
+            prefixes at the beginning of the ordered result.
+            """
+            match = re.search(r"(?:\.|\s)([0-9]+)$", prefix)
             return int(match.group(1)) if match else -1
 
-        def adjust_display_prefix(prefix):
-            match = re.match(r"^(.*?\.)([0-9]+)", prefix)
-            if match:
-                base = match.group(1).rstrip(".")  # 'sources.'
-                index = int(match.group(2)) + 1  # 0 → 1
-                return f"{base.capitalize()} {index}"  # → 'Sources 1'
-            return prefix
-
-        def group_by_index(items):
+        def group_index_only(items):
             result = {"flat": [], "grouped": defaultdict(list)}
+
             for item in items:
                 field = item["field"]
                 parts = field.split(".")
 
-                if len(parts) >= 3 and parts[1].isdigit():
-                    index_prefix = f"{parts[0]}.{parts[1]}"  # e.g., sources.0
-                    display_field = ".".join(parts[2:])
-                    item = item.copy()
-                    item["display_field"] = display_field
-                    # Use human-readable 1-based index format for display_prefix
-                    item[
-                        "display_prefix"
-                    ] = f"{parts[0].capitalize()} {int(parts[1]) + 1}"
-                    # Add display_index for UI-friendly index label
-                    item["display_index"] = str(int(parts[1]) + 1)
-                    result["grouped"][index_prefix].append(item)
-                elif "." in field:
-                    group = field.split(".")[0]
-                    item = item.copy()
-                    item["display_field"] = ".".join(field.split(".")[1:])
-                    item["display_prefix"] = group
-                    # Remove display_index if present for non-indexed fields
-                    if "display_index" in item:
-                        del item["display_index"]
-                    result["grouped"][group].append(item)
+                list_idx = None
+                list_name = None
+                idx_pos = None
+                for pos in range(1, len(parts)):
+                    if parts[pos].isdigit():
+                        list_idx = parts[pos]  # '0'
+                        list_name = parts[pos - 1]  # 'timeseries'
+                        idx_pos = pos
+                        break
+
+                if list_idx is not None:
+                    # «Timeseries 0», «Bbox 1» …
+                    group_key = f"{list_name.capitalize()} {list_idx}"
+                    display_field = (
+                        ".".join(parts[idx_pos + 1 :])
+                        if idx_pos + 1 < len(parts)
+                        else ""
+                    )
+
+                    enriched = item.copy()
+                    enriched["display_field"] = display_field
+                    enriched["display_prefix"] = group_key
+                    enriched["display_index"] = list_idx
+                    result["grouped"][group_key].append(enriched)
                 else:
-                    item["display_field"] = field
-                    # Remove display_index if present for flat fields
-                    if "display_index" in item:
-                        del item["display_index"]
+                    trimmed = field.split(".", 1)[1] if "." in field else field
+                    item["display_field"] = trimmed
+                    item.pop("display_index", None)
                     result["flat"].append(item)
 
+            result["grouped"] = dict(
+                sorted(result["grouped"].items(), key=lambda kv: int(kv[0].split()[-1]))
+            )
+            return result
+
+        def group_by_index(items):
+            """
+            Organise *items* into
+              * ``flat``     – fields without any nesting,
+              * ``grouped``  – dict whose keys are human‑readable list titles
+                               such as 'Timeseries 0', 'Sources 1', …
+
+            All fields that share the same list index (e.g. timeseries.0.*)
+            are collected under one group.  The groups are ordered by their
+            numeric index so that 0, 1, 2 … appear in sequence.
+            """
+            result = {"flat": [], "grouped": defaultdict(list)}
+
+            for item in items:
+                field = item["field"]
+                parts = field.split(".")
+
+                # Handle list elements like timeseries.0.start
+                if len(parts) >= 3 and parts[1].isdigit():
+                    index = parts[1]  # '0'
+                    group_key = f"{parts[0].capitalize()} {index}"  # 'Timeseries 0'
+                    display_field = ".".join(parts[2:])  # 'start'
+
+                    enriched = item.copy()
+                    enriched["display_field"] = display_field
+                    enriched["display_prefix"] = group_key
+                    enriched["display_index"] = index
+
+                    result["grouped"][group_key].append(enriched)
+
+                # Handle nested (but non‑list) structures, e.g. spatial.epsg
+                elif "." in field:
+                    group_key = field.split(".")[0]  # 'spatial'
+                    enriched = item.copy()
+                    enriched["display_field"] = ".".join(field.split(".")[1:])
+                    enriched["display_prefix"] = group_key
+                    enriched.pop("display_index", None)
+
+                    result["grouped"][group_key].append(enriched)
+
+                # Handle completely flat fields
+                else:
+                    item["display_field"] = field
+                    item.pop("display_index", None)
+                    result["flat"].append(item)
+
+            # Sort grouped entries by their numeric index (Timeseries 0, 1, 2 …)
             sorted_grouped = dict(
                 sorted(result["grouped"].items(), key=lambda kv: extract_index(kv[0]))
             )
@@ -2077,7 +2131,10 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         grouped_meta = {}
         for cat, items in main_categories.items():
-            grouped = group_by_index(items)
+            if cat in {"spatial", "temporal"}:
+                grouped = group_index_only(items)  # only list‑index grouping
+            else:
+                grouped = group_by_index(items)  # previous behaviour
             grouped_meta[cat] = {
                 "flat": grouped["flat"],
                 "grouped": grouped["grouped"],
