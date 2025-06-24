@@ -2036,41 +2036,58 @@ class PeerReviewView(LoginRequiredMixin, View):
             return int(match.group(1)) if match else -1
 
         # ------------------------------------------------------------------
-        # Helper for nested structure inside each "Sources N" group
+        # Helper: inside each "Sources N" split into second‑level list groups
+        # e.g.  sources.<src_idx>.licenses.0.url      → "Licenses 0"
+        #       sources.<src_idx>.contacts.1.name     → "Contacts 1"
+        # Any path with pattern <listname>.<index> after the 2‑nd segment
+        # becomes its own accordion; everything else stays flat.
         # ------------------------------------------------------------------
-        def nest_license_groups(source_items):
+        def nest_sublist_groups(source_items):
             """
-            Split *source_items* of one 'Sources N' group into:
-              * flat     – fields that are not under 'licenses.<idx>'
-              * grouped  – dict 'License 0' → [...], 'License 1' → [...]
+            Turn one Source‑block (list of dicts) into:
+              {
+                "flat":     [ ... items without  <listname>.<idx> ... ],
+                "grouped":  { "<Listname> 0": [...], "<Listname> 1": [...], ... }
+              }
 
-            Expects full field path like 'sources.0.licenses.1.path'.
+            Accepts arbitrary list names, not just 'licenses'.
             """
             nested = {"flat": [], "grouped": defaultdict(list)}
 
             for itm in source_items:
                 parts = itm["field"].split(".")
-                # structure: sources.<src_idx>.licenses.<lic_idx>.<rest>
-                if len(parts) >= 5 and parts[2] == "licenses" and parts[3].isdigit():
-                    lic_idx = parts[3]
-                    group_key = f"License {lic_idx}"
+                # expect pattern: sources.<src_idx>.<listname>.<index>.<rest>
+                if (
+                    len(parts) >= 4
+                    and parts[2].isidentifier()  # list name
+                    and parts[3].isdigit()  # index
+                ):
+                    list_name = parts[2]  # e.g. "licenses"
+                    idx = parts[3]  # e.g. "0"
+                    group_key = f"{list_name.capitalize()} {idx}"
                     display_field = ".".join(parts[4:]) or "value"
 
                     enriched = itm.copy()
                     enriched["display_field"] = display_field
                     enriched["display_prefix"] = group_key
-                    enriched["display_index"] = lic_idx
+                    enriched["display_index"] = idx
                     nested["grouped"][group_key].append(enriched)
                 else:
-                    # keep as flat field within this source block
+                    # keep as flat inside this Source block
                     trimmed = ".".join(parts[2:]) if len(parts) > 2 else itm["field"]
                     enriched = itm.copy()
                     enriched["display_field"] = trimmed
                     nested["flat"].append(enriched)
 
-            # order License groups numerically
+            # sort groups numerically (… 0, 1, 2 …) within each list name
             nested["grouped"] = dict(
-                sorted(nested["grouped"].items(), key=lambda kv: int(kv[0].split()[-1]))
+                sorted(
+                    nested["grouped"].items(),
+                    key=lambda kv: (
+                        kv[0].split()[0],  # list name
+                        int(kv[0].split()[-1]),  # numeric index
+                    ),
+                )
             )
             return nested
 
@@ -2176,10 +2193,10 @@ class PeerReviewView(LoginRequiredMixin, View):
                 # First‑level grouping: Source 0, Source 1, …
                 src_level = group_index_only(items)
 
-                # For every 'Sources N' list build inner License groups
+                # For every 'Sources N' list build inner sublist groups
                 nested_grouped = {}
                 for src_key, src_items in src_level["grouped"].items():
-                    nested_grouped[src_key] = nest_license_groups(src_items)
+                    nested_grouped[src_key] = nest_sublist_groups(src_items)
 
                 grouped = {
                     "flat": src_level["flat"],
