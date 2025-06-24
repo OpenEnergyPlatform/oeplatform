@@ -2035,6 +2035,45 @@ class PeerReviewView(LoginRequiredMixin, View):
             match = re.search(r"(?:\.|\s)([0-9]+)$", prefix)
             return int(match.group(1)) if match else -1
 
+        # ------------------------------------------------------------------
+        # Helper for nested structure inside each "Sources N" group
+        # ------------------------------------------------------------------
+        def nest_license_groups(source_items):
+            """
+            Split *source_items* of one 'Sources N' group into:
+              * flat     – fields that are not under 'licenses.<idx>'
+              * grouped  – dict 'License 0' → [...], 'License 1' → [...]
+
+            Expects full field path like 'sources.0.licenses.1.path'.
+            """
+            nested = {"flat": [], "grouped": defaultdict(list)}
+
+            for itm in source_items:
+                parts = itm["field"].split(".")
+                # structure: sources.<src_idx>.licenses.<lic_idx>.<rest>
+                if len(parts) >= 5 and parts[2] == "licenses" and parts[3].isdigit():
+                    lic_idx = parts[3]
+                    group_key = f"License {lic_idx}"
+                    display_field = ".".join(parts[4:]) or "value"
+
+                    enriched = itm.copy()
+                    enriched["display_field"] = display_field
+                    enriched["display_prefix"] = group_key
+                    enriched["display_index"] = lic_idx
+                    nested["grouped"][group_key].append(enriched)
+                else:
+                    # keep as flat field within this source block
+                    trimmed = ".".join(parts[2:]) if len(parts) > 2 else itm["field"]
+                    enriched = itm.copy()
+                    enriched["display_field"] = trimmed
+                    nested["flat"].append(enriched)
+
+            # order License groups numerically
+            nested["grouped"] = dict(
+                sorted(nested["grouped"].items(), key=lambda kv: int(kv[0].split()[-1]))
+            )
+            return nested
+
         def group_index_only(items):
             result = {"flat": [], "grouped": defaultdict(list)}
 
@@ -2133,6 +2172,19 @@ class PeerReviewView(LoginRequiredMixin, View):
         for cat, items in main_categories.items():
             if cat in {"spatial", "temporal"}:
                 grouped = group_index_only(items)  # only list‑index grouping
+            elif cat == "source":
+                # First‑level grouping: Source 0, Source 1, …
+                src_level = group_index_only(items)
+
+                # For every 'Sources N' list build inner License groups
+                nested_grouped = {}
+                for src_key, src_items in src_level["grouped"].items():
+                    nested_grouped[src_key] = nest_license_groups(src_items)
+
+                grouped = {
+                    "flat": src_level["flat"],
+                    "grouped": nested_grouped,
+                }
             else:
                 grouped = group_by_index(items)  # previous behaviour
             grouped_meta[cat] = {
