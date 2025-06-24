@@ -2202,6 +2202,19 @@ class PeerReviewView(LoginRequiredMixin, View):
                     "flat": src_level["flat"],
                     "grouped": nested_grouped,
                 }
+            elif cat == "license":
+                # First‑level grouping: License 0, License 1, …
+                lic_level = group_index_only(items)
+
+                # For every 'Licenses N' entry build inner sub‑list groups
+                nested_grouped_lic = {}
+                for lic_key, lic_items in lic_level["grouped"].items():
+                    nested_grouped_lic[lic_key] = nest_sublist_groups(lic_items)
+
+                grouped = {
+                    "flat": lic_level["flat"],
+                    "grouped": nested_grouped_lic,
+                }
             else:
                 grouped = group_by_index(items)  # previous behaviour
             grouped_meta[cat] = {
