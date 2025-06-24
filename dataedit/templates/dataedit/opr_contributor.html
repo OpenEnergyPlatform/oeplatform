@@ -281,7 +281,7 @@
   </div>
 </div>
           
-            <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
+<div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
   <div class="review__items accordion" id="accordion-source">
 
     {# --- flat dataset‑level source fields (if any) --------------------- #}
@@ -326,27 +326,27 @@
                 </div>
               {% endfor %}
 
-              {# ---- nested accordion for License indices ---------------- #}
-              <div class="accordion accordion-inner" id="accordion-license-{{ src_id }}">
-                {% for lic_prefix, lic_items in src_content.grouped.items %}
-                  {% with lic_prefix|slugify as lic_id %}
+              {# ---- nested accordion for sub-groups (generic) ---------------- #}
+              <div class="accordion accordion-inner" id="accordion-sub-{{ src_id }}">
+                {% for sub_prefix, sub_items in src_content.grouped.items %}
+                  {% with sub_prefix|slugify as sub_id %}
                     <div class="accordion-item">
                       <h2 class="accordion-header"
-                          id="heading-license-{{ src_id }}-{{ lic_id }}">
+                          id="heading-sub-{{ src_id }}-{{ sub_id }}">
                         <button class="accordion-button collapsed" type="button"
                                 data-bs-toggle="collapse"
-                                data-bs-target="#collapse-license-{{ src_id }}-{{ lic_id }}"
+                                data-bs-target="#collapse-sub-{{ src_id }}-{{ sub_id }}"
                                 aria-expanded="false"
-                                aria-controls="collapse-license-{{ src_id }}-{{ lic_id }}">
-                          {{ lic_prefix }}
+                                aria-controls="collapse-sub-{{ src_id }}-{{ sub_id }}">
+                          {{ sub_prefix }}
                         </button>
                       </h2>
-                      <div id="collapse-license-{{ src_id }}-{{ lic_id }}"
+                      <div id="collapse-sub-{{ src_id }}-{{ sub_id }}"
                            class="accordion-collapse collapse"
-                           aria-labelledby="heading-license-{{ src_id }}-{{ lic_id }}"
-                           data-bs-parent="#accordion-license-{{ src_id }}">
+                           aria-labelledby="heading-sub-{{ src_id }}-{{ sub_id }}"
+                           data-bs-parent="#accordion-sub-{{ src_id }}">
                         <div class="accordion-body">
-                          {% for item in lic_items %}
+                          {% for item in sub_items %}
                             <div id="field_{{ item.field|slugify }}" class="field review__item"
                                  data-category="source"
                                  onclick="click_field('{{ item.field }}', '{{ item.value }}', 'source');">
@@ -372,110 +372,88 @@
   </div>
 </div>
 
-  <div class="review__items accordion" id="accordion-source">
+            <div class="tab-pane fade" id="license" role="tabpanel" aria-labelledby="license-tab">
+  <div class="review__items accordion" id="accordion-license-main">
 
-    {% for item in meta.source.flat %}
-      <div id="field_{{ item.field|slugify }}" class="field review__item" data-category="source" onclick="click_field('{{ item.field }}', '{{ item.value }}', 'source');">
-        <p class="review__item-content">
-          <span class="key">{{ item.display_field }}</span>
-          <span class="value">{{ item.newValue|default:item.value }}</span>
-          {% if item.reviewer_suggestion %}
-            <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-          {% endif %}
-          {% if item.suggestion_comment %}
-            <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span><br>
-          {% endif %}
-          {% if item.additional_comment %}
-            <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-          {% endif %}
-        </p>
-      </div>
-    {% endfor %}
-
-    {% for prefix, items in meta.source.grouped.items %}
-      {% with prefix|slugify as safe_id %}
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="heading-source-{{ safe_id }}">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-source-{{ safe_id }}" aria-expanded="false" aria-controls="collapse-source-{{ safe_id }}">
-              {{ items.0.display_prefix|default:prefix|title }}
-            </button>
-          </h2>
-          <div id="collapse-source-{{ safe_id }}" class="accordion-collapse collapse" aria-labelledby="heading-source-{{ safe_id }}" data-bs-parent="#accordion-source">
-            <div class="accordion-body">
-              {% for item in items %}
-                <div id="field_{{ item.field|slugify }}" class="field review__item" data-category="source" onclick="click_field('{{ item.field }}', '{{ item.value }}', 'source');">
-                  <p class="review__item-content">
-                    <span class="key">{{ item.display_field }}</span>
-                    <span class="value">{{ item.newValue|default:item.value }}</span>
-                    {% if item.reviewer_suggestion %}
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                    {% endif %}
-                    {% if item.suggestion_comment %}
-                      <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span><br>
-                    {% endif %}
-                    {% if item.additional_comment %}
-                      <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                    {% endif %}
-                  </p>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      {% endwith %}
-    {% endfor %}
-
-  </div>
-</div>
-
-           <div class="tab-pane fade" id="license" role="tabpanel" aria-labelledby="license-tab">
-  <div class="review__items accordion" id="accordion-license">
-
+    {# --- flat dataset‑level license fields (if any) -------------------- #}
     {% for item in meta.license.flat %}
-      <div id="field_{{ item.field|slugify }}" class="field review__item" data-category="license" onclick="click_field('{{ item.field }}', '{{ item.value }}', 'license');">
+      <div id="field_{{ item.field|slugify }}" class="field review__item"
+           data-category="license"
+           onclick="click_field('{{ item.field }}', '{{ item.value }}', 'license');">
         <p class="review__item-content">
           <span class="key">{{ item.display_field }}</span>
           <span class="value">{{ item.newValue|default:item.value }}</span>
-          {% if item.reviewer_suggestion %}
-            <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-          {% endif %}
-          {% if item.suggestion_comment %}
-            <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span><br>
-          {% endif %}
-          {% if item.additional_comment %}
-            <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-          {% endif %}
         </p>
       </div>
     {% endfor %}
 
-    {% for prefix, items in meta.license.grouped.items %}
-      {% with prefix|slugify as safe_id %}
+    {# ---------- 1st level accordion: License 0, License 1 … ------------ #}
+    {% for lic_prefix, lic_content in meta.license.grouped.items %}
+      {% with lic_prefix|slugify as lic_id %}
         <div class="accordion-item">
-          <h2 class="accordion-header" id="heading-license-{{ safe_id }}">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-license-{{ safe_id }}" aria-expanded="false" aria-controls="collapse-license-{{ safe_id }}">
-              {{ items.0.display_prefix|default:prefix|title }}
+          <h2 class="accordion-header" id="heading-lic-{{ lic_id }}">
+            <button class="accordion-button collapsed" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapse-lic-{{ lic_id }}"
+                    aria-expanded="false"
+                    aria-controls="collapse-lic-{{ lic_id }}">
+              {{ lic_prefix }}
             </button>
           </h2>
-          <div id="collapse-license-{{ safe_id }}" class="accordion-collapse collapse" aria-labelledby="heading-license-{{ safe_id }}" data-bs-parent="#accordion-license">
+          <div id="collapse-lic-{{ lic_id }}" class="accordion-collapse collapse"
+               aria-labelledby="heading-lic-{{ lic_id }}"
+               data-bs-parent="#accordion-license-main">
             <div class="accordion-body">
-              {% for item in items %}
-                <div id="field_{{ item.field|slugify }}" class="field review__item" data-category="license" onclick="click_field('{{ item.field }}', '{{ item.value }}', 'license');">
+
+              {# ---- flat fields inside this License N ------------------- #}
+              {% for item in lic_content.flat %}
+                <div id="field_{{ item.field|slugify }}" class="field review__item"
+                     data-category="license"
+                     onclick="click_field('{{ item.field }}', '{{ item.value }}', 'license');">
                   <p class="review__item-content">
                     <span class="key">{{ item.display_field }}</span>
                     <span class="value">{{ item.newValue|default:item.value }}</span>
-                    {% if item.reviewer_suggestion %}
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                    {% endif %}
-                    {% if item.suggestion_comment %}
-                      <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span><br>
-                    {% endif %}
-                    {% if item.additional_comment %}
-                      <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                    {% endif %}
                   </p>
                 </div>
               {% endfor %}
+
+              {# ---- nested accordion for sub‑lists (generic) ------------ #}
+              <div class="accordion accordion-inner" id="accordion-lic-sub-{{ lic_id }}">
+                {% for sub_prefix, sub_items in lic_content.grouped.items %}
+                  {% with sub_prefix|slugify as sub_id %}
+                    <div class="accordion-item">
+                      <h2 class="accordion-header"
+                          id="heading-lic-sub-{{ lic_id }}-{{ sub_id }}">
+                        <button class="accordion-button collapsed" type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapse-lic-sub-{{ lic_id }}-{{ sub_id }}"
+                                aria-expanded="false"
+                                aria-controls="collapse-lic-sub-{{ lic_id }}-{{ sub_id }}">
+                          {{ sub_prefix }}
+                        </button>
+                      </h2>
+                      <div id="collapse-lic-sub-{{ lic_id }}-{{ sub_id }}"
+                           class="accordion-collapse collapse"
+                           aria-labelledby="heading-lic-sub-{{ lic_id }}-{{ sub_id }}"
+                           data-bs-parent="#accordion-lic-sub-{{ lic_id }}">
+                        <div class="accordion-body">
+                          {% for item in sub_items %}
+                            <div id="field_{{ item.field|slugify }}" class="field review__item"
+                                 data-category="license"
+                                 onclick="click_field('{{ item.field }}', '{{ item.value }}', 'license');">
+                              <p class="review__item-content">
+                                <span class="key">{{ item.display_field }}</span>
+                                <span class="value">{{ item.newValue|default:item.value }}</span>
+                              </p>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endwith %}
+                {% endfor %}
+              </div> {# /accordion-inner #}
+
             </div>
           </div>
         </div>
