@@ -284,6 +284,96 @@
             <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
   <div class="review__items accordion" id="accordion-source">
 
+    {# --- flat dataset‑level source fields (if any) --------------------- #}
+    {% for item in meta.source.flat %}
+      <div id="field_{{ item.field|slugify }}" class="field review__item"
+           data-category="source"
+           onclick="click_field('{{ item.field }}', '{{ item.value }}', 'source');">
+        <p class="review__item-content">
+          <span class="key">{{ item.display_field }}</span>
+          <span class="value">{{ item.newValue|default:item.value }}</span>
+        </p>
+      </div>
+    {% endfor %}
+
+    {# ---------- 1st level accordion: Source 0, Source 1 … -------------- #}
+    {% for src_prefix, src_content in meta.source.grouped.items %}
+      {% with src_prefix|slugify as src_id %}
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="heading-source-{{ src_id }}">
+            <button class="accordion-button collapsed" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapse-source-{{ src_id }}"
+                    aria-expanded="false"
+                    aria-controls="collapse-source-{{ src_id }}">
+              {{ src_prefix }}
+            </button>
+          </h2>
+          <div id="collapse-source-{{ src_id }}" class="accordion-collapse collapse"
+               aria-labelledby="heading-source-{{ src_id }}"
+               data-bs-parent="#accordion-source">
+            <div class="accordion-body">
+
+              {# ---- flat fields inside this Source N -------------------- #}
+              {% for item in src_content.flat %}
+                <div id="field_{{ item.field|slugify }}" class="field review__item"
+                     data-category="source"
+                     onclick="click_field('{{ item.field }}', '{{ item.value }}', 'source');">
+                  <p class="review__item-content">
+                    <span class="key">{{ item.display_field }}</span>
+                    <span class="value">{{ item.newValue|default:item.value }}</span>
+                  </p>
+                </div>
+              {% endfor %}
+
+              {# ---- nested accordion for License indices ---------------- #}
+              <div class="accordion accordion-inner" id="accordion-license-{{ src_id }}">
+                {% for lic_prefix, lic_items in src_content.grouped.items %}
+                  {% with lic_prefix|slugify as lic_id %}
+                    <div class="accordion-item">
+                      <h2 class="accordion-header"
+                          id="heading-license-{{ src_id }}-{{ lic_id }}">
+                        <button class="accordion-button collapsed" type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapse-license-{{ src_id }}-{{ lic_id }}"
+                                aria-expanded="false"
+                                aria-controls="collapse-license-{{ src_id }}-{{ lic_id }}">
+                          {{ lic_prefix }}
+                        </button>
+                      </h2>
+                      <div id="collapse-license-{{ src_id }}-{{ lic_id }}"
+                           class="accordion-collapse collapse"
+                           aria-labelledby="heading-license-{{ src_id }}-{{ lic_id }}"
+                           data-bs-parent="#accordion-license-{{ src_id }}">
+                        <div class="accordion-body">
+                          {% for item in lic_items %}
+                            <div id="field_{{ item.field|slugify }}" class="field review__item"
+                                 data-category="source"
+                                 onclick="click_field('{{ item.field }}', '{{ item.value }}', 'source');">
+                              <p class="review__item-content">
+                                <span class="key">{{ item.display_field }}</span>
+                                <span class="value">{{ item.newValue|default:item.value }}</span>
+                              </p>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endwith %}
+                {% endfor %}
+              </div> {# /accordion-inner #}
+
+            </div>
+          </div>
+        </div>
+      {% endwith %}
+    {% endfor %}
+
+  </div>
+</div>
+
+  <div class="review__items accordion" id="accordion-source">
+
     {% for item in meta.source.flat %}
       <div id="field_{{ item.field|slugify }}" class="field review__item" data-category="source" onclick="click_field('{{ item.field }}', '{{ item.value }}', 'source');">
         <p class="review__item-content">
