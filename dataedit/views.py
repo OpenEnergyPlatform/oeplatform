@@ -1986,6 +1986,9 @@ class PeerReviewView(LoginRequiredMixin, View):
         """
         import re
 
+        def _plus_one_if_digit(txt: str) -> str:
+            return str(int(txt) + 1) if txt.isdigit() else txt
+
         val = self.parse_keys(oemetadata)
 
         main_categories = {
@@ -2047,7 +2050,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             Turn one Source‑block (list of dicts) into:
               {
                 "flat":     [ ... items without  <listname>.<idx> ... ],
-                "grouped":  { "<Listname> 0": [...], "<Listname> 1": [...], ... }
+                "grouped":  { "<Listname> 1": [...], "<Listname> 2": [...], ... }
               }
 
             Accepts arbitrary list names, not just 'licenses'.
@@ -2064,7 +2067,8 @@ class PeerReviewView(LoginRequiredMixin, View):
                 ):
                     list_name = parts[2]  # e.g. "licenses"
                     idx = parts[3]  # e.g. "0"
-                    group_key = f"{list_name.capitalize()} {idx}"
+                    display_idx = int(idx) + 1
+                    group_key = f"{list_name.capitalize()} {display_idx}"
                     display_field = ".".join(parts[4:]) or "value"
 
                     enriched = itm.copy()
@@ -2076,10 +2080,10 @@ class PeerReviewView(LoginRequiredMixin, View):
                     # keep as flat inside this Source block
                     trimmed = ".".join(parts[2:]) if len(parts) > 2 else itm["field"]
                     enriched = itm.copy()
-                    enriched["display_field"] = trimmed
+                    enriched["display_field"] = _plus_one_if_digit(trimmed)
                     nested["flat"].append(enriched)
 
-            # sort groups numerically (… 0, 1, 2 …) within each list name
+            # sort groups numerically (… 1, 2, 3 …) within each list name
             nested["grouped"] = dict(
                 sorted(
                     nested["grouped"].items(),
@@ -2109,8 +2113,9 @@ class PeerReviewView(LoginRequiredMixin, View):
                         break
 
                 if list_idx is not None:
-                    # «Timeseries 0», «Bbox 1» …
-                    group_key = f"{list_name.capitalize()} {list_idx}"
+                    # «Timeseries 1», «Bbox 2» …
+                    display_idx = int(list_idx) + 1  # show 1‑based index
+                    group_key = f"{list_name.capitalize()} {display_idx}"
                     display_field = (
                         ".".join(parts[idx_pos + 1 :])
                         if idx_pos + 1 < len(parts)
@@ -2124,7 +2129,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                     result["grouped"][group_key].append(enriched)
                 else:
                     trimmed = field.split(".", 1)[1] if "." in field else field
-                    item["display_field"] = trimmed
+                    item["display_field"] = _plus_one_if_digit(trimmed)
                     item.pop("display_index", None)
                     result["flat"].append(item)
 
@@ -2138,11 +2143,11 @@ class PeerReviewView(LoginRequiredMixin, View):
             Organise *items* into
               * ``flat``     – fields without any nesting,
               * ``grouped``  – dict whose keys are human‑readable list titles
-                               such as 'Timeseries 0', 'Sources 1', …
+                               such as 'Timeseries 1', 'Sources 2', …
 
             All fields that share the same list index (e.g. timeseries.0.*)
             are collected under one group.  The groups are ordered by their
-            numeric index so that 0, 1, 2 … appear in sequence.
+            numeric index so that 1, 2, 3 … appear in sequence.
             """
             result = {"flat": [], "grouped": defaultdict(list)}
 
@@ -2153,7 +2158,10 @@ class PeerReviewView(LoginRequiredMixin, View):
                 # Handle list elements like timeseries.0.start
                 if len(parts) >= 3 and parts[1].isdigit():
                     index = parts[1]  # '0'
-                    group_key = f"{parts[0].capitalize()} {index}"  # 'Timeseries 0'
+                    display_idx = int(index) + 1
+                    group_key = (
+                        f"{parts[0].capitalize()} {display_idx}"  # 'Timeseries 1'
+                    )
                     display_field = ".".join(parts[2:])  # 'start'
 
                     enriched = item.copy()
@@ -2167,7 +2175,8 @@ class PeerReviewView(LoginRequiredMixin, View):
                 elif "." in field:
                     group_key = field.split(".")[0]  # 'spatial'
                     enriched = item.copy()
-                    enriched["display_field"] = ".".join(field.split(".")[1:])
+                    raw_tail = ".".join(field.split(".")[1:])
+                    enriched["display_field"] = _plus_one_if_digit(raw_tail)
                     enriched["display_prefix"] = group_key
                     enriched.pop("display_index", None)
 
@@ -2176,10 +2185,11 @@ class PeerReviewView(LoginRequiredMixin, View):
                 # Handle completely flat fields
                 else:
                     item["display_field"] = field
+                    item["display_field"] = _plus_one_if_digit(item["display_field"])
                     item.pop("display_index", None)
                     result["flat"].append(item)
 
-            # Sort grouped entries by their numeric index (Timeseries 0, 1, 2 …)
+            # Sort grouped entries by their numeric index (Timeseries 1, 2, 3 …)
             sorted_grouped = dict(
                 sorted(result["grouped"].items(), key=lambda kv: extract_index(kv[0]))
             )
