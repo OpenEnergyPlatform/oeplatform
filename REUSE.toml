@@ -3392,3 +3392,27 @@ SPDX-FileCopyrightText = [
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
+[[annotations]]
+path = "script/reuse/mail-to-github.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut",
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/layouts/_login.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "vite.config.mjs"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
