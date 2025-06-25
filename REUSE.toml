@@ -3312,6 +3312,23 @@ SPDX-FileCopyrightText = [
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Eike Broda <https://github.com/ebroda>",
-  "2025 Vismaya Jochem <https://github.com/vismayajochem>",
   "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/installation/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/apps/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]

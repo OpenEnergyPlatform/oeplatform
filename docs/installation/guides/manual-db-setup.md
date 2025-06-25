@@ -1,10 +1,3 @@
-<!--
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-
-SPDX-License-Identifier: CC0-1.0
--->
-
 # Complete manual database setup
 
 Below we describe the complete manual installation of the OpenEnergyPlatform database infrastructure, which is currently composed by multiple databases:
