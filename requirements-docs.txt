@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # does not run in (productive py3.6) but that's ok
 # because doc build should only runs on newer python on github
 mkdocs-material~=9.1
