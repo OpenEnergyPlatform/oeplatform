@@ -3333,3 +3333,26 @@ SPDX-FileCopyrightText = [
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
+[[annotations]]
+path = "factsheet/frontend/src/**.jsx"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/src/**.tsx"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
