@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Upload
 
 The process op uploading data to the oep is implemented in the OEP-WEB api and can be used via rest entirely. Recently some required enhancements have been identified and the API will be updated, old endpoints are redirected to prevent breaking 3rd party code.

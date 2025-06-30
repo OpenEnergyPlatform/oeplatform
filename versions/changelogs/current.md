@@ -37,6 +37,7 @@ SPDX-License-Identifier: CC0-1.0
 # Changes to the oeplatform code
 
 ## Changes
+- Finish REUSE compliant check [(#2037)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2037)
 
 ## Features
 - Make repository REUSE compliant [(#2016)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2016)
