@@ -1,0 +1,266 @@
+{
+  "name": "example_wind_farm_capacity",
+  "title": "Example dataset for wind farm capacity data to demonstrate common data for the Open Energy Platform.",
+  "@context": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/v2/v20/context.json",
+  "resources": [
+    {
+      "name": "oep_example_table",
+      "path": "https://openenergy-platform.org/dataedit/view/model_draft/oep_table_example",
+      "type": "Table",
+      "title": "OEP Example Table",
+      "format": "PostgreSQL",
+      "review": {
+        "path": "",
+        "badge": null
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "serial",
+            "unit": "",
+            "isAbout": [{}],
+            "nullable": false,
+            "description": "Unique identifier",
+            "valueReference": [{}]
+          },
+          {
+            "name": "technology",
+            "type": "text",
+            "unit": "",
+            "isAbout": [
+              {
+                "@id": "https://openenergy-platform.org/ontology/oeo/OEO_00000407",
+                "name": "technology"
+              }
+            ],
+            "nullable": true,
+            "description": "Technology name",
+            "valueReference": [{}]
+          },
+          {
+            "name": "type",
+            "type": "text",
+            "unit": "",
+            "isAbout": [
+              {
+                "@id": "https://openenergy-platform.org/ontology/oeo/OEO_00000447",
+                "name": "wind farm"
+              }
+            ],
+            "nullable": true,
+            "description": "Type of wind farm",
+            "valueReference": [
+              {
+                "@id": "https://openenergy-platform.org/ontology/oeo/OEO_00000311",
+                "name": "onshore wind farm",
+                "value": "onshore "
+              },
+              {
+                "@id": "https://openenergy-platform.org/ontology/oeo/OEO_00000308",
+                "name": "offshore wind farm",
+                "value": "offshore "
+              }
+            ]
+          },
+          {
+            "name": "year",
+            "type": "integer",
+            "unit": "",
+            "isAbout": [
+              {
+                "@id": "http://openenergy-platform.org/ontology/oeo/OEO_00020161",
+                "name": "annual"
+              }
+            ],
+            "nullable": true,
+            "description": "Reference year",
+            "valueReference": [{}]
+          },
+          {
+            "name": "date",
+            "type": "integer",
+            "unit": "",
+            "isAbout": [
+              {
+                "@id": "http://openenergy-platform.org/ontology/oeo/OEO_00030031",
+                "name": "start time"
+              }
+            ],
+            "nullable": true,
+            "description": "Start of the time series",
+            "valueReference": [{}]
+          },
+          {
+            "name": "value",
+            "type": "double precision",
+            "unit": "MW",
+            "isAbout": [
+              {
+                "@id": "https://openenergy-platform.org/ontology/oeo/OEO_00000350",
+                "name": "quantity value"
+              },
+              {
+                "@id": "http://openenergy-platform.org/ontology/oeo/OEO_00230003",
+                "name": "nameplate capacity"
+              }
+            ],
+            "nullable": true,
+            "description": "Installed capacity",
+            "valueReference": [{}]
+          },
+          {
+            "name": "comment",
+            "type": "text",
+            "unit": "",
+            "isAbout": [],
+            "nullable": true,
+            "description": "Unique identifier",
+            "valueReference": []
+          },
+          {
+            "name": "geometry",
+            "type": "text",
+            "unit": "",
+            "isAbout": [],
+            "nullable": true,
+            "description": "Unique identifier",
+            "valueReference": []
+          }
+        ],
+        "primaryKey": ["id"],
+        "foreignKeys": [
+          {
+            "fields": [""],
+            "reference": {
+              "fields": [""],
+              "resource": ""
+            }
+          }
+        ]
+      },
+      "topics": [""],
+      "context": {
+        "title": "",
+        "contact": "https://openenergy-platform.org/contact/",
+        "grantNo": "03EI1035",
+        "homepage": "https://openenergyplatform.org/",
+        "publisher": "",
+        "sourceCode": "https://github.com/OpenEnergyPlatform/oemetadata",
+        "documentation": "https://openenergyplatform.org/about/",
+        "fundingAgency": "Bundesministerium für Wirtschaft und Klimaschutz (BMWK)",
+        "publisherLogo": "https://github.com/OpenEnergyPlatform/organisation/blob/production/logo/OpenEnergyFamily_Logo_OpenEnergyFamily.png",
+        "fundingAgencyLogo": "https://commons.wikimedia.org/wiki/File:BMWi_Logo_2021.svg#/media/File:BMWi_Logo_2021.svg"
+      },
+      "dialect": {
+        "delimiter": "",
+        "decimalSeparator": "."
+      },
+      "sources": [
+        {
+          "path": "https://github.com/OpenEnergyPlatform/oemetadata",
+          "title": "Open Energy Family - Example Table ",
+          "authors": [],
+          "description": "Table example",
+          "sourceLicenses": [
+            {
+              "name": "CC0-1.0",
+              "path": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+              "title": "Creative Commons Zero v1.0 Universal",
+              "attribution": "© Open Energy Family",
+              "instruction": "You are free: To Share, To Create, To Adapt",
+              "copyrightStatement": null
+            }
+          ],
+          "publicationYear": null
+        }
+      ],
+      "spatial": {
+        "extent": {
+          "crs": "",
+          "name": "germany",
+          "boundingBox": [0, 0, 0, 0],
+          "resolutionUnit": "",
+          "resolutionValue": "country"
+        },
+        "location": {
+          "address": null,
+          "latitude": "",
+          "longitude": ""
+        }
+      },
+      "subject": [
+        {
+          "@id": "https://openenergy-platform.org/ontology/oeo/OEO_00000150",
+          "name": "energy"
+        },
+        {
+          "@id": "https://openenergy-platform.org/ontology/oeo/OEO_00000408",
+          "name": "test dataset"
+        }
+      ],
+      "encoding": "UTF-8",
+      "keywords": ["energy", "example", "template", "test"],
+      "licenses": [
+        {
+          "name": "CC0-1.0",
+          "path": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+          "title": "Creative Commons Zero v1.0 Universal",
+          "attribution": "© Open Energy Family",
+          "instruction": "You are free: To Share, To Create, To Adapt",
+          "copyrightStatement": null
+        }
+      ],
+      "temporal": {
+        "timeseries": [
+          {
+            "end": "2022-12-31T23:00:00+01:00",
+            "start": "2021-01-01T00:00:00+01:00",
+            "alignment": "",
+            "resolutionUnit": "year",
+            "aggregationType": "sum",
+            "resolutionValue": "1"
+          }
+        ],
+        "referenceDate": "2023-07-03"
+      },
+      "languages": ["en-GB", "en-US", "de-DE"],
+      "description": "This is an example table with OEMetadata for the OEP.",
+      "contributors": [
+        {
+          "date": "2023-07-03",
+          "path": null,
+          "roles": [""],
+          "title": "Ludee",
+          "object": "metadata",
+          "comment": "Create metadata",
+          "organization": null
+        },
+        {
+          "date": "2025-03-01",
+          "path": "https://github.com/OpenEnergyPlatform",
+          "role": ["platform-maintainer"],
+          "title": "Open Energy Platform oemetadata conversion to v2",
+          "object": "conversion of all metadata to oemetadata  version 2.0.4",
+          "comment": "The conversion was done by the OpenEnergyFamily team using the OMI software.We did our best to mitigate data loss. Most unexpected or incorrect metadata propertyentries will be lost.",
+          "organization": "OpenEnergyFamily"
+        }
+      ],
+      "embargoPeriod": {
+        "end": "",
+        "start": "",
+        "isActive": false
+      },
+      "publicationDate": "2023-07-03"
+    }
+  ],
+  "description": "",
+  "metaMetadata": {
+    "metadataLicense": {
+      "name": "CC0-1.0",
+      "path": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "title": "Creative Commons Zero v1.0 Universal"
+    },
+    "metadataVersion": "OEMetadata-2.0.4"
+  }
+}
