@@ -39,7 +39,12 @@ SPDX-License-Identifier: CC0-1.0
 ## Changes
 
 ## Features
+
 - Make repository REUSE compliant [(#2016)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2016)
+
+- Add management command to seed the database with table, data and metadata from the example dataset [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+
+- Add prototype script to import datasets from the production OEP into a local instance [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
 
 ## Bugs
 
