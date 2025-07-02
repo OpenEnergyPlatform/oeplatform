@@ -1,4 +1,6 @@
+import json
 from csv import DictReader
+from pathlib import Path
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
@@ -7,9 +9,16 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
-from api.actions import _get_engine
+from api.actions import (
+    _get_engine,
+    set_table_metadata,
+    try_convert_metadata_to_v2,
+    try_parse_metadata,
+    try_validate_metadata,
+)
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
+from dataedit.views import get_tag_keywords_synchronized_metadata
 
 User = get_user_model()
 
@@ -139,6 +148,17 @@ class Command(BaseCommand):
                     )
                 )
 
+            try:
+                # Set metadata for the table
+                metadata_file = "dataedit/management/data/datapackage.json"
+                self._set_metadata(schema_name, table_name, metadata_file)
+            except Exception as e:
+                self.stderr.write(
+                    self.style.ERROR(
+                        f"✘ Failed to set metadata for {schema_name}.{table_name}: {e}"
+                    )
+                )
+
     def _seed_data(self, schema, table_name, csv_file):
         engine = _get_engine()
         Session = sessionmaker(bind=engine)
@@ -196,3 +216,41 @@ class Command(BaseCommand):
                 self.stderr.write(self.style.ERROR(f"General insert error: {e}"))
             finally:
                 session.close()
+
+    def _set_metadata(self, schema, table_name, metadata_file):
+        metadata_path = Path(metadata_file)
+        metadata: dict = {}
+
+        if not metadata_path.exists():
+            self.stderr.write(
+                self.style.ERROR(f"Metadata file '{metadata_file}' not found.")
+            )
+            return
+
+        with open(metadata_path, encoding="utf-8") as f:
+            raw_metadata = json.load(f)
+
+        metadata, error = try_parse_metadata(raw_metadata)
+        if error:
+            raise Exception(f"Metadata parse error: {error}")
+
+        metadata = try_convert_metadata_to_v2(metadata)
+        metadata, error = try_validate_metadata(metadata)
+        if error:
+            raise Exception(f"Metadata validation error: {error}")
+
+        # Sync keywords with tag system
+        keywords = metadata["resources"][0].get("keywords", []) or []
+        synced = get_tag_keywords_synchronized_metadata(
+            table=table_name, schema=schema, keywords_new=keywords
+        )
+        metadata["resources"][0]["keywords"] = synced["resources"][0]["keywords"]
+
+        # Save to Django's oemetadata JSONB field and comment
+        set_table_metadata(table=table_name, schema=schema, metadata=metadata)
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"✔ Metadata saved and tags synced for {schema}.{table_name}"
+            )
+        )

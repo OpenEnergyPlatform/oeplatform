@@ -4,8 +4,8 @@
   "@context": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/v2/v20/context.json",
   "resources": [
     {
-      "name": "oep_example_table",
-      "path": "https://openenergy-platform.org/dataedit/view/model_draft/oep_table_example",
+      "name": "example_wind_farm_capacity",
+      "path": "http://127.0.0.1:8000/dataedit/view/model_draft/example_wind_farm_capacity",
       "type": "Table",
       "title": "OEP Example Table",
       "format": "PostgreSQL",
@@ -120,7 +120,7 @@
           },
           {
             "name": "geometry",
-            "type": "text",
+            "type": "geometry",
             "unit": "",
             "isAbout": [],
             "nullable": true,
