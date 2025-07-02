@@ -1,0 +1,33 @@
+{% load i18n %}
+{% load allauth %}
+{% load socialaccount %}
+{% get_providers as socialaccount_providers %}
+{% if socialaccount_providers %}
+    {% if not SOCIALACCOUNT_ONLY %}
+        <!-- Separator -->
+        <div class="login__separation">
+            <div class="login__separation-line"></div>
+            <div class="login__separation-word">OR</div>
+            <div class="login__separation-line"></div>
+        </div>
+        <span></span>
+    {% endif %}
+     <div class="socialaccount_ballot">
+        <div class="provider-buttons">
+        {% for provider in socialaccount_providers %}
+            <form method="post" action="{% provider_login_url provider.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="login__button login__button--outline-secondary">
+                <span>
+                <svg width="24" height="24" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m73.543 39.375h4.7969l-0.003906-3.543-3.543-1.7734-24.797-12.395-24.793 12.395-3.543 1.7734v3.543zm-10.625-5.3125-12.914-6.457-12.914 6.457zm-27.973 33.438-0.003906-23.027h-5.3164v23.027zm17.707-23.027v23.023h-5.3125l-0.003906-23.023zm17.711 0v23.023h-5.3125l-0.003906-23.023zm7.9766 31.207c0 1.4648-1.1836 2.6562-2.6484 2.6562h-51.367c-1.4648 0-2.6562-1.1875-2.6562-2.6562 0-1.4648 1.1914-2.6562 2.6562-2.6562h51.363c1.4648 0.003906 2.6523 1.1914 2.6523 2.6562z"/>
+                </svg>
+                </span>
+                <span>Sign in through your institution</span>
+            </button>
+            </form>
+        {% endfor %}
+        </div>
+    </div>
+    {% include "socialaccount/snippets/login_extra.html" %}
+{% endif %}

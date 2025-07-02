@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 from django.urls import path, re_path
 
 from factsheet import views
@@ -5,7 +14,7 @@ from factsheet import views
 app_name = "factsheet"
 urlpatterns = [
     path(r"", views.factsheets_index),
-    path(r"main", views.factsheets_index),
+    path(r"main", views.factsheets_index, name="factsheets_index"),
     re_path(r"^id/*", views.factsheets_index, name="bundle-id-page"),
     re_path(r"^compare/*", views.factsheets_index),
     re_path(r"^oekg_history/*", views.factsheets_index),
@@ -25,7 +34,6 @@ urlpatterns = [
     path(r"add_a_fact/", views.add_a_fact),
     path(r"populate_factsheets_elements/", views.populate_factsheets_elements),
     path(r"update_an_entity/", views.update_an_entity),
-    path(r"query/", views.query_oekg),
     path(r"get_scenarios/", views.get_scenarios),
     path(r"test_query/", views.test_query),
     path(r"get_oekg_modifications/", views.get_oekg_modifications),

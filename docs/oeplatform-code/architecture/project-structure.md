@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 ## Project directory
 
 The tree structure you see below describes the structure of the oeplatform code project. In general it is a django (using version 3.2) project that maintains multiple django apps that either serve for the frontend UI of the oeplatform website or host our WEB-API´s like the REST-API or our OEKG-API which provide a interface to specific functionality that accesses the the different databases we maintain.

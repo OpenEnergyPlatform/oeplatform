@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani>
+// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr>
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 const getColors = (colorName) => {
   const colors = {
     text: "#E0E0E0",

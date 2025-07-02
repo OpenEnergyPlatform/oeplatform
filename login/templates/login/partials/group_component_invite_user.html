@@ -1,6 +1,6 @@
 <div class="htmxComponentGroupMembership">
         <div class="profile-category__member-invite">
-            <form id="invite-form" hx-post="{% url 'partial-group-invite' group_id=group.id %}" hx-target="#error-message" hx-encType="multipart/form-data" data-error-display="error-message">
+            <form id="invite-form" hx-post="{% url 'login:partial-group-invite' group_id=group.id %}" hx-target="#error-message" hx-encType="multipart/form-data" data-error-display="error-message">
                 {% csrf_token %}
                 <input type="hidden" name="mode" value="add_user">
                 <input class="form-control" id="username-input" name="name" type="text" placeholder="Add a user" >

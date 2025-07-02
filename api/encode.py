@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import itertools as it
 from json.encoder import INFINITY, encode_basestring, encode_basestring_ascii
 from types import GeneratorType

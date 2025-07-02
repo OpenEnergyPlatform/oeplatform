@@ -1,0 +1,3418 @@
+# SPDX-FileCopyrightText: 2024 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+version = 1
+SPDX-PackageName = "oeplatform"
+SPDX-PackageSupplier = "Ludwig Hülk <https://github.com/Ludee>"
+SPDX-PackageDownloadLocation = "https://github.com/OpenEnergyPlatform/oeplatform/"
+SPDX-PackageComment = "The code of this repository is licensed under the GNU Affero General Public License v3.0 or later License (AGPL-3.0-or-later)."
+
+
+[[annotations]]
+path = ".devcontainer/devcontainer.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = ".github/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "VERSION"
+precedence = "override"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileCopyrightText = [
+  "oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>"
+]
+
+[[annotations]]
+path = ".gitmodules"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = ".dockerignore"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "LICENSE"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = ".eslintrc.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = ".bumpversion.cfg"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "mkdocs.yml"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = ".prettierignore"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = ".gitignore"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2015 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2015 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Alexis Michaltsis <https://github.com/4lm> © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "CITATION.cff"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "tox.ini"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "alembic.ini"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "environment.yml"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = ".pre-commit-config.yaml"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docker/apache2.conf"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "docker/Dockerfile"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Eike Broda <https://github.com/ebroda>",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docker/docker-compose.yaml"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_ext/oeo_extended_store/test/data/expected_composedUnit.owl"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_ext/templates/oeo_ext/partials/oeo-ext-plugin-ui.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_ext/templates/oeo_ext/partials/success.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_ext/templates/oeo_ext/partials/unit_element.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/img/OEP-Datasets-System-2023-06-15-1708.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/img/draft-infrastructure-oep-2023-10-24-1338.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/oekg-api/oekg.yaml"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/oauth2-redirect.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle-core.js.map"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/swagger-ui.js.map"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/swagger-ui.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/swagger-ui-es-bundle.js.map"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/favicon-32x32.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/swagger-ui.css.map"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/swagger-ui-standalone-preset.js.map"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/index.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/index.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/swagger-ui-bundle.js.map"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/dist/favicon-16x16.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/web-api/oedb-rest-api/schema.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/css/extra.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "modelview/static/css/form-style.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/static/css/mv-style.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/static/css/custom_alert.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/editframework.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 quentinpeyras <https://github.com/quentinpeyras>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/editmodel_snippet_depend.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/editmodel_snippet.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 quentinpeyras <https://github.com/quentinpeyras>",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/error_template.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/detail_view.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/array_snippet.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/modellist.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/editmodel.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 quentinpeyras <https://github.com/quentinpeyras>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/base.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/overview.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/form_element_factory.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/model.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 quentinpeyras <https://github.com/quentinpeyras>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/error_snipet.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/tag_selector.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/model_snippet.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 quentinpeyras <https://github.com/quentinpeyras>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/framework.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 quentinpeyras <https://github.com/quentinpeyras>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/FactSheets_schema.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/widgets/dynamic_edit.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/widgets/multiwidget.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/widgets/dynamic_array.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/generic_form.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/login/list_memberships.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/login/detach.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/login/oepuser_edit_form.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/user_settings.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/oepuser_create_form.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/activate.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/login/user_tables.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/user_groups.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/admin_group.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Marco Finkendei <https://github.com/MFinkendei>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/sidebar_user.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/user_nav.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/user_review.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/delete_account.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/login/modals/table_publish.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/group_component_tables.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/group_component_form_edit.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/user_partial_tables.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/group_component_invite_user.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/badge_icon.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/groups.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/group_component_membership.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/group_management.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/registration/custom_password_reset_done.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/registration/custom_password_reset_form.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/registration/password_reset_email.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/registration/login.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/registration/custom_password_reset_confirm.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/registration/custom_password_reset_complete.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/mails/base.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/mails/verification_mail.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "oekg/static/sparql_ui/vendor/yasgui-4.2.28/js/yasgui.min.js.map"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oekg/static/sparql_ui/vendor/yasgui-4.2.28/css/yasgui.min.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oekg/templates/oekg/main.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/favicon.ico"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/OEP_logo_2_no_text.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/oeplogo.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/open_ego_logo_breit.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "base/static/OpenEnergyFamily_Logo_OpenEnergyPlatform.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/OEP_logo_2.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "base/static/project_detail_pages_content/szenarien_db.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/project_detail_pages_content/sirop.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/project_detail_pages_content/lod_geoss.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/project_detail_pages_content/open_fred.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/project_detail_pages_content/.PROJECT_TEMPLATE.jsonc"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/static/project_detail_pages_content/open_modex.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/project_detail_pages_content/open_ego.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Maja Zimmermann <https://github.com/mjazimm> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/logos/project/open_MODEX_Header.jpg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/project/open_FRED_Header.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/project/SzenarienDB_Header.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/project/LOD-GEOSS_Header.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/project/open_ego_logo.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/project/SIROP_logo.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/project/open_eGo_Header.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/funder/BMWK.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/HZG.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/ZNES.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/pik_logo.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/Logo_IER_UniStuttgart-1200x386.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/OvGU.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/partner_logo_fortiss.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/RLI.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/partner_logo_hereon.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/IEE.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/DLR-VE.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/FZJuelich-1.jpg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/NE.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/OEI.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/EUF.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/partner_logo_nfdi4energy.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2024 Santosch Mutyala <https://github.com/smutyala1at> © Uni Oldenburg",
+]
+
+[[annotations]]
+path = "base/static/logos/partner/InfAI-Logo.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/selector-icons.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Marco Finkendei <https://github.com/MFinkendei>",
+]
+
+[[annotations]]
+path = "base/static/img/icon-unknown.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Marco Finkendei <https://github.com/MFinkendei>",
+]
+
+[[annotations]]
+path = "base/static/img/search.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Marco Finkendei <https://github.com/MFinkendei>",
+]
+
+[[annotations]]
+path = "base/static/img/OpenEnergyFamily_OEPlatypus.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/OpenEnergyFamily_modules_trans.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/icon-unknown-alt.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Marco Finkendei <https://github.com/MFinkendei>",
+]
+
+[[annotations]]
+path = "base/static/img/about/OpenEnergyFamily_modeling-cycle.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/about/OpenEnergyFamily_modeling-open-science.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/about/OpenEnergyFamily_GroupPhoto.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/about/OpenEnergyFamily_GroupPhoto2.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2024 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/about-community.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/ontology.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/videos.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/documentation.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/beginners.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/bundles.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/api.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/database.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/OEP_Documentation.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/factsheets.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2021 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/about-openscience.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/concept.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "base/static/img/welcome/about-process-modelling.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/img/badges/badge_iron.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/badges/badge_silver.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/badges/badge_bronze.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/badges/badge_platinum.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/img/badges/badge_gold.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/css/jquery-ui.min.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+    "Copyright 2014 jQuery Foundation and other contributors",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/css/base-style.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 Till Isenhuth <https://github.com/thsstll>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/css/filterform.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Marco Finkendei <https://github.com/MFinkendei>",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/static/css/index-style.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/static/css/bootstrap.min.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [ 
+    "Copyright 2011-2022 The Bootstrap Authors",
+    "Copyright 2011-2022 Twitter, Inc.",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/static/css/bootstrap-select.min.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+    "Copyright 2012-2021 SnapAppointments, LLC",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/templates/base/base-full.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/templates/base/_footer.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/templates/base/base-wide-react.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/templates/base/500.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Klara Reder <https://github.com/klarareder> © Fraunhofer IEE",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/templates/base/base-profile.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/templates/base/base.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 quentinpeyras <https://github.com/quentinpeyras>",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 Till Isenhuth <https://github.com/thsstll>",
+  "2017 Marco Finkendei <https://github.com/MFinkendei>",
+  "2017 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Dhruvin1412 <Dhruvin1412> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/templates/base/privacy_policy.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/templates/base/terms_of_use.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Europa-Universität Flensburg (EUF)",
+  "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/templates/base/faq.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/templates/base/base-sidebar.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+    "Copyright (c) 2011-2024 The Bootstrap Authors",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/templates/base/discussion.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Berit Müller <https://github.com/beritRLI> © Reiner Lemoine Institut",
+  "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
+  "2018 Hannah Förster <https://github.com/han-f> © Öko-Institut e.V.",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/templates/base/contact.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Europa-Universität Flensburg (EUF)",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Lukas Emele <https://github.com/l-emele> © Öko-Institut e.V.",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/templates/base/project-detail.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "base/templates/base/about.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
+  "2017 Berit Müller <https://github.com/beritRLI> © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2024 Santosch Mutyala <https://github.com/smutyala1at> © Uni Oldenburg",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/templates/base/_header.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "base/templates/base/index.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 Till Isenhuth <https://github.com/thsstll>",
+  "2016 Berit Müller <https://github.com/beritRLI> © Reiner Lemoine Institut",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Editha Koetter <https://github.com/EdithaK> © Reiner Lemoine Institut",
+  "2017 Wolf-Dieter Bunke <https://github.com/wolfbunke> © Europa-Universität Flensburg (EUF)",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Stephan Günther <https://github.com/gnn> © Otto-von-Guericke-Universität Magdeburg",
+  "2018 Klara Reder <https://github.com/klarareder> © Fraunhofer IEE",
+  "2018 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2020 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "base/templates/base/404.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2019 Klara Reder <https://github.com/klarareder> © Fraunhofer IEE",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "factsheet/templates/factsheet/index.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/templates/partials/related_oekg_scenarios.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/package-lock.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/.gitignore"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "factsheet/frontend/package.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "factsheet/frontend/public/manifest.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "factsheet/frontend/public/index.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "factsheet/frontend/src/app.less"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/src/index.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/src/conf.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/src/data/countries.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/src/styles/App.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/src/styles/react-checkbox-tree.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/src/styles/OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "ontology/templates/ontology/partial_ontology_sidebar_content.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "ontology/templates/ontology/partial_ontology_full.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "ontology/templates/ontology/partial_ontology_content.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "ontology/templates/ontology/oeo-steering-committee.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2021 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "ontology/templates/ontology/about.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Janna Hastings <https://github.com/jannahastings> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Mirjam Stappel <https://github.com/stap-m> © Fraunhofer IEE",
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "ontology/templates/ontology/oeo.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "ontology/templates/ontology/class.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/fixtures/topics.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/static/colorfield/jscolor/hv.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "dataedit/static/colorfield/jscolor/arrow.gif"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "dataedit/static/colorfield/jscolor/demo.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "dataedit/static/colorfield/jscolor/hs.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "dataedit/static/colorfield/jscolor/cross.gif"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "dataedit/static/metaedit/schema.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/static/metaedit/metaedit.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/static/peer_review/schema.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/static/peer_review/example_datenmodell.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/static/peer_review/template_datenmodell.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/static/peer_review/img/opr-process-bpmn.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/static/dataedit/dataview.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "dataedit/static/dataedit/dataedit.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/dataedit/api.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "dataedit/static/dataedit/metadata.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/dataedit/jquery.dataTables.min.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/dataedit/query-builder.default.min.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+    "Copyright 2014-2018 Damien 'Mistic' Sorel (http://www.strangeplanet.fr)",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/dataedit/leaflet.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/dataedit/images/marker-shadow.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/dataedit/images/marker-icon.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/metadata-viewer/metadata-viewer.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/static/images/sort_asc.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/images/sort_asc_disabled.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/images/sort_desc_disabled.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/images/sort_both.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/images/sort_desc.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/wizard/wizard.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/static/wizard/.gitignore"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/templates/messages.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/dataedit_tablelist.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2018 Lukas Emele <https://github.com/l-emele> © Öko-Institut e.V.",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/tag_editor.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/url_list_field.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/wizard.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/dataedit_schemalist.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Jonas H <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2019 Dhruvin1412 <Dhruvin1412> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/tablemap_form.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/opr_contributor.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/tablegraph_form.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/table_permissions.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/opr_review.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
+  "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/tag_overview.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/base.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
+  "2017 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/base-sidebar.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/base_fullwidth.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/meta_edit.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/tagged_field.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/dataview.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2017 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2018 Tom Heimbrodt <https://github.com/tom-heimbrodt>",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2020 Hannah Förster <https://github.com/han-f> © Öko-Institut e.V.",
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2020 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Eike Broda <https://github.com/ebroda>",
+  "2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/tag_form.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/filter.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2022 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/taggable_setting.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/admin.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "dataedit/templates/partials/metadata_viewer.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oedb_datamodels/script.py.mako"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oedb_datamodels/README"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "oeplatform/securitysettings.py.default"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2015 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2016 Pietro Zambelli <https://github.com/zarch>",
+  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
+  "2019 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut",
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut",
+  "2023 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "script/setup_and_migrate_db"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_viewer/.gitignore"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_viewer/data/oeo_viewer_json_data.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "oeo_viewer/templates/index.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/.babelrc"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/package-lock.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.", 
+  "2022 Jonas Hiber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  ]
+
+[[annotations]]
+path = "oeo_viewer/client/package.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/source-code/index.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/source-code/statics/oep.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/source-code/statics/network.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/source-code/statics/oeo_info.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/source-code/statics/d3-dependencies.csv"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/source-code/styles/index.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/oep.fa81489f.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/flags.c284a657.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/icons.c653e3a9.woff2"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/brand-icons.a1ff5e2a.woff2"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/outline-icons.73dd3248.woff2"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/outline-icons.1bbd56ed.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/brand-icons.eb08bf9d.ttf"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/brand-icons.e4ffb4d8.eot"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/outline-icons.585fe6ab.ttf"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/outline-icons.00440017.woff"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/icons.f15da7ef.ttf"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/brand-icons.85906eb5.woff"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/network.2770f24c.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/scripts.bcf3243b.js.map"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/icons.69098388.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/scripts.bcf3243b.css.map"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/outline-icons.5d6254f9.eot"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/index.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/brand-icons.ea4bcc5e.svg"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/icons.6f55393b.woff"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/icons.1164acc1.eot"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/scripts.bcf3243b.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+    "Copyright 2014 Contributors",
+    "Copyright 2013 Contributors",
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "oeo_viewer/client/dist/bezier.c0025d7c.cjs"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+]
+
+[[annotations]]
+path = "theming/_variables.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/.dockerignore"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "theming/oepstrap.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/.gitignore"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "theming/Dockerfile"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "theming/scss/layouts/_ontology.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/layouts/_database.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "theming/scss/layouts/_profile.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "theming/scss/layouts/_review.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/layouts/_main.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "theming/scss/layouts/_topics.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/base/_index.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/base/_custom_variables.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/base/_mixins.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/components/_tabs.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "theming/scss/components/_paginations.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/components/_buttons.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/components/_headers.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/components/_alerts.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "theming/scss/components/_sidebars.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Eike Broda <https://github.com/ebroda>",
+]
+
+[[annotations]]
+path = "theming/scss/components/_empty_states.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/components/_tables.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/components/_cards.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/components/_tags.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/components/_controls.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/components/_collapses.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "api/services/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "api/validators/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/management/commands/create_example_tables.py"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/static/database/css/database-enhancements.css"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docker/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2021 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Eike Broda <https://github.com/ebroda>",
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/installation/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "docs/oeplatform-code/apps/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/src/**.jsx"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "factsheet/frontend/src/**.tsx"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/account/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Alexandro Steinert"
+]
+
+[[annotations]]
+path = "login/templates/socialaccount/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024 Alexandro Steinert"
+]
+
+[[annotations]]
+path = "package-lock.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "package.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "script/reuse/mail-to-github.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut",
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "theming/scss/layouts/_login.scss"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "vite.config.mjs"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]

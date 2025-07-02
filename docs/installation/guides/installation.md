@@ -3,25 +3,16 @@
 Below we describe the manual installation of the oeplatform code and infrastructure.
 
 !!! tip
-    We also offer the possibility to use [docker](https://www.docker.com/), to install the oeplatform and additional databases. As the hole setup is pre-configured docker can be used to automatically install the hole infrastructure.
+    We also support [docker](https://www.docker.com/) users by providing basic oeplatform-webapp and database images . This brings an easy setup which provides an installed and ready to use locally oeplatform and additional databases.
+    To support developers with getting started with the initial setup which provides a pre configured complete oeplatform software infrastructure with a docker compose setup that installs all components of the infrastructure using containers run locally in a shared virtual network. By adding convince functionality to the setup we enhance the developer experience to support the development.
 
-    We provide 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database). The images are updated & published with each release. They can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
+    [Find the installation instructions that get you started with development here](./installation-docker-dev.md)
 
-    [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+    [Find the (old) instructions related to our docker image mainly used for testing as part of the CI](../../../docker/README.md)
 
 !!! danger
     Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features.
     It is not mandatory to run the core functionality of the oeplatform. You need to install it manually as described in the installation guide.
-
-
-<!-- !!! tip
-    Use our Make script to automate most of the installation and setup process and get started in a simple and reusable way. Don't forget to familiarize yourself with the structure of the oeplattform architecture and know the credentials for each component (e.g. the user information of the databases).
-
-    ```bash
-        make -f script/setup_and_migrate_db all
-    ```
-
-    !!! info "Only proven on Linux based systems." -->
 
 ??? Info "All steps & commands in one list"
 

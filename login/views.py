@@ -1,6 +1,22 @@
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Marco Finkendei <https://github.com/MFinkendei>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import json
 from itertools import groupby
-from django import forms
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
@@ -13,15 +29,16 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
-from django.views.generic import FormView, View
+from django.views.generic import RedirectView, View
 from django.views.generic.edit import DeleteView, UpdateView
 from rest_framework.authtoken.models import Token
 
 import login.models as models
-from dataedit.helper import delete_peer_review
-from dataedit.models import PeerReviewManager, PeerReview
+
+# from dataedit.helper import delete_peer_review
+from dataedit.models import PeerReview, PeerReviewManager
 from dataedit.views import schema_whitelist
 from login.utils import (
     get_badge_icon_path,
@@ -33,7 +50,6 @@ from login.utils import (
 from oeplatform.settings import UNVERSIONED_SCHEMAS
 
 from .forms import (
-    ChangeEmailForm,
     CreateUserForm,
     DetachForm,
     EditUserForm,
@@ -44,6 +60,7 @@ from .forms import (
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
 from .models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
+
 ###########################################################################
 #            User Tables related views & partial views for htmx           #
 ###########################################################################
@@ -335,6 +352,7 @@ def delete_peer_review_simple(request):
         return JsonResponse({"message": "PeerReview successfully deleted."})
     else:
         return JsonResponse({"error": "PeerReview not found."}, status=404)
+
 
 class SettingsView(View):
     def get(self, request, user_id):
@@ -853,6 +871,16 @@ class CreateUserView(View):
             return render(request, "login/oepuser_create_form.html", {"form": form})
 
 
+class UserRedirectView(LoginRequiredMixin, RedirectView):
+    permanent = False
+
+    def get_redirect_url(self):
+        return reverse("login:settings", kwargs={"user_id": self.request.user.id})
+
+
+user_redirect_view = UserRedirectView.as_view()
+
+
 class DetachView(LoginRequiredMixin, View):
     def get(self, request):
         if request.user.is_native:
@@ -891,35 +919,6 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
         return render(request, "login/delete_account.html", {"profile_user": user})
-
-
-class ActivationNoteView(FormView):
-    template_name = "login/activate.html"
-    form_class = ChangeEmailForm
-    success_url = "user/activate"
-
-    def form_valid(self, form):
-        if self.request.user.is_anonymous or self.request.user.is_mail_verified:
-            raise PermissionDenied
-        form.save(self.request.user)
-        return super(ActivationNoteView, self).form_valid(form)
-
-
-def activate(request, token):
-    token_obj = models.ActivationToken.objects.filter(value=token).first()
-    if not token_obj:
-        form = ChangeEmailForm()
-        form._errors = {
-            forms.forms.NON_FIELD_ERRORS: form.error_class(
-                ["Your token was invalid or expired"]
-            )
-        }
-        return render(request, "login/activate.html", {"form": form})
-    else:
-        token_obj.user.is_mail_verified = True
-        token_obj.user.save()
-        token_obj.delete()
-    return redirect("/user/profile/{id}".format(id=token_obj.user.id))
 
 
 def token_reset(request):

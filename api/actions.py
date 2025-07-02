@@ -1,6 +1,28 @@
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.           # noqa: E501
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg   # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg         # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg         # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg         # noqa: E501
+# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>                                             # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.                           # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut               # noqa: E501
+# SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut                                   # noqa: E501
+# SPDX-FileCopyrightText: 2025 henhuy <https://github.com/henhuy> © Reiner Lemoine Institut                                 # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
+# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut                                # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.                           # noqa: E501
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import json
 import logging
 import re
+from copy import deepcopy
 from datetime import datetime, timedelta
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
@@ -9,10 +31,9 @@ import sqlalchemy as sa
 from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404
-from omi.dialects.oep import OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
-from omi.dialects.oep.compiler import JSONCompiler
-from omi.dialects.oep.parser import ParserException
-from omi.structure import Compilable
+from omi.base import get_metadata_version
+from omi.conversion import convert_metadata
+from omi.validation import ValidationError, parse_metadata, validate_metadata
 from shapely import wkb
 from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
 from sqlalchemy import types as sqltypes
@@ -32,6 +53,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
+from api.utils import check_if_oem_license_exists
 from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Schema as DBSchema
@@ -55,10 +77,6 @@ ID_COLUMN_NAME = "id"
 
 MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
 IDENTIFIER_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_IDENTIFIER_LENGTH - 1))
-
-# instances of metadata parsers / compilers, order of priority
-METADATA_PARSERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect()]
-METADATA_COMPILERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect(), JSONCompiler()]
 
 
 def get_column_obj(table, column):
@@ -104,7 +122,7 @@ def assert_permission(user, table, permission, schema=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
     if user.is_anonymous:
-        raise APIError('User is anonymous', 401)
+        raise APIError("User is anonymous", 401)
 
     if user.get_table_permission_level(DBTable.load(schema, table)) < permission:
         raise PermissionDenied
@@ -132,7 +150,7 @@ def assert_add_tag_permission(user, table, permission, schema):
     #         can_add = level >= login_models.WRITE_PERM
 
     if user.is_anonymous:
-        raise APIError('User is anonymous', 401)
+        raise APIError("User is anonymous", 401)
 
     if user.get_table_permission_level(DBTable.load(schema, table)) < permission:
         raise PermissionDenied
@@ -199,9 +217,17 @@ def try_parse_metadata(inp):
 
     """
 
-    if isinstance(inp, Compilable):
-        # already parsed
+    if isinstance(inp, dict):
+        # already parsed but need to check if metaMetadata version exists
+
+        result = check_if_oem_license_exists(inp)
+        if result[1] is not None:
+            return result
+
+        # cleanup curser metadata
+
         return inp, None
+    # TODO: is this even needed anymore?
     elif not isinstance(inp, (str, bytes)):
         # in order to use the omi parsers, input needs to be str (or bytes)
         try:
@@ -210,21 +236,23 @@ def try_parse_metadata(inp):
             return None, "Could not serialize json"
 
     last_err = None
-    # try all the dialects
-    for parser in METADATA_PARSERS:
-        try:
-            return parser.parse(inp), None
-        except ParserException as e:
-            return None, str(e)
-        except Exception as e:
-            last_err = e
-            # APIError(f"Metadata could not be parsed: {last_err}")
-            # try next dialect
 
+    try:
+        parsed_meta = parse_metadata(inp)
+
+        result = check_if_oem_license_exists(parsed_meta)
+        if result[1] is not None:
+            return result
+
+        return parsed_meta, None
+    except ValidationError as e:
+        return None, str(e)
+    except Exception as e:
+        last_err = e
     raise APIError(f"Metadata could not be parsed: {last_err}")
 
 
-def try_compile_metadata(inp):
+def try_validate_metadata(inp):
     """
 
     Args:
@@ -232,21 +260,40 @@ def try_compile_metadata(inp):
 
     Returns:
         Tuple[str or None, str or None]:
-        The first component is the result of the compiling procedure or `None` if
-        the compiling failed. The second component is None if the compiling failed,
-        otherwise an error message.
+        The first part is the result of the validate procedure or `None` if
+        the validation failed. The second part includes the exception message.
     """
+    meta = deepcopy(inp)
     last_err = None
-    # try all the dialects
-    for compiler in METADATA_COMPILERS:
-        try:
-            return compiler.compile(inp), None
-        except Exception as e:
-            last_err = e
-            # APIError(f"Metadata could not be compiled: {last_err}")
-            # try next dialect
 
-    raise APIError(f"Metadata could not be compiled: {last_err}")
+    try:
+        meta.pop("connection_id", None)
+        meta.pop("cursor_id", None)
+        meta_str = json.dumps(meta)
+        validate_metadata(meta_str, check_license=False)
+        return inp, None
+    except ValidationError as e:
+        return None, str(e)
+    except Exception as e:
+        last_err = e
+
+    raise APIError(f"Metadata validation failed: {last_err}")
+
+
+def try_convert_metadata_to_v2(metadata: dict):
+    valid_oemetadata_versions = ["OEP-1.5.2", "OEP-1.6.0", "OEMetadata-2.0"]
+    valid_conversable_oemetadata_versions = ["OEP-1.5.2", "OEP-1.6.0"]
+    version = get_metadata_version(metadata)
+    if version in valid_conversable_oemetadata_versions:
+        converted = convert_metadata(metadata, "OEMetadata-2.0")
+        return converted
+    # Try to force conversion to v2
+    elif version not in valid_oemetadata_versions:
+        metadata["metaMetadata"]["metadataVersion"] = "OEP-1.6.0"
+        converted = convert_metadata(metadata, "OEMetadata-2.0")
+        return converted
+
+    return metadata
 
 
 def describe_columns(schema, table):
@@ -2500,14 +2547,14 @@ def set_table_metadata(table, schema, metadata, cursor=None):
         raise APIError(err)
     # compile OEPMetadata instance back into native python object (dict)
     # TODO: we should try to convert to the latest standard in this step?
-    metadata_obj, err = try_compile_metadata(metadata_oep)
+    metadata_obj, err = try_validate_metadata(metadata_oep)
     if err:
         raise APIError(err)
     # dump the metadata dict into json string
-    try:
-        metadata_str = json.dumps(metadata_obj, ensure_ascii=False)
-    except Exception:
-        raise APIError("Cannot serialize metadata")
+    # try:
+    #     metadata_str = json.dumps(metadata_obj, ensure_ascii=False)
+    # except Exception:
+    #     raise APIError("Cannot serialize metadata")
 
     # ---------------------------------------
     # update the oemetadata field (JSONB) in django db
@@ -2526,23 +2573,6 @@ def set_table_metadata(table, schema, metadata, cursor=None):
         current_name=django_table_obj.human_readable_name,
         readable_table_name=readable_table_name,
     )
-
-    # ---------------------------------------
-    # update the table comment in oedb table if sqlalchemy curser is provided
-    # ---------------------------------------
-
-    # TODO: The following 2 lines seems to duplicate with the lines below the if block
-    oedb_table_obj = _get_table(schema=schema, table=table)
-    oedb_table_obj.comment = metadata_str
-    if cursor is not None:
-        # Surprisingly, SQLAlchemy does not seem to escape comment strings
-        # properly. Certain strings cause errors database errors.
-        # This MAY be a security issue. Therefore, we do not use
-        # SQLAlchemy's compiler here but do it manually.
-        sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
-            schema=oedb_table_obj.schema, table=oedb_table_obj.name
-        )
-        cursor.execute(sql, (metadata_str,))
 
     # ---------------------------------------
     # update search index

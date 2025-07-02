@@ -1,0 +1,8 @@
+# Use the official Ontop image as the base
+FROM ontop/ontop:latest
+
+# Copy the PostgreSQL JDBC driver into Ontop's lib directory
+COPY serviceConfigs/ontop/postgresql.jar /opt/ontop/lib/postgresql.jar
+
+# Ensure it's world-readable (optional but safe)
+# RUN chmod 644 /opt/ontop/lib/postgresql.jar
