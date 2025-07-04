@@ -262,6 +262,14 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
+path = "docs/img/banner_oefamily_oep.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
 path = "docs/oeplatform-code/web-api/oekg-api/oekg.yaml"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
