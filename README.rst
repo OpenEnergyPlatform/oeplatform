@@ -7,9 +7,9 @@
     :target: https://github.com/OpenEnergyPlatform/oeplatform/
     :alt: OEP Logo
 
-==========
-super-repo
-==========
+==========================
+Open Energy Platform (OEP)
+==========================
 
 **The Open Energy Platform (OEP) is research data infrastructure for the energy, climate and mobility domain.**
 
@@ -63,9 +63,9 @@ License and Citation
 ====================
 | The code of this repository is licensed under the **GNU Affero General Public License v3.0 or later** (AGPL-3.0-or-later).
 | Authorship and license for each file are documented using `REUSE <https://api.reuse.software/info/github.com/OpenEnergyPlatform/oeplatform>`_ specification.
-| See `LICENSE.txt <https://github.com/OpenEnergyPlatform/oeplatform/blob/master/LICENSE.txt>`_ for rights and obligations.
+| See `LICENSE.txt <https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/LICENSE.txt>`_ for rights and obligations.
 | See the *Cite this repository* function or `CITATION.cff <https://github.com/OpenEnergyPlatform/oeplatform/blob/master/CITATION.cff>`_ for citation of this repository.
-| Copyright: `oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>`_ © `Reiner Lemoine Institut <https://reiner-lemoine-institut.de/>`_ | `MIT <LICENSE.txt>`_
+| Copyright: `oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>`_ © OEP-Developers | `AGPL-3.0-or-later <LICENSE.txt>`_
 
 
 .. |badge_license| image:: https://img.shields.io/github/license/OpenEnergyPlatform/oeplatform
