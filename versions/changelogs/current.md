@@ -37,7 +37,10 @@ SPDX-License-Identifier: CC0-1.0
 # Changes to the oeplatform code
 
 ## Changes
+
 - Finish REUSE compliant check [(#2037)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2037)
+
+- Update README.rst page [(#2046)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2046)
 
 ## Features
 
@@ -47,7 +50,18 @@ SPDX-License-Identifier: CC0-1.0
 
 - Add prototype script to import datasets from the production OEP into a local instance [(#2043)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2043)
 
+- Add REUSE license check workflow [(#2046)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2046)
+
+
 ## Bugs
+
+- Fix missing license info [(#2046)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2046)
+
+
+## Removed
+
+- Remove old README.md file [(#2046)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2046)
+
 
 ## Documentation updates
 

@@ -262,6 +262,14 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
+path = "docs/img/banner_oefamily_oep.png"
+precedence = "override"
+SPDX-License-Identifier = [ "CC-BY-4.0",]
+SPDX-FileCopyrightText = [
+  "2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
 path = "docs/oeplatform-code/web-api/oekg-api/oekg.yaml"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
@@ -3291,6 +3299,14 @@ SPDX-FileCopyrightText = [
 path = "dataedit/management/commands/create_example_tables.py"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/management/data/**"
+precedence = "override"
+SPDX-License-Identifier = "CC0-1.0"
 SPDX-FileCopyrightText = [
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
