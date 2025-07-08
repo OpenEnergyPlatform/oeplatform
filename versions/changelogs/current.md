@@ -40,7 +40,10 @@ SPDX-License-Identifier: CC0-1.0
 
 - Finish REUSE compliant check [(#2037)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2037)
 
+- Update OEO-SC page [(#2045)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2045)
+
 - Update README.rst page [(#2046)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2046)
+
 
 ## Features
 
