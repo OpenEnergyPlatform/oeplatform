@@ -2,7 +2,7 @@
   SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform>
   SPDX-License-Identifier: CC0-1.0
 
-.. figure:: https://github.com/OpenEnergyPlatform/oeplatform/blob/feature-2044-README-LICENSE/docs/img/banner_oefamily_oep.png
+.. figure:: https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docs/img/banner_oefamily_oep.png
     :align: left
     :target: https://github.com/OpenEnergyPlatform/oeplatform/
     :alt: OEP Logo
