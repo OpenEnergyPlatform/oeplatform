@@ -76,7 +76,7 @@ License and Citation
     :target: https://api.reuse.software/info/github.com/OpenEnergyPlatform/oeplatform
     :alt: REUSE
 
-.. |badge_documentation| image:: https://img.shields.io/github/actions/workflow/status/OpenEnergyPlatform/oeplatform/deploy-docs.yml?branch=develop&label=documentation
+.. |badge_documentation| image:: https://img.shields.io/github/actions/workflow/status/OpenEnergyPlatform/oeplatform/deploy-docs.yaml?branch=develop&label=documentation
     :target: https://openenergyplatform.github.io/oeplatform/
     :alt: Documentation
 
