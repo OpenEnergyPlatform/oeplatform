@@ -191,10 +191,20 @@
           Metadata specification
         </a>
       </span>
-      <button onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
-        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-      </svg>Download JSON</button>
+      <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="metadataDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Download or view metadata">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
+            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+          </svg>
+          Metadata Options
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="metadataDropdown">
+          <li><a class="dropdown-item" href="#" onclick="downloadMetadata(); return false;">Download JSON</a></li>
+          <li><a class="dropdown-item" href="#" onclick="openMetadataApiPage(); return false;">Open Metadata API Page</a></li>
+        </ul>
+      </div>
+
       
       <span {% if not can_add or opr.opr_id and not opr.is_finished %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata. If you have permissions it is likely that a metadata review is in progress, data can't be changed during ongoing Open Peer Reviews." {% endif %}>
     <a href="{{table}}/meta_edit" type="button" class="btn btn-primary btn-sm {% if not can_add or opr.opr_id and not opr.is_finished %} disabled {% endif %}">
@@ -547,6 +557,11 @@ for row in result.json():
       URL.revokeObjectURL(dataUrl);
       a.parentNode.removeChild(a);
     })
+  };
+
+  var openMetadataApiPage = function () {
+    var metaUrl = "/api/v0/schema/{{ schema }}/tables/{{ table }}/meta";
+    window.open(metaUrl, "_blank");
   };
 
   DataEdit(table=table, schema=schema);
