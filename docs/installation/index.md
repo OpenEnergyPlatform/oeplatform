@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Installation
 
 This section provides detailed information on how to install for development purposes. We will also provide a more detailed guide on how to operate the oeplatform for production use cases in the future. The guide covers the full oeplatform software and its infrastructure which is composed of the website, various databases, a lookup service and the ontop-vkg service (see [Infrastructure](../oeplatform-code/architecture/infrastructure.md)). You will find two main options to install everything:

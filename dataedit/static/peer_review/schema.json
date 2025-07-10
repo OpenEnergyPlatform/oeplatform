@@ -405,7 +405,7 @@
           },
           "email": {
             "description": "A email address of the contributor or GitHub handle.",
-            "example": "@Ludee",
+            "example": "@Ludwig Huelk",
             "type": ["string", "null"],
             "badge": "Bronze",
             "title": "Email",

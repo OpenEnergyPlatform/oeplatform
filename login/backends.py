@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 from django.contrib.auth.backends import ModelBackend
 from django.db import models
 from django.db.models import Q

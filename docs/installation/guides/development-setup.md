@@ -85,7 +85,11 @@ Keep in mind that you now use a bundled version of the react app and all changes
 
 To create a dummy user for functionality testing purposes
 
-Then execute this python code (either directly in a terminal or from a file)
+Run the django management command with arguments. Below you see an example:
+
+    python manage.py create_dev_user "$DEV_USER" "$DEV_USER@mail.com" --password "$DEV_PW" || true
+
+You can also use this script to create a new user. Execute this python code (either directly in a terminal or from a file)
 
     import os
     import django
@@ -105,9 +109,19 @@ Before we can get started we have to register the topics where data can be group
 
     python manage.py create_topics
 
+To create and seed the test table using our test dataset you can use the following command:
+
+    python manage.py create_example_tables
+
+The command will read the example dataset form our representative, minimal example. Once successfully seeded the database contains the dataset 'example_wind_farm_capacity' in the 'model_draft' topic, including 4 rows of data and metadata.
+
 ### Using the HTTP-API
 
-You can either use the http api that is available once you started your local development server using the `runserver` command. To understand how to use the api you can have a look at our academy courses but keep in mind that you have to modify the URL of the api endpoints to you locally running oep instance. You can to this by changing the beginning of the url from something like `https://www.oeplatform.org/` to `http://127.0.0.1/`. [Have a look at this course to get started with the http api.](https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/)
+You can use the http api that is available once you started your local development server using the `runserver` command. To understand how to use the api you can have a look at our academy courses but keep in mind that you have to modify the URL of the api endpoints to you locally running oep instance. You can to this by changing the beginning of the url from something like `https://www.oeplatform.org/` to `http://127.0.0.1/`. [Have a look at this course to get started with the http api.](https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/)
+
+!!! Note
+
+    There are several capabilities which are offered by the API some are aimed on client integration and some are implemented as traditional REST API endpoints. You can find a [openAPI schema here](https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/), we are currently working on providing the full list of attributes supported by each endpoint. Until this is done we rely on the academy to provide the key information on how to use the REST-API.
 
 ### Using the OEP-Website UI
 
@@ -138,3 +152,11 @@ You can navigate to the profile page using your local instance of the OEP websit
 There you find a tab called tables. If you include an open data license in the metadata of your test table you previously create in the `model_draft` topic, a publish button becomes visible. Once you click it you can select a topic to move the table to.
 
 You can edit the metadata for a table by visiting the detail page of a table then click the tab meta information and click the button edit. The license information should be added to the licenses field of the metadata.
+
+## Import datasets from openenergyplatform.org
+
+Sometimes it is very useful to have actual datasets which are available on the OEP in your local instance to be able fully reproduce use cases or reproduce errors.
+
+We offer a [script](https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/) in the 'script' directory of the oeplatform code project. It is currently a prototype for doing what is described above. It is not fully tested against all data types so far so might be error prone.
+
+To use it you must adapt the code and add the information on what datasets you want to import. Datasets are referenced by schema and table name. It is possible to import multiple once in one run and you can limit the amount of rows each dataset should included as some datasets are very large and it is not important to have the full data for testing use cases.

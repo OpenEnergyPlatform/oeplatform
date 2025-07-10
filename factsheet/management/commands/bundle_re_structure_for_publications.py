@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import subprocess as sp
 import uuid
 
@@ -46,6 +50,7 @@ def execute(cmd, cwd):
 
 
 class Command(BaseCommand):
+
     def handle(self, *args, **options):
         all_bundles_uids = []
         for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
@@ -56,6 +61,7 @@ class Command(BaseCommand):
             bundle_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
 
             if (bundle_URI, OEKG["report_title"], None) in oekg:
+
                 publication_uuid = str(uuid.uuid4())
                 publications_URI = URIRef(
                     "http://openenergy-platform.org/ontology/oekg/publication/"

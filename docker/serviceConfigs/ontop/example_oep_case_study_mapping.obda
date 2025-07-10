@@ -1,0 +1,257 @@
+[PrefixDeclaration]
+:           http://example.org/voc#
+owl:        http://www.w3.org/2002/07/owl#
+rdf:        http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:        http://www.w3.org/XML/1998/namespace
+xsd:        http://www.w3.org/2001/XMLSchema#
+foaf:       http://xmlns.com/foaf/0.1/
+obda:       https://w3id.org/obda/vocabulary#
+rdfs:       http://www.w3.org/2000/01/rdf-schema#
+oeo:        http://openenergy-platform.org/ontology/oeo/
+oekg:       http://openenergy-platform.org/ontology/oeo/oekg/
+llc:        https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/
+
+[MappingDeclaration] @collection [[
+
+mappingId       eu_leg_data_2021_rep_table_1_TargetClass
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "eu_leg_data_2021_rep_table_1"^^xsd:string .
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1"
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_AT
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Austria>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'AT'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_BE
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Belgium>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'BE'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_BG
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Bulgaria>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'BG'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_CH
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Switzerland>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'CH'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_CY
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Cyprus>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'CY'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_CZ
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Czechia>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'CZ'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_DE
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Germany>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'DE'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_DK
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Denmark>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'DK'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_EE
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Estonia>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'EE'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_EL
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Greece>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'EL'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_ES
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Spain>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'ES'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_FI
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Finland>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'FI'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_FR
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/France>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'FR'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_GB
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/UnitedKingdomOfGreatBritainAndNorthernIreland>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'GB'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_GR
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Greece>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'GR'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_HR
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Croatia>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'HR'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_HU
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Hungary>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'HU'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_IE
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Ireland>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'IE'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_IS
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Iceland>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'IS'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_IT
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Italy>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'IT'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_LT
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Lithuania>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'LT'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_LU
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Luxembourg>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'LU'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_LV
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Latvia>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'LV'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_MT
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Malta>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'MT'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_NL
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Netherlands>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'NL'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_NO
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Norway>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'NO'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_PL
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Poland>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'PL'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_PT
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Portugal>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'PT'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_RO
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Romania>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'RO'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_SE
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Sweden>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'SE'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_SI
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Slovenia>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'SI'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_SK
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Slovakia>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'SK'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_spatial_region_UK
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/UnitedKingdomOfGreatBritainAndNorthernIreland>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE country_code = 'UK'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_crf_based_sector_division
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division "{category}" .
+source          SELECT "id", "category" FROM "scenario"."eu_leg_data_2021_rep_table_1"
+
+
+mappingId       eu_leg_data_2021_rep_table_1_scenario_year
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020224 "{year}" .
+source          SELECT "id", "year" FROM "scenario"."eu_leg_data_2021_rep_table_1"
+
+
+mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_CH4
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000025>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE gas = 'CH4'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_CO2
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000006>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE gas = 'CO2'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_N2O
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000027>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE gas = 'N2O'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_NF3
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000026>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE gas = 'NF3'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_HFC
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000219>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE gas = 'HFC'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_PFC
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000322>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE gas = 'PFC'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_SF6
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000038>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE gas = 'SF6'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_scenario_WEM
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 <http://openenergy-platform.org/ontology/oeo/OEO_00020311>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE scenario = 'WEM'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_scenario_WAM
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 <http://openenergy-platform.org/ontology/oeo/OEO_00020312>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE scenario = 'WAM'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_scenario_WOM
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 <http://openenergy-platform.org/ontology/oeo/OEO_00020310>.
+source          SELECT "id" FROM "scenario"."eu_leg_data_2021_rep_table_1" WHERE scenario = 'WOM'
+
+
+mappingId       eu_leg_data_2021_rep_table_1_unit_of_measurement
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00040010 "{unit}" .
+source          SELECT "id", "unit" FROM "scenario"."eu_leg_data_2021_rep_table_1"
+
+
+mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_emission_value
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00140178 "{value}" .
+source          SELECT "id", "value" FROM "scenario"."eu_leg_data_2021_rep_table_1"
+
+
+
+]]
