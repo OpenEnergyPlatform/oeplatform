@@ -50,6 +50,16 @@ export default defineConfig({
     rollupOptions: {
       input: {
         factsheet: resolve('./factsheet/frontend/src/index.jsx'),
+        bootstrapTheme: resolve('./theming/oepstrap.scss'),
+      },
+      output: {
+        // Ensures output is named clearly (we’ll rename it later)
+        assetFileNames: (chunkInfo) => {
+          if (chunkInfo.name === 'bootstrapTheme') {
+            return './base/static/css/bootstrap.min.css'
+          }
+          return 'django-vite/[name][extname]'
+        },
       },
     },
   },
