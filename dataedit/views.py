@@ -1,33 +1,3 @@
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 import csv
 import json
 import logging
@@ -53,10 +23,9 @@ from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
-from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
 
 # from oemetadata.v1.v160.template import OEMETADATA_V160_TEMPLATE
-# from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
+from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
 
 # from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
@@ -65,6 +34,9 @@ from sqlalchemy.orm import sessionmaker
 
 import api.parser
 from api.actions import describe_columns
+
+# from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
+
 
 try:
     import oeplatform.securitysettings as sec
@@ -1057,7 +1029,7 @@ class DataView(View):
                 schema=schema, table=table
             ),
             "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
-            "opr_enabled": False,
+            "opr_enabled": True,
             # oemetadata
             # is not None,  # check if the table has the metadata
         }
@@ -1977,7 +1949,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         Returns:
             dict: JSON schema.
         """
-        json_schema = OEMETADATA_V160_SCHEMA
+        json_schema = OEMETADATA_V20_SCHEMA
         return json_schema
 
     def parse_keys(self, val, old=""):
@@ -2014,82 +1986,76 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def sort_in_category(self, schema, table, oemetadata):
         """
-        Sorts the metadata of a table into categories and adds the value
-        suggestion and comment that were added during the review, to facilitate
-        Further processing easier.
+        Group flattened OEMetadata v2 fields into thematic buckets and attach
+        placeholders required by the review UI.
 
-        Note:
-            The categories spatial & temporal are often combined during visualization.
+        Each entry in the resulting lists has **five** keys:
 
-        Args:
-            schema (str): The schema of the table.
-            table (str): The name of the table.
+        ```json
+        {
+          "field": "<dot‑notation path>",
+          "value": "<current value>",
+          "newValue": "",
+          "reviewer_suggestion": "",
+          "suggestion_comment": ""
+        }
+        ```
 
-        Returns:
+        Buckets returned:
 
-
-        Examples:
-            A return value can look like the below dictionary:
-
-            >>>
-            {
-                "general": [
-                    {
-                    "field": "id",
-                    "value": "http: //127.0.0.1:8000/dataedit/view/model_draft/test2",
-                    "newValue": "",
-                    "reviewer_suggestion": "",
-                    "suggestion_comment": ""
-                    }
-                ],
-                "spatial": [...],
-                "temporal": [...],
-                "source": [...],
-                "license": [...],
-            }
-
+        * general
+        * spatial
+        * temporal
+        * source
+        * license
         """
 
-        val = self.parse_keys(oemetadata)
-        gen_key_list = []
-        spatial_key_list = []
-        temporal_key_list = []
-        source_key_list = []
-        license_key_list = []
+        from collections import defaultdict
 
-        for i in val:
-            fieldKey = list(i.values())[0]
-            if fieldKey.split(".")[0] == "spatial":
-                spatial_key_list.append(i)
-            elif fieldKey.split(".")[0] == "temporal":
-                temporal_key_list.append(i)
-            elif fieldKey.split(".")[0] == "sources":
-                source_key_list.append(i)
-            elif fieldKey.split(".")[0] == "licenses":
-                license_key_list.append(i)
+        # Flatten the nested JSON into [{'field': k, 'value': v}, ...]
+        flattened = self.parse_keys(oemetadata)
 
-            elif (
-                fieldKey.split(".")[0] == "name"
-                or fieldKey.split(".")[0] == "title"
-                or fieldKey.split(".")[0] == "id"
-                or fieldKey.split(".")[0] == "description"
-                or fieldKey.split(".")[0] == "language"
-                or fieldKey.split(".")[0] == "subject"
-                or fieldKey.split(".")[0] == "keywords"
-                or fieldKey.split(".")[0] == "publicationDate"
-                or fieldKey.split(".")[0] == "context"
-            ):
-                gen_key_list.append(i)
-
-        meta = {
-            "general": gen_key_list,
-            "spatial": spatial_key_list,
-            "temporal": temporal_key_list,
-            "source": source_key_list,
-            "license": license_key_list,
+        bucket_map = {
+            "spatial": "spatial",
+            "temporal": "temporal",
+            "sources": "source",
+            "licenses": "license",
         }
 
-        return meta
+        tmp = defaultdict(list)
+
+        for item in flattened:
+            raw_key = item["field"]
+            parts = raw_key.split(".")
+
+            # Detect v2 resource path → resources.<idx>.<root>.…
+            if parts[0] == "resources" and len(parts) >= 3:
+                root = parts[2]
+            else:
+                root = parts[0]
+
+            bucket = bucket_map.get(root, "general")
+
+            # Extend structure with placeholders expected by review workflow
+            tmp[bucket].append(
+                {
+                    "field": raw_key,
+                    "value": item["value"],
+                    "newValue": "",
+                    "reviewer_suggestion": "",
+                    "suggestion_comment": "",
+                }
+            )
+
+        # Guarantee keys exist even when empty
+        buckets = {
+            "general": tmp["general"],
+            "spatial": tmp["spatial"],
+            "temporal": tmp["temporal"],
+            "source": tmp["source"],
+            "license": tmp["license"],
+        }
+        return buckets
 
     def get_all_field_descriptions(self, json_schema, prefix=""):
         """
@@ -2116,12 +2082,17 @@ class PeerReviewView(LoginRequiredMixin, View):
 
                 if any(
                     attr in value
-                    for attr in ["description", "example", "badge", "title"]
+                    for attr in ["description", "examples", "example", "badge", "title"]
                 ):
                     field_descriptions[key] = {}
                     if "description" in value:
                         field_descriptions[key]["description"] = value["description"]
-                    if "example" in value:
+                    # Prefer v2 "examples" (array) over v1 "example" (single value)
+                    if "examples" in value and value["examples"]:
+                        # v2: first item of the examples array
+                        field_descriptions[key]["example"] = value["examples"][0]
+                    elif "example" in value:
+                        # v1 fallback
                         field_descriptions[key]["example"] = value["example"]
                     if "badge" in value:
                         field_descriptions[key]["badge"] = value["badge"]
