@@ -38,6 +38,10 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+Removing contributor tab from peer review ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
+Opening windows for indexed fields ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
+Openinig windows for subcategories ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
+
 ## Features
 
 ## Bugs
