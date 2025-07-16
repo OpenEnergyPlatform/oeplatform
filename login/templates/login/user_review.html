@@ -140,6 +140,8 @@
                             <a href="{% url 'dataedit:peer_review_reviewer' reviewer_reviewed.latest_active.schema reviewer_reviewed.latest_active.table reviewer_reviewed.latest_active.id %}" class="btn btn-primary">
                                 {{ reviewer_reviewed.latest_active.schema }} - {{ reviewer_reviewed.latest_active.table }}
                             </a>
+        <button class="btn btn-dark" id="peer_review-delete">Delete</button>
+
                         </div>
                         <div class="profile-rvw__item-history">
                             <!-- remove button wrapper div once history dropdown is implemented -->
@@ -432,11 +434,25 @@
 
 {% block after-body-bottom-js %}
 <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    config.redirectUrl = window.location.href;  // redirect to the same page
+    config.url_table = window.location.href;  // url for redirect
+  });
+
+  var config = {
+    url_peer_review: "{% url 'login:delete_peer_review_simple' %}",
+    review_id: "{{ latest_review_id }}"
+  };
+</script>
+
+
+  <script src="{% static '/peer_review/opr_reviewer.js' %}"></script>
+
+
+
+<script>
     $(function () {
         $('[data-bs-toggle="popover"]').popover()
-        // $('.popover-dismiss').popover({
-        //     trigger: 'focus'
-        // })
     } )
 
 </script>

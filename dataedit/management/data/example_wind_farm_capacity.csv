@@ -1,0 +1,5 @@
+"id","technology","type","year","date","value","comment","geometry"
+"1","wind","onshore","2021","2021-01-01","55.93","",""
+"2","wind","offshore","2021","2021-01-01","7.79","Including nearshore",""
+"3","wind","onshore","2022","2022-01-01","58.05","",""
+"4","wind","offshore","2022","2022-01-01","8.13","Including nearshore",""

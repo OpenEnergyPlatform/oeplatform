@@ -1,0 +1,24 @@
+{
+  "name": "OEP Django (Compose)",
+  "dockerComposeFile": ["../docker-compose.dev.yaml"],
+  "service": "web",
+  "workspaceFolder": "/home/appuser/app",
+  "forwardPorts": [8000, 5678],
+  "shutdownAction": "stopCompose",
+  "remoteUser": "appuser",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        // point to your virtualenv Python
+        "python.pythonPath": "/opt/venv/bin/python",
+        // enable Pylance’s automatic search-path discovery
+        "python.analysis.autoSearchPaths": true,
+        "python.analysis.useLibraryCodeForTypes": true,
+        // explicitly add common folders (e.g. src/) to your import path
+        "python.analysis.extraPaths": ["src"]
+      },
+      "extensions": ["ms-python.python", "ms-python.vscode-pylance"]
+    }
+  }
+}

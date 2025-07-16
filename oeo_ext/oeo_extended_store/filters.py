@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # from rdflib import RDF, Literal  # noqa
 
 # from oeo_ext.oeo_extended_store import namespaces  # noqa

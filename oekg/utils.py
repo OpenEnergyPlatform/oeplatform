@@ -1,9 +1,19 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import re
 
 import requests
 
 from oekg.sparqlModels import DatasetConfig
-from oekg.sparqlQuery import add_datasets_to_scenario, scenario_in_bundle
+from oekg.sparqlQuery import (
+    add_datasets_to_scenario,
+    scenario_bundle_filter_oekg,
+    scenario_in_bundle,
+)
 from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
 
 # Whitelist of supported formats
@@ -13,6 +23,18 @@ SUPPORTED_FORMATS = {
     "xml": "application/rdf+xml",
     "turtle": "text/turtle",
 }
+
+
+def execute_filter_sparql_query(criteria) -> dict:
+    """
+    Executes the SPARQL query and returns the appropriate response.
+
+    :param sparql_query: The SPARQL query string.
+    :param response_format: The requested response format.
+    :return: Tuple (response content, content_type)
+    """
+    result = scenario_bundle_filter_oekg(criteria)
+    return result
 
 
 def execute_sparql_query(sparql_query, response_format):

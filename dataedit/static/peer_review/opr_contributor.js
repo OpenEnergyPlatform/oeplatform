@@ -1,3 +1,14 @@
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 var selectedField;
 var selectedFieldValue;
 var selectedState;
@@ -24,7 +35,9 @@ var current_review = {
 // BINDS
 // Submit field review
 $('#submitButton').bind('click', saveEntrances);
+$('#submitCommentButton').bind('click', saveEntrances);
 $('#submitButton').bind('click', hideReviewerOptions);
+$('#submitCommentButton').bind('click', hideReviewerOptions);
 // Submit review (not visible to reviewer)
 $('#submit_summary').bind('click', submitPeerReview);
 // save the current review (not visible to reviewer)
@@ -39,7 +52,7 @@ $('#ok-button').bind('click', saveEntrances);
 $('#suggestion-button').bind('click', showReviewerOptions);
 $('#suggestion-button').bind('click', updateSubmitButtonColor);
 // Reject Field View Change
-$('#rejected-button').bind('click', showReviewerOptions);
+$('#rejected-button').bind('click', showReviewerCommentsOptions);
 $('#rejected-button').bind('click', updateSubmitButtonColor);
 // Clear Input fields when new tab is selected
 // nav items are selected via their class
@@ -179,6 +192,7 @@ function cancelPeerReview() {
  * @param {string} category Metadata catgeory related to the fieldKey
  */
 
+
 function getFieldState(fieldKey) {
   // This function gets the state of a field
   return state_dict[fieldKey];
@@ -223,10 +237,10 @@ function click_field(fieldKey, fieldValue, category) {
     fieldDescriptionsElement.textContent = "No description found";
   }
   const fieldState = getFieldState(fieldKey);
-  if (fieldState === 'ok' || !fieldState) {
+  if (fieldState === 'ok' || !fieldState || fieldState === 'rejected') {
     document.getElementById("ok-button").disabled = true;
     document.getElementById("rejected-button").disabled = true;
-  } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+  } else if (fieldState === 'suggestion') {
     document.getElementById("ok-button").disabled = false;
     document.getElementById("rejected-button").disabled = false;
   } else {
@@ -352,6 +366,27 @@ function renderSummaryPageFields() {
   function addFieldToCategory(category, field) {
     if (!categoriesMap[category]) categoriesMap[category] = [];
     categoriesMap[category].push(field);
+
+    if (category_name === "summary") {
+      continue;
+    }
+    const category_fields = category.querySelectorAll(".field");
+    for (field of category_fields) {
+      const field_id = field.id.slice(6);
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      const found = current_review.reviews.some((review) => review.key === field_id);
+      const fieldState = getFieldState(field_id);
+      const fieldCategory = field.getAttribute('data-category');
+      let fieldName = field_id.replace(/\./g, ' ');
+      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
+
+      if (isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
+        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields", fieldSuggestion });
+      } else if (!found && fieldState !== 'ok' && fieldState !== 'rejected' && !isEmptyValue(fieldValue)) {
+        missingFields.push({ fieldName, fieldValue, fieldCategory });
+        processedFields.add(uniqueFieldIdentifier);
+      }
+    }
   }
 
   const fields = document.querySelectorAll('.field');
@@ -418,6 +453,12 @@ function renderSummaryPageFields() {
         } else {
           groupedFields[prefix].noIndex.push({ ...field, fieldName: nameWithoutIndices });
         }
+
+      let th = document.createElement('th');
+      th.scope = "row";
+      th.className = "status";
+      if (item.fieldStatus === "Pending") {
+        th.className = "status missing";
       }
     });
 
@@ -503,22 +544,6 @@ function renderSummaryPageFields() {
           innerHTML += `</div>`;
         }
 
-        accordionItem.innerHTML = `
-          <h2 class="accordion-header" id="${headingId}">
-            <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
-              ${['source', 'license'].includes(category) ? 'fields name' : prefix}
-            </button>
-          </h2>
-          <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#accordion-${category}">
-            <div class="accordion-body">${innerHTML}</div>
-          </div>`;
-
-        accordionContainer.appendChild(accordionItem);
-        accordionIndex++;
-      }
-      tabPane.appendChild(accordionContainer);
-    }
-
     tabsContent.appendChild(tabPane);
     firstTab = false;
   }
@@ -598,12 +623,14 @@ function showToast(title, message, type) {
   bsToast.show();
 }
 
-
 /**
  * Saves field review to current review list
  */
+console.log(0)
+
 function saveEntrances() {
-  if (selectedState !== "ok") {
+
+  if (selectedState !== "ok" && selectedState !== "rejected") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
 
@@ -641,6 +668,8 @@ function saveEntrances() {
     for (let i = 0; i < current_review["reviews"].length; i++) {
       if (current_review["reviews"][i]["key"] === selectedField) {
         reviewFound = true;
+        // console.log("review" + current_review.reviews["reviews"][i]["fieldReview"]) //undefined "reviews"
+        console.log("review" + current_review["reviews"][i]["fieldReview"]) //undefined "reviews"
         if (!Array.isArray(current_review["reviews"][i]["fieldReview"])) {
           current_review["reviews"][i]["fieldReview"] = [current_review["reviews"][i]["fieldReview"]];
         }
@@ -653,6 +682,7 @@ function saveEntrances() {
           "contributorValue": selectedFieldValue,
           "newValue": selectedState === "ok" ? initialReviewerSuggestions[selectedField] : "",
           "comment": document.getElementById("commentarea").value,
+          "additionalComment": document.getElementById("comments").value,
           "reviewerSuggestion": document.getElementById("valuearea").value,
           "state": selectedState,
         });
@@ -660,8 +690,10 @@ function saveEntrances() {
         var fieldElement = document.getElementById("field_" + selectedField);
         var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
         var commentElement = fieldElement.querySelector('.suggestion--comment');
+        // var additionalCommentElement = fieldElement.querySelector('.suggestion--additional-comment');
         suggestionElement.innerText = document.getElementById("valuearea").value;
         commentElement.innerText = document.getElementById("commentarea").value;
+        // additionalCommentElement.innerText = document.getElementById("comments").value;
         break;
       }
     }
@@ -680,6 +712,7 @@ function saveEntrances() {
             "contributorValue": selectedFieldValue,
             "newValue": selectedState === "ok" ? initialReviewerSuggestions[selectedField] : "",
             "comment": document.getElementById("commentarea").value,
+            "additionalComment": document.getElementById("comments").value,
             "reviewerSuggestion": document.getElementById("valuearea").value,
             "state": selectedState,
           },
@@ -689,18 +722,21 @@ function saveEntrances() {
       var fieldElement = document.getElementById("field_" + selectedField);
       var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
       var commentElement = fieldElement.querySelector('.suggestion--comment');
+      var additionalCommentElement = fieldElement.querySelector('.suggestion--additional-comment'); // For new comment
+
       suggestionElement.innerText = document.getElementById("valuearea").value;
       commentElement.innerText = document.getElementById("commentarea").value;
+      additionalCommentElement.innerText = document.getElementById("comments").value; // Update new comment
+
     }
   }
-
+    document.getElementById("comments").value = "";
   updateFieldColor();
   checkReviewComplete();
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
 }
-
 /**
  *
  * Checks if all fields are reviewed and activates submit button if ready
@@ -713,7 +749,7 @@ function checkReviewComplete() {
     const fieldState = getFieldState(fieldName);
     let reviewed = current_review["reviews"].find((review) => review.key === fieldName);
 
-    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
+    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(fieldValue) && fieldState !== "rejected") {
       $('#submit_summary').addClass('disabled');
       return;
     }
@@ -737,6 +773,11 @@ function showReviewerOptions() {
  */
 function hideReviewerOptions() {
   $("#reviewer_remarks").addClass('d-none');
+  $("#reviewer_comments").addClass('d-none');
+}
+
+function showReviewerCommentsOptions() {
+  $("#reviewer_comments").removeClass('d-none');
 }
 
 /**
@@ -757,14 +798,15 @@ function updateFieldColor() {
 function updateSubmitButtonColor() {
   // Color Save comment / new value
   $(submitButton).removeClass('btn-warning');
+  $(submitCommentButton).removeClass('btn-warning');
   $(submitButton).removeClass('btn-danger');
-  if (selectedState == "suggestion") {
+  $(submitCommentButton).removeClass('btn-danger');
+  if (selectedState === "suggestion") {
     $(submitButton).addClass('btn-warning');
   } else {
-    $(submitButton).addClass('btn-danger');
+    $(submitCommentButton).addClass('btn-danger');
   }
 }
-
 
 function updateTabProgressIndicatorClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
@@ -776,17 +818,18 @@ function updateTabProgressIndicatorClasses() {
 
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-    let allOk = fieldsInTab.every((field) => {
-      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
-      return isEmptyValue(fieldValue) || field.classList.contains('field-ok');
+    let allReviewed = fieldsInTab.every((field, index) => {
+      let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      let fieldState = getFieldState(field.id.replace('field_', ''));
+      return isEmptyValue(fieldValue) || ['ok', 'suggestion', 'rejected'].includes(fieldState);
     });
 
-    if (allOk) {
+    if (allReviewed) {
       tab.classList.add('status--done');
     } else {
-      tab.classList.add('status');
+      tab.classList.remove('status--done');
     }
-  }
+    }
 }
 
 function updateTabClasses() {
@@ -798,30 +841,27 @@ function updateTabClasses() {
 
     let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-    let allOk = true;
-    for (let j = 0; j < fields.length; j++) {
-      let fieldState = getFieldState(fields[j].id.replace('field_', ''));
-      if (fieldState !== 'ok') {
-        allOk = false;
-        break;
-      }
-    }
-    if (allOk) {
+   let allReviewed = fields.every(field => {
+      let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      let fieldState = getFieldState(field.id.replace('field_', ''));
+      return isEmptyValue(fieldValue) || ['ok', 'suggest', 'rejected'].includes(fieldState);
+    });
+
+    if (allReviewed) {
       tab.classList.add('status');
       tab.classList.add('status--done');
     } else {
       tab.classList.add('status');
+      tab.classList.remove('status--done');
     }
   }
 }
 window.addEventListener('DOMContentLoaded', updateTabClasses);
 
-
+console.log(888)
 /**
  * Hide and show revier controles once the user clicks the summary tab
  */
-console.log('Script is running...');
-
 document.addEventListener('DOMContentLoaded', function() {
   // console.log('DOM fully loaded and parsed');
 
@@ -834,9 +874,6 @@ document.addEventListener('DOMContentLoaded', function() {
   ];
   const reviewContent = document.querySelector(".review__content");
 
-  console.log('Summary Tab:', summaryTab);
-  console.log('Other Tabs:', otherTabs);
-  console.log('Review Content:', reviewContent);
 
   if (summaryTab && reviewContent) {
     summaryTab.addEventListener('click', function() {
@@ -860,7 +897,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function toggleReviewControls(show) {
     const reviewControls = document.querySelector('.review__controls');
-    console.log('Review Controls:', reviewControls);
     if (reviewControls) {
       reviewControls.style.display = show ? '' : 'none';
     }

@@ -1,4 +1,5 @@
 {
   "toep": "/",
-  "obdi": "/api/v0/oevkg-query"
+  "obdi": "/api/oevkg-query",
+  "oekgQueryFilter": "oekg/filter-by-criteria/"
 }

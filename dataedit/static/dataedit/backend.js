@@ -1,3 +1,11 @@
+// SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+// SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 "use strict";
 
 var map;
@@ -279,7 +287,7 @@ function load_view(schema, table, csrftoken, current_view) {
   };
   $.when(
       $.ajax({
-        url: '/api/v0/schema/' + schema + '/tables/' + table + '/columns',
+        url: '/api/v0/schema/' + schema + '/tables/' + table + '/columns/',
       }), $.ajax({
         type: 'POST',
         url: '/api/v0/advanced/search',

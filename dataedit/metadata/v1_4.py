@@ -1,4 +1,13 @@
-from omi.dialects.oep.dialect import OEP_V_1_3_Dialect, OEP_V_1_4_Dialect
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# from omi.dialects.oep.dialect import OEP_V_1_3_Dialect, OEP_V_1_4_Dialect
 
 from api import actions
 from dataedit.metadata import v1_3
@@ -88,6 +97,7 @@ def from_v1_2(comment_on_table):
 
 
 def from_v1_3(comment):
-    d13 = OEP_V_1_3_Dialect()
-    d14 = OEP_V_1_4_Dialect()
-    return d14.compile(d13._parser().parse(comment))
+    # d13 = OEP_V_1_3_Dialect()
+    # d14 = OEP_V_1_4_Dialect()
+    # return d14.compile(d13._parser().parse(comment))
+    return comment
