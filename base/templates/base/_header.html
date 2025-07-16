@@ -1,5 +1,4 @@
-{% load static %}
-{% load fontawesome_5 %}
+{% load static i18n fontawesome_5 django_bootstrap5 %}
 
 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -12,18 +11,37 @@
         <li class="nav-item">
             <a class="nav-link" href="/dataedit/schemas">Database</a>
         </li>
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMeta" role="button"
+               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Metadata
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMeta">
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.oemetadata_key_description }}" target="_blank"><i class="fas fa-external-link-alt"></i> OEMetadata standard</a>
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.oedatamodel }}" target="_blank"><i class="fas fa-external-link-alt"></i> OEDataModel </a>
+                <a class="dropdown-item" href="{% url 'dataedit:oemetabuilder' %}">OEMetaBuilder Tool</a>
+            </div>
+        </li>
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFS" role="button"
                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Scenario Bundles
+                Factsheets
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdownFS">
-                <!-- <a class="dropdown-item" href="/factsheets/overview/">Overview</a> -->
-                <!-- <sup class="small text-muted">Early Access</sup> -->
-                <a class="dropdown-item" href="/scenario-bundles/main">Scenario Bundle</a>
                 <a class="dropdown-item" href="/factsheets/frameworks/">Framework Factsheet</a>
                 <a class="dropdown-item" href="/factsheets/models/">Model Factsheet</a>
-                <!-- <a class="dropdown-item" href="/factsheets/scenarios/">Scenario Factsheet</a> -->
+            </div>
+        </li>
+        
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSB" role="button"
+               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Scenario Bundles
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownSB">
+                <a class="dropdown-item" href="{% url 'factsheet:factsheets_index' %}">Scenario Bundle</a>
+                <a class="dropdown-item" href="/oekg/gui/">OEKG SPARQL-Query</a>
             </div>
         </li>
         <li class="nav-item dropdown">
@@ -39,8 +57,26 @@
                 <a class="dropdown-item" href="{{ EXTERNAL_URLS.tib_terminology_service }}" target="_blank" data-toggle="tooltip" data-placement="top" title="We want to combine our efforts in ontology development with the TIB as part of the NFDI4Energy project."><i class="fas fa-external-link-alt"></i> TIB Terminology Service</a>
             </div>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ EXTERNAL_URLS.tutorials_index }}" target="_blank">Academy <i class="fas fa-external-link-alt"></i></a>
+        <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAcademy" role="button"
+               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Academy
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownAcademy">
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.tutorials_index }}" target="_blank"><i class="fas fa-external-link-alt"></i> Getting Started </a>
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.tutorials_faq }}" target="_blank"><i class="fas fa-external-link-alt"></i> Questions </a>
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.ORKG }}" target="_blank"><i class="fas fa-external-link-alt"></i> ORKG </a>
+            </div>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownTools" role="button"
+               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Open Data Tools
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownTools">
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.open_plan }}" target="_blank"><i class="fas fa-external-link-alt"></i> Open Plan</a>
+                <a class="dropdown-item" href="{{ EXTERNAL_URLS.open_mastr }}" target="_blank"><i class="fas fa-external-link-alt"></i> Open MaStR</a>
+            </div>
         </li>
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAbout" role="button"
@@ -52,30 +88,24 @@
                 <a class="dropdown-item" href="{{ EXTERNAL_URLS.compendium }}" target="_blank"><i class="fas fa-external-link-alt"></i> Compendium</a>
                 <a class="dropdown-item" href="{{ EXTERNAL_URLS.mkdocs }}" target="_blank"><i class="fas fa-external-link-alt"></i> Developer Documentation</a>
                 <a class="dropdown-item" href="{{ EXTERNAL_URLS.readthedocs }}" target="_blank"><i class="fas fa-external-link-alt"></i> REST-API Documentation</a>
-                <a class="dropdown-item" href="{{ EXTERNAL_URLS.tutorials_faq }}" target="_blank"><i class="fas fa-external-link-alt"></i> FAQ</a>
             </div>
         </li>
     </ul>
 </div>
-{% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
-
-    <div class="d-flex align-items-center gap-3">
-        <!-- Profile Link -->
-        <a class="btn btn-link text-white p-0" href="/user/profile/{{ user.pk }}/settings">
-            {% fa5_icon 'user' 'fas' %} {{ user }}
-        </a>
-
-        <!-- Logout Form -->
-        <form method="post" action="{% url 'logout' %}" class="m-0">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="/">
-            <button type="submit" class="btn btn-danger btn-sm">
-                {% fa5_icon 'arrow-right' 'fas' %} Logout
-            </button>
-        </form>
-    </div>
-
+{% if request.user.is_authenticated %}
+    <!-- Profile Link -->
+    <a class="btn btn-link text-white p-0" href="{% url 'login:settings' user.pk %} ">
+        {% fa5_icon 'user' 'fas' %} {{ user }}
+    </a>
+    {# URL provided by django-allauth/account/urls.py #}
+    <a href="{% url 'account_logout' %}"
+        class="btn btn-danger btn-sm m-1">  {% fa5_icon 'arrow-right' 'fas' %} {% translate "Sign Out" %}</a>
 {% else %}
-    <a class="btn btn-info" style="float: right;margin:5px"
-       href="/user/login/?next={{ request.get_full_path|urlencode }}">{% fa5_icon 'log-in' 'fas' %} Login</a>
+    {% if ACCOUNT_ALLOW_REGISTRATION %}
+        {# URL provided by django-allauth/account/urls.py #}
+        <a href="{% url 'account_signup' %}"
+        class="btn btn-info btn-sm m-1">{% translate "Sign Up" %}</a>
+    {% endif %}
+    {# URL provided by django-allauth/account/urls.py #}
+    <a class="btn btn-info btn-sm m-1" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
 {% endif %}

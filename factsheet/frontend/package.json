@@ -24,7 +24,7 @@
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
     "apollo-boost": "^0.4.9",
-    "axios": "^1.7.4",
+    "axios": "^1.8.2",
     "chart.js": "^4.4.3",
     "chartjs-plugin-datalabels": "^2.2.0",
     "date-fns": "^2.30.0",
@@ -86,5 +86,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.85"
   }
 }

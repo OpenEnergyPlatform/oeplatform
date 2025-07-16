@@ -1,3 +1,14 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
+
 from api.tests import APITestCase, APITestCaseWithTable
 
 _TYPES = [
@@ -328,7 +339,7 @@ class TestMovePublish(APITestCaseWithTable):
         self.api_req(
             "post",
             path="meta/",
-            data={"id": self.test_table, "licenses": [{"name": "CC-BY-4.0"}]},
+            data=OEMETADATA_V20_EXAMPLE,
             exp_code=200,
         )
 

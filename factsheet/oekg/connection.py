@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import os
 from pathlib import Path
 
@@ -5,10 +13,15 @@ from owlready2 import get_ontology
 from rdflib import Graph
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 from rdflib.plugins.stores import sparqlstore
-from SPARQLWrapper import SPARQLWrapper
+from SPARQLWrapper import POST, SPARQLWrapper
 
 from factsheet.oekg.namespaces import bind_all_namespaces
-from oeplatform.settings import ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME, RDF_DATABASES
+from oeplatform.settings import (
+    ONTOLOGY_ROOT,
+    OPEN_ENERGY_ONTOLOGY_NAME,
+    RDF_DATABASES,
+    USE_DOCKER,
+)
 
 # from datetime import date
 # from SPARQLWrapper import SPARQLWrapper
@@ -40,10 +53,29 @@ update_endpoint = "http://%(host)s:%(port)s/%(name)s/update" % rdfdb
 
 sparql = SPARQLWrapper(query_endpoint)
 sparql_wrapper_update = SPARQLWrapper(update_endpoint)
+# TODO: Currently we are not using credentials in prod
+if USE_DOCKER:
+    sparql_wrapper_update.setHTTPAuth("BASIC")
+    sparql_wrapper_update.setCredentials(rdfdb.get("user"), rdfdb.get("password"))
+    sparql_wrapper_update.setMethod(POST)
 
-store = sparqlstore.SPARQLUpdateStore()
+if USE_DOCKER:
+    store = sparqlstore.SPARQLUpdateStore(
+        query_endpoint,  # your query URL
+        update_endpoint,  # your update URL
+        auth=(
+            rdfdb.get("user"),
+            rdfdb.get("password"),
+        ),  # HTTP Basic pair :contentReference[oaicite:0]{index=0}
+        postAsEncoded=True,  # (optional—default True)
+        autocommit=True,  # commit after each add/delete
+        dirty_reads=False,  # commit before each read
+    )
+else:
+    # TODO: Keep this until prod is updated
+    store = sparqlstore.SPARQLUpdateStore()
+    store.open((query_endpoint, update_endpoint))
 
-store.open((query_endpoint, update_endpoint))
 oekg = Graph(store, identifier=default)
 
 oekg_with_namespaces = bind_all_namespaces(oekg)

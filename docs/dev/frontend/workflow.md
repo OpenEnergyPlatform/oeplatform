@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Frontend Workflow <span class="badge badge--warning">Draft</span>
 
 If you need or wish to work on the visual part of the platform, here are some resources to help you started with.

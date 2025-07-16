@@ -1,3 +1,16 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Marco Finkendei <https://github.com/MFinkendei>
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
+from allauth.account.forms import SignupForm
+from allauth.socialaccount.forms import SignupForm as SocialSignupForm
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -13,39 +26,22 @@ from .models import UserGroup
 from .models import myuser as OepUser
 
 
-class CreateUserForm(UserCreationForm):
+class UserSocialSignupForm(SocialSignupForm):
+    """
+    Renders the form when user has signed up using social accounts.
+    Default fields will be added automatically.
+    See UserSignupForm otherwise.
+    """
+
+
+class CreateUserForm(SignupForm):
     captcha = CaptchaField()
 
-    class Meta:
-        model = OepUser
-        fields = (
-            "name",
-            "email",
-            "fullname",
-            "location",
-            "affiliation",
-            "work",
-            "linkedin",
-            "twitter",
-            "facebook",
-            "profile_img",
-            "password1",
-            "password2",
-        )
-
-    def save(self, commit=True):
-        user = super(CreateUserForm, self).save(commit=commit)
-        user.send_activation_mail()
+    def save(self, request):
+        user = super(CreateUserForm, self).save(request)
         return user
 
-    def __init__(self, *args, **kwargs):
-        super(CreateUserForm, self).__init__(*args, **kwargs)
-        for key in self.Meta.fields:
-            field = self.fields[key]
-            cstring = field.widget.attrs.get("class", "")
-            field.widget.attrs["class"] = cstring + "form-control"
-            if field.required:
-                field.label_suffix = "*"
+    # def signup(self, request, user):
 
 
 class EditUserForm(UserChangeForm):
@@ -61,7 +57,7 @@ class EditUserForm(UserChangeForm):
         model = OepUser
         fields = (
             "profile_img",
-            "email",
+            # "email",
             "fullname",
             "location",
             "work",

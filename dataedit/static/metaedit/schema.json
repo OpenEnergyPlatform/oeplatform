@@ -1,12 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/metadata/v20/v20/schema.json",
-  "description": "Open Energy Metadata (OEMetadata) - metadata schema",
+  "$id": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/v2/v20/schema.json",
+  "description": "Open Energy Metadata (OEMetadata) - Metadata schema for documenting 1...n datasets using the json / jsonld format. Structure and validation is implemented in the tool OMI using the json-schema specification. Best suited for tabular data including relational models. Compatible with frictionless datapackage specification and its tooling. Optimized for precise data annotations using ontology terms to annotate both columns and cell values which enables broad data comparisons.",
   "type": "object",
   "format": "categories",
-  "basicCategoryTitle": "General",
+  "basicCategoryTitle": "Dataset overview",
   "required": ["resources"],
   "properties": {
+    "@context": {
+      "description": "Explanation of metadata keys in ontology terms.",
+      "examples": [
+        "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json"
+      ],
+      "type": ["string", "null"],
+      "badge": "Platinum",
+      "title": "@context",
+      "readOnly": true
+    },
     "name": {
       "description": "A filename or database conform dataset name.",
       "type": ["string", "null"],
@@ -28,13 +38,13 @@
       "badge": "Bronze",
       "title": "Dataset Description"
     },
-    "id": {
+    "@id": {
       "description": "A unique identifier (UUID/DOI) for the collection.",
       "type": ["string", "null"],
       "examples": [
-        "https://databus.openenergyplatform.org/oeplatform/reference"
+        "https://databus.openenergyplatform.org/oeplatform/supply/wri_global_power_plant_database/"
       ],
-      "badge": "Silver",
+      "badge": "Platinum",
       "title": "Dataset Identifier",
       "format": "uri",
       "readOnly": true
@@ -50,20 +60,10 @@
             "description": "A Uniform Resource Identifier (URI) that links the resource via the OpenEnergyDatabus (DBpedia Databus).",
             "type": ["string", "null"],
             "examples": [
-              "https://databus.openenergyplatform.org/oeplatform/supply/wri_global_power_plant_database/2022-11-07"
+              "https://databus.openenergyplatform.org/oeplatform/supply/wri_global_power_plant_database/2022-11-07/wri_global_power_plant_database_variant=data.csv"
             ],
             "badge": "Platinum",
             "title": "@Id",
-            "readOnly": true
-          },
-          "@context": {
-            "description": "Explanation of metadata keys in ontology terms.",
-            "examples": [
-              "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/metadata/latest/context.json"
-            ],
-            "type": ["string", "null"],
-            "badge": "Platinum",
-            "title": "@context",
             "readOnly": true
           },
           "name": {
@@ -81,10 +81,10 @@
               "type": ["string", "null"],
               "examples": ["model_draft", "reference"],
               "badge": "Bronze",
-              "title": "Keyword"
+              "title": "Topic"
             },
             "badge": "Bronze",
-            "title": "Keywords"
+            "title": "Topics"
           },
           "title": {
             "description": "A human readable table name.",
@@ -156,6 +156,17 @@
                   "badge": "Platinum",
                   "title": "Subject Identifier",
                   "format": "uri"
+                },
+                "openModalButton": {
+                  "description": "Button to open a modal for HTMX request",
+                  "format": "button",
+                  "options": {
+                    "button": {
+                      "text": "Open OEO-extended",
+                      "icon": "external-link-alt",
+                      "action": "openModalAction"
+                    }
+                  }
                 }
               },
               "badge": "Platinum",
@@ -341,7 +352,7 @@
                   }
                 },
                 "badge": "Silver",
-                "title": "Extent"
+                "title": "Location"
               },
               "extent": {
                 "description": "An object that describes a covered area or region.",
@@ -381,7 +392,7 @@
                     "type": "array",
                     "examples": [13.08825, 52.33859, 13.76104, 52.6754],
                     "items": {
-                      "type": "number"
+                      "type": ["number", "null"]
                     },
                     "minItems": 4,
                     "maxItems": 4,
@@ -504,10 +515,10 @@
                       "The Core Writing Team"
                     ],
                     "badge": "Bronze",
-                    "title": "Keyword"
+                    "title": "Author"
                   },
                   "badge": "Bronze",
-                  "title": "Keywords"
+                  "title": "Authors"
                 },
                 "description": {
                   "description": "A free text description of the source.",
@@ -684,7 +695,7 @@
                 "path": {
                   "description": "A qualified link or path pointing to a relevant location online for the contributor. This can be the GitHub page or ORCID.",
                   "type": ["string", "null"],
-                  "examples": ["https://github.com/Ludee"],
+                  "examples": ["https://github.com/Ludwig Huelk"],
                   "badge": "Bronze",
                   "title": "Path"
                 },
@@ -778,6 +789,7 @@
                 "items": {
                   "type": "object",
                   "format": "categories",
+                  "basicCategoryTitle": "Column",
                   "properties": {
                     "name": {
                       "description": "The name of the field. The name may only consist of lowercase alphanumeric characters or underscores. It must not begin with a number or an underscore.",
@@ -850,6 +862,17 @@
                             "badge": "Platinum",
                             "title": "Is About Identifier",
                             "format": "uri"
+                          },
+                          "openModalButton": {
+                            "description": "Button to open a modal for HTMX request",
+                            "format": "button",
+                            "options": {
+                              "button": {
+                                "text": "Open OEO-extended",
+                                "icon": "external-link-alt",
+                                "action": "openModalAction"
+                              }
+                            }
                           }
                         },
                         "badge": "Platinum",
@@ -896,6 +919,17 @@
                             "badge": "Platinum",
                             "title": "Value Reference Identifier",
                             "format": "uri"
+                          },
+                          "openModalButton": {
+                            "description": "Button to open a modal for HTMX request",
+                            "format": "button",
+                            "options": {
+                              "button": {
+                                "text": "Open OEO-extended",
+                                "icon": "external-link-alt",
+                                "action": "openModalAction"
+                              }
+                            }
                           }
                         },
                         "badge": "Platinum",
@@ -982,7 +1016,7 @@
                 "title": "Foreign Keys"
               }
             },
-            "title": "Schema",
+            "title": "Data schema",
             "required": ["primaryKey"]
           },
           "dialect": {

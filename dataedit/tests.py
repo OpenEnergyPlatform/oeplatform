@@ -1,5 +1,13 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 from django.test import TestCase
-from metadata.v160.example import OEMETADATA_V160_EXAMPLE
+from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from login.models import myuser
 
@@ -28,7 +36,7 @@ class MigrationTest(TestCase):
         table = Table.objects.create(
             schema=test_schema,
             name="test_table",
-            oemetadata=OEMETADATA_V160_EXAMPLE,
+            oemetadata=OEMETADATA_V20_EXAMPLE,
         )
 
         test_contributor = myuser.objects.create(
@@ -70,7 +78,7 @@ class MigrationTest(TestCase):
 
         # Since the 'oemetadata' field is added by the migration, it will exist here
         # Now perform your checks on 'oemetadata'
-        self.assertEqual(review.oemetadata, OEMETADATA_V160_EXAMPLE)
+        self.assertEqual(review.oemetadata, OEMETADATA_V20_EXAMPLE)
 
     def test_migration_rollback(self):
         # Implement if needed

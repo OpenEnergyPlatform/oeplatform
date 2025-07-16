@@ -1,3 +1,10 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 // e.preventDefault(), e.stopPropagation(), t.saveJSON()
 
@@ -74,13 +81,17 @@ var MetaEdit = function(config) {
 
     // make some readonly
     if (config.standalone == false) {
-      json.properties.id.readonly = true;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
+      json.properties["@id"].readOnly = false;
+      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readOnly = true;
+      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readOnly = true;
     } else {
-      json.properties.id.readonly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = false;
+      json.properties["@context"].options = {hidden: true};
+      json.properties["@id"].readOnly = false;
+      json.properties.resources.items.properties["@id"].readOnly = false;
+      json.properties.resources.items.properties.path.readOnly = false;
+      json.properties.resources.items.properties.schema.properties.fields.items.properties.nullable.readOnly = false;
+      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readOnly = false;
+      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readOnly = false;
     }
 
     // remove some: TODO: but make sure fields are not lost
@@ -102,71 +113,106 @@ var MetaEdit = function(config) {
     };
 
     if (config.standalone == false) {
-      json["title"] = "Metadata for " + config.table;
+      json["title"] = "Metadata for the Dataset: " + config.table;
     } else {
-      json["title"] = "Create new Metadata";
+      json["title"] = "Create new Metadata for your Dataset";
     }
 
+    // add names to resources categories
+    json.properties.resources.items.basicCategoryTitle = "General"
 
     return json;
   }
 
   function fixData(json) {
-    // MUST have ID
-    json["id"] = config["url_table_id"];
+    json = json || {};
 
-    // MUST have one resource with name == id == tablename
-    json["resources"] = json["resources"] || [{}];
-    json["resources"][0]["name"] = json["resources"][0]["name"] || config.table;
+    // Required top-level fields
+    json["@context"] = json["@context"] || "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json";
 
-    // auto set / correct columns
-    json["resources"][0]["schema"] = json["resources"][0]["schema"] || {};
-    json["resources"][0]["schema"]["fields"] = json["resources"][0]["schema"]["fields"] || [];
-    var fieldsByName = {};
-    json["resources"][0]["schema"]["fields"].map(function(field) {
-      fieldsByName[field.name] = field;
+    json.metaMetadata = json.metaMetadata || {};
+    if (!json.metaMetadata.metadataVersion) {
+      json.metaMetadata.metadataVersion = "OEMetadata-2.0.4";
+    }
+
+    // Ensure one resource
+    json.resources = json.resources || [{}];
+    const resource = json.resources[0];
+    resource.name = resource.name || config.table;
+    resource.path = resource.path || config.url_table_id;
+
+    // Ensure schema object exists
+    resource.schema = resource.schema || {};
+    resource.schema.fields = resource.schema.fields || [];
+
+    // Rebuild fields with merging and renaming
+    const existingFields = resource.schema.fields;
+    const fieldMap = new Map();
+
+    // Add existing fields to a map for quick lookup
+    existingFields.forEach(field => {
+      if (field.name) fieldMap.set(field.name, field);
     });
 
-    json["resources"][0]["schema"]["fields"] = [];
-    config.columns.map(function(column) {
-      var field = fieldsByName[column.name] || {name: column.name};
-      field.type = field.type || column.data_type;
-      json["resources"][0]["schema"]["fields"].push(field);
+    // Prepare updated fields array
+    const updatedFields = config.columns.map(col => {
+      const existing = fieldMap.get(col.name) || {};
+
+      return {
+        name: col.name,
+        type: col.data_type || existing.type || null,
+        description: existing.description ?? null,
+        unit: existing.unit ?? null,
+        nullable: existing.nullable !== undefined ? existing.nullable : true,
+      };
     });
 
+    // Set updated field list (removes stale fields)
+    resource.schema.fields = updatedFields;
 
-    // add empty value for all missing so they show up in editor
-    // these will be removed at the end
-    function fixRecursive(schemaProps, elemObject, path) {
-      // is object ?
-      if (typeof elemObject != 'object' || $.isArray(elemObject)) {
-        return;
-      }
-      // for each key: fill missing (recursively)
-      Object.keys(schemaProps).map(function(key) {
-        var prop = schemaProps[key];
-        // console.log(path + '.' + key, prop.type)
-        if (prop.type == 'object') {
-          elemObject[key] = elemObject[key] || {};
-          fixRecursive(prop.properties, elemObject[key], path + '.' + key);
-        } else if (prop.type == 'array') {
-          elemObject[key] = elemObject[key] || [];
-          // if non empty array
-          if ($.isArray(elemObject[key]) && elemObject[key].length > 0) {
-            elemObject[key].map(function(elem, i) {
-              fixRecursive(prop.items.properties, elem, path + '.' + key + '.' + i);
-            });
+    // Fill missing top-level fields recursively based on schema
+    function fillMissingFromSchema(schemaProps, target) {
+      Object.entries(schemaProps).forEach(([key, prop]) => {
+        if (target[key] === undefined) {
+          if (prop.type === 'object') {
+            target[key] = {};
+            if (prop.properties) {
+              fillMissingFromSchema(prop.properties, target[key]);
+            }
+          } else if (prop.type === 'array') {
+            target[key] = [];
+            if (prop.items?.type === 'object' && prop.items.properties) {
+              const obj = {};
+              fillMissingFromSchema(prop.items.properties, obj);
+              target[key].push(obj);
+            }
+          } else {
+            target[key] = null;
           }
-        } else { // value
-          if (elemObject[key] === undefined) {
-            // console.log('adding empty value: ' + path + '.' + key)
-            elemObject[key] = null;
-          }
+        } else if (prop.type === 'object' && typeof target[key] === 'object' && prop.properties) {
+          fillMissingFromSchema(prop.properties, target[key]);
+        } else if (prop.type === 'array' && Array.isArray(target[key]) && prop.items?.properties) {
+          target[key].forEach(item => {
+            if (typeof item === 'object') {
+              fillMissingFromSchema(prop.items.properties, item);
+            }
+          });
         }
       });
     }
 
-    fixRecursive(config.schema.properties, json, 'root');
+    fillMissingFromSchema(config.schema.properties, json);
+    // Fix boundingBox in each resource if needed
+    if (Array.isArray(json.resources)) {
+      json.resources.forEach(resource => {
+        const bboxPath = resource?.spatial?.extent?.boundingBox;
+        if (!Array.isArray(bboxPath) || bboxPath.length !== 4 || bboxPath.some(val => typeof val !== 'number')) {
+          if (!resource.spatial) resource.spatial = {};
+          if (!resource.spatial.extent) resource.spatial.extent = {};
+          resource.spatial.extent.boundingBox = [0, 0, 0, 0]; // fallback valid default
+        }
+      });
+    }
 
     return json;
   }
@@ -178,37 +224,6 @@ var MetaEdit = function(config) {
       x = x.statusText;
     }
     return x;
-  }
-
-  function convertDescriptionIntoPopover() {
-    function convert(descr, label) {
-      var description = $(descr).text(); // get description text
-      if (description && label) {
-        label
-            .attr('data-bs-content', description)
-            .attr('title', label.text())
-            .attr('data-bs-toggle', 'popover')
-            .popover({
-              placement: 'top',
-              trigger: 'hover',
-              template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>',
-            });
-        descr.addClass('d-none');
-      }
-    }
-
-    // headings
-    config.form.find('.card-title').parent().find('>p').not('.d-none').each(function(i, e) {
-      convert($(e), $(e).parent().find('>.card-title>label'));
-    });
-
-    // inputs
-    config.form.find('.form-group>.form-text').not('.d-none').each(function(_i, e) {
-      convert($(e), $(e).parent().find('>label'));
-    });
-
-    // remove button groups
-    config.form.find('.btn-group').removeClass('btn-group');
   }
 
   // Function to recursively convert empty strings to null
@@ -355,7 +370,7 @@ var MetaEdit = function(config) {
             "getResultValue_name": function getResultValue(jseditor_editor, result) {
               selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
 
-              let path = String(jseditor_editor.path).replace("name", "path");
+              let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
               path_uri.setValue(String(result.resource));
 
@@ -384,6 +399,7 @@ var MetaEdit = function(config) {
 
         standalone_options = {
           schema: config.schema,
+          // startval: {"@context": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json"},
           theme: 'bootstrap5',
           iconlib: 'fontawesome5',
           mode: 'form',
@@ -449,7 +465,7 @@ var MetaEdit = function(config) {
             "getResultValue_name": function getResultValue(jseditor_editor, result) {
               selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
 
-              let path = String(jseditor_editor.path).replace("name", "path");
+              let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
               path_uri.setValue(String(result.resource));
 
@@ -472,7 +488,6 @@ var MetaEdit = function(config) {
       });
     }
   })();
-
 
   return config;
 };

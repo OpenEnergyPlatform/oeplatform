@@ -1,4 +1,32 @@
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Jonas H <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Tu Phan Ngoc <RL-INSTITUT\tuphan.ngoc@rli-nb-65.rl-institut.local> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Venkatesh Murugadas <venkatesh.murugadas@st.ovgu.de> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Zoë Schaaff <z.schaaff@oeko.de>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Pietro Zambelli <https://github.com/zarch>
+# SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+#
+# SPDX-License-Identifier: CC0-1.0
+
 Django==5.1.4
+django-allauth[socialaccount]==65.2.0
 matplotlib==3.8.3
 urllib3==1.26.19
 # scipy==1.12.0 # big package, only used when attemping to get the github activity graph -> not implemented ATM
@@ -7,7 +35,7 @@ SQLAlchemy==1.3.24 #  <1.4 is important (test_sync_tags_keywords_969, test_issue
 Pillow==10.3.0
 bibtexparser==1.4.1
 django-colorfield==0.7.3
-requests==2.32.0
+requests==2.32.4
 psycopg2-binary==2.9.9
 webcolors==1.13
 djangorestframework==3.15.2
@@ -18,15 +46,16 @@ alembic==1.13.1
 django-simple-captcha==0.5.20
 django-bootstrap5==21.3
 django-fontawesome-5==1.0.18
-omi==0.2.1
+omi==1.1.0
 zipstream-new==1.1.8
 rdflib==7.0.0
 pyparsing==2.4.7 # <3 otherwise: sparql queries as text cannot be parsed
 django-better-admin-arrayfield==1.4.2
 SPARQLWrapper==1.8.5
 GeoAlchemy2==0.11.1
-jsonschema==3.2.0
-oemetadata==1.6.0
+jsonschema==4.22.0 # Mainly required by omi / oemetadata
+oemetadata==2.0.4
 django-compressor==4.5.1
 django-cors-headers==4.3.1
 owlready2==0.45
+django_vite==3.1.0

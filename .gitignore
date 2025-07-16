@@ -88,8 +88,15 @@ apache*
 
 .DS_Store
 
+# Docker
+.node_modules_stamp
+.vite
+docker/serviceConfigs/ontop/postgresql.jar
+
 # Deployment files
 docker/oeplatform_data
+docker/data
+assets/
 
 **/node_modules
 oep-website/oeo_viewer/client/node_modules
