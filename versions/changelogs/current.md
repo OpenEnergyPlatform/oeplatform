@@ -38,6 +38,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+Grouping in the opening window for indexed fields on the summary page ([#1946]https://github.com/OpenEnergyPlatform/oeplatform/pull/1946)
+Indexed fields are numbered starting from 1 ([#1946]https://github.com/OpenEnergyPlatform/oeplatform/pull/1946)
+Removing contributor tab from peer review ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
+Opening windows for indexed fields in opr ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
+Openinig windows for subcategories in opr ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
+
 ## Features
 
 ## Bugs
