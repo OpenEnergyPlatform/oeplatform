@@ -1,3 +1,24 @@
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.           # noqa: E501
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg   # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg         # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg         # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg         # noqa: E501
+# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>                                             # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.                           # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut               # noqa: E501
+# SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut                                   # noqa: E501
+# SPDX-FileCopyrightText: 2025 henhuy <https://github.com/henhuy> © Reiner Lemoine Institut                                 # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
+# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut                                # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.                           # noqa: E501
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import json
 import logging
 import re
@@ -2552,23 +2573,6 @@ def set_table_metadata(table, schema, metadata, cursor=None):
         current_name=django_table_obj.human_readable_name,
         readable_table_name=readable_table_name,
     )
-
-    # ---------------------------------------
-    # update the table comment in oedb table if sqlalchemy curser is provided
-    # ---------------------------------------
-
-    # # TODO: The following 2 lines seems to duplicate with the lines below the if block
-    # oedb_table_obj = _get_table(schema=schema, table=table)
-    # oedb_table_obj.comment = metadata_str
-    # if cursor is not None:
-    #     # Surprisingly, SQLAlchemy does not seem to escape comment strings
-    #     # properly. Certain strings cause errors database errors.
-    #     # This MAY be a security issue. Therefore, we do not use
-    #     # SQLAlchemy's compiler here but do it manually.
-    #     sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
-    #         schema=oedb_table_obj.schema, table=oedb_table_obj.name
-    #     )
-    #     cursor.execute(sql, (metadata_str,))
 
     # ---------------------------------------
     # update search index

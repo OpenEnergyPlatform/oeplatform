@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import React, { useState, useEffect, useRef } from 'react';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -470,7 +476,7 @@ function Factsheet(props) {
             // Handle successful response
 
             if (response.data === 'Factsheet saved') {
-              navigate('/factsheet/fs/' + new_uid);
+              navigate('/scenario-bundles/id/' + new_uid);
               setIsCreated(true);
               setOpenSavedDialog(true);
               setUID(new_uid);
@@ -2338,7 +2344,7 @@ const renderScenariosOverview = () => (
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    <span> <span> {v.date_of_publication.split('/')[0]} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                    <span> <span> {v.date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
                   </ContentTableCell>
                 </TableRow>
 

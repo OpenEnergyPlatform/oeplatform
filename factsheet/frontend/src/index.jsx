@@ -21,7 +21,8 @@ const container = document.getElementById('root');
 const root = createRoot(container);
 
 root.render(
-  <React.StrictMode>
+  // StrictMode currently breaks DND in qualitative comparison
+  // <React.StrictMode>
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
@@ -36,5 +37,5 @@ root.render(
         </LocalizationProvider>
       </ThemeProvider>
     </CacheProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );

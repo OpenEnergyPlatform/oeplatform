@@ -52,7 +52,9 @@ function App() {
   }
   if (!loading) {
     if (resource === 'scenario-bundles' && route === 'compare') {
-      return <ComparisonBoardMain params={route} />
+      const uidString = window.location.pathname.split('/')[3] || '';
+      const uids = uidString.split('&'); // ✅ split into array
+      return <ComparisonBoardMain params={uids} />
     }
     // now matches both '/scenario-bundles/id/new' and '/scenario-bundles/id/<uuid>'
     if (resource === 'scenario-bundles' && route === 'id' && idOrNew) {

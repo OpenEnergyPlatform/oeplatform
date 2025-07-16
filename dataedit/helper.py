@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """
 Provide helper functionality for views to reduce code lines in views.py
 make the codebase more modular.
@@ -12,12 +21,10 @@ from dataedit.models import PeerReview, Table
 ##############################################
 
 
-# TODO: Add py 3.10 feature to annotate the return type as str | None
-# Dev´s need to update python version first ...
-def read_label(table, oemetadata) -> str:
+def read_label_only_for_first_resource_element(table, oemetadata) -> str:
     """
-    Extracts the readable name from @comment and appends the real name in parens.
-    If comment is not a JSON-dictionary or does not contain a field 'Name' None
+    Extracts the readable name from oemetadata and appends the real name in parens.
+    If oemetadata is not a JSON-dictionary or does not contain a field 'Name' None
     is returned.
 
     :param table: Name to append
@@ -27,10 +34,10 @@ def read_label(table, oemetadata) -> str:
     :return: Readable name appended by the true table name as string or None
     """
     try:
-        if oemetadata.get("resources"):
-            return oemetadata.get("resources", {})["title"].strip() + " (" + table + ")"
-        # elif oemetadata.get("Title"):
-        #     return oemetadata["Title"].strip() + " (" + table + ")"
+        if oemetadata.get("resources")[0]:
+            return (
+                oemetadata.get("resources", [])[0]["title"].strip() + " (" + table + ")"
+            )
 
         else:
             return None
@@ -50,7 +57,9 @@ def get_readable_table_name(table_obj: Table) -> str:
     """
 
     try:
-        label = read_label(table_obj.name, table_obj.oemetadata)
+        label = read_label_only_for_first_resource_element(
+            table_obj.name, table_obj.oemetadata
+        )
     except Exception as e:
         raise e
     return label

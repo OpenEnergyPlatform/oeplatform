@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 from django.shortcuts import get_object_or_404, render
 
 from dataedit.models import Table

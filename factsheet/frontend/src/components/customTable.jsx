@@ -1,3 +1,12 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
@@ -12,7 +21,6 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 // import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
 import { visuallyHidden } from '@mui/utils';
 import { styled } from '@mui/material/styles';
 import { tableCellClasses } from '@mui/material/TableCell';
@@ -27,9 +35,7 @@ import Chip from '@mui/material/Chip';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit.jsx';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import Collapse from '@mui/material/Collapse';
@@ -41,15 +47,8 @@ import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
 // import RuleIcon from '@mui/icons-material/Rule';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
-import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import TextField from '@mui/material/TextField';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Slider from '@mui/material/Slider';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
@@ -66,7 +65,9 @@ import '../styles/App.css';
 import variables from '../styles/oep-theme/variables.js';
 // import palette from '../styles/oep-theme/palette.js';
 import CSRFToken from './csrfToken.js';
-import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
+// import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
+import FactsheetFilterDialog from './FactsheetFilterDialog.jsx';
+import FilterFeedbackBanner from './filterFeedbackBanner';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -221,6 +222,9 @@ function EnhancedTableHead(props) {
 
 EnhancedTableHead.propTypes = {
   numSelected: PropTypes.number.isRequired,
+  handleOpenQuery: PropTypes.func.isRequired,
+  handleReset: PropTypes.func.isRequired,
+  filterApplied: PropTypes.bool.isRequired,
   onRequestSort: PropTypes.func.isRequired,
   onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
@@ -229,7 +233,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected, logged_in } = props;
+  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected, logged_in, filterApplied, handleReset } = props;
   const [isDisabled, setIsDisabled] = useState(true);
   return (
     <div>
@@ -269,11 +273,17 @@ function EnhancedTableToolbar(props) {
             {/* <Tooltip title="Show all">
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
             </Tooltip> */}
-            <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
-            <Button disabled={true}size="small" key="resetFilterButton" sx={{ marginLeft: '8px' }} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
+            <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Search</Button>
+            <Button
+              disabled={!filterApplied}
+              size="small"
+              key="resetFilterButton"
+              sx={{ marginLeft: '8px' }}
+              startIcon={<ReplayIcon />}
+              onClick={handleReset}>Reset</Button>
             <Tooltip title="Compare">
 
-              {numSelected > 1 ? <Link to={`scenario-bundles/compare/${[...selected].join('#')}`} onClick={() => this.forceUpdate} style={{ color: 'white' }}>
+              {numSelected > 1 ? <Link to={`scenario-bundles/compare/${[...selected].join('&')}`} onClick={() => this.forceUpdate} style={{ color: 'white' }}>
                 <Button size="small"
                   style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }}
                   variant="contained"
@@ -358,14 +368,17 @@ export default function CustomTable(props) {
   const [authors, setAuthors] = useState([]);
   const [fundingSources, setFundingSources] = useState([]);
   const [selectedFundingSource, setSelectedFundingSource] = useState([]);
-  const [startDateOfPublication, setStartDateOfPublication] = useState('2000');
-  const [endDateOfPublication, setEndDateOfPublication] = useState('2050');
-  const [selectedStudyKewords, setSelectedStudyKewords] = useState([]);
+  const [startDateOfPublication, setStartDateOfPublication] = useState(null);
+  const [endDateOfPublication, setEndDateOfPublication] = useState(null);
+  const [selectedStudyKeywords, setSelectedStudyKewords] = useState([]);
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
   const [selectedAspects, setSelectedAspects] = useState([]);
   const [alignment, setAlignment] = React.useState('list');
   const [filteredFactsheets, setFilteredFactsheets] = useState([]);
   const [logged_in, setLogged_in] = React.useState('');
+
+  const [scenarioYearTouched, setScenarioYearTouched] = useState(false);
+  const [publicationDateTouched, setPublicationDateTouched] = useState(false);
 
  const handleChangeView = (event, newAlignment) => {
     if (newAlignment !== null) {
@@ -463,19 +476,29 @@ export default function CustomTable(props) {
     setOpenQuery(false);
   };
 
-  const handleReset = (event) => {
+  const handleReset = () => {
     setOpenQuery(false);
     setSelectedAuthors([]);
     setSelectedInstitution([]);
+    setSelectedFundingSource([]);
+    setSelectedStudyKewords([]);
+    setScenarioYearValue([2000, 2200]);
+    setStartDateOfPublication(null);
+    setEndDateOfPublication(null);
+    setScenarioYearTouched(false);
+    setPublicationDateTouched(false);
+    setFilteredFactsheets([]);
+    setFilterApplied(false);
+    setFeedbackOpen(false);
   };
 
   const handleStudyKeywords = (event) => {
     if (event.target.checked) {
-      if (!selectedStudyKewords.includes(event.target.name)) {
-        setSelectedStudyKewords([...selectedStudyKewords, event.target.name]);
+      if (!selectedStudyKeywords.includes(event.target.name)) {
+        setSelectedStudyKewords([...selectedStudyKeywords, event.target.name]);
       }
     } else {
-      const filteredStudyKeywords = selectedStudyKewords.filter(i => i !== event.target.name);
+      const filteredStudyKeywords = selectedStudyKeywords.filter(i => i !== event.target.name);
       setSelectedStudyKewords(filteredStudyKeywords);
     }
   }
@@ -540,31 +563,75 @@ export default function CustomTable(props) {
   const fundingSourceHandler = (fundingSourceList) => {
     setSelectedFundingSource(fundingSourceList);
   };
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackType, setFeedbackType] = useState(''); // 'noFilters' or 'noResults'
+  const [filterApplied, setFilterApplied] = useState(false);
 
-  const handleConfirmQuery = (event) => {
-    setOpenQuery(false);
-    setOpenBackDrop(true);
-    const criteria = {
-      'institutions': selectedInstitution.map(i => 'OEKG:' + i.iri),
-      'authors': selectedAuthors.map(i => 'OEKG:' + i.iri),
-      'fundingSource': selectedFundingSource.map(i => 'OEKG:' + i.iri),
-      'startDateOfPublication': startDateOfPublication,
-      'endDateOfPublication': endDateOfPublication,
-      'studyKewords': selectedStudyKewords,
-      'scenarioYearValue': scenarioYearValue,
+  const handleConfirmQuery = () => {
+    const isFilterEmpty =
+      selectedInstitution.length === 0 &&
+      selectedAuthors.length === 0 &&
+      selectedFundingSource.length === 0 &&
+      selectedStudyKeywords.length === 0 &&
+      !scenarioYearTouched &&
+      !publicationDateTouched;
+
+    if (isFilterEmpty) {
+      // Case A: No filters selected → show banner inside dialog
+      setFeedbackType('noFilters');
+      setFeedbackOpen(true);
+      return;
     }
-    axios.post(conf.toep + 'scenario-bundles/query/',
-      {
-        'criteria': criteria,
-      },
-      {
-        headers: { 'X-CSRFToken': CSRFToken() }
-      }
+
+    // Filters selected – proceed to query
+    setOpenBackDrop(true);
+
+    const criteria = {};
+    if (selectedInstitution.length > 0) {
+      criteria.institutions = selectedInstitution.map(i => 'OEKG:' + i.iri);
+    }
+    if (selectedAuthors.length > 0) {
+      criteria.authors = selectedAuthors.map(i => 'OEKG:' + i.iri);
+    }
+    if (selectedFundingSource.length > 0) {
+      criteria.fundingSource = selectedFundingSource.map(i => 'OEKG:' + i.iri);
+    }
+    if (selectedStudyKeywords.length > 0) {
+      criteria.studyKeywords = selectedStudyKeywords;
+    }
+    if (scenarioYearTouched) {
+      criteria.scenarioYearValue = scenarioYearValue;
+    }
+    if (publicationDateTouched) {
+      criteria.startDateOfPublication = startDateOfPublication;
+      criteria.endDateOfPublication = endDateOfPublication;
+    }
+
+    axios.post(conf.toep + conf.oekgQueryFilter,
+      { criteria },
+      { headers: { 'X-CSRFToken': CSRFToken() } }
     ).then(response => {
       const filteredResultList = response.data;
-      const filteredStudyAcronyms = filteredResultList.map(i => i.study_acronym).map(j => j.value);
+      const filteredStudyAcronyms = filteredResultList.map(i => i.study_acronym?.value);
       const newFactsheetsList = factsheets.filter(item => filteredStudyAcronyms.includes(item.acronym));
       setFilteredFactsheets(newFactsheetsList);
+
+      if (newFactsheetsList.length === 0) {
+        // Case B: Filters were set but no results → close dialog + show banner outside
+        setFeedbackType('noResults');
+        setFeedbackOpen(true);
+        setOpenQuery(false);
+        setFilterApplied(true);
+      } else {
+        // Case C: Results found → update + close dialog
+        setFeedbackOpen(false);
+        setOpenQuery(false);
+        setFilterApplied(true);
+      }
+
+      setOpenBackDrop(false);
+    }).catch(err => {
+      console.error("Query failed:", err);
       setOpenBackDrop(false);
     });
   };
@@ -587,14 +654,14 @@ export default function CustomTable(props) {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-  const visibleRows = React.useMemo(
-    () =>
-      stableSort(rows, getComparator(order, orderBy)).slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage,
-      ),
-    [order, orderBy, page, rowsPerPage],
-  );
+  const visibleRows = React.useMemo(() => {
+    const finalRows = filteredFactsheets.length === 0 ? factsheets : filteredFactsheets;
+    return stableSort(finalRows, getComparator(order, orderBy)).slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage,
+    );
+  }, [filteredFactsheets, factsheets, order, orderBy, page, rowsPerPage]);
+
 
 
   const scenarioAspects = [
@@ -607,13 +674,13 @@ export default function CustomTable(props) {
   ];
 
   const renderRows = (rs) => {
-    const rowsToRender = filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
+    // const rowsToRender = filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
     return <TableBody >
-      {rowsToRender.map((row, index) => {
+      {rs.map((row, index) => {
         const isItemSelected = isSelected(row.study_name);
         const labelId = `enhanced-table-checkbox-${index}`;
         return (
-          <React.Fragment key={row.study_name}>
+          <React.Fragment key={row.uid}>
             <StyledTableRow
               hover
               role="checkbox"
@@ -669,7 +736,7 @@ export default function CustomTable(props) {
                   row.collected_scenario_publication_dates.map(
                     (date_of_publication, idx) => (
                       <Typography
-                        key={date_of_publication ?? idx}           // ← add key here
+                        key={date_of_publication ?? idx}
                         variant="subtitle1"
                         gutterBottom
                         style={{ marginTop: '2px' }}
@@ -902,92 +969,69 @@ export default function CustomTable(props) {
       </Dialog>
 
 
-      <Dialog
-        maxWidth="md"
+      <FactsheetFilterDialog
         open={openQuery}
-        aria-labelledby="responsive-dialog-title"
-        style={{ height: '85vh', overflow: 'auto' }}
-      >
-        <DialogTitle id="responsive-dialog-title">
-          <b>Please define the criteria for selecting factsheets.</b>
-        </DialogTitle >
-        <DialogContent>
-          <DialogContentText>
-            <div>
-               <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="institution" showSelectedElements={true} manyItems optionsSet={institutions} kind='Which institutions are you interested in?' handler={institutionHandler} selectedElements={selectedInstitution} />
-              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="author" showSelectedElements={true} manyItems optionsSet={authors} kind='Which authors are you interested in?' handler={authorsHandler} selectedElements={selectedAuthors} />
-              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="Funding source" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Which funding sources are you interested in?' handler={fundingSourceHandler} selectedElements={selectedFundingSource} />
-              <div>Date of publication:</div>
-              <div style={{ display: 'flex', marginTop: "10px" }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <Stack spacing={3} style={{ width: '90%' }}>
-                    <DesktopDatePicker
-                      label='Start'
-                      views={['year']}
-                      value={startDateOfPublication.split('-')[0]}
-                      renderInput={(params) => <TextField {...params} />}
-                      onChange={(newValue) => {
-                        const dateObj = new Date(newValue);
-                        const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate())
-                        setStartDateOfPublication(dateString.split('-')[0]);
-                      }}
-                    />
-                  </Stack>
-                </LocalizationProvider>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <Stack spacing={3} style={{ width: '90%', marginLeft: '10px' }}>
-                    <DesktopDatePicker
-                      label='End'
-                      views={['year']}
-                      value={endDateOfPublication.split('-')[0]}
-                      renderInput={(params) => <TextField {...params} />}
-                      onChange={(newValue) => {
-                        const dateObj = new Date(newValue);
-                        const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate())
-                        setEndDateOfPublication(dateString.split('-')[0]);
-                      }}
-                    />
-                  </Stack>
-                </LocalizationProvider>
-              </div>
-              <div style={{ marginTop: "20px" }}>
-                <div>Study descriptors:</div>
-                <FormGroup>
-                  <div >
-                    {
-                      StudyKeywords.map((item) => <FormControlLabel key={item[0]} control={
-                        <Checkbox size="small" color="default" />
-                      } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]} />)
-                    }
-                  </div>
-                </FormGroup>
-              </div>
+        onClose={handleCloseQuery}
+        onConfirm={handleConfirmQuery}
+        institutions={institutions}
+        authors={authors}
+        fundingSources={fundingSources}
+        selectedInstitution={selectedInstitution}
+        selectedAuthors={selectedAuthors}
+        selectedFundingSource={selectedFundingSource}
+        startDateOfPublication={startDateOfPublication}
+        endDateOfPublication={endDateOfPublication}
+        scenarioYearValue={scenarioYearValue}
+        selectedStudyKeywords={selectedStudyKeywords}
+        setSelectedInstitution={setSelectedInstitution}
+        setSelectedAuthors={setSelectedAuthors}
+        setSelectedFundingSource={setSelectedFundingSource}
+        setStartDateOfPublication={(val) => {
+          setStartDateOfPublication(val);
+          setPublicationDateTouched(true);
+        }}
+        setEndDateOfPublication={(val) => {
+          setEndDateOfPublication(val);
+          setPublicationDateTouched(true);
+        }}
+        setScenarioYearValue={(val) => {
+          setScenarioYearValue(val);
+          setScenarioYearTouched(true);
+        }}
+        setSelectedStudyKewords={setSelectedStudyKewords}
+        defaultStartDate="2000"
+        defaultEndDate="2050"
+        defaultScenarioYearRange={[2000, 2200]}
+        feedbackOpen={feedbackType === 'noFilters' && feedbackOpen}
+        feedbackType={feedbackType}
+        setFeedbackOpen={setFeedbackOpen}
+        setFeedbackType={setFeedbackType}
+      />
 
-              <div style={{ marginTop: "20px" }}>
-                <div>Scenario years:</div>
-                <Slider
-                  value={scenarioYearValue}
-                  onChange={handleScenarioYearChange}
-                  valueLabelDisplay="auto"
-                  min={2000}
-                  max={2200}
-                />
-              </div>
-            </div>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="contained" onClick={handleConfirmQuery} >
-            Confirm
-          </Button>
-          <Button variant="outlined" onClick={handleCloseQuery}  >
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Container maxWidth="xl">
-        <EnhancedTableToolbar logged_in={logged_in} numSelected={selected.size} selected={selected} alignment={alignment} handleChangeView={handleChangeView} handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison} />
+        <EnhancedTableToolbar
+          logged_in={logged_in}
+          numSelected={selected.size}
+          selected={selected}
+          alignment={alignment}
+          handleChangeView={handleChangeView}
+          handleOpenQuery={handleOpenQuery}
+          handleShowAll={handleShowAll}
+          handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}
+          filterApplied={filterApplied}
+          handleReset={handleReset}
+        />
+        {feedbackType === 'noResults' && feedbackOpen && (
+          <Box sx={{ mx: 2, mb: 2 }}>
+            <FilterFeedbackBanner
+              open={feedbackOpen}
+              onClose={() => setFeedbackOpen(false)}
+              type={feedbackType}
+            />
+          </Box>
+        )}
+
         {alignment == "list" && <TableContainer>
           <Table
             sx={{ minWidth: 1400 }}

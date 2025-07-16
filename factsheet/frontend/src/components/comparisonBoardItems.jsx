@@ -1,4 +1,13 @@
-import React, { useState } from 'react';
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
@@ -7,7 +16,7 @@ import palette from '../styles/oep-theme/palette.js';
 import variables from '../styles/oep-theme/variables.js';
 import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors';
 import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx';
-import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles';
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
@@ -21,7 +30,7 @@ const aspectStyle = {
   padding: variables.spacing[3],
   color: palette.text.primary,
   fontSize: variables.fontSize.sm,
-  lineHeight: variables.lineHeight.sm
+  lineHeight: variables.lineHeight.sm,
 };
 
 const getItemStyle = (isDragging, draggableStyle, index) => ({
@@ -38,7 +47,7 @@ const getItemStyle = (isDragging, draggableStyle, index) => ({
   ...draggableStyle,
 });
 
-const getListStyle = isDraggingOver => ({
+const getListStyle = (isDraggingOver) => ({
   background: isDraggingOver ? 'white' : 'white',
   display: 'flex',
   overflow: 'auto',
@@ -46,70 +55,97 @@ const getListStyle = isDraggingOver => ({
   minHeight: '20rem',
 });
 
-export default function  ComparisonBoardItems (props) {
+export default function ComparisonBoardItems(props) {
   const { elements, c_aspects } = props;
-  const [state, setState] = useState({ items : elements });
 
-  function onDragEnd(result) {
-    if (!result.destination) {
-      return;
-    }
-    if (result.destination.index === result.source.index) {
-      return;
-    }
-    const newItems = reorder(
-      state.items,
-      result.source.index,
-      result.destination.index
-    );
-    setState({
-      items: newItems,
-    });
-  }
+  const [state, setState] = useState({ items: elements });
+  const [mounted, setMounted] = useState(false);
 
-  const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
+  useEffect(() => {
+    setState({ items: elements });
+  }, [elements]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 30); // allow DOM to stabilize
+    return () => clearTimeout(timer);
+  }, []);
+
+  const onDragEnd = (result) => {
+    if (!result.destination || result.destination.index === result.source.index) return;
+
+    const newItems = reorder(state.items, result.source.index, result.destination.index);
+    setState({ items: newItems });
+  };
+
+  if (!mounted || !state.items?.length) return null;
 
   return (
     <div style={{ overflow: 'auto', marginBottom: variables.spacing[6] }}>
       <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable
-          droppableId="droppable"
-          direction="horizontal"
-        >
-        {(provided, snapshot) => (
+        <Droppable droppableId="droppable-scenarios" direction="horizontal">
+          {(provided, snapshot) => (
             <div
               ref={provided.innerRef}
-              style={getListStyle(snapshot.isDraggingOver)}
               {...provided.droppableProps}
+              style={getListStyle(snapshot.isDraggingOver)}
             >
-             {state.items.map((item, index) => (
-                <Draggable key={item.data.uid} draggableId={item.data.uid} index={index}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      style={getItemStyle(
-                        snapshot.isDragging,
-                        provided.draggableProps.style,
-                        index
-                      )
-                    }
-                    >
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent:'center', height: '4rem', marginBottom: variables.spacing[3], backgroundColor: index === 0 ? palette.background.highlight : palette.background.lighter,  color: index === 0 ? palette.primary.contrastText : palette.text.primary }} >
+              {state.items.map((item, index) => {
+                const uid = String(item?.data?.uid);
+                if (!uid) return null;
 
-                      <Typography variant="h6">
-                        { index === 0 ? <b>{item.acronym}</b> : item.acronym }
-                      </Typography>
-                      <Typography variant="caption">
-                      { index === 0 ? 'Base scenario' : ''  }
-                      </Typography>
-                    </div>
+                return (
+                  <Draggable key={uid} draggableId={uid} index={index}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        style={getItemStyle(
+                          snapshot.isDragging,
+                          provided.draggableProps.style,
+                          index
+                        )}
+                      >
+                        {/* --- DRAGGABLE CONTENT HERE --- */}
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '4rem',
+                            marginBottom: variables.spacing[3],
+                            backgroundColor:
+                              index === 0
+                                ? palette.background.highlight
+                                : palette.background.lighter,
+                            color:
+                              index === 0
+                                ? palette.primary.contrastText
+                                : palette.text.primary,
+                          }}
+                        >
+                          <Typography variant="h6">
+                            {index === 0 ? <b>{item.acronym}</b> : item.acronym}
+                          </Typography>
+                          <Typography variant="caption">
+                            {index === 0 ? 'Base scenario' : ''}
+                          </Typography>
+                        </div>
 
-                    <div style={{ height: '60vh',overflow: 'auto', }}>
+                        <div style={{ height: '60vh', overflow: 'auto' }}>
+                          {c_aspects.includes('Study name') && (
+                            <div style={aspectStyle}>
+                              <Typography variant="subtitle2" gutterBottom>
+                                <b>Study name:</b>
+                              </Typography>
+                              <Typography variant="body2">
+                                {item.data.study_label}
+                              </Typography>
+                            </div>
+                          )}
 
-
-                      {c_aspects.includes("Study name") && <div style= {aspectStyle} >
+                          {c_aspects.includes("Study name") && <div style= {aspectStyle} >
                         <Typography variant="subtitle2" gutterBottom component="div">
                           <b>Study name:</b>
                         </Typography>
@@ -277,13 +313,13 @@ export default function  ComparisonBoardItems (props) {
                           </HtmlTooltip>
                         ))}
                       </div>}
-
-                    </div>
-
-                    </div>
-                  )}
-                </Draggable>
-              ))}
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                );
+              })}
+              {provided.placeholder}
             </div>
           )}
         </Droppable>

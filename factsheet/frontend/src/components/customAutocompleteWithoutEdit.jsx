@@ -126,39 +126,45 @@ export default function CustomAutocompleteWithoutEdit(props) {
         size="small"
         disableCloseOnSelect
         options={optionsSet}
-        getOptionLabel={(o) => o.acronym}
+        getOptionLabel={(o) =>
+          typeof o === 'string' ? o : o?.name || o?.acronym || o?.id || ''
+        }
         isOptionEqualToValue={(o, v) => o.name === v.name}
         value={value}
         onChange={handleChange}
         renderTags={() => null}
         filterOptions={(opts, params) => filter(opts, params)}
-        renderOption={(props, option, { selected }) => (
-          <li {...stripInvalidProps(props)}>
-            {!option.inputValue && (
-              <Checkbox
-                icon={icon}
-                checkedIcon={checkedIcon}
-                sx={{ mr: 1 }}
-                checked={selected}
-              />
-            )}
-            {!option.inputValue && (
-              <HtmlTooltip
-                placement="top"
-                title={
-                  <Typography variant="caption" color="inherit">
-                    <FactsheetMetadataList data={option} />
-                    <br />
-                    <a href={option.url}>More info …</a>
-                  </Typography>
-                }
-              >
-                <HelpOutlineIcon sx={{ color: 'text.secondary', mr: 1 }} />
-              </HtmlTooltip>
-            )}
-            {option.name}
-          </li>
-        )}
+        renderOption={(props, option, { selected }) => {
+          const { key, ...safeProps } = stripInvalidProps(props);
+          return (
+            <li key={key} {...safeProps}>
+              {!option.inputValue && (
+                <Checkbox
+                  icon={icon}
+                  checkedIcon={checkedIcon}
+                  sx={{ mr: 1 }}
+                  checked={selected}
+                />
+              )}
+              {!option.inputValue && (
+                <HtmlTooltip
+                  placement="top"
+                  title={
+                    <Typography variant="caption" color="inherit">
+                      <FactsheetMetadataList data={option} />
+                      <br />
+                      <a href={option.url}>More info …</a>
+                    </Typography>
+                  }
+                >
+                  <HelpOutlineIcon sx={{ color: 'text.secondary', mr: 1 }} />
+                </HtmlTooltip>
+              )}
+              {option.name}
+            </li>
+          );
+        }}
+
         renderInput={(params) => (
           <StyledTextField
             {...params}

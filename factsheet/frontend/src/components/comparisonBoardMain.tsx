@@ -1,3 +1,12 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import React, { useState, useEffect, } from 'react';
 // import Chart from "chart.js/auto";
 import { Bar } from "react-chartjs-2";
@@ -55,8 +64,10 @@ const ComparisonBoardMain = (props) => {
 
   const { params } = props;
   const [scenarios, setScenarios] = useState([]);
-  const scenarios_uid = params.split('#');
+  const scenarios_uid = params;
+  // console.log(scenarios_uid);
   const scenarios_uid_json = JSON.stringify(scenarios_uid);
+  // console.log(scenarios_uid_json);
   const [selectedCriteria, setselectedCriteria] = useState(['Study descriptors', 'Scenario types', 'Study name']);
   const [alignment, setAlignment] = React.useState('Qualitative');
   const [sparqOutput, setSparqlOutput] = useState([]);
@@ -198,11 +209,12 @@ const ComparisonBoardMain = (props) => {
     });
   }, []);
 
-  const handleChangeView = (
-    newAlignment,
-  ) => {
-    newAlignment !== null && setAlignment(newAlignment);
+  const handleChangeView = (event, newAlignment) => {
+    if (newAlignment !== null) {
+      setAlignment(newAlignment);
+    }
   };
+
 
   // 'http://oevkg:8080/sparql'
 
@@ -259,7 +271,7 @@ const ComparisonBoardMain = (props) => {
       const categorieIDs = [];
       for (let key in category_disctionary) {
           if (selectedCategories.includes(category_disctionary[key])) {
-            categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
+            categorieIDs.push('https://openenergyplatform.org/ontology/oeo/' + key);
           }
       }
 
@@ -525,7 +537,7 @@ const ComparisonBoardMain = (props) => {
   const sendGetScenariosQuery = async () => {
     setLoading(true);
 
-    const get_scenarios_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    const get_scenarios_query = `PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
               SELECT DISTINCT ?scenario WHERE {
               ?s oeo:OEO_00020226 ?scenario .
     }`
@@ -569,7 +581,7 @@ const ComparisonBoardMain = (props) => {
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
 
-    const get_categories_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    const get_categories_query = `PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     SELECT DISTINCT ?category ?table_name WHERE {
       ?s oeo:has_sector_division ?category .
       ?s oeo:OEO_00000504 ?table_name .
@@ -634,7 +646,7 @@ const ComparisonBoardMain = (props) => {
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
 
-    const get_gas_query = `PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    const get_gas_query = `PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     SELECT DISTINCT ?gas ?table_name WHERE {
       ?s oeo:OEO_00010121 ?gas .
       ?s oeo:OEO_00000504 ?table_name .
@@ -786,7 +798,7 @@ const sendQuery = async (index) => {
     PREFIX ou: <http://opendata.unex.es/def/ontouniversidad#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
 
     SELECT DISTINCT ?s ?value ?country_code ?year ?category ?gas ?table_name ?unit WHERE {
@@ -837,7 +849,7 @@ const sendQuery = async (index) => {
         const categorieIDs = [];
         for (let key in category_disctionary) {
             if (selectedCategories.includes(category_disctionary[key])) {
-              categorieIDs.push('http://openenergy-platform.org/ontology/oeo/' + key);
+              categorieIDs.push('https://openenergyplatform.org/ontology/oeo/' + key);
             }
         }
 
@@ -1171,29 +1183,34 @@ const sendQuery = async (index) => {
         </Toolbar>
         {/* <ComparisonControl /> */}
 
-        {alignment == "Qualitative" &&
+        {alignment === "Qualitative" && scenarios.length > 0 && (
         <Grid item xs={12}>
           <OptionBox>
             <h2>Criteria</h2>
             <FormGroup>
-              <div >
-                {
-                  Criteria.map((item) => <FormControlLabel control={<Checkbox size="medium" color="primary" />} checked={selectedCriteria.includes(item)} onChange={handleCriteria} label={item} name={item} />)
-                }
+              <div>
+                {Criteria.map((item) => (
+                  <FormControlLabel
+                    key={item}
+                    control={<Checkbox size="medium" color="primary" />}
+                    checked={selectedCriteria.includes(item)}
+                    onChange={handleCriteria}
+                    label={item}
+                    name={item}
+                  />
+                ))}
               </div>
             </FormGroup>
-            {/* <MultipleSelectChip
-              sx={{ mt: 2, width: "100%" }}
-              options={['Scenario 1', 'Scenario 2', 'Scenario 3']}
-              label="Scenarios to be compared"
-              disabled={true}
-            /> */}
           </OptionBox>
-          <ComparisonBoardItems elements={scenarios} c_aspects={selectedCriteria} />
+            <ComparisonBoardItems
+              key={`qualitative-${scenarios.map(s => s.data.uid).join(',')}`}
+              elements={scenarios}
+              c_aspects={selectedCriteria}
+            />
         </Grid>
-        }
-        {alignment == "Quantitative" &&
+      )}
 
+      {alignment === "Quantitative" &&
         <Grid container spacing={2}>
           <Grid item lg={6} sx={{ borderLeft: variables.border.light, px: 2 }}>
 

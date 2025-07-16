@@ -1,3 +1,16 @@
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa
+# SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut # noqa
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import json
 import logging
 
@@ -9,9 +22,8 @@ from django.utils.cache import patch_response_headers
 from django.views.decorators.cache import never_cache
 from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.compare import graph_diff, to_isomorphic
-from SPARQLWrapper import JSON
 
-from factsheet.oekg.connection import oekg, oeo, oeo_owl, sparql
+from factsheet.oekg.connection import oekg, oeo, oeo_owl
 from factsheet.oekg.filters import OekgQuery
 from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
@@ -368,7 +380,7 @@ def create_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
                         )
 
-                # TODO: jh-RLI: Update to avoid duplicated table name entries
+                # TODO: Jonas Huber: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         # TODO- set in settings
@@ -411,7 +423,7 @@ def create_factsheet(request, *args, **kwargs):
                         )
                         bundle.add((scenario_URI, OEO.RO_0002233, input_dataset_URI))
 
-                # TODO: jh-RLI: Update to avoid duplicated table name entries
+                # TODO: Jonas Huber: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         # TODO- set in settings
@@ -777,7 +789,7 @@ def update_factsheet(request, *args, **kwargs):
                             (
                                 scenario_region,
                                 RDFS.label,
-                                Literal(remove_non_printable(region["name"])),
+                                Literal(region["name"]),
                             )
                         )
                         new_bundle.add(
@@ -842,7 +854,7 @@ def update_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
                         )
 
-                # TODO: jh-RLI: Update to avoid duplicated table name entries
+                # TODO: Jonas Huber: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
                     for input_dataset in item["input_datasets"]:
                         input_dataset_URI = URIRef(
@@ -886,7 +898,7 @@ def update_factsheet(request, *args, **kwargs):
                             (scenario_URI, OEO.RO_0002233, input_dataset_URI)
                         )
 
-                # TODO: jh-RLI: Update to avoid duplicated table name entries
+                # TODO: Jonas Huber: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
                     for output_dataset in item["output_datasets"]:
                         output_dataset_URI = URIRef(
@@ -1113,7 +1125,7 @@ def update_factsheet(request, *args, **kwargs):
             old_state=in_first.serialize(format="json-ld"),
             new_state=in_second.serialize(format="json-ld"),
         )
-        # OEKG_Modifications_instance.save()
+        OEKG_Modifications_instance.save()
 
         response = JsonResponse(
             "factsheet updated!", safe=False, content_type="application/json"
@@ -1236,6 +1248,7 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["technologies"] = []
     for s, p, o in oekg.triples((study_URI, OEO.OEO_00000522, None)):
         label = oeo.value(o, RDFS.label)
+        class_iri = o
         if label != None:  # noqa
             factsheet["technologies"].append(
                 {"value": label, "label": label, "class": o, "id": class_iri}
@@ -1392,111 +1405,6 @@ def factsheet_by_id(request, *args, **kwargs):
     return response
 
 
-# @login_required
-def query_oekg(request, *args, **kwargs):
-    """
-    This function takes filter objects provided by the user and utilises
-    them to construct a SPARQL query.
-
-    Args:
-        request (HttpRequest): The incoming HTTP GET request.
-        criteria (str): An object that contains institutions, authors,
-        funding sources, start date of the publications, end date of publications
-        study descriptors, and a range for scenario years. All of these fields
-        are utilised to construct a SPARQL query for execution on the OEKG.
-
-    """
-    request_body = json.loads(request.body)
-    criteria = request_body["criteria"]
-
-    institutes_list = criteria["institutions"]
-    authors_list = criteria["authors"]
-    funding_sources_list = criteria["fundingSource"]
-    publication_date_start_value = criteria["startDateOfPublication"]
-    publication_date_end_value = criteria["endDateOfPublication"]
-    study_keywords_list = criteria["studyKewords"]
-    scenario_year_start_value = criteria["scenarioYearValue"][0]
-    scenario_year_end_value = criteria["scenarioYearValue"][1]
-
-    query_structure = """
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
-        PREFIX OEO: <http://openenergy-platform.org/ontology/oeo/>
-        PREFIX OEKG: <http://openenergy-platform.org/ontology/oekg/>
-        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-        PREFIX DC: <http://purl.org/dc/terms/>
-
-        SELECT DISTINCT ?study_acronym
-        WHERE
-        {{
-        ?s  DC:acronym ?study_acronym .
-
-        {funding_sources_exp}
-        {study_descriptors_exp}
-        {institutes_exp}
-
-        ?s OEKG:has_publication ?publication .
-        ?publication OEKG:date_of_publication ?publication_date .
-
-        {authors_exp}
-
-        FILTER ((?institutes IN ({institutes}) )
-        || (?authors IN ({authors}) )
-        || (?funding_sources IN ({funding_sources}) )
-        || (?publication_date >= "{publication_date_start}" && ?publication_date <= "{publication_date_end}")
-        || (?study_keywords IN ({study_keywords}) ) )
-
-        }}"""  # noqa: E501
-
-    authors_exp = (
-        "?publication OEO:OEO_00000506 ?authors ." if authors_list != [] else ""
-    )
-    funding_sources_exp = (
-        "?s OEO:OEO_00000509 ?funding_sources ." if funding_sources_list != [] else ""
-    )
-    study_descriptors_exp = (
-        "?s OEO:has_study_keyword ?study_keywords ."
-        if study_keywords_list != []
-        else ""
-    )
-    institutes_exp = (
-        "?s OEO:OEO_00000510 ?institutes ." if institutes_list != [] else ""
-    )
-
-    final_query = query_structure.format(
-        institutes=str(institutes_list)
-        .replace("[", "")
-        .replace("]", "")
-        .replace("'", ""),
-        authors=str(authors_list).replace("[", "").replace("]", "").replace("'", ""),
-        funding_sources=str(funding_sources_list)
-        .replace("[", "")
-        .replace("]", "")
-        .replace("'", ""),
-        publication_date_start=publication_date_start_value,
-        publication_date_end=publication_date_end_value,
-        study_keywords=str(study_keywords_list).replace("[", "").replace("]", ""),
-        scenario_year_start=scenario_year_start_value,
-        scenario_year_end=scenario_year_end_value,
-        funding_sources_exp=funding_sources_exp,
-        study_descriptors_exp=study_descriptors_exp,
-        institutes_exp=institutes_exp,
-        authors_exp=authors_exp,
-    )
-
-    print(final_query)
-    sparql.setReturnFormat(JSON)
-    sparql.setQuery(final_query)
-    results = sparql.query().convert()
-
-    response = JsonResponse(
-        results["results"]["bindings"],
-        safe=False,
-        content_type="application/json",
-    )
-    return response
-
-
 @only_if_user_is_owner_of_scenario_bundle
 @login_required
 def delete_factsheet_by_id(request, *args, **kwargs):
@@ -1548,7 +1456,7 @@ def get_entities_by_type(request, *args, **kwargs):
     classId = entity_type.split(".")[1]
     prefix = ""
     if vocab == "OEO":
-        prefix = "http://openenergy-platform.org/ontology/oeo/"
+        prefix = "https://openenergyplatform.org/ontology/oeo/"
     if vocab == "OBO":
         prefix = "http://purl.obolibrary.org/obo/"
 
@@ -1585,7 +1493,7 @@ def add_entities(request, *args, **kwargs):
     classId = entity_type.split(".")[1]
     prefix = ""
     if vocab == "OEO":
-        prefix = "http://openenergy-platform.org/ontology/oeo/"
+        prefix = "https://openenergyplatform.org/ontology/oeo/"
     if vocab == "OBO":
         prefix = "http://purl.obolibrary.org/obo/"
 
@@ -1614,7 +1522,7 @@ def add_a_fact(request, *args, **kwargs):
         "http://openenergy-platform.org/ontology/oekg/" + clean_name(_subject)
     )
     _predicate_URI = URIRef(
-        "http://openenergy-platform.org/ontology/oeo/" + clean_name(_predicate)
+        "https://openenergyplatform.org/ontology/oeo/" + clean_name(_predicate)
     )
     _object_URI = URIRef(
         "http://openenergy-platform.org/ontology/oekg/" + clean_name(_object)
@@ -1683,7 +1591,7 @@ def update_an_entity(request, *args, **kwargs):
     classId = entity_type.split(".")[1]
     prefix = ""
     if vocab == "OEO":
-        prefix = "http://openenergy-platform.org/ontology/oeo/"
+        prefix = "https://openenergyplatform.org/ontology/oeo/"
     if vocab == "OBO":
         prefix = "http://purl.obolibrary.org/obo/"
 
@@ -1752,9 +1660,7 @@ def get_all_factsheets(request, *args, **kwargs):
             pubs_per_bundle = []
             for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
                 if o1:
-                    pubs_per_bundle.append(
-                        serialize_publication_date(str(remove_non_printable(o1)))
-                    )
+                    pubs_per_bundle.append(serialize_publication_date(str(o1)))
 
             if pubs_per_bundle:
                 temp.update(pubs_per_bundle)
@@ -1803,7 +1709,7 @@ def search_scenario_type_iris_by_label(label, input):
 
 def get_scenario_type_iri(scenario_type_label: str):
     scenario_class = oeo_owl.search_one(
-        iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
+        iri="https://openenergyplatform.org/ontology/oeo/OEO_00000364"
     )
     scenario_subclasses = get_all_sub_classes(scenario_class)
 

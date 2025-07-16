@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Overview <span class="badge badge--warning">Draft</span>
 
 ## Foundations

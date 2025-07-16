@@ -392,7 +392,7 @@
                     "type": "array",
                     "examples": [13.08825, 52.33859, 13.76104, 52.6754],
                     "items": {
-                      "type": "number"
+                      "type": ["number", "null"]
                     },
                     "minItems": 4,
                     "maxItems": 4,
@@ -695,7 +695,7 @@
                 "path": {
                   "description": "A qualified link or path pointing to a relevant location online for the contributor. This can be the GitHub page or ORCID.",
                   "type": ["string", "null"],
-                  "examples": ["https://github.com/Ludee"],
+                  "examples": ["https://github.com/Ludwig Huelk"],
                   "badge": "Bronze",
                   "title": "Path"
                 },
