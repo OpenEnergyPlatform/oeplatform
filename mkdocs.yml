@@ -68,40 +68,23 @@ extra_css:
 # Navigation
 nav:
   - Home: index.md
+  - Getting Started:
+    - installation/index.md
+    - Installation Guide: installation/guides/installation-docker-dev.md
+    - Development setup: installation/guides/development-setup.md
+    - Manual Installation Guide: installation/guides/installation.md
   - Development:
     - dev/index.md
-    - Context:
-      - Use Cases: dev/use-case.md
-      - Users: dev/personas.md
+
     - Best Practices:
-      - dev/best-practice.md
+      - Software development process: 
+        - dev/index.md
       - Frontend and UI:
         - Workflow: dev/frontend/workflow.md
         - Design System: dev/frontend/design-system.md
         - Accessibility: dev/frontend/accessibility.md
-    - Collaboration:
-      - Community: dev/community.md
-      - Git & GitHub: dev/git-github.md
-    #   - Users: development/collaboration/users.md
-      - Planning & Communication: dev/collaboration/planning-communication.md
-      - Code of Conduct: dev/collaboration/code-of-conduct.md
-      - License and Citation: dev/collaboration/license-and-citation.md
-  # - Git:
-  #   - development/git/index.md
-  #   - Gitignore: development/git/gitignore.md
-  #   - Pre-commit: development/git/pre-commit.md
-    # - Continuous Integration:
-    #   - development/continuous-integration/index.md
-    #   - Test-Driven-Development: development/best-practice/test-driven-development-workflow.md
-    # - Documentation:
-    #   - development/documentation/index.md
-    # - Release:
-    #   - development/release/index.md
-  - Installation:
-    - installation/index.md
-    - Installation Guide: installation/guides/installation.md
-    - Manual database setup: installation/guides/manual-db-setup.md
-    - Development setup: installation/guides/development-setup.md
+    - Context:
+      - dev/context.md
   - Documentation:
     - oeplatform-code/index.md
     - Architecture:
@@ -116,7 +99,11 @@ nav:
         # - Draft open-API schema: oeplatform-code/web-api/oedb-rest-api/swagger-ui.html
       - OEKG API:
         - oeplatform-code/web-api/oekg-api/index.md
-        - Edit scenario datasets: oeplatform-code/web-api/oekg-api/scenario-dataset.md
+    - Edit scenario datasets: oeplatform-code/web-api/oekg-api/scenario-dataset.md
+    - Django Apps:
+      - oeplatform-code/apps/index.md
+      - oeplatform-code/apps/login.md
+
     - Features:
       - oeplatform-code/features/index.md
       - 🚧 OEP-Datasets:

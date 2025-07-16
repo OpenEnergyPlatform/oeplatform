@@ -3,7 +3,7 @@
 
 <div class="htmxReplacementBox">
     <div class="backlink">
-        <a href="" hx-get="{% url 'partial-groups' request.user.id %}" hx-target=".htmxReplacementBox" hx-push-url="/user/profile/{{request.user.id}}/groups" hx-push-state>
+        <a href="" hx-get="{% url 'login:partial-groups' request.user.id %}" hx-target=".htmxReplacementBox" hx-push-url="{% url 'login:groups' request.user.id %}" hx-push-state>
             <svg width="14" height="14" fill="currentColor" version="1.1" viewBox="0 0 16.933 16.936" xmlns="http://www.w3.org/2000/svg">
                 <path d="m10.794 16.748 1.4961-1.4961-6.7832-6.7832 6.7832-6.7832-1.4961-1.4961-8.2793 8.2793z"/>
             </svg>
@@ -24,11 +24,11 @@
         <div class="profile-category__danger">
             <h2 class="profile-category__heading profile-category__heading--border-btm">Danger zone</h2>
             <div>
-                <button class="profile-category__btn profile-category__btn--leave" hx-post="{% url 'group-leave' group.id %}">Leave group</button>
+                <button class="profile-category__btn profile-category__btn--leave" hx-post="{% url 'login:group-leave' group.id %}">Leave group</button>
                 <div id="error-display"></div>
             </div>
             {% if is_admin %}
-            <form id="delete-group-form" hx-confirm="Are you sure you want to delete this group: {{ group.name }}?" hx-post="{% url 'partial-group-membership' group_id=group.id %}" hx-swap="outerHTML">
+            <form id="delete-group-form" hx-confirm="Are you sure you want to delete this group: {{ group.name }}?" hx-post="{% url 'login:partial-group-membership' group_id=group.id %}" hx-swap="outerHTML">
                 {% csrf_token %}
                 <input type="hidden" name="mode" value="delete_group">
                 <button class="profile-category__btn profile-category__btn--delete">

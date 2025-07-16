@@ -1,3 +1,33 @@
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+# SPDX-FileCopyrightText: 2025 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import csv
 import json
 import logging
@@ -27,8 +57,9 @@ from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
 
 # from oemetadata.v1.v160.template import OEMETADATA_V160_TEMPLATE
 # from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
-# from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
-from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
+from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
+
+# from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -297,12 +328,16 @@ def listschemas(request):
         for row in response
     ]
 
+    # Count all tables
+    total_table_count = tables.aggregate(total=Count("name"))["total"]
+
     # sort by name
     schemas = sorted(schemas, key=lambda x: x[0])
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
         {
+            "total_table_count": total_table_count,
             "schemas": schemas,
             "query": searched_query_string,
             "tags": searched_tag_ids,
@@ -1562,7 +1597,7 @@ def update_table_tags(request):
                 actions.set_table_metadata(
                     table=table,
                     schema=schema,
-                    metadata=OEMETADATA_V20_EXAMPLE,
+                    metadata=OEMETADATA_V20_TEMPLATE,
                     cursor=con,
                 )
                 # update tags in db and harmonize metadata
@@ -1773,6 +1808,8 @@ def get_column_description(schema, table):
                 "data_type": get_datatype_str(col),
                 "is_nullable": col["is_nullable"],
                 "is_pk": name in pk_fields,
+                "unit": None,
+                "description": None,
             }
         )
     return columns

@@ -1,3 +1,15 @@
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 import * as common from './peer_review.js';
 import {
   hideReviewerOptions,
@@ -13,18 +25,16 @@ import {
   showToast,
   updateFieldDescription,
   highlightSelectedField, initializeEventBindings,
-
 } from './peer_review.js';
 import {selectNextField, switchCategoryTab} from "./navigation.js";
 import {getFieldState, setGetFieldState} from "./state_current_review.js";
 import {updateFieldColor} from "./utilities.js";
 import {renderSummaryPageFields, updateTabProgressIndicatorClasses} from "./summary.js";
 window.selectState = common.selectState;
+var selectedField;
 
 // OK Field View Change
 $('#button').bind('click', hideReviewerOptions);
-
-
 
 
 function click_field(fieldKey, fieldValue, category) {
@@ -35,8 +45,8 @@ function click_field(fieldKey, fieldValue, category) {
 
   setSelectedField(fieldKey);
 
-setselectedFieldValue(fieldValue);
-    setSelectedCategory(category);
+  setselectedFieldValue(fieldValue);
+  setSelectedCategory(category);
 
   updateFieldDescription(cleanedFieldKey, fieldValue);
   highlightSelectedField(fieldKey);

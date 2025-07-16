@@ -1,5 +1,11 @@
 # Development setup
 
+!!! Note "Recent updates"
+
+    As we shift the development support towards a docker based setup which sets up the oeplatform infrastructure and deploys it locally most of the commands below are are already included in the automated docker compose setup. For example there is dummy data and a test user pre "installed" and ready to use. Also note that if you use the docker based setup you must run the commands below inside the oeplatform web container to gain any effect.
+
+    Available information which effect your host environment like your IDE and your operating system stay the same.
+
 See our [developer guidelines](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) and get in touch with our [developer team](https://openenergyplatform.github.io/organisation/family_community/contact/).
 Have a look at the official [git-Book](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup) instructions on how to setup your git on a new system to be able to contribute to our GitHub repository.
 
@@ -63,14 +69,27 @@ You can run your own local copy of the OEP website server with
 
     python manage.py runserver
 
-By default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser.
+By default, you should be able to connect to this copy by visiting [127.0.0.1:8000](http://127.0.0.1:8000) in your web browser.
 This way you can insert your changes without worrying about breaking anything in the production system.
+
+### Deploy react app´s locally
+
+!!! Note
+    This solution is not the best developer experience and needs optimization
+
+As some Apps of the Oeplatform integrate React apps they need to be build using npm locally. We offer build scripts that can be triggered using django management commands. For example to build the scenario bundles react app and deploy it in the django app factsheet you can run the command `python manage.py build_factsheet_app`. Once done you can access the scenario bundles app via your locally deployed django instance (see above).
+
+Keep in mind that you now use a bundled version of the react app and all changes you might want to add to the React jsx components will only show up once you build the app again. For development this might be a bit clunky but since the app is deployed inside the django app this enables the React app to use the django authentication. An alternative that will not be able to use the django user authentication currently is to deploy the React app alongside the locally deployed django instance. You can use npm start while being inside the `factsheet/frontend/` directory in the terminal. To make this work you will have to change the config.json inside the same directory. In this file you find the key `"toep": "/"` you'll have to change this `/` value to `http://127.0.0.1:8000` to point to the django instance currently deployed locally. If your react test server is still running (`npm start`) you can now access it at `http://127.0.0.1:3000/scenario-bundles/main`. All changes made to the React jsx components will now be reflected instantly using live reloading.
 
 ## User Management - Setup a test user
 
 To create a dummy user for functionality testing purposes
 
-Then execute this python code (either directly in a terminal or from a file)
+Run the django management command with arguments. Below you see an example:
+
+    python manage.py create_dev_user "$DEV_USER" "$DEV_USER@mail.com" --password "$DEV_PW" || true
+
+You can also use this script to create a new user. Execute this python code (either directly in a terminal or from a file)
 
     import os
     import django
@@ -90,9 +109,19 @@ Before we can get started we have to register the topics where data can be group
 
     python manage.py create_topics
 
+To create and seed the test table using our test dataset you can use the following command:
+
+    python manage.py create_example_tables
+
+The command will read the example dataset form our representative, minimal example. Once successfully seeded the database contains the dataset 'example_wind_farm_capacity' in the 'model_draft' topic, including 4 rows of data and metadata.
+
 ### Using the HTTP-API
 
-You can either use the http api that is available once you started your local development server using the `runserver` command. To understand how to use the api you can have a look at our academy courses but keep in mind that you have to modify the URL of the api endpoints to you locally running oep instance. You can to this by changing the beginning of the url from something like `https://www.oeplatform.org/` to `http://127.0.0.1/`. [Have a look at this course to get started with the http api.](https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/)
+You can use the http api that is available once you started your local development server using the `runserver` command. To understand how to use the api you can have a look at our academy courses but keep in mind that you have to modify the URL of the api endpoints to you locally running oep instance. You can to this by changing the beginning of the url from something like `https://www.oeplatform.org/` to `http://127.0.0.1/`. [Have a look at this course to get started with the http api.](https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/)
+
+!!! Note
+
+    There are several capabilities which are offered by the API some are aimed on client integration and some are implemented as traditional REST API endpoints. You can find a [openAPI schema here](https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/), we are currently working on providing the full list of attributes supported by each endpoint. Until this is done we rely on the academy to provide the key information on how to use the REST-API.
 
 ### Using the OEP-Website UI
 
@@ -123,3 +152,11 @@ You can navigate to the profile page using your local instance of the OEP websit
 There you find a tab called tables. If you include an open data license in the metadata of your test table you previously create in the `model_draft` topic, a publish button becomes visible. Once you click it you can select a topic to move the table to.
 
 You can edit the metadata for a table by visiting the detail page of a table then click the tab meta information and click the button edit. The license information should be added to the licenses field of the metadata.
+
+## Import datasets from openenergyplatform.org
+
+Sometimes it is very useful to have actual datasets which are available on the OEP in your local instance to be able fully reproduce use cases or reproduce errors.
+
+We offer a [script](https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/) in the 'script' directory of the oeplatform code project. It is currently a prototype for doing what is described above. It is not fully tested against all data types so far so might be error prone.
+
+To use it you must adapt the code and add the information on what datasets you want to import. Datasets are referenced by schema and table name. It is possible to import multiple once in one run and you can limit the amount of rows each dataset should included as some datasets are very large and it is not important to have the full data for testing use cases.
