@@ -440,7 +440,7 @@
   });
 
   var config = {
-    url_peer_review: "{% url 'delete_peer_review_simple' %}",
+    url_peer_review: "{% url 'login:delete_peer_review_simple' %}",
     review_id: "{{ latest_review_id }}"
   };
 </script>

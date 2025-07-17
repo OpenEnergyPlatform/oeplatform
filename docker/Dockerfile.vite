@@ -1,0 +1,34 @@
+FROM node:18
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+# Create user and group dynamically
+# Create group only if needed
+RUN getent group ${GROUP_ID} || groupadd -g ${GROUP_ID} appgroup
+
+# Create user if UID doesn't already exist
+RUN if ! id -u ${USER_ID} >/dev/null 2>&1; then \
+      useradd -m -u ${USER_ID} -g appgroup --shell /bin/bash appuser; \
+    else \
+      echo "✅ UID ${USER_ID} already exists, skipping useradd"; \
+    fi
+
+WORKDIR /home/appuser/app
+
+# copy package manifests so entrypoint can npm ci
+COPY package*.json ./
+RUN npm ci
+
+# drop in our install-if-missing entrypoint
+COPY docker/vite-entrypoint.sh /usr/local/bin/vite-entrypoint.sh
+RUN chmod +x /usr/local/bin/vite-entrypoint.sh
+
+# USER appuser
+
+# expose dev port
+EXPOSE 5173
+
+# first runs entrypoint, then runs 'npm run dev'
+ENTRYPOINT [ "vite-entrypoint.sh" ]
+CMD       [ "npm", "run", "dev", "--", "--host", "0.0.0.0" ]

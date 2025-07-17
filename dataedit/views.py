@@ -1,8 +1,39 @@
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+# SPDX-FileCopyrightText: 2025 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 import csv
 import json
 import logging
 import os
 import re
+from collections import defaultdict
 from functools import reduce
 from io import TextIOWrapper
 from itertools import chain
@@ -27,8 +58,9 @@ from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
 
 # from oemetadata.v1.v160.template import OEMETADATA_V160_TEMPLATE
 # from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
-# from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
-from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
+from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
+
+# from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -297,12 +329,16 @@ def listschemas(request):
         for row in response
     ]
 
+    # Count all tables
+    total_table_count = tables.aggregate(total=Count("name"))["total"]
+
     # sort by name
     schemas = sorted(schemas, key=lambda x: x[0])
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
         {
+            "total_table_count": total_table_count,
             "schemas": schemas,
             "query": searched_query_string,
             "tags": searched_tag_ids,
@@ -1562,7 +1598,7 @@ def update_table_tags(request):
                 actions.set_table_metadata(
                     table=table,
                     schema=schema,
-                    metadata=OEMETADATA_V20_EXAMPLE,
+                    metadata=OEMETADATA_V20_TEMPLATE,
                     cursor=con,
                 )
                 # update tags in db and harmonize metadata
@@ -1773,6 +1809,8 @@ def get_column_description(schema, table):
                 "data_type": get_datatype_str(col),
                 "is_nullable": col["is_nullable"],
                 "is_pk": name in pk_fields,
+                "unit": None,
+                "description": None,
             }
         )
     return columns
@@ -1977,82 +2015,261 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def sort_in_category(self, schema, table, oemetadata):
         """
-        Sorts the metadata of a table into categories and adds the value
-        suggestion and comment that were added during the review, to facilitate
-        Further processing easier.
-
-        Note:
-            The categories spatial & temporal are often combined during visualization.
-
-        Args:
-            schema (str): The schema of the table.
-            table (str): The name of the table.
-
-        Returns:
-
-
-        Examples:
-            A return value can look like the below dictionary:
-
-            >>>
-            {
-                "general": [
-                    {
-                    "field": "id",
-                    "value": "http: //127.0.0.1:8000/dataedit/view/model_draft/test2",
-                    "newValue": "",
-                    "reviewer_suggestion": "",
-                    "suggestion_comment": ""
-                    }
-                ],
-                "spatial": [...],
-                "temporal": [...],
-                "source": [...],
-                "license": [...],
-            }
-
+        Groups metadata fields by top-level categories and subgroups within them.
+        If a field has no dot (.), it's considered flat and shown directly.
+        If a field has a dot and includes an index (e.g., sources.0.name),
+        then all fields with the same index are grouped together and shown in order.
+        Adds display_prefix for human-readable (1-based) indexing.
         """
+        import re
+
+        def _plus_one_if_digit(txt: str) -> str:
+            return str(int(txt) + 1) if txt.isdigit() else txt
 
         val = self.parse_keys(oemetadata)
-        gen_key_list = []
-        spatial_key_list = []
-        temporal_key_list = []
-        source_key_list = []
-        license_key_list = []
 
-        for i in val:
-            fieldKey = list(i.values())[0]
-            if fieldKey.split(".")[0] == "spatial":
-                spatial_key_list.append(i)
-            elif fieldKey.split(".")[0] == "temporal":
-                temporal_key_list.append(i)
-            elif fieldKey.split(".")[0] == "sources":
-                source_key_list.append(i)
-            elif fieldKey.split(".")[0] == "licenses":
-                license_key_list.append(i)
-
-            elif (
-                fieldKey.split(".")[0] == "name"
-                or fieldKey.split(".")[0] == "title"
-                or fieldKey.split(".")[0] == "id"
-                or fieldKey.split(".")[0] == "description"
-                or fieldKey.split(".")[0] == "language"
-                or fieldKey.split(".")[0] == "subject"
-                or fieldKey.split(".")[0] == "keywords"
-                or fieldKey.split(".")[0] == "publicationDate"
-                or fieldKey.split(".")[0] == "context"
-            ):
-                gen_key_list.append(i)
-
-        meta = {
-            "general": gen_key_list,
-            "spatial": spatial_key_list,
-            "temporal": temporal_key_list,
-            "source": source_key_list,
-            "license": license_key_list,
+        main_categories = {
+            "general": [],
+            "spatial": [],
+            "temporal": [],
+            "source": [],
+            "license": [],
+            "resource": [],
         }
 
-        return meta
+        for item in val:
+            field = item["field"]
+            top_key = field.split(".")[0]
+
+            if top_key in {
+                "name",
+                "title",
+                "id",
+                "description",
+                "language",
+                "subject",
+                "keywords",
+                "publicationDate",
+                "context",
+            }:
+                main_categories["general"].append(item)
+            elif top_key == "spatial":
+                main_categories["spatial"].append(item)
+            elif top_key == "temporal":
+                main_categories["temporal"].append(item)
+            elif top_key == "sources":
+                main_categories["source"].append(item)
+            elif top_key == "licenses":
+                main_categories["license"].append(item)
+            elif top_key == "resources":
+                main_categories["resource"].append(item)
+
+        def extract_index(prefix):
+            """
+            Return the numeric list index found at the end of *prefix*.
+
+            Works for both  'sources.0'  *and* 'Sources 0'.
+            If no trailing index exists, ``-1`` is returned to keep such
+            prefixes at the beginning of the ordered result.
+            """
+            match = re.search(r"(?:\.|\s)([0-9]+)$", prefix)
+            return int(match.group(1)) if match else -1
+
+        # ------------------------------------------------------------------
+        # Helper: inside each "Sources N" split into second‑level list groups
+        # e.g.  sources.<src_idx>.licenses.0.url      → "Licenses 0"
+        #       sources.<src_idx>.contacts.1.name     → "Contacts 1"
+        # Any path with pattern <listname>.<index> after the 2‑nd segment
+        # becomes its own accordion; everything else stays flat.
+        # ------------------------------------------------------------------
+        def nest_sublist_groups(source_items):
+            """
+            Turn one Source‑block (list of dicts) into:
+              {
+                "flat":     [ ... items without  <listname>.<idx> ... ],
+                "grouped":  { "<Listname> 1": [...], "<Listname> 2": [...], ... }
+              }
+
+            Accepts arbitrary list names, not just 'licenses'.
+            """
+            nested = {"flat": [], "grouped": defaultdict(list)}
+
+            for itm in source_items:
+                parts = itm["field"].split(".")
+                # expect pattern: sources.<src_idx>.<listname>.<index>.<rest>
+                if (
+                    len(parts) >= 4
+                    and parts[2].isidentifier()  # list name
+                    and parts[3].isdigit()  # index
+                ):
+                    list_name = parts[2]  # e.g. "licenses"
+                    idx = parts[3]  # e.g. "0"
+                    display_idx = int(idx) + 1
+                    group_key = f"{list_name.capitalize()} {display_idx}"
+                    display_field = ".".join(parts[4:]) or "value"
+
+                    enriched = itm.copy()
+                    enriched["display_field"] = display_field
+                    enriched["display_prefix"] = group_key
+                    enriched["display_index"] = idx
+                    nested["grouped"][group_key].append(enriched)
+                else:
+                    # keep as flat inside this Source block
+                    trimmed = ".".join(parts[2:]) if len(parts) > 2 else itm["field"]
+                    enriched = itm.copy()
+                    enriched["display_field"] = _plus_one_if_digit(trimmed)
+                    nested["flat"].append(enriched)
+
+            # sort groups numerically (… 1, 2, 3 …) within each list name
+            nested["grouped"] = dict(
+                sorted(
+                    nested["grouped"].items(),
+                    key=lambda kv: (
+                        kv[0].split()[0],  # list name
+                        int(kv[0].split()[-1]),  # numeric index
+                    ),
+                )
+            )
+            return nested
+
+        def group_index_only(items):
+            result = {"flat": [], "grouped": defaultdict(list)}
+
+            for item in items:
+                field = item["field"]
+                parts = field.split(".")
+
+                list_idx = None
+                list_name = None
+                idx_pos = None
+                for pos in range(1, len(parts)):
+                    if parts[pos].isdigit():
+                        list_idx = parts[pos]  # '0'
+                        list_name = parts[pos - 1]  # 'timeseries'
+                        idx_pos = pos
+                        break
+
+                if list_idx is not None:
+                    # «Timeseries 1», «Bbox 2» …
+                    display_idx = int(list_idx) + 1  # show 1‑based index
+                    group_key = f"{list_name.capitalize()} {display_idx}"
+                    display_field = (
+                        ".".join(parts[idx_pos + 1 :])
+                        if idx_pos + 1 < len(parts)
+                        else ""
+                    )
+
+                    enriched = item.copy()
+                    enriched["display_field"] = display_field
+                    enriched["display_prefix"] = group_key
+                    enriched["display_index"] = list_idx
+                    result["grouped"][group_key].append(enriched)
+                else:
+                    trimmed = field.split(".", 1)[1] if "." in field else field
+                    item["display_field"] = _plus_one_if_digit(trimmed)
+                    item.pop("display_index", None)
+                    result["flat"].append(item)
+
+            result["grouped"] = dict(
+                sorted(result["grouped"].items(), key=lambda kv: int(kv[0].split()[-1]))
+            )
+            return result
+
+        def group_by_index(items):
+            """
+            Organise *items* into
+              * ``flat``     – fields without any nesting,
+              * ``grouped``  – dict whose keys are human‑readable list titles
+                               such as 'Timeseries 1', 'Sources 2', …
+
+            All fields that share the same list index (e.g. timeseries.0.*)
+            are collected under one group.  The groups are ordered by their
+            numeric index so that 1, 2, 3 … appear in sequence.
+            """
+            result = {"flat": [], "grouped": defaultdict(list)}
+
+            for item in items:
+                field = item["field"]
+                parts = field.split(".")
+
+                # Handle list elements like timeseries.0.start
+                if len(parts) >= 3 and parts[1].isdigit():
+                    index = parts[1]  # '0'
+                    display_idx = int(index) + 1
+                    group_key = (
+                        f"{parts[0].capitalize()} {display_idx}"  # 'Timeseries 1'
+                    )
+                    display_field = ".".join(parts[2:])  # 'start'
+
+                    enriched = item.copy()
+                    enriched["display_field"] = display_field
+                    enriched["display_prefix"] = group_key
+                    enriched["display_index"] = index
+
+                    result["grouped"][group_key].append(enriched)
+
+                # Handle nested (but non‑list) structures, e.g. spatial.epsg
+                elif "." in field:
+                    group_key = field.split(".")[0]  # 'spatial'
+                    enriched = item.copy()
+                    raw_tail = ".".join(field.split(".")[1:])
+                    enriched["display_field"] = _plus_one_if_digit(raw_tail)
+                    enriched["display_prefix"] = group_key
+                    enriched.pop("display_index", None)
+
+                    result["grouped"][group_key].append(enriched)
+
+                # Handle completely flat fields
+                else:
+                    item["display_field"] = field
+                    item["display_field"] = _plus_one_if_digit(item["display_field"])
+                    item.pop("display_index", None)
+                    result["flat"].append(item)
+
+            # Sort grouped entries by their numeric index (Timeseries 1, 2, 3 …)
+            sorted_grouped = dict(
+                sorted(result["grouped"].items(), key=lambda kv: extract_index(kv[0]))
+            )
+            return {"flat": result["flat"], "grouped": sorted_grouped}
+
+        grouped_meta = {}
+        for cat, items in main_categories.items():
+            if cat in {"spatial", "temporal"}:
+                grouped = group_index_only(items)  # only list‑index grouping
+            elif cat == "source":
+                # First‑level grouping: Source 0, Source 1, …
+                src_level = group_index_only(items)
+
+                # For every 'Sources N' list build inner sublist groups
+                nested_grouped = {}
+                for src_key, src_items in src_level["grouped"].items():
+                    nested_grouped[src_key] = nest_sublist_groups(src_items)
+
+                grouped = {
+                    "flat": src_level["flat"],
+                    "grouped": nested_grouped,
+                }
+            elif cat == "license":
+                # First‑level grouping: License 0, License 1, …
+                lic_level = group_index_only(items)
+
+                # For every 'Licenses N' entry build inner sub‑list groups
+                nested_grouped_lic = {}
+                for lic_key, lic_items in lic_level["grouped"].items():
+                    nested_grouped_lic[lic_key] = nest_sublist_groups(lic_items)
+
+                grouped = {
+                    "flat": lic_level["flat"],
+                    "grouped": nested_grouped_lic,
+                }
+            else:
+                grouped = group_by_index(items)  # previous behaviour
+            grouped_meta[cat] = {
+                "flat": grouped["flat"],
+                "grouped": grouped["grouped"],
+            }
+
+        return grouped_meta
 
     def get_all_field_descriptions(self, json_schema, prefix=""):
         """

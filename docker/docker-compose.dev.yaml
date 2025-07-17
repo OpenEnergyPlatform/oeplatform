@@ -1,0 +1,137 @@
+volumes:
+  pgdata:
+  fuseki_databases:
+  vite_node_modules:
+  vite_cache:
+  vite_temp:
+
+
+services:
+  postgres:
+    image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${OEP_DEV_PORT_POSTGRES:-5432}:5432"
+
+  fuseki:
+    image: stain/jena-fuseki:5.1.0
+    container_name: fuseki
+    environment:
+      ADMIN_PASSWORD: "admin"
+      FUSEKI_DATASET_1: "ds"
+    volumes:
+      - fuseki_databases:/home/fuseki/databases
+      # - ./fuseki/config:/home/fuseki/configuration
+    restart: unless-stopped
+    ports:
+      - "${OEP_DEV_PORT_FUSEKI:-3030}:3030"
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    user: "${USER_ID}:${GROUP_ID}"
+    image: oeplatform-dev
+    container_name: oeplatform-web-dev
+    working_dir: /home/appuser/app # match the WORKDIR in your Dockerfile.dev
+    volumes:
+      - type: bind
+        source: ..
+        target: /home/appuser/app
+    ports:
+      - "${OEP_DEV_PORT_WEB:-8000}:8000" # expose web
+      - "${OEP_DEV_PORT_DEBUGPY:-5678}:5678" # add debugpy port
+    command:
+      - python
+      - -m
+      - debugpy
+      - --listen
+      - "0.0.0.0:5678"
+      # - --wait-for-client
+      - manage.py
+      - runserver
+      - "0.0.0.0:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: "oeplatform.settings"
+      CHOKIDAR_USEPOLLING: "false"
+      DEBUG: True
+      OEP_DJANGO_USER: postgres
+      OEP_DB_PW: postgres
+      OEP_DJANGO_HOST: postgres
+      OEP_DJANGO_NAME: oep_django
+      LOCAL_DB_USER: postgres
+      LOCAL_DB_PASSWORD: postgres
+      LOCAL_DB_NAME: oedb
+      LOCAL_DB_HOST: postgres
+      VITE_DEV_MODE: "True"
+      VITE_DEV_SERVER_URL: "http://vite:5173"
+    depends_on:
+      - postgres
+
+  vite:
+    build:
+      context: .. # same root context
+      dockerfile: docker/Dockerfile.vite
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    # user: "${USER_ID}:${GROUP_ID}"
+    image: oeplatform-vite-dev
+    container_name: vite-js-dev
+    working_dir: /home/appuser/app # same path inside container
+    ports:
+      - "${OEP_DEV_PORT_VITE:-5173}:5173"
+    volumes:
+
+      # 1) keep dependencies in a named volume *inside* /app
+      - type: volume
+        source: vite_node_modules
+        target: /home/appuser/app/node_modules
+
+      # 2) Vite’s own cache directories in named volumes
+      - type: volume
+        source: vite_cache
+        target: /home/appuser/app/.vite_cache
+
+      # 3) Bind mount the app source code to have live reload for development
+      - type: bind
+        source: ..
+        target: /home/appuser/app
+    environment:
+      CHOKIDAR_USEPOLLING: "false"
+      HOST: "0.0.0.0"
+    depends_on:
+      - web
+
+  ontop:
+    build:
+      context: .
+      dockerfile: Dockerfile.ontop
+    container_name: ontop
+    ports:
+      - "8080:8080"
+    environment:
+      ONTOP_MAPPING_FILE: "/opt/ontop-config/mapping.obda"
+      ONTOP_OWL_FILE: "/opt/ontop-config/ontology.owl"
+      ONTOP_PROPERTIES_FILE: "/opt/ontop-config/ontop.properties"
+    volumes:
+      - ./serviceConfigs/ontop:/opt/ontop-config
+    depends_on:
+      - postgres
+
+  lookup:
+    restart: unless-stopped
+    image: dbpedia/lookup:dev
+    container_name: loep_lookup_dev
+    ports:
+      - "3004:8082"
+    volumes:
+      - ./data/index/:/index
+      - ./serviceConfigs/lookup/config.yaml:/resources/config.yml

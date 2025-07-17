@@ -1,2 +1,5 @@
 venv*
+env*
 oeplatform/securitysettings.py
+
+node_modules/
