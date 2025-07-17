@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2025 Reiner Lemoine Institut
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import {current_review, selectedState} from "./peer_review.js";
 import {getFieldState} from "./state_current_review.js";
 import {isEmptyValue} from "./utilities.js";

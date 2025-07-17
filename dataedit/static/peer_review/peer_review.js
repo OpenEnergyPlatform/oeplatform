@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Reiner Lemoine Institut
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {
   checkFieldStates,
   check_if_review_finished
