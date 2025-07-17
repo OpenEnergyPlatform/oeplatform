@@ -34,7 +34,6 @@ import json
 import logging
 import os
 import re
-from collections import defaultdict
 from functools import reduce
 from io import TextIOWrapper
 from itertools import chain
@@ -2046,6 +2045,9 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         # Flatten the nested JSON into [{'field': k, 'value': v}, ...]
         flattened = self.parse_keys(oemetadata)
+        flattened = [
+            item for item in flattened if item["field"].startswith("resources.")
+        ]
 
         bucket_map = {
             "spatial": "spatial",
