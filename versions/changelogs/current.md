@@ -42,6 +42,8 @@ SPDX-License-Identifier: CC0-1.0
 - Indexed fields are numbered starting from 1 ([#1946](https://github.com/OpenEnergyPlatform/oeplatform/pull/1946))
 - Removing contributor tab from peer review ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
 - Opening windows for indexed fields an subcategories in opr ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
+- Dividing the review functionality into 7 modules, connected in the main module ([#1965](https://github.com/OpenEnergyPlatform/oeplatform/pull/1965))
+- Add modules: main for connecting logic; navigation for switching between fields/tabs; opr_reviewer_logic for checking if review is complete; peer_review for main review logic; state_current_review for getting certain values from review; summary for review summary ([#1965](https://github.com/OpenEnergyPlatform/oeplatform/pull/1965))
 
 ## Features
 
