@@ -1061,7 +1061,7 @@ class DataView(View):
                 schema=schema, table=table
             ),
             "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
-            "opr_enabled": True,
+            "opr_enabled": False,
             # oemetadata
             # is not None,  # check if the table has the metadata
         }
