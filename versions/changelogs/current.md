@@ -42,6 +42,7 @@ SPDX-License-Identifier: CC0-1.0
 - Indexed fields are numbered starting from 1 ([#1946](https://github.com/OpenEnergyPlatform/oeplatform/pull/1946))
 - Removing contributor tab from peer review ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
 - Opening windows for indexed fields an subcategories in opr ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
+- Change main views function for metadata v2 structure ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2056))
 
 ## Features
 
