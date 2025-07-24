@@ -1,0 +1,53 @@
+version: "1.0"
+indexPath: ./index
+maxBufferedDocs: 1000000
+logInterval: 10000
+exactMatchBoost: 6
+prefixMatchBoost: 5
+fuzzyMatchBoost: 2
+fuzzyEditDistance: 2
+fuzzyPrefixLength: 2
+maxResults: 100
+format: JSON
+minScore: 0.1
+lookupFields:
+  - name: label
+    weight: 10
+    tokenize: true
+    highlight: true
+    queryByDefault: true
+    allowPartialMatch: true
+  - name: abstract
+    weight: 1
+    tokenize: true
+    highlight: true
+    queryByDefault: true
+    allowPartialMatch: true
+  - name: typeName
+    allowPartialMatch: true
+    weight: 0
+    highlight: false
+    required: true
+    exact: true
+    tokenize: true
+  - name: part
+    weight: 10
+    tokenize: true
+    allowPartialMatch: true
+    queryByDefault: true
+  - name: publisher
+    weight: 0
+    tokenize: true
+    queryByDefault: false
+    exact: true
+    allowPartialMatch: true
+    required: true
+    highlight: false
+  - name: group
+    weight: 0
+    tokenize: true
+    queryByDefault: false
+    exact: true
+    allowPartialMatch: true
+    required: true
+    highlight: false
