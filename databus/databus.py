@@ -91,6 +91,11 @@ def register_oep_table(
 
     metadata_url = f"{url_schema}/api/v0/schema/{schema_name}/tables/{table_name}/meta/"
 
+    # TODO: Remove python client and use the databus api directly
+    # TODO: For large files dont calc bitesize and checksum
+    # /api/register?fetch-file-properties=false
+    # -> metadata props dcat:byteSizedcat:byteSize, sha256sum
+
     distributions = [
         databusclient.create_distribution(
             url=data_url,
