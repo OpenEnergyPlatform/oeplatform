@@ -27,7 +27,7 @@ import requests
 
 OEP_API_TOKEN = "<Add-Your-Token>"
 HEADER = {"Authorization": f"Token {OEP_API_TOKEN}"}
-sparql_endpoint = "https://openenergy-platform.org/api/v0/oekg/sparql/"
+sparql_endpoint = "https://openenergyplatform.org/api/v0/oekg/sparql/"
 payload = {
     "query": """SELECT ?s ?p ?o
                 WHERE {
