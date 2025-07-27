@@ -196,7 +196,7 @@ def create_factsheet(request, *args, **kwargs):
 
     Duplicate_study_factsheet = False
 
-    for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
+    for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00020227)):
         study_acronym = oekg.value(s, DC.acronym)
         if str(clean_name(acronym)) == str(study_acronym):
             Duplicate_study_factsheet = True
@@ -211,7 +211,7 @@ def create_factsheet(request, *args, **kwargs):
         bundle = Graph()
 
         study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
-        bundle.add((study_URI, RDF.type, OEO.OEO_00010252))
+        bundle.add((study_URI, RDF.type, OEO.OEO_00020227))
 
         if acronym != "":
             bundle.add((study_URI, DC.acronym, Literal(remove_non_printable(acronym))))
@@ -657,7 +657,7 @@ def update_factsheet(request, *args, **kwargs):
 
     Duplicate_study_factsheet = False
 
-    for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
+    for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00020227)):
         study_acronym = oekg.value(s, DC.acronym)
         if str(clean_name(acronym)) == str(study_acronym) and str(
             clean_name(acronym)
@@ -682,7 +682,7 @@ def update_factsheet(request, *args, **kwargs):
                 old_bundle.add((s1, p1, o1))
 
         new_bundle = Graph()
-        new_bundle.add((study_URI, RDF.type, OEO.OEO_00010252))
+        new_bundle.add((study_URI, RDF.type, OEO.OEO_00020227))
 
         _publications = json.loads(publications) if publications is not None else []
         for item in _publications:
@@ -1610,7 +1610,7 @@ def update_an_entity(request, *args, **kwargs):
 
 def get_all_factsheets(request, *args, **kwargs):
     all_factsheets = []
-    for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
+    for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00020227)):
         uid = str(s).split("/")[-1]
         element = {}
         acronym = remove_non_printable(oekg.value(s, DC.acronym))

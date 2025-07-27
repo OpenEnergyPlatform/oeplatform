@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -38,7 +38,7 @@ class TestOekgQuery(unittest.TestCase):
         input1 = URIRef("input1")
         input2 = URIRef("input2")
 
-        g.add((bundle, RDF.type, namespaces.OEO.OEO_00010252))
+        g.add((bundle, RDF.type, namespaces.OEO.OEO_00020227))
         g.add((bundle, namespaces.OEKG["has_scenario"], scenario1))
         g.add((bundle, namespaces.OEKG["has_scenario"], scenario2))
         g.add((scenario1, namespaces.OEO.RO_0002233, input1))

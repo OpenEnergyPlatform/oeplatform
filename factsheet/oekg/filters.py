@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -59,7 +59,7 @@ class OekgQuery:
         table_iri = self.serialize_table_iri(table_iri)
 
         # Find all scenario bundles
-        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
+        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00020227)):
             # find all scenarios in any bundle
             for s1, p1, o1 in self.oekg.triples(
                 (s, namespaces.OEKG["has_scenario"], None)
@@ -97,7 +97,7 @@ class OekgQuery:
         table_iri = self.serialize_table_iri(table_iri)
 
         # Find all scenario bundles
-        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
+        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00020227)):
             # find all scenarios in any bundle
             for s1, p1, o1 in self.oekg.triples(
                 (s, namespaces.OEKG["has_scenario"], None)
@@ -150,7 +150,7 @@ class OekgQuery:
 
         scenario_bundles_input = set()
 
-        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
+        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00020227)):
             for i in related_scenarios_input:
                 for s1, p1, o1 in oekg.triples((s, namespaces.OEKG["has_scenario"], i)):
                     if s1:
@@ -179,7 +179,7 @@ class OekgQuery:
         )
         scenario_bundles_output = set()
 
-        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00010252)):
+        for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00020227)):
             for i in related_scenarios_output:
                 for s1, p1, o1 in oekg.triples((s, namespaces.OEKG["has_scenario"], i)):
                     if s1:

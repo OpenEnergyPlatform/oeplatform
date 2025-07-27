@@ -5510,7 +5510,7 @@
       "editor_note": []
     },
     {
-      "id": "OEO_00010252",
+      "id": "OEO_00020227",
       "name": "scenario study",
       "description": [
         "A scenario study is a study that investigates one or more scenarios."
@@ -9795,7 +9795,7 @@
     { "source": "OEO_00000240", "target": "OEO_00320004" },
     { "source": "OEO_00010250", "target": "OEO_00010251" },
     { "source": "OEO_00010250", "target": "OEO_00340006" },
-    { "source": "OEO_00020011", "target": "OEO_00010252" },
+    { "source": "OEO_00020011", "target": "OEO_00020227" },
     { "source": "OEO_00020093", "target": "OEO_00010255" },
     { "source": "OEO_00010256", "target": "OEO_00010257" },
     { "source": "OEO_00010256", "target": "OEO_00230000" },
@@ -10251,8 +10251,8 @@
     { "source": "OEO_00320040", "target": "OEO_00320065" },
     { "source": "OEO_00020178", "target": "OEO_00320074" },
     { "source": "OEO_00020264", "target": "OEO_00360001" },
-    { "source": "OEO_00010252", "target": "OEO_00360002" },
-    { "source": "OEO_00010252", "target": "OEO_00360003" },
+    { "source": "OEO_00020227", "target": "OEO_00360002" },
+    { "source": "OEO_00020227", "target": "OEO_00360003" },
     { "source": "BFO_0000001", "target": "BFO_0000002" },
     { "source": "BFO_0000001", "target": "BFO_0000003" },
     { "source": "owl#Thing", "target": "BFO_0000031" },
