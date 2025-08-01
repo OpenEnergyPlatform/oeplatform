@@ -42,6 +42,7 @@ from django.http import (
     JsonResponse,
     StreamingHttpResponse,
 )
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -62,11 +63,16 @@ from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from api.serializers import (
+    DatasetAssignTablesSerializer,
+    DatasetCreateSerializer,
+    DatasetReadSerializer,
+    DatasetResourceSerializer,
     EnergyframeworkSerializer,
     EnergymodelSerializer,
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
+from api.services.dataset_creation import assemble_dataset_metadata
 from api.services.embargo import (
     EmbargoValidationError,
     apply_embargo,
@@ -77,7 +83,7 @@ from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
-from dataedit.models import Embargo
+from dataedit.models import Dataset, Embargo
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
@@ -372,6 +378,99 @@ class Metadata(APIView):
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
+
+
+class DatasetsListCreate(generics.ListCreateAPIView):
+    queryset = Dataset.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return DatasetCreateSerializer
+        return DatasetReadSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        metadata = assemble_dataset_metadata(serializer.validated_data)
+        dataset = Dataset.objects.create(metadata=metadata, name=metadata["name"])
+
+        return Response(
+            {"id": dataset.pk, "metadata": dataset.metadata},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class DatasetsListResources(generics.ListAPIView):
+    serializer_class = DatasetResourceSerializer
+
+    def get_queryset(self):
+        dataset_name = self.kwargs["dataset_name"]
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        return dataset.tables.all()
+
+
+class DatasetManager(APIView):
+    """
+    View to retrieve, update, or delete a single dataset's metadata.
+    URL: /v0/datasets/<dataset_name>/
+    """
+
+    def get(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        serializer = DatasetReadSerializer(dataset)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        serializer = DatasetCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        dataset.metadata = assemble_dataset_metadata(serializer.validated_data)
+        dataset.save()
+        return Response({"message": "Dataset updated"}, status=status.HTTP_200_OK)
+
+    def delete(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        dataset.delete()
+        return Response(
+            {"message": "Dataset deleted"}, status=status.HTTP_204_NO_CONTENT
+        )
+
+
+class AssignDatasetTables(APIView):
+    def post(self, request, dataset_name):
+        serializer = DatasetAssignTablesSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        table_refs = serializer.validated_data["tables"]
+
+        try:
+            dataset = Dataset.objects.get(name=dataset_name)
+        except Dataset.DoesNotExist:
+            return Response({"error": "Dataset not found"}, status=404)
+
+        missing = []
+        added_tables = []
+
+        for table_ref in table_refs:
+            try:
+                table = DBTable.load(table_ref["schema"], table_ref["name"])
+                dataset.tables.add(table)
+                added_tables.append(table.name)
+            except DBTable.DoesNotExist:
+                missing.append(table_ref)
+
+        dataset.update_resources_from_tables()
+
+        return Response(
+            {
+                "message": f"Added {len(added_tables)} tables.",
+                "added": added_tables,
+                "missing": missing,
+            },
+            status=200,
+        )
 
 
 class Table(APIView):
