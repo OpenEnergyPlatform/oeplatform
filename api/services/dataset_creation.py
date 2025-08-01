@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+from copy import deepcopy
 from typing import Any
 
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
@@ -12,6 +13,7 @@ def assemble_dataset_metadata(
     validated_data: dict[str, Any], oemetadata: dict = OEMETADATA_V20_TEMPLATE
 ) -> dict[str, Any]:
     # set the context
+    oemetadata = deepcopy(oemetadata)
     oemetadata["@context"] = OEMETADATA_V20_EXAMPLE["@context"]
     oemetadata["resources"] = []  # Remove resources
 
