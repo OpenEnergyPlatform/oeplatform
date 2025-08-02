@@ -109,11 +109,9 @@ function renderSummaryPageFields() {
     if (!categoriesMap[category]) categoriesMap[category] = [];
     categoriesMap[category].push(field);
 
-    if (category_name === "summary") {
-      continue;
-    }
+    // Removed incorrect use of 'continue' and refactored loop variable declaration
     const category_fields = category.querySelectorAll(".field");
-    for (field of category_fields) {
+    for (const field of category_fields) {
       const field_id = field.id.slice(6);
       const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const found = current_review.reviews.some((review) => review.key === field_id);
@@ -196,13 +194,14 @@ function renderSummaryPageFields() {
           groupedFields[prefix].noIndex.push({ ...field, fieldName: nameWithoutIndices });
         }
 
-      let th = document.createElement('th');
-      th.scope = "row";
-      th.className = "status";
-      if (item.fieldStatus === "Pending") {
-        th.className = "status missing";
-      }
-    });
+        let th = document.createElement('th');
+        th.scope = "row";
+        th.className = "status";
+        if (item.fieldStatus === "Pending") {
+          th.className = "status missing";
+        }
+      } // <-- Add closing brace here for else block
+    }); // <-- Closing fields.forEach
 
     if (singleFields.length > 0) {
       const table = document.createElement('table');
@@ -291,7 +290,7 @@ function renderSummaryPageFields() {
   }
   const viewsNavItem = document.createElement('li');
   viewsNavItem.className = 'nav-item';
-  viewsNavItem.innerHTML = <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-views">views</button>;
+  viewsNavItem.innerHTML = '<button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-views">views</button>';
 
 
   tabsNav.appendChild(viewsNavItem);
@@ -477,4 +476,5 @@ function saveEntrancesForContributor() {
   updateTabProgressIndicatorClasses();
 }
 initializeEventBindings(saveEntrancesForContributor);
+}}}
 
