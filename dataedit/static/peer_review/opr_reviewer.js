@@ -159,18 +159,20 @@ if (explanationContainer) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.field').forEach((field) => {
-    field.addEventListener('click', () => {
-      const fieldKey = field.getAttribute('data-fieldkey');
-      const fieldValue = field.getAttribute('data-fieldvalue');
-      const category = field.getAttribute('data-category');
+  document.addEventListener('click', function (event) {
+    const field = event.target.closest('.field');
+    if (!field) return;
 
+    const fieldKey = field.dataset.fieldkey;
+    const fieldValue = field.dataset.fieldvalue;
+    const category = field.dataset.category;
+
+    if (fieldKey && category !== undefined) {
       click_field(fieldKey, fieldValue, category);
-    });
+    }
   });
 });
 window.click_field = click_field;
-
 
 /**
  * Saves field review to current review list
