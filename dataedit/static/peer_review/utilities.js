@@ -4,11 +4,12 @@ import {getCsrfToken, selectedState} from "./peer_review.js";
 
 export function updateFieldColor() {
   // Color ok/suggestion/rejected
-  let field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
-  $(field_id).removeClass('field-ok');
-  $(field_id).removeClass('field-suggestion');
-  $(field_id).removeClass('field-rejected');
-  $(field_id).addClass(`field-${selectedState}`);
+  let field_id = `field_${selectedField}`;
+  let safe_selector = `#${CSS.escape(field_id)}`;
+  $(safe_selector).removeClass('field-ok');
+  $(safe_selector).removeClass('field-suggestion');
+  $(safe_selector).removeClass('field-rejected');
+  $(safe_selector).addClass(`field-${selectedState}`);
 }
 
 export function getCookie(name) {
