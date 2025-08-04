@@ -321,6 +321,14 @@ class Sequence(APIView):
 
 
 class Metadata(APIView):
+    """
+    Important note:
+    oemetadata v2 introduces datasets which are not relevant on a table level
+    always query for metadata["resources"][0]. Keeping the complete oemetadata v2 JSON
+    makes it easy to integrate as no further changes to validation are required for now.
+    Datasets are handled in the model.Datasets & api views.
+    """
+
     @api_exception
     @method_decorator(never_cache)
     def get(self, request, schema, table):
@@ -344,7 +352,8 @@ class Metadata(APIView):
             cursor = actions.load_cursor_from_context(request.data)
 
             # update/sync keywords with tags before saving metadata
-            # TODO make this iter over all resources
+            # oemetadata v2 introduces datasets which are not relevant on a table level
+            # always query for metadata["resources"][0]
             keywords = metadata["resources"][0].get("keywords", []) or []
 
             # get_tag_keywords_synchronized_metadata returns the OLD metadata
@@ -354,18 +363,19 @@ class Metadata(APIView):
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
-            # TODO make this iter over all resources
+            # oemetadata v2 introduces datasets which are not relevant on a table level
+            # always query for metadata["resources"][0]
             metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
 
             # Write oemetadata json to dataedit.models.tables
-            # and to SQL comment on table
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
-            # TODO make this iter over all resources
+            # oemetadata v2 introduces datasets which are not relevant on a table level
+            # always query for metadata["resources"][0]
             metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
 
             # make sure extra metadata is removed
