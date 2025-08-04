@@ -13,15 +13,19 @@ from dataedit.models import Dataset, Schema, Table
 
 class DatasetAPITests(APITestCase):
     def setUpDatasetMetadata(self, dataset_name: str):
-        self.metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
+        metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
 
-        self.metadata["name"] = dataset_name
-        self.metadata["resources"] = []
+        metadata["name"] = dataset_name
+        metadata["resources"] = []
+
+        return metadata
 
     def setUpResourceMetadata(self, table_name: str):
-        self.metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
+        metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
 
-        self.metadata["resources"][0]["name"] = table_name
+        metadata["resources"][0]["name"] = table_name
+
+        return metadata
 
     def test_create_dataset(self):
         payload = {
