@@ -46,8 +46,14 @@ SPDX-License-Identifier: CC0-1.0
 - Add javaScript modules: main for connecting logic as entrypoint; navigation for switching between fields/tabs; opr_reviewer_logic for checking if review is complete; peer_review for main review logic; state_current_review for getting certain values from review; summary for review summary ([#1965](https://github.com/OpenEnergyPlatform/oeplatform/pull/1965))
 - Change main views function for metadata v2 structure ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2056))
 
-
 ## Features
+
+- Add Dataset rest-api and metadata based concept as specified in oemetadata / frictionless ([#2071](https://github.com/OpenEnergyPlatform/oeplatform/pull/2071))
+
+  - Ressource metadata is stored for each created table.
+  - Dataset objects can be listed, created, edited and existing tables can be assigned as resource
+  - Datasets and assigned Ressources are stored in the django database using a m:n relation with tables to read the oemetadata.
+  - Rest api implementation
 
 ## Bugs
 
