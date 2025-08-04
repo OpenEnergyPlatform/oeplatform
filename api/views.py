@@ -23,6 +23,7 @@ import itertools
 import json
 import logging
 import re
+from copy import deepcopy
 from decimal import Decimal
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
@@ -46,6 +47,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from oemetadata.latest.example import OEMETADATA_LATEST_EXAMPLE
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
@@ -653,6 +655,39 @@ class Table(APIView):
                 schema=schema,
                 metadata=metadata,
                 cursor=cursor,
+            )
+        else:
+            # If no metadata is provided, we create a minimal metadata object
+            metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
+            metadata["@context"] = OEMETADATA_LATEST_EXAMPLE["@context"]
+            metadata["metaMetadata"] = OEMETADATA_LATEST_EXAMPLE["metaMetadata"]
+
+            # Set basic resource info
+            resource = {
+                "name": table,
+                "topics": [schema],
+            }
+
+            # Update the first resource - there will only be one resource.
+            # The dataset section is managed by the database implementation ...
+            metadata["resources"][0].update(resource)
+
+            # Build schema fields from columns
+            fields = []
+            for col in columns:
+                field = {
+                    "name": col["name"],
+                    "type": col["data_type"],
+                    "nullable": col.get("is_nullable", True),
+                    # add more field metadata as needed
+                }
+                fields.append(field)
+
+            # Replace the fields list entirely
+            metadata["resources"][0]["schema"]["fields"] = fields
+
+            actions.set_table_metadata(
+                table=table, schema=schema, metadata=metadata, cursor=None
             )
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
