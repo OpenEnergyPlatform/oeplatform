@@ -2,6 +2,9 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+from copy import deepcopy
+
+from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -9,6 +12,17 @@ from dataedit.models import Dataset, Schema, Table
 
 
 class DatasetAPITests(APITestCase):
+    def setUpDatasetMetadata(self, dataset_name: str):
+        self.metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
+
+        self.metadata["name"] = dataset_name
+        self.metadata["resources"] = []
+
+    def setUpResourceMetadata(self, table_name: str):
+        self.metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
+
+        self.metadata["resources"][0]["name"] = table_name
+
     def test_create_dataset(self):
         payload = {
             "name": "test_dataset",
@@ -24,16 +38,20 @@ class DatasetAPITests(APITestCase):
         self.assertEqual(response.data["metadata"]["name"], "test_dataset")
 
     def test_list_datasets(self):
-        Dataset.objects.create(name="ds1", metadata={"name": "ds1"})
-        Dataset.objects.create(name="ds2", metadata={"name": "ds2"})
+        Dataset.objects.create(name="ds1", metadata=self.setUpDatasetMetadata("ds1"))
+        Dataset.objects.create(name="ds2", metadata=self.setUpDatasetMetadata("ds2"))
         response = self.client.get("/api/v0/datasets/")  # fixed
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
     def test_assign_tables_to_dataset(self):
         schema = Schema.objects.create(name="test_schema")
-        Table.objects.create(name="t1", schema=schema, oemetadata={"name": "t1"})
-        Table.objects.create(name="t2", schema=schema, oemetadata={"name": "t2"})
+        Table.objects.create(
+            name="t1", schema=schema, oemetadata=self.setUpResourceMetadata("t1")
+        )
+        Table.objects.create(
+            name="t2", schema=schema, oemetadata=self.setUpResourceMetadata("t2")
+        )
         dataset = Dataset.objects.create(
             name="test_dataset", metadata={"name": "test_dataset"}
         )
@@ -57,10 +75,10 @@ class DatasetAPITests(APITestCase):
     def test_list_resources_for_dataset(self):
         schema = Schema.objects.create(name="test_schema")
         table = Table.objects.create(
-            name="t1", schema=schema, oemetadata={"name": "t1"}
+            name="t1", schema=schema, oemetadata=self.setUpResourceMetadata("t1")
         )
         dataset = Dataset.objects.create(
-            name="test_dataset", metadata={"name": "test_dataset"}
+            name="test_dataset", metadata=self.setUpDatasetMetadata("test_dataset")
         )
         dataset.tables.add(table)
         dataset.update_resources_from_tables()
@@ -73,7 +91,9 @@ class DatasetAPITests(APITestCase):
         self.assertEqual(response.data[0]["name"], "t1")
 
     def test_assign_missing_table(self):
-        Dataset.objects.create(name="ds_missing", metadata={"name": "ds_missing"})
+        Dataset.objects.create(
+            name="ds_missing", metadata=self.setUpDatasetMetadata("ds_missing")
+        )
 
         payload = {
             "dataset_name": "ds_missing",
