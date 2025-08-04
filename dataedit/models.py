@@ -188,7 +188,9 @@ class Dataset(models.Model):
         """
         Rebuild the `resources` field in OEMetadata based on linked tables.
         """
-        self.metadata["resources"] = [table.oemetadata for table in self.tables.all()]
+        self.metadata["resources"] = [
+            table.oemetadata["resources"][0] for table in self.tables.all()
+        ]
         self.save()
 
 
