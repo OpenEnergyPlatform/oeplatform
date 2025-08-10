@@ -133,10 +133,10 @@
   data-category="general">
                   <p class="review__item-content">
                     {% if item.field is Null %}
-                      <span class="key">{{item.field}}</span>
+                      <span class="key">{{ item.label|default:item.field }}</span>
                       <span class="value">{{ item.value }}</span>
                     {% else %}
-                      <span class="key">{{item.field}}</span>
+                      <span class="key">{{ item.label|default:item.field }}</span>
                       <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight"> {{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span> <br>
@@ -159,10 +159,10 @@
   data-category="spatial">
                   <p class="review__item-content">
                     {% if item.field is Null %}
-                      <span class="key">{{item.field}}</span>
+                      <span class="key">{{ item.label|default:item.field }}</span>
                       <span class="value">{{ item.value }}</span>
                     {% else %}
-                      <span class="key">{{item.field}}</span>
+                      <span class="key">{{ item.label|default:item.field }}</span>
                       <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span> <br>
@@ -181,10 +181,10 @@
   data-category="temporal">
                   <p class="review__item-content">
                     {% if item.field is Null %}
-                      <span class="key">{{item.field}}</span>
+                      <span class="key">{{ item.label|default:item.field }}</span>
                       <span class="value">{{ item.value }}</span>
                     {% else %}
-                      <span class="key">{{item.field}}</span>
+                      <span class="key">{{ item.label|default:item.field }}</span>
                       <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span> <br>
@@ -206,10 +206,10 @@
   data-category="source">
                   <p class="review__item-content">
                     {% if item.field is Null %}
-                      <span class="key">{{item.field}}</span>
+                      <span class="key">{{ item.label|default:item.field }}</span>
                       <span class="value">{{ item.value }}</span>
                     {% else %}
-                      <span class="key">{{item.field}}</span>
+                      <span class="key">{{ item.label|default:item.field }}</span>
                       <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span> <br>
@@ -231,10 +231,10 @@
   data-category="license">
                   <p class="review__item-content">
                     {% if item.field is Null %}
-                      <span class="key">{{item.field}}</span>
+                      <span class="key">{{ item.label|default:item.field }}</span>
                       <span class="value">{{ item.value }}</span>
                     {% else %}
-                      <span class="key">{{item.field}}</span>
+                      <span class="key">{{ item.label|default:item.field }}</span>
                       <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span> <br>
@@ -387,12 +387,18 @@
     // var existing_review = JSON.parse("{{ existing_review | escapejs }}");
 
     document.addEventListener("DOMContentLoaded", function() {
-        let keys = document.querySelectorAll(".key");
-        keys.forEach(key => {
-            let words = key.textContent.split(".");
-            let formattedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
-            key.textContent = formattedWords.join(" ");
-        });
+      const keys = document.querySelectorAll('.key');
+      keys.forEach((key) => {
+        let txt = key.textContent.trim();
+        if (/^resources\./.test(txt)) {
+          // Remove leading resources.<idx>. and prettify
+          txt = txt.replace(/^resources\.[0-9]+\./, '');
+          txt = txt.replace(/_/g, ' ');
+          const parts = txt.split('.');
+          const pretty = parts.map((w, i) => (w.length ? (i === 0 ? w[0].toUpperCase() + w.slice(1) : w) : w)).join(' ');
+          key.textContent = pretty;
+        }
+      });
     });
 
     var initialReviewerSuggestions = {};
