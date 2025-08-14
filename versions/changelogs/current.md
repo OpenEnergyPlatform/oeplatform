@@ -50,7 +50,9 @@ SPDX-License-Identifier: CC0-1.0
 ## Features
 
 ## Bugs
-
+- connect opr_reviewer.js to main.js for clickability of fields in opr ([#2072](https://github.com/OpenEnergyPlatform/oeplatform/pull/2073))
+- connect navigation functions to main.js for opr purposes ([#2072](https://github.com/OpenEnergyPlatform/oeplatform/pull/2073))
+  
 ## Removed
 
 ## Documentation updates
