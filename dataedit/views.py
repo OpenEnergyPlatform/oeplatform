@@ -2017,33 +2017,22 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def sort_in_category(self, schema, table, oemetadata):
         """
-        Group flattened OEMetadata v2 fields into thematic buckets and attach
+        Group flattened OEMetadata v2 fields into thematic buckets and attach
         placeholders required by the review UI.
 
-        Each entry in the resulting lists has **five** keys:
-
-        ```json
+        Each entry has six keys:
         {
-          "field": "<dot‑notation path>",
+          "field": "<dot-path>",
+          "label": "<display label without 'resources.<idx>.'>",
           "value": "<current value>",
           "newValue": "",
           "reviewer_suggestion": "",
           "suggestion_comment": ""
         }
-        ```
-
-        Buckets returned:
-
-        * general
-        * spatial
-        * temporal
-        * source
-        * license
         """
-
+        import re
         from collections import defaultdict
 
-        # Flatten the nested JSON into [{'field': k, 'value': v}, ...]
         flattened = self.parse_keys(oemetadata)
         flattened = [
             item for item in flattened if item["field"].startswith("resources.")
@@ -2056,13 +2045,26 @@ class PeerReviewView(LoginRequiredMixin, View):
             "licenses": "license",
         }
 
+        def make_label(dot_path: str) -> str:
+            # remove leading resources.<idx>.
+            trimmed = re.sub(r"^resources\.[0-9]+\.", "", dot_path)
+            parts = trimmed.split(".")
+            out = []
+            for p in parts:
+                if p in {"@id", "@type"}:
+                    out.append(p)
+                else:
+                    out.append(p.replace("_", " "))
+            if out:
+                out[0] = out[0][:1].upper() + out[0][1:]
+            return " ".join(out)
+
         tmp = defaultdict(list)
 
         for item in flattened:
             raw_key = item["field"]
             parts = raw_key.split(".")
 
-            # Detect v2 resource path → resources.<idx>.<root>.…
             if parts[0] == "resources" and len(parts) >= 3:
                 root = parts[2]
             else:
@@ -2070,10 +2072,10 @@ class PeerReviewView(LoginRequiredMixin, View):
 
             bucket = bucket_map.get(root, "general")
 
-            # Extend structure with placeholders expected by review workflow
             tmp[bucket].append(
                 {
                     "field": raw_key,
+                    "label": make_label(raw_key),
                     "value": item["value"],
                     "newValue": "",
                     "reviewer_suggestion": "",
@@ -2081,15 +2083,13 @@ class PeerReviewView(LoginRequiredMixin, View):
                 }
             )
 
-        # Guarantee keys exist even when empty
-        buckets = {
+        return {
             "general": tmp["general"],
             "spatial": tmp["spatial"],
             "temporal": tmp["temporal"],
             "source": tmp["source"],
             "license": tmp["license"],
         }
-        return buckets
 
     def get_all_field_descriptions(self, json_schema, prefix=""):
         """
