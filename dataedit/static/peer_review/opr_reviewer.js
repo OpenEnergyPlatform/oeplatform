@@ -126,18 +126,33 @@ function click_field(fieldKey, fieldValue, category) {
   }
 });
 
-const explanationContainer = document.getElementById("explanation-container");
+const fieldElementForMsg = document.querySelector(`.field[data-fieldkey="${fieldKey}"]`);
+if (fieldElementForMsg) {
+  const safeKey = fieldKey.replace(/[^a-zA-Z0-9_-]/g, '_');
+  let explanationElement = document.getElementById(`explanation_${safeKey}`);
 
-if (explanationContainer) {
-  const existingExplanation = explanationContainer.querySelector('.explanation');
-
-  if (isEmpty && !existingExplanation) {
-    const explanationElement = document.createElement('p');
-    explanationElement.textContent = 'Field is empty. Reviewing is not possible.';
-    explanationElement.classList.add('explanation');
-    explanationContainer.appendChild(explanationElement);
-  } else if (!isEmpty && existingExplanation) {
-    explanationContainer.removeChild(existingExplanation);
+  if (isEmpty) {
+    if (!explanationElement) {
+      explanationElement = document.createElement('p');
+      explanationElement.id = `explanation_${safeKey}`;
+      explanationElement.classList.add('explanation', 'text-muted', 'mt-1');
+      explanationElement.innerText = 'Field is empty. Reviewing is not possible.';
+      fieldElementForMsg.appendChild(explanationElement);
+    } else if (explanationElement.parentElement !== fieldElementForMsg) {
+      fieldElementForMsg.appendChild(explanationElement);
+    }
+    // Style label and value in light gray
+    const labelEl = fieldElementForMsg.querySelector('.field-label, .field__label, .label, .key, .field-name');
+    const valueEl = fieldElementForMsg.querySelector('.field-value, .value');
+    if (labelEl) labelEl.style.color = '#6c757d';
+    if (valueEl) valueEl.style.color = '#6c757d';
+  } else if (explanationElement) {
+    explanationElement.remove();
+    // Reset label/value color
+    const labelEl = fieldElementForMsg.querySelector('.field-label, .field__label, .label, .key, .field-name');
+    const valueEl = fieldElementForMsg.querySelector('.field-value, .value');
+    if (labelEl) labelEl.style.color = '';
+    if (valueEl) valueEl.style.color = '';
   }
 }
 
