@@ -327,7 +327,7 @@ def create_factsheet(request, *args, **kwargs):
                         bundle.add(
                             (scenario_region, RDFS.label, Literal(region["name"]))
                         )
-                        bundle.add((scenario_region, OEKG["reference"], region_URI))
+                        bundle.add((scenario_region, OEO.OEO_00390078, region_URI))
                         bundle.add((scenario_URI, OEO.OEO_00020220, scenario_region))
 
                 if "interacting_regions" in item:
@@ -351,7 +351,7 @@ def create_factsheet(request, *args, **kwargs):
                         bundle.add(
                             (
                                 scenario_interacting_region,
-                                OEKG["reference"],
+                                OEO.OEO_00390078,
                                 interacting_region_URI,
                             )
                         )
@@ -791,7 +791,7 @@ def update_factsheet(request, *args, **kwargs):
                         new_bundle.add(
                             (
                                 scenario_region,
-                                OEKG["reference"],
+                                OEO.OEO_00390078,
                                 region_URI,
                             )
                         )
@@ -820,7 +820,7 @@ def update_factsheet(request, *args, **kwargs):
                         new_bundle.add(
                             (
                                 scenario_interacting_region,
-                                OEKG["reference"],
+                                OEO.OEO_00390078,
                                 interacting_region_URI,
                             )
                         )
