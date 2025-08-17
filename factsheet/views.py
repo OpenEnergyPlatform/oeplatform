@@ -376,9 +376,7 @@ def create_factsheet(request, *args, **kwargs):
                 if "descriptors" in item:
                     for descriptor in item["descriptors"]:
                         descriptor = URIRef(descriptor["class"])
-                        bundle.add(
-                            (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
-                        )
+                        bundle.add((scenario_URI, OEO.OEO_00390073, descriptor))
 
                 # TODO: Jonas Huber: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
@@ -850,9 +848,7 @@ def update_factsheet(request, *args, **kwargs):
                 if "descriptors" in item:
                     for descriptor in item["descriptors"]:
                         descriptor = URIRef(descriptor["class"])
-                        new_bundle.add(
-                            (scenario_URI, OEO["has_scenario_descriptor"], descriptor)
-                        )
+                        new_bundle.add((scenario_URI, OEO.OEO_00390073, descriptor))
 
                 # TODO: Jonas Huber: Update to avoid duplicated table name entries
                 if "input_datasets" in item:
@@ -1350,7 +1346,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 {"iri": str(o1).split("/")[-1], "id": o1_label, "name": o1_label}
             )
 
-        for s11, p11, o11 in oekg.triples((o, OEO["has_scenario_descriptor"], None)):
+        for s11, p11, o11 in oekg.triples((o, OEO.OEO_00390073, None)):
             label = oeo.value(o11, RDFS.label)
             scenario["descriptors"].append(
                 {"value": label, "label": label, "class": o11}
@@ -1743,7 +1739,7 @@ def get_scenarios(request, *args, **kwargs):
             for s, p, o in oekg.triples((s, DC.abstract, None)):
                 abstract = o
 
-            for s1, p1, o1 in oekg.triples((s, OEO["has_scenario_descriptor"], None)):
+            for s1, p1, o1 in oekg.triples((s, OEO.OEO_00390073, None)):
                 scenario_descriptors.append(
                     (
                         str(oeo.value(o1, RDFS.label)),
