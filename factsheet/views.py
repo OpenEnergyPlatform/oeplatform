@@ -585,7 +585,7 @@ def create_factsheet(request, *args, **kwargs):
         )
         if _study_keywords != []:
             for keyword in _study_keywords:
-                bundle.add((study_URI, OEO["has_study_keyword"], Literal(keyword)))
+                bundle.add((study_URI, OEO.OEO_00390071, Literal(keyword)))
 
         for s, p, o in bundle.triples((None, None, None)):
             oekg.add((s, p, o))
@@ -1096,7 +1096,7 @@ def update_factsheet(request, *args, **kwargs):
             json.loads(study_keywords) if study_keywords is not None else []
         )
         for keyword in _study_keywords:
-            new_bundle.add((study_URI, OEO["has_study_keyword"], Literal(keyword)))
+            new_bundle.add((study_URI, OEO.OEO_00390071, Literal(keyword)))
 
         iso_old_bundle = to_isomorphic(old_bundle)
         iso_new_bundle = to_isomorphic(new_bundle)
@@ -1255,7 +1255,7 @@ def factsheet_by_id(request, *args, **kwargs):
             )
 
     factsheet["study_keywords"] = []
-    for s, p, o in oekg.triples((study_URI, OEO["has_study_keyword"], None)):
+    for s, p, o in oekg.triples((study_URI, OEO.OEO_00390071, None)):
         if o != None:  # noqa
             factsheet["study_keywords"].append(o)
 

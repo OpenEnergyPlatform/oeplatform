@@ -213,9 +213,7 @@ class OekgQuery:
             (None, namespaces.OEKG["has_scenario"], scenario_URI)
         ):
             # find all study descriptors for the scenario bundle
-            for s2, p2, o2 in oekg.triples(
-                (s1, namespaces.OEO["has_study_keyword"], None)
-            ):
+            for s2, p2, o2 in oekg.triples((s1, namespaces.OEO.OEO_00390071, None)):
                 if o2 != None:  # noqa
                     study_descriptors.append(o2)
 

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -191,7 +191,7 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
         "funding_sources", "OEO:OEO_00000509", funding_sources
     )
     study_keywords_exp = build_filter_block_string_values(
-        "OEO:has_study_keyword", study_keywords
+        "OEO:OEO_00390071", study_keywords
     )
 
     # Scenario year clause
