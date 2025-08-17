@@ -233,9 +233,7 @@ def create_factsheet(request, *args, **kwargs):
             publications_URI = URIRef(
                 "http://openenergy-platform.org/ontology/oekg/publication/" + item["id"]
             )
-            bundle.add(
-                (publications_URI, OEKG["publication_uuid"], Literal(item["id"]))
-            )
+            bundle.add((publications_URI, OEO.OEO_00390095, Literal(item["id"])))
 
             bundle.add((study_URI, OEO.BFO_0000051, publications_URI))
             if item["report_title"] != "":
@@ -314,7 +312,7 @@ def create_factsheet(request, *args, **kwargs):
                         )
                     )
 
-                bundle.add((scenario_URI, OEKG["scenario_uuid"], Literal(item["id"])))
+                bundle.add((scenario_URI, OEO.OEO_00390095, Literal(item["id"])))
 
                 if "regions" in item:
                     for region in item["regions"]:
@@ -415,7 +413,7 @@ def create_factsheet(request, *args, **kwargs):
                         bundle.add(
                             (
                                 input_dataset_URI,
-                                OEO["has_key"],
+                                OEO.OEO_00390095,
                                 Literal(input_dataset["key"]),
                             )
                         )
@@ -458,7 +456,7 @@ def create_factsheet(request, *args, **kwargs):
                         bundle.add(
                             (
                                 output_dataset_URI,
-                                OEO["has_key"],
+                                OEO.OEO_00390095,
                                 Literal(output_dataset["key"]),
                             )
                         )
@@ -685,9 +683,7 @@ def update_factsheet(request, *args, **kwargs):
             publications_URI = URIRef(
                 "http://openenergy-platform.org/ontology/oekg/publication/" + item["id"]
             )
-            new_bundle.add(
-                (publications_URI, OEKG["publication_uuid"], Literal(item["id"]))
-            )
+            new_bundle.add((publications_URI, OEO.OEO_00390095, Literal(item["id"])))
             new_bundle.add((study_URI, OEO.BFO_0000051, publications_URI))
             if item["report_title"] != "":
                 new_bundle.add(
@@ -752,9 +748,7 @@ def update_factsheet(request, *args, **kwargs):
                 for s, p, o in oekg.triples((scenario_URI, None, None)):
                     oekg.remove((o, p, o))
 
-                new_bundle.add(
-                    (scenario_URI, OEKG["scenario_uuid"], Literal(item["id"]))
-                )
+                new_bundle.add((scenario_URI, OEO.OEO_00390095, Literal(item["id"])))
                 new_bundle.add((scenario_URI, RDF.type, OEO.OEO_00000365))
                 new_bundle.add((scenario_URI, RDFS.label, Literal((item["acronym"]))))
                 if item["name"] != "":
@@ -884,7 +878,7 @@ def update_factsheet(request, *args, **kwargs):
                         new_bundle.add(
                             (
                                 input_dataset_URI,
-                                OEO["has_key"],
+                                OEO.OEO_00390095,
                                 Literal(input_dataset["key"]),
                             )
                         )
@@ -924,7 +918,7 @@ def update_factsheet(request, *args, **kwargs):
                         new_bundle.add(
                             (
                                 output_dataset_URI,
-                                OEO["has_key"],
+                                OEO.OEO_00390095,
                                 Literal(output_dataset["key"]),
                             )
                         )
@@ -1284,7 +1278,7 @@ def factsheet_by_id(request, *args, **kwargs):
         if label is not None:
             publication["report_title"] = label
 
-        publication_uuid = oekg.value(o, OEKG["publication_uuid"])
+        publication_uuid = oekg.value(o, OEO.OEO_00390095)
         publication["id"] = publication_uuid
 
         publication["authors"] = []
@@ -1314,7 +1308,7 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples((study_URI, OEO.BFO_0000051, None)):
         scenario = {}
         label = oekg.value(o, RDFS.label)
-        scenario_uuid = oekg.value(o, OEKG["scenario_uuid"])
+        scenario_uuid = oekg.value(o, OEO.OEO_00390095)
 
         if label != None:  # noqa
             scenario["acronym"] = label
@@ -1353,7 +1347,7 @@ def factsheet_by_id(request, *args, **kwargs):
         for s2, p2, o2 in oekg.triples((o, OEO.OEO_00020437, None)):
             o2_iri = oekg.value(o2, OEO.OEO_00390094)
             o2_label = oekg.value(o2, RDFS.label)
-            o2_key = oekg.value(o2, OEO["has_key"])
+            o2_key = oekg.value(o2, OEO.OEO_00390095)
             o2_idx = oekg.value(o2, OEO["has_id"])
 
             scenario["input_datasets"].append(
@@ -1367,7 +1361,7 @@ def factsheet_by_id(request, *args, **kwargs):
         for s3, p3, o3 in oekg.triples((o, OEO.OEO_00020436, None)):
             o3_iri = oekg.value(o3, OEO.OEO_00390094)
             o3_label = oekg.value(o3, RDFS.label)
-            o3_key = oekg.value(o3, OEO["has_key"])
+            o3_key = oekg.value(o3, OEO.OEO_00390095)
             o3_idx = oekg.value(o3, OEO["has_id"])
 
             scenario["output_datasets"].append(

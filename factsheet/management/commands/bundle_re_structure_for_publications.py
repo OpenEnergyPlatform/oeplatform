@@ -69,7 +69,7 @@ class Command(BaseCommand):
                 oekg.add(
                     (
                         publications_URI,
-                        OEKG["publication_uuid"],
+                        OEO.OEO_00390095,
                         Literal(publication_uuid),
                     )
                 )
