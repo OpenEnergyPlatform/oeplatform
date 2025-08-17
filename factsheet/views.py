@@ -264,7 +264,7 @@ def create_factsheet(request, *args, **kwargs):
                 bundle.add(
                     (
                         publications_URI,
-                        OEKG["date_of_publication"],
+                        OEO.OEO_00390096,
                         Literal(item["date_of_publication"]),
                     )
                 )
@@ -720,7 +720,7 @@ def update_factsheet(request, *args, **kwargs):
                 new_bundle.add(
                     (
                         publications_URI,
-                        OEKG["date_of_publication"],
+                        OEO.OEO_00390096,
                         Literal(item["date_of_publication"]),
                     )
                 )
@@ -738,9 +738,7 @@ def update_factsheet(request, *args, **kwargs):
 
             # remove old date in publication
             # iterate to make sure it can only have unique publication date
-            for _s, _p, _o in oekg.triples(
-                (publications_URI, OEKG["date_of_publication"], None)
-            ):
+            for _s, _p, _o in oekg.triples((publications_URI, OEO.OEO_00390096, None)):
                 oekg.remove((_s, _p, _o))
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
@@ -1299,7 +1297,7 @@ def factsheet_by_id(request, *args, **kwargs):
             publication["doi"] = o2
 
         publication["date_of_publication"] = ""
-        for s3, p3, o3 in oekg.triples((o, OEKG["date_of_publication"], None)):
+        for s3, p3, o3 in oekg.triples((o, OEO.OEO_00390096, None)):
             publication["date_of_publication"] = serialize_publication_date(str(o3))
             temp.update(serialize_publication_date(str(o3)))
 
@@ -1652,7 +1650,7 @@ def get_all_factsheets(request, *args, **kwargs):
         temp = set()
         for s, p, o in oekg.triples((s, OEKG["has_publication"], None)):
             pubs_per_bundle = []
-            for s1, p1, o1 in oekg.triples((o, OEKG["date_of_publication"], None)):
+            for s1, p1, o1 in oekg.triples((o, OEO.OEO_00390096, None)):
                 if o1:
                     pubs_per_bundle.append(serialize_publication_date(str(o1)))
 

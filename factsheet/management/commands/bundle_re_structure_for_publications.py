@@ -77,13 +77,11 @@ class Command(BaseCommand):
                 for s, p, o in oekg.triples((bundle_URI, OEKG["report_title"], None)):
                     oekg.add((publications_URI, RDFS.label, o))
 
-                for s, p, o in oekg.triples(
-                    (bundle_URI, OEKG["date_of_publication"], None)
-                ):
+                for s, p, o in oekg.triples((bundle_URI, OEO.OEO_00390096, None)):
                     oekg.add(
                         (
                             publications_URI,
-                            OEKG["date_of_publication"],
+                            OEO.OEO_00390096,
                             o,
                         )
                     )
