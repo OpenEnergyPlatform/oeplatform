@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -47,7 +47,7 @@ class Command(BaseCommand):
                         oekg.add(
                             (
                                 framework_URI,
-                                OEO["has_iri"],
+                                OEO.OEO_00390094,
                                 Literal(framework_meta["urn"]),
                             )
                         )
@@ -79,7 +79,7 @@ class Command(BaseCommand):
                             )
 
                         oekg.add(
-                            (model_URI, OEO["has_iri"], Literal(model_meta["urn"]))
+                            (model_URI, OEO.OEO_00390094, Literal(model_meta["urn"]))
                         )
 
                         oekg.remove((s, p, o))

@@ -70,7 +70,7 @@ class OekgQuery:
                 ):
                     if o1_input_ds_uid is not None:
                         for s3, p3, o3_input_ds_iri in self.oekg.triples(
-                            (o1_input_ds_uid, namespaces.OEO["has_iri"], None)
+                            (o1_input_ds_uid, namespaces.OEO.OEO_00390094, None)
                         ):
                             if (
                                 self.serialize_table_iri(str(o3_input_ds_iri))
@@ -109,7 +109,7 @@ class OekgQuery:
                         for s3, p3, o3_output_ds_iri in oekg.triples(
                             (
                                 o2_output_ds_uid,
-                                namespaces.OEO["has_iri"],
+                                namespaces.OEO.OEO_00390094,
                                 None,
                             )
                         ):

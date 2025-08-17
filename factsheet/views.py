@@ -403,7 +403,7 @@ def create_factsheet(request, *args, **kwargs):
                         bundle.add(
                             (
                                 input_dataset_URI,
-                                OEO["has_iri"],
+                                OEO.OEO_00390094,
                                 Literal(input_dataset["value"]["url"]),
                             )
                         )
@@ -446,7 +446,7 @@ def create_factsheet(request, *args, **kwargs):
                         bundle.add(
                             (
                                 output_dataset_URI,
-                                OEO["has_iri"],
+                                OEO.OEO_00390094,
                                 Literal(output_dataset["value"]["url"]),
                             )
                         )
@@ -533,7 +533,7 @@ def create_factsheet(request, *args, **kwargs):
             bundle.add(
                 (
                     model_URI,
-                    OEO["has_iri"],
+                    OEO.OEO_00390094,
                     Literal(model_url),
                 )
             )
@@ -571,7 +571,7 @@ def create_factsheet(request, *args, **kwargs):
                 bundle.add(
                     (
                         framework_URI,
-                        OEO["has_iri"],
+                        OEO.OEO_00390094,
                         Literal(framework_url),
                     )
                 )
@@ -876,7 +876,7 @@ def update_factsheet(request, *args, **kwargs):
                         new_bundle.add(
                             (
                                 input_dataset_URI,
-                                OEO["has_iri"],
+                                OEO.OEO_00390094,
                                 Literal(input_dataset["value"]["url"]),
                             )
                         )
@@ -916,7 +916,7 @@ def update_factsheet(request, *args, **kwargs):
                         new_bundle.add(
                             (
                                 output_dataset_URI,
-                                OEO["has_iri"],
+                                OEO.OEO_00390094,
                                 Literal(output_dataset["value"]["url"]),
                             )
                         )
@@ -1025,7 +1025,7 @@ def update_factsheet(request, *args, **kwargs):
             new_bundle.add(
                 (
                     model_URI,
-                    OEO["has_iri"],
+                    OEO.OEO_00390094,
                     Literal(model_url),
                 )
             )
@@ -1039,7 +1039,7 @@ def update_factsheet(request, *args, **kwargs):
 
             # remove old iri´s
             # iterate to make sure only current selection is available
-            for _s, _p, _o in oekg.triples((model_URI, OEO["has_iri,"], None)):
+            for _s, _p, _o in oekg.triples((model_URI, OEO.OEO_00390094, None)):
                 oekg.remove((_s, _p, _o))
 
         # TODO: Fix
@@ -1073,7 +1073,7 @@ def update_factsheet(request, *args, **kwargs):
                 new_bundle.add(
                     (
                         framework_URI,
-                        OEO["has_iri"],
+                        OEO.OEO_00390094,
                         Literal(framework_url),
                     )
                 )
@@ -1087,7 +1087,7 @@ def update_factsheet(request, *args, **kwargs):
 
             # remove old iri´s
             # iterate to make sure only current selection is available
-            for _s, _p, _o in oekg.triples((framework_URI, OEO["has_iri,"], None)):
+            for _s, _p, _o in oekg.triples((framework_URI, OEO.OEO_00390094, None)):
                 oekg.remove((_s, _p, _o))
 
         _study_keywords = (
@@ -1261,7 +1261,7 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet["frameworks"] = []
 
     for _, _, o in oekg.triples((study_URI, OEO["has_framework"], None)):
-        for _, _, o1 in oekg.triples((o, OEO["has_iri"], None)):
+        for _, _, o1 in oekg.triples((o, OEO.OEO_00390094, None)):
             framework_id = int(str(o).split("/")[-1])
             framework_metadata = get_framework_metadata_by_id(
                 framework_id, "energyframework"
@@ -1272,7 +1272,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 factsheet["frameworks"].append(framework_metadata)
 
     for _, _, o in oekg.triples((study_URI, OEO["has_model"], None)):
-        for _, _, o1 in oekg.triples((o, OEO["has_iri"], None)):
+        for _, _, o1 in oekg.triples((o, OEO.OEO_00390094, None)):
             model_id = int(str(o).split("/")[-1])
             model_metadata = get_model_metadata_by_id(model_id, "energymodel")
 
@@ -1357,7 +1357,7 @@ def factsheet_by_id(request, *args, **kwargs):
             )
 
         for s2, p2, o2 in oekg.triples((o, OEO.RO_0002233, None)):
-            o2_iri = oekg.value(o2, OEO["has_iri"])
+            o2_iri = oekg.value(o2, OEO.OEO_00390094)
             o2_label = oekg.value(o2, RDFS.label)
             o2_key = oekg.value(o2, OEO["has_key"])
             o2_idx = oekg.value(o2, OEO["has_id"])
@@ -1371,7 +1371,7 @@ def factsheet_by_id(request, *args, **kwargs):
             )
 
         for s3, p3, o3 in oekg.triples((o, OEO.RO_0002234, None)):
-            o3_iri = oekg.value(o3, OEO["has_iri"])
+            o3_iri = oekg.value(o3, OEO.OEO_00390094)
             o3_label = oekg.value(o3, RDFS.label)
             o3_key = oekg.value(o3, OEO["has_key"])
             o3_idx = oekg.value(o3, OEO["has_id"])
@@ -1762,23 +1762,23 @@ def get_scenarios(request, *args, **kwargs):
             for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020440, None)):
                 scenario_years.append(o4)
             for s5, p5, o5 in oekg.triples((s, OEO.RO_0002233, None)):
-                oekg_value = oekg.value(o5, OEO["has_iri"])
+                oekg_value = oekg.value(o5, OEO.OEO_00390094)
                 comparable = str(oekg_value).split("scenario/")
                 input_datasets.append(
                     (
                         oekg.value(o5, RDFS.label),
-                        oekg.value(o5, OEO["has_iri"]),
+                        oekg.value(o5, OEO.OEO_00390094),
                         comparable[1],
                     )
                 )
             for s6, p6, o6 in oekg.triples((s, OEO.RO_0002234, None)):
-                oekg_value = oekg.value(o6, OEO["has_iri"])
+                oekg_value = oekg.value(o6, OEO.OEO_00390094)
                 comparable = str(oekg_value).split("scenario/")
 
                 output_datasets.append(
                     (
                         oekg.value(o6, RDFS.label),
-                        oekg.value(o6, OEO["has_iri"]),
+                        oekg.value(o6, OEO.OEO_00390094),
                         comparable[1],
                     )
                 )
