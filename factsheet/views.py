@@ -419,7 +419,7 @@ def create_factsheet(request, *args, **kwargs):
                                 Literal(input_dataset["key"]),
                             )
                         )
-                        bundle.add((scenario_URI, OEO.RO_0002233, input_dataset_URI))
+                        bundle.add((scenario_URI, OEO.OEO_00020437, input_dataset_URI))
 
                 # TODO: Jonas Huber: Update to avoid duplicated table name entries
                 if "output_datasets" in item:
@@ -889,7 +889,7 @@ def update_factsheet(request, *args, **kwargs):
                             )
                         )
                         new_bundle.add(
-                            (scenario_URI, OEO.RO_0002233, input_dataset_URI)
+                            (scenario_URI, OEO.OEO_00020437, input_dataset_URI)
                         )
 
                 # TODO: Jonas Huber: Update to avoid duplicated table name entries
@@ -1350,7 +1350,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 {"value": label, "label": label, "class": o11}
             )
 
-        for s2, p2, o2 in oekg.triples((o, OEO.RO_0002233, None)):
+        for s2, p2, o2 in oekg.triples((o, OEO.OEO_00020437, None)):
             o2_iri = oekg.value(o2, OEO.OEO_00390094)
             o2_label = oekg.value(o2, RDFS.label)
             o2_key = oekg.value(o2, OEO["has_key"])
@@ -1755,7 +1755,7 @@ def get_scenarios(request, *args, **kwargs):
 
             for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020440, None)):
                 scenario_years.append(o4)
-            for s5, p5, o5 in oekg.triples((s, OEO.RO_0002233, None)):
+            for s5, p5, o5 in oekg.triples((s, OEO.OEO_00020437, None)):
                 oekg_value = oekg.value(o5, OEO.OEO_00390094)
                 comparable = str(oekg_value).split("scenario/")
                 input_datasets.append(

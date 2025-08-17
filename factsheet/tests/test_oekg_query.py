@@ -41,8 +41,8 @@ class TestOekgQuery(unittest.TestCase):
         g.add((bundle, RDF.type, namespaces.OEO.OEO_00020227))
         g.add((bundle, namespaces.OEKG["has_scenario"], scenario1))
         g.add((bundle, namespaces.OEKG["has_scenario"], scenario2))
-        g.add((scenario1, namespaces.OEO.RO_0002233, input1))
-        g.add((scenario2, namespaces.OEO.RO_0002233, input2))
+        g.add((scenario1, namespaces.OEO.OEO_00020437, input1))
+        g.add((scenario2, namespaces.OEO.OEO_00020437, input2))
         g.add((input1, namespaces.OEO.OEO_00390094, Literal(iri)))
         g.add((input2, namespaces.OEO.OEO_00390094, Literal(iri)))
 

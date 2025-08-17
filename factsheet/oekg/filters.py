@@ -49,7 +49,7 @@ class OekgQuery:
         Special OEO classes & and relations:
             OEO_00020227 = Scenario Bundle
             OEO_00000365 = Scenario factsheet type (IS STILL IN USE ???)
-            RO_0002233 = has_input relation in the oekg
+            OEO_00020437 = has_input relation in the oekg
 
         Args:
             table_iri(str): IRI of any table in the scenario topic on the OEP.
@@ -66,7 +66,7 @@ class OekgQuery:
             ):
                 # Find scenarios where the given table is the input dataset
                 for s2, p2, o1_input_ds_uid in self.oekg.triples(
-                    (o1, namespaces.OEO.RO_0002233, None)
+                    (o1, namespaces.OEO.OEO_00020437, None)
                 ):
                     if o1_input_ds_uid is not None:
                         for s3, p3, o3_input_ds_iri in self.oekg.triples(
@@ -138,7 +138,7 @@ class OekgQuery:
         Specific OEO classes & and relations:
             OEO_00020227 = Scenario Bundle
             OEO_00000365 = Scenario factsheet type
-            RO_0002233 = has_input relation in the oekg
+            OEO_00020437 = has_input relation in the oekg
 
         Args:
             table_iri(str): IRI of any table in the scenario topic on the OEP.
