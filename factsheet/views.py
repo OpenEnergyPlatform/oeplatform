@@ -1225,7 +1225,7 @@ def factsheet_by_id(request, *args, **kwargs):
             )
 
     # factsheet['energy_carriers'] = []
-    # for s, p, o in oekg.triples(( study_URI, OEO["covers_energy_carrier"], None )):
+    # for s, p, o in oekg.triples(( study_URI, OEO.OEO_00020432, None )):
     #     label = oeo.value(o, RDFS.label)
     #     class_label = oeo.value(o, RDFS.label)
     #     if label != None:
