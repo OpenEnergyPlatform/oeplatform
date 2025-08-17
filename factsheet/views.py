@@ -368,7 +368,7 @@ def create_factsheet(request, *args, **kwargs):
                         bundle.add(
                             (
                                 scenario_URI,
-                                OEO.OEO_00020224,
+                                OEO.OEO_00020440,
                                 Literal(scenario_year["name"]),
                             )
                         )
@@ -842,7 +842,7 @@ def update_factsheet(request, *args, **kwargs):
                         new_bundle.add(
                             (
                                 scenario_URI,
-                                OEO.OEO_00020224,
+                                OEO.OEO_00020440,
                                 Literal(scenario_year["name"]),
                             )
                         )
@@ -1386,7 +1386,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 }
             )
 
-        for s4, p4, o4 in oekg.triples((o, OEO.OEO_00020224, None)):
+        for s4, p4, o4 in oekg.triples((o, OEO.OEO_00020440, None)):
             scenario["scenario_years"].append({"id": o4, "name": o4})
 
         factsheet["scenarios"].append(scenario)
@@ -1761,7 +1761,7 @@ def get_scenarios(request, *args, **kwargs):
                 o1_label = oekg.value(o1, RDFS.label)
                 interacting_regions.append(o1_label)
 
-            for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020224, None)):
+            for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020440, None)):
                 scenario_years.append(o4)
             for s5, p5, o5 in oekg.triples((s, OEO.RO_0002233, None)):
                 oekg_value = oekg.value(o5, OEO["has_iri"])

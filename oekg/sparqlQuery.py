@@ -202,7 +202,7 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
             year_end = int(year_end)
             scenario_year_exp = f"""
                 ?s OEKG:has_scenario ?scenario .
-                ?scenario OEO:OEO_00020224 ?scenario_year .
+                ?scenario OEO:OEO_00020440 ?scenario_year .
                 FILTER (
                     xsd:integer(?scenario_year) >= {year_start} &&
                     xsd:integer(?scenario_year) <= {year_end}
