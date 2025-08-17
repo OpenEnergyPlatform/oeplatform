@@ -87,7 +87,7 @@ class OekgQuery:
 
         Special OEO classes & and relations:
             OEO_00000365 = Scenario factsheet type
-            RO_0002234 = has_output relation in the oekg
+            OEO_00020436 = has_output relation in the oekg
 
         Args:
             table_iri(str): IRI of any table in the scenario topic on the OEP.
@@ -103,7 +103,7 @@ class OekgQuery:
                 (s, namespaces.OEKG["has_scenario"], None)
             ):
                 for s2, p2, o2_output_ds_uid in self.oekg.triples(
-                    (o1, namespaces.OEO.RO_0002234, None)
+                    (o1, namespaces.OEO.OEO_00020436, None)
                 ):
                     if o2_output_ds_uid is not None:
                         for s3, p3, o3_output_ds_iri in oekg.triples(
@@ -165,7 +165,7 @@ class OekgQuery:
 
         Special OEO classes & and relations:
             OEO_00000365 = Scenario factsheet type
-            RO_0002234 = has_output relation in the oekg
+            OEO_00020436 = has_output relation in the oekg
 
         Args:
             table_iri(str): IRI of any table in the scenario topic on the OEP.

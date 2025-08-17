@@ -462,7 +462,7 @@ def create_factsheet(request, *args, **kwargs):
                                 Literal(output_dataset["key"]),
                             )
                         )
-                        bundle.add((scenario_URI, OEO.RO_0002234, output_dataset_URI))
+                        bundle.add((scenario_URI, OEO.OEO_00020436, output_dataset_URI))
 
         institutions = json.loads(institution) if institution is not None else []
         for item in institutions:
@@ -929,7 +929,7 @@ def update_factsheet(request, *args, **kwargs):
                             )
                         )
                         new_bundle.add(
-                            (scenario_URI, OEO.RO_0002234, output_dataset_URI)
+                            (scenario_URI, OEO.OEO_00020436, output_dataset_URI)
                         )
 
                 new_bundle.add((study_URI, OEKG["has_scenario"], scenario_URI))
@@ -1364,7 +1364,7 @@ def factsheet_by_id(request, *args, **kwargs):
                 }
             )
 
-        for s3, p3, o3 in oekg.triples((o, OEO.RO_0002234, None)):
+        for s3, p3, o3 in oekg.triples((o, OEO.OEO_00020436, None)):
             o3_iri = oekg.value(o3, OEO.OEO_00390094)
             o3_label = oekg.value(o3, RDFS.label)
             o3_key = oekg.value(o3, OEO["has_key"])
@@ -1765,7 +1765,7 @@ def get_scenarios(request, *args, **kwargs):
                         comparable[1],
                     )
                 )
-            for s6, p6, o6 in oekg.triples((s, OEO.RO_0002234, None)):
+            for s6, p6, o6 in oekg.triples((s, OEO.OEO_00020436, None)):
                 oekg_value = oekg.value(o6, OEO.OEO_00390094)
                 comparable = str(oekg_value).split("scenario/")
 
