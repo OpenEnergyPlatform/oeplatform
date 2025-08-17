@@ -503,8 +503,8 @@ export default function CustomTable(props) {
     }
   }
 
-  const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+  const getOrganization = async () => {
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00030022' } });
     return data;
   };
 
@@ -524,7 +524,7 @@ export default function CustomTable(props) {
   };
 
   useEffect(() => {
-    getInstitution().then((data) => {
+    getOrganization().then((data) => {
       const tmp = [];
       data.map((item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }));
       setInstitutions(tmp);

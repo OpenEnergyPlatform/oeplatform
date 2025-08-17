@@ -388,7 +388,7 @@ def create_factsheet(request, *args, **kwargs):
                             "http://openenergy-platform.org/ontology/oekg/input_datasets/"  # noqa
                             + input_dataset["key"]
                         )
-                        bundle.add((input_dataset_URI, RDF.type, OEO.OEO_00030030))
+                        bundle.add((input_dataset_URI, RDF.type, OEO.OEO_00030029))
                         bundle.add(
                             (
                                 input_dataset_URI,
@@ -431,7 +431,7 @@ def create_factsheet(request, *args, **kwargs):
                             "http://openenergy-platform.org/ontology/oekg/output_datasets/"  # noqa
                             + output_dataset["key"]
                         )
-                        bundle.add((output_dataset_URI, RDF.type, OEO.OEO_00030029))
+                        bundle.add((output_dataset_URI, RDF.type, OEO.OEO_00030030))
                         bundle.add(
                             (
                                 output_dataset_URI,
@@ -865,7 +865,7 @@ def update_factsheet(request, *args, **kwargs):
                         for s, p, o in oekg.triples((input_dataset_URI, None, None)):
                             oekg.remove((o, p, o))
 
-                        new_bundle.add((input_dataset_URI, RDF.type, OEO.OEO_00030030))
+                        new_bundle.add((input_dataset_URI, RDF.type, OEO.OEO_00030029))
                         new_bundle.add(
                             (
                                 input_dataset_URI,
@@ -905,7 +905,7 @@ def update_factsheet(request, *args, **kwargs):
                             "http://openenergy-platform.org/ontology/oekg/output_datasets/"  # noqa: E501
                             + output_dataset["key"]
                         )
-                        new_bundle.add((output_dataset_URI, RDF.type, OEO.OEO_00030029))
+                        new_bundle.add((output_dataset_URI, RDF.type, OEO.OEO_00030030))
                         new_bundle.add(
                             (
                                 output_dataset_URI,
