@@ -61,9 +61,7 @@ class OekgQuery:
         # Find all scenario bundles
         for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00020227)):
             # find all scenarios in any bundle
-            for s1, p1, o1 in self.oekg.triples(
-                (s, namespaces.OEKG["has_scenario"], None)
-            ):
+            for s1, p1, o1 in self.oekg.triples((s, namespaces.OEO.BFO_0000051, None)):
                 # Find scenarios where the given table is the input dataset
                 for s2, p2, o1_input_ds_uid in self.oekg.triples(
                     (o1, namespaces.OEO.OEO_00020437, None)
@@ -99,9 +97,7 @@ class OekgQuery:
         # Find all scenario bundles
         for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00020227)):
             # find all scenarios in any bundle
-            for s1, p1, o1 in self.oekg.triples(
-                (s, namespaces.OEKG["has_scenario"], None)
-            ):
+            for s1, p1, o1 in self.oekg.triples((s, namespaces.OEO.BFO_0000051, None)):
                 for s2, p2, o2_output_ds_uid in self.oekg.triples(
                     (o1, namespaces.OEO.OEO_00020436, None)
                 ):
@@ -152,7 +148,7 @@ class OekgQuery:
 
         for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00020227)):
             for i in related_scenarios_input:
-                for s1, p1, o1 in oekg.triples((s, namespaces.OEKG["has_scenario"], i)):
+                for s1, p1, o1 in oekg.triples((s, namespaces.OEO.BFO_0000051, i)):
                     if s1:
                         scenario_bundles_input.add((s1, s))
 
@@ -181,7 +177,7 @@ class OekgQuery:
 
         for s, p, o in self.oekg.triples((None, RDF.type, namespaces.OEO.OEO_00020227)):
             for i in related_scenarios_output:
-                for s1, p1, o1 in oekg.triples((s, namespaces.OEKG["has_scenario"], i)):
+                for s1, p1, o1 in oekg.triples((s, namespaces.OEO.BFO_0000051, i)):
                     if s1:
                         scenario_bundles_output.add((s1, s))
 
@@ -210,7 +206,7 @@ class OekgQuery:
 
         # find bundle for the current scenario
         for s1, p1, o1 in self.oekg.triples(
-            (None, namespaces.OEKG["has_scenario"], scenario_URI)
+            (None, namespaces.OEO.BFO_0000051, scenario_URI)
         ):
             # find all study descriptors for the scenario bundle
             for s2, p2, o2 in oekg.triples((s1, namespaces.OEO.OEO_00390071, None)):

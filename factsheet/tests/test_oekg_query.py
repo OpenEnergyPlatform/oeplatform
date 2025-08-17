@@ -39,8 +39,8 @@ class TestOekgQuery(unittest.TestCase):
         input2 = URIRef("input2")
 
         g.add((bundle, RDF.type, namespaces.OEO.OEO_00020227))
-        g.add((bundle, namespaces.OEKG["has_scenario"], scenario1))
-        g.add((bundle, namespaces.OEKG["has_scenario"], scenario2))
+        g.add((bundle, namespaces.OEO.BFO_0000051, scenario1))
+        g.add((bundle, namespaces.OEO.BFO_0000051, scenario2))
         g.add((scenario1, namespaces.OEO.OEO_00020437, input1))
         g.add((scenario2, namespaces.OEO.OEO_00020437, input2))
         g.add((input1, namespaces.OEO.OEO_00390094, Literal(iri)))

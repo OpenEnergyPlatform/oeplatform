@@ -112,7 +112,7 @@ class Command(BaseCommand):
                 for s, p, o in oekg.triples((bundle_URI, OEO.OEO_00000506, None)):
                     oekg.add((publications_URI, OEO.OEO_00000506, o))
 
-                oekg.add((bundle_URI, OEKG["has_publication"], publications_URI))
+                oekg.add((bundle_URI, OEO.BFO_0000051, publications_URI))
 
                 print(
                     "The bundle with id {id} has been updated to handle multiple publications!".format(  # noqa:E501

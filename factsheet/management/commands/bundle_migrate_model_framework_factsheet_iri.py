@@ -13,7 +13,7 @@ from modelview.utils import get_framework_metadata_by_name, get_model_metadata_b
 class Command(BaseCommand):
     def handle(self, *args, **options):
         for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
-            for s, p, o in oekg.triples((s, OEO["has_framework"], None)):
+            for s, p, o in oekg.triples((s, OEO.BFO_0000051, None)):
                 if not str(o).startswith("<http://openenergy-"):
                     framework_meta = get_framework_metadata_by_name(
                         str(o), "energyframework"
@@ -57,7 +57,7 @@ class Command(BaseCommand):
                             f"In bundle {s} updated framework {str(o)} with {framework_URI}"  # noqa
                         )
 
-            for s, p, o in oekg.triples((s, OEO["has_model"], None)):
+            for s, p, o in oekg.triples((s, OEO.BFO_0000051, None)):
                 if not str(o).startswith("<http://openenergy-"):
                     model_meta = get_model_metadata_by_name(str(o), "energymodel")
 
