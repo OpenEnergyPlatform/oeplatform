@@ -219,7 +219,7 @@ def create_factsheet(request, *args, **kwargs):
             bundle.add(
                 (
                     study_URI,
-                    OEKG["has_full_name"],
+                    RDFS.label,
                     Literal(remove_non_printable(study_name)),
                 )
             )
@@ -300,7 +300,7 @@ def create_factsheet(request, *args, **kwargs):
                     bundle.add(
                         (
                             scenario_URI,
-                            OEKG["has_full_name"],
+                            RDFS.label,
                             Literal(remove_non_printable(item["name"])),
                         )
                     )
@@ -761,7 +761,7 @@ def update_factsheet(request, *args, **kwargs):
                     new_bundle.add(
                         (
                             scenario_URI,
-                            OEKG["has_full_name"],
+                            RDFS.label,
                             Literal(remove_non_printable(item["name"])),
                         )
                     )
@@ -940,7 +940,7 @@ def update_factsheet(request, *args, **kwargs):
             )
 
         new_bundle.add(
-            (study_URI, OEKG["has_full_name"], Literal(remove_non_printable(studyName)))
+            (study_URI, RDFS.label, Literal(remove_non_printable(studyName)))
         )
 
         institutions = json.loads(institution) if institution is not None else []
@@ -1170,7 +1170,7 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples((study_URI, DC.acronym, None)):
         acronym = o
 
-    for s, p, o in oekg.triples((study_URI, OEKG["has_full_name"], None)):
+    for s, p, o in oekg.triples((study_URI, RDFS.label, None)):
         study_name = o
 
     for s, p, o in oekg.triples((study_URI, DC.abstract, None)):
@@ -1328,7 +1328,7 @@ def factsheet_by_id(request, *args, **kwargs):
         scenario["output_datasets"] = []
 
         abstract = oekg.value(o, DC.abstract)
-        name = oekg.value(o, OEKG["has_full_name"])
+        name = oekg.value(o, RDFS.label)
         scenario["name"] = name
         scenario["abstract"] = abstract
 
@@ -1606,7 +1606,7 @@ def get_all_factsheets(request, *args, **kwargs):
         uid = str(s).split("/")[-1]
         element = {}
         acronym = remove_non_printable(oekg.value(s, DC.acronym))
-        study_name = remove_non_printable(oekg.value(s, OEKG["has_full_name"]))
+        study_name = remove_non_printable(oekg.value(s, RDFS.label))
         abstract = oekg.value(s, DC.abstract)
         element["uid"] = uid
         element["acronym"] = (
@@ -1778,7 +1778,7 @@ def get_scenarios(request, *args, **kwargs):
                 )
 
             for s1, p1, o1 in oekg.triples((None, OEKG["has_scenario"], s)):
-                study_label = oekg.value(s1, OEKG["has_full_name"])
+                study_label = oekg.value(s1, RDFS.label)
                 study_abstract = oekg.value(s1, DC.abstract)
 
             # additionally get the study descriptors from the scenario bundle
