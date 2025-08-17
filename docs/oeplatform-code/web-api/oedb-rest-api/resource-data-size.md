@@ -1,3 +1,10 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
+
 # Database Table Sizes
 
 Short guide for the **Table Sizes** API endpoint. This endpoint returns the storage size of individual tables (including indexes) or all tables across all schemas.
