@@ -498,7 +498,7 @@ def create_factsheet(request, *args, **kwargs):
         _sectors = json.loads(sectors) if sectors is not None else []
         for item in _sectors:
             sector_URI = URIRef(item["class"])
-            bundle.add((study_URI, OEO.OEO_00000505, sector_URI))
+            bundle.add((study_URI, OEO.OEO_00020439, sector_URI))
 
         _technologies = json.loads(technologies) if technologies is not None else []
         for item in _technologies:
@@ -983,7 +983,7 @@ def update_factsheet(request, *args, **kwargs):
         _sectors = json.loads(sectors) if sectors is not None else []
         for item in _sectors:
             sector_URI = URIRef(item["class"])
-            new_bundle.add((study_URI, OEO.OEO_00000505, sector_URI))
+            new_bundle.add((study_URI, OEO.OEO_00020439, sector_URI))
 
         _technologies = json.loads(technologies) if technologies is not None else []
         for item in _technologies:
@@ -1216,7 +1216,7 @@ def factsheet_by_id(request, *args, **kwargs):
             )
 
     factsheet["sectors"] = []
-    for s, p, o in oekg.triples((study_URI, OEO.OEO_00000505, None)):
+    for s, p, o in oekg.triples((study_URI, OEO.OEO_00020439, None)):
         label = oeo.value(o, RDFS.label)
         class_iri = o
         if label != None:  # noqa
