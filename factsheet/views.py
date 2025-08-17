@@ -503,7 +503,7 @@ def create_factsheet(request, *args, **kwargs):
         _technologies = json.loads(technologies) if technologies is not None else []
         for item in _technologies:
             technology_URI = URIRef(item["class"])
-            bundle.add((study_URI, OEO.OEO_00000522, technology_URI))
+            bundle.add((study_URI, OEO.OEO_00020438, technology_URI))
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
@@ -988,7 +988,7 @@ def update_factsheet(request, *args, **kwargs):
         _technologies = json.loads(technologies) if technologies is not None else []
         for item in _technologies:
             technology_URI = URIRef(item["class"])
-            new_bundle.add((study_URI, OEO.OEO_00000522, technology_URI))
+            new_bundle.add((study_URI, OEO.OEO_00020438, technology_URI))
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
@@ -1238,7 +1238,7 @@ def factsheet_by_id(request, *args, **kwargs):
     #         factsheet['energy_transformation_processes'].append({ "value": label, "label":label, "class": o }) # noqa: E501
 
     factsheet["technologies"] = []
-    for s, p, o in oekg.triples((study_URI, OEO.OEO_00000522, None)):
+    for s, p, o in oekg.triples((study_URI, OEO.OEO_00020438, None)):
         label = oeo.value(o, RDFS.label)
         class_iri = o
         if label != None:  # noqa
