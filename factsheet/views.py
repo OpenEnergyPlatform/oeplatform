@@ -255,7 +255,7 @@ def create_factsheet(request, *args, **kwargs):
                 bundle.add((publications_URI, OEO.OEO_00000506, author_URI))
 
             if item["doi"] != "":
-                bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
+                bundle.add((publications_URI, OEO.OEO_00390098, Literal(item["doi"])))
 
             if (
                 item["date_of_publication"] != "01-01-1900"
@@ -711,7 +711,9 @@ def update_factsheet(request, *args, **kwargs):
                         new_bundle.add((publications_URI, OEO.OEO_00000506, author_URI))
 
             if item["doi"] != "":
-                new_bundle.add((publications_URI, OEKG["doi"], Literal(item["doi"])))
+                new_bundle.add(
+                    (publications_URI, OEO.OEO_00390098, Literal(item["doi"]))
+                )
 
             if (
                 item["date_of_publication"] != "1900"
@@ -1297,7 +1299,7 @@ def factsheet_by_id(request, *args, **kwargs):
             publication["authors"].append({"iri": o1, "name": o1_label})
 
         publication["doi"] = ""
-        for s2, p2, o2 in oekg.triples((o, OEKG["doi"], None)):
+        for s2, p2, o2 in oekg.triples((o, OEO.OEO_00390098, None)):
             publication["doi"] = o2
 
         publication["date_of_publication"] = ""
