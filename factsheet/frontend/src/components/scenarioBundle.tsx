@@ -751,8 +751,8 @@ function Factsheet(props) {
     return <div>'studyName'</div>
   }
 
-  const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+  const getOrganization = async () => {
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00030022' } });
     return data;
   };
 
@@ -797,7 +797,7 @@ function Factsheet(props) {
   };
 
   useEffect(() => {
-    getInstitution().then((data) => {
+    getOrganization().then((data) => {
       const tmp = [];
       data.map((item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }));
       setInstitutions(tmp);
@@ -872,7 +872,7 @@ function Factsheet(props) {
   const HandleAddNewInstitution = (newElement) => {
     axios.post(conf.toep + 'scenario-bundles/add_entities/',
       {
-        entity_type: 'OEO.OEO_00000238',
+        entity_type: 'OEO.OEO_00030022',
         entity_label: newElement.name,
         entity_iri: newElement.iri
       },
@@ -882,8 +882,8 @@ function Factsheet(props) {
     ).then(response => {
       if (response.data === 'A new entity added!') {
         setOpenAddedDialog(true);
-        setAddedEntity(['Institution', newElement.name]);
-        getInstitution().then((data) => {
+        setAddedEntity(['Organization', newElement.name]);
+        getOrganization().then((data) => {
           const tmp = [];
           data.map((item) => tmp.push(item))
           setInstitutions(tmp);
@@ -896,7 +896,7 @@ function Factsheet(props) {
   const HandleEditInstitution = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
       {
-        entity_type: 'OEO.OEO_00000238',
+        entity_type: 'OEO.OEO_00030022',
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
@@ -908,7 +908,7 @@ function Factsheet(props) {
       if (response.data === 'entity updated!') {
         setOpenEditDialog(true);
         setEditedEntity(['Institution', oldElement, newElement]);
-        getInstitution().then((data) => {
+        getOrganization().then((data) => {
           const tmp = [];
           data.map((item) => tmp.push(item))
           setInstitutions(tmp);
@@ -1730,7 +1730,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Institutions"
         tooltipText="An institution is an organisation that serves a social purpose."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000238"
+        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00030022"
         renderField={() => (
           <CustomAutocomplete
             width="100%"
@@ -2879,7 +2879,7 @@ const renderScenariosOverview = () => (
                                 <Typography color="inherit" variant="subtitle1">
                                   {'An institution is an organisation that serves a social purpose.'}
                                   <br />
-                                  <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000238">More info...</a>
+                                  <a href="https://openenergy-platform.org/ontology/oeo/OEO_00030022">More info...</a>
                                 </Typography>
                               </React.Fragment>
                             }
