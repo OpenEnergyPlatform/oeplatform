@@ -273,7 +273,7 @@ def create_factsheet(request, *args, **kwargs):
                 bundle.add(
                     (
                         publications_URI,
-                        OEKG["link_to_study_report"],
+                        OEO.OEO_00390078,
                         Literal(item["link_to_study_report"]),
                     )
                 )
@@ -729,7 +729,7 @@ def update_factsheet(request, *args, **kwargs):
                 new_bundle.add(
                     (
                         publications_URI,
-                        OEKG["link_to_study_report"],
+                        OEO.OEO_00390078,
                         Literal(item["link_to_study_report"]),
                     )
                 )
@@ -1305,7 +1305,7 @@ def factsheet_by_id(request, *args, **kwargs):
         factsheet["collected_scenario_publication_dates"] = list(temp)
 
         publication["link_to_study_report"] = ""
-        for s4, p4, o4 in oekg.triples((o, OEKG["link_to_study_report"], None)):
+        for s4, p4, o4 in oekg.triples((o, OEO.OEO_00390078, None)):
             publication["link_to_study_report"] = o4
 
         factsheet["publications"].append(publication)

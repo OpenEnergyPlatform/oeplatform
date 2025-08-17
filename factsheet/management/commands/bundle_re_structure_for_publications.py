@@ -97,11 +97,11 @@ class Command(BaseCommand):
                         )
                     )
 
-                for s, p, o in oekg.triples((bundle_URI, OEKG["link_to_study"], None)):
+                for s, p, o in oekg.triples((bundle_URI, OEO.OEO_00390078, None)):
                     oekg.add(
                         (
                             publications_URI,
-                            OEKG["link_to_study"],
+                            OEO.OEO_00390078,
                             o,
                         )
                     )
