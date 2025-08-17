@@ -292,7 +292,7 @@ def create_factsheet(request, *args, **kwargs):
                 bundle.add(
                     (
                         scenario_URI,
-                        RDFS.label,
+                        DC.acronym,
                         Literal(remove_non_printable(item["acronym"])),
                     )
                 )
