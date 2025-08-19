@@ -1,20 +1,20 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
 # SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut  # noqa: E501
+# SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut  # noqa: E501
+# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.  # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -23,7 +23,7 @@ import itertools
 import json
 import logging
 import re
-from datetime import datetime, timedelta  # noqa
+from copy import deepcopy
 from decimal import Decimal
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
@@ -34,9 +34,7 @@ import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import DatabaseError, transaction
 from django.db.models import Q
-from django.db.utils import IntegrityError
 from django.http import (
     Http404,
     HttpResponse,
@@ -45,9 +43,11 @@ from django.http import (
     JsonResponse,
     StreamingHttpResponse,
 )
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from oemetadata.latest.example import OEMETADATA_LATEST_EXAMPLE
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
@@ -65,11 +65,16 @@ from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from api.serializers import (
+    DatasetAssignTablesSerializer,
+    DatasetCreateSerializer,
+    DatasetReadSerializer,
+    DatasetResourceSerializer,
     EnergyframeworkSerializer,
     EnergymodelSerializer,
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
+from api.services.dataset_creation import assemble_dataset_metadata
 from api.services.embargo import (
     EmbargoValidationError,
     apply_embargo,
@@ -80,8 +85,7 @@ from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
-from dataedit.models import Embargo
-from dataedit.models import Schema as DBSchema
+from dataedit.models import Dataset, Embargo
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
@@ -319,6 +323,14 @@ class Sequence(APIView):
 
 
 class Metadata(APIView):
+    """
+    Important note:
+    oemetadata v2 introduces datasets which are not relevant on a table level
+    always query for metadata["resources"][0]. Keeping the complete oemetadata v2 JSON
+    makes it easy to integrate as no further changes to validation are required for now.
+    Datasets are handled in the model.Datasets & api views.
+    """
+
     @api_exception
     @method_decorator(never_cache)
     def get(self, request, schema, table):
@@ -342,7 +354,8 @@ class Metadata(APIView):
             cursor = actions.load_cursor_from_context(request.data)
 
             # update/sync keywords with tags before saving metadata
-            # TODO make this iter over all resources
+            # oemetadata v2 introduces datasets which are not relevant on a table level
+            # always query for metadata["resources"][0]
             keywords = metadata["resources"][0].get("keywords", []) or []
 
             # get_tag_keywords_synchronized_metadata returns the OLD metadata
@@ -352,18 +365,19 @@ class Metadata(APIView):
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
-            # TODO make this iter over all resources
+            # oemetadata v2 introduces datasets which are not relevant on a table level
+            # always query for metadata["resources"][0]
             metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
 
             # Write oemetadata json to dataedit.models.tables
-            # and to SQL comment on table
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
-            # TODO make this iter over all resources
+            # oemetadata v2 introduces datasets which are not relevant on a table level
+            # always query for metadata["resources"][0]
             metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
 
             # make sure extra metadata is removed
@@ -376,6 +390,99 @@ class Metadata(APIView):
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
+
+
+class DatasetsListCreate(generics.ListCreateAPIView):
+    queryset = Dataset.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return DatasetCreateSerializer
+        return DatasetReadSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        metadata = assemble_dataset_metadata(serializer.validated_data)
+        dataset = Dataset.objects.create(metadata=metadata, name=metadata["name"])
+
+        return Response(
+            {"id": dataset.pk, "metadata": dataset.metadata},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class DatasetsListResources(generics.ListAPIView):
+    serializer_class = DatasetResourceSerializer
+
+    def get_queryset(self):
+        dataset_name = self.kwargs["dataset_name"]
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        return dataset.tables.all()
+
+
+class DatasetManager(APIView):
+    """
+    View to retrieve, update, or delete a single dataset's metadata.
+    URL: /v0/datasets/<dataset_name>/
+    """
+
+    def get(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        serializer = DatasetReadSerializer(dataset)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        serializer = DatasetCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        dataset.metadata = assemble_dataset_metadata(serializer.validated_data)
+        dataset.save()
+        return Response({"message": "Dataset updated"}, status=status.HTTP_200_OK)
+
+    def delete(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        dataset.delete()
+        return Response(
+            {"message": "Dataset deleted"}, status=status.HTTP_204_NO_CONTENT
+        )
+
+
+class AssignDatasetTables(APIView):
+    def post(self, request, dataset_name):
+        serializer = DatasetAssignTablesSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        table_refs = serializer.validated_data["tables"]
+
+        try:
+            dataset = Dataset.objects.get(name=dataset_name)
+        except Dataset.DoesNotExist:
+            return Response({"error": "Dataset not found"}, status=404)
+
+        missing = []
+        added_tables = []
+
+        for table_ref in table_refs:
+            try:
+                table = DBTable.load(table_ref["schema"], table_ref["name"])
+                dataset.tables.add(table)
+                added_tables.append(table.name)
+            except DBTable.DoesNotExist:
+                missing.append(table_ref)
+
+        dataset.update_resources_from_tables()
+
+        return Response(
+            {
+                "message": f"Added {len(added_tables)} tables.",
+                "added": added_tables,
+                "missing": missing,
+            },
+            status=200,
+        )
 
 
 class Table(APIView):
@@ -549,6 +656,39 @@ class Table(APIView):
                 metadata=metadata,
                 cursor=cursor,
             )
+        else:
+            # If no metadata is provided, we create a minimal metadata object
+            metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
+            metadata["@context"] = OEMETADATA_LATEST_EXAMPLE["@context"]
+            metadata["metaMetadata"] = OEMETADATA_LATEST_EXAMPLE["metaMetadata"]
+
+            # Set basic resource info
+            resource = {
+                "name": table,
+                "topics": [schema],
+            }
+
+            # Update the first resource - there will only be one resource.
+            # The dataset section is managed by the database implementation ...
+            metadata["resources"][0].update(resource)
+
+            # Build schema fields from columns
+            fields = []
+            for col in columns:
+                field = {
+                    "name": col["name"],
+                    "type": col["data_type"],
+                    "nullable": col.get("is_nullable", True),
+                    # add more field metadata as needed
+                }
+                fields.append(field)
+
+            # Replace the fields list entirely
+            metadata["resources"][0]["schema"]["fields"] = fields
+
+            actions.set_table_metadata(
+                table=table, schema=schema, metadata=metadata, cursor=None
+            )
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
@@ -575,228 +715,6 @@ class Table(APIView):
                 )
             if len(colname) > MAX_COL_NAME_LENGTH:
                 raise APIError(f"Column name is too long! {err_msg}")
-
-    def oep_create_table_transaction(
-        self,
-        django_schema_object,
-        schema,
-        table,
-        column_definitions,
-        constraint_definitions,
-    ):
-        """
-        This method handles atomic table creation transactions on the OEP. It
-        attempts to create first the django table objects and stored it in
-        dataedit_tables table. Then it attempts to create the OEDB table.
-        If there is an error raised during the first two steps the function
-        will cleanup any table object or table artifacts created during the
-        process. The order of execution matters, it should always first
-        create the django table object.
-
-        Params:
-            django_schema_object: The schema object stored in the django
-                database
-            schema:
-            table
-            column_definitions
-            constraint_definitions
-
-        returns:
-            table_object: The django table objects that was created
-        """
-
-        try:
-            with transaction.atomic():
-                # First create the table object in the django database.
-                table_object = self._create_table_object(django_schema_object, table)
-            # Then attempt to create the OEDB table to check
-            # if creation will succeed - action includes checks
-            # and will raise api errors
-            actions.table_create(
-                schema, table, column_definitions, constraint_definitions
-            )
-        except DatabaseError as e:
-            # remove any oedb table artifacts left after table creation
-            # transaction failed
-            self.__remove_oedb_table_on_exception_raised_during_creation_transaction(
-                table, schema
-            )
-
-            # also remove any django table object
-            # find the created django table object
-            object_to_delete = DBTable.objects.filter(
-                name=table, schema=django_schema_object
-            )
-            # delete it if it exists
-            if object_to_delete.exists():
-                object_to_delete.delete()
-
-            raise APIError(
-                message="Error during table creation transaction. All table fragments"
-                f"have been removed. For further details see: {e}"
-            )
-
-        # for now only return the django table object
-        # TODO: Check if is necessary to return the response dict returned by the oedb
-        # table creation function
-        return table_object
-
-    def __remove_oedb_table_on_exception_raised_during_creation_transaction(
-        self, table, schema
-    ):
-        """
-        This private method handles removing a table form the OEDB only for the case
-        where an error was raised during table creation. It specifically will delete
-        the OEDB table created by the user and also the edit_ meta(revision) table
-        that is automatically created in the background.
-        """
-        # find the created oedb table
-        if actions.has_table({"table": table, "schema": schema}):
-            # get table and schema names, also for meta(revision) tables
-            schema, table = actions.get_table_name(schema, table)
-            meta_schema = actions.get_meta_schema_name(schema)
-
-            # drop the revision table with edit_ prefix
-            edit_table = actions.get_edit_table_name(schema, table)
-            actions._get_engine().execute(
-                'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                    schema=meta_schema, table=edit_table
-                )
-            )
-            # drop the data table
-            actions._get_engine().execute(
-                'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                    schema=schema, table=table
-                )
-            )
-
-    @load_cursor()
-    def __create_table(
-        self,
-        request,
-        schema,
-        table,
-        column_definitions,
-        constraint_definitions,
-        metadata=None,
-        embargo_data=None,
-    ):
-        assert_valid_identifier_name(table)
-        self.validate_column_names(column_definitions)
-
-        schema_object, _ = DBSchema.objects.get_or_create(name=schema)
-        context = {
-            "connection_id": actions.get_or_403(request.data, "connection_id"),
-            "cursor_id": actions.get_or_403(request.data, "cursor_id"),
-        }
-        cursor = sessions.load_cursor_from_context(context)
-
-        embargo_error, embargo_payload_check = self._check_embargo_payload_valid(
-            embargo_data
-        )
-        if embargo_error:
-            raise embargo_error
-
-        if embargo_payload_check:
-            table_object = self.oep_create_table_transaction(
-                django_schema_object=schema_object,
-                table=table,
-                schema=schema,
-                column_definitions=column_definitions,
-                constraint_definitions=constraint_definitions,
-            )
-            self._apply_embargo(table_object, embargo_data)
-
-            if metadata:
-                actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata, cursor=cursor
-                )
-
-            try:
-                self._assign_table_holder(request.user, schema, table)
-            except ValueError as e:
-                # Ensure the user is assigned as the table holder
-                self._assign_table_holder(request.user, schema, table)
-                raise APIError(
-                    "Table was created without embargo due to an unexpected "
-                    "error during embargo setup."
-                    f"{e}"
-                )
-
-        else:
-            table_object = self.oep_create_table_transaction(
-                django_schema_object=schema_object,
-                table=table,
-                schema=schema,
-                column_definitions=column_definitions,
-                constraint_definitions=constraint_definitions,
-            )
-            self._assign_table_holder(request.user, schema, table)
-
-            if metadata:
-                actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata, cursor=cursor
-                )
-
-    def _create_table_object(self, schema_object, table):
-        try:
-            table_object = DBTable.objects.create(name=table, schema=schema_object)
-        except IntegrityError:
-            raise APIError("Table already exists")
-        return table_object
-
-    def _check_embargo_payload_valid(self, embargo_data):
-        if not embargo_data:
-            return None, False
-
-        if not isinstance(embargo_data, dict):
-            error = APIError("The embargo payload must be a dict")
-            return error, False
-
-        embargo_period = embargo_data.get("duration")
-        if embargo_period in ["6_months", "1_year"]:
-            # self._apply_embargo(table_object, embargo_period)
-            return None, True
-        elif embargo_period == "none":
-            return None, False
-        else:
-            error = actions.APIError(
-                f"Could not parse the embargo period format: {embargo_period}. "
-                "Please use {'embargo': {'duration':'6_months'} } or '1_year' to "
-                "set the embargo or use 'none' to remove the embargo."
-            )
-            return error, False
-
-    def _apply_embargo(self, table_object, embargo_period):
-        unpack_embargo_period = embargo_period.get("duration")
-        duration_in_weeks = 26 if unpack_embargo_period == "6_months" else 52
-        embargo, created = Embargo.objects.get_or_create(
-            table=table_object,
-            defaults={
-                "duration": unpack_embargo_period,
-                "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
-            },
-        )
-        if not created:
-            if embargo.date_started:
-                embargo.date_ended = embargo.date_started + timedelta(
-                    weeks=duration_in_weeks
-                )
-            else:
-                embargo.date_started = datetime.now()
-                embargo.date_ended = embargo.date_started + timedelta(
-                    weeks=duration_in_weeks
-                )
-            embargo.save()
-
-    def _assign_table_holder(self, user, schema, table):
-        table_object = DBTable.load(schema, table)
-        perm, _ = login_models.UserPermission.objects.get_or_create(
-            table=table_object, holder=user
-        )
-        perm.level = login_models.ADMIN_PERM
-        perm.save()
-        user.save()
 
     @api_exception
     @require_delete_permission

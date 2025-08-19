@@ -1,5 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -10,7 +9,7 @@ from django.urls import reverse
 from rest_framework import serializers
 
 from dataedit.helper import get_readable_table_name
-from dataedit.models import Table
+from dataedit.models import Dataset, Table
 from modelview.models import Energyframework, Energymodel
 from oeplatform.settings import URL
 
@@ -164,3 +163,38 @@ class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
             raise serializers.ValidationError("Dataset names must be unique.")
 
         return value
+
+
+class DatasetReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dataset
+        fields = ["uuid", "name", "metadata", "created_at"]
+
+
+class DatasetCreateSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    title = serializers.CharField()
+    description = serializers.CharField()
+    at_id = serializers.URLField(required=False)
+
+
+class DatasetAssignTablesSerializer(serializers.Serializer):
+    tables = serializers.ListField(
+        child=serializers.DictField(child=serializers.CharField()), min_length=1
+    )
+
+    def validate_tables(self, value):
+        for item in value:
+            if "schema" not in item or "name" not in item:
+                raise serializers.ValidationError(
+                    "Each table must have 'schema' and 'name'."
+                )
+        return value
+
+
+class DatasetResourceSerializer(serializers.ModelSerializer):
+    schema = serializers.StringRelatedField()
+
+    class Meta:
+        model = Table
+        fields = ["id", "schema", "name", "oemetadata", "human_readable_name"]
