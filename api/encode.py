@@ -31,6 +31,7 @@ class GeneratorJSONEncoder(DjangoJSONEncoder):
             if o != o:
                 text = "NaN"
             elif o == _inf:
+                # Todo: check if additional quotes help or null -> json compliant
                 text = "Infinity"
             elif o == _neginf:
                 text = "-Infinity"
