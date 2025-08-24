@@ -5,7 +5,7 @@ volumes:
   vite_cache:
   vite_temp:
 
-
+name: "oeplatform-dev"
 services:
   postgres:
     image: ghcr.io/openenergyplatform/oeplatform-postgres:latest

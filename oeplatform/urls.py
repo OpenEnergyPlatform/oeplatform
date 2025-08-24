@@ -52,5 +52,6 @@ urlpatterns = [
     re_path(r"^viewer/oeo/", include("oeo_viewer.urls")),
     re_path(r"^scenario-bundles/", include("factsheet.urls")),
     re_path(r"^tutorials/.*", redirect_tutorial),
+    path("databus/", include("databus.urls")),
     re_path(r"^oekg/", include("oekg.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
