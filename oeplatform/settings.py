@@ -336,3 +336,6 @@ LOGGING = {
         "level": "DEBUG",
     },
 }
+
+SANDBOX_SCHEMA = "sandbox"
+DATASETS_SCHEMA = "datasets"

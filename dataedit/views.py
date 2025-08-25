@@ -94,7 +94,7 @@ from dataedit.models import PeerReview, PeerReviewManager, Table
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
-from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS
+from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SANDBOX_SCHEMA
 
 from .models import TableRevision
 from .models import View as DataViewModel
@@ -119,7 +119,7 @@ schema_whitelist = [
     "supply",
 ]
 
-schema_sandbox = "sandbox"
+schema_sandbox = SANDBOX_SCHEMA
 
 
 def admin_constraints(request):

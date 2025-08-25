@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 
 from api.actions import get_schema_names, get_table_names
 from dataedit.models import Table
+from oeplatform.settings import DATASETS_SCHEMA, SANDBOX_SCHEMA
 
 # from dataedit.views import schema_whitelist
 # copied from dataedit.views, because it may be removed later
@@ -21,8 +22,8 @@ schema_whitelist = [
     "society",
     "supply",
 ]
-schema_sandbox = "sandbox"
-schema_datasets = "datasets"
+schema_sandbox = SANDBOX_SCHEMA
+schema_datasets = DATASETS_SCHEMA
 schema_test = "test"
 
 
