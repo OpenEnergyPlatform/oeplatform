@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -10,6 +10,7 @@ from django.test import TestCase
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from login.models import myuser
+from oeplatform.settings import SANDBOX_SCHEMA
 
 from .models import PeerReview, Schema, Table
 
@@ -31,7 +32,7 @@ def populate_peerreview_oemetadata():
 class MigrationTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        test_schema = Schema.objects.create(name="test")
+        test_schema = Schema.objects.create(name=SANDBOX_SCHEMA)
 
         table = Table.objects.create(
             schema=test_schema,

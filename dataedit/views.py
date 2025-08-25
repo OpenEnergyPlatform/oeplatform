@@ -1583,7 +1583,6 @@ def update_table_tags(request):
     schema, table = actions.get_table_name(
         schema=request.POST["schema"],
         table=request.POST["table"],
-        restrict_schemas=False,
     )
     # check write permission
     actions.assert_add_tag_permission(

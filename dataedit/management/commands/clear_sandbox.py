@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -9,10 +9,7 @@ from django.core.management.base import BaseCommand
 
 from api.connection import _get_engine
 from dataedit.models import Table
-from oeplatform.securitysettings import PLAYGROUNDS
 from oeplatform.settings import SANDBOX_SCHEMA
-
-assert SANDBOX_SCHEMA in PLAYGROUNDS, f"{SANDBOX_SCHEMA} not in playground schemas"
 
 
 def get_sandbox_tables_django() -> List[Table]:

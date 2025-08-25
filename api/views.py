@@ -1,20 +1,20 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda> # noqa: E501
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -55,6 +55,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from utils import get_valid_schema
 
 import api.parser
 import login.models as login_models
@@ -91,7 +92,7 @@ from oekg.utils import (
     process_datasets_sparql_query,
     validate_public_sparql_query,
 )
-from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
+from oeplatform.settings import USE_LOEP, USE_ONTOP
 
 if USE_LOEP:
     from oeplatform.settings import DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
@@ -257,7 +258,7 @@ def api_exception(f):
 
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", actions.DEFAULT_SCHEMA)
+        schema = get_valid_schema(kwargs.get("schema"))
         table = kwargs.get("table") or kwargs.get("sequence")
         actions.assert_permission(request.user, table, permission, schema=schema)
         return f(caller, request, *args, **kwargs)
@@ -284,10 +285,7 @@ def conjunction(clauses):
 class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
+        schema = get_valid_schema(schema)
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
         if actions.has_table(dict(schema=schema, sequence_name=sequence), {}):
@@ -297,10 +295,7 @@ class Sequence(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
+        schema = get_valid_schema(schema)
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
         return self.__delete_sequence(request, schema, sequence, request.data)
@@ -403,7 +398,7 @@ class Table(APIView):
         :return:
         """
 
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = actions.get_table_name(schema, table)
 
         return JsonResponse(
             {
@@ -424,10 +419,7 @@ class Table(APIView):
         :param table:
         :return:
         """
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
+        schema = get_valid_schema(schema)
         json_data = request.data
 
         if "column" in json_data["type"]:
@@ -489,10 +481,7 @@ class Table(APIView):
 
         """
         # 1) Basic schema checks
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
+        schema = get_valid_schema(schema)
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
         if actions.has_table({"schema": schema, "table": table}, {}):
@@ -851,7 +840,7 @@ class Column(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(self, request, schema, table, column=None):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = actions.get_table_name(schema, table)
         response = actions.describe_columns(schema, table)
         if column:
             try:
@@ -882,7 +871,7 @@ class Column(APIView):
 class Fields(APIView):
     @method_decorator(never_cache)
     def get(self, request, schema, table, id, column=None):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = actions.get_table_name(schema, table)
         if (
             not parser.is_pg_qual(table)
             or not parser.is_pg_qual(schema)
@@ -960,7 +949,7 @@ class Rows(APIView):
                 status=403,
             )
 
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = actions.get_table_name(schema, table)
         columns = request.GET.getlist("column")
 
         where = request.GET.getlist("where")

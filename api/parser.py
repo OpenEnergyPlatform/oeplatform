@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
+# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
+# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -41,11 +41,10 @@ from sqlalchemy.sql import functions as fun
 from sqlalchemy.sql.elements import Slice
 from sqlalchemy.sql.expression import CompoundSelect
 from sqlalchemy.sql.sqltypes import Interval
+from utils import get_valid_schema
 
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
-
-from . import DEFAULT_SCHEMA
 
 __KNOWN_TABLES = {}
 
@@ -531,7 +530,7 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
         if dtype == "label":
             return parse_label(d)
         if dtype == "sequence":
-            schema = read_pgid(d["schema"]) if "schema" in d else DEFAULT_SCHEMA
+            schema = get_valid_schema(read_pgid(d["schema"]) if "schema" in d else None)
             # s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
             return Sequence(get_or_403(d, "sequence"), schema=schema)
         if dtype == "select":
