@@ -1643,7 +1643,7 @@ SPDX-FileCopyrightText = [
 path = "base/static/css/bootstrap.min.css"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [ 
+SPDX-FileCopyrightText = [
     "Copyright 2011-2022 The Bootstrap Authors",
     "Copyright 2011-2022 Twitter, Inc.",
   "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
@@ -2762,7 +2762,7 @@ precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
   "2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.", 
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
   "2022 Jonas Hiber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   ]
 

@@ -118,7 +118,9 @@ If you followed this documentation, you can skip the entire `Setup Your Database
   - You need to reapply the migrations
 
 #### Restart oeplatform
-- Open a bash in the oeplatform container and run ``apache2ctl restart``.
+
+- Open a bash in the oeplatform container and run `apache2ctl restart`.
+
 ```sh
 # Find name of oeplatform container
 $ me@local:~$ sudo docker ps --format '{{.Names}}'
@@ -129,7 +131,6 @@ me@local:~$ docker exec -ti docker-oeplatform-1 bash
 root@27...7:/app#  apache2ctl restart
 root@27...7:/app#
 ```
-
 
 ##### Build the oeplatform image
 

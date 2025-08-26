@@ -128,9 +128,10 @@
 # # --- REUSE.toml separat bearbeiten ---
 # process_reuse_toml()
 
-import os
 import json
+import os
 import re
+
 import toml
 
 # --- Lade E-Mail → GitHub-Handle Mapping ---
@@ -139,6 +140,7 @@ with open("mail-to-github.json", "r", encoding="utf-8") as f:
 
 # Regex: Erkenne SPDX-Zeilen mit E-Mail in <...>
 spdx_regex = re.compile(r"(SPDX-FileCopyrightText:\s*\d{4}\s+[^<]+<)([^>]+)(>)")
+
 
 def process_file(path):
     try:
@@ -172,6 +174,7 @@ def process_file(path):
 
     return False
 
+
 # --- REUSE.toml anpassen ---
 # def process_reuse_toml(path="REUSE.toml"):
 #     if not os.path.exists(path):
@@ -204,6 +207,7 @@ def process_file(path):
 #     else:
 #         print("ℹ️ REUSE.toml unverändert.")
 
+
 def process_reuse_toml(path="REUSE.toml"):
     if not os.path.exists(path):
         print("⚠️ REUSE.toml nicht gefunden.")
@@ -232,6 +236,7 @@ def process_reuse_toml(path="REUSE.toml"):
         print(f"✅ REUSE.toml angepasst.")
     else:
         print("ℹ️ REUSE.toml unverändert.")
+
 
 # --- Alle Dateien im Repo durchgehen ---
 for root, dirs, files in os.walk("."):
