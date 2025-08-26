@@ -9,8 +9,8 @@
 
 import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
-from utils import get_valid_schema
 
+from api.utils import get_valid_schema
 from dataedit.models import Schema, Table
 
 try:

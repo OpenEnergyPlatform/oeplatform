@@ -14,21 +14,26 @@ from rest_framework.authtoken.models import Token
 
 from api import actions
 from login.models import myuser
-from oeplatform.settings import SANDBOX_SCHEMA
+from oeplatform.settings import SANDBOX_SCHEMA, TEST_SCHEMA
 
 from .utils import load_content_as_json
 
 
+def clean_test_schemas():
+    for schema in [SANDBOX_SCHEMA, TEST_SCHEMA]:
+        for prefix in ["", "_"]:
+            schema_name = f"{prefix}{schema}"
+            actions.perform_sql(f"DROP SCHEMA IF EXISTS {schema_name} CASCADE")
+            actions.perform_sql(f"CREATE SCHEMA {schema_name}")
+
+
 class APITestCase(TestCase):
-    test_schema = SANDBOX_SCHEMA
+    test_schema = TEST_SCHEMA
     test_table = "test_table"
 
     @classmethod
     def setUpClass(cls):
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS {cls.test_schema} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA {cls.test_schema}")
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS _{cls.test_schema} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA _{cls.test_schema}")
+        clean_test_schemas()
 
         super(APITestCase, cls).setUpClass()
         cls.user, _ = myuser.objects.get_or_create(
@@ -76,14 +81,14 @@ class APITestCase(TestCase):
     def api_req(
         self,
         method: str,
-        table: str = None,
-        schema: str = None,
-        path: str = None,
-        data: dict = None,
+        table: str | None = None,
+        schema: str | None = None,
+        path: str | None = None,
+        data: dict | None = None,
         auth=None,
-        exp_code: int = None,
+        exp_code: int | None = None,
         exp_res=None,
-    ):
+    ) -> dict:
         path = path or ""
         if path.startswith("/"):
             assert not table and not schema

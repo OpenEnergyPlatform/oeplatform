@@ -1,15 +1,16 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.  # noqa E501
+# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>  # noqa E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg  # noqa E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg  # noqa E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.  # noqa E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut  # noqa E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from api.tests import APITestCase, APITestCaseWithTable
+from oeplatform.settings import SANDBOX_SCHEMA, TEST_SCHEMA
 
 _TYPES = [
     "bigint",
@@ -301,8 +302,10 @@ class TestDelete(APITestCaseWithTable):
 
 class TestMove(APITestCaseWithTable):
     test_table = "test_table_move"
-    test_schema = "model_draft"  # cannot move from "test" schema
-    target_schema = "scenario"
+
+    # TODO: chw: move will be obsolete after schema dissolve
+    test_schema = TEST_SCHEMA
+    target_schema = SANDBOX_SCHEMA
 
     def test_move(self):
         self.api_req(
@@ -326,8 +329,9 @@ class TestMove(APITestCaseWithTable):
 
 class TestMovePublish(APITestCaseWithTable):
     test_table = "test_table_move_publish"
-    test_schema = "model_draft"  # cannot move from "test" schema
-    target_schema = "scenario"
+    # TODO: chw: move will be obsolete after schema dissolve
+    test_schema = TEST_SCHEMA
+    target_schema = SANDBOX_SCHEMA
 
     def test_move_publish(self):
         # this will fail, because the licenses check fails

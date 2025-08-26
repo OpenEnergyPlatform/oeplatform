@@ -339,3 +339,4 @@ LOGGING = {
 
 SANDBOX_SCHEMA = "sandbox"
 DATASETS_SCHEMA = "datasets"
+TEST_SCHEMA = "test"

@@ -1,24 +1,13 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut  # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-from api import actions
 from api.actions import has_table
 from api.tests import APITestCase
 from oeplatform.settings import SANDBOX_SCHEMA
 
 
 class TestTableNameUnique(APITestCase):
-    schema_sandbox = SANDBOX_SCHEMA
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS {cls.schema_sandbox} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA {cls.schema_sandbox}")
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS _{cls.schema_sandbox} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA _{cls.schema_sandbox}")
-
     def test_tables_should_not_exists_on_error(self):
         test_duplicate_column_table_name = "table_column_duplicate"
         # create table with duplicated column names will should an error
@@ -34,7 +23,7 @@ class TestTableNameUnique(APITestCase):
             self.create_table,
             table=test_duplicate_column_table_name,
             structure=duplicate_field_error_data_struct,
-            schema=self.schema_sandbox,
+            schema=SANDBOX_SCHEMA,
         )
 
         # also check: table should not have been created in oedb
@@ -42,7 +31,7 @@ class TestTableNameUnique(APITestCase):
             has_table(
                 {
                     "table": test_duplicate_column_table_name,
-                    "schema": self.schema_sandbox,
+                    "schema": SANDBOX_SCHEMA,
                 }
             )
         )

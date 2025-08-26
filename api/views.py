@@ -55,7 +55,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from utils import get_valid_schema
 
 import api.parser
 import login.models as login_models
@@ -78,13 +77,13 @@ from api.services.embargo import (
 )
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
-from api.utils import get_dataset_configs
+from api.utils import get_dataset_configs, get_valid_schema
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
-from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
+from dataedit.views import get_tag_keywords_synchronized_metadata
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -898,23 +897,18 @@ class MovePublish(APIView):
     @require_admin_permission
     @api_exception
     def post(self, request, schema, table, to_schema):
-        if schema not in schema_whitelist or to_schema not in schema_whitelist:
-            raise APIError("Invalid origin or target schema")
+        # TODO wingechr: meta schema should not be tested once schema is allowed
+        schema = get_valid_schema(schema)
+        to_schema = get_valid_schema(to_schema)
+
         # Make payload more friendly as users tend to use the query wrapper in payload
         json_data = request.data.get("query", {})
         embargo_period = request.data.get("embargo", {}).get(
             "duration", None
         ) or json_data.get("embargo", {}).get("duration", None)
+
         actions.move_publish(schema, table, to_schema, embargo_period)
 
-        # tables = Table.objects.all()
-        # context = {
-        #     "draft_tables": [table for table in tables if not table.is_publish],
-        #     "published_tables": [table for table in tables if table.is_publish],
-        #     "schema_whitelist": schema_whitelist,
-        # }
-        # html = render_to_string("login/user_tables.html", context)
-        # return HttpResponse(html)
         return HttpResponse(status=status.HTTP_200_OK)
 
 
@@ -922,8 +916,10 @@ class Move(APIView):
     @require_admin_permission
     @api_exception
     def post(self, request, schema, table, to_schema):
-        if schema not in schema_whitelist or to_schema not in schema_whitelist:
-            raise APIError("Invalid origin or target schema")
+        # TODO wingechr: meta schema should not be tested once schema is allowed
+        # also: duplicate of MovePublish?
+        schema = get_valid_schema(schema)
+        to_schema = get_valid_schema(to_schema)
         actions.move(schema, table, to_schema)
         return HttpResponse(status=status.HTTP_200_OK)
 

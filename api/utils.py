@@ -10,7 +10,7 @@ like processing steps.
 from typing import Union
 
 from oekg.sparqlModels import DatasetConfig
-from oeplatform.settings import DATASETS_SCHEMA, SANDBOX_SCHEMA
+from oeplatform.settings import DATASETS_SCHEMA, SANDBOX_SCHEMA, TEST_SCHEMA
 
 
 def get_dataset_configs(validated_data) -> list[DatasetConfig]:
@@ -40,6 +40,10 @@ def check_if_oem_license_exists(metadata: dict):
 def get_valid_schema(schema: Union[str, None] = None) -> str:
     if schema is None:
         return SANDBOX_SCHEMA
-    elif schema not in {SANDBOX_SCHEMA, DATASETS_SCHEMA}:
+    elif schema in {SANDBOX_SCHEMA, DATASETS_SCHEMA, TEST_SCHEMA}:
+        # TODO wingechr: test schema should only be allowed if run in test environment
+        return schema
+    elif schema in {"_" + SANDBOX_SCHEMA, "_" + DATASETS_SCHEMA, "_" + TEST_SCHEMA}:
+        # TODO wingechr: meta schema should not be tested once schema is allowed
         return schema
     raise Exception(f"Invalid schema: {schema}")

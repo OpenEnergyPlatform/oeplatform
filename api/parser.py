@@ -41,10 +41,10 @@ from sqlalchemy.sql import functions as fun
 from sqlalchemy.sql.elements import Slice
 from sqlalchemy.sql.expression import CompoundSelect
 from sqlalchemy.sql.sqltypes import Interval
-from utils import get_valid_schema
 
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
+from api.utils import get_valid_schema
 
 __KNOWN_TABLES = {}
 

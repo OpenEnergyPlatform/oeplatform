@@ -1,33 +1,22 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.   # noqa E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-from api import actions
 from api.actions import has_table
 from api.tests import APITestCase
-from oeplatform.settings import SANDBOX_SCHEMA
+from oeplatform.settings import SANDBOX_SCHEMA, TEST_SCHEMA
 
 
 class TestTableNameUnique(APITestCase):
-    schema_sandbox = SANDBOX_SCHEMA
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS {cls.schema_sandbox} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA {cls.schema_sandbox}")
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS _{cls.schema_sandbox} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA _{cls.schema_sandbox}")
-
     def test_table_name_unique(self):
         # create table in default (test) schema
-        self.create_table()
+        self.create_table(schema=TEST_SCHEMA)
 
         # create same table in another (sandbox) schema
         # should fail
-        self.assertRaises(AssertionError, self.create_table, schema=self.schema_sandbox)
+        self.assertRaises(AssertionError, self.create_table, schema=SANDBOX_SCHEMA)
 
         # also check: table should not have been created in oedb
         self.assertFalse(
-            has_table({"table": self.test_table, "schema": self.schema_sandbox})
+            has_table({"table": self.test_table, "schema": SANDBOX_SCHEMA})
         )

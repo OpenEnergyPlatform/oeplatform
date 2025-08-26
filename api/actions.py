@@ -39,7 +39,6 @@ from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
 from sqlalchemy import types as sqltypes
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
-from utils import get_valid_schema
 
 import api
 import dataedit.metadata
@@ -53,7 +52,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from api.utils import check_if_oem_license_exists
+from api.utils import check_if_oem_license_exists, get_valid_schema
 from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Schema as DBSchema
@@ -1709,10 +1708,18 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
                 )
             )
 
+        # before moving table tags: delete existing
+        session.query(OEDBTableTags).filter(
+            OEDBTableTags.schema_name == to_schema,
+            OEDBTableTags.table_name == table_name,
+        ).delete()  # type: ignore
+        # moving table tags
         session.query(OEDBTableTags).filter(
             OEDBTableTags.schema_name == from_schema,
             OEDBTableTags.table_name == table_name,
-        ).update({OEDBTableTags.schema_name: to_schema})
+        ).update(
+            {OEDBTableTags.schema_name: to_schema}
+        )  # type: ignore
 
         if embargo_period in ["6_months", "1_year"]:
             duration_in_weeks = 26 if embargo_period == "6_months" else 52
