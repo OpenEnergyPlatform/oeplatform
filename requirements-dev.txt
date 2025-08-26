@@ -10,3 +10,4 @@ isort
 pre-commit
 bumpversion
 debugpy
+toml

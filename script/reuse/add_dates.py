@@ -1,5 +1,5 @@
-# SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut  # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -44,7 +44,7 @@ def update_reuse_file():
 
     updated_blocks = []
     file_blocks = re.findall(
-        r'(?s)(\[\[File\]\]\s*Path = "[^"]+"\s*Licenses = \[[^\]]*\]\s*Copyright = \[[^\]]*\])',
+        r'(?s)(\[\[File\]\]\s*Path = "[^"]+"\s*Licenses = \[[^\]]*\]\s*Copyright = \[[^\]]*\])',  # noqa: E501
         content,
     )
 

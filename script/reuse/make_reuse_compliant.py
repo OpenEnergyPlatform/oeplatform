@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 vismayajochem <vismayajochem>
+# SPDX-FileCopyrightText: 2025 vismayajochem <vismayajochem>  # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 

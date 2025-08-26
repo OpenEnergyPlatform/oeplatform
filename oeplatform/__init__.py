@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>  # noqa: E501
 
 # SPDX-License-Identifier: CC0-1.0
 

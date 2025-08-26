@@ -1,5 +1,5 @@
-# SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut  # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -132,8 +132,6 @@ import json
 import os
 import re
 
-import toml
-
 # --- Lade E-Mail → GitHub-Handle Mapping ---
 with open("mail-to-github.json", "r", encoding="utf-8") as f:
     email_map = json.load(f)
@@ -233,7 +231,7 @@ def process_reuse_toml(path="REUSE.toml"):
     if changed:
         with open(path, "w", encoding="utf-8") as f:
             f.writelines(lines)
-        print(f"✅ REUSE.toml angepasst.")
+        print("✅ REUSE.toml angepasst.")
     else:
         print("ℹ️ REUSE.toml unverändert.")
 
