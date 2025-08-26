@@ -14,13 +14,13 @@ from rest_framework.authtoken.models import Token
 
 from api import actions
 from login.models import myuser
-from oeplatform.settings import SANDBOX_SCHEMA, TEST_SCHEMA
+from oeplatform.settings import DATASETS_SCHEMA_TEST, SANDBOX_SCHEMA
 
 from .utils import load_content_as_json
 
 
 def clean_test_schemas():
-    for schema in [SANDBOX_SCHEMA, TEST_SCHEMA]:
+    for schema in [SANDBOX_SCHEMA, DATASETS_SCHEMA_TEST]:
         for prefix in ["", "_"]:
             schema_name = f"{prefix}{schema}"
             actions.perform_sql(f"DROP SCHEMA IF EXISTS {schema_name} CASCADE")
@@ -28,7 +28,7 @@ def clean_test_schemas():
 
 
 class APITestCase(TestCase):
-    test_schema = TEST_SCHEMA
+    test_schema = DATASETS_SCHEMA_TEST
     test_table = "test_table"
 
     @classmethod

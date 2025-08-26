@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 
 from api.actions import get_schema_names, get_table_names
 from dataedit.models import Table
-from oeplatform.settings import DATASETS_SCHEMA, SANDBOX_SCHEMA
+from oeplatform.settings import DATASETS_SCHEMA, DATASETS_SCHEMA_TEST, SANDBOX_SCHEMA
 
 # from dataedit.views import schema_whitelist
 # copied from dataedit.views, because it may be removed later
@@ -22,9 +22,6 @@ schema_whitelist = [
     "society",
     "supply",
 ]
-schema_sandbox = SANDBOX_SCHEMA
-schema_datasets = DATASETS_SCHEMA
-schema_test = "test"
 
 
 def get_schema_tables_to_migrate() -> dict[str, list[str]]:
@@ -39,8 +36,8 @@ def get_schema_tables_to_migrate() -> dict[str, list[str]]:
             "topology",
             "information_schema",
         }
-        | {schema_sandbox, schema_datasets, schema_test}
-        | {"_" + schema_sandbox, "_" + schema_datasets, "_" + schema_test}
+        | {SANDBOX_SCHEMA, DATASETS_SCHEMA, DATASETS_SCHEMA_TEST}
+        | {"_" + SANDBOX_SCHEMA, "_" + DATASETS_SCHEMA, "_" + DATASETS_SCHEMA_TEST}
     ) & schema_names_oedb
     schema_names_unexpected = (
         schema_names_oedb
@@ -165,7 +162,7 @@ class Command(BaseCommand):
         for schema, tables in schema_tables_to_migrate.items():
             for table in tables:
                 sql = (
-                    f'ALTER TABLE "{schema}"."{table}" SET SCHEMA "{schema_datasets}";'
+                    f'ALTER TABLE "{schema}"."{table}" SET SCHEMA "{DATASETS_SCHEMA}";'
                 )
                 print(sql)
 

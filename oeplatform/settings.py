@@ -339,4 +339,6 @@ LOGGING = {
 
 SANDBOX_SCHEMA = "sandbox"
 DATASETS_SCHEMA = "datasets"
-TEST_SCHEMA = "test"
+# tests should not be run in production,
+# but as a safeguard,we use a separate schema in tests
+DATASETS_SCHEMA_TEST = "datasets_test"

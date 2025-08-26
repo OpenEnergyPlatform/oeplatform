@@ -4,13 +4,13 @@
 
 from api.actions import has_table
 from api.tests import APITestCase
-from oeplatform.settings import SANDBOX_SCHEMA, TEST_SCHEMA
+from oeplatform.settings import DATASETS_SCHEMA_TEST, SANDBOX_SCHEMA
 
 
 class TestTableNameUnique(APITestCase):
     def test_table_name_unique(self):
         # create table in default (test) schema
-        self.create_table(schema=TEST_SCHEMA)
+        self.create_table(schema=DATASETS_SCHEMA_TEST)
 
         # create same table in another (sandbox) schema
         # should fail

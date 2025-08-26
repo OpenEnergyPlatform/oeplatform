@@ -10,7 +10,7 @@
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from api.tests import APITestCase, APITestCaseWithTable
-from oeplatform.settings import SANDBOX_SCHEMA, TEST_SCHEMA
+from oeplatform.settings import DATASETS_SCHEMA_TEST, SANDBOX_SCHEMA
 
 _TYPES = [
     "bigint",
@@ -304,7 +304,7 @@ class TestMove(APITestCaseWithTable):
     test_table = "test_table_move"
 
     # TODO: chw: move will be obsolete after schema dissolve
-    test_schema = TEST_SCHEMA
+    test_schema = DATASETS_SCHEMA_TEST
     target_schema = SANDBOX_SCHEMA
 
     def test_move(self):
@@ -330,7 +330,7 @@ class TestMove(APITestCaseWithTable):
 class TestMovePublish(APITestCaseWithTable):
     test_table = "test_table_move_publish"
     # TODO: chw: move will be obsolete after schema dissolve
-    test_schema = TEST_SCHEMA
+    test_schema = DATASETS_SCHEMA_TEST
     target_schema = SANDBOX_SCHEMA
 
     def test_move_publish(self):

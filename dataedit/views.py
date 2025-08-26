@@ -65,6 +65,7 @@ from sqlalchemy.orm import sessionmaker
 
 import api.parser
 from api.actions import describe_columns
+from api.utils import get_valid_schema
 
 # from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
 
@@ -94,7 +95,12 @@ from dataedit.models import PeerReview, PeerReviewManager, Table
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
-from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SANDBOX_SCHEMA
+from oeplatform.settings import (
+    DATASETS_SCHEMA,
+    DOCUMENTATION_LINKS,
+    EXTERNAL_URLS,
+    SANDBOX_SCHEMA,
+)
 
 from .models import TableRevision
 from .models import View as DataViewModel
@@ -102,24 +108,7 @@ from .models import View as DataViewModel
 session = None
 
 """ This is the initial view that initialises the database connection """
-schema_whitelist = [
-    "boundaries",
-    "climate",
-    "demand",
-    "economy",
-    "emission",
-    "environment",
-    "grid",
-    "model_draft",
-    "openstreetmap",
-    "policy",
-    "reference",
-    "scenario",
-    "society",
-    "supply",
-]
-
-schema_sandbox = SANDBOX_SCHEMA
+schema_whitelist = [DATASETS_SCHEMA, SANDBOX_SCHEMA]
 
 
 def admin_constraints(request):
@@ -971,10 +960,7 @@ class DataView(View):
         :return:
         """
 
-        if (
-            schema not in schema_whitelist and schema != schema_sandbox
-        ) or schema.startswith("_"):
-            raise Http404("Schema not accessible")
+        schema = get_valid_schema(schema)
 
         engine = actions._get_engine()
 
