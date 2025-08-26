@@ -134,10 +134,7 @@ class Table(Tagable):
         Mark the table as published (ready for destination schema & public)
         and save the change to the database.
         """
-        if to_schema != "model_draft":
-            self.is_publish = True
-        else:
-            self.is_publish = False
+        self.is_publish = True
         self.save()
 
     # TODO: Use function when implementing the publish button. It should be

@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg  # noqa: E501
+# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg  # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -13,27 +13,15 @@ Create Date: 2017-11-23 15:53:57.716306
 """
 from alembic import op
 
+from oeplatform.settings import DATASETS_SCHEMA, SANDBOX_SCHEMA
+
 # revision identifiers, used by Alembic.
 revision = "5c098aa81e2c"
 down_revision = "048215319c74"
 branch_labels = None
 depends_on = None
 
-schemas = [
-    "demand",
-    "economy",
-    "emission",
-    "environment",
-    "grid",
-    "boundaries",
-    "society",
-    "supply",
-    "scenario",
-    "climate",
-    "model_draft",
-    "openstreetmap",
-    "reference",
-]
+schemas = [DATASETS_SCHEMA, SANDBOX_SCHEMA]
 
 
 def upgrade():

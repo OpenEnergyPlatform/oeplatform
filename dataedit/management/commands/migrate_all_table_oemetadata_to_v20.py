@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut  # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -69,8 +69,7 @@ def fix_metadata_v2(metadata, table_name, table_schema):
 
     license_error = False
     try:
-        check_license = False if table_schema == "model_draft" else True
-        validate_metadata(result_conversion, check_license)
+        validate_metadata(result_conversion, check_license=True)
     except Exception as e:
         license_error = True
         logger.error(

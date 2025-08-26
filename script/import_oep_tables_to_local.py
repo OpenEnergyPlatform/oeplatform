@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut  # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -10,6 +10,8 @@ from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from shapely import wkt
 from shapely.geometry import base as shapely_geom_base
 
+from oeplatform.settings import DATASETS_SCHEMA
+
 # === CONFIG ===
 
 PROD_BASE = "https://openenergyplatform.org/api/v0"
@@ -20,7 +22,7 @@ LOCAL_TOKEN = ""  # UPDATE: Set your local API token here
 
 CHUNK_SIZE = 1000
 SKIP_GEOMETRY_COLUMNS = False  # Now we include geometry, converted to GeoJSON
-LOCAL_SCHEMA = "model_draft"
+LOCAL_SCHEMA = DATASETS_SCHEMA
 
 TABLES_TO_COPY = [
     {

@@ -294,6 +294,7 @@ def listschemas(request):
     # get table count per schema
     response = tables.values("schema__name").annotate(tables_count=Count("name"))
 
+    # TODO wingechr: this will be topics
     description = {
         "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",  # noqa
         "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",  # noqa
@@ -1806,7 +1807,7 @@ def get_column_description(schema, table):
 class WizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv)."""
 
-    def get(self, request, schema="model_draft", table=None):
+    def get(self, request, schema=DATASETS_SCHEMA, table=None):
         """Handle GET request (render the page)."""
         engine = actions._get_engine()
 
@@ -1816,9 +1817,7 @@ class WizardView(LoginRequiredMixin, View):
         n_rows = None
         if table:
             # get information about the table
-            # if upload: table must exist in schema model_draft
-            if schema != "model_draft":
-                raise Http404("Can only upload to schema model_draft")
+            schema = get_valid_schema(schema)
             if not engine.dialect.has_table(engine, table, schema=schema):
                 raise Http404("Table does not exist")
             table_obj = Table.load(schema, table)

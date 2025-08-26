@@ -1671,7 +1671,7 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
 
         license_check, license_error = validate_open_data_license(t)
 
-        if not license_check and to_schema != "model_draft":
+        if not license_check:
             raise APIError(
                 "A issue with the license from the metadata was found: "
                 f"{license_error}"
