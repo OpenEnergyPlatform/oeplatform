@@ -2,16 +2,56 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+
+"""SPARQL queries related to filtering scenario bundles in the OEKG."""
+
 import logging
+from typing import Union
 from uuid import UUID
 
 import requests
+from rdflib import URIRef
 from SPARQLWrapper import JSON, POST
 
 from factsheet.oekg.connection import sparql, sparql_wrapper_update, update_endpoint
 from oekg.sparqlModels import DatasetConfig
 
 logger = logging.getLogger("oeplatform")
+
+
+def bundle_scenarios_filter(bundle_uri: Union[str, URIRef], return_format=JSON) -> dict:
+    """
+    Return scenarios that are part-of the given bundle URI.
+    """
+    u = str(bundle_uri).strip()
+    if not (u.startswith("<") and u.endswith(">")):
+        u = f"<{u}>"
+
+    sparql_query = f"""
+        PREFIX obo:  <http://purl.obolibrary.org/obo/>
+        PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
+        PREFIX dc:   <http://purl.org/dc/terms/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX oekg: <https://openenergyplatform.org/ontology/oekg/>
+
+        SELECT DISTINCT ?o ?label ?abstract ?fullName ?uid
+        WHERE {{
+
+            VALUES ?bundle {{ {u} }}
+            ?bundle obo:BFO_0000051 ?o .
+
+            ?o a oeo:OEO_00000365 .
+
+            OPTIONAL {{ ?o dc:acronym  ?label }}
+            OPTIONAL {{ ?o dc:abstract ?abstract }}
+            OPTIONAL {{ ?o rdfs:label  ?fullName }}
+            OPTIONAL {{ ?o oeo:OEO_00390095 ?uid }}
+        }}
+    """
+
+    sparql.setReturnFormat(return_format)
+    sparql.setQuery(sparql_query)
+    return sparql.query().convert()
 
 
 def scenario_in_bundle(bundle_uuid: UUID, scenario_uuid: UUID) -> bool:
