@@ -25,11 +25,16 @@ from rdflib.compare import graph_diff, to_isomorphic
 
 from factsheet.oekg.connection import oekg, oeo, oeo_owl
 from factsheet.oekg.filters import OekgQuery
-from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, bind_all_namespaces
+from factsheet.oekg.namespaces import DC, OBO, OEO, RDFS, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 from factsheet.utils import remove_non_printable, serialize_publication_date
 from login import models as login_models
 from modelview.utils import get_framework_metadata_by_id, get_model_metadata_by_id
+from oekg.sparqlQuery import (
+    bundle_scenarios_filter,
+    list_factsheets_oekg,
+    normalize_factsheets_rows,
+)
 
 from .models import OEKG_Modifications, ScenarioBundleAccessControl
 
@@ -1595,85 +1600,45 @@ def update_an_entity(request, *args, **kwargs):
 
 
 def get_all_factsheets(request, *args, **kwargs):
-    all_factsheets = []
-    for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00020227)):
-        uid = str(s).split("/")[-1]
-        element = {}
-        acronym = remove_non_printable(oekg.value(s, DC.acronym))
-        study_name = remove_non_printable(oekg.value(s, RDFS.label))
-        abstract = oekg.value(s, DC.abstract)
-        element["uid"] = uid
-        element["acronym"] = (
-            remove_non_printable(acronym) if acronym != None else ""  # noqa
-        )
-        element["study_name"] = (
-            remove_non_printable(study_name) if study_name != None else ""  # noqa
-        )
-        element["abstract"] = (
-            remove_non_printable(abstract) if abstract != None else ""  # noqa
-        )
-        study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
-        element["institutions"] = []
-        for s, p, o in oekg.triples((study_URI, OEO.OEO_00000510, None)):
-            label = oekg.value(o, RDFS.label)
-            if label != None:  # noqa
-                element["institutions"].append(remove_non_printable(label))
+    criteria = {
+        "institutions": request.GET.getlist("institutions"),
+        "authors": request.GET.getlist("authors"),
+        "fundingSource": request.GET.getlist("fundingSource"),
+        "studyKeywords": request.GET.getlist("studyKeywords")
+        or request.GET.getlist("studyKewords"),
+        "scenarioYearValue": request.GET.getlist("scenarioYearValue"),  # [start, end]
+        "startDateOfPublication": request.GET.get("startDateOfPublication"),
+        "endDateOfPublication": request.GET.get("endDateOfPublication"),
+        "resultsPerPage": request.GET.get("resultsPerPage", 25),
+        "page": request.GET.get("page", 1),
+    }
 
-        element["funding_sources"] = []
-        for s, p, o in oekg.triples((study_URI, OEO.OEO_00000509, None)):
-            label = oekg.value(o, RDFS.label)
-            if label != None:  # noqa
-                element["funding_sources"].append(remove_non_printable(label))
+    # 1) Fast list via SPARQL
+    res = list_factsheets_oekg(criteria)
+    factsheets = normalize_factsheets_rows(res)
 
-        element["models"] = []
-        for s, p, o in oekg.triples((study_URI, OEO.BFO_0000051, None)):
-            if o != None:  # noqa
-                label = oekg.value(o, RDFS.label)
-                if label:
-                    element["models"].append(remove_non_printable(label))
+    # 2) (Optional) If you still want scenarios embedded,
+    # keep your existing call per bundle:
+    for f in factsheets:
+        data = bundle_scenarios_filter(
+            f"https://openenergyplatform.org/ontology/oekg/{f['uid']}"
+        )  # noqa:E501
 
-        element["frameworks"] = []
-        for s, p, o in oekg.triples((study_URI, OEO.BFO_0000051, None)):
-            if o != None:  # noqa
-                label = oekg.value(o, RDFS.label)
-                if label is not None:
-                    element["frameworks"].append(remove_non_printable(label))
-                else:
-                    pass
+        def bval(row, key):
+            cell = row.get(key)
+            return cell.get("value") if cell else None
 
-        temp = set()
-        for s, p, o in oekg.triples((s, OEO.BFO_0000051, None)):
-            pubs_per_bundle = []
-            for s1, p1, o1 in oekg.triples((o, OEO.OEO_00390096, None)):
-                if o1:
-                    pubs_per_bundle.append(serialize_publication_date(str(o1)))
+        f["scenarios"] = [
+            {
+                "label": bval(r, "label"),
+                "abstract": bval(r, "abstract"),
+                "full_name": bval(r, "fullName"),
+                "uid": bval(r, "uid"),
+            }
+            for r in data["results"]["bindings"]
+        ]
 
-            if pubs_per_bundle:
-                temp.update(pubs_per_bundle)
-
-        # Convert set to list before creating the JSON response
-        element["collected_scenario_publication_dates"] = list(temp)
-
-        element["scenarios"] = []
-        for s, p, o in oekg.triples((study_URI, OEO.BFO_0000051, None)):
-            label = oekg.value(o, RDFS.label)
-            abstract = oekg.value(o, DC.abstract)
-            full_name = oekg.value(o, OEKG.has_full_name)
-            uid = oekg.value(o, OEKG.scenario_uuid)
-
-            if label != None:  # noqa
-                element["scenarios"].append(
-                    {
-                        "label": remove_non_printable(label),
-                        "abstract": remove_non_printable(abstract),
-                        "full_name": remove_non_printable(full_name),
-                        "uid": uid,
-                    }
-                )
-
-        all_factsheets.append(element)
-
-    response = JsonResponse(all_factsheets, safe=False, content_type="application/json")
+    response = JsonResponse(factsheets, safe=False, content_type="application/json")
     patch_response_headers(response, cache_timeout=1)
     return response
 
