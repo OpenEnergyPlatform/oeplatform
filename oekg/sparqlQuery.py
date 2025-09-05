@@ -62,8 +62,8 @@ def scenario_in_bundle(bundle_uuid: UUID, scenario_uuid: UUID) -> bool:
     PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
 
     ASK {{
-        <http://openenergy-platform.org/ontology/oekg/{bundle_uuid}> ?p
-            <http://openenergy-platform.org/ontology/oekg/scenario/{scenario_uuid}> .
+        <https://openenergyplatform.org/ontology/oekg/{bundle_uuid}> ?p
+            <https://openenergyplatform.org/ontology/oekg/scenario/{scenario_uuid}> .
     }}
     """
     sparql.setQuery(sparql_query)
@@ -86,7 +86,7 @@ def dataset_exists(scenario_uuid: UUID, dataset_url: str) -> bool:
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
     ASK {{
-        <http://openenergy-platform.org/ontology/oekg/scenario/{scenario_uuid}> ?p ?dataset .
+        <https://openenergyplatform.org/ontology/oekg/scenario/{scenario_uuid}> ?p ?dataset .
         ?dataset oeo:has_iri "{dataset_url}" .
     }}
 
@@ -125,13 +125,13 @@ def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig):
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
     INSERT DATA {{
-        <http://openenergy-platform.org/ontology/oekg/input_datasets/{oekgDatasetConfig.dataset_id}> a oeo:{type_entity} ;
+        <https://openenergyplatform.org/ontology/oekg/input_datasets/{oekgDatasetConfig.dataset_id}> a oeo:{type_entity} ;
             rdfs:label "{oekgDatasetConfig.dataset_label}" ;
             oeo:has_iri "{oekgDatasetConfig.dataset_url}" ;
             oeo:has_key "{oekgDatasetConfig.dataset_id}" .
 
-        <http://openenergy-platform.org/ontology/oekg/scenario/{oekgDatasetConfig.scenario_uuid}> oeo:{rel_property}
-            <http://openenergy-platform.org/ontology/oekg/input_datasets/{oekgDatasetConfig.dataset_id}> .
+        <https://openenergyplatform.org/ontology/oekg/scenario/{oekgDatasetConfig.scenario_uuid}> oeo:{rel_property}
+            <https://openenergyplatform.org/ontology/oekg/input_datasets/{oekgDatasetConfig.dataset_id}> .
     }}
     """  # noqa
 
@@ -159,7 +159,7 @@ def remove_datasets_from_scenario(scenario_uuid, dataset_name, dataset_type):
     sparql_query = f"""
     PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     DELETE DATA {{
-        GRAPH <http://openenergy-platform.org/ontology/oekg/{scenario_uuid}> {{
+        GRAPH <https://openenergyplatform.org/ontology/oekg/{scenario_uuid}> {{
             oeo:{dataset_name} a oeo:{dataset_type}Dataset .
         }}
     }}
@@ -274,7 +274,7 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
         PREFIX OEO: <https://openenergyplatform.org/ontology/oeo/>
-        PREFIX OEKG: <http://openenergy-platform.org/ontology/oekg/>
+        PREFIX OEKG: <https://openenergyplatform.org/ontology/oekg/>
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
         PREFIX DC: <http://purl.org/dc/terms/>
 
