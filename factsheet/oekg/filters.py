@@ -200,7 +200,7 @@ class OekgQuery:
 
     def get_bundle_study_descriptors_where_scenario_is_part_of(self, scenario_uid):
         scenario_URI = URIRef(
-            "http://openenergy-platform.org/ontology/oekg/scenario/" + scenario_uid
+            "https://openenergyplatform.org/ontology/oekg/scenario/" + scenario_uid
         )
         study_descriptors: list = []
 

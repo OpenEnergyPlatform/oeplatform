@@ -31,7 +31,7 @@ DC = Namespace("http://purl.org/dc/terms/")
 RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 NPG = Namespace("http://ns.nature.com/terms/")
 SCHEMA = Namespace("https://schema.org/")
-OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
+OEKG = Namespace("https://openenergyplatform.org/ontology/oekg/")
 DBO = Namespace("http://dbpedia.org/ontology/")
 
 oekg.bind("OEO", OEO)
@@ -57,12 +57,12 @@ class Command(BaseCommand):
             all_bundles_uids.append(uid)
 
         for uid in all_bundles_uids:
-            bundle_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
+            bundle_URI = URIRef("https://openenergyplatform.org/ontology/oekg/" + uid)
 
             if (bundle_URI, OEKG["report_title"], None) in oekg:
                 publication_uuid = str(uuid.uuid4())
                 publications_URI = URIRef(
-                    "http://openenergy-platform.org/ontology/oekg/publication/"
+                    "https://openenergyplatform.org/ontology/oekg/publication/"
                     + publication_uuid
                 )
 

@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa:E501
+# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa:E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa:E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
         NPG = Namespace("http://ns.nature.com/terms/")
         SCHEMA = Namespace("https://schema.org/")
-        OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
+        OEKG = Namespace("https://openenergyplatform.org/ontology/oekg/")
         DBO = Namespace("http://dbpedia.org/ontology/")
 
         versions = os.listdir(f"{ONTOLOGY_ROOT}/{OPEN_ENERGY_ONTOLOGY_NAME}")

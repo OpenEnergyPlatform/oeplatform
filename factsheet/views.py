@@ -25,7 +25,7 @@ from rdflib.compare import graph_diff, to_isomorphic
 
 from factsheet.oekg.connection import oekg, oeo, oeo_owl
 from factsheet.oekg.filters import OekgQuery
-from factsheet.oekg.namespaces import DC, OBO, OEO, RDFS, XSD, bind_all_namespaces
+from factsheet.oekg.namespaces import DC, OBO, OEO, RDFS, SKOS, XSD, bind_all_namespaces
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 from factsheet.utils import remove_non_printable, serialize_publication_date
 from login import models as login_models
@@ -1828,19 +1828,83 @@ def get_all_sub_classes(cls, visited=None):
     return dict
 
 
+PROP_DEFINED_BY = URIRef(
+    "https://openenergyplatform.org/ontology/oeo/OEO_00000504"
+)  # "is defined by"
+PROP_DEFINITION = URIRef("http://purl.obolibrary.org/obo/IAO_0000115")
+SECTOR_DEVISIONS = [OEO.OEO_00010056, OEO.OEO_00000242, OEO.OEO_00010304]
+PROP_DEFINITION = URIRef("http://purl.obolibrary.org/obo/IAO_0000115")
+
+
+def _label(g: Graph, node: URIRef):
+    lab = g.value(node, RDFS.label)
+    return str(lab) if lab else None
+
+
+def _definition(g: Graph, node: URIRef):
+    # Prefer IAO:definition; fall back to SKOS definition or rdfs:comment
+    for p in (PROP_DEFINITION, SKOS.definition, RDFS.comment):
+        val = g.value(node, p)
+        if val:
+            return str(val)
+    return None
+
+
+def build_sector_dropdowns_from_oeo(g: Graph):
+    sector_divisions_list = []
+    sectors_list = []
+
+    for sd in SECTOR_DEVISIONS:
+        sd_label = _label(g, sd) or sd.n3(g.namespace_manager)
+        sd_def = _definition(g, sd)
+
+        # division dropdown option (+ definition)
+        sector_divisions_list.append(
+            {
+                "class": sd,  # TODO; URIRef; cast to str?
+                "label": sd_label,
+                "name": sd_label,
+                "value": sd_label,
+                "sector_division_definition": sd_def,
+            }
+        )
+
+        # sector individuals: ?sector oeo:is_defined_by ?sd
+        for sector in g.subjects(PROP_DEFINED_BY, sd):
+            sec_label = _label(g, sector)
+            definition = g.value(sector, PROP_DEFINITION)
+
+            sectors_list.append(
+                {
+                    "iri": sector,
+                    "label": sec_label,
+                    "value": sec_label,
+                    "sector_division": sd,
+                    "sector_difinition": (str(definition) if definition else None),
+                }
+            )
+
+    return sector_divisions_list, sectors_list
+
+
 # @login_required
 def populate_factsheets_elements(request, *args, **kwargs):
     """
     This function populates the elements required for creating or updating a factsheet.
+    For example: Elements returned form this function populate dropdown elements which
+    help the user to select sectors, technologies, scenario descriptors etc.
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+
+    Returns:
+        JsonResponse: A JSON response containing the elements for factsheet creation or
+                    update.
     """
-    scenario_class = oeo_owl.search_one(
-        iri="https://openenergyplatform.org/ontology/oeo/OEO_00000364"
-    )
+    scenario_class = oeo_owl.search_one(iri=OEO.OEO_00000364)
     scenario_subclasses = get_all_sub_classes(scenario_class)
 
-    technology_class = oeo_owl.search_one(
-        iri="https://openenergyplatform.org/ontology/oeo/OEO_00000407"
-    )
+    technology_class = oeo_owl.search_one(iri=OEO.OEO_00000407)
     technology_subclasses = get_all_sub_classes(technology_class)
 
     # energy_carrier_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020039") # noqa
@@ -1849,36 +1913,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
     # energy_transformation_process_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020003") # noqa
     # energy_transformation_processes = get_all_sub_classes(energy_transformation_process_class) # noqa
 
-    sector_divisions = ["OEO_00010056", "OEO_00000242", "OEO_00010304"]
-
-    sector_divisions_list = []
-    sectors_list = []
-    for sd in sector_divisions:
-        sector_division_URI = URIRef(
-            "https://openenergyplatform.org/ontology/oeo/" + sd
-        )
-        sector_division_label = oeo.value(sector_division_URI, RDFS.label)
-        sector_divisions_list.append(
-            {
-                "class": sector_division_URI,
-                "label": sector_division_label,
-                "name": sector_division_label,
-                "value": sector_division_label,
-            }
-        )
-        for s, p, o in oeo.triples((None, OEO.OEO_00000504, OEO[sd])):
-            sector_label = oeo.value(s, RDFS.label)
-            sector_difinition = oeo.value(s, OBO.IAO_0000115)
-            sectors_list.append(
-                {
-                    "iri": s,
-                    "label": sector_label,
-                    "value": sector_label,
-                    "sector_division": sector_division_URI,
-                    "sector_difinition": sector_difinition,
-                }
-            )
-
+    sector_divisions_list, sectors_list = build_sector_dropdowns_from_oeo(oeo)
     elements = {}
     # elements['energy_carriers'] = [energy_carriers]
     # elements['energy_transformation_processes'] = [energy_transformation_processes]

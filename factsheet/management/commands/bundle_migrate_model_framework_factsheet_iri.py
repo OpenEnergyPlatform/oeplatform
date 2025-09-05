@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
                     if framework_meta:
                         framework_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/frameworks/"
+                            "https://openenergyplatform.org/ontology/oekg/frameworks/"
                             + str(framework_meta["id"])
                         )
 
@@ -63,7 +63,7 @@ class Command(BaseCommand):
 
                     if model_meta:
                         model_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/models/"
+                            "https://openenergyplatform.org/ontology/oekg/models/"
                             + str(model_meta["id"])
                         )
 
