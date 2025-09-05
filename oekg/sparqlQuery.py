@@ -192,12 +192,6 @@ def build_filter_block(var, predicate, values):
     """
 
 
-def build_filter_block_string_values(predicate: str, values: list[str]) -> str:
-    if not values:
-        return ""
-    return "\n".join(f'?s {predicate} "{v}" .' for v in values)
-
-
 def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
     """
     Function to filter scenario bundles in the OEKG based on various criteria.
@@ -224,15 +218,31 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
     page = int(criteria.get("page", 1))
     offset = (page - 1) * results_per_page
 
-    # Build required triple+filter blocks
-    authors_exp = build_filter_block("authors", "OEO:OEO_00000506", authors)
+    values_items = " ".join(f"{author}" for author in authors)
+    authors_exp = ""
+    if authors:
+        authors_exp = f"""
+            ?s OBO:BFO_0000051 ?publication .
+            ?publication OEO:OEO_00000506 ?author .
+
+            # Use full IRIs here (examples)
+            VALUES ?author {{ {values_items} }}
+        """
+
     institutes_exp = build_filter_block("institutes", "OEO:OEO_00000510", institutes)
     funding_sources_exp = build_filter_block(
         "funding_sources", "OEO:OEO_00000509", funding_sources
     )
-    study_keywords_exp = build_filter_block_string_values(
-        "OEO:OEO_00390071", study_keywords
-    )
+
+    values_items = " ".join(f'"{kw}"' for kw in study_keywords)
+    study_keywords_exp = ""
+    if values_items:
+        study_keywords_exp = f"""
+            ?s OEO:OEO_00390071 ?descriptor_iri .
+            ?descriptor_iri RDFS:label ?descriptor .
+
+            VALUES ?descriptor {{ {values_items} }}
+        """
 
     # Scenario year clause
     scenario_year_exp = ""
@@ -241,12 +251,10 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
             year_start = int(year_start)
             year_end = int(year_end)
             scenario_year_exp = f"""
-                ?s OEKG:has_scenario ?scenario .
-                ?scenario OEO:OEO_00020440 ?scenario_year .
-                FILTER (
-                    xsd:integer(?scenario_year) >= {year_start} &&
-                    xsd:integer(?scenario_year) <= {year_end}
-                )
+                ?s OBO:BFO_0000051 ?scenario .
+                ?scenario OEO:OEO_00020440 ?scenario_date .
+                BIND (YEAR(?scenario_date) AS ?scenario_year)
+                FILTER (?scenario_year >= {year_start} && ?scenario_year <= {year_end})
             """
     except ValueError:
         pass
@@ -258,19 +266,18 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
             pub_date_start = int(pub_date_start)
             pub_date_end = int(pub_date_end)
             pub_date_exp = f"""
-                ?s OEKG:has_publication ?publication .
-                ?publication OEKG:date_of_publication ?publication_date .
-                BIND(xsd:integer(SUBSTR(STR(?publication_date), 1, 4)) AS ?pub_year)
+                ?s OBO:BFO_0000051 ?publication .
+                ?publication OEO:OEO_00390096 ?publication_date .
+                BIND (YEAR(?publication_date) AS ?pub_year)
                 FILTER (?pub_year >= {pub_date_start} && ?pub_year <= {pub_date_end})
             """
-        else:
-            # Still need to bind ?publication if no date filtering is applied
-            pub_date_exp = "?s OEKG:has_publication ?publication ."
+
     except ValueError:
         pass
 
-    # Final query
+    # Final query ... keep http it is mandatory
     query_structure = f"""
+        PREFIX OBO:  <http://purl.obolibrary.org/obo/>
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
         PREFIX OEO: <https://openenergyplatform.org/ontology/oeo/>
@@ -296,3 +303,6 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
     sparql.setReturnFormat(return_format)
     sparql.setQuery(query_structure)
     return sparql.query().convert()
+
+
+# --- filter helpers (reusable) -------------------------------------
