@@ -990,7 +990,14 @@ export default function CustomTable(props) {
           </Table>
         </TableContainer>
 
-        <TablePagination
+
+      </>
+    )}
+
+  {/* CARDS VIEW */}
+  {alignment === "cards" && data.length > 0 && renderCards(visibleRows)}
+      </Container>
+      <TablePagination
           rowsPerPageOptions={[5, 15, 25, 50]}
           component="div"
           count={data.length}
@@ -999,12 +1006,7 @@ export default function CustomTable(props) {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-      </>
-    )}
-
-  {/* CARDS VIEW */}
-  {alignment === "cards" && data.length > 0 && renderCards(visibleRows)}
-      </Container>
     </Box>
+
   );
 }
