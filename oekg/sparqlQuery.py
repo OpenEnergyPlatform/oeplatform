@@ -306,3 +306,204 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
 
 
 # --- filter helpers (reusable) -------------------------------------
+
+
+def authors_filter_block(authors):
+    """
+    Accepts values like 'OEKG:…' or full IRIs. Reuses iri_list().
+    """
+    if not authors:
+        return ""
+    return f"""
+        ?s OBO:BFO_0000051 ?publication .
+        ?publication OEO:OEO_00000506 ?author .
+        FILTER(?author IN ({iri_list(authors)}))
+    """
+
+
+def descriptors_filter_block_ci(labels):
+    """
+    Case-insensitive exact match on rdfs:label for descriptors.
+    """
+    items = [la for la in (labels or []) if la]
+    if not items:
+        return ""
+    quoted = ", ".join(f'"{la.lower()}"' for la in items)
+    return f"""
+        ?s OEO:OEO_00390071 ?descriptor_iri .
+        ?descriptor_iri RDFS:label ?descriptor .
+        BIND(LCASE(STR(?descriptor)) AS ?_desc_lc)
+        FILTER(?_desc_lc IN ({quoted}))
+    """
+
+
+def scenario_year_filter_block(year_start, year_end):
+    try:
+        ys = int(year_start) if year_start not in ("", None) else None
+        ye = int(year_end) if year_end not in ("", None) else None
+    except ValueError:
+        ys = ye = None
+    if not (ys and ye):
+        return ""
+    return f"""
+        ?s OBO:BFO_0000051 ?scenario .
+        ?scenario OEO:OEO_00020440 ?scenario_date .
+        BIND (YEAR(?scenario_date) AS ?scenario_year)
+        FILTER (?scenario_year >= {ys} && ?scenario_year <= {ye})
+    """
+
+
+def publication_year_filter_block(start_year, end_year):
+    try:
+        ys = int(start_year) if start_year not in ("", None) else None
+        ye = int(end_year) if end_year not in ("", None) else None
+    except ValueError:
+        ys = ye = None
+    if not (ys and ye):
+        return ""
+    return f"""
+        ?s OBO:BFO_0000051 ?pub .
+        ?pub OEO:OEO_00390096 ?publication_date .
+        BIND (YEAR(?publication_date) AS ?pub_year)
+        FILTER (?pub_year >= {ys} && ?pub_year <= {ye})
+    """
+
+
+# --- fast list query to get all factsheets (bundles) ---------------------------
+# Use in SB react app instead of slow rdflib loops
+
+
+def list_factsheets_oekg(criteria: dict, return_format=JSON):
+    """
+    Aggregated list for bundles, replacing slow rdflib loops in the view.
+    Returns SPARQL JSON that your view can map to the same structure as before.
+    """
+
+    # Pagination
+    results_per_page = int(criteria.get("resultsPerPage", 25))
+    page = int(criteria.get("page", 1))
+    offset = (page - 1) * results_per_page
+
+    # Filters (use same keys you already send from React)
+    institutes = criteria.get("institutions", [])
+    authors = criteria.get("authors", [])
+    funding_sources = criteria.get("fundingSource", [])
+    study_keywords = criteria.get("studyKeywords", criteria.get("studyKewords", []))
+    scenario_range = criteria.get("scenarioYearValue", ["", ""])
+    year_start, year_end = scenario_range if len(scenario_range) == 2 else ("", "")
+    pub_date_start = criteria.get("startDateOfPublication", "")
+    pub_date_end = criteria.get("endDateOfPublication", "")
+
+    # Compose dynamic filter blocks (re-using your build_filter_block)
+    blocks = "\n".join(
+        [
+            publication_year_filter_block(pub_date_start, pub_date_end),
+            authors_filter_block(authors),
+            build_filter_block("institutes", "OEO:OEO_00000510", institutes),
+            build_filter_block("funding_sources", "OEO:OEO_00000509", funding_sources),
+            descriptors_filter_block_ci(study_keywords),
+            scenario_year_filter_block(year_start, year_end),
+        ]
+    )
+
+    # Use a safe separator for GROUP_CONCAT
+    SEP = "||"
+
+    sparql_query = f"""
+        PREFIX OBO:  <http://purl.obolibrary.org/obo/>
+        PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX OEO:  <https://openenergyplatform.org/ontology/oeo/>
+        PREFIX OEKG: <https://openenergyplatform.org/ontology/oekg/>
+        PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+        PREFIX DC:   <http://purl.org/dc/terms/>
+
+        SELECT ?s ?uid ?study_acronym ?study_name ?abstract
+               (GROUP_CONCAT(DISTINCT ?inst_label;         separator="{SEP}") AS ?institutions)
+               (GROUP_CONCAT(DISTINCT ?fund_label;         separator="{SEP}") AS ?funding_sources)
+               (GROUP_CONCAT(DISTINCT ?model_label;        separator="{SEP}") AS ?models)
+               (GROUP_CONCAT(DISTINCT ?framework_label;    separator="{SEP}") AS ?frameworks)
+               (GROUP_CONCAT(DISTINCT STR(?pub_date);      separator="{SEP}") AS ?collected_pub_dates)
+        WHERE {{
+          # bundles (factsheets)
+          ?s a OEO:OEO_00020227 ;
+             DC:acronym ?study_acronym .
+          OPTIONAL {{ ?s RDFS:label   ?study_name }}
+          OPTIONAL {{ ?s DC:abstract  ?abstract }}
+
+          # institutions
+          OPTIONAL {{
+            ?s OEO:OEO_00000510 ?inst_iri .
+            ?inst_iri RDFS:label ?inst_label .
+          }}
+
+          # funding sources
+          OPTIONAL {{
+            ?s OEO:OEO_00000509 ?fund_iri .
+            ?fund_iri RDFS:label ?fund_label .
+          }}
+
+          OPTIONAL {{
+            ?s OBO:BFO_0000051 ?modelPart .
+            ?modelPart RDFS:label ?model_label .
+            FILTER(CONTAINS(STR(?modelPart), "/models/"))
+          }}
+
+          OPTIONAL {{
+            ?s OBO:BFO_0000051 ?frameworkPart .
+            ?frameworkPart RDFS:label ?framework_label .
+            FILTER(CONTAINS(STR(?frameworkPart), "/framework"))
+          }}
+
+          # publication dates of parts (for collected list)
+          OPTIONAL {{
+            ?s OBO:BFO_0000051 ?p .
+            ?p OEO:OEO_00390096 ?pub_date .
+          }}
+
+          # dynamic filters
+          {blocks}
+
+          # uid for your frontend
+          BIND( STRAFTER(STR(?s), "https://openenergyplatform.org/ontology/oekg/") AS ?uid )
+        }}
+        GROUP BY ?s ?uid ?study_acronym ?study_name ?abstract
+        ORDER BY ?study_acronym
+        # LIMIT {results_per_page}
+        # OFFSET {offset}
+    """  # noqa:E501
+
+    sparql.setReturnFormat(return_format)
+    sparql.setQuery(sparql_query)
+    return sparql.query().convert()
+
+
+def normalize_factsheets_rows(res_json: dict) -> list[dict]:
+    """
+    Convert SPARQL JSON rows into your existing list structure,
+    keeping keys your frontend already expects.
+    """
+    SEP = "||"
+    out = []
+    for row in res_json.get("results", {}).get("bindings", []):
+
+        def get(var):
+            return row[var]["value"] if var in row else ""
+
+        def split(var):
+            return [v for v in (get(var).split(SEP) if get(var) else []) if v]
+
+        out.append(
+            {
+                "uid": get("uid"),
+                "acronym": get("study_acronym"),
+                "study_name": get("study_name"),
+                "abstract": get("abstract"),
+                "institutions": split("institutions"),
+                "funding_sources": split("funding_sources"),
+                "models": split("models"),
+                "frameworks": split("frameworks"),
+                "collected_scenario_publication_dates": split("collected_pub_dates"),
+            }
+        )
+    return out
