@@ -43,8 +43,11 @@ SPDX-License-Identifier: CC0-1.0
 - Removing contributor tab from peer review ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
 - Opening windows for indexed fields an subcategories in opr ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2026))
 - Change main views function for metadata v2 structure ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2056))
+- Enhance the Scenario Bundles initial page response time by refactoring to pur SPARQL Query ([#2070](https://github.com/OpenEnergyPlatform/oeplatform/pull/2070))
 
 ## Features
+
+- Inplement OEKG v2 (Senario Bundles) which includes a stabalized OEKG structure with latest OEO concepts and a updated Scenario Bundle Frontend / Bakend implementation. ([#2070](https://github.com/OpenEnergyPlatform/oeplatform/pull/2070))
 
 ## Bugs
 
