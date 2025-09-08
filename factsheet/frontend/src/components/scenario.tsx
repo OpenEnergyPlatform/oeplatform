@@ -385,7 +385,7 @@ export default function Scenario(props) {
           fieldGridSize={9}
           spanValue="Output dataset(s)"
           tooltipText="Exogenous data is a data item whose quantity..."
-          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00030029"
+          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00030030"
           TooltipComponent={HtmlTooltip}
           customSpan={
             <IconButton color="primary" size="small" onClick={addOutputDatasetItem}>

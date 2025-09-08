@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -6,14 +6,14 @@ from django.core.management.base import BaseCommand
 from rdflib import RDF, Literal, URIRef
 
 from factsheet.oekg.connection import oekg_with_namespaces as oekg
-from factsheet.oekg.namespaces import OEO, RDFS
+from factsheet.oekg.namespaces import OBO, OEO, RDFS
 from modelview.utils import get_framework_metadata_by_name, get_model_metadata_by_name
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
-            for s, p, o in oekg.triples((s, OEO["has_framework"], None)):
+            for s, p, o in oekg.triples((s, OBO.BFO_0000051, None)):
                 if not str(o).startswith("<http://openenergy-"):
                     framework_meta = get_framework_metadata_by_name(
                         str(o), "energyframework"
@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
                     if framework_meta:
                         framework_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/frameworks/"
+                            "https://openenergyplatform.org/ontology/oekg/frameworks/"
                             + str(framework_meta["id"])
                         )
 
@@ -47,7 +47,7 @@ class Command(BaseCommand):
                         oekg.add(
                             (
                                 framework_URI,
-                                OEO["has_iri"],
+                                OEO.OEO_00390094,
                                 Literal(framework_meta["urn"]),
                             )
                         )
@@ -57,13 +57,13 @@ class Command(BaseCommand):
                             f"In bundle {s} updated framework {str(o)} with {framework_URI}"  # noqa
                         )
 
-            for s, p, o in oekg.triples((s, OEO["has_model"], None)):
+            for s, p, o in oekg.triples((s, OBO.BFO_0000051, None)):
                 if not str(o).startswith("<http://openenergy-"):
                     model_meta = get_model_metadata_by_name(str(o), "energymodel")
 
                     if model_meta:
                         model_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/models/"
+                            "https://openenergyplatform.org/ontology/oekg/models/"
                             + str(model_meta["id"])
                         )
 
@@ -79,7 +79,7 @@ class Command(BaseCommand):
                             )
 
                         oekg.add(
-                            (model_URI, OEO["has_iri"], Literal(model_meta["urn"]))
+                            (model_URI, OEO.OEO_00390094, Literal(model_meta["urn"]))
                         )
 
                         oekg.remove((s, p, o))

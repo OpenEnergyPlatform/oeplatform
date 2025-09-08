@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa:E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa:E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa:E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -92,3 +92,19 @@ def filter_oekg_by_scenario_bundles_attributes(request):
         content_type="application/json",
     )
     return response
+
+
+# # TODO: check if API TOKEN safety required
+# def send_oekg_rdf(requests):
+#     """
+#     This function sends the entire OEKG as RDF data in Turtle format.
+
+#     Args:
+#         request (HttpRequest): The incoming HTTP GET request.
+
+#     Returns:
+#         HttpResponse: A response containing the OEKG RDF data in Turtle format.
+#     """
+#     oekg = get_oekg()
+#     rdf_data = oekg.serialize(format="turtle")
+#     return HttpResponse(rdf_data, content_type="text/turtle")

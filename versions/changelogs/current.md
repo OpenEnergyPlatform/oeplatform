@@ -45,9 +45,12 @@ SPDX-License-Identifier: CC0-1.0
 - Dividing the review functionality into 7 javaScript modules, the main module is the new entry point which is connected to vite and djnago staticfiles ([#1965](https://github.com/OpenEnergyPlatform/oeplatform/pull/1965))
 - Add javaScript modules: main for connecting logic as entrypoint; navigation for switching between fields/tabs; opr_reviewer_logic for checking if review is complete; peer_review for main review logic; state_current_review for getting certain values from review; summary for review summary ([#1965](https://github.com/OpenEnergyPlatform/oeplatform/pull/1965))
 - Change main views function for metadata v2 structure ([#2026](https://github.com/OpenEnergyPlatform/oeplatform/pull/2056))
+- Enhance the Scenario Bundles initial page response time by refactoring to pur SPARQL Query ([#2070](https://github.com/OpenEnergyPlatform/oeplatform/pull/2070))
 
 
 ## Features
+
+- Inplement OEKG v2 (Senario Bundles) which includes a stabalized OEKG structure with latest OEO concepts and a updated Scenario Bundle Frontend / Bakend implementation. ([#2070](https://github.com/OpenEnergyPlatform/oeplatform/pull/2070))
 
 ## Bugs
 - connect opr_reviewer.js to main.js for clickability of fields in opr ([#2072](https://github.com/OpenEnergyPlatform/oeplatform/pull/2073))

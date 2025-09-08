@@ -1,42 +1,73 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg  # noqa:E501
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa:E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import re
+from datetime import datetime
+
+try:
+    from rdflib.term import Literal as RDFLiteral
+except Exception:
+    RDFLiteral = None
+    XSD = None
 
 
-def serialize_publication_date(triple_object_pub_year: str):
+def serialize_publication_date(value) -> str:
     """
-    Serialize strings in different formats to return the year (yyyy) only.
-
-    Args:
-    triple_object_pub_year (str): A string representing the publication
-    date in various formats.
-
-    Returns:
-    str: The year in yyyy format, or "None" if the date is invalid or empty.
+    Return year 'YYYY' or 'None' from various date representations:
+    - rdflib Literals with xsd:date, xsd:dateTime, xsd:gYear, xsd:gYearMonth
+    - 'YYYY', 'YYYY-MM', 'YYYY-MM-DD', 'YYYY/M/D'
+    - ISO 8601 datetime (with Z or offsets), optional fractional seconds
+    - Typed literal strings like: "2023-01-01T00:00:00"^^<...#dateTime>
     """
-
-    # Return "None" if the input is an empty string
-    if not triple_object_pub_year:
+    if not value:
         return "None"
 
-    # Regex patterns to match different date formats
-    patterns = [
-        r"^(?P<year>\d{4})-\d{2}-\d{2}$",  # Matches "2022-11-28"
-        r"^(?P<year>\d{4})/\d{1,2}/\d{1,2}$",  # Matches "2023/8/15"
-        r"^(?P<year>\d{4})$",  # Matches "2023"
-        r"^(?P<year>\d{4})-\d{2}-\d{2}\^\^xsd:date$",  # Matches "2017-03-06^^xsd:date"
-    ]
+    # 1) rdflib Literal: use toPython() when possible
+    if RDFLiteral and isinstance(value, RDFLiteral):
+        try:
+            py = value.toPython()
+            if hasattr(py, "year"):
+                return f"{int(py.year):04d}"  # date/datetime
+            if isinstance(py, int):  # gYear sometimes becomes int
+                return f"{py:04d}"
+        except Exception:
+            pass
+        # fallback to string form
+        s = str(value)
+    else:
+        s = str(value)
 
-    # Attempt to match the input string with each pattern
-    for pattern in patterns:
-        match = re.match(pattern, triple_object_pub_year)
-        if match:
-            return match.group("year")
+    s = s.strip()
 
-    # If none of the patterns match, return "None" for invalid date formats
+    # 2) Strip ^^datatype and outer quotes if present
+    if "^^" in s:
+        s = s.split("^^", 1)[0].strip()
+    s = s.strip('"').strip("'")
+
+    # 3) Normalize 2023/8/5 -> 2023-08-05 (keeps year extraction simple)
+    if "/" in s and re.fullmatch(r"\d{4}/\d{1,2}/\d{1,2}", s):
+        y, mth, day = s.split("/")
+        s = f"{y}-{int(mth):02d}-{int(day):02d}"
+
+    # 4) Try Python's ISO parser (handles YYYY-MM-DD[THH:MM:SS[.fff]][±HH:MM])
+    iso = s[:-1] + "+00:00" if s.endswith("Z") else s
+    try:
+        dt = datetime.fromisoformat(iso)
+        return f"{dt.year:04d}"
+    except Exception:
+        pass
+
+    # 5) Regex fallbacks for YYYY-MM(-DD)(T...) and bare YYYY
+    m = re.match(r"^\s*(\d{4})-(\d{2})(?:-(\d{2}))?(?:T.*)?\s*$", s)
+    if m:
+        return m.group(1)
+
+    m = re.match(r"^\s*(\d{4})\s*$", s)
+    if m:
+        return m.group(1)
+
     return "None"
 
 
