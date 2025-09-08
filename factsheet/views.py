@@ -1114,7 +1114,7 @@ def update_factsheet(request, *args, **kwargs):
             json.loads(study_keywords) if study_keywords is not None else []
         )
         for keyword in _study_keywords:
-            new_bundle.add((study_URI, OEO.OEO_00390071, Literal(keyword)))
+            new_bundle.add((study_URI, OEO.OEO_00390071, URIRef(keyword)))
 
         iso_old_bundle = to_isomorphic(old_bundle)
         iso_new_bundle = to_isomorphic(new_bundle)

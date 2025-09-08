@@ -1678,8 +1678,8 @@ function Factsheet(props) {
         {...props}
         showTooltip={false}
         spanValue="Study descriptors"
-        tooltipText="A funder is a sponsor that supports by giving money.."
-        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00090001"
+        tooltipText="A Study descriptors describes keywords for a study.."
+        hrefLink=""
         renderField={() => (
           <FormGroup>
             <div >
@@ -1701,7 +1701,7 @@ function Factsheet(props) {
                     >
                       <FormControlLabel control={
                         <Checkbox size="small" color="default" />
-                      } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]}
+                      } checked={selectedStudyKewords.includes(item[1])} onChange={handleStudyKeywords} label={item[0]} name={item[1]}
                       />
                     </HtmlTooltip>
                       :
@@ -1720,7 +1720,7 @@ function Factsheet(props) {
                       >
                         <FormControlLabel control={
                           <Checkbox size="small" color="default" />
-                        } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]}
+                        } checked={selectedStudyKewords.includes(item[1])} onChange={handleStudyKeywords} label={item[1]} name={item[0]}
                         />
                       </HtmlTooltip>
                     }
@@ -2787,7 +2787,7 @@ const renderScenariosOverview = () => (
                       <Grid item xs={3} >
                         <span>Descriptors</span>
                         <span >
-                          {/* <HtmlTooltip
+                          <HtmlTooltip
                         title={
                         <React.Fragment>
                           <Typography color="inherit" variant="subtitle1">
@@ -2799,13 +2799,18 @@ const renderScenariosOverview = () => (
                       }
                       >
                       <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                      </HtmlTooltip> */}
+                      </HtmlTooltip>
                         </span>
                       </Grid>
                       <Grid item xs={9} style={{ paddingTop: '10px' }}>
-                        {/* {selectedStudyKewords.map((v, i) => (
-                          <span> <span> <Chip label={v} size="small" variant={StudyKeywords.filter((i) => i[0] == v)[0][1] === "" ? "" : "outlined"} onClick={() => handleOpenURL(StudyKeywords.filter((i) => i[0] == v)[0][1])} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-                        ))} */}
+                        {selectedStudyKewords.map((v, i) => (
+                          <span> <span>
+                            <Chip label={StudyKeywords.filter((i) => i[1] == v)[0][0]}
+                            size="small"
+                            variant={StudyKeywords.filter((i) => i[1] == v)[0][1] === "" ? "" : "outlined"}
+                            onClick={() => handleOpenURL(StudyKeywords.filter((i) => i[1] == v)[0][1])} />
+                            </span> <span>   <b className="separator-dot">  </b></span> </span>
+                        ))}
                       </Grid>
                     </InfoListItem>
                     <InfoListItem>
