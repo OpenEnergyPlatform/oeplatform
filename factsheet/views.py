@@ -2044,6 +2044,8 @@ def filter_scenario_bundles_view(request):
     table_iri = request.GET.get("table_iri", "")
     # table_iri = "dataedit/view/scenario/abbb_emob"
 
+    table_name = table_iri.split("/scenario/")[1]
+
     # Create an instance of OekgQuery
     oekg_query = OekgQuery()
 
@@ -2076,6 +2078,7 @@ def filter_scenario_bundles_view(request):
 
     # Prepare data for rendering in the template
     context = {
+        "table_name": table_name,
         "input_dataset_bundles": input_dataset_bundle_acronyms,
         "output_dataset_bundles": output_dataset_bundle_acronyms,
     }
