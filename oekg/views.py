@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_POST
 
-from oekg.utils import execute_filter_sparql_query, execute_sparql_query, get_oekg
+from oekg.utils import execute_filter_sparql_query, execute_sparql_query
 from oeplatform.settings import DOCUMENTATION_LINKS
 
 
@@ -94,17 +94,17 @@ def filter_oekg_by_scenario_bundles_attributes(request):
     return response
 
 
-# TODO: check if API TOKEN safety required
-def send_oekg_rdf(requests):
-    """
-    This function sends the entire OEKG as RDF data in Turtle format.
+# # TODO: check if API TOKEN safety required
+# def send_oekg_rdf(requests):
+#     """
+#     This function sends the entire OEKG as RDF data in Turtle format.
 
-    Args:
-        request (HttpRequest): The incoming HTTP GET request.
+#     Args:
+#         request (HttpRequest): The incoming HTTP GET request.
 
-    Returns:
-        HttpResponse: A response containing the OEKG RDF data in Turtle format.
-    """
-    oekg = get_oekg()
-    rdf_data = oekg.serialize(format="turtle")
-    return HttpResponse(rdf_data, content_type="text/turtle")
+#     Returns:
+#         HttpResponse: A response containing the OEKG RDF data in Turtle format.
+#     """
+#     oekg = get_oekg()
+#     rdf_data = oekg.serialize(format="turtle")
+#     return HttpResponse(rdf_data, content_type="text/turtle")
