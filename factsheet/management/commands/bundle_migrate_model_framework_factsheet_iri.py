@@ -6,14 +6,14 @@ from django.core.management.base import BaseCommand
 from rdflib import RDF, Literal, URIRef
 
 from factsheet.oekg.connection import oekg_with_namespaces as oekg
-from factsheet.oekg.namespaces import OEO, RDFS
+from factsheet.oekg.namespaces import OBO, OEO, RDFS
 from modelview.utils import get_framework_metadata_by_name, get_model_metadata_by_name
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
-            for s, p, o in oekg.triples((s, OEO.BFO_0000051, None)):
+            for s, p, o in oekg.triples((s, OBO.BFO_0000051, None)):
                 if not str(o).startswith("<http://openenergy-"):
                     framework_meta = get_framework_metadata_by_name(
                         str(o), "energyframework"
@@ -57,7 +57,7 @@ class Command(BaseCommand):
                             f"In bundle {s} updated framework {str(o)} with {framework_URI}"  # noqa
                         )
 
-            for s, p, o in oekg.triples((s, OEO.BFO_0000051, None)):
+            for s, p, o in oekg.triples((s, OBO.BFO_0000051, None)):
                 if not str(o).startswith("<http://openenergy-"):
                     model_meta = get_model_metadata_by_name(str(o), "energymodel")
 

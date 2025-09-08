@@ -205,7 +205,7 @@ class OekgQuery:
 
         # find bundle for the current scenario
         for s1, p1, o1 in self.oekg.triples(
-            (None, namespaces.OEO.BFO_0000051, scenario_URI)
+            (None, namespaces.OBO.BFO_0000051, scenario_URI)
         ):
             # find all study descriptors for the scenario bundle
             for s2, p2, o2 in oekg.triples((s1, namespaces.OEO.OEO_00390071, None)):
