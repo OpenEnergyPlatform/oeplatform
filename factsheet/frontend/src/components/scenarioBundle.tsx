@@ -2803,14 +2803,25 @@ const renderScenariosOverview = () => (
                         </span>
                       </Grid>
                       <Grid item xs={9} style={{ paddingTop: '10px' }}>
-                        {selectedStudyKewords.map((v, i) => (
-                          <span> <span>
-                            <Chip label={StudyKeywords.filter((i) => i[1] == v)[0][0]}
-                            size="small"
-                            variant={StudyKeywords.filter((i) => i[1] == v)[0][1] === "" ? "" : "outlined"}
-                            onClick={() => handleOpenURL(StudyKeywords.filter((i) => i[1] == v)[0][1])} />
-                            </span> <span>   <b className="separator-dot">  </b></span> </span>
-                        ))}
+                        {selectedStudyKewords.map((v, i) => {
+                          const match = StudyKeywords.find((it) => it[1] === v) || [v, ""];
+                          const [label, url] = match;
+                          const variant = url ? "outlined" : "filled";
+
+                          return (
+                            <span key={`${v}-${i}`}>
+                              <span>
+                                <Chip
+                                  label={label}
+                                  size="small"
+                                  variant={variant}
+                                  onClick={url ? () => handleOpenURL(url) : undefined}
+                                />
+                              </span>
+                              <span><b className="separator-dot"> </b></span>
+                            </span>
+                          );
+                        })}
                       </Grid>
                     </InfoListItem>
                     <InfoListItem>
