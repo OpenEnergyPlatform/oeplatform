@@ -1,0 +1,165 @@
+{% extends "dataedit/base.html" %}
+{% load compress %}
+{% load static %}
+{% load django_bootstrap5 %}
+
+{% block after-head %}
+<link href="{% static 'metaedit/sidebar-layout.css' %}" rel="stylesheet">
+<link href="{% static 'metaedit/metaedit.css' %}" rel="stylesheet">
+{% endblock after-head %}
+
+{% block site-header %}
+<h2 class="site-header">
+    <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i>
+</h2>
+{% endblock site-header %}
+
+{% block main %}
+<div class="d-flex justify-content-center">
+    <div class="spinner-border text-primary m-5 d-none" role="status" id="metaedit-loading">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<!-- Fixed Controls -->
+<div class="fixed-controls d-none" id="metaedit-controls">
+    <div class="btn-group" role="group">
+        <span class="" {% if not can_add %} data-bs-toggle="popover" title="You need write permissions on this table to upload meta data" {% endif %}>
+            <button class="btn btn-success btn-sm mr-2 {% if not can_add %} disabled {% endif %}" id="metaedit-submit">
+                <span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="metaedit-submitting"></span>
+                <i class="fa fa-save mr-1"></i>Submit
+            </button>
+        </span>
+        <button class="btn btn-secondary btn-sm mr-2" id="metaedit-cancel">
+            <i class="fa fa-times mr-1"></i>Cancel
+        </button>
+        <button class="btn btn-primary btn-sm mr-2" id="metaedit-download">
+            <i class="fa fa-download mr-1"></i>Download
+        </button>
+    </div>
+</div>
+
+<!-- Main container will be populated by JavaScript -->
+<div id="main-container">
+    <!-- Sidebar layout will be inserted here -->
+</div>
+
+<!-- Hidden form container -->
+<form id="metaedit-form" style="display: none;">
+    <!-- JSON Editor form will be rendered here -->
+</form>
+
+<!-- Modal for OEO extended -->
+<div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Add your custom units as extension to the oeo:</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Insert the form here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock main %}
+
+{% block after-body-bottom-js %}
+    {% compress js %}
+    <script src="{% static 'metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js' %}"></script>
+    <script src="{% static 'metaedit/sidebar-metaedit.js' %}"></script>
+    <script src="{% static 'modelview/htmx.min.js' %}"></script>
+    {% endcompress %}
+    
+    <script src="https://unpkg.com/@trevoreyre/autocomplete-js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@trevoreyre/autocomplete-js/dist/style.css" />
+
+    <script>
+        var createUrl = '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}';
+        var config = JSON.parse("{{ config|escapejs }}");
+        
+        // Initialize the sidebar metadata editor
+        SidebarMetaEdit(config);
+        
+        $(function () {
+            $('[data-bs-toggle="popover"]').popover()
+            $('.popover-dismiss').popover({
+                trigger: 'focus'
+            })
+        })
+
+        // Enhanced tab filtering for sidebar layout
+        function hideTabsFilter(tabIdsToRemove) {
+            const observer = new MutationObserver(() => {
+                document.querySelectorAll('.nav-item a.nav-link').forEach(link => {
+                    const href = link.getAttribute('href');
+                    const label = link.querySelector('span')?.textContent.trim();
+
+                    if (tabIdsToRemove.includes(href?.replace('#', '')) || tabIdsToRemove.includes(label)) {
+                        const item = link.closest('.nav-item');
+                        if (item) item.remove();
+                    }
+                });
+            });
+
+            const target = document.querySelector('#metaedit-form');
+            if (target) {
+                observer.observe(target, {
+                    childList: true,
+                    subtree: true,
+                });
+            }
+        }
+
+        // Set up tab filtering
+        hideTabsFilter(['Meta Metadata', 'Embargo Period', 'Dialect', 'Review']);
+
+        // JSON Editor callbacks
+        window.JSONEditor.defaults.callbacks = {
+            "autocomplete": {
+                "search_name": function search(jseditor_editor, input) {
+                    var url = "https://openenergyplatform.org/api/oeo-search?query=" + input;
+
+                    return new Promise(function(resolve) {
+                        fetch(url, {
+                            mode: 'cors',
+                        }).then(function(response) {
+                            return response.json();
+                        }).then(function(data) {
+                            resolve(data["docs"]);
+                        });
+                    });
+                },
+                "renderResult_name": function(jseditor_editor, result, props) {
+                    return ['<li ' + props + '>',
+                        '<div class="eiao-object-snippet">' + result.label + '<small>' + '<span style="color:green">' + ' : ' + result.definition + '</span></div>',
+                        '</li>'].join('');
+                },
+                "getResultValue_name": function getResultValue(jseditor_editor, result) {
+                    selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
+
+                    let path = String(jseditor_editor.path).replace("name", "@id");
+                    let path_uri = config.editor.getEditor(path);
+                    path_uri.setValue(String(result.resource));
+
+                    return selected_value;
+                },
+            },
+            "button": {
+                "openModalAction": function openOeoExtPlugin(jseditor, e) {
+                    htmx.ajax('GET', createUrl, {
+                        target: '.modal-body',
+                        swap: 'innerHTML',
+                        trigger: 'click'
+                    });
+                    $('#formModal').modal('show');
+                }
+            }
+        };
+    </script>
+{% endblock after-body-bottom-js %}
