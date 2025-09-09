@@ -31,7 +31,8 @@ export const StudyKeywords = [
     ['heating grid', 'https://openenergyplatform.org/ontology/oeo/OEO_00020005', 'A heating grid is a supply grid that distributes thermal energy via circulating steam or liquids.'],
     ['scenario projection comparison', 'https://openenergyplatform.org/ontology/oeo/OEO_00360003', 'Scenario projection comparison is the analysis of different future scenarios to evaluate potential outcomes and impacts.'],
     ['model intercomparison study', 'https://openenergyplatform.org/ontology/oeo/OEO_00360002', 'Model intercomparison study involves comparing the outputs of different models to understand variability and improve accuracy in projections.'],
-    ['policies and measures', 'https://openenergyplatform.org/ontology/oeo/OEO_00140151', 'Policy instrument is a means through which governments or organizations implement strategies to influence economic or social outcomes.']
+    ['policies and measures', 'https://openenergyplatform.org/ontology/oeo/OEO_00140151', 'Policy instrument is a means through which governments or organizations implement strategies to influence economic or social outcomes.'],
+    ['process climate neutrality', 'https://openenergyplatform.org/ontology/oeo/OEO_00360011', 'Process climate neutrality is a process attribute that conforms to some climate neutrality criteria.'],
   ];
 
   export default StudyKeywords;
