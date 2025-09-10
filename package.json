@@ -71,7 +71,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^9.25.1",
-    "vite": "^6.3.2",
+    "vite": "^6.3.6",
     "vite-plugin-eslint": "^1.8.1"
   }
 }
