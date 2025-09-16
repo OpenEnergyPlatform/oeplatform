@@ -111,57 +111,57 @@ An example of input parameters
   "sectors": [
     {
       "label": "KSG sector buildings",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010067"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010067"
     },
     {
       "label": "KSG sector industry",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010066"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010066"
     },
     {
       "label": "CRF sector (IPCC 2006): wetlands",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010192"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010192"
     },
     {
       "label": "CRF sector (IPCC 2006): other product manufacture and use",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010172"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010172"
     },
     {
       "label": "CRF sector (IPCC 2006): manure management",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010180"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010180"
     },
     {
       "label": "CRF sector (IPCC 2006): multilateral operations",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010203"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010203"
     },
     {
       "label": "CRF sector (IPCC 2006): chemical industry - other",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010353"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010353"
     }
   ],
   "technologies": [
     {
       "label": "power generation technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010423"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010423"
     },
     {
       "label": "wind power technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010424"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010424"
     },
     {
       "label": "offshore wind power technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010426"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010426"
     },
     {
       "label": "solar thermal power technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010429"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010429"
     },
     {
       "label": "hydro power technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010431"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010431"
     },
     {
       "label": "run of river power technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010432"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010432"
     }
   ],
   "study_descriptors": [
@@ -205,15 +205,15 @@ An example of input parameters
       "descriptors ": [
         {
           "label": "explorative scenario ",
-          "class": "http://openenergy-platform.org/ontology/oeo/OEO_00020248 "
+          "class": "https://openenergyplatform.org/ontology/oeo/OEO_00020248 "
         },
         {
           "label": "policy scenario ",
-          "class": "http://openenergy-platform.org/ontology/oeo/OEO_00020309 "
+          "class": "https://openenergyplatform.org/ontology/oeo/OEO_00020309 "
         },
         {
           "label": "climate scenario ",
-          "class": "http://openenergy-platform.org/ontology/oeo/OEO_00030007"
+          "class": "https://openenergyplatform.org/ontology/oeo/OEO_00030007"
         }
       ],
       "input_datasets": [
@@ -266,23 +266,23 @@ An example of input parameters
       "descriptors ": [
         {
           "label ": "explorative scenario ",
-          "class ": "http://openenergy-platform.org/ontology/oeo/OEO_00020248 "
+          "class ": "https://openenergyplatform.org/ontology/oeo/OEO_00020248 "
         },
         {
           "label ": "with additional measures scenario ",
-          "class ": "http://openenergy-platform.org/ontology/oeo/OEO_00020312 "
+          "class ": "https://openenergyplatform.org/ontology/oeo/OEO_00020312 "
         },
         {
           "label ": "greenhouse gas emission scenario ",
-          "class ": "http://openenergy-platform.org/ontology/oeo/OEO_00020317 "
+          "class ": "https://openenergyplatform.org/ontology/oeo/OEO_00020317 "
         },
         {
           "label ": "climate scenario ",
-          "class ": "http://openenergy-platform.org/ontology/oeo/OEO_00030007 "
+          "class ": "https://openenergyplatform.org/ontology/oeo/OEO_00030007 "
         },
         {
           "label ": "economic scenario ",
-          "class ": "http://openenergy-platform.org/ontology/oeo/OEO_00030008 "
+          "class ": "https://openenergyplatform.org/ontology/oeo/OEO_00030008 "
         }
       ],
       "input_datasets ": [
@@ -409,57 +409,57 @@ The `uid` should belong to an existing bundle in OEKG. The remaining fields are 
   "sectors": [
     {
       "label": "KSG sector buildings",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010067"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010067"
     },
     {
       "label": "KSG sector industry",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010066"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010066"
     },
     {
       "label": "CRF sector (IPCC 2006): wetlands",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010192"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010192"
     },
     {
       "label": "CRF sector (IPCC 2006): other product manufacture and use",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010172"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010172"
     },
     {
       "label": "CRF sector (IPCC 2006): manure management",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010180"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010180"
     },
     {
       "label": "CRF sector (IPCC 2006): multilateral operations",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010203"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010203"
     },
     {
       "label": "CRF sector (IPCC 2006): chemical industry - other",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010353"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010353"
     }
   ],
   "technologies": [
     {
       "label": "power generation technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010423"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010423"
     },
     {
       "label": "wind power technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010424"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010424"
     },
     {
       "label": "offshore wind power technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010426"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010426"
     },
     {
       "label": "solar thermal power technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010429"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010429"
     },
     {
       "label": "hydro power technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010431"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010431"
     },
     {
       "label": "run of river power technology",
-      "class": "http://openenergy-platform.org/ontology/oeo/OEO_00010432"
+      "class": "https://openenergyplatform.org/ontology/oeo/OEO_00010432"
     }
   ],
   "study_descriptors": [
@@ -503,15 +503,15 @@ The `uid` should belong to an existing bundle in OEKG. The remaining fields are 
       "descriptors ": [
         {
           "label": "explorative scenario ",
-          "class": "http://openenergy-platform.org/ontology/oeo/OEO_00020248 "
+          "class": "https://openenergyplatform.org/ontology/oeo/OEO_00020248 "
         },
         {
           "label": "policy scenario ",
-          "class": "http://openenergy-platform.org/ontology/oeo/OEO_00020309 "
+          "class": "https://openenergyplatform.org/ontology/oeo/OEO_00020309 "
         },
         {
           "label": "climate scenario ",
-          "class": "http://openenergy-platform.org/ontology/oeo/OEO_00030007"
+          "class": "https://openenergyplatform.org/ontology/oeo/OEO_00030007"
         }
       ],
       "input_datasets": [
@@ -564,23 +564,23 @@ The `uid` should belong to an existing bundle in OEKG. The remaining fields are 
       "descriptors ": [
         {
           "label ": "explorative scenario ",
-          "class ": "http://openenergy-platform.org/ontology/oeo/OEO_00020248 "
+          "class ": "https://openenergyplatform.org/ontology/oeo/OEO_00020248 "
         },
         {
           "label ": "with additional measures scenario ",
-          "class ": "http://openenergy-platform.org/ontology/oeo/OEO_00020312 "
+          "class ": "https://openenergyplatform.org/ontology/oeo/OEO_00020312 "
         },
         {
           "label ": "greenhouse gas emission scenario ",
-          "class ": "http://openenergy-platform.org/ontology/oeo/OEO_00020317 "
+          "class ": "https://openenergyplatform.org/ontology/oeo/OEO_00020317 "
         },
         {
           "label ": "climate scenario ",
-          "class ": "http://openenergy-platform.org/ontology/oeo/OEO_00030007 "
+          "class ": "https://openenergyplatform.org/ontology/oeo/OEO_00030007 "
         },
         {
           "label ": "economic scenario ",
-          "class ": "http://openenergy-platform.org/ontology/oeo/OEO_00030008 "
+          "class ": "https://openenergyplatform.org/ontology/oeo/OEO_00030008 "
         }
       ],
       "input_datasets ": [

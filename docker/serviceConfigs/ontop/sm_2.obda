@@ -1,0 +1,1607 @@
+[PrefixDeclaration]
+rdf:   http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:  http://www.w3.org/2000/01/rdf-schema#
+xsd:   http://www.w3.org/2001/XMLSchema#
+obo:   http://purl.obolibrary.org/obo/
+oeo:   https://openenergyplatform.org/ontology/oeo/
+oekg:  https://openenergyplatform.org/ontology/oekg/
+llc:   https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/
+
+
+[MappingDeclaration] @collection [[
+
+
+
+
+mappingId   M_eu_leg_data_2016_eea_Id
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} a oeo:IAO_0000027 ;
+            oeo:OEO_00000504 "eu_leg_data_2016_eea"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea"
+
+# scenario type flags (WEM/WAM/WOM)
+mappingId   M_eu_leg_data_2016_eea_Scenario_WEM
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00020226 oeo:OEO_00020311 .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2016_eea_Scenario_WAM
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00020226 oeo:OEO_00020312 .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2016_eea_Scenario_WOM
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00020226 oeo:OEO_00020310 .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE scenario = 'WOM'
+
+# gas classification (proper OEO classes)
+mappingId   M_eu_leg_data_2016_eea_methane
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oeo:OEO_00000025 .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2016_eea_nitrous_oxide
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oeo:OEO_00000027 .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2016_eea_nitrogen_trifluoride
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oeo:OEO_00000026 .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2016_eea_hydrofluorocarbon
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oeo:OEO_00000219 .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2016_eea_carbon_dioxide
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oeo:OEO_00000006 .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2016_eea_perfluorocarbon
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oeo:OEO_00000322 .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2016_eea_sulphur_hexafluoride
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oeo:OEO_00000038 .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'SF6'
+
+# pseudo-gases (not in OEO) → mint them under oekg:
+mappingId   M_eu_leg_data_2016_eea_Total_GHGs
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oekg:Total_GHGs .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2016_eea_Total_ESD_GHGs
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2016_eea_Total_ETS_GHGs
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2016_eea_Total_ESR_GHGs
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eea" WHERE gas = 'Total ESR GHGs'
+
+# units, year, value, country — MUST be literals (quoted + typed)
+mappingId   M_eu_leg_data_2016_eea_unit
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00040010 ""{unit}"" .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2016_eea"
+
+mappingId   M_eu_leg_data_2016_eea_year
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00020224 ""{year}"^^xsd:integer"^^xsd:integer .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2016_eea"
+
+mappingId   M_eu_leg_data_2016_eea_Value
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00140178 ""{value}"^^xsd:decimal"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value_reported FROM "scenario"."eu_leg_data_2016_eea"
+
+mappingId   M_eu_leg_data_2016_eea_Country
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00020221 ""{country_name}"" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name
+           FROM "scenario"."eu_leg_data_2016_eea" t
+           JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+# category (uses OEO numeric IRI from dim table) + correct property id
+mappingId   M_eu_leg_data_2016_eea_category
+target      oekg:data_descriptor/eu_leg_data_2016_eea/{id} oeo:OEO_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id
+           FROM "scenario"."eu_leg_data_2016_eea" t
+           JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_Id
+target      oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id}  oeo:OEO_00000504 "eu_leg_data_2016_eio_ir_article23_t1"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_methane
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_unit
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_year
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_Value
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_Country
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2016_eio_ir_article23_t1_category
+target          oekg:data_descriptor/eu_leg_data_2016_eio_ir_article23_t1/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2016_eio_ir_article23_t1" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2017_eea_Id
+target      oekg:data_descriptor/eu_leg_data_2017_eea/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2017_eea/{id}  oeo:OEO_00000504 "eu_leg_data_2017_eea"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+
+mappingId   M_eu_leg_data_2017_eea_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2017_eea_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2017_eea_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2017_eea_methane
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2017_eea_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2017_eea_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2017_eea_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2017_eea_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2017_eea_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2017_eea_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2017_eea_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2017_eea_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2017_eea_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2017_eea_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eea"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2017_eea_unit
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2017_eea"
+
+mappingId   M_eu_leg_data_2017_eea_year
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2017_eea"
+
+mappingId   M_eu_leg_data_2017_eea_Value
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value_reported FROM "scenario"."eu_leg_data_2017_eea"
+
+mappingId   M_eu_leg_data_2017_eea_Country
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2017_eea" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2017_eea_category
+target          oekg:data_descriptor/eu_leg_data_2017_eea/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2017_eea" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_Id
+target      oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id}  oeo:OEO_00000504 "eu_leg_data_2017_eio_ir_article23_t1"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_methane
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_unit
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_year
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_Value
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_Country
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2017_eio_ir_article23_t1_category
+target          oekg:data_descriptor/eu_leg_data_2017_eio_ir_article23_t1/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2017_eio_ir_article23_t1" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2018_eea_Id
+target      oekg:data_descriptor/eu_leg_data_2018_eea/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2018_eea/{id}  oeo:OEO_00000504 "eu_leg_data_2018_eea"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+
+mappingId   M_eu_leg_data_2018_eea_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2018_eea_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2018_eea_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2018_eea_methane
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2018_eea_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2018_eea_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2018_eea_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2018_eea_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2018_eea_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2018_eea_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2018_eea_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2018_eea_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2018_eea_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2018_eea_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eea"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2018_eea_unit
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2018_eea"
+
+mappingId   M_eu_leg_data_2018_eea_year
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2018_eea"
+
+mappingId   M_eu_leg_data_2018_eea_Value
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value_reported FROM "scenario"."eu_leg_data_2018_eea"
+
+mappingId   M_eu_leg_data_2018_eea_Country
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2018_eea" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2018_eea_category
+target          oekg:data_descriptor/eu_leg_data_2018_eea/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2018_eea" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_Id
+target      oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id}  oeo:OEO_00000504 "eu_leg_data_2018_eio_ir_article23_t1"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_methane
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_unit
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_year
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_Value
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_Country
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2018_eio_ir_article23_t1_category
+target          oekg:data_descriptor/eu_leg_data_2018_eio_ir_article23_t1/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2018_eio_ir_article23_t1" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2019_eea_Id
+target      oekg:data_descriptor/eu_leg_data_2019_eea/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2019_eea/{id}  oeo:OEO_00000504 "eu_leg_data_2019_eea"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+
+mappingId   M_eu_leg_data_2019_eea_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2019_eea_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2019_eea_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2019_eea_methane
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2019_eea_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2019_eea_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2019_eea_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2019_eea_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2019_eea_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2019_eea_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2019_eea_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2019_eea_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2019_eea_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2019_eea_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eea"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2019_eea_unit
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2019_eea"
+
+mappingId   M_eu_leg_data_2019_eea_year
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2019_eea"
+
+mappingId   M_eu_leg_data_2019_eea_Value
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value_reported FROM "scenario"."eu_leg_data_2019_eea"
+
+mappingId   M_eu_leg_data_2019_eea_Country
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2019_eea" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2019_eea_category
+target          oekg:data_descriptor/eu_leg_data_2019_eea/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2019_eea" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_Id
+target      oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id}  oeo:OEO_00000504 "eu_leg_data_2019_eio_ir_article23_t1"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_methane
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_unit
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_year
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_Value
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_Country
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2019_eio_ir_article23_t1_category
+target          oekg:data_descriptor/eu_leg_data_2019_eio_ir_article23_t1/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2019_eio_ir_article23_t1" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2020_eea_Id
+target      oekg:data_descriptor/eu_leg_data_2020_eea/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2020_eea/{id}  oeo:OEO_00000504 "eu_leg_data_2020_eea"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+
+mappingId   M_eu_leg_data_2020_eea_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2020_eea_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2020_eea_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2020_eea_methane
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2020_eea_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2020_eea_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2020_eea_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2020_eea_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2020_eea_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2020_eea_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2020_eea_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2020_eea_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2020_eea_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2020_eea_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eea"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2020_eea_unit
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2020_eea"
+
+mappingId   M_eu_leg_data_2020_eea_year
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2020_eea"
+
+mappingId   M_eu_leg_data_2020_eea_Value
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value_reported FROM "scenario"."eu_leg_data_2020_eea"
+
+mappingId   M_eu_leg_data_2020_eea_Country
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2020_eea" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2020_eea_category
+target          oekg:data_descriptor/eu_leg_data_2020_eea/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2020_eea" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_Id
+target      oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id}  oeo:OEO_00000504 "eu_leg_data_2020_eio_ir_article23_t1"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_methane
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_unit
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_year
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_Value
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1"
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_Country
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2020_eio_ir_article23_t1_category
+target          oekg:data_descriptor/eu_leg_data_2020_eio_ir_article23_t1/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2020_eio_ir_article23_t1" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2021_eea_Id
+target      oekg:data_descriptor/eu_leg_data_2021_eea/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2021_eea/{id}  oeo:OEO_00000504 "eu_leg_data_2021_eea"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+
+mappingId   M_eu_leg_data_2021_eea_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2021_eea_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2021_eea_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2021_eea_methane
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2021_eea_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2021_eea_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2021_eea_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2021_eea_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2021_eea_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2021_eea_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2021_eea_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2021_eea_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2021_eea_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2021_eea_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_eea"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2021_eea_unit
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2021_eea"
+
+mappingId   M_eu_leg_data_2021_eea_year
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2021_eea"
+
+mappingId   M_eu_leg_data_2021_eea_Value
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value_reported FROM "scenario"."eu_leg_data_2021_eea"
+
+mappingId   M_eu_leg_data_2021_eea_Country
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2021_eea" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2021_eea_category
+target          oekg:data_descriptor/eu_leg_data_2021_eea/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2021_eea" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2022_eea_Id
+target      oekg:data_descriptor/eu_leg_data_2022_eea/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2022_eea/{id}  oeo:OEO_00000504 "eu_leg_data_2022_eea"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+
+mappingId   M_eu_leg_data_2022_eea_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2022_eea_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2022_eea_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2022_eea_methane
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2022_eea_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2022_eea_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2022_eea_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2022_eea_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2022_eea_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2022_eea_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2022_eea_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2022_eea_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2022_eea_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2022_eea_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_eea"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2022_eea_unit
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2022_eea"
+
+mappingId   M_eu_leg_data_2022_eea_year
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2022_eea"
+
+mappingId   M_eu_leg_data_2022_eea_Value
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value_reported FROM "scenario"."eu_leg_data_2022_eea"
+
+mappingId   M_eu_leg_data_2022_eea_Country
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2022_eea" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2022_eea_category
+target          oekg:data_descriptor/eu_leg_data_2022_eea/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2022_eea" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2023_eea_Id
+target      oekg:data_descriptor/eu_leg_data_2023_eea/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2023_eea/{id}  oeo:OEO_00000504 "eu_leg_data_2023_eea"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+
+mappingId   M_eu_leg_data_2023_eea_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2023_eea_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2023_eea_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2023_eea_methane
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2023_eea_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2023_eea_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2023_eea_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2023_eea_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2023_eea_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2023_eea_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2023_eea_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2023_eea_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2023_eea_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2023_eea_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_eea"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2023_eea_unit
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2023_eea"
+
+mappingId   M_eu_leg_data_2023_eea_year
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2023_eea"
+
+mappingId   M_eu_leg_data_2023_eea_Value
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value_reported FROM "scenario"."eu_leg_data_2023_eea"
+
+mappingId   M_eu_leg_data_2023_eea_Country
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2023_eea" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2023_eea_category
+target          oekg:data_descriptor/eu_leg_data_2023_eea/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2023_eea" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+mappingId   M_eu_leg_data_2021_rep_table_1_Id
+target      oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id}  oeo:OEO_00000504 "eu_leg_data_2021_rep_table_1"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+
+mappingId   M_eu_leg_data_2021_rep_table_1_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_methane
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2021_rep_table_1"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2021_rep_table_1_unit
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2021_rep_table_1"
+
+mappingId   M_eu_leg_data_2021_rep_table_1_year
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2021_rep_table_1"
+
+mappingId   M_eu_leg_data_2021_rep_table_1_Value
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value FROM "scenario"."eu_leg_data_2021_rep_table_1"
+
+mappingId   M_eu_leg_data_2021_rep_table_1_Country
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2021_rep_table_1" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2021_rep_table_1_category
+target          oekg:data_descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2021_rep_table_1" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2022_rep_table_1_Id
+target      oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id}  oeo:OEO_00000504 "eu_leg_data_2022_rep_table_1"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+
+mappingId   M_eu_leg_data_2022_rep_table_1_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_methane
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2022_rep_table_1"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2022_rep_table_1_unit
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2022_rep_table_1"
+
+mappingId   M_eu_leg_data_2022_rep_table_1_year
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2022_rep_table_1"
+
+mappingId   M_eu_leg_data_2022_rep_table_1_Value
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value FROM "scenario"."eu_leg_data_2022_rep_table_1"
+
+mappingId   M_eu_leg_data_2022_rep_table_1_Country
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2022_rep_table_1" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2022_rep_table_1_category
+target          oekg:data_descriptor/eu_leg_data_2022_rep_table_1/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2022_rep_table_1" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+
+mappingId   M_eu_leg_data_2023_rep_table_1_Id
+target      oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} a oeo:IAO_0000027  .
+			oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id}  oeo:OEO_00000504 "eu_leg_data_2023_rep_table_1"^^xsd:string .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+
+mappingId   M_eu_leg_data_2023_rep_table_1_Scenario_WEM
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020311  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE scenario = 'WEM'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_Scenario_WAM
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020312  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE scenario = 'WAM'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_Scenario_WOM
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020310  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE scenario = 'WOM'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_methane
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000025  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'CH4'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_nitrous_oxide
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000027  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'N2O'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_nitrogen_trifluoride
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000026  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'NF3'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_hydrofluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000219  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'HFC'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_carbon_dioxide
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000006  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'CO2'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_perfluorocarbon
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000322  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'PFC'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_sulphur_hexafluoride
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000038  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'SF6'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_Total_GHGs
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'Total GHGs'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_Total_ESD_GHGs
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_ESD_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'Total ESD GHGs'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_Total_ETS_GHGs
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_ETS_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'Total ETS GHGs'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_Total_ESR_GHGs
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00010121 oekg:Total_ESR_GHGs  .
+source      SELECT CAST(id AS DECIMAL) AS id FROM "scenario"."eu_leg_data_2023_rep_table_1"
+            WHERE gas = 'Total ESR GHGs'
+
+mappingId   M_eu_leg_data_2023_rep_table_1_unit
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00040010 "{unit}"  .
+source      SELECT CAST(id AS DECIMAL) AS id, unit FROM "scenario"."eu_leg_data_2023_rep_table_1"
+
+mappingId   M_eu_leg_data_2023_rep_table_1_year
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00020224 "{year}"^^xsd:integer  .
+source      SELECT CAST(id AS DECIMAL) AS id, year FROM "scenario"."eu_leg_data_2023_rep_table_1"
+
+mappingId   M_eu_leg_data_2023_rep_table_1_Value
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00140178 "{value}"^^xsd:decimal .
+source      SELECT CAST(id AS DECIMAL) AS id, value FROM "scenario"."eu_leg_data_2023_rep_table_1"
+
+mappingId   M_eu_leg_data_2023_rep_table_1_Country
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:OEO_00020221 "{country_name}" .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.country_name AS CHAR) AS country_name FROM "scenario"."eu_leg_data_2023_rep_table_1" t JOIN "scenario"."eu_leg_dim_country" n ON t.country_code = n.country_code
+
+mappingId   M_eu_leg_data_2023_rep_table_1_category
+target          oekg:data_descriptor/eu_leg_data_2023_rep_table_1/{id} oeo:oeo_00390079 oeo:{category_id} .
+source      SELECT CAST(t.id AS DECIMAL) AS id, CAST(n.oeo_id AS CHAR) AS category_id FROM "scenario"."eu_leg_data_2023_rep_table_1" t JOIN "scenario"."eu_leg_dim_category" n ON t.category = n.category
+
+
+
+
+
+]]
