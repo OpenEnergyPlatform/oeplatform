@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa:E501
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -22,7 +22,7 @@
 # TEMP_RESULT_OEO_OWL = "temp_oeox.owl"
 # TEMP_RESULT_OEO_OWL_PATH = Path(BASE_DIR, TEMP_RESULT_OEO_OWL)
 # RESULT_URI = URIRef(
-#     "http://openenergy-platform.org/ontology/oeoxTest/composedUnit/OEOX_1"
+#     "https://openenergyplatform.org/ontology/oeoxTest/composedUnit/OEOX_1"
 # )
 
 
@@ -34,9 +34,9 @@
 #         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
 #         xmlns:owl="http://www.w3.org/2002/07/owl#"
 #         xml:base="http://example.org/ontology"
-#         xmlns="http://openenergy-platform.org/ontology/oeoxTest#">
+#         xmlns="https://openenergyplatform.org/ontology/oeoxTest#">
 
-# <owl:Ontology rdf:about="http://openenergy-platform.org/ontology/oeoxTest"/>
+# <owl:Ontology rdf:about="https://openenergyplatform.org/ontology/oeoxTest"/>
 
 
 # </rdf:RDF>

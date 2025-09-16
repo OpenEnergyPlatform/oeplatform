@@ -35,7 +35,7 @@ class Command(BaseCommand):
     help = "build oeo viewer web app in static"
 
     def handle(self, *args, **options):
-        OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
+        OEO = Namespace("https://openenergyplatform.org/ontology/oeo/")
         OBO = Namespace("http://purl.obolibrary.org/obo/")
         DC = Namespace("http://purl.org/dc/terms/")
         RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")

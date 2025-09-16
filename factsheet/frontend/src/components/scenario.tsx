@@ -155,7 +155,7 @@ export default function Scenario(props) {
           fieldGridSize={9}
           spanValue="Name"
           tooltipText="A study is a project with the goal to investigate something."
-          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020011"
+          hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00020011"
           TooltipComponent={HtmlTooltip}
           renderField={() => (
             <TextField
@@ -176,7 +176,7 @@ export default function Scenario(props) {
           fieldGridSize={9}
           spanValue="Acronym"
           tooltipText="An acronym is an abbreviation of the title..."
-          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000048"
+          hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000048"
           TooltipComponent={HtmlTooltip}
           renderField={() => (
             <TextField
@@ -220,7 +220,7 @@ export default function Scenario(props) {
           fieldGridSize={9}
           spanValue="Spatial regions"
           tooltipText="A study region is a spatial region..."
-          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020032"
+          hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00020032"
           TooltipComponent={HtmlTooltip}
           renderField={() => (
             <CustomAutocompleteWithoutAddNew
@@ -243,7 +243,7 @@ export default function Scenario(props) {
           fieldGridSize={9}
           spanValue="Interacting regions"
           tooltipText="An interacting region is part of a considered region..."
-          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020036"
+          hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00020036"
           TooltipComponent={HtmlTooltip}
           renderField={() => (
             <CustomAutocompleteWithoutAddNew
@@ -270,7 +270,7 @@ export default function Scenario(props) {
           fieldGridSize={9}
           spanValue="Scenario years"
           tooltipText="A scenario year is a time step of one year..."
-          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020097"
+          hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00020097"
           TooltipComponent={HtmlTooltip}
           renderField={() => (
             <CustomAutocompleteWithoutAddNew
@@ -297,7 +297,7 @@ export default function Scenario(props) {
           fieldGridSize={9}
           spanValue="Scenario type"
           tooltipText="A scenario is an information content entity..."
-          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
+          hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000364"
           TooltipComponent={HtmlTooltip}
           renderField={() => (
             <CustomTreeViewWithCheckBox
@@ -315,7 +315,7 @@ export default function Scenario(props) {
               title=""
               toolTipInfo={[
                 "A scenario is an information content entity...",
-                "http://openenergy-platform.org/ontology/oeo/OEO_00000364",
+                "https://openenergyplatform.org/ontology/oeo/OEO_00000364",
               ]}
             />
           )}
@@ -328,7 +328,7 @@ export default function Scenario(props) {
           fieldGridSize={9}
           spanValue="Input dataset(s)"
           tooltipText="Endogenous data is a data item whose quantity..."
-          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000364"
+          hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000364"
           TooltipComponent={HtmlTooltip}
           customSpan={
             <IconButton color="primary" size="small" onClick={addInputDatasetItem}>
@@ -385,7 +385,7 @@ export default function Scenario(props) {
           fieldGridSize={9}
           spanValue="Output dataset(s)"
           tooltipText="Exogenous data is a data item whose quantity..."
-          hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00030030"
+          hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00030030"
           TooltipComponent={HtmlTooltip}
           customSpan={
             <IconButton color="primary" size="small" onClick={addOutputDatasetItem}>
