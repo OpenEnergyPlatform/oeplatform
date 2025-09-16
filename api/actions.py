@@ -44,7 +44,7 @@ import api
 import dataedit.metadata
 import login.models as login_models
 from api import DEFAULT_SCHEMA
-from api.connection import _get_engine
+from api.connection import _get_engine, create_oedb_session
 from api.error import APIError
 from api.parser import get_or_403, parse_type, read_bool, read_pgid
 from api.sessions import (
@@ -2579,3 +2579,89 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # ---------------------------------------
 
     update_meta_search(table, schema)
+
+
+def get_single_table_size(
+    schema: str, table: str, allowed_schemas: list[str]
+) -> dict | None:
+    """
+    Return size details for one schema.table or None if not found.
+    """
+    sql = sa.text(
+        """
+        SELECT
+            :schema AS table_schema,
+            :table  AS table_name,
+            pg_relation_size(format('%I.%I', :schema, :table))                       AS table_bytes,
+            pg_indexes_size(format('%I.%I', :schema, :table))                        AS index_bytes,
+            pg_total_relation_size(format('%I.%I', :schema, :table))                 AS total_bytes,
+            pg_size_pretty(pg_relation_size(format('%I.%I', :schema, :table)))       AS table_pretty,
+            pg_size_pretty(pg_indexes_size(format('%I.%I', :schema, :table)))        AS index_pretty,
+            pg_size_pretty(pg_total_relation_size(format('%I.%I', :schema, :table))) AS total_pretty
+    """  # noqa: E501
+    )
+
+    if schema not in allowed_schemas:
+        raise APIError(f"Schema '{schema}' is not allowed.", status=403)
+    sess = create_oedb_session()
+    try:
+        res = sess.execute(sql, {"schema": schema, "table": table})
+        row = res.fetchone()
+        if not row:
+            return None
+        d = dict(row.items())  # RowProxy -> dict
+        for k in ("table_bytes", "index_bytes", "total_bytes"):
+            d[k] = int(d[k])
+        return d
+    finally:
+        sess.close()
+
+
+def list_table_sizes(
+    allowed_schemas: list[str], schema: str | None = None
+) -> list[dict]:
+    """
+    List table sizes limited to a whitelist. If `schema` provided, restrict to it.
+    """
+    if schema and schema not in allowed_schemas:
+        # Let the view map this to 403 cleanly
+        from .error import APIError
+
+        raise APIError(f"Schema '{schema}' is not allowed.", status=403)
+
+    if schema:
+        filter_sql = "table_schema = :schema"
+        params = {"schema": schema}
+    else:
+        filter_sql = "table_schema = ANY(:schemas)"
+        params = {"schemas": allowed_schemas}
+
+    sql = sa.text(
+        f"""
+        SELECT
+            table_schema,
+            table_name,
+            pg_relation_size(format('%I.%I', table_schema, table_name))       AS table_bytes,
+            pg_indexes_size(format('%I.%I', table_schema, table_name))        AS index_bytes,
+            pg_total_relation_size(format('%I.%I', table_schema, table_name)) AS total_bytes,
+            pg_size_pretty(pg_total_relation_size(format('%I.%I', table_schema, table_name))) AS total_pretty
+        FROM information_schema.tables
+        WHERE {filter_sql}
+          AND table_type = 'BASE TABLE'
+        ORDER BY pg_total_relation_size(format('%I.%I', table_schema, table_name)) DESC
+    """  # noqa: E501
+    )
+
+    sess = create_oedb_session()
+    try:
+        res = sess.execute(sql, params)
+        rows = res.fetchall()
+        out = []
+        for r in rows:
+            m = dict(r.items())  # RowProxy -> dict
+            for k in ("table_bytes", "index_bytes", "total_bytes"):
+                m[k] = int(m[k])
+            out.append(m)
+        return out
+    finally:
+        sess.close()
