@@ -96,6 +96,7 @@ nav:
       - oeplatform-code/web-api/index.md
       - OEDB REST-API:
         - oeplatform-code/web-api/oedb-rest-api/index.md
+        - oeplatform-code/web-api/oedb-rest-api/resource-data-size.md
         # - Draft open-API schema: oeplatform-code/web-api/oedb-rest-api/swagger-ui.html
       - OEKG API:
         - oeplatform-code/web-api/oekg-api/index.md
