@@ -5,7 +5,6 @@
 
 {% block after-head %}
 <link href="/static/metaedit/metaedit.css" rel="stylesheet">
-<link href="/static/metaedit/sidebar-layout.css" rel="stylesheet">
 {% endblock after-head %}
 
 {% block site-header %}
@@ -34,13 +33,11 @@
     For a brief introduction on how to work with the oemetadata and the <a href="{{oemetabuilder_tutorial}}" target="_blank">OEMetaBuilder</a> tool find our <a href="{{oemetadata_tutorial}}" target="_blank">tutorial</a> in the academy.
   </div>
 </div>
-
-<div class="d-flex justify-content-center">
+<div class=" d-flex justify-content-center">
     <div class="spinner-border text-primary m-5 d-none" role="status" id="metaedit-loading">
         <span class="visually-hidden">Loading...</span>
     </div>
 </div>
-
 <div class="row d-none fixed-controls" id="metaedit-controls">
   <div class="col">
       <span class="" {% if not can_add %} data-bs-toggle="popover" title="You need write permissions on this table to upload meta data" {% endif %}>
@@ -51,84 +48,11 @@
   </div>
 </div>
 
-<!-- Added sidebar layout container -->
-<div class="sidebar-layout">
-  <!-- Sidebar Navigation -->
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <h3>Metadata Editor</h3>
-    </div>
-    <nav class="sidebar-nav">
-      <ul class="nav-list">
-        <li class="nav-item">
-          <a href="#" class="nav-link active" data-section="overview">
-            <i class="fas fa-info-circle"></i>
-            <span>Dataset Overview</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link" data-section="resources">
-            <i class="fas fa-database"></i>
-            <span>Data Resources</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link" data-section="contributors">
-            <i class="fas fa-users"></i>
-            <span>Contributors</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link" data-section="sources">
-            <i class="fas fa-book"></i>
-            <span>Sources</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link" data-section="licenses">
-            <i class="fas fa-certificate"></i>
-            <span>Licenses</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link" data-section="spatial">
-            <i class="fas fa-map"></i>
-            <span>Spatial</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link" data-section="temporal">
-            <i class="fas fa-clock"></i>
-            <span>Temporal</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-    
-    <!-- Resource Manager Section -->
-    <div class="resource-manager mt-4">
-      <h4>Resource Manager</h4>
-      <div class="resource-list" id="resource-list">
-        <div class="loading-state">Loading resources...</div>
-      </div>
-      <button class="btn btn-sm btn-outline-primary mt-2" id="add-resource">
-        <i class="fas fa-plus"></i> Add Resource
-      </button>
-    </div>
-  </div>
-
-  <!-- Main Content Area -->
-  <div class="main-content">
-    <div class="content-header">
-      <h2 id="section-title">Dataset Overview</h2>
-      <p id="section-description">Configure basic dataset information and metadata.</p>
-    </div>
-    
-    <div class="form-container">
-      <form id="metaedit-form">
-          <!-- JSON Editor will be rendered here -->
+<div class="row">
+  <div class="col">
+      <form iv id="metaedit-form">
+          <!-- placeholder -->
       </form>
-    </div>
   </div>
 </div>
 
@@ -146,6 +70,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          
         </div>
       </div>
     </div>
@@ -157,20 +82,21 @@
 {% block after-body-bottom-js %}
 
   <style>
+
   .fixed-controls {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      z-index: 1000;
-      background-color: white;
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000; /* Ensure it is above other content */
+      background-color: white; /* Optional: Background color to make it stand out */
+      padding: 10px; /* Optional: Padding for better spacing */
+      border-radius: 5px; /* Optional: Rounded corners for better aesthetics */
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Optional: Add a slight shadow for better visibility */
   }
   </style>
     {% compress js %}
     <script src="/static/metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js"></script>
-    <script src="/static/metaedit/sidebar-metaedit.js"></script>
+    <script src="/static/metaedit/metaedit.js"></script>
     <script src="{% static 'modelview/htmx.min.js' %}"></script>
     {% endcompress %}
     <!-- fix imports below - we dont use cdn anymore -->
@@ -184,7 +110,7 @@
     <script>
         var createUrl = '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}';
         var config = JSON.parse("{{ config|escapejs }}");
-        SidebarMetaEdit(config);
+        MetaEdit(config);
         $(function () {
             $('[data-bs-toggle="popover"]').popover()
 
@@ -192,5 +118,30 @@
             trigger: 'focus'
             })
         })
+        function hideTabsFilter(tabIdsToRemove) {
+          const observer = new MutationObserver(() => {
+            document.querySelectorAll('.nav-item a.nav-link').forEach(link => {
+              const href = link.getAttribute('href');
+              const label = link.querySelector('span')?.textContent.trim();
+
+              if (tabIdsToRemove.includes(href?.replace('#', '')) || tabIdsToRemove.includes(label)) {
+                const item = link.closest('.nav-item');
+                if (item) item.remove();
+              }
+            });
+          });
+
+          // Observe the form for any new child elements
+          const target = document.querySelector('#metaedit-form');
+          if (target) {
+            observer.observe(target, {
+              childList: true,
+              subtree: true,
+            });
+          }
+        }
+
+        // Set up tab filtering
+        hideTabsFilter(['Meta Metadata', 'Embargo Period', 'Dialect', 'Review']);
     </script>
 {% endblock after-body-bottom-js %}
