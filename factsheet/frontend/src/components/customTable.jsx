@@ -7,7 +7,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -25,7 +25,7 @@ import { visuallyHidden } from '@mui/utils';
 import { styled } from '@mui/material/styles';
 import { tableCellClasses } from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
-import { Route, Routes, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 // import VisibilityIcon from '@mui/icons-material/Visibility';
 // import ViewComfyAltIcon from '@mui/icons-material/ViewComfyAlt';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
@@ -253,7 +253,7 @@ function EnhancedTableToolbar(props) {
             <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020227">Scenario bundles</a> weave together important information about one or more <a href="http://openenergyplatform.org/ontology/oeo/OEO_00000364">scenarios</a>. They inform about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020011">studies</a> made based on a scenario, including publications (= <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020012">study report</a>).
           </Typography>
           <Typography variant="body2">
-            If there is quantitative <a href="http://openenergyplatform.org/ontology/oeo/OEO_00030029">input data</a> and / or <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020013">output data</a> available on the OEP, the scenario bundles can link to that data, too.
+            If there is quantitative <a href="http://openenergyplatform.org/ontology/oeo/OEO_00030029">input data</a> and / or <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020013">output data</a> available on the OEP, the scenario bundles can link to that data, too.
             They can also inform about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020353">models</a> (if available as a <a href="https://openenergyplatform.org/factsheets/models/">model factsheet</a>) and frameworks (if available as a <a href="https://openenergyplatform.org/factsheets/frameworks/">framework factsheet</a>) that were used to project a scenario into the future (= <a href="http://openenergyplatform.org/ontology/oeo/OEO_00010262">scenario projection</a>).
           </Typography>
           <Typography variant="body2">
@@ -374,11 +374,17 @@ export default function CustomTable(props) {
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
   const [selectedAspects, setSelectedAspects] = useState([]);
   const [alignment, setAlignment] = React.useState('list');
-  const [filteredFactsheets, setFilteredFactsheets] = useState([]);
+
   const [logged_in, setLogged_in] = React.useState('');
 
   const [scenarioYearTouched, setScenarioYearTouched] = useState(false);
   const [publicationDateTouched, setPublicationDateTouched] = useState(false);
+
+  const [filteredFactsheets, setFilteredFactsheets] = useState([]);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackType, setFeedbackType] = useState(''); // 'noFilters' or 'noResults'
+  const [filterApplied, setFilterApplied] = useState(false);
+
 
  const handleChangeView = (event, newAlignment) => {
     if (newAlignment !== null) {
@@ -386,10 +392,12 @@ export default function CustomTable(props) {
     }
   };
 
-  const handleScenarioYearChange = (event, newValue) => {
-    setScenarioYearValue(newValue);
-  };
-  const [rows, setRows] = useState(factsheets);
+
+  // const [rows, setRows] = useState(factsheets);
+  const data = React.useMemo(
+    () => (filterApplied ? filteredFactsheets : factsheets),
+    [filterApplied, filteredFactsheets, factsheets]
+  );
 
   const [openBackDrop, setOpenBackDrop] = useState(false);
 
@@ -406,11 +414,10 @@ export default function CustomTable(props) {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.study_name);
-      setSelected(newSelected);
-      return;
+      setSelected(new Set(data.map((n) => n.study_name)));
+    } else {
+      setSelected(new Set());
     }
-    setSelected([]);
   };
 
   const handleClick = (event, name) => {
@@ -420,38 +427,21 @@ export default function CustomTable(props) {
     if (newSelected.has(name)) newSelected.delete(name);
     else newSelected.add(name);
 
-    // const selectedIndex = selected.indexOf(name);
-    // let newSelected = [];
-
-    // if (selectedIndex === -1) {
-    //   newSelected = newSelected.concat(selected, name);
-    // } else if (selectedIndex === 0) {
-    //   newSelected = newSelected.concat(selected.slice(1));
-    // } else if (selectedIndex === selected.length - 1) {
-    //   newSelected = newSelected.concat(selected.slice(0, -1));
-    // } else if (selectedIndex > 0) {
-    //   newSelected = newSelected.concat(
-    //     selected.slice(0, selectedIndex),
-    //     selected.slice(selectedIndex + 1),
-    //   );
-    // }
-
     setSelected(newSelected);
 
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+  const handleChangePage = (event, newPage) => setPage(newPage);
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const handleChangeDense = (event) => {
-    setDense(event.target.checked);
-  };
+  useEffect(() => {
+    setPage(0);
+  }, [data, rowsPerPage]);
+
 
   const handleOpenQuery = (event) => {
     setOpenQuery(true);
@@ -467,9 +457,12 @@ export default function CustomTable(props) {
     setOpenScenarioComparisonMessage(false);
   };
 
-  const handleShowAll = (event) => {
-    setRows(factsheets);
-    console.log(rows);
+  const handleShowAll = () => {
+    // show all factsheets again
+    setFilteredFactsheets([]);
+    setFilterApplied(false);
+    setFeedbackOpen(false);
+    setPage(0);
   };
 
   const handleCloseQuery = (event) => {
@@ -492,19 +485,8 @@ export default function CustomTable(props) {
     setFeedbackOpen(false);
   };
 
-  const handleStudyKeywords = (event) => {
-    if (event.target.checked) {
-      if (!selectedStudyKeywords.includes(event.target.name)) {
-        setSelectedStudyKewords([...selectedStudyKeywords, event.target.name]);
-      }
-    } else {
-      const filteredStudyKeywords = selectedStudyKeywords.filter(i => i !== event.target.name);
-      setSelectedStudyKewords(filteredStudyKeywords);
-    }
-  }
-
-  const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+  const getOrganization = async () => {
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00030022' } });
     return data;
   };
 
@@ -524,7 +506,7 @@ export default function CustomTable(props) {
   };
 
   useEffect(() => {
-    getInstitution().then((data) => {
+    getOrganization().then((data) => {
       const tmp = [];
       data.map((item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }));
       setInstitutions(tmp);
@@ -553,19 +535,6 @@ export default function CustomTable(props) {
     });
   }, []);
 
-  const institutionHandler = (institutionList) => {
-    setSelectedInstitution(institutionList);
-  };
-  const authorsHandler = (authorsList) => {
-    setSelectedAuthors(authorsList);
-  };
-
-  const fundingSourceHandler = (fundingSourceList) => {
-    setSelectedFundingSource(fundingSourceList);
-  };
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [feedbackType, setFeedbackType] = useState(''); // 'noFilters' or 'noResults'
-  const [filterApplied, setFilterApplied] = useState(false);
 
   const handleConfirmQuery = () => {
     const isFilterEmpty =
@@ -639,39 +608,17 @@ export default function CustomTable(props) {
 
   const isSelected = (name) => selected.has(name);
 
-  const handleAspects = (event) => {
-    if (event.target.checked) {
-      if (!selectedAspects.includes(event.target.name)) {
-        setSelectedAspects([...selectedAspects, event.target.name]);
-      }
-    } else {
-      const filteredAspects = selectedAspects.filter(i => i !== event.target.name);
-      setSelectedAspects(filteredAspects);
-    }
-  }
-
-  // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  // // Avoid a layout jump when reaching the last page with empty rows.
+  // const emptyRows =
+  //   page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
   const visibleRows = React.useMemo(() => {
-    const finalRows = filteredFactsheets.length === 0 ? factsheets : filteredFactsheets;
-    return stableSort(finalRows, getComparator(order, orderBy)).slice(
-      page * rowsPerPage,
-      page * rowsPerPage + rowsPerPage,
-    );
-  }, [filteredFactsheets, factsheets, order, orderBy, page, rowsPerPage]);
+  return stableSort(data, getComparator(order, orderBy)).slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+}, [data, order, orderBy, page, rowsPerPage]);
 
-
-
-  const scenarioAspects = [
-    "Descriptors",
-    "Years",
-    "Regions",
-    "Interacting regions",
-    "Input datasets",
-    "Output datasets",
-  ];
 
   const renderRows = (rs) => {
     // const rowsToRender = filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
@@ -812,122 +759,111 @@ export default function CustomTable(props) {
   }
 
   const renderCards = (rs) => {
-    const rowsToRender = filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
-    return <Grid
+  const rowsToRender = rs; // already paged + sorted
+
+  return (
+    <Grid
       container
       justifyContent="space-between"
-      alignItems="start"
+      alignItems="flex-start"
       direction="row"
-      sx={{ paddingBottom: variables.spacing[6] }}
+      sx={{ pb: 6 }}
     >
       {rowsToRender.map((row, index) => {
-        const isItemSelected = isSelected(row.study_name);
-        const labelId = `enhanced-table-checkbox-${index}`;
+        // (optional) if you end up needing these again, you can keep them
+        // const isItemSelected = isSelected(row.study_name);
+        // const labelId = `enhanced-table-checkbox-${index}`;
+
         return (
-          <CardItem key={index}>
+          <CardItem key={row.uid ?? index}>
             <CardHeader>
               <Link to={`scenario-bundles/id/${row.uid}`}>
                 {row.acronym}
               </Link>
             </CardHeader>
+
             <CardBody>
               <CardRow
                 rowKey="Acronym"
                 rowValue={
-                  <Link
-                    to={`scenario-bundles/id/${row.uid}`}
-                    onClick={() => this.forceUpdate}
-                  >
-                    <Typography variant="link">
-                      {row.acronym}
-                    </Typography>
+                  <Link to={`scenario-bundles/id/${row.uid}`}>
+                    <Typography variant="link">{row.acronym}</Typography>
                   </Link>
                 }
               />
-              {row.collected_scenario_publication_dates !== null &&
+
+              {!!row.collected_scenario_publication_dates?.length && (
                 <CardRow
-                  rowKey='Year of publication'
+                  rowKey="Year of publication"
                   rowValue={row.collected_scenario_publication_dates
-                    .map(date_of_publication => date_of_publication)
+                    .map((d) => (d ? String(d).substring(0, 4) : 'None'))
                     .join(' • ')}
                 />
-              }
+              )}
+
+              <CardRow rowKey="Abstract" rowValue={row.abstract} />
+
               <CardRow
-                rowKey='Abstract'
-                rowValue={row.abstract}
-              >
-              </CardRow>
-              <CardRow
-                rowKey='Institutions'
-                rowValue={
-                  row.institutions.map((v) => (
-                    <span key={v}>
-                      <span> {v} </span>
-                      <span>
-                        <b className="separator-dot"> . </b>
-                      </span>
-                    </span>
-                  ))
-                }
+                rowKey="Institutions"
+                rowValue={row.institutions.map((v) => (
+                  <span key={v}>
+                    <span>{v}</span>
+                    <span><b className="separator-dot"> . </b></span>
+                  </span>
+                ))}
               />
+
               <CardRow
-                rowKey='Funding sources'
-                rowValue={
-                  row.funding_sources.map((v) => (
-                    <span key={v}>
-                      <span> {v} </span>
-                      <span>
-                        <b className="separator-dot"> . </b>
-                      </span>
-                    </span>
-                  ))
-                }
+                rowKey="Funding sources"
+                rowValue={row.funding_sources.map((v) => (
+                  <span key={v}>
+                    <span>{v}</span>
+                    <span><b className="separator-dot"> . </b></span>
+                  </span>
+                ))}
               />
+
               <CardRow
-                rowKey='Models and frameworks'
+                rowKey="Models and frameworks"
                 rowValue={
                   <>
                     {row.models.map((v) => (
                       <span key={v}>
-                        <span> {v} </span>
-                        <span>
-                          <b className="separator-dot"> . </b>
-                        </span>
+                        <span>{v}</span>
+                        <span><b className="separator-dot"> . </b></span>
                       </span>
                     ))}
                     {row.frameworks.map((v) => (
                       <span key={v}>
-                        <span> {v} </span>
-                        <span>
-                          <b className="separator-dot"> . </b>
-                        </span>
+                        <span>{v}</span>
+                        <span><b className="separator-dot"> . </b></span>
                       </span>
                     ))}
                   </>
                 }
               />
+
               <CardRow
                 rowKey="Scenarios"
                 rowValue={row.scenarios.map((v) => (
                   <HtmlTooltip
+                    key={v.uid}
                     style={{ marginLeft: '10px' }}
                     placement="top"
                     title={
-                      <React.Fragment key={v}>
-                        <div>
-                          <b>Full name: </b> {v.full_name}
-                          <Divider style={{ marginTop: '10px', marginBottom: '10px' }} />
-                          <b>Abstract:</b> {v.abstract}
-                        </div>
-                      </React.Fragment>
+                      <div>
+                        <b>Full name: </b>{v.full_name}
+                        <Divider sx={{ mt: 1, mb: 1 }} />
+                        <b>Abstract:</b> {v.abstract}
+                      </div>
                     }
                   >
                     <Chip
                       size="small"
                       color="primary"
                       label={v.label}
-                      variant={selected.has(v.uid) ? "filled" : "outlined"}
-                      sx={{ 'marginLeft': '5px', 'marginTop': '4px' }}
+                      variant={selected.has(v.uid) ? 'filled' : 'outlined'}
+                      sx={{ ml: 0.5, mt: 0.5 }}
                       onClick={(event) => handleClick(event, v.uid)}
                     />
                   </HtmlTooltip>
@@ -938,7 +874,9 @@ export default function CustomTable(props) {
         );
       })}
     </Grid>
-  }
+  );
+};
+
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -1032,7 +970,9 @@ export default function CustomTable(props) {
           </Box>
         )}
 
-        {alignment == "list" && <TableContainer>
+        {alignment === "list" && data.length > 0 && (
+      <>
+        <TableContainer>
           <Table
             sx={{ minWidth: 1400 }}
             aria-labelledby="tableTitle"
@@ -1044,24 +984,29 @@ export default function CustomTable(props) {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={data.length}
             />
             {renderRows(visibleRows)}
           </Table>
-        </TableContainer>}
-        {alignment == "list" && <TablePagination
+        </TableContainer>
+
+
+      </>
+    )}
+
+  {/* CARDS VIEW */}
+  {alignment === "cards" && data.length > 0 && renderCards(visibleRows)}
+      </Container>
+      <TablePagination
           rowsPerPageOptions={[5, 15, 25, 50]}
           component="div"
-          count={rows.length}
+          count={data.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-        />}
-
-
-        {alignment == "cards" && renderCards(visibleRows)}
-      </Container>
+        />
     </Box>
+
   );
 }

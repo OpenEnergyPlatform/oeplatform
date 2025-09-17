@@ -803,7 +803,7 @@ const sendQuery = async (index) => {
 
     SELECT DISTINCT ?s ?value ?country_code ?year ?category ?gas ?table_name ?unit WHERE {
       ?s oeo:OEO_00020221 ?country_code .
-      ?s oeo:OEO_00020224 ?year .
+      ?s oeo:OEO_00020440 ?year .
       ?s oeo:OEO_00140178 ?value .
       ?s oeo:OEO_00000504 ?table_name .
       ?s oeo:has_sector_division ?category .
