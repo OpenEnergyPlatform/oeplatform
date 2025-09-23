@@ -103,6 +103,10 @@ def is_owner(user, bundle_id):
 
 def check_ownership(request, bundle_id):
     if bundle_id != "new":
+        if request.user.is_admin:
+            return JsonResponse(
+                {"isOwner": True}, safe=False, content_type="application/json"
+            )
         if is_owner(request.user.id, bundle_id):
             return JsonResponse(
                 {"isOwner": True}, safe=False, content_type="application/json"
