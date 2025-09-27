@@ -17,6 +17,7 @@ from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
 
 # from dataedit.metadata.v1_3 import TEMPLATE_v1_3
 # from dataedit.metadata.v1_4 import TEMPLATE_V1_4
+
 from dataedit.metadata.v1_5 import TEMPLATE_V1_5
 
 # import omi
@@ -27,6 +28,7 @@ from dataedit.metadata.v1_5 import TEMPLATE_V1_5
 # from .error import MetadataException
 
 METADATA_TEMPLATE = {
+    6: OEMETADATA_V160_TEMPLATE,
     5: TEMPLATE_V1_5,
     # 4: TEMPLATE_V1_4,
     # 3: TEMPLATE_v1_3,

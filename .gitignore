@@ -97,6 +97,7 @@ docker/serviceConfigs/ontop/postgresql.jar
 docker/oeplatform_data
 docker/data
 assets/
+docker/databus
 
 **/node_modules
 oep-website/oeo_viewer/client/node_modules

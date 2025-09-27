@@ -1,0 +1,40 @@
+[project]
+name = "oeplatform"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "django-widget-tweaks==1.5.0",
+    "django==5.1.1",
+    "matplotlib==3.8.3",
+    "urllib3==1.26.19",
+    "sqlalchemy==1.3.24",
+    "pillow==10.3.0",
+    "bibtexparser==1.4.1",
+    "django-colorfield==0.7.3",
+    "requests==2.32.0",
+    "psycopg2-binary==2.9.9",
+    "webcolors==1.13",
+    "djangorestframework==3.15.2",
+    "django-axes==5.41.1",
+    "shapely==1.8.5.post1",
+    "markdown2==2.4.13",
+    "alembic==1.13.1",
+    "django-simple-captcha==0.5.20",
+    "django-bootstrap5==21.3",
+    "django-fontawesome-5==1.0.18",
+    "omi==0.2.1",
+    "zipstream-new==1.1.8",
+    "rdflib==7.0.0",
+    "pyparsing==2.4.7",
+    "django-better-admin-arrayfield==1.4.2",
+    "sparqlwrapper==1.8.5",
+    "geoalchemy2==0.11.1",
+    "jsonschema==3.2.0",
+    "oemetadata==1.6.0",
+    "django-compressor==4.5.1",
+    "django-cors-headers==4.3.1",
+    "owlready2==0.45",
+    "databusclient>=0.12",
+]
