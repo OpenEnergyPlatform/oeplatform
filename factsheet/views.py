@@ -1960,10 +1960,10 @@ def populate_factsheets_elements(request, *args, **kwargs):
     technology_class = oeo_owl.search_one(iri=OEO.OEO_00000407)
     technology_subclasses = get_all_sub_classes(technology_class)
 
-    # energy_carrier_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020039") # noqa
+    # energy_carrier_class = oeo_owl.search_one(iri="https://openenergyplatform.org/ontology/oeo/OEO_00020039") # noqa
     # energy_carriers = get_all_sub_classes(energy_carrier_class)
 
-    # energy_transformation_process_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020003") # noqa
+    # energy_transformation_process_class = oeo_owl.search_one(iri="https://openenergyplatform.org/ontology/oeo/OEO_00020003") # noqa
     # energy_transformation_processes = get_all_sub_classes(energy_transformation_process_class) # noqa
 
     sector_divisions_list, sectors_list = build_sector_dropdowns_from_oeo(oeo)
