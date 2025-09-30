@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import toml
-from pathlib import Path
 
 # def parse_dep5(dep5_path):
 #     with open(dep5_path, "r", encoding="utf-8") as f:
@@ -46,6 +45,7 @@ from pathlib import Path
 
 #     return entries
 
+
 def parse_dep5(dep5_path):
     with open(dep5_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
@@ -65,11 +65,13 @@ def parse_dep5(dep5_path):
             continue
 
         if line.startswith("Files:"):
-            current["Files"] = [f.strip() for f in line[len("Files:"):].strip().split()]
+            current["Files"] = [
+                f.strip() for f in line[len("Files:") :].strip().split()
+            ]
         elif line.startswith("License:"):
-            current["License"] = line[len("License:"):].strip()
+            current["License"] = line[len("License:") :].strip()
         elif line.startswith("Copyright:"):
-            current_copyright.append(line[len("Copyright:"):].strip())
+            current_copyright.append(line[len("Copyright:") :].strip())
         elif line.startswith(" "):
             stripped = line.strip()
             if "License" in current and not current_copyright:
@@ -90,12 +92,15 @@ def build_reuse_toml(entries):
     for entry in entries:
         license_name = entry.get("License", "NO-LICENSE").strip()
         for file_path in entry["Files"]:
-            reuse_entries.append({
-                "Path": file_path,
-                "Licenses": [license_name],
-                "Copyright": entry.get("Copyright", [])
-            })
+            reuse_entries.append(
+                {
+                    "Path": file_path,
+                    "Licenses": [license_name],
+                    "Copyright": entry.get("Copyright", []),
+                }
+            )
     return {"File": reuse_entries}
+
 
 # def build_reuse_toml(entries):
 #     reuse_entries = []
@@ -111,6 +116,7 @@ def build_reuse_toml(entries):
 #             })
 #     return {"File": reuse_entries}
 
+
 def main():
     dep5_file = ".reuse/dep5"  # oder z. B. "debian/copyright"
     output_file = "REUSE.toml"
@@ -122,6 +128,7 @@ def main():
         toml.dump(reuse_data, f)
 
     print(f"✅ REUSE.toml erstellt mit {len(reuse_data['File'])} Einträgen.")
+
 
 if __name__ == "__main__":
     main()

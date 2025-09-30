@@ -18,7 +18,6 @@ from django.contrib.auth.forms import (
     PasswordChangeForm,
     SetPasswordForm,
     UserChangeForm,
-    UserCreationForm,
 )
 from django.core.exceptions import ValidationError
 

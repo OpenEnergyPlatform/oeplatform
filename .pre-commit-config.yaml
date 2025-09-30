@@ -1,4 +1,4 @@
-exclude: ^.*(.min.js|.min.css|.html|.js|.js.map|docs/*|mkdocs.yml)$
+exclude: ^.*(.min.js|.min.css|.html|.js|.js.map|docs/.*|mkdocs.yml)$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -19,7 +19,7 @@ repos:
     rev: 6.0.0
     hooks:
       - id: flake8
-        args: ["--max-line-length=88", "--ignore=E20,W503"] # black compatible
+        args: ["--max-line-length=88", "--ignore=E20,W503,E501"] # black compatible
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v8.38.0
     hooks:
