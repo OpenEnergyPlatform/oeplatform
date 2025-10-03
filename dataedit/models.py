@@ -56,6 +56,10 @@ class Tagable(models.Model):
         abstract = True
 
 
+class Topic(models.Model):
+    name = CharField(max_length=128, primary_key=True)
+
+
 class Schema(Tagable):
     """
     Represents a schema in the database.
@@ -85,7 +89,9 @@ class Table(Tagable):
         JSON string parsing.
     """
 
+    # TODO: will be deleted in second phase of migration to dataset schema
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
+
     search = SearchVectorField(default="")
 
     # TODO: Maybe oemetadata should be stored in a separate table and
@@ -94,6 +100,8 @@ class Table(Tagable):
     is_reviewed = BooleanField(default=False, null=False)
     is_publish = BooleanField(null=False, default=False)
     human_readable_name = CharField(max_length=1000, null=True)
+    is_sandbox = BooleanField(null=False, default=False)
+    topics = models.ManyToManyField(Topic)
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
