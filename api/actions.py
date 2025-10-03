@@ -1788,11 +1788,6 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
 
 
 def create_meta(schema, table):
-    # meta_schema = get_meta_schema_name(schema)
-
-    if not has_schema({"schema": "_" + schema}):
-        create_meta_schema(schema)
-
     get_edit_table_name(schema, table)
     # Table for inserts
     get_insert_table_name(schema, table)
@@ -2241,18 +2236,6 @@ def get_insert_table_name(schema, table, create=True):
 
 def get_meta_schema_name(schema):
     return "_" + schema
-
-
-def create_meta_schema(schema):
-    """Create a schema to store schema meta information
-
-    :param schema: Name of the schema
-    :return: None
-    """
-    engine = _get_engine()
-    query = "CREATE SCHEMA {schema}".format(schema=get_meta_schema_name(schema))
-    connection = engine.connect()
-    connection.execute(query)
 
 
 def create_meta_table(
