@@ -38,6 +38,8 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- OEP admin users now can edit scenario bundles ([#2103](https://github.com/OpenEnergyPlatform/oeplatform/pull/2103))
+
 ## Features
 
 ## Bugs
