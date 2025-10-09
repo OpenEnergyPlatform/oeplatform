@@ -40,6 +40,7 @@
     "lodash": "^4.17.21",
     "mkdirp": "^3.0.1",
     "moment": "^2.30.1",
+    "patch-package": "^8.0.1",
     "react": "18.3",
     "react-beautiful-dnd": "^13.1.1",
     "react-chartjs-2": "^5.2.0",
@@ -64,7 +65,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "prepare": "patch-package"
   },
   "keywords": [],
   "author": "",
