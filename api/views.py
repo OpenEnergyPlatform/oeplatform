@@ -1060,10 +1060,10 @@ class Rows(APIView):
                 content_type="text/csv",
                 session=session,
             )
-            response["Content-Disposition"] = (
-                'attachment; filename="{schema}__{table}.csv"'.format(
-                    schema=schema, table=table
-                )
+            response[
+                "Content-Disposition"
+            ] = 'attachment; filename="{schema}__{table}.csv"'.format(
+                schema=schema, table=table
             )
             return response
         elif format == "datapackage":
@@ -1094,10 +1094,10 @@ class Rows(APIView):
                 content_type="application/zip",
                 session=session,
             )
-            response["Content-Disposition"] = (
-                'attachment; filename="{schema}__{table}.zip"'.format(
-                    schema=schema, table=table
-                )
+            response[
+                "Content-Disposition"
+            ] = 'attachment; filename="{schema}__{table}.zip"'.format(
+                schema=schema, table=table
             )
             return response
         else:
