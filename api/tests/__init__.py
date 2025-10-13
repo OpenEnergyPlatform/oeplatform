@@ -12,6 +12,7 @@ import json
 from django.test import Client, TestCase
 from rest_framework.authtoken.models import Token
 
+from api import actions
 from login.models import myuser
 
 from .utils import load_content_as_json
@@ -23,6 +24,11 @@ class APITestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        actions.perform_sql(f"DROP SCHEMA IF EXISTS {cls.test_schema} CASCADE")
+        actions.perform_sql(f"CREATE SCHEMA {cls.test_schema}")
+        actions.perform_sql(f"DROP SCHEMA IF EXISTS _{cls.test_schema} CASCADE")
+        actions.perform_sql(f"CREATE SCHEMA _{cls.test_schema}")
+
         super(APITestCase, cls).setUpClass()
         cls.user, _ = myuser.objects.get_or_create(
             name="MrTest",

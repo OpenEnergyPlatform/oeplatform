@@ -64,8 +64,8 @@ jobs:
       - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
-          java-version: "11"
+          distribution: 'temurin'
+          java-version: '11'
       - name: Wait for Fuseki to start
         run: |
           for i in {1..30}; do
@@ -96,8 +96,8 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: |
-          psql -h localhost -p 5432 -U postgres -c "CREATE SCHEMA IF NOT EXISTS dataset" oedb
-          psql -h localhost -p 5432 -U postgres -c "CREATE SCHEMA IF NOT EXISTS _dataset" oedb
+          psql -h localhost -p 5432 -U postgres -c "CREATE SCHEMA IF NOT EXISTS sandbox" oedb
+          psql -h localhost -p 5432 -U postgres -c "CREATE SCHEMA IF NOT EXISTS _sandbox" oedb
       - name: oeo & oeo-ext integration
         run: |
           mkdir -p ontologies/oeo/1/

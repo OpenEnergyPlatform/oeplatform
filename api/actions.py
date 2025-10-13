@@ -1606,8 +1606,41 @@ def move(from_schema, table, to_schema):
             t = DBTable.objects.get(name=table, schema__name=from_schema)
         except DBTable.DoesNotExist:
             raise APIError("Table for schema movement not found")
+        try:
+            to_schema_reg, _ = DBSchema.objects.get_or_create(name=to_schema)
+        except DBSchema.DoesNotExist:
+            raise APIError("Target schema not found")
         if from_schema == to_schema:
             raise APIError("Target schema same as current schema")
+        t.schema = to_schema_reg
+
+        meta_to_schema = get_meta_schema_name(to_schema)
+        meta_from_schema = get_meta_schema_name(from_schema)
+
+        movements = [
+            (from_schema, table, to_schema),
+            (meta_from_schema, get_edit_table_name(from_schema, table), meta_to_schema),
+            (
+                meta_from_schema,
+                get_insert_table_name(from_schema, table),
+                meta_to_schema,
+            ),
+            (
+                meta_from_schema,
+                get_delete_table_name(from_schema, table),
+                meta_to_schema,
+            ),
+        ]
+
+        for fr, tab, to in movements:
+            session.execute(
+                "ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
+                    from_schema=fr, table=tab, to_schema=to
+                )
+            )
+        session.query(OEDBTableTags).filter(
+            OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
+        ).update({OEDBTableTags.schema_name: to_schema})
 
         all_peer_reviews = PeerReview.objects.filter(table=table, schema=from_schema)
 
@@ -1655,6 +1688,7 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
 
     try:
         t = DBTable.objects.get(name=table_name, schema__name=from_schema)
+        to_schema_reg, _ = DBSchema.objects.get_or_create(name=to_schema)
 
         if from_schema == to_schema:
             raise APIError("Target schema same as current schema")
@@ -1666,6 +1700,42 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
                 "A issue with the license from the metadata was found: "
                 f"{license_error}"
             )
+
+        t.schema = to_schema_reg
+
+        meta_to_schema = get_meta_schema_name(to_schema)
+        meta_from_schema = get_meta_schema_name(from_schema)
+
+        movements = [
+            (from_schema, table_name, to_schema),
+            (
+                meta_from_schema,
+                get_edit_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+            (
+                meta_from_schema,
+                get_insert_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+            (
+                meta_from_schema,
+                get_delete_table_name(from_schema, table_name),
+                meta_to_schema,
+            ),
+        ]
+
+        for fr, tab, to in movements:
+            session.execute(
+                "ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
+                    from_schema=fr, table=tab, to_schema=to
+                )
+            )
+
+        session.query(OEDBTableTags).filter(
+            OEDBTableTags.schema_name == from_schema,
+            OEDBTableTags.table_name == table_name,
+        ).update({OEDBTableTags.schema_name: to_schema})
 
         if embargo_period in ["6_months", "1_year"]:
             duration_in_weeks = 26 if embargo_period == "6_months" else 52
