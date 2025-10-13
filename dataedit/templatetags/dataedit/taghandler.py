@@ -16,9 +16,9 @@ register = template.Library()
 @register.simple_tag
 def get_tags(schema=None, table=None, limit=None):
     if limit:
-        return get_popular_tags(schema=schema, table=table, limit=limit)
+        return get_popular_tags(table=table, limit=limit)
     else:
-        return get_all_tags(schema=schema, table=table)
+        return get_all_tags(table=table)
 
 
 @register.simple_tag()

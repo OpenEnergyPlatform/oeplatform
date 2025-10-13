@@ -472,7 +472,7 @@ def listtables(request, schema_name):
             array_agg(Tag.color),
             array_agg(Tag.usage_count),
         )
-        .filter(TableTags.schema_name == schema_name, TableTags.tag == Tag.id)  # join
+        .filter(TableTags.tag == Tag.id)  # join
         .group_by(TableTags.table_name)
     )
 
@@ -983,12 +983,6 @@ class DataView(View):
         ) or schema.startswith("_"):
             raise Http404("Schema not accessible")
 
-        engine = actions._get_engine()
-
-        if not engine.dialect.has_table(engine, table, schema=schema):
-            raise Http404("Table does not exist in the database")
-
-        actions.create_meta(schema, table)
         metadata = load_metadata_from_db(schema, table)
         table_obj = Table.load(schema, table)
         if table_obj is None:

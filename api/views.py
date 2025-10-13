@@ -83,7 +83,6 @@ from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
-from dataedit.models import Topic
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
@@ -1692,6 +1691,7 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     Used for the scenario bundles react app to be able to populate
     form select options with existing datasets from scenario topic.
     """
+
     queryset = DBTable.objects.filter(topics__name="scenario")
     serializer_class = ScenarioDataTablesSerializer
 

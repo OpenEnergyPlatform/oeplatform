@@ -7,6 +7,7 @@ Collection of utility functions for the API used to define various action
 like processing steps.
 """
 
+from dataedit import views
 from oekg.sparqlModels import DatasetConfig
 
 
@@ -32,3 +33,20 @@ def check_if_oem_license_exists(metadata: dict):
         return None, "The version info in metaMetadata is empty."
 
     return metadata["metaMetadata"]["metadataVersion"], None
+
+
+def validate_schema(schema: str) -> str:
+    schema = schema or "sandbox"  # default fallback
+    if schema.startswith("_"):
+        prefix = "_"
+        schema = schema[1:]
+    else:
+        prefix = ""
+
+    if schema in views.schema_whitelist:  # if regular data schema: use dataset
+        schema = "dataset"
+    elif schema not in {"test", "sandbox"}:
+        raise Exception("Invalid schema")
+
+    schema = prefix + schema
+    return schema

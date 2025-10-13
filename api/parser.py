@@ -44,6 +44,7 @@ from sqlalchemy.sql.sqltypes import Interval
 
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
+from api.utils import validate_schema
 
 from . import DEFAULT_SCHEMA
 
@@ -297,14 +298,17 @@ def parse_from_item(d):
     if isinstance(d, list):
         return [parse_from_item(f) for f in d]
     dtype = get_or_403(d, "type")
+
+    schema_name = read_pgid(d["schema"]) if "schema" in d else None
+    schema_name = validate_schema(schema_name)
+
     if dtype == "table":
-        schema_name = read_pgid(d["schema"]) if "schema" in d else None
         # only = d.get("only", False)
         ext_name = read_pgid(get_or_403(d, "table"))
         tkwargs = dict(autoload=True)
         if schema_name:
             ext_name = schema_name + "." + ext_name
-            tkwargs["schema"] = d["schema"]
+            tkwargs["schema"] = schema_name
         if ext_name in __PARSER_META.tables:
             item = __PARSER_META.tables[ext_name]
         else:
@@ -315,7 +319,7 @@ def parse_from_item(d):
 
         engine = _get_engine()
         conn = engine.connect()
-        exists = engine.dialect.has_table(conn, item.name, item.schema)
+        exists = engine.dialect.has_table(conn, item.name, schema_name)
         conn.close()
         if not exists:
             raise APIError("Table not found: " + str(item), status=400)
@@ -343,6 +347,7 @@ __PARSER_META = MetaData(bind=_get_engine())
 
 def load_table_from_metadata(table_name, schema_name=None):
     ext_name = table_name
+    schema_name = validate_schema(schema_name)
     if schema_name:
         ext_name = schema_name + "." + ext_name
     if ext_name and ext_name in __PARSER_META.tables:
@@ -367,10 +372,9 @@ def parse_column(d, mapper):
         def do_map(x):
             return mapper.get(x, x)
 
-        if "schema" in d:
-            schema_name = read_pgid(do_map(d["schema"]))
-        else:
-            schema_name = None
+        schema_name = read_pgid(do_map(d["schema"])) if "schema" in d else None
+        schema_name = validate_schema(schema_name)
+
         table = load_table_from_metadata(table_name, schema_name=schema_name)
     if table is not None and name in table.c:
         col = table.c[name]
@@ -531,9 +535,10 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
         if dtype == "label":
             return parse_label(d)
         if dtype == "sequence":
-            schema = read_pgid(d["schema"]) if "schema" in d else DEFAULT_SCHEMA
+            schema_name = read_pgid(d["schema"]) if "schema" in d else DEFAULT_SCHEMA
+            schema_name = validate_schema(schema_name)
             # s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
-            return Sequence(get_or_403(d, "sequence"), schema=schema)
+            return Sequence(get_or_403(d, "sequence"), schema=schema_name)
         if dtype == "select":
             return parse_select(d)
         if dtype == "cast":
@@ -664,6 +669,7 @@ def parse_function(d):
 
 def parse_scolumnd_from_columnd(schema, table, name, column_description):
     # Migrate Postgres to Python Structures
+    schema_name = validate_schema(schema)
     data_type = column_description.get("data_type")
     size = column_description.get("character_maximum_length")
     if size is not None and data_type is not None:
@@ -676,7 +682,7 @@ def parse_scolumnd_from_columnd(schema, table, name, column_description):
         "not_null": notnull,
         "data_type": data_type,
         "new_name": column_description.get("new_name"),
-        "c_schema": schema,
+        "c_schema": schema_name,
         "c_table": table,
     }
 

@@ -53,10 +53,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from api.utils import check_if_oem_license_exists
-from dataedit import (  # we need schema_whitelist, but cannot import directly (circular imports)
-    views,
-)
+from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Schema as DBSchema
@@ -98,6 +95,8 @@ def get_column_obj(table, column):
 
 
 def get_table_name(schema, table, restrict_schemas=True):
+    schema = validate_schema(schema)
+
     if not has_schema(dict(schema=schema)):
         raise Http404
     if not has_table(dict(schema=schema, table=table)):
@@ -107,7 +106,7 @@ def get_table_name(schema, table, restrict_schemas=True):
     if restrict_schemas:
         if schema not in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
             raise PermissionDenied
-    schema = validate_schema(schema)
+
     # TODO check if table in schema_whitelist but circular import
     # from dataedit.views import schema_whitelist
     # if schema not in schema_whitelist
@@ -2132,23 +2131,6 @@ def get_insert_table_name(schema, table, create=True):
 
 def get_meta_schema_name(schema):
     return "_" + schema
-
-
-def validate_schema(schema: str) -> str:
-    schema = schema or "sandbox"  # default fallback
-    if schema.startswith("_"):
-        prefix = "_"
-        schema = schema[1:]
-    else:
-        prefix = ""
-
-    if schema in views.schema_whitelist:  # if regular data schema: use dataset
-        schema = "dataset"
-    elif schema not in {"test", "sandbox"}:
-        raise Exception("Invalid schema")
-
-    schema = prefix + schema
-    return schema
 
 
 def create_meta_table(
