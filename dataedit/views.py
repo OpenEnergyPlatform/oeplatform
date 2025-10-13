@@ -117,6 +117,7 @@ schema_whitelist = [
     "scenario",
     "society",
     "supply",
+    "dataset",
 ]
 
 schema_sandbox = "sandbox"
