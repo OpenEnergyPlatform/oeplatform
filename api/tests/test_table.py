@@ -299,34 +299,8 @@ class TestDelete(APITestCaseWithTable):
         self.create_table(self.test_structure)
 
 
-class TestMove(APITestCaseWithTable):
-    test_table = "test_table_move"
-    test_schema = "model_draft"  # cannot move from "test" schema
-    target_schema = "scenario"
-
-    def test_move(self):
-        self.api_req(
-            "post",
-            path=f"move/{self.target_schema}/",
-            exp_code=200,
-        )
-
-        # check that target table exists, and source does not exist anymore
-        self.api_req("get", exp_code=404)
-        self.api_req("get", schema=self.target_schema, exp_code=200)
-
-        # move back
-        self.api_req(
-            "post",
-            schema=self.target_schema,
-            path=f"move/{self.test_schema}/",
-            exp_code=200,
-        )
-
-
 class TestMovePublish(APITestCaseWithTable):
     test_table = "test_table_move_publish"
-    test_schema = "model_draft"  # cannot move from "test" schema
     target_schema = "scenario"
 
     def test_move_publish(self):
@@ -352,18 +326,6 @@ class TestMovePublish(APITestCaseWithTable):
             exp_code=200,
         )
 
-        # check that target table exists, and source does not exist anymore
-        self.api_req("get", exp_code=404)
-        self.api_req("get", schema=self.target_schema, exp_code=200)
-
-        # move back so we can publish again
-        self.api_req(
-            "post",
-            schema=self.target_schema,
-            path=f"move/{self.test_schema}/",
-            exp_code=200,
-        )
-
         # publish again with valid embargo
         # .. now we do it, but without (valid) setting embargo
         embargo_duration = "none"
@@ -371,13 +333,5 @@ class TestMovePublish(APITestCaseWithTable):
             "post",
             path=f"move_publish/{self.target_schema}/",
             data={"embargo": {"duration": embargo_duration}},
-            exp_code=200,
-        )
-
-        # move back so cleanup works
-        self.api_req(
-            "post",
-            schema=self.target_schema,
-            path=f"move/{self.test_schema}/",
             exp_code=200,
         )

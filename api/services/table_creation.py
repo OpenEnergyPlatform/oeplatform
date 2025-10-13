@@ -8,7 +8,10 @@ from dataedit.models import Table as DBTable
 
 class DjangoTableService:
     def create(self, schema_obj, table_name):
-        return DBTable.objects.create(name=table_name, schema=schema_obj)
+        is_sandbox = schema_obj.name == "sandbox"
+        return DBTable.objects.create(
+            name=table_name, schema=schema_obj, is_sandbox=is_sandbox
+        )
 
     def delete(self, schema_obj, table_name):
         DBTable.objects.filter(name=table_name, schema=schema_obj).delete()
@@ -26,6 +29,7 @@ class OEDBTableService:
 
         real_schema, real_table = actions.get_table_name(schema, table)
         meta_schema = actions.get_meta_schema_name(real_schema)
+
         edit_table = actions.get_edit_table_name(real_schema, real_table)
         engine = actions._get_engine()
 

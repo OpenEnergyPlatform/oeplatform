@@ -64,7 +64,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api.actions import describe_columns
+from api import actions
 
 # from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
 
@@ -77,7 +77,6 @@ except Exception:
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 
-from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
@@ -117,6 +116,7 @@ schema_whitelist = [
     "scenario",
     "society",
     "supply",
+    "dataset",
 ]
 
 schema_sandbox = "sandbox"
@@ -375,9 +375,6 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     # only whitelisted schemata:
     filters.append(Q(schema__name__in=schema_whitelist))
 
-    if schema_name:  # only tables in schema
-        filters.append(Q(schema__name=schema_name))
-
     if query_string:  # filter by search terms
         filters.append(
             Q(
@@ -417,9 +414,7 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
         # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851   # noqa
 
         for schema_name, table_name in tag_query:
-            filter_tables = filter_tables | (
-                Q(schema__name=schema_name) & Q(name=table_name)
-            )
+            filter_tables = filter_tables | (Q(name=table_name))
 
         filters.append(filter_tables)
 
@@ -884,7 +879,7 @@ def view_delete(request, schema, table):
 class GraphView(View):
     def get(self, request, schema, table):
         # get the columns id from the schema and the table
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         formset = GraphViewForm(columns=columns)
 
         return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
@@ -912,7 +907,7 @@ class GraphView(View):
 
 class MapView(View):
     def get(self, request, schema, table, maptype):
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(columns=columns)
         elif maptype == "geom":
@@ -923,7 +918,7 @@ class MapView(View):
         return render(request, "dataedit/tablemap_form.html", {"form": form})
 
     def post(self, request, schema, table, maptype):
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(request.POST, columns=columns)
             options = dict(lat=request.POST.get("lat"), lon=request.POST.get("lon"))

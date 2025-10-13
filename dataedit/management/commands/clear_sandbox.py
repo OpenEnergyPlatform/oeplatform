@@ -20,7 +20,7 @@ def get_sandbox_tables_django() -> List[Table]:
     Returns:
         List[Table]: list of table objects in django db in sandbox schema
     """
-    return Table.objects.filter(schema__name=SANDBOX_SCHEMA).all()
+    return Table.objects.filter(is_sandbox=True).all()
 
 
 def get_sandbox_table_names_oedb() -> List[str]:
