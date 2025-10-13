@@ -1692,9 +1692,7 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     Used for the scenario bundles react app to be able to populate
     form select options with existing datasets from scenario topic.
     """
-
-    topic = Topic.objects.get(name="scenario")
-    queryset = topic.tables.all()
+    queryset = DBTable.objects.filter(topics__name="scenario")
     serializer_class = ScenarioDataTablesSerializer
 
 
