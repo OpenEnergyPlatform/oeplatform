@@ -46,7 +46,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.db.models import Count, Q
+from django.db.models import Count, Q, QuerySet
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -89,7 +89,7 @@ from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Table
+from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
@@ -302,9 +302,6 @@ def listschemas(request):
     # find all tables (layzy query set)
     tables = find_tables(query_string=searched_query_string, tag_ids=searched_tag_ids)
 
-    # get table count per schema
-    response = tables.values("schema__name").annotate(tables_count=Count("name"))
-
     description = {
         "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",  # noqa
         "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",  # noqa
@@ -322,26 +319,37 @@ def listschemas(request):
         "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.",  # noqa
     }
 
-    schemas = [
+    # NOTE: tablesmaybe in mutliple topics, so
+    # total_table_count <= sum(count per topic)
+    total_table_count = tables.count()
+
+    topics_descriptions_tablecounts = []
+    # NOTE/TODO:WINGECHR: model_draft is not a proper topic
+    topics_descriptions_tablecounts.append(
         (
-            row["schema__name"],
-            description.get(row["schema__name"], "No description"),
-            row["tables_count"],  # number of tables in schema
+            "model_draft",
+            description["model_draft"],
+            tables.filter(is_publish=False).count(),
         )
-        for row in response
-    ]
+    )
 
-    # Count all tables
-    total_table_count = tables.aggregate(total=Count("name"))["total"]
+    # get a count of tables for each topics
+    topics = Topic.objects.filter(tables__in=tables).annotate(
+        table_count=Count("tables")
+    )
+    for topic in topics.order_by("name").all():
+        count = topic.table_count
+        total_table_count += count
+        topics_descriptions_tablecounts.append(
+            (topic.name, description[topic.name], count)
+        )
 
-    # sort by name
-    schemas = sorted(schemas, key=lambda x: x[0])
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
         {
             "total_table_count": total_table_count,
-            "schemas": schemas,
+            "schemas": topics_descriptions_tablecounts,
             "query": searched_query_string,
             "tags": searched_tag_ids,
             "doc_oem_builder_link": EXTERNAL_URLS["tutorials_oemetabuilder"],
@@ -357,11 +365,13 @@ def get_session_query():
     return session.query
 
 
-def find_tables(schema_name=None, query_string=None, tag_ids=None):
+def find_tables(
+    topic_name: str | None = None, query_string: str | None = None, tag_ids=None
+) -> QuerySet[Table]:
     """find tables given search criteria
 
     Args:
-        schema_name (str, optional): only tables in this schema
+        topic_name (str, optional): only tables in this topic
         query_string (str, optional): user search term
         tag_ids (list, optional): list of tag ids
 
@@ -370,10 +380,15 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     """
 
     # define search filter (will be combined with AND):
-    filters = []
+    # only show tables NOT in sandbox
+    filters = [Q(is_sandbox=False)]
 
-    # only whitelisted schemata:
-    filters.append(Q(schema__name__in=schema_whitelist))
+    if topic_name:
+        # TODO: WINGECHR: is model_draft a proper topic?
+        if topic_name == "model_draft":
+            filters.append(Q(is_publish=False))
+        else:
+            filters.append(Q(topics=topic_name))
 
     if query_string:  # filter by search terms
         filters.append(
@@ -392,16 +407,13 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
 
         # find tables (in schema), that use all of the tags
         filter_tags = [TableTags.tag.in_(tag_ids)]
-        if schema_name:
-            filter_tags.append(TableTags.schema_name == schema_name)
 
         tag_query = (
             get_session_query()(
-                TableTags.schema_name,
                 TableTags.table_name,
             )
             .filter(*filter_tags)
-            .group_by(TableTags.schema_name, TableTags.table_name)
+            .group_by(TableTags.table_name)
             .having(
                 # only if number of matches == number of tags
                 sqla.func.count()
@@ -413,7 +425,7 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
         # start with a "always false" condition, because we add OR statements
         # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851   # noqa
 
-        for schema_name, table_name in tag_query:
+        for topic_name, table_name in tag_query:
             filter_tables = filter_tables | (Q(name=table_name))
 
         filters.append(filter_tables)
@@ -446,7 +458,7 @@ def listtables(request, schema_name):
 
     # find all tables (layzy query set) in this schema
     tables = find_tables(
-        schema_name=schema_name,
+        topic_name=schema_name,
         query_string=searched_query_string,
         tag_ids=searched_tag_ids,
     )
