@@ -2017,79 +2017,201 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def sort_in_category(self, schema, table, oemetadata):
         """
-        Group flattened OEMetadata v2 fields into thematic buckets and attach
-        placeholders required by the review UI.
+                Groups OEMetadata v2 fields by top categories and
+                creates a two-level grouping of lists
+                (accordion-within-an-accordion) for general,
+                source, license, and spatial/temporal.
 
-        Each entry has six keys:
-        {
-          "field": "<dot-path>",
-          "label": "<display label without 'resources.<idx>.'>",
-          "value": "<current value>",
-          "newValue": "",
-          "reviewer_suggestion": "",
-          "suggestion_comment": ""
-        }
+        Category Exit:
+                {"flat":    [ { field, value, label, display_field, newValue,
+                 reviewer_suggestion, suggestion_comment,
+                   ... } ],
+                  "grouped": { "<Name N>": { "flat":[...], "grouped":{ "<Sub N>":[...]
+                  } }, ... }
+                }
         """
         import re
         from collections import defaultdict
 
+        def _plus_one_if_digit(txt: str) -> str:
+            return str(int(txt) + 1) if str(txt).isdigit() else txt
+
         flattened = self.parse_keys(oemetadata)
         flattened = [
-            item for item in flattened if item["field"].startswith("resources.")
+            x for x in flattened if str(x.get("field", "")).startswith("resources.")
         ]
 
-        bucket_map = {
-            "spatial": "spatial",
-            "temporal": "temporal",
-            "sources": "source",
-            "licenses": "license",
-        }
-
-        def make_label(dot_path: str) -> str:
-            # remove leading resources.<idx>.
-            trimmed = re.sub(r"^resources\.[0-9]+\.", "", dot_path)
-            parts = trimmed.split(".")
-            out = []
-            for p in parts:
-                if p in {"@id", "@type"}:
-                    out.append(p)
-                else:
-                    out.append(p.replace("_", " "))
-            if out:
-                out[0] = out[0][:1].upper() + out[0][1:]
-            return " ".join(out)
-
-        tmp = defaultdict(list)
-
+        base_items = []
         for item in flattened:
-            raw_key = item["field"]
-            parts = raw_key.split(".")
-
-            if parts[0] == "resources" and len(parts) >= 3:
-                root = parts[2]
+            raw = item["field"]
+            parts = raw.split(".")
+            if len(parts) >= 3 and parts[0] == "resources" and parts[1].isdigit():
+                trimmed = ".".join(parts[2:])
             else:
-                root = parts[0]
+                trimmed = raw
 
-            bucket = bucket_map.get(root, "general")
+            lbl_parts = [p.replace("_", " ") for p in trimmed.split(".")]
+            if lbl_parts:
+                lbl_parts[0] = lbl_parts[0][:1].upper() + lbl_parts[0][1:]
+            label = " ".join(lbl_parts)
 
-            tmp[bucket].append(
+            base_items.append(
                 {
-                    "field": raw_key,
-                    "label": make_label(raw_key),
-                    "value": item["value"],
+                    "field": trimmed,
+                    "label": label,
+                    "value": item.get("value", ""),
                     "newValue": "",
                     "reviewer_suggestion": "",
                     "suggestion_comment": "",
+                    "additional_comment": item.get("additional_comment", ""),
                 }
             )
 
-        return {
-            "general": tmp["general"],
-            "spatial": tmp["spatial"],
-            "temporal": tmp["temporal"],
-            "source": tmp["source"],
-            "license": tmp["license"],
-        }
+        main_categories = defaultdict(list)
+        for itm in base_items:
+            root = itm["field"].split(".")[0] if "." in itm["field"] else itm["field"]
+            cat = {
+                "spatial": "spatial",
+                "temporal": "temporal",
+                "sources": "source",
+                "licenses": "license",
+            }.get(root, "general")
+            main_categories[cat].append(itm)
+
+        def extract_index(prefix: str) -> int:
+            m = re.search(r"(?:\.|\s)([0-9]+)$", prefix or "")
+            return int(m.group(1)) if m else -1
+
+        def group_index_only(items):
+            """First index occurrence: name.0.* → 'Name 1';
+            otherwise, group by the first token."""
+            result = {"flat": [], "grouped": defaultdict(list)}
+            for itm in items:
+                field = itm["field"]
+                m = re.match(r"^([^.]+)\.([0-9]+)(?:\.(.*))?$", field)
+                if m:
+                    list_name, idx, tail = (
+                        m.group(1),
+                        int(m.group(2)),
+                        m.group(3) or "value",
+                    )
+                    disp_prefix = f"{list_name.capitalize()} {idx + 1}"
+                    enriched = dict(itm)
+                    enriched["display_field"] = tail
+                    enriched["display_prefix"] = disp_prefix
+                    enriched["display_index"] = str(idx + 1)
+                    result["grouped"][disp_prefix].append(enriched)
+                elif "." in field:
+                    group_key = field.split(".")[0]
+                    enriched = dict(itm)
+                    enriched["display_field"] = ".".join(field.split(".")[1:])
+                    enriched["display_prefix"] = group_key
+                    enriched.pop("display_index", None)
+                    result["grouped"][group_key].append(enriched)
+                else:
+                    enriched = dict(itm)
+                    enriched["display_field"] = field
+                    enriched.pop("display_index", None)
+                    result["flat"].append(enriched)
+            result["grouped"] = dict(
+                sorted(result["grouped"].items(), key=lambda kv: extract_index(kv[0]))
+            )
+            return result
+
+        def nest_sublist_groups(items_for_one_parent):
+            """Within the first-level group ('Sources 1'),
+            separate sublists of the type '<sublist>.<idx>.*' into their own
+             sections. The rest goes in flat.
+            """
+            nested = {"flat": [], "grouped": defaultdict(list)}
+            for itm in items_for_one_parent:
+                field = itm["field"]
+                mm = re.match(r"^([^.]+)\.([0-9]+)(?:\.(.*))?$", field)
+                if mm:
+                    sublist_name, idx, tail = (
+                        mm.group(1),
+                        int(mm.group(2)),
+                        mm.group(3) or "value",
+                    )
+                    group_key = f"{sublist_name.capitalize()} {idx + 1}"
+                    enriched = dict(itm)
+                    enriched["display_field"] = tail
+                    enriched["display_prefix"] = group_key
+                    enriched["display_index"] = str(idx + 1)
+                    nested["grouped"][group_key].append(enriched)
+                else:
+                    enriched = dict(itm)
+                    trimmed = ".".join(field.split(".")[1:]) if "." in field else field
+                    enriched["display_field"] = _plus_one_if_digit(trimmed)
+                    nested["flat"].append(enriched)
+            nested["grouped"] = dict(
+                sorted(
+                    nested["grouped"].items(),
+                    key=lambda kv: (kv[0].split()[0], int(kv[0].split()[-1])),
+                )
+            )
+            return nested
+
+        def _strip_cat_prefix(items, cat_name):
+            """spatial.extent.name → extent.name; temporal.period.start →
+            period.start"""
+            out = []
+            for it in items:
+                f = it["field"]
+                if f.startswith(cat_name + "."):
+                    trimmed = f[len(cat_name) + 1 :]
+                    e = dict(it)
+                    e["field"] = trimmed
+                    out.append(e)
+                else:
+                    out.append(it)
+            return out
+
+        def _group_spatiotemporal(items, cat_name):
+            """Level 1: by the first token AFTER
+            'spatial.'/'temporal.'
+            Level 2: as usual – separate the '<name>.<idx>.*'
+            lists into nested sections.
+            """
+
+            stripped = _strip_cat_prefix(items, cat_name)
+
+            first = group_index_only(stripped)
+
+            nested_grouped = {}
+            for gkey, gitems in first["grouped"].items():
+                nested_grouped[gkey.capitalize()] = nest_sublist_groups(gitems)
+
+            return {"flat": first["flat"], "grouped": nested_grouped}
+
+        grouped_meta = {}
+        for cat, items in main_categories.items():
+            if cat == "spatial":
+                grouped = _group_spatiotemporal(items, "spatial")
+            elif cat == "temporal":
+                grouped = _group_spatiotemporal(items, "temporal")
+            elif cat == "source":
+                first = group_index_only(items)
+                nested_grouped = {
+                    k: nest_sublist_groups(v) for k, v in first["grouped"].items()
+                }
+                grouped = {"flat": first["flat"], "grouped": nested_grouped}
+            elif cat == "license":
+                first = group_index_only(items)
+                nested_grouped = {
+                    k: nest_sublist_groups(v) for k, v in first["grouped"].items()
+                }
+                grouped = {"flat": first["flat"], "grouped": nested_grouped}
+            else:
+                # general (как было у вас)
+                grouped = group_index_only(items)
+
+            grouped_meta[cat] = {"flat": grouped["flat"], "grouped": grouped["grouped"]}
+
+        for k in ("general", "spatial", "temporal", "source", "license"):
+            grouped_meta.setdefault(k, {"flat": [], "grouped": {}})
+
+        return grouped_meta
 
     def get_all_field_descriptions(self, json_schema, prefix=""):
         """
