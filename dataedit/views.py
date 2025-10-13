@@ -64,7 +64,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api import actions
+from api import actions, utils
 
 # from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
 
@@ -1825,6 +1825,7 @@ class WizardView(LoginRequiredMixin, View):
     def get(self, request, schema="model_draft", table=None):
         """Handle GET request (render the page)."""
         engine = actions._get_engine()
+        schema = utils.validate_schema(schema)
 
         can_add = False
         columns = None
@@ -1833,8 +1834,6 @@ class WizardView(LoginRequiredMixin, View):
         if table:
             # get information about the table
             # if upload: table must exist in schema model_draft
-            if schema != "model_draft":
-                raise Http404("Can only upload to schema model_draft")
             if not engine.dialect.has_table(engine, table, schema=schema):
                 raise Http404("Table does not exist")
             table_obj = Table.load(schema, table)

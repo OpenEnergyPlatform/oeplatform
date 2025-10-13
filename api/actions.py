@@ -1734,6 +1734,7 @@ def has_table(request, context=None):
     """TODO: should check in all (whitelisted) schemas"""
     engine = _get_engine()
     schema = request.pop("schema", DEFAULT_SCHEMA)
+    schema = validate_schema(schema)
     table = get_or_403(request, "table")
     conn = engine.connect()
     try:

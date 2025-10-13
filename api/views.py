@@ -77,7 +77,7 @@ from api.services.embargo import (
 )
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
-from api.utils import get_dataset_configs
+from api.utils import get_dataset_configs, validate_schema
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
@@ -91,7 +91,7 @@ from oekg.utils import (
     process_datasets_sparql_query,
     validate_public_sparql_query,
 )
-from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
+from oeplatform.settings import USE_LOEP, USE_ONTOP
 
 if USE_LOEP:
     from oeplatform.settings import DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
@@ -284,8 +284,7 @@ def conjunction(clauses):
 class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
+        schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
@@ -297,8 +296,7 @@ class Sequence(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
+        schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
@@ -424,8 +422,7 @@ class Table(APIView):
         :param table:
         :return:
         """
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
+        schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         json_data = request.data
@@ -488,9 +485,8 @@ class Table(APIView):
             JsonResponse: A JSON response with the status code 201 CREATED
 
         """
+        schema = validate_schema(schema)
         # 1) Basic schema checks
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
@@ -499,7 +495,6 @@ class Table(APIView):
             raise APIError("Table already exists", 409)
 
         # 2) Validate identifiers
-        assert_valid_identifier_name(schema)
         assert_valid_identifier_name(table)
 
         # 3) Parse and validate payload
