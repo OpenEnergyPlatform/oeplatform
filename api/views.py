@@ -650,10 +650,12 @@ class Table(APIView):
         the OEDB table created by the user and also the edit_ meta(revision) table
         that is automatically created in the background.
         """
+
         # find the created oedb table
         if actions.has_table({"table": table, "schema": schema}):
             # get table and schema names, also for meta(revision) tables
             schema, table = actions.get_table_name(schema, table)
+            schema = actions.validate_schema(schema)
             meta_schema = actions.get_meta_schema_name(schema)
 
             # drop the revision table with edit_ prefix

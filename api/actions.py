@@ -60,6 +60,7 @@ from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
+from dataedit.views import schema_whitelist
 from login.utils import validate_open_data_license
 from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
@@ -104,6 +105,7 @@ def get_table_name(schema, table, restrict_schemas=True):
     if restrict_schemas:
         if schema not in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
             raise PermissionDenied
+    schema = validate_schema(schema)
     # TODO check if table in schema_whitelist but circular import
     # from dataedit.views import schema_whitelist
     # if schema not in schema_whitelist
@@ -821,6 +823,8 @@ def get_column_definition_query(d):
 
 
 def column_alter(query, context, schema, table, column):
+    schema = validate_schema(schema)
+
     if column == "id":
         raise APIError("You cannot alter the id column")
     alter_preamble = "ALTER TABLE {schema}.{table} ALTER COLUMN {column} ".format(
@@ -853,6 +857,7 @@ def column_alter(query, context, schema, table, column):
 
 
 def column_add(schema, table, column, description):
+    schema = validate_schema(schema)
     description["name"] = column
     settings = get_column_definition_query(description)
     name = settings.name
@@ -994,6 +999,7 @@ def table_change_column(column_definition):
     """
 
     schema = get_or_403(column_definition, "c_schema")
+    schema = validate_schema(schema)
     table = get_or_403(column_definition, "c_table")
 
     # Check if column exists
@@ -1089,6 +1095,7 @@ def table_change_constraint(constraint_definition):
 
     table = get_or_403(constraint_definition, "c_table")
     schema = get_or_403(constraint_definition, "c_schema")
+    schema = validate_schema(schema)
 
     existing_column_description = describe_columns(schema, table)
 
@@ -1254,6 +1261,8 @@ def drop_not_null_constraints_from_delete_meta_table(
 ) -> None:
     # https://github.com/OpenEnergyPlatform/oeplatform/issues/1548
     # we only want id column (and meta colums, wich start with a "_")
+
+    meta_schema = validate_schema(meta_schema)
 
     engine = _get_engine()
 
@@ -2143,11 +2152,29 @@ def get_meta_schema_name(schema):
     return "_" + schema
 
 
+def validate_schema(schema: str) -> str:
+    schema = schema or "sandbox"  # default fallback
+    if schema.startswith("_"):
+        prefix = "_"
+        schema = schema[1:]
+    else:
+        prefix = ""
+
+    if schema in schema_whitelist:  # if regular data schema: use dataset
+        schema = "dataset"
+    elif schema not in {"test", "sandbox"}:
+        raise Exception("Invalid schema")
+
+    schema = prefix + schema
+    return schema
+
+
 def create_meta_table(
-    schema, table, meta_table, meta_schema=None, include_indexes=True
+    schema: str, table, meta_table, meta_schema=None, include_indexes=True
 ):
-    if not meta_schema:
-        meta_schema = get_meta_schema_name(schema)
+    schema = validate_schema(schema)
+    meta_schema = get_meta_schema_name(schema)
+
     if not has_table(dict(schema=meta_schema, table=meta_table)):
         query = (
             'CREATE TABLE "{meta_schema}"."{edit_table}" ' '(LIKE "{schema}"."{table}"'
@@ -2177,9 +2204,10 @@ def create_insert_table(schema, table, meta_schema=None):
     create_meta_table(schema, table, meta_table, meta_schema)
 
 
-def create_comment_table(schema, table, meta_schema=None):
-    if not meta_schema:
-        meta_schema = get_meta_schema_name(schema)
+def create_comment_table(schema: str, table, meta_schema=None):
+    schema = validate_schema(schema)
+    meta_schema = get_meta_schema_name(schema)
+
     engine = _get_engine()
     query = (
         "CREATE TABLE {schema}.{table} (PRIMARY KEY (_id)) "

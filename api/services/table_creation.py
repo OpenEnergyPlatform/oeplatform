@@ -26,6 +26,7 @@ class OEDBTableService:
 
         real_schema, real_table = actions.get_table_name(schema, table)
         meta_schema = actions.get_meta_schema_name(real_schema)
+
         edit_table = actions.get_edit_table_name(real_schema, real_table)
         engine = actions._get_engine()
 
