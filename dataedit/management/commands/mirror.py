@@ -41,7 +41,8 @@ class Command(BaseCommand):
         print("---")
         # create django table objects if table in oedb and not in django
         for schema, table in real_tables.difference(table_objects):
+            schema = "dataset"
             print(schema, table)
-            s, _ = Schema.objects.get_or_create(name=schema)
+            s = Schema.objects.get(name=schema)
             t = Table(name=table, schema=s)
             t.save()

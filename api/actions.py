@@ -54,13 +54,15 @@ from api.sessions import (
     load_session_from_context,
 )
 from api.utils import check_if_oem_license_exists
+from dataedit import (  # we need schema_whitelist, but cannot import directly (circular imports)
+    views,
+)
 from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
-from dataedit.views import schema_whitelist
 from login.utils import validate_open_data_license
 from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
@@ -2160,7 +2162,7 @@ def validate_schema(schema: str) -> str:
     else:
         prefix = ""
 
-    if schema in schema_whitelist:  # if regular data schema: use dataset
+    if schema in views.schema_whitelist:  # if regular data schema: use dataset
         schema = "dataset"
     elif schema not in {"test", "sandbox"}:
         raise Exception("Invalid schema")
@@ -2419,9 +2421,8 @@ def update_meta_search(table, schema):
     """
     TODO: also update JSONB index fields
     """
-    schema_obj, _ = DBSchema.objects.get_or_create(
-        name=schema if schema is not None else DEFAULT_SCHEMA
-    )
+    schema = validate_schema(schema)
+    schema_obj, _ = DBSchema.objects.get_or_create(name=schema)
     t = DBTable.objects.get(name=table, schema=schema_obj)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
