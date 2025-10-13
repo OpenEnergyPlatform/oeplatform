@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2025 Christian Winger
+
 import logging
 
 from django.core.management.base import BaseCommand
