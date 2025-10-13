@@ -375,9 +375,6 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     # only whitelisted schemata:
     filters.append(Q(schema__name__in=schema_whitelist))
 
-    if schema_name:  # only tables in schema
-        filters.append(Q(schema__name=schema_name))
-
     if query_string:  # filter by search terms
         filters.append(
             Q(
@@ -417,9 +414,7 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
         # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851   # noqa
 
         for schema_name, table_name in tag_query:
-            filter_tables = filter_tables | (
-                Q(schema__name=schema_name) & Q(name=table_name)
-            )
+            filter_tables = filter_tables | (Q(name=table_name))
 
         filters.append(filter_tables)
 

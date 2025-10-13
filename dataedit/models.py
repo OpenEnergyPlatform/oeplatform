@@ -101,7 +101,7 @@ class Table(Tagable):
     is_publish = BooleanField(null=False, default=False)
     human_readable_name = CharField(max_length=1000, null=True)
     is_sandbox = BooleanField(null=False, default=False)
-    topics = models.ManyToManyField(Topic)
+    topics = models.ManyToManyField(Topic, related_name="tables")
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
@@ -137,11 +137,12 @@ class Table(Tagable):
         self.save()
 
     # TODO: Use function when implementing the publish button
-    def set_is_published(self, topic):
+    def set_is_published(self, topic_name: str):
         """
         Mark the table as published (ready for destination schema & public)
         and save the change to the database.
         """
+        topic = Topic.objects.get(name=topic_name)
         self.is_publish = True
         self.topics.add(topic)
         self.save()

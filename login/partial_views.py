@@ -11,8 +11,7 @@ from login.utils import get_badge_icon_path, get_review_badge_from_table_metadat
 
 def metadata_review_badge_indicator_icon_file(request, user_id, table_name):
     # is_badge : bool , msg : string -> either error msg or badge name
-    schema = "model_draft"  # set fixed for now
-    table = get_object_or_404(Table, schema__name=schema, name=table_name)
+    table = get_object_or_404(Table, name=table_name)
     is_badge, msg = get_review_badge_from_table_metadata(table)
 
     icon_path = None

@@ -20,9 +20,7 @@ def populate_peerreview_oemetadata():
     for review in PeerReview.objects.all():
         if not review.oemetadata or review.oemetadata == {}:
             # Logic to find a matching value from TableModel.
-            table = Table.objects.filter(
-                schema__name=review.schema, name=review.table
-            ).first()
+            table = Table.objects.filter(name=review.table).first()
             if table:
                 review.oemetadata = table.oemetadata
                 review.save()

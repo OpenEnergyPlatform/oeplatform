@@ -36,7 +36,7 @@ class Command(BaseCommand):
             if inp == "Y":
                 for schema, table in delete_schema_tables:
                     print(schema, table)
-                    Table.objects.get(name=table, schema__name=schema).delete()
+                    Table.objects.get(name=table).delete()
 
         print("---")
         # create django table objects if table in oedb and not in django

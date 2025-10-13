@@ -83,6 +83,7 @@ from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
+from dataedit.models import Topic
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
@@ -832,7 +833,7 @@ class Table(APIView):
                 schema=schema, table=table
             )
         )
-        table_object = DBTable.objects.get(name=table, schema__name=schema)
+        table_object = DBTable.objects.get(name=table)
         table_object.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)
 
@@ -910,8 +911,6 @@ class MovePublish(APIView):
     @require_admin_permission
     @api_exception
     def post(self, request, schema, table, to_schema):
-        if schema not in schema_whitelist or to_schema not in schema_whitelist:
-            raise APIError("Invalid origin or target schema")
         # Make payload more friendly as users tend to use the query wrapper in payload
         json_data = request.data.get("query", {})
         embargo_period = request.data.get("embargo", {}).get(
@@ -942,7 +941,7 @@ class Move(APIView):
 
 def check_embargo(schema, table):
     try:
-        table_obj = DBTable.objects.get(name=table, schema__name=schema)
+        table_obj = DBTable.objects.get(name=table)
         embargo = Embargo.objects.filter(table=table_obj).first()
         if embargo and embargo.date_ended > timezone.now():
             return True
@@ -1694,8 +1693,8 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     form select options with existing datasets from scenario topic.
     """
 
-    topic = "scenario"
-    queryset = DBTable.objects.filter(schema__name=topic)
+    topic = Topic.objects.get(name="scenario")
+    queryset = topic.tables.all()
     serializer_class = ScenarioDataTablesSerializer
 
 

@@ -25,7 +25,7 @@ User = get_user_model()
 
 TABLE_DEFS = [
     {
-        "schema": "model_draft",
+        "schema": "dataset",
         "table": "example_wind_farm_capacity",
         "columns": [
             {

@@ -1639,68 +1639,48 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
     Returns:
 
     """
-    engine = _get_engine()
-    Session = sessionmaker(engine)
-    session = Session()
 
-    try:
-        t = DBTable.objects.get(name=table_name, schema__name=from_schema)
-        license_check, license_error = validate_open_data_license(t)
+    t = DBTable.objects.get(name=table_name)
+    license_check, license_error = validate_open_data_license(t)
 
-        if not license_check:
-            raise APIError(
-                "A issue with the license from the metadata was found: "
-                f"{license_error}"
-            )
+    if not license_check:
+        raise APIError(
+            "A issue with the license from the metadata was found: " f"{license_error}"
+        )
 
-        if embargo_period in ["6_months", "1_year"]:
-            duration_in_weeks = 26 if embargo_period == "6_months" else 52
-            embargo, created = Embargo.objects.get_or_create(
-                table=t,
-                defaults={
-                    "duration": embargo_period,
-                    "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
-                },
-            )
-            if not created:
-                if embargo.date_started:
-                    embargo.duration = embargo_period
-                    embargo.date_ended = embargo.date_started + timedelta(
-                        weeks=duration_in_weeks
-                    )
-                else:
-                    embargo.duration = embargo_period
-                    embargo.date_started = datetime.now()
-                    embargo.date_ended = embargo.date_started + timedelta(
-                        weeks=duration_in_weeks
-                    )
-                embargo.save()
-        elif embargo_period == "none":
-            if Embargo.objects.filter(table=t).exists():
-                reset_embargo = Embargo.objects.get(table=t)
-                reset_embargo.delete()
+    if embargo_period in ["6_months", "1_year"]:
+        duration_in_weeks = 26 if embargo_period == "6_months" else 52
+        embargo, created = Embargo.objects.get_or_create(
+            table=t,
+            defaults={
+                "duration": embargo_period,
+                "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
+            },
+        )
+        if not created:
+            if embargo.date_started:
+                embargo.duration = embargo_period
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+            else:
+                embargo.duration = embargo_period
+                embargo.date_started = datetime.now()
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+            embargo.save()
+    elif embargo_period == "none":
+        if Embargo.objects.filter(table=t).exists():
+            reset_embargo = Embargo.objects.get(table=t)
+            reset_embargo.delete()
 
-        all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
+    all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
 
-        for peer_review in all_peer_reviews:
-            peer_review.update_all_table_peer_reviews_after_table_moved(
-                to_schema=to_schema
-            )
+    for peer_review in all_peer_reviews:
+        peer_review.update_all_table_peer_reviews_after_table_moved(to_schema=to_schema)
 
-        t.set_is_published(topic=to_schema)
-        session.commit()
-
-    except DBTable.DoesNotExist:
-        session.rollback()
-        raise APIError("Table for schema movement not found")
-    except DBSchema.DoesNotExist:
-        session.rollback()
-        raise APIError("Target schema not found")
-    except Exception as e:
-        session.rollback()
-        raise e
-    finally:
-        session.close()
+    t.set_is_published(topic_name=to_schema)
 
 
 def create_meta(schema, table):
