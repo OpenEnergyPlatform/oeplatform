@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import TssAutocomplete from "../features/terminology/components/TssAutocomplete";
 import TssMetadata from "../features/terminology/components/TssMetadata";
+import TssOeoInfo from "../features/terminology/components/TssOeoInfo";
+import TssHierarchy from "../features/terminology/components/TssHierarchy";
 
 export default function OeoViewerPage() {
   const [selection, setSelection] = useState(null);
@@ -14,11 +16,15 @@ export default function OeoViewerPage() {
         // ontology="OEO"
         onChange={(sel) => setSelection(sel)}
       />
-      <TssMetadata/>
-
       <pre style={{ marginTop: 12, padding: 12, background: "#f6f6f6" }}>
         {JSON.stringify(selection, null, 2)}
       </pre>
+      <TssMetadata/>
+      <TssHierarchy/>
+
+      <TssOeoInfo/>
+
+
     </div>
   );
 }
