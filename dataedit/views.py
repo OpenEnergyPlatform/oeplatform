@@ -425,7 +425,7 @@ def find_tables(
         # start with a "always false" condition, because we add OR statements
         # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851   # noqa
 
-        for topic_name, table_name in tag_query:
+        for table_name in tag_query:
             filter_tables = filter_tables | (Q(name=table_name))
 
         filters.append(filter_tables)
