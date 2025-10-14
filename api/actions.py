@@ -2389,7 +2389,6 @@ def update_meta_search(table, schema):
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
     tags = session.query(OEDBTag.name).filter(
-        OEDBTableTags.schema_name == schema,
         OEDBTableTags.table_name == table,
         OEDBTableTags.tag == OEDBTag.id,
     )

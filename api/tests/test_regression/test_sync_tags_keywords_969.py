@@ -63,7 +63,6 @@ class Test_sync_tags_keywords_969(APITestCase):
                             tt.tag
                             for tt in ses.query(TableTags).filter(
                                 TableTags.table_name == table,
-                                TableTags.schema_name == self.test_schema,
                             )
                         ]
                     )
@@ -75,9 +74,7 @@ class Test_sync_tags_keywords_969(APITestCase):
 
         def set_tag_names_in_db(names):
             ses = create_oedb_session()
-            ses.query(TableTags).filter(
-                TableTags.table_name == table, TableTags.schema_name == self.test_schema
-            ).delete()
+            ses.query(TableTags).filter(TableTags.table_name == table).delete()
             ses.flush()
             added_ids = set()
             for n in names:

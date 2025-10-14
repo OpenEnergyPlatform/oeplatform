@@ -1460,10 +1460,7 @@ def get_tag_keywords_synchronized_metadata(
     )  # remove empy
 
     tag_ids_old = set(
-        tt.tag
-        for tt in session.query(TableTags).filter(
-            TableTags.table_name == table, TableTags.schema_name == schema
-        )
+        tt.tag for tt in session.query(TableTags).filter(TableTags.table_name == table)
     )
     tags_old = session.query(Tag).filter(Tag.id.in_(tag_ids_old)).all()
 
@@ -1537,7 +1534,6 @@ def get_tag_keywords_synchronized_metadata(
             continue
         session.query(TableTags).filter(
             TableTags.table_name == table,
-            TableTags.schema_name == schema,
             TableTags.tag == tid,
         ).delete()
 
@@ -1633,7 +1629,7 @@ def redirect_after_table_tags_updated(request):
     return redirect(request.META["HTTP_REFERER"])
 
 
-def get_all_tags(schema=None, table=None):
+def get_all_tags(schema_name: str | None = None, table_name: str | None = None):
     """
     Load all tags of a specific table
     :param schema: Name of a schema
@@ -1645,7 +1641,7 @@ def get_all_tags(schema=None, table=None):
     Session = sessionmaker()
     session = Session(bind=engine)
     try:
-        if table is None:
+        if table_name is None:
             # Neither table, not schema are defined
             result = session.execute(sqla.select([Tag]).order_by("name"))
             session.commit()
@@ -1662,10 +1658,6 @@ def get_all_tags(schema=None, table=None):
             ]
             return sort_tags_by_popularity(r)
 
-        if schema is None:
-            # default schema is the public schema
-            schema = "public"
-
         result = session.execute(
             session.query(
                 Tag.name.label("name"),
@@ -1677,8 +1669,7 @@ def get_all_tags(schema=None, table=None):
                 TableTags.table_name,
             )
             .filter(TableTags.tag == Tag.id)
-            .filter(TableTags.table_name == table)
-            .filter(TableTags.schema_name == schema)
+            .filter(TableTags.table_name == table_name)
             .order_by("name")
         )
         session.commit()
@@ -1707,8 +1698,10 @@ def sort_tags_by_popularity(tags):
     return tags
 
 
-def get_popular_tags(schema=None, table=None, limit=10):
-    tags = get_all_tags(schema, table)
+def get_popular_tags(
+    schema_name: str | None = None, table_name: str | None = None, limit=10
+):
+    tags = get_all_tags(table_name=table_name)
     sort_tags_by_popularity(tags)
 
     return tags[:limit]

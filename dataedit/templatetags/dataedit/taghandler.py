@@ -14,11 +14,11 @@ register = template.Library()
 
 
 @register.simple_tag
-def get_tags(schema=None, table=None, limit=None):
+def get_tags(schema: str | None = None, table: str | None = None, limit=None):
     if limit:
-        return get_popular_tags(table=table, limit=limit)
+        return get_popular_tags(table_name=table, limit=limit)
     else:
-        return get_all_tags(table=table)
+        return get_all_tags(table_name=table)
 
 
 @register.simple_tag()
