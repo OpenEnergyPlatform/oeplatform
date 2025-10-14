@@ -406,29 +406,15 @@ def find_tables(
         # instead, we load all table names that match the given tags
 
         # find tables (in schema), that use all of the tags
-        filter_tags = [TableTags.tag.in_(tag_ids)]
+        for tag_id in tag_ids:
 
-        tag_query = (
-            get_session_query()(
-                TableTags.table_name,
-            )
-            .filter(*filter_tags)
-            .group_by(TableTags.table_name)
-            .having(
-                # only if number of matches == number of tags
-                sqla.func.count()
-                == len(tag_ids)
-            )
-        )
-
-        filter_tables = Q(pk__in=[])
-        # start with a "always false" condition, because we add OR statements
-        # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851   # noqa
-
-        for table_name in tag_query:
-            filter_tables = filter_tables | (Q(name=table_name))
-
-        filters.append(filter_tables)
+            table_names = [
+                x[0]
+                for x in get_session_query()(TableTags.table_name).filter(
+                    TableTags.tag == tag_id
+                )
+            ]
+            filters.append(Q(name__in=table_names))
 
     tables = Table.objects.filter(*filters)
 
@@ -646,7 +632,7 @@ def send_dump(schema, table, fname):
 
 
 def show_revision(request, schema, table, date):
-    global pending_dumps
+    # global pending_dumps
 
     rev = TableRevision.objects.get(schema=schema, table=table, date=date)
     rev.last_accessed = timezone.now()
