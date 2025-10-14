@@ -15,7 +15,13 @@ export default defineConfig({
       },
     }),
     eslint({
-      include: ['src/**/*.js', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx'],
+      include: [
+        'src/**/*.js',
+        'src/**/*.jsx',
+        'src/**/*.ts',
+        'src/**/*.tsx',
+        // '**/frontend/src/**/*.{js,jsx,ts,tsx}',
+      ],
       failOnWarning: false,
       failOnError:   true,
     }),
@@ -31,6 +37,11 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
+    exclude: [
+      // '@elastic/eui',
+      // '@elastic/datemath',
+      // '@ts4nfdi/terminology-service-suite',
+    ],
     include: [
       '@emotion/react',
       '@emotion/styled',
@@ -39,7 +50,7 @@ export default defineConfig({
       '@mui/material/styles',
       '@mui/system',
       '@mui/utils',
-      // add any other @mui/* packages you import directly
+      // '@ts4nfdi/terminology-service-suite',
     ],
   },
   build: {
@@ -47,10 +58,14 @@ export default defineConfig({
     assetsDir: 'django-vite/',
     emptyOutDir: true,
     manifest: true,
+    dynamicImportVarsOptions: {
+      exclude: [],
+    },
     rollupOptions: {
       input: {
         factsheet: resolve('./factsheet/frontend/src/index.jsx'),
         opr_review: resolve('./dataedit/static/peer_review/main.js'),
+        oeo_viewer: resolve('./oeo_viewer/frontend/src/index.jsx'),
       },
     },
   },

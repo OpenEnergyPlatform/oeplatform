@@ -1,8 +1,12 @@
 {% extends "base/base-wide-react.html" %}
 {% load static %}
 
+{% load django_vite %}
+
 {% block after-head %}
-<link rel="stylesheet" href="{% static 'oeo_viewer/scripts.cf23d0f5.css' %}">
+    <!-- The following must stay before the vite_asset tag -->
+    {% vite_react_refresh nonce="{{ request.csp_nonce }}" %}
+    {% vite_asset "oeo_viewer/frontend/src/index.jsx" %}
 {% endblock after-head %}
 
 {% block main %}
@@ -20,10 +24,12 @@
         </div>
     </div>
     {% block main-content-body %}
-    <div id="app"></div>
+    <div id="main">
+        <!-- The app renders here -->
+    </div>
     {% endblock main-content-body %}
 {% endblock main %}
 
 {% block after-body-bottom-js %}
-<script src="{% static 'oeo_viewer/scripts.be2500bb.js' %}"></script>
+
 {% endblock after-body-bottom-js %}
