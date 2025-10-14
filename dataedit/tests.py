@@ -11,7 +11,7 @@ from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from login.models import myuser
 
-from .models import PeerReview, Schema, Table
+from .models import PeerReview, Table
 
 
 # replicated functionality form dataedit migration 0033
@@ -29,10 +29,7 @@ def populate_peerreview_oemetadata():
 class MigrationTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        test_schema = Schema.objects.create(name="test")
-
         table = Table.objects.create(
-            schema=test_schema,
             name="test_table",
             oemetadata=OEMETADATA_V20_EXAMPLE,
         )
@@ -48,7 +45,7 @@ class MigrationTest(TestCase):
             # Make sure this assignment matches your model's expectations
             table=table.name,
             # Adjust based on how `schema` is related in `PeerReview`
-            schema=table.schema.name,
+            schema="sandbox",
             contributor=test_contributor,
             reviewer=test_reviewer,
             # Simulate a record that needs migration

@@ -25,7 +25,9 @@ def migrate_metadata(apps, schema_editor):
             metadata = get_comment_table(table.schema.name, table.name)
             try:
                 set_table_metadata(
-                    schema=table.schema.name, table=table.name, metadata=metadata
+                    schema_name=table.schema.name,
+                    table_name=table.name,
+                    metadata=metadata,
                 )
             except APIError:
                 # TODO: i think we should ignore those and continue?

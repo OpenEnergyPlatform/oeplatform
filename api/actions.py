@@ -56,7 +56,6 @@ from api.sessions import (
 from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
-from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
@@ -1173,8 +1172,8 @@ def _get_table(schema, table):
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
 
-def get_table_metadata(schema, table):
-    django_obj = DBTable.load(schema=schema, table=table)
+def get_table_metadata(schema_name: str, table_name: str):
+    django_obj = DBTable.load(schema_name=schema_name, table_name=table_name)
     oemetadata = django_obj.oemetadata
     return oemetadata if oemetadata else {}
 
@@ -2385,8 +2384,8 @@ def update_meta_search(table, schema):
     TODO: also update JSONB index fields
     """
     schema = validate_schema(schema)
-    schema_obj, _ = DBSchema.objects.get_or_create(name=schema)
-    t = DBTable.objects.get(name=table, schema=schema_obj)
+
+    t = DBTable.objects.get(name=table)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
     tags = session.query(OEDBTag.name).filter(
@@ -2407,7 +2406,7 @@ def update_meta_search(table, schema):
     t.save()
 
 
-def set_table_metadata(table, schema, metadata, cursor=None):
+def set_table_metadata(table_name: str, schema_name: str, metadata, cursor=None):
     """saves metadata as json string on table comment.
 
     Args:
@@ -2440,7 +2439,7 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.load(table=table, schema=schema)
+    django_table_obj = DBTable.load(table_name=table_name, schema_name=schema_name)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
 
@@ -2458,7 +2457,7 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # update search index
     # ---------------------------------------
 
-    update_meta_search(table, schema)
+    update_meta_search(table_name, schema_name)
 
 
 def get_single_table_size(

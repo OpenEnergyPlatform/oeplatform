@@ -11,7 +11,7 @@ import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
 from api import DEFAULT_SCHEMA
-from dataedit.models import Schema, Table
+from dataedit.models import Table
 
 try:
     import oeplatform.securitysettings as sec
@@ -56,7 +56,7 @@ def table_exists_in_oedb(table, schema=None):
     return result
 
 
-def table_exists_in_django(table, schema=None):
+def table_exists_in_django(table_name: str):
     """check if table exists in django
 
     Args:
@@ -66,10 +66,8 @@ def table_exists_in_django(table, schema=None):
     Returns:
         bool
     """
-    schema = schema or DEFAULT_SCHEMA
-    schema_obj = Schema.objects.get_or_create(name=schema)[0]
     try:
-        Table.objects.get(name=table, schema=schema_obj)
+        Table.objects.get(name=table_name)
         return True
     except Table.DoesNotExist:
         return False

@@ -19,7 +19,7 @@ from .utils import load_content_as_json
 
 
 class APITestCase(TestCase):
-    test_schema = "test"
+    test_schema = "sandbox"
     test_table = "test_table"
 
     @classmethod

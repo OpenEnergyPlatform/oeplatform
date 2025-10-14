@@ -81,7 +81,6 @@ from api.utils import get_dataset_configs, validate_schema
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
-from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
@@ -356,7 +355,7 @@ class Metadata(APIView):
             # Write oemetadata json to dataedit.models.tables
             # and to SQL comment on table
             actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=cursor
+                table_name=table, schema_name=schema, metadata=metadata, cursor=cursor
             )
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
@@ -369,7 +368,7 @@ class Metadata(APIView):
             metadata.pop("cursor_id", None)
 
             actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=cursor
+                table_name=table, schema_name=schema, metadata=metadata, cursor=cursor
             )
             return JsonResponse(raw_input)
         else:
@@ -539,8 +538,8 @@ class Table(APIView):
             }
             cursor = sessions.load_cursor_from_context(ctx)
             actions.set_table_metadata(
-                table=table,
-                schema=schema,
+                table_name=table,
+                schema_name=schema,
                 metadata=metadata,
                 cursor=cursor,
             )
@@ -573,9 +572,8 @@ class Table(APIView):
 
     def oep_create_table_transaction(
         self,
-        django_schema_object,
-        schema,
-        table,
+        schema_name: str,
+        table_name: str,
         column_definitions,
         constraint_definitions,
     ):
@@ -603,25 +601,23 @@ class Table(APIView):
         try:
             with transaction.atomic():
                 # First create the table object in the django database.
-                table_object = self._create_table_object(django_schema_object, table)
+                table_object = self._create_table_object(table_name=table_name)
             # Then attempt to create the OEDB table to check
             # if creation will succeed - action includes checks
             # and will raise api errors
             actions.table_create(
-                schema, table, column_definitions, constraint_definitions
+                schema_name, table_name, column_definitions, constraint_definitions
             )
         except DatabaseError as e:
             # remove any oedb table artifacts left after table creation
             # transaction failed
             self.__remove_oedb_table_on_exception_raised_during_creation_transaction(
-                table, schema
+                table_name, schema_name
             )
 
             # also remove any django table object
             # find the created django table object
-            object_to_delete = DBTable.objects.filter(
-                name=table, schema=django_schema_object
-            )
+            object_to_delete = DBTable.objects.filter(name=table_name)
             # delete it if it exists
             if object_to_delete.exists():
                 object_to_delete.delete()
@@ -680,7 +676,6 @@ class Table(APIView):
         assert_valid_identifier_name(table)
         self.validate_column_names(column_definitions)
 
-        schema_object, _ = DBSchema.objects.get_or_create(name=schema)
         context = {
             "connection_id": actions.get_or_403(request.data, "connection_id"),
             "cursor_id": actions.get_or_403(request.data, "cursor_id"),
@@ -695,9 +690,8 @@ class Table(APIView):
 
         if embargo_payload_check:
             table_object = self.oep_create_table_transaction(
-                django_schema_object=schema_object,
-                table=table,
-                schema=schema,
+                table_name=table,
+                schema_name=schema,
                 column_definitions=column_definitions,
                 constraint_definitions=constraint_definitions,
             )
@@ -705,7 +699,10 @@ class Table(APIView):
 
             if metadata:
                 actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata, cursor=cursor
+                    table_name=table,
+                    schema_name=schema,
+                    metadata=metadata,
+                    cursor=cursor,
                 )
 
             try:
@@ -721,9 +718,8 @@ class Table(APIView):
 
         else:
             table_object = self.oep_create_table_transaction(
-                django_schema_object=schema_object,
-                table=table,
-                schema=schema,
+                table_name=table,
+                schema_name=schema,
                 column_definitions=column_definitions,
                 constraint_definitions=constraint_definitions,
             )
@@ -731,12 +727,15 @@ class Table(APIView):
 
             if metadata:
                 actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata, cursor=cursor
+                    table_name=table,
+                    schema_name=schema,
+                    metadata=metadata,
+                    cursor=cursor,
                 )
 
-    def _create_table_object(self, schema_object, table):
+    def _create_table_object(self, table_name: str):
         try:
-            table_object = DBTable.objects.create(name=table, schema=schema_object)
+            table_object = DBTable.objects.create(name=table_name)
         except IntegrityError:
             raise APIError("Table already exists")
         return table_object

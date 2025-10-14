@@ -14,7 +14,7 @@ from api.tests import APITestCase
 
 
 class Test_issue_807_table_artefacts(APITestCase):
-    schema = "test"  # created in APITestCase
+    schema = "sandbox"  # created in APITestCase
     table = "nonexisting_table"
 
     def test_issue_807_table_artefacts(self):
@@ -30,4 +30,4 @@ class Test_issue_807_table_artefacts(APITestCase):
 
         self.assertFalse(table_exists_in_oedb(self.table, self.schema))
         # this failed before the bugfix
-        self.assertFalse(table_exists_in_django(self.table, self.schema))
+        self.assertFalse(table_exists_in_django(self.table))

@@ -1058,7 +1058,7 @@ class DataView(View):
 
         opr_context = {
             "contributor": PeerReviewManager.load_contributor(
-                schema=schema, table=table
+                schema_name=schema, table_name=table
             ),
             "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
             "opr_enabled": False,
@@ -1450,7 +1450,7 @@ def get_tag_keywords_synchronized_metadata(
 
     session = create_oedb_session()
 
-    metadata = load_metadata_from_db(schema=schema, table=table)
+    metadata = load_metadata_from_db(schema_name=schema, table_name=table)
     # TODO: Fixed resource index will fail to produce good
     # metadata for metadata with multiple resource
     keywords_old = set(
@@ -1599,8 +1599,8 @@ def update_table_tags(request):
         with con.begin():
             if not actions.assert_has_metadata(table=table, schema=schema):
                 actions.set_table_metadata(
-                    table=table,
-                    schema=schema,
+                    table_name=table,
+                    schema_name=schema,
                     metadata=OEMETADATA_V20_TEMPLATE,
                     cursor=con,
                 )
@@ -1612,7 +1612,7 @@ def update_table_tags(request):
 
             # TODO Add metadata to table (JSONB field) somewhere here
             actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=con
+                table_name=table, schema_name=schema, metadata=metadata, cursor=con
             )
 
     message = messages.success(
@@ -2224,7 +2224,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         }
         return render(request, "dataedit/opr_review.html", context=context_meta)
 
-    def post(self, request, schema, table, review_id=None):
+    def post(self, request, schema_name: str, table_name: str, review_id=None):
         """
         Handle POST requests for submitting reviews by the reviewer.
 
@@ -2287,22 +2287,26 @@ class PeerReviewView(LoginRequiredMixin, View):
             if review_post_type == "delete":
                 return delete_peer_review(review_id)
 
-            contributor = PeerReviewManager.load_contributor(schema, table)
+            contributor = PeerReviewManager.load_contributor(schema_name, table_name)
 
             if contributor is not None:
                 # Überprüfen, ob ein aktiver PeerReview existiert
-                active_peer_review = PeerReview.load(schema=schema, table=table)
+                active_peer_review = PeerReview.load(
+                    schema=schema_name, table=table_name
+                )
                 if active_peer_review is None or active_peer_review.is_finished:
                     # Kein aktiver PeerReview vorhanden
                     # oder der aktive PeerReview ist abgeschlossen
                     table_review = PeerReview(
-                        schema=schema,
-                        table=table,
+                        schema=schema_name,
+                        table=table_name,
                         is_finished=review_finished,
                         review=review_datamodel,
                         reviewer=request.user,
                         contributor=contributor,
-                        oemetadata=load_metadata_from_db(schema=schema, table=table),
+                        oemetadata=load_metadata_from_db(
+                            schema_name=schema_name, table_name=table_name
+                        ),
                     )
                     table_review.save(review_type=review_post_type)
                 else:
@@ -2320,19 +2324,23 @@ class PeerReviewView(LoginRequiredMixin, View):
             else:
                 error_msg = (
                     "Failed to retrieve any user that identifies "
-                    f"as table holder for the current table: {table}!"
+                    f"as table holder for the current table: {table_name}!"
                 )
                 return JsonResponse({"error": error_msg}, status=400)
 
             # TODO: Check for schema/topic as reviewed finished also indicates the table
             # needs to be or has to be moved.
             if review_finished is True:
-                review_table = Table.load(schema=schema, table=table)
+                review_table = Table.load(
+                    schema_name=schema_name, table_name=table_name
+                )
                 review_table.set_is_reviewed()
-                metadata = self.load_json(schema, table, review_id=review_id)
+                metadata = self.load_json(schema_name, table_name, review_id=review_id)
                 updated_metadata = recursive_update(metadata, review_data)
-                save_metadata_to_db(schema, table, updated_metadata)
-                active_peer_review = PeerReview.load(schema=schema, table=table)
+                save_metadata_to_db(schema_name, table_name, updated_metadata)
+                active_peer_review = PeerReview.load(
+                    schema=schema_name, table=table_name
+                )
 
                 if active_peer_review:
                     updated_oemetadata = recursive_update(

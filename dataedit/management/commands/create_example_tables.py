@@ -247,7 +247,7 @@ class Command(BaseCommand):
         metadata["resources"][0]["keywords"] = synced["resources"][0]["keywords"]
 
         # Save to Django's oemetadata JSONB field and comment
-        set_table_metadata(table=table_name, schema=schema, metadata=metadata)
+        set_table_metadata(table_name=table_name, schema_name=schema, metadata=metadata)
 
         self.stdout.write(
             self.style.SUCCESS(
