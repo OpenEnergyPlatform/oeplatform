@@ -4,7 +4,7 @@ import { AutocompleteWidget } from "@ts4nfdi/terminology-service-suite";
 export default function TssAutocomplete({
   api = "https://api.terminology.tib.eu/api/",
   placeholder = "Type to search...",
-  onChange = () => {},
+  onChange = () => { },
   ontology,
 }) {
   const parameter = [
