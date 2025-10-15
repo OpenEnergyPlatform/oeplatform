@@ -1,18 +1,19 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Marco Finkendei <https://github.com/MFinkendei>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Marco Finkendei <https://github.com/MFinkendei>
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import json
 from itertools import groupby
@@ -47,7 +48,6 @@ from login.utils import (
     get_user_tables,
     validate_open_data_license,
 )
-from oeplatform.settings import UNVERSIONED_SCHEMAS
 
 from .forms import (
     CreateUserForm,
@@ -93,7 +93,6 @@ class TablesView(View):
             # Use attributes in the templates
             table_data = {
                 "name": table.name,
-                "schema": table.schema.name,
                 "table_label": table.human_readable_name,
                 "is_publish": table.is_publish,
                 "is_reviewed": table.is_reviewed,
@@ -110,7 +109,7 @@ class TablesView(View):
             }
 
             if permission_level >= models.WRITE_PERM:
-                if table.is_publish and table.schema.name not in UNVERSIONED_SCHEMAS:
+                if table.is_publish:
                     published_tables.append(table_data)
                 else:
                     draft_tables.append(table_data)
@@ -443,9 +442,9 @@ def group_leave(request, group_id: int):
     errors: dict = {}
     members = GroupMembership.objects.filter(group=group).exclude(user=user.id).count()
     if members == 0:
-        errors[
-            "err_leave"
-        ] = "Please delete the group instead (you are the only member)."
+        errors["err_leave"] = (
+            "Please delete the group instead (you are the only member)."
+        )
         return JsonResponse(errors, status=400)
 
     if membership.level >= ADMIN_PERM:
@@ -594,9 +593,9 @@ class GroupManagement(View, LoginRequiredMixin):
                 membership.save()
                 response = HttpResponse()
                 # response["profile_user"] = user
-                response[
-                    "HX-Redirect"
-                ] = f"/user/profile/1/groups?create_msg=True&profile_user={user}"
+                response["HX-Redirect"] = (
+                    f"/user/profile/1/groups?create_msg=True&profile_user={user}"
+                )
                 return response
 
 
@@ -666,9 +665,9 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
                     errors["name"] = "A group needs at least one admin"
                     return JsonResponse(errors, status=405)
             elif membership.level < target_membership.level:
-                errors[
-                    "name"
-                ] = "You cant remove memberships with higher permission level."
+                errors["name"] = (
+                    "You cant remove memberships with higher permission level."
+                )
                 return JsonResponse(errors, status=400)
 
             target_membership.delete()
@@ -695,9 +694,9 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
             response = HttpResponse()
             user_id = request.user.id
             response["profile_user"] = user_id
-            response[
-                "HX-Redirect"
-            ] = f"/user/profile/1/groups?delete_msg=True&profile_user={user_id}"
+            response["HX-Redirect"] = (
+                f"/user/profile/1/groups?delete_msg=True&profile_user={user_id}"
+            )
             return response
         else:
             raise PermissionDenied

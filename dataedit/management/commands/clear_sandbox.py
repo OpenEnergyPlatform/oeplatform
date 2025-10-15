@@ -1,6 +1,8 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 from typing import List
 
@@ -75,7 +77,7 @@ def clear_sandbox(output: bool = False) -> None:
     # delete all from django
     for table in get_sandbox_tables_django():
         if output:
-            print(f"django: delete {table.schema.name}.{table.name}")
+            print(f"django: delete {table.name}")
         table.delete()
 
 
