@@ -93,6 +93,7 @@ class TablesView(View):
             # Use attributes in the templates
             table_data = {
                 "name": table.name,
+                "schema": "dataset",  # TODO
                 "table_label": table.human_readable_name,
                 "is_publish": table.is_publish,
                 "is_reviewed": table.is_reviewed,
