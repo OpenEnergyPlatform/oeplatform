@@ -1,11 +1,13 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import logging
 import os
@@ -321,9 +323,9 @@ class OntologyStatics(View):
                     response = HttpResponse(
                         f, content_type="application/csv; charset=utf-8"
                     )
-                    response[
-                        "Content-Disposition"
-                    ] = f'attachment; filename="{file}.{extension}"'
+                    response["Content-Disposition"] = (
+                        f'attachment; filename="{file}.{extension}"'
+                    )
                     return response
             else:
                 raise Http404
@@ -353,9 +355,9 @@ class OntologyStatics(View):
                     response = HttpResponse(
                         zip_file.read(), content_type="application/zip"
                     )
-                    response[
-                        "Content-Disposition"
-                    ] = f'attachment; filename="{result_file}.{extension}"'
+                    response["Content-Disposition"] = (
+                        f'attachment; filename="{result_file}.{extension}"'
+                    )
                     response["Content-Length"] = os.path.getsize(zip_file_path)
 
                     return response
@@ -379,9 +381,9 @@ class OntologyStatics(View):
                 if not file:
                     file = "oeo-full"
 
-                response[
-                    "Content-Disposition"
-                ] = f'attachment; filename="{file}.{extension}"'
+                response["Content-Disposition"] = (
+                    f'attachment; filename="{file}.{extension}"'
+                )
 
                 return response
         else:
@@ -392,9 +394,9 @@ class OntologyStatics(View):
                 response = HttpResponse(
                     f, content_type="application/rdf+xml; charset=utf-8"
                 )
-                response[
-                    "Content-Disposition"
-                ] = f'attachment; filename="{file}.{extension}"'
+                response["Content-Disposition"] = (
+                    f'attachment; filename="{file}.{extension}"'
+                )
                 return response
 
 
@@ -417,9 +419,9 @@ class OeoExtendedFileServe(View):
             response = HttpResponse(
                 self.oeo_ext_static, content_type="application/rdf+xml; charset=utf-8"
             )
-            response[
-                "Content-Disposition"
-            ] = f'attachment; filename="{self.file_name}.{self.file_extension}"'
+            response["Content-Disposition"] = (
+                f'attachment; filename="{self.file_name}.{self.file_extension}"'
+            )
         else:
             response = HttpResponse("File not found!", status_code=404)
 
