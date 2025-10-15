@@ -1,9 +1,9 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""SPARQL queries related to filtering scenario bundles in the OEKG.
 
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 
-"""SPARQL queries related to filtering scenario bundles in the OEKG."""
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import logging
 from typing import Union
