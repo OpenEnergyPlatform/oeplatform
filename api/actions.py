@@ -102,9 +102,6 @@ def get_table_name(schema, table, restrict_schemas=True):
         raise Http404
     if schema.startswith("_") or schema == "public" or schema is None:
         raise PermissionDenied
-    if restrict_schemas:
-        if schema not in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
 
     # TODO check if table in schema_whitelist but circular import
     # from dataedit.views import schema_whitelist
@@ -1444,26 +1441,24 @@ def data_insert_check(schema, table, values, context):
 def data_insert(request, context=None):
     cursor = load_cursor_from_context(context)
     # If the insert request is not for a meta table, change the request to do so
-    orig_table = get_or_403(request, "table")
-    if orig_table.startswith("_") or orig_table.endswith("_cor"):
+    table_name = get_or_403(request, "table")
+    if table_name.startswith("_") or table_name.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = request.get("schema", DEFAULT_SCHEMA)
+    schema_name = request.get("schema", DEFAULT_SCHEMA)
 
-    schema, table = get_table_name(orig_schema, orig_table)
+    schema_name, table_name = get_table_name(schema_name, table_name)
 
-    if schema is None:
-        schema = DEFAULT_SCHEMA
-
-    assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
+    assert_permission(
+        context["user"], table_name, login_models.WRITE_PERM, schema=schema_name
+    )
 
     # mapper = {orig_schema: schema, orig_table: table}
 
-    request["table"] = get_insert_table_name(orig_schema, orig_table)
-    if not orig_schema.startswith("_"):
-        request["schema"] = "_" + orig_schema
+    request["table"] = get_insert_table_name(schema_name, table_name)
+    request["schema"] = "_" + schema_name
 
     query, values = api.parser.parse_insert(request, context)
-    data_insert_check(orig_schema, orig_table, values, context)
+    data_insert_check(schema_name, table_name, values, context)
     _execute_sqla(query, cursor)
     description = cursor.description
     response = {}
@@ -1481,8 +1476,8 @@ def data_insert(request, context=None):
             for col in description
         ]
     response["rowcount"] = cursor.rowcount
-    if schema in PLAYGROUNDS or orig_schema in UNVERSIONED_SCHEMAS:
-        apply_changes(schema, table, cursor)
+
+    apply_changes(schema_name, table_name, cursor)
 
     return response
 
