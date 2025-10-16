@@ -44,7 +44,7 @@ def validate_schema(schema: str) -> str:
         prefix = ""
 
     if schema not in {SCHEMA_DEFAULT_TEST_SANDBOX, SCHEMA_DATA}:
-        raise Exception("Invalid schema")
+        raise Exception(f"Invalid schema: {schema}")
 
     schema = prefix + schema
     return schema
