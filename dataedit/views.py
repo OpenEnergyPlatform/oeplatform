@@ -32,7 +32,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import csv
 import json
-import logging
 import os
 import re
 from functools import reduce
@@ -43,6 +42,7 @@ from subprocess import call
 from wsgiref.util import FileWrapper
 
 import sqlalchemy as sqla
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
@@ -52,6 +52,7 @@ from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonRespo
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
@@ -61,17 +62,8 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
+import oeplatform.securitysettings as sec
 from api import actions, utils
-from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
-
-try:
-    import oeplatform.securitysettings as sec
-except Exception:
-    logging.error("No securitysettings found. Triggerd in dataedit/views.py")
-
-from django.contrib import messages
-from django.utils.decorators import method_decorator
-
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
@@ -88,6 +80,7 @@ from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
+from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS
 
 from .models import TableRevision

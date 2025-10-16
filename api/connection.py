@@ -11,15 +11,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
+import oeplatform.securitysettings as sec
 from api import DEFAULT_SCHEMA
 from dataedit.models import Table
-
-try:
-    import oeplatform.securitysettings as sec
-except Exception:
-    import logging
-
-    logging.error("No securitysettings found. Triggerd in api/connection.py")
 
 
 def get_connection_string():
