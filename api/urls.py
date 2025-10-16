@@ -229,6 +229,26 @@ urlpatterns = [
         views.ManageOekgScenarioDatasets.as_view(),
         name="add-scenario-datasets",
     ),
+    path(
+        "v0/datasets/",
+        views.DatasetsListCreate.as_view(),
+        name="dataset-list-create",
+    ),
+    path(
+        "v0/datasets/<str:dataset_name>/assign-tables/",
+        views.AssignDatasetTables.as_view(),
+        name="dataset-assign-tables",
+    ),
+    path(
+        "v0/datasets/<str:dataset_name>/",
+        views.DatasetManager.as_view(),
+        name="dataset",
+    ),
+    path(
+        "v0/datasets/<str:dataset_name>/resources/",
+        views.DatasetsListResources.as_view(),
+        name="dataset-resources",
+    ),
 ]
 
 

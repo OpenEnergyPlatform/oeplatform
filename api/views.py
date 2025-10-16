@@ -23,7 +23,7 @@ import itertools
 import json
 import logging
 import re
-from datetime import datetime, timedelta  # noqa
+from copy import deepcopy
 from decimal import Decimal
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
@@ -34,9 +34,7 @@ import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import DatabaseError, transaction
 from django.db.models import Q
-from django.db.utils import IntegrityError
 from django.http import (
     Http404,
     HttpResponse,
@@ -45,9 +43,11 @@ from django.http import (
     JsonResponse,
     StreamingHttpResponse,
 )
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from oemetadata.latest.example import OEMETADATA_LATEST_EXAMPLE
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
@@ -65,11 +65,16 @@ from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from api.serializers import (
+    DatasetAssignTablesSerializer,
+    DatasetCreateSerializer,
+    DatasetReadSerializer,
+    DatasetResourceSerializer,
     EnergyframeworkSerializer,
     EnergymodelSerializer,
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
+from api.services.dataset_creation import assemble_dataset_metadata
 from api.services.embargo import (
     EmbargoValidationError,
     apply_embargo,
@@ -80,8 +85,7 @@ from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
-from dataedit.models import Embargo
-from dataedit.models import Schema as DBSchema
+from dataedit.models import Dataset, Embargo
 from dataedit.models import Table as DBTable
 from dataedit.models import Topic
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
@@ -320,6 +324,14 @@ class Sequence(APIView):
 
 
 class Metadata(APIView):
+    """
+    Important note:
+    oemetadata v2 introduces datasets which are not relevant on a table level
+    always query for metadata["resources"][0]. Keeping the complete oemetadata v2 JSON
+    makes it easy to integrate as no further changes to validation are required for now.
+    Datasets are handled in the model.Datasets & api views.
+    """
+
     @api_exception
     @method_decorator(never_cache)
     def get(self, request, schema, table):
@@ -343,7 +355,8 @@ class Metadata(APIView):
             cursor = actions.load_cursor_from_context(request.data)
 
             # update/sync keywords with tags before saving metadata
-            # TODO make this iter over all resources
+            # oemetadata v2 introduces datasets which are not relevant on a table level
+            # always query for metadata["resources"][0]
             keywords = metadata["resources"][0].get("keywords", []) or []
 
             # get_tag_keywords_synchronized_metadata returns the OLD metadata
@@ -353,18 +366,19 @@ class Metadata(APIView):
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
-            # TODO make this iter over all resources
+            # oemetadata v2 introduces datasets which are not relevant on a table level
+            # always query for metadata["resources"][0]
             metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
 
             # Write oemetadata json to dataedit.models.tables
-            # and to SQL comment on table
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
-            # TODO make this iter over all resources
+            # oemetadata v2 introduces datasets which are not relevant on a table level
+            # always query for metadata["resources"][0]
             metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
 
             # make sure extra metadata is removed
@@ -377,6 +391,99 @@ class Metadata(APIView):
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
+
+
+class DatasetsListCreate(generics.ListCreateAPIView):
+    queryset = Dataset.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return DatasetCreateSerializer
+        return DatasetReadSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        metadata = assemble_dataset_metadata(serializer.validated_data)
+        dataset = Dataset.objects.create(metadata=metadata, name=metadata["name"])
+
+        return Response(
+            {"id": dataset.pk, "metadata": dataset.metadata},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class DatasetsListResources(generics.ListAPIView):
+    serializer_class = DatasetResourceSerializer
+
+    def get_queryset(self):
+        dataset_name = self.kwargs["dataset_name"]
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        return dataset.tables.all()
+
+
+class DatasetManager(APIView):
+    """
+    View to retrieve, update, or delete a single dataset's metadata.
+    URL: /v0/datasets/<dataset_name>/
+    """
+
+    def get(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        serializer = DatasetReadSerializer(dataset)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        serializer = DatasetCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        dataset.metadata = assemble_dataset_metadata(serializer.validated_data)
+        dataset.save()
+        return Response({"message": "Dataset updated"}, status=status.HTTP_200_OK)
+
+    def delete(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        dataset.delete()
+        return Response(
+            {"message": "Dataset deleted"}, status=status.HTTP_204_NO_CONTENT
+        )
+
+
+class AssignDatasetTables(APIView):
+    def post(self, request, dataset_name):
+        serializer = DatasetAssignTablesSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        table_refs = serializer.validated_data["tables"]
+
+        try:
+            dataset = Dataset.objects.get(name=dataset_name)
+        except Dataset.DoesNotExist:
+            return Response({"error": "Dataset not found"}, status=404)
+
+        missing = []
+        added_tables = []
+
+        for table_ref in table_refs:
+            try:
+                table = DBTable.load(table_ref["schema"], table_ref["name"])
+                dataset.tables.add(table)
+                added_tables.append(table.name)
+            except DBTable.DoesNotExist:
+                missing.append(table_ref)
+
+        dataset.update_resources_from_tables()
+
+        return Response(
+            {
+                "message": f"Added {len(added_tables)} tables.",
+                "added": added_tables,
+                "missing": missing,
+            },
+            status=200,
+        )
 
 
 class Table(APIView):
@@ -549,6 +656,39 @@ class Table(APIView):
                 schema=schema,
                 metadata=metadata,
                 cursor=cursor,
+            )
+        else:
+            # If no metadata is provided, we create a minimal metadata object
+            metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
+            metadata["@context"] = OEMETADATA_LATEST_EXAMPLE["@context"]
+            metadata["metaMetadata"] = OEMETADATA_LATEST_EXAMPLE["metaMetadata"]
+
+            # Set basic resource info
+            resource = {
+                "name": table,
+                "topics": [schema],
+            }
+
+            # Update the first resource - there will only be one resource.
+            # The dataset section is managed by the database implementation ...
+            metadata["resources"][0].update(resource)
+
+            # Build schema fields from columns
+            fields = []
+            for col in columns:
+                field = {
+                    "name": col["name"],
+                    "type": col["data_type"],
+                    "nullable": col.get("is_nullable", True),
+                    # add more field metadata as needed
+                }
+                fields.append(field)
+
+            # Replace the fields list entirely
+            metadata["resources"][0]["schema"]["fields"] = fields
+
+            actions.set_table_metadata(
+                table=table, schema=schema, metadata=metadata, cursor=None
             )
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)

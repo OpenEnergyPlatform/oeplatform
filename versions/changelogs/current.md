@@ -40,6 +40,13 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Features
 
+- Add Dataset rest-api and metadata based concept as specified in oemetadata / frictionless ([#2071](https://github.com/OpenEnergyPlatform/oeplatform/pull/2071))
+
+  - Resource metadata is stored for each created table.
+  - Dataset objects can be listed, created, edited and existing tables can be assigned as resource
+  - Datasets and assigned Resources are stored in the django database using a m:n relation with tables to read the oemetadata.
+  - Rest api implementation
+
 ## Bugs
 
 ## Removed

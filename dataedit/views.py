@@ -997,6 +997,8 @@ class DataView(View):
         meta_widget = MetaDataWidget(ordered_oem_151)
         revisions = []
 
+        # TODO Legacy code, not fully reviewed yet, currently not used
+        # seems to continue to track changes in the brackround
         api_changes = change_requests(schema, table)
         data = api_changes.get("data")
         display_message = api_changes.get("display_message")
