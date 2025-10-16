@@ -55,21 +55,14 @@ from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
-
-# from oemetadata.v1.v160.template import OEMETADATA_V160_TEMPLATE
 from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
-
-# from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
 from api import actions, utils
 from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
-
-# from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
-
 
 try:
     import oeplatform.securitysettings as sec
@@ -99,6 +92,10 @@ from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS
 
 from .models import TableRevision
 from .models import View as DataViewModel
+
+# TODO: WINGECHR: model_draft is not a topic, but currently,
+# frontend still usses it to filter / search for unpublished data
+TODO_PSEUDO_TOPIC_DRAFT = "model_draft"
 
 session = None
 
@@ -319,16 +316,17 @@ def listschemas(request):
         "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.",  # noqa
     }
 
-    # NOTE: tablesmaybe in mutliple topics, so
+    # NOTE: tables maybe in mutliple topics, so
     # total_table_count <= sum(count per topic)
     total_table_count = tables.count()
 
     topics_descriptions_tablecounts = []
     # NOTE/TODO:WINGECHR: model_draft is not a proper topic
+    # but currently, all unpublished datastes are displayed in frontend
     topics_descriptions_tablecounts.append(
         (
-            "model_draft",
-            description["model_draft"],
+            TODO_PSEUDO_TOPIC_DRAFT,
+            description[TODO_PSEUDO_TOPIC_DRAFT],
             tables.filter(is_publish=False).count(),
         )
     )
@@ -384,8 +382,9 @@ def find_tables(
     filters = [Q(is_sandbox=False)]
 
     if topic_name:
-        # TODO: WINGECHR: is model_draft a proper topic?
-        if topic_name == "model_draft":
+        # TODO: WINGECHR: model_draft is not a topic, but currently,
+        # frontend still usses it to filter / search for unpublished data
+        if topic_name == TODO_PSEUDO_TOPIC_DRAFT:
             filters.append(Q(is_publish=False))
         else:
             filters.append(Q(topics=topic_name))
@@ -1801,7 +1800,7 @@ def get_column_description(schema, table):
 class WizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv)."""
 
-    def get(self, request, schema="model_draft", table=None):
+    def get(self, request, schema=SCHEMA_DATA, table=None):
         """Handle GET request (render the page)."""
         engine = actions._get_engine()
         schema = utils.validate_schema(schema)
