@@ -6,7 +6,7 @@ SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  ©
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 NB-KREDER\kreder <https://github.com/klarareder> © Fraunhofer IEE
+SPDX-FileCopyrightText: 2025 NB-KREDER\\kreder <https://github.com/klarareder> © Fraunhofer IEE
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 
 SPDX-License-Identifier: AGPL-3.0-or-later
