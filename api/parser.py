@@ -49,8 +49,7 @@ from sqlalchemy.sql.sqltypes import Interval
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
 from api.utils import validate_schema
-
-from . import DEFAULT_SCHEMA
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 __KNOWN_TABLES = {}
 
@@ -539,7 +538,9 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
         if dtype == "label":
             return parse_label(d)
         if dtype == "sequence":
-            schema_name = read_pgid(d["schema"]) if "schema" in d else DEFAULT_SCHEMA
+            schema_name = (
+                read_pgid(d["schema"]) if "schema" in d else SCHEMA_DEFAULT_TEST_SANDBOX
+            )
             schema_name = validate_schema(schema_name)
             # s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
             return Sequence(get_or_403(d, "sequence"), schema=schema_name)

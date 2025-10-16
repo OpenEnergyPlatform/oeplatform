@@ -100,6 +100,7 @@ if USE_LOEP:
 if USE_ONTOP:
     from oeplatform.settings import ONTOP_SPARQL_ENDPOINT_URL
 
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
 
@@ -258,7 +259,7 @@ def api_exception(f):
 
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", actions.DEFAULT_SCHEMA)
+        schema = kwargs.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
         table = kwargs.get("table") or kwargs.get("sequence")
         actions.assert_permission(request.user, table, permission, schema=schema)
         return f(caller, request, *args, **kwargs)

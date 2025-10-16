@@ -45,7 +45,6 @@ from sqlalchemy.orm.session import sessionmaker
 import api
 import dataedit.metadata
 import login.models as login_models
-from api import DEFAULT_SCHEMA
 from api.connection import _get_engine, create_oedb_session
 from api.error import APIError
 from api.parser import get_or_403, parse_type, read_bool, read_pgid
@@ -62,7 +61,7 @@ from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
 from login.utils import validate_open_data_license
-from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -121,7 +120,7 @@ class ResponsiveException(Exception):
 
 def assert_permission(user, table, permission, schema=None):
     if schema is None:
-        schema = DEFAULT_SCHEMA
+        schema = SCHEMA_DEFAULT_TEST_SANDBOX
     if user.is_anonymous:
         raise APIError("User is anonymous", 401)
 
@@ -771,7 +770,7 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
 
 
 def get_column(d):
-    schema = d.get("schema", DEFAULT_SCHEMA)
+    schema = d.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
     table = get_or_403(d, "table")
     name = get_or_403(d, "column")
     return Column("%s.%s" % (table, name), schema=schema)
@@ -788,9 +787,9 @@ def get_column_definition_query(d):
         d["autoincrement"] = True
 
     for fk in d.get("foreign_key", []):
-        fkschema = fk.get("schema", DEFAULT_SCHEMA)
+        fkschema = fk.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
         if fkschema is None:
-            fkschema = DEFAULT_SCHEMA
+            fkschema = SCHEMA_DEFAULT_TEST_SANDBOX
 
         fktable = Table(get_or_403(fk, "table"), MetaData(), schema=fkschema)
 
@@ -1199,7 +1198,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
     query = {
         "from": {
             "type": "table",
-            "schema": read_pgid(request.get("schema", DEFAULT_SCHEMA)),
+            "schema": read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)),
             "table": orig_table,
         }
     }
@@ -1223,7 +1222,10 @@ def __change_rows(request, context, target_table, setter, fields=None):
     table_name = orig_table
     meta = MetaData(bind=_get_engine())
     table = Table(
-        table_name, meta, autoload=True, schema=request.get("schema", DEFAULT_SCHEMA)
+        table_name,
+        meta,
+        autoload=True,
+        schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
     )
     pks = [c for c in table.columns if c.primary_key]
 
@@ -1244,7 +1246,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
 
             inserts.append(dict(insert))
         # Add metadata for insertions
-        schema = request.get("schema", DEFAULT_SCHEMA)
+        schema = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
         meta_schema = (
             get_meta_schema_name(schema) if not schema.startswith("_") else schema
         )
@@ -1293,12 +1295,12 @@ def data_delete(request, context=None):
     orig_table = get_or_403(request, "table")
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = request.get("schema", DEFAULT_SCHEMA)
+    orig_schema = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
 
     schema, table = get_table_name(orig_schema, orig_table)
 
     if schema is None:
-        schema = DEFAULT_SCHEMA
+        schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
     assert_permission(context["user"], table, login_models.DELETE_PERM, schema=schema)
 
@@ -1310,8 +1312,7 @@ def data_delete(request, context=None):
     drop_not_null_constraints_from_delete_meta_table(target_table, meta_schema)
 
     result = __change_rows(request, context, target_table, setter, ["id"])
-    if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
-        apply_changes(schema, table, cursor)
+    apply_changes(schema, table, cursor)
     return result
 
 
@@ -1319,11 +1320,11 @@ def data_update(request, context=None):
     orig_table = read_pgid(get_or_403(request, "table"))
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = read_pgid(request.get("schema", DEFAULT_SCHEMA))
+    orig_schema = read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX))
     schema, table = get_table_name(orig_schema, orig_table)
 
     if schema is None:
-        schema = DEFAULT_SCHEMA
+        schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
     assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
 
@@ -1334,10 +1335,9 @@ def data_update(request, context=None):
             raise APIError("values passed in list format without field info")
         field_names = [read_pgid(d["column"]) for d in request["fields"]]
         setter = dict(zip(field_names, setter))
-    cursor = load_cursor_from_context(context)
+    cursor = load_cursor_from_context(context)  # TODO:
     result = __change_rows(request, context, target_table, setter)
-    if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
-        apply_changes(schema, table, cursor)
+    apply_changes(schema, table, cursor)
     return result
 
 
@@ -1446,7 +1446,7 @@ def data_insert(request, context=None):
     table_name = get_or_403(request, "table")
     if table_name.startswith("_") or table_name.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    schema_name = request.get("schema", DEFAULT_SCHEMA)
+    schema_name = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
 
     schema_name, table_name = get_table_name(schema_name, table_name)
 
@@ -1729,7 +1729,7 @@ def has_schema(request, context=None):
 def has_table(request, context=None):
     """TODO: should check in all (whitelisted) schemas"""
     engine = _get_engine()
-    schema = request.pop("schema", DEFAULT_SCHEMA)
+    schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
     schema = validate_schema(schema)
     table = get_or_403(request, "table")
     conn = engine.connect()
@@ -1747,7 +1747,7 @@ def has_sequence(request, context=None):
         result = engine.dialect.has_sequence(
             conn,
             get_or_403(request, "sequence_name"),
-            schema=request.get("schema", DEFAULT_SCHEMA),
+            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
         )
     finally:
         conn.close()
@@ -1761,7 +1761,7 @@ def has_type(request, context=None):
         result = engine.dialect.has_schema(
             conn,
             get_or_403(request, "sequence_name"),
-            schema=request.get("schema", DEFAULT_SCHEMA),
+            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
         )
     finally:
         conn.close()
@@ -1775,7 +1775,7 @@ def get_table_oid(request, context=None):
         result = engine.dialect.get_table_oid(
             conn,
             get_or_403(request, "table"),
-            schema=request.get("schema", DEFAULT_SCHEMA),
+            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
             **request,
         )
     except sa.exc.NoSuchTableError as e:
@@ -1800,7 +1800,7 @@ def get_table_names(request, context=None):
     conn = engine.connect()
     try:
         result = engine.dialect.get_table_names(
-            conn, schema=request.pop("schema", DEFAULT_SCHEMA), **request
+            conn, schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX), **request
         )
     finally:
         conn.close()
@@ -1812,7 +1812,7 @@ def get_view_names(request, context=None):
     conn = engine.connect()
     try:
         result = engine.dialect.get_view_names(
-            conn, schema=request.pop("schema", DEFAULT_SCHEMA), **request
+            conn, schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX), **request
         )
     finally:
         conn.close()
@@ -1826,7 +1826,7 @@ def get_view_definition(request, context=None):
         result = engine.dialect.get_schema_names(
             conn,
             get_or_403(request, "view_name"),
-            schema=request.pop("schema", DEFAULT_SCHEMA),
+            schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
             **request,
         )
     finally:
@@ -1839,7 +1839,7 @@ def get_columns(request, context=None):
     connection = engine.connect()
 
     table_name = get_or_403(request, "table")
-    schema = request.pop("schema", DEFAULT_SCHEMA)
+    schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
 
     # We need to translate the info_cache from a json-friendly format to the
     # conventional one
@@ -1908,7 +1908,7 @@ def get_pk_constraint(request, context=None):
         result = engine.dialect.get_pk_constraint(
             conn,
             get_or_403(request, "table"),
-            schema=request.pop("schema", DEFAULT_SCHEMA),
+            schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
             **request,
         )
     finally:
@@ -1920,7 +1920,7 @@ def get_foreign_keys(request, context=None):
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
-        request["schema"] = DEFAULT_SCHEMA
+        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
     try:
         result = engine.dialect.get_foreign_keys(
             conn,
@@ -1939,7 +1939,7 @@ def get_indexes(request, context=None):
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
-        request["schema"] = DEFAULT_SCHEMA
+        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
     try:
         result = engine.dialect.get_indexes(
             conn, get_or_403(request, "table"), **request
@@ -1953,7 +1953,7 @@ def get_unique_constraints(request, context=None):
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
-        request["schema"] = DEFAULT_SCHEMA
+        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
     try:
         result = engine.dialect.get_foreign_keys(
             conn, get_or_403(request, "table"), **request

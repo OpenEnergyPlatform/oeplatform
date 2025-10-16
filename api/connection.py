@@ -12,8 +12,8 @@ import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
 import oeplatform.securitysettings as sec
-from api import DEFAULT_SCHEMA
 from dataedit.models import Table
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 def get_connection_string():
@@ -41,7 +41,7 @@ def table_exists_in_oedb(table, schema=None):
     Returns:
         bool
     """
-    schema = schema or DEFAULT_SCHEMA
+    schema = schema or SCHEMA_DEFAULT_TEST_SANDBOX
     engine = _get_engine()
     conn = engine.connect()
     try:
