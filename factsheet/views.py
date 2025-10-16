@@ -94,29 +94,18 @@ def set_ownership(bundle_uid, user):
 
 
 def is_owner(user, bundle_id):
-    bundle = ScenarioBundleAccessControl.load_by_uid(uid=bundle_id)
-    if bundle is not None:
-        eval = user == bundle.owner_user.id
-    else:
-        eval = False
-
-    return eval
+    return ScenarioBundleAccessControl.user_has_access(user, bundle_id)
 
 
 def check_ownership(request, bundle_id):
-    if bundle_id != "new":
-        if is_owner(request.user.id, bundle_id):
-            return JsonResponse(
-                {"isOwner": True}, safe=False, content_type="application/json"
-            )
-        else:
-            return JsonResponse(
-                {"isOwner": False}, safe=False, content_type="application/json"
-            )
-    else:
-        return JsonResponse(
-            {"isOwner": True}, safe=False, content_type="application/json"
-        )
+    if bundle_id == "new":
+        return JsonResponse({"isOwner": True})
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"isOwner": False}, status=401)
+
+    is_owner_flag = is_owner(request.user, bundle_id)
+    return JsonResponse({"isOwner": is_owner_flag})
 
 
 def add_history(triple_subject, triple_predicate, triple_object, type_of_action, user):

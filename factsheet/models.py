@@ -33,3 +33,12 @@ class ScenarioBundleAccessControl(models.Model):
     @classmethod
     def load_by_uid(cls, uid):
         return ScenarioBundleAccessControl.objects.filter(bundle_id=uid).first()
+
+    @classmethod
+    def users_for_bundle(cls, uid):
+        # all relations for the bundle
+        return cls.objects.select_related("owner_user").filter(bundle_id=uid)
+
+    @classmethod
+    def user_has_access(cls, user, uid):
+        return cls.objects.filter(owner_user=user, bundle_id=uid).exists()
