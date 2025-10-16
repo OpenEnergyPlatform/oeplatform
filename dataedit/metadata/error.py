@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+
 class MetadataException(Exception):
     def __init__(self, metadata, error):
         self.metadata = metadata

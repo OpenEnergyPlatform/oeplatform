@@ -189,7 +189,7 @@ source          SELECT "id", "category" FROM "scenario"."eu_leg_data_2021_rep_ta
 
 
 mappingId       eu_leg_data_2021_rep_table_1_scenario_year
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020224 "{year}" .
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020440 "{year}" .
 source          SELECT "id", "year" FROM "scenario"."eu_leg_data_2021_rep_table_1"
 
 

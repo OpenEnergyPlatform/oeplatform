@@ -64,7 +64,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api.actions import describe_columns
+from api import actions
 
 # from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
 
@@ -77,7 +77,6 @@ except Exception:
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 
-from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
@@ -117,6 +116,7 @@ schema_whitelist = [
     "scenario",
     "society",
     "supply",
+    "dataset",
 ]
 
 schema_sandbox = "sandbox"
@@ -375,9 +375,6 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     # only whitelisted schemata:
     filters.append(Q(schema__name__in=schema_whitelist))
 
-    if schema_name:  # only tables in schema
-        filters.append(Q(schema__name=schema_name))
-
     if query_string:  # filter by search terms
         filters.append(
             Q(
@@ -417,9 +414,7 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
         # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851   # noqa
 
         for schema_name, table_name in tag_query:
-            filter_tables = filter_tables | (
-                Q(schema__name=schema_name) & Q(name=table_name)
-            )
+            filter_tables = filter_tables | (Q(name=table_name))
 
         filters.append(filter_tables)
 
@@ -884,7 +879,7 @@ def view_delete(request, schema, table):
 class GraphView(View):
     def get(self, request, schema, table):
         # get the columns id from the schema and the table
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         formset = GraphViewForm(columns=columns)
 
         return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
@@ -912,7 +907,7 @@ class GraphView(View):
 
 class MapView(View):
     def get(self, request, schema, table, maptype):
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(columns=columns)
         elif maptype == "geom":
@@ -923,7 +918,7 @@ class MapView(View):
         return render(request, "dataedit/tablemap_form.html", {"form": form})
 
     def post(self, request, schema, table, maptype):
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(request.POST, columns=columns)
             options = dict(lat=request.POST.get("lat"), lon=request.POST.get("lon"))
@@ -2019,33 +2014,22 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def sort_in_category(self, schema, table, oemetadata):
         """
-        Group flattened OEMetadata v2 fields into thematic buckets and attach
+        Group flattened OEMetadata v2 fields into thematic buckets and attach
         placeholders required by the review UI.
 
-        Each entry in the resulting lists has **five** keys:
-
-        ```json
+        Each entry has six keys:
         {
-          "field": "<dot‑notation path>",
+          "field": "<dot-path>",
+          "label": "<display label without 'resources.<idx>.'>",
           "value": "<current value>",
           "newValue": "",
           "reviewer_suggestion": "",
           "suggestion_comment": ""
         }
-        ```
-
-        Buckets returned:
-
-        * general
-        * spatial
-        * temporal
-        * source
-        * license
         """
-
+        import re
         from collections import defaultdict
 
-        # Flatten the nested JSON into [{'field': k, 'value': v}, ...]
         flattened = self.parse_keys(oemetadata)
         flattened = [
             item for item in flattened if item["field"].startswith("resources.")
@@ -2058,13 +2042,26 @@ class PeerReviewView(LoginRequiredMixin, View):
             "licenses": "license",
         }
 
+        def make_label(dot_path: str) -> str:
+            # remove leading resources.<idx>.
+            trimmed = re.sub(r"^resources\.[0-9]+\.", "", dot_path)
+            parts = trimmed.split(".")
+            out = []
+            for p in parts:
+                if p in {"@id", "@type"}:
+                    out.append(p)
+                else:
+                    out.append(p.replace("_", " "))
+            if out:
+                out[0] = out[0][:1].upper() + out[0][1:]
+            return " ".join(out)
+
         tmp = defaultdict(list)
 
         for item in flattened:
             raw_key = item["field"]
             parts = raw_key.split(".")
 
-            # Detect v2 resource path → resources.<idx>.<root>.…
             if parts[0] == "resources" and len(parts) >= 3:
                 root = parts[2]
             else:
@@ -2072,10 +2069,10 @@ class PeerReviewView(LoginRequiredMixin, View):
 
             bucket = bucket_map.get(root, "general")
 
-            # Extend structure with placeholders expected by review workflow
             tmp[bucket].append(
                 {
                     "field": raw_key,
+                    "label": make_label(raw_key),
                     "value": item["value"],
                     "newValue": "",
                     "reviewer_suggestion": "",
@@ -2083,15 +2080,13 @@ class PeerReviewView(LoginRequiredMixin, View):
                 }
             )
 
-        # Guarantee keys exist even when empty
-        buckets = {
+        return {
             "general": tmp["general"],
             "spatial": tmp["spatial"],
             "temporal": tmp["temporal"],
             "source": tmp["source"],
             "license": tmp["license"],
         }
-        return buckets
 
     def get_all_field_descriptions(self, json_schema, prefix=""):
         """

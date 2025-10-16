@@ -250,3 +250,8 @@ urlpatterns = [
         name="dataset-resources",
     ),
 ]
+
+
+urlpatterns += [
+    path("v0/db/table-sizes/", views.TableSize.as_view(), name="table-sizes"),
+]

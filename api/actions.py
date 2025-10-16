@@ -44,7 +44,7 @@ import api
 import dataedit.metadata
 import login.models as login_models
 from api import DEFAULT_SCHEMA
-from api.connection import _get_engine
+from api.connection import _get_engine, create_oedb_session
 from api.error import APIError
 from api.parser import get_or_403, parse_type, read_bool, read_pgid
 from api.sessions import (
@@ -54,6 +54,9 @@ from api.sessions import (
     load_session_from_context,
 )
 from api.utils import check_if_oem_license_exists
+from dataedit import (  # we need schema_whitelist, but cannot import directly (circular imports)
+    views,
+)
 from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Schema as DBSchema
@@ -104,6 +107,7 @@ def get_table_name(schema, table, restrict_schemas=True):
     if restrict_schemas:
         if schema not in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
             raise PermissionDenied
+    schema = validate_schema(schema)
     # TODO check if table in schema_whitelist but circular import
     # from dataedit.views import schema_whitelist
     # if schema not in schema_whitelist
@@ -821,6 +825,8 @@ def get_column_definition_query(d):
 
 
 def column_alter(query, context, schema, table, column):
+    schema = validate_schema(schema)
+
     if column == "id":
         raise APIError("You cannot alter the id column")
     alter_preamble = "ALTER TABLE {schema}.{table} ALTER COLUMN {column} ".format(
@@ -853,6 +859,7 @@ def column_alter(query, context, schema, table, column):
 
 
 def column_add(schema, table, column, description):
+    schema = validate_schema(schema)
     description["name"] = column
     settings = get_column_definition_query(description)
     name = settings.name
@@ -994,6 +1001,7 @@ def table_change_column(column_definition):
     """
 
     schema = get_or_403(column_definition, "c_schema")
+    schema = validate_schema(schema)
     table = get_or_403(column_definition, "c_table")
 
     # Check if column exists
@@ -1089,6 +1097,7 @@ def table_change_constraint(constraint_definition):
 
     table = get_or_403(constraint_definition, "c_table")
     schema = get_or_403(constraint_definition, "c_schema")
+    schema = validate_schema(schema)
 
     existing_column_description = describe_columns(schema, table)
 
@@ -1254,6 +1263,8 @@ def drop_not_null_constraints_from_delete_meta_table(
 ) -> None:
     # https://github.com/OpenEnergyPlatform/oeplatform/issues/1548
     # we only want id column (and meta colums, wich start with a "_")
+
+    meta_schema = validate_schema(meta_schema)
 
     engine = _get_engine()
 
@@ -1597,66 +1608,12 @@ def move(from_schema, table, to_schema):
         Currently we implemented two versions of the move functionality
         this will later be harmonized. See 'move_publish'.
     """
-    table = read_pgid(table)
-    engine = _get_engine()
-    Session = sessionmaker(engine)
-    session = Session()
-    try:
-        try:
-            t = DBTable.objects.get(name=table, schema__name=from_schema)
-        except DBTable.DoesNotExist:
-            raise APIError("Table for schema movement not found")
-        try:
-            to_schema_reg, _ = DBSchema.objects.get_or_create(name=to_schema)
-        except DBSchema.DoesNotExist:
-            raise APIError("Target schema not found")
-        if from_schema == to_schema:
-            raise APIError("Target schema same as current schema")
-        t.schema = to_schema_reg
-
-        meta_to_schema = get_meta_schema_name(to_schema)
-        meta_from_schema = get_meta_schema_name(from_schema)
-
-        movements = [
-            (from_schema, table, to_schema),
-            (meta_from_schema, get_edit_table_name(from_schema, table), meta_to_schema),
-            (
-                meta_from_schema,
-                get_insert_table_name(from_schema, table),
-                meta_to_schema,
-            ),
-            (
-                meta_from_schema,
-                get_delete_table_name(from_schema, table),
-                meta_to_schema,
-            ),
-        ]
-
-        for fr, tab, to in movements:
-            session.execute(
-                "ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
-                    from_schema=fr, table=tab, to_schema=to
-                )
-            )
-        session.query(OEDBTableTags).filter(
-            OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
-        ).update({OEDBTableTags.schema_name: to_schema})
-
-        all_peer_reviews = PeerReview.objects.filter(table=table, schema=from_schema)
-
-        for peer_review in all_peer_reviews:
-            peer_review.update_all_table_peer_reviews_after_table_moved(
-                to_schema=to_schema
-            )
-
-        t.set_is_published(to_schema=to_schema)
-        session.commit()
-        t.save()
-    except Exception:
-        session.rollback()
-        raise
-    finally:
-        session.close()
+    move_publish(
+        from_schema=from_schema,
+        table_name=table,
+        to_schema=to_schema,
+        embargo_period="none",
+    )
 
 
 def move_publish(from_schema, table_name, to_schema, embargo_period):
@@ -1682,117 +1639,51 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
     Returns:
 
     """
-    engine = _get_engine()
-    Session = sessionmaker(engine)
-    session = Session()
 
-    try:
-        t = DBTable.objects.get(name=table_name, schema__name=from_schema)
-        to_schema_reg, _ = DBSchema.objects.get_or_create(name=to_schema)
+    t = DBTable.objects.get(name=table_name)
+    license_check, license_error = validate_open_data_license(t)
 
-        if from_schema == to_schema:
-            raise APIError("Target schema same as current schema")
+    if not license_check:
+        raise APIError(
+            "A issue with the license from the metadata was found: " f"{license_error}"
+        )
 
-        license_check, license_error = validate_open_data_license(t)
-
-        if not license_check and to_schema != "model_draft":
-            raise APIError(
-                "A issue with the license from the metadata was found: "
-                f"{license_error}"
-            )
-
-        t.schema = to_schema_reg
-
-        meta_to_schema = get_meta_schema_name(to_schema)
-        meta_from_schema = get_meta_schema_name(from_schema)
-
-        movements = [
-            (from_schema, table_name, to_schema),
-            (
-                meta_from_schema,
-                get_edit_table_name(from_schema, table_name),
-                meta_to_schema,
-            ),
-            (
-                meta_from_schema,
-                get_insert_table_name(from_schema, table_name),
-                meta_to_schema,
-            ),
-            (
-                meta_from_schema,
-                get_delete_table_name(from_schema, table_name),
-                meta_to_schema,
-            ),
-        ]
-
-        for fr, tab, to in movements:
-            session.execute(
-                "ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
-                    from_schema=fr, table=tab, to_schema=to
+    if embargo_period in ["6_months", "1_year"]:
+        duration_in_weeks = 26 if embargo_period == "6_months" else 52
+        embargo, created = Embargo.objects.get_or_create(
+            table=t,
+            defaults={
+                "duration": embargo_period,
+                "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
+            },
+        )
+        if not created:
+            if embargo.date_started:
+                embargo.duration = embargo_period
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
                 )
-            )
+            else:
+                embargo.duration = embargo_period
+                embargo.date_started = datetime.now()
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+            embargo.save()
+    elif embargo_period == "none":
+        if Embargo.objects.filter(table=t).exists():
+            reset_embargo = Embargo.objects.get(table=t)
+            reset_embargo.delete()
 
-        session.query(OEDBTableTags).filter(
-            OEDBTableTags.schema_name == from_schema,
-            OEDBTableTags.table_name == table_name,
-        ).update({OEDBTableTags.schema_name: to_schema})
+    all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
 
-        if embargo_period in ["6_months", "1_year"]:
-            duration_in_weeks = 26 if embargo_period == "6_months" else 52
-            embargo, created = Embargo.objects.get_or_create(
-                table=t,
-                defaults={
-                    "duration": embargo_period,
-                    "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
-                },
-            )
-            if not created:
-                if embargo.date_started:
-                    embargo.duration = embargo_period
-                    embargo.date_ended = embargo.date_started + timedelta(
-                        weeks=duration_in_weeks
-                    )
-                else:
-                    embargo.duration = embargo_period
-                    embargo.date_started = datetime.now()
-                    embargo.date_ended = embargo.date_started + timedelta(
-                        weeks=duration_in_weeks
-                    )
-                embargo.save()
-        elif embargo_period == "none":
-            if Embargo.objects.filter(table=t).exists():
-                reset_embargo = Embargo.objects.get(table=t)
-                reset_embargo.delete()
+    for peer_review in all_peer_reviews:
+        peer_review.update_all_table_peer_reviews_after_table_moved(to_schema=to_schema)
 
-        all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
-
-        for peer_review in all_peer_reviews:
-            peer_review.update_all_table_peer_reviews_after_table_moved(
-                to_schema=to_schema
-            )
-
-        t.set_is_published(to_schema=to_schema)
-        session.commit()
-
-    except DBTable.DoesNotExist:
-        session.rollback()
-        raise APIError("Table for schema movement not found")
-    except DBSchema.DoesNotExist:
-        session.rollback()
-        raise APIError("Target schema not found")
-    except Exception as e:
-        session.rollback()
-        raise e
-    finally:
-        session.close()
+    t.set_is_published(topic_name=to_schema)
 
 
 def create_meta(schema, table):
-    # meta_schema = get_meta_schema_name(schema)
-
-    if not has_schema({"schema": "_" + schema}):
-        create_meta_schema(schema)
-
     get_edit_table_name(schema, table)
     # Table for inserts
     get_insert_table_name(schema, table)
@@ -2243,23 +2134,29 @@ def get_meta_schema_name(schema):
     return "_" + schema
 
 
-def create_meta_schema(schema):
-    """Create a schema to store schema meta information
+def validate_schema(schema: str) -> str:
+    schema = schema or "sandbox"  # default fallback
+    if schema.startswith("_"):
+        prefix = "_"
+        schema = schema[1:]
+    else:
+        prefix = ""
 
-    :param schema: Name of the schema
-    :return: None
-    """
-    engine = _get_engine()
-    query = "CREATE SCHEMA {schema}".format(schema=get_meta_schema_name(schema))
-    connection = engine.connect()
-    connection.execute(query)
+    if schema in views.schema_whitelist:  # if regular data schema: use dataset
+        schema = "dataset"
+    elif schema not in {"test", "sandbox"}:
+        raise Exception("Invalid schema")
+
+    schema = prefix + schema
+    return schema
 
 
 def create_meta_table(
-    schema, table, meta_table, meta_schema=None, include_indexes=True
+    schema: str, table, meta_table, meta_schema=None, include_indexes=True
 ):
-    if not meta_schema:
-        meta_schema = get_meta_schema_name(schema)
+    schema = validate_schema(schema)
+    meta_schema = get_meta_schema_name(schema)
+
     if not has_table(dict(schema=meta_schema, table=meta_table)):
         query = (
             'CREATE TABLE "{meta_schema}"."{edit_table}" ' '(LIKE "{schema}"."{table}"'
@@ -2289,9 +2186,10 @@ def create_insert_table(schema, table, meta_schema=None):
     create_meta_table(schema, table, meta_table, meta_schema)
 
 
-def create_comment_table(schema, table, meta_schema=None):
-    if not meta_schema:
-        meta_schema = get_meta_schema_name(schema)
+def create_comment_table(schema: str, table, meta_schema=None):
+    schema = validate_schema(schema)
+    meta_schema = get_meta_schema_name(schema)
+
     engine = _get_engine()
     query = (
         "CREATE TABLE {schema}.{table} (PRIMARY KEY (_id)) "
@@ -2503,9 +2401,8 @@ def update_meta_search(table, schema):
     """
     TODO: also update JSONB index fields
     """
-    schema_obj, _ = DBSchema.objects.get_or_create(
-        name=schema if schema is not None else DEFAULT_SCHEMA
-    )
+    schema = validate_schema(schema)
+    schema_obj, _ = DBSchema.objects.get_or_create(name=schema)
     t = DBTable.objects.get(name=table, schema=schema_obj)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
@@ -2579,3 +2476,89 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # ---------------------------------------
 
     update_meta_search(table, schema)
+
+
+def get_single_table_size(
+    schema: str, table: str, allowed_schemas: list[str]
+) -> dict | None:
+    """
+    Return size details for one schema.table or None if not found.
+    """
+    sql = sa.text(
+        """
+        SELECT
+            :schema AS table_schema,
+            :table  AS table_name,
+            pg_relation_size(format('%I.%I', :schema, :table))                       AS table_bytes,
+            pg_indexes_size(format('%I.%I', :schema, :table))                        AS index_bytes,
+            pg_total_relation_size(format('%I.%I', :schema, :table))                 AS total_bytes,
+            pg_size_pretty(pg_relation_size(format('%I.%I', :schema, :table)))       AS table_pretty,
+            pg_size_pretty(pg_indexes_size(format('%I.%I', :schema, :table)))        AS index_pretty,
+            pg_size_pretty(pg_total_relation_size(format('%I.%I', :schema, :table))) AS total_pretty
+    """  # noqa: E501
+    )
+
+    if schema not in allowed_schemas:
+        raise APIError(f"Schema '{schema}' is not allowed.", status=403)
+    sess = create_oedb_session()
+    try:
+        res = sess.execute(sql, {"schema": schema, "table": table})
+        row = res.fetchone()
+        if not row:
+            return None
+        d = dict(row.items())  # RowProxy -> dict
+        for k in ("table_bytes", "index_bytes", "total_bytes"):
+            d[k] = int(d[k])
+        return d
+    finally:
+        sess.close()
+
+
+def list_table_sizes(
+    allowed_schemas: list[str], schema: str | None = None
+) -> list[dict]:
+    """
+    List table sizes limited to a whitelist. If `schema` provided, restrict to it.
+    """
+    if schema and schema not in allowed_schemas:
+        # Let the view map this to 403 cleanly
+        from .error import APIError
+
+        raise APIError(f"Schema '{schema}' is not allowed.", status=403)
+
+    if schema:
+        filter_sql = "table_schema = :schema"
+        params = {"schema": schema}
+    else:
+        filter_sql = "table_schema = ANY(:schemas)"
+        params = {"schemas": allowed_schemas}
+
+    sql = sa.text(
+        f"""
+        SELECT
+            table_schema,
+            table_name,
+            pg_relation_size(format('%I.%I', table_schema, table_name))       AS table_bytes,
+            pg_indexes_size(format('%I.%I', table_schema, table_name))        AS index_bytes,
+            pg_total_relation_size(format('%I.%I', table_schema, table_name)) AS total_bytes,
+            pg_size_pretty(pg_total_relation_size(format('%I.%I', table_schema, table_name))) AS total_pretty
+        FROM information_schema.tables
+        WHERE {filter_sql}
+          AND table_type = 'BASE TABLE'
+        ORDER BY pg_total_relation_size(format('%I.%I', table_schema, table_name)) DESC
+    """  # noqa: E501
+    )
+
+    sess = create_oedb_session()
+    try:
+        res = sess.execute(sql, params)
+        rows = res.fetchall()
+        out = []
+        for r in rows:
+            m = dict(r.items())  # RowProxy -> dict
+            for k in ("table_bytes", "index_bytes", "total_bytes"):
+                m[k] = int(m[k])
+            out.append(m)
+        return out
+    finally:
+        sess.close()

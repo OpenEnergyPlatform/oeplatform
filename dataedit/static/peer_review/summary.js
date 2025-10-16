@@ -41,8 +41,9 @@ export function renderSummaryPageFields() {
   }
 
   for (const review of current_review.reviews) {
-    const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
-    const fieldValue = $(field_id).find('.value').text().replace(/\s+/g, ' ').trim();
+    const field_id = `field_${review.key}`;
+    const fieldSelector = `#${CSS.escape(field_id)}`;
+    const fieldValue = $(fieldSelector).find('.value').text().replace(/\s+/g, ' ').trim();
     const fieldState = review.fieldReview.state;
     const fieldCategory = review.category;
     const fieldSuggestion = review.fieldReview.reviewerSuggestion

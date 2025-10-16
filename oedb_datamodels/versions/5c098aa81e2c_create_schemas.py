@@ -20,19 +20,7 @@ branch_labels = None
 depends_on = None
 
 schemas = [
-    "demand",
-    "economy",
-    "emission",
-    "environment",
-    "grid",
-    "boundaries",
-    "society",
-    "supply",
-    "scenario",
-    "climate",
-    "model_draft",
-    "openstreetmap",
-    "reference",
+    "dataset",
 ]
 
 

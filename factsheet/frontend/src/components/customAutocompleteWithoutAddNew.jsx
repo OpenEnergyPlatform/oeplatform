@@ -73,15 +73,17 @@ export default function CustomAutocompleteWithoutAddNew({
                   placement="top"
                   title={
                     <Typography variant="caption" color="inherit">
-                      Description of <b>{option.name}</b>: TDB…
+                      Description of <b>{option.name}</b>:
                       <br />
-                      <a href="#">More info from OEKG…</a>
+                      {option.sector_division_definition}
+                      {/* <a href={options.class}>More info from OEKG…</a> */}
                     </Typography>
                   }
                 >
                   <HelpOutlineIcon sx={{ color: 'text.secondary', mr: 1 }} />
                 </HtmlTooltip>
               )}
+
               {option.name}
             </li>
           );
