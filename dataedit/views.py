@@ -66,6 +66,7 @@ from sqlalchemy.orm import sessionmaker
 
 import api.parser
 from api import actions, utils
+from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 # from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
 
@@ -117,10 +118,8 @@ schema_whitelist = [
     "scenario",
     "society",
     "supply",
-    "dataset",
+    SCHEMA_DATA,
 ]
-
-schema_sandbox = "sandbox"
 
 
 def admin_constraints(request):
@@ -966,7 +965,7 @@ class DataView(View):
         """
 
         if (
-            schema not in schema_whitelist and schema != schema_sandbox
+            schema not in schema_whitelist and schema != SCHEMA_DEFAULT_TEST_SANDBOX
         ) or schema.startswith("_"):
             raise Http404("Schema not accessible")
 

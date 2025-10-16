@@ -1,14 +1,14 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 """
 Collection of utility functions for the API used to define various action
 like processing steps.
-"""
 
-from dataedit import views
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 from oekg.sparqlModels import DatasetConfig
+from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 def get_dataset_configs(validated_data) -> list[DatasetConfig]:
@@ -36,16 +36,14 @@ def check_if_oem_license_exists(metadata: dict):
 
 
 def validate_schema(schema: str) -> str:
-    schema = schema or "sandbox"  # default fallback
+    schema = schema or SCHEMA_DEFAULT_TEST_SANDBOX  # default fallback
     if schema.startswith("_"):
         prefix = "_"
         schema = schema[1:]
     else:
         prefix = ""
 
-    if schema in views.schema_whitelist:  # if regular data schema: use dataset
-        schema = "dataset"
-    elif schema not in {"test", "sandbox"}:
+    if schema not in {SCHEMA_DEFAULT_TEST_SANDBOX, SCHEMA_DATA}:
         raise Exception("Invalid schema")
 
     schema = prefix + schema

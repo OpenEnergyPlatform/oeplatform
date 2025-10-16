@@ -48,6 +48,7 @@ from login.utils import (
     get_user_tables,
     validate_open_data_license,
 )
+from oeplatform.securitysettings import SCHEMA_DATA
 
 from .forms import (
     CreateUserForm,
@@ -93,7 +94,7 @@ class TablesView(View):
             # Use attributes in the templates
             table_data = {
                 "name": table.name,
-                "schema": "dataset",  # TODO
+                "schema": SCHEMA_DATA,
                 "table_label": table.human_readable_name,
                 "is_publish": table.is_publish,
                 "is_reviewed": table.is_reviewed,

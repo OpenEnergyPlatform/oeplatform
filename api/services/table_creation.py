@@ -3,6 +3,7 @@ from django.db import transaction
 from api import actions
 from api.error import APIError
 from dataedit.models import Table as DBTable
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class DjangoTableService:
@@ -63,7 +64,7 @@ class TableCreationOrchestrator:
                     constraints=constraint_defs,
                 )
                 physical_created = True
-                is_sandbox = schema_name == "sandbox"
+                is_sandbox = schema_name == SCHEMA_DEFAULT_TEST_SANDBOX
                 table_obj = self.django_svc.create(
                     table_name=table_name, is_sandbox=is_sandbox
                 )

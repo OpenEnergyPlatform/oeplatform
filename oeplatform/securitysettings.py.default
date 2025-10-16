@@ -136,3 +136,8 @@ SOCIALACCOUNT_PROVIDERS = {
         }]
     }
 }
+
+# schema for testing / playground, also the default
+SCHEMA_DEFAULT_TEST_SANDBOX = "sandbox"
+# schema for actual data tables
+SCHEMA_DATA = "data"

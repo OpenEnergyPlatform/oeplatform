@@ -1,13 +1,16 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 from api import actions
 from api.tests import APITestCase
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class TestTableNameUnique(APITestCase):
-    schema_sandbox = "sandbox"
+    schema_sandbox = SCHEMA_DEFAULT_TEST_SANDBOX
 
     @classmethod
     def setUpClass(cls):

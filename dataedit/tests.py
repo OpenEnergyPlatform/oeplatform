@@ -1,15 +1,19 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+"""  # noqa: 501
 
 from django.test import TestCase
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from login.models import myuser
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 from .models import PeerReview, Table
 
@@ -45,7 +49,7 @@ class MigrationTest(TestCase):
             # Make sure this assignment matches your model's expectations
             table=table.name,
             # Adjust based on how `schema` is related in `PeerReview`
-            schema="sandbox",
+            schema=SCHEMA_DEFAULT_TEST_SANDBOX,
             contributor=test_contributor,
             reviewer=test_reviewer,
             # Simulate a record that needs migration

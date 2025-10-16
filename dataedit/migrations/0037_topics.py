@@ -11,6 +11,8 @@
 
 from django.db import migrations, models
 
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+
 TOPICS = [  # from dataedit/views.py:schema_whitelist
     "boundaries",
     "climate",
@@ -39,7 +41,7 @@ def migrate_topics(apps, schema_editor):
 
     for table in Table.objects.all():
         schema = table.schema.name
-        if schema == "sandbox":
+        if schema == SCHEMA_DEFAULT_TEST_SANDBOX:
             is_sandbox = True
             is_published = False
             topics = []

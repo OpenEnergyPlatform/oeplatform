@@ -19,13 +19,14 @@ from api.actions import (
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from dataedit.views import get_tag_keywords_synchronized_metadata
+from oeplatform.securitysettings import SCHEMA_DATA
 
 User = get_user_model()
 
 
 TABLE_DEFS = [
     {
-        "schema": "dataset",
+        "schema": SCHEMA_DATA,
         "table": "example_wind_farm_capacity",
         "columns": [
             {
