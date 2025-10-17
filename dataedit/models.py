@@ -1,19 +1,20 @@
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import json
 import logging
@@ -56,6 +57,10 @@ class Tagable(models.Model):
         abstract = True
 
 
+class Topic(models.Model):
+    name = CharField(max_length=128, primary_key=True)
+
+
 class Schema(Tagable):
     """
     Represents a schema in the database.
@@ -85,7 +90,9 @@ class Table(Tagable):
         JSON string parsing.
     """
 
-    schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
+    # TODO: will be deleted in second phase of migration to dataset schema
+    schema = models.ForeignKey(Schema, on_delete=models.CASCADE, null=True)
+
     search = SearchVectorField(default="")
 
     # TODO: Maybe oemetadata should be stored in a separate table and
@@ -94,12 +101,14 @@ class Table(Tagable):
     is_reviewed = BooleanField(default=False, null=False)
     is_publish = BooleanField(null=False, default=False)
     human_readable_name = CharField(max_length=1000, null=True)
+    is_sandbox = BooleanField(null=False, default=False)
+    topics = models.ManyToManyField(Topic, related_name="tables")
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
 
     @classmethod
-    def load(cls, schema, table):
+    def load(cls, schema_name: str, table_name: str):
         """
         Load a table object from the database given its schema and table name.
 
@@ -115,9 +124,7 @@ class Table(Tagable):
             in the database.
         """
 
-        table_obj = Table.objects.get(
-            name=table, schema=Schema.objects.get_or_create(name=schema)[0]
-        )
+        table_obj = Table.objects.get(name=table_name)
 
         return table_obj
 
@@ -129,15 +136,14 @@ class Table(Tagable):
         self.save()
 
     # TODO: Use function when implementing the publish button
-    def set_is_published(self, to_schema):
+    def set_is_published(self, topic_name: str):
         """
         Mark the table as published (ready for destination schema & public)
         and save the change to the database.
         """
-        if to_schema != "model_draft":
-            self.is_publish = True
-        else:
-            self.is_publish = False
+        topic = Topic.objects.get(name=topic_name)
+        self.is_publish = True
+        self.topics.add(topic)
         self.save()
 
     # TODO: Use function when implementing the publish button. It should be
@@ -339,7 +345,7 @@ class PeerReview(models.Model):
 
             elif review_type == "submit":
                 result = self.set_version_of_metadata_for_review(
-                    schema=self.schema, table=self.table
+                    schema_name=self.schema, table_name=self.table
                 )
                 if result[0]:
                     logging.info(result[1])
@@ -353,7 +359,7 @@ class PeerReview(models.Model):
 
             elif review_type == "finished":
                 result = self.set_version_of_metadata_for_review(
-                    schema=self.schema, table=self.table
+                    schema_name=self.schema, table_name=self.table
                 )
                 if result[0]:
                     logging.info(result[1])
@@ -408,7 +414,9 @@ class PeerReview(models.Model):
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
-    def set_version_of_metadata_for_review(self, table, schema, *args, **kwargs):
+    def set_version_of_metadata_for_review(
+        self, table_name: str, schema_name: str, *args, **kwargs
+    ):
         """
         Once the peer review is started, we save the current version of the
         oemetadata that is present on the table to the peer review instance
@@ -426,7 +434,9 @@ class PeerReview(models.Model):
             a version of oemetadata available for this review & readable
             status message.
         """
-        table_oemetdata = Table.load(schema=schema, table=table).oemetadata
+        table_oemetdata = Table.load(
+            schema_name=schema_name, table_name=table_name
+        ).oemetadata
 
         if self.oemetadata is None:
             self.oemetadata = table_oemetdata
@@ -434,12 +444,14 @@ class PeerReview(models.Model):
 
             return (
                 True,
-                f"Set current version of table's: '{table}' oemetadata for review.",
+                f"Set current version of table's: '{table_name}' "
+                "oemetadata for review.",
             )
 
         return (
             False,
-            f"This tables (name: {table}) review already got a version of oemetadata.",
+            f"This tables (name: {table_name}) review "
+            "already got a version of oemetadata.",
         )
 
     def update_all_table_peer_reviews_after_table_moved(
@@ -612,7 +624,7 @@ class PeerReviewManager(models.Model):
         return role, result
 
     @staticmethod
-    def load_contributor(schema, table):
+    def load_contributor(schema_name: str, table_name: str):
         """
         Get the contributor for the table a review is started.
 
@@ -623,7 +635,7 @@ class PeerReviewManager(models.Model):
         Returns:
             User: The contributor user.
         """
-        current_table = Table.load(schema=schema, table=table)
+        current_table = Table.load(schema_name=schema_name, table_name=table_name)
         try:
             table_holder = (
                 current_table.userpermission_set.filter(table=current_table.id)

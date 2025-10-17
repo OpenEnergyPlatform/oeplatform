@@ -1,23 +1,25 @@
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut  # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.           # noqa: E501
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg   # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg         # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg         # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg         # noqa: E501
-# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>                                             # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.                           # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut               # noqa: E501
-# SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut                                   # noqa: E501
-# SPDX-FileCopyrightText: 2025 henhuy <https://github.com/henhuy> © Reiner Lemoine Institut                                 # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut                            # noqa: E501
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut                                # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.                           # noqa: E501
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 henhuy <https://github.com/henhuy> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import json
 import logging
@@ -43,7 +45,6 @@ from sqlalchemy.orm.session import sessionmaker
 import api
 import dataedit.metadata
 import login.models as login_models
-from api import DEFAULT_SCHEMA
 from api.connection import _get_engine, create_oedb_session
 from api.error import APIError
 from api.parser import get_or_403, parse_type, read_bool, read_pgid
@@ -53,15 +54,14 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from api.utils import check_if_oem_license_exists
+from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
-from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
 from login.utils import validate_open_data_license
-from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -95,15 +95,15 @@ def get_column_obj(table, column):
 
 
 def get_table_name(schema, table, restrict_schemas=True):
+    schema = validate_schema(schema)
+
     if not has_schema(dict(schema=schema)):
         raise Http404
     if not has_table(dict(schema=schema, table=table)):
         raise Http404
     if schema.startswith("_") or schema == "public" or schema is None:
         raise PermissionDenied
-    if restrict_schemas:
-        if schema not in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
-            raise PermissionDenied
+
     # TODO check if table in schema_whitelist but circular import
     # from dataedit.views import schema_whitelist
     # if schema not in schema_whitelist
@@ -120,7 +120,7 @@ class ResponsiveException(Exception):
 
 def assert_permission(user, table, permission, schema=None):
     if schema is None:
-        schema = DEFAULT_SCHEMA
+        schema = SCHEMA_DEFAULT_TEST_SANDBOX
     if user.is_anonymous:
         raise APIError("User is anonymous", 401)
 
@@ -770,7 +770,7 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
 
 
 def get_column(d):
-    schema = d.get("schema", DEFAULT_SCHEMA)
+    schema = d.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
     table = get_or_403(d, "table")
     name = get_or_403(d, "column")
     return Column("%s.%s" % (table, name), schema=schema)
@@ -787,9 +787,9 @@ def get_column_definition_query(d):
         d["autoincrement"] = True
 
     for fk in d.get("foreign_key", []):
-        fkschema = fk.get("schema", DEFAULT_SCHEMA)
+        fkschema = fk.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
         if fkschema is None:
-            fkschema = DEFAULT_SCHEMA
+            fkschema = SCHEMA_DEFAULT_TEST_SANDBOX
 
         fktable = Table(get_or_403(fk, "table"), MetaData(), schema=fkschema)
 
@@ -821,6 +821,8 @@ def get_column_definition_query(d):
 
 
 def column_alter(query, context, schema, table, column):
+    schema = validate_schema(schema)
+
     if column == "id":
         raise APIError("You cannot alter the id column")
     alter_preamble = "ALTER TABLE {schema}.{table} ALTER COLUMN {column} ".format(
@@ -853,6 +855,7 @@ def column_alter(query, context, schema, table, column):
 
 
 def column_add(schema, table, column, description):
+    schema = validate_schema(schema)
     description["name"] = column
     settings = get_column_definition_query(description)
     name = settings.name
@@ -994,6 +997,7 @@ def table_change_column(column_definition):
     """
 
     schema = get_or_403(column_definition, "c_schema")
+    schema = validate_schema(schema)
     table = get_or_403(column_definition, "c_table")
 
     # Check if column exists
@@ -1089,6 +1093,7 @@ def table_change_constraint(constraint_definition):
 
     table = get_or_403(constraint_definition, "c_table")
     schema = get_or_403(constraint_definition, "c_schema")
+    schema = validate_schema(schema)
 
     existing_column_description = describe_columns(schema, table)
 
@@ -1165,8 +1170,8 @@ def _get_table(schema, table):
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
 
-def get_table_metadata(schema, table):
-    django_obj = DBTable.load(schema=schema, table=table)
+def get_table_metadata(schema_name: str, table_name: str):
+    django_obj = DBTable.load(schema_name=schema_name, table_name=table_name)
     oemetadata = django_obj.oemetadata
     return oemetadata if oemetadata else {}
 
@@ -1193,7 +1198,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
     query = {
         "from": {
             "type": "table",
-            "schema": read_pgid(request.get("schema", DEFAULT_SCHEMA)),
+            "schema": read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)),
             "table": orig_table,
         }
     }
@@ -1217,7 +1222,10 @@ def __change_rows(request, context, target_table, setter, fields=None):
     table_name = orig_table
     meta = MetaData(bind=_get_engine())
     table = Table(
-        table_name, meta, autoload=True, schema=request.get("schema", DEFAULT_SCHEMA)
+        table_name,
+        meta,
+        autoload=True,
+        schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
     )
     pks = [c for c in table.columns if c.primary_key]
 
@@ -1238,7 +1246,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
 
             inserts.append(dict(insert))
         # Add metadata for insertions
-        schema = request.get("schema", DEFAULT_SCHEMA)
+        schema = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
         meta_schema = (
             get_meta_schema_name(schema) if not schema.startswith("_") else schema
         )
@@ -1254,6 +1262,8 @@ def drop_not_null_constraints_from_delete_meta_table(
 ) -> None:
     # https://github.com/OpenEnergyPlatform/oeplatform/issues/1548
     # we only want id column (and meta colums, wich start with a "_")
+
+    meta_schema = validate_schema(meta_schema)
 
     engine = _get_engine()
 
@@ -1285,12 +1295,12 @@ def data_delete(request, context=None):
     orig_table = get_or_403(request, "table")
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = request.get("schema", DEFAULT_SCHEMA)
+    orig_schema = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
 
     schema, table = get_table_name(orig_schema, orig_table)
 
     if schema is None:
-        schema = DEFAULT_SCHEMA
+        schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
     assert_permission(context["user"], table, login_models.DELETE_PERM, schema=schema)
 
@@ -1302,8 +1312,7 @@ def data_delete(request, context=None):
     drop_not_null_constraints_from_delete_meta_table(target_table, meta_schema)
 
     result = __change_rows(request, context, target_table, setter, ["id"])
-    if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
-        apply_changes(schema, table, cursor)
+    apply_changes(schema, table, cursor)
     return result
 
 
@@ -1311,11 +1320,11 @@ def data_update(request, context=None):
     orig_table = read_pgid(get_or_403(request, "table"))
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = read_pgid(request.get("schema", DEFAULT_SCHEMA))
+    orig_schema = read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX))
     schema, table = get_table_name(orig_schema, orig_table)
 
     if schema is None:
-        schema = DEFAULT_SCHEMA
+        schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
     assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
 
@@ -1326,10 +1335,9 @@ def data_update(request, context=None):
             raise APIError("values passed in list format without field info")
         field_names = [read_pgid(d["column"]) for d in request["fields"]]
         setter = dict(zip(field_names, setter))
-    cursor = load_cursor_from_context(context)
+    cursor = load_cursor_from_context(context)  # TODO:
     result = __change_rows(request, context, target_table, setter)
-    if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
-        apply_changes(schema, table, cursor)
+    apply_changes(schema, table, cursor)
     return result
 
 
@@ -1435,26 +1443,24 @@ def data_insert_check(schema, table, values, context):
 def data_insert(request, context=None):
     cursor = load_cursor_from_context(context)
     # If the insert request is not for a meta table, change the request to do so
-    orig_table = get_or_403(request, "table")
-    if orig_table.startswith("_") or orig_table.endswith("_cor"):
+    table_name = get_or_403(request, "table")
+    if table_name.startswith("_") or table_name.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = request.get("schema", DEFAULT_SCHEMA)
+    schema_name = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
 
-    schema, table = get_table_name(orig_schema, orig_table)
+    schema_name, table_name = get_table_name(schema_name, table_name)
 
-    if schema is None:
-        schema = DEFAULT_SCHEMA
-
-    assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
+    assert_permission(
+        context["user"], table_name, login_models.WRITE_PERM, schema=schema_name
+    )
 
     # mapper = {orig_schema: schema, orig_table: table}
 
-    request["table"] = get_insert_table_name(orig_schema, orig_table)
-    if not orig_schema.startswith("_"):
-        request["schema"] = "_" + orig_schema
+    request["table"] = get_insert_table_name(schema_name, table_name)
+    request["schema"] = "_" + schema_name
 
     query, values = api.parser.parse_insert(request, context)
-    data_insert_check(orig_schema, orig_table, values, context)
+    data_insert_check(schema_name, table_name, values, context)
     _execute_sqla(query, cursor)
     description = cursor.description
     response = {}
@@ -1472,8 +1478,8 @@ def data_insert(request, context=None):
             for col in description
         ]
     response["rowcount"] = cursor.rowcount
-    if schema in PLAYGROUNDS or orig_schema in UNVERSIONED_SCHEMAS:
-        apply_changes(schema, table, cursor)
+
+    apply_changes(schema_name, table_name, cursor)
 
     return response
 
@@ -1597,66 +1603,12 @@ def move(from_schema, table, to_schema):
         Currently we implemented two versions of the move functionality
         this will later be harmonized. See 'move_publish'.
     """
-    table = read_pgid(table)
-    engine = _get_engine()
-    Session = sessionmaker(engine)
-    session = Session()
-    try:
-        try:
-            t = DBTable.objects.get(name=table, schema__name=from_schema)
-        except DBTable.DoesNotExist:
-            raise APIError("Table for schema movement not found")
-        try:
-            to_schema_reg, _ = DBSchema.objects.get_or_create(name=to_schema)
-        except DBSchema.DoesNotExist:
-            raise APIError("Target schema not found")
-        if from_schema == to_schema:
-            raise APIError("Target schema same as current schema")
-        t.schema = to_schema_reg
-
-        meta_to_schema = get_meta_schema_name(to_schema)
-        meta_from_schema = get_meta_schema_name(from_schema)
-
-        movements = [
-            (from_schema, table, to_schema),
-            (meta_from_schema, get_edit_table_name(from_schema, table), meta_to_schema),
-            (
-                meta_from_schema,
-                get_insert_table_name(from_schema, table),
-                meta_to_schema,
-            ),
-            (
-                meta_from_schema,
-                get_delete_table_name(from_schema, table),
-                meta_to_schema,
-            ),
-        ]
-
-        for fr, tab, to in movements:
-            session.execute(
-                "ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
-                    from_schema=fr, table=tab, to_schema=to
-                )
-            )
-        session.query(OEDBTableTags).filter(
-            OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
-        ).update({OEDBTableTags.schema_name: to_schema})
-
-        all_peer_reviews = PeerReview.objects.filter(table=table, schema=from_schema)
-
-        for peer_review in all_peer_reviews:
-            peer_review.update_all_table_peer_reviews_after_table_moved(
-                to_schema=to_schema
-            )
-
-        t.set_is_published(to_schema=to_schema)
-        session.commit()
-        t.save()
-    except Exception:
-        session.rollback()
-        raise
-    finally:
-        session.close()
+    move_publish(
+        from_schema=from_schema,
+        table_name=table,
+        to_schema=to_schema,
+        embargo_period="none",
+    )
 
 
 def move_publish(from_schema, table_name, to_schema, embargo_period):
@@ -1682,117 +1634,51 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
     Returns:
 
     """
-    engine = _get_engine()
-    Session = sessionmaker(engine)
-    session = Session()
 
-    try:
-        t = DBTable.objects.get(name=table_name, schema__name=from_schema)
-        to_schema_reg, _ = DBSchema.objects.get_or_create(name=to_schema)
+    t = DBTable.objects.get(name=table_name)
+    license_check, license_error = validate_open_data_license(t)
 
-        if from_schema == to_schema:
-            raise APIError("Target schema same as current schema")
+    if not license_check:
+        raise APIError(
+            "A issue with the license from the metadata was found: " f"{license_error}"
+        )
 
-        license_check, license_error = validate_open_data_license(t)
-
-        if not license_check and to_schema != "model_draft":
-            raise APIError(
-                "A issue with the license from the metadata was found: "
-                f"{license_error}"
-            )
-
-        t.schema = to_schema_reg
-
-        meta_to_schema = get_meta_schema_name(to_schema)
-        meta_from_schema = get_meta_schema_name(from_schema)
-
-        movements = [
-            (from_schema, table_name, to_schema),
-            (
-                meta_from_schema,
-                get_edit_table_name(from_schema, table_name),
-                meta_to_schema,
-            ),
-            (
-                meta_from_schema,
-                get_insert_table_name(from_schema, table_name),
-                meta_to_schema,
-            ),
-            (
-                meta_from_schema,
-                get_delete_table_name(from_schema, table_name),
-                meta_to_schema,
-            ),
-        ]
-
-        for fr, tab, to in movements:
-            session.execute(
-                "ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
-                    from_schema=fr, table=tab, to_schema=to
+    if embargo_period in ["6_months", "1_year"]:
+        duration_in_weeks = 26 if embargo_period == "6_months" else 52
+        embargo, created = Embargo.objects.get_or_create(
+            table=t,
+            defaults={
+                "duration": embargo_period,
+                "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
+            },
+        )
+        if not created:
+            if embargo.date_started:
+                embargo.duration = embargo_period
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
                 )
-            )
+            else:
+                embargo.duration = embargo_period
+                embargo.date_started = datetime.now()
+                embargo.date_ended = embargo.date_started + timedelta(
+                    weeks=duration_in_weeks
+                )
+            embargo.save()
+    elif embargo_period == "none":
+        if Embargo.objects.filter(table=t).exists():
+            reset_embargo = Embargo.objects.get(table=t)
+            reset_embargo.delete()
 
-        session.query(OEDBTableTags).filter(
-            OEDBTableTags.schema_name == from_schema,
-            OEDBTableTags.table_name == table_name,
-        ).update({OEDBTableTags.schema_name: to_schema})
+    all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
 
-        if embargo_period in ["6_months", "1_year"]:
-            duration_in_weeks = 26 if embargo_period == "6_months" else 52
-            embargo, created = Embargo.objects.get_or_create(
-                table=t,
-                defaults={
-                    "duration": embargo_period,
-                    "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
-                },
-            )
-            if not created:
-                if embargo.date_started:
-                    embargo.duration = embargo_period
-                    embargo.date_ended = embargo.date_started + timedelta(
-                        weeks=duration_in_weeks
-                    )
-                else:
-                    embargo.duration = embargo_period
-                    embargo.date_started = datetime.now()
-                    embargo.date_ended = embargo.date_started + timedelta(
-                        weeks=duration_in_weeks
-                    )
-                embargo.save()
-        elif embargo_period == "none":
-            if Embargo.objects.filter(table=t).exists():
-                reset_embargo = Embargo.objects.get(table=t)
-                reset_embargo.delete()
+    for peer_review in all_peer_reviews:
+        peer_review.update_all_table_peer_reviews_after_table_moved(to_schema=to_schema)
 
-        all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
-
-        for peer_review in all_peer_reviews:
-            peer_review.update_all_table_peer_reviews_after_table_moved(
-                to_schema=to_schema
-            )
-
-        t.set_is_published(to_schema=to_schema)
-        session.commit()
-
-    except DBTable.DoesNotExist:
-        session.rollback()
-        raise APIError("Table for schema movement not found")
-    except DBSchema.DoesNotExist:
-        session.rollback()
-        raise APIError("Target schema not found")
-    except Exception as e:
-        session.rollback()
-        raise e
-    finally:
-        session.close()
+    t.set_is_published(topic_name=to_schema)
 
 
 def create_meta(schema, table):
-    # meta_schema = get_meta_schema_name(schema)
-
-    if not has_schema({"schema": "_" + schema}):
-        create_meta_schema(schema)
-
     get_edit_table_name(schema, table)
     # Table for inserts
     get_insert_table_name(schema, table)
@@ -1843,7 +1729,8 @@ def has_schema(request, context=None):
 def has_table(request, context=None):
     """TODO: should check in all (whitelisted) schemas"""
     engine = _get_engine()
-    schema = request.pop("schema", DEFAULT_SCHEMA)
+    schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
+    schema = validate_schema(schema)
     table = get_or_403(request, "table")
     conn = engine.connect()
     try:
@@ -1860,7 +1747,7 @@ def has_sequence(request, context=None):
         result = engine.dialect.has_sequence(
             conn,
             get_or_403(request, "sequence_name"),
-            schema=request.get("schema", DEFAULT_SCHEMA),
+            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
         )
     finally:
         conn.close()
@@ -1874,7 +1761,7 @@ def has_type(request, context=None):
         result = engine.dialect.has_schema(
             conn,
             get_or_403(request, "sequence_name"),
-            schema=request.get("schema", DEFAULT_SCHEMA),
+            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
         )
     finally:
         conn.close()
@@ -1888,7 +1775,7 @@ def get_table_oid(request, context=None):
         result = engine.dialect.get_table_oid(
             conn,
             get_or_403(request, "table"),
-            schema=request.get("schema", DEFAULT_SCHEMA),
+            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
             **request,
         )
     except sa.exc.NoSuchTableError as e:
@@ -1913,7 +1800,7 @@ def get_table_names(request, context=None):
     conn = engine.connect()
     try:
         result = engine.dialect.get_table_names(
-            conn, schema=request.pop("schema", DEFAULT_SCHEMA), **request
+            conn, schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX), **request
         )
     finally:
         conn.close()
@@ -1925,7 +1812,7 @@ def get_view_names(request, context=None):
     conn = engine.connect()
     try:
         result = engine.dialect.get_view_names(
-            conn, schema=request.pop("schema", DEFAULT_SCHEMA), **request
+            conn, schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX), **request
         )
     finally:
         conn.close()
@@ -1939,7 +1826,7 @@ def get_view_definition(request, context=None):
         result = engine.dialect.get_schema_names(
             conn,
             get_or_403(request, "view_name"),
-            schema=request.pop("schema", DEFAULT_SCHEMA),
+            schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
             **request,
         )
     finally:
@@ -1952,7 +1839,7 @@ def get_columns(request, context=None):
     connection = engine.connect()
 
     table_name = get_or_403(request, "table")
-    schema = request.pop("schema", DEFAULT_SCHEMA)
+    schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
 
     # We need to translate the info_cache from a json-friendly format to the
     # conventional one
@@ -2021,7 +1908,7 @@ def get_pk_constraint(request, context=None):
         result = engine.dialect.get_pk_constraint(
             conn,
             get_or_403(request, "table"),
-            schema=request.pop("schema", DEFAULT_SCHEMA),
+            schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
             **request,
         )
     finally:
@@ -2033,7 +1920,7 @@ def get_foreign_keys(request, context=None):
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
-        request["schema"] = DEFAULT_SCHEMA
+        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
     try:
         result = engine.dialect.get_foreign_keys(
             conn,
@@ -2052,7 +1939,7 @@ def get_indexes(request, context=None):
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
-        request["schema"] = DEFAULT_SCHEMA
+        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
     try:
         result = engine.dialect.get_indexes(
             conn, get_or_403(request, "table"), **request
@@ -2066,7 +1953,7 @@ def get_unique_constraints(request, context=None):
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
-        request["schema"] = DEFAULT_SCHEMA
+        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
     try:
         result = engine.dialect.get_foreign_keys(
             conn, get_or_403(request, "table"), **request
@@ -2243,23 +2130,12 @@ def get_meta_schema_name(schema):
     return "_" + schema
 
 
-def create_meta_schema(schema):
-    """Create a schema to store schema meta information
-
-    :param schema: Name of the schema
-    :return: None
-    """
-    engine = _get_engine()
-    query = "CREATE SCHEMA {schema}".format(schema=get_meta_schema_name(schema))
-    connection = engine.connect()
-    connection.execute(query)
-
-
 def create_meta_table(
-    schema, table, meta_table, meta_schema=None, include_indexes=True
+    schema: str, table, meta_table, meta_schema=None, include_indexes=True
 ):
-    if not meta_schema:
-        meta_schema = get_meta_schema_name(schema)
+    schema = validate_schema(schema)
+    meta_schema = get_meta_schema_name(schema)
+
     if not has_table(dict(schema=meta_schema, table=meta_table)):
         query = (
             'CREATE TABLE "{meta_schema}"."{edit_table}" ' '(LIKE "{schema}"."{table}"'
@@ -2289,9 +2165,10 @@ def create_insert_table(schema, table, meta_schema=None):
     create_meta_table(schema, table, meta_table, meta_schema)
 
 
-def create_comment_table(schema, table, meta_schema=None):
-    if not meta_schema:
-        meta_schema = get_meta_schema_name(schema)
+def create_comment_table(schema: str, table, meta_schema=None):
+    schema = validate_schema(schema)
+    meta_schema = get_meta_schema_name(schema)
+
     engine = _get_engine()
     query = (
         "CREATE TABLE {schema}.{table} (PRIMARY KEY (_id)) "
@@ -2503,14 +2380,12 @@ def update_meta_search(table, schema):
     """
     TODO: also update JSONB index fields
     """
-    schema_obj, _ = DBSchema.objects.get_or_create(
-        name=schema if schema is not None else DEFAULT_SCHEMA
-    )
-    t = DBTable.objects.get(name=table, schema=schema_obj)
+    schema = validate_schema(schema)
+
+    t = DBTable.objects.get(name=table)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
     tags = session.query(OEDBTag.name).filter(
-        OEDBTableTags.schema_name == schema,
         OEDBTableTags.table_name == table,
         OEDBTableTags.tag == OEDBTag.id,
     )
@@ -2527,7 +2402,7 @@ def update_meta_search(table, schema):
     t.save()
 
 
-def set_table_metadata(table, schema, metadata, cursor=None):
+def set_table_metadata(table_name: str, schema_name: str, metadata, cursor=None):
     """saves metadata as json string on table comment.
 
     Args:
@@ -2560,7 +2435,7 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.load(table=table, schema=schema)
+    django_table_obj = DBTable.load(table_name=table_name, schema_name=schema_name)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
 
@@ -2578,7 +2453,7 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # update search index
     # ---------------------------------------
 
-    update_meta_search(table, schema)
+    update_meta_search(table_name, schema_name)
 
 
 def get_single_table_size(

@@ -1,8 +1,3 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 """admin command to check for dead links in test environment
 
 looking for
@@ -19,7 +14,13 @@ Probably not useful on a productive server as it will iterate
 over every table page as well.
 This is by no means perfect, but covers a lot of possible broken links
 
-"""
+
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import logging
 import re
 from urllib.parse import urljoin, urlparse, urlunparse

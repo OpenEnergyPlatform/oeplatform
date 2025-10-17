@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+"""
+SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+SPDX-License-Identifier: CC0-1.0
+"""  # noqa: 501
 
-# SPDX-License-Identifier: CC0-1.0
-
-__version__ = "1.4.1"
+__version__ = "1.5.0"

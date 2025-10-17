@@ -1,24 +1,19 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""Contains functions to interact with the postgres oedb.
 
-"""Contains functions to interact with the postgres oedb"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
-from api import DEFAULT_SCHEMA
-from dataedit.models import Schema, Table
-
-try:
-    import oeplatform.securitysettings as sec
-except Exception:
-    import logging
-
-    logging.error("No securitysettings found. Triggerd in api/connection.py")
+import oeplatform.securitysettings as sec
+from dataedit.models import Table
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 def get_connection_string():
@@ -46,7 +41,7 @@ def table_exists_in_oedb(table, schema=None):
     Returns:
         bool
     """
-    schema = schema or DEFAULT_SCHEMA
+    schema = schema or SCHEMA_DEFAULT_TEST_SANDBOX
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -56,7 +51,7 @@ def table_exists_in_oedb(table, schema=None):
     return result
 
 
-def table_exists_in_django(table, schema=None):
+def table_exists_in_django(table_name: str):
     """check if table exists in django
 
     Args:
@@ -66,10 +61,8 @@ def table_exists_in_django(table, schema=None):
     Returns:
         bool
     """
-    schema = schema or DEFAULT_SCHEMA
-    schema_obj = Schema.objects.get_or_create(name=schema)[0]
     try:
-        Table.objects.get(name=table, schema=schema_obj)
+        Table.objects.get(name=table_name)
         return True
     except Table.DoesNotExist:
         return False

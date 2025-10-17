@@ -1,11 +1,12 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
@@ -119,6 +120,8 @@ class TestPut(APITestCase):
         self.test_table = "table_all_columns"
         self.api_req("put", data={"query": self._structure_data})
         self.checkStructure()
+        # clean up
+        self.drop_table(table=self.test_table)
 
     def test_create_and_drop_uppercase_table(self):
         self._structure_data = {
@@ -226,6 +229,8 @@ class TestPut(APITestCase):
             },
             ["ordinal_position"],
         )
+        # clean up
+        self.drop_table(table=self.test_table)
 
     def test_create_table_anonymous(self):
         self._structure_data = {
@@ -299,34 +304,8 @@ class TestDelete(APITestCaseWithTable):
         self.create_table(self.test_structure)
 
 
-class TestMove(APITestCaseWithTable):
-    test_table = "test_table_move"
-    test_schema = "model_draft"  # cannot move from "test" schema
-    target_schema = "scenario"
-
-    def test_move(self):
-        self.api_req(
-            "post",
-            path=f"move/{self.target_schema}/",
-            exp_code=200,
-        )
-
-        # check that target table exists, and source does not exist anymore
-        self.api_req("get", exp_code=404)
-        self.api_req("get", schema=self.target_schema, exp_code=200)
-
-        # move back
-        self.api_req(
-            "post",
-            schema=self.target_schema,
-            path=f"move/{self.test_schema}/",
-            exp_code=200,
-        )
-
-
 class TestMovePublish(APITestCaseWithTable):
     test_table = "test_table_move_publish"
-    test_schema = "model_draft"  # cannot move from "test" schema
     target_schema = "scenario"
 
     def test_move_publish(self):
@@ -352,18 +331,6 @@ class TestMovePublish(APITestCaseWithTable):
             exp_code=200,
         )
 
-        # check that target table exists, and source does not exist anymore
-        self.api_req("get", exp_code=404)
-        self.api_req("get", schema=self.target_schema, exp_code=200)
-
-        # move back so we can publish again
-        self.api_req(
-            "post",
-            schema=self.target_schema,
-            path=f"move/{self.test_schema}/",
-            exp_code=200,
-        )
-
         # publish again with valid embargo
         # .. now we do it, but without (valid) setting embargo
         embargo_duration = "none"
@@ -371,13 +338,5 @@ class TestMovePublish(APITestCaseWithTable):
             "post",
             path=f"move_publish/{self.target_schema}/",
             data={"embargo": {"duration": embargo_duration}},
-            exp_code=200,
-        )
-
-        # move back so cleanup works
-        self.api_req(
-            "post",
-            schema=self.target_schema,
-            path=f"move/{self.test_schema}/",
             exp_code=200,
         )

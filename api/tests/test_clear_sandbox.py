@@ -1,28 +1,30 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 from dataedit.management.commands.clear_sandbox import (
-    SANDBOX_SCHEMA,
     clear_sandbox,
     get_sandbox_meta_table_names_oedb,
     get_sandbox_table_names_oedb,
     get_sandbox_tables_django,
 )
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 from . import APITestCase
 
 
 class TestCommandClearSandbox(APITestCase):
-    test_schema = SANDBOX_SCHEMA
+    test_schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
     def test_clear_sandbox(self):
         # create a test table with data
         # so that sandbox is not empty
         self.create_table(
             table="test_sandbox_table",
-            schema=SANDBOX_SCHEMA,
+            schema=SCHEMA_DEFAULT_TEST_SANDBOX,
             structure={"columns": [{"name": "id", "data_type": "bigint"}]},
             data=[{"id": 1}],
         )
