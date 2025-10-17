@@ -103,7 +103,7 @@ class EditBaseOld(Base):
     _id = Column(
         "_id", BigInteger, primary_key=True, nullable=False, autoincrement=True
     )
-    _message = Column("_message", Text, nullable=False)
+    _message = Column("_message", Text, nullable=True)
     _user = Column("_user", String(50), nullable=False)
     _submitted = Column(
         "_submitted", DateTime, nullable=False, server_default=text("now()")
