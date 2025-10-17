@@ -120,6 +120,8 @@ class TestPut(APITestCase):
         self.test_table = "table_all_columns"
         self.api_req("put", data={"query": self._structure_data})
         self.checkStructure()
+        # clean up
+        self.drop_table(table=self.test_table)
 
     def test_create_and_drop_uppercase_table(self):
         self._structure_data = {
@@ -227,6 +229,8 @@ class TestPut(APITestCase):
             },
             ["ordinal_position"],
         )
+        # clean up
+        self.drop_table(table=self.test_table)
 
     def test_create_table_anonymous(self):
         self._structure_data = {
