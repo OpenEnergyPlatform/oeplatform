@@ -133,6 +133,28 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "[{levelname}] {asctime} {name}: {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
+    },
+}
+
+
 # schema for testing / playground, also the default
 SCHEMA_DEFAULT_TEST_SANDBOX = "sandbox"
 # schema for actual data tables
