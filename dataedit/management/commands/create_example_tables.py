@@ -243,7 +243,7 @@ class Command(BaseCommand):
         # Sync keywords with tag system
         keywords = metadata["resources"][0].get("keywords", []) or []
         synced = get_tag_keywords_synchronized_metadata(
-            table=table_name, schema=schema, keywords_new=keywords
+            table_name=table_name, schema_name=schema, keywords_new=keywords
         )
         metadata["resources"][0]["keywords"] = synced["resources"][0]["keywords"]
 

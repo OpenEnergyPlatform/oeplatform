@@ -16,16 +16,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 # TODO: This might have t be removed fully
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
 
-# from dataedit.metadata.v1_3 import TEMPLATE_v1_3
-# from dataedit.metadata.v1_4 import TEMPLATE_V1_4
 from dataedit.metadata.v1_5 import TEMPLATE_V1_5
-
-# import omi
-# import omi.validation
-# from dataedit.metadata import v1_5 as __LATEST
-
-
-# from .error import MetadataException
+from dataedit.models import Table
 
 METADATA_TEMPLATE = {
     5: TEMPLATE_V1_5,
@@ -86,8 +78,6 @@ def load_metadata_from_db(schema_name: str, table_name: str):
         There is a consideration to change this function to use a different approach
         or keep the old functionality (TODO).
     """
-
-    from dataedit.models import Table
 
     metadata = Table.load(schema_name=schema_name, table_name=table_name).oemetadata
     if not metadata:

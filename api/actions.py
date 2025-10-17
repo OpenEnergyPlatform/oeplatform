@@ -58,8 +58,6 @@ from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
-from dataedit.structures import TableTags as OEDBTableTags
-from dataedit.structures import Tag as OEDBTag
 from login.utils import validate_open_data_license
 from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
@@ -2376,30 +2374,26 @@ def apply_deletion(session, table, rows, rids):
         set_applied(session, table, [rid], __DELETE)
 
 
-def update_meta_search(table, schema):
+def update_meta_search(table_name: str, schema_name: str) -> None:
     """
     TODO: also update JSONB index fields
     """
-    schema = validate_schema(schema)
+    schema_name = validate_schema(schema_name)
 
-    t = DBTable.objects.get(name=table)
-    comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
-    session = sessionmaker()(bind=_get_engine())
-    tags = session.query(OEDBTag.name).filter(
-        OEDBTableTags.table_name == table,
-        OEDBTableTags.tag == OEDBTag.id,
-    )
+    table = DBTable.objects.get(name=table_name)
+    comment = str(dataedit.metadata.load_metadata_from_db(schema_name, table_name))
+    tags = [t.name for t in table.tags.all()]
     s = " ".join(
         (
-            *re.findall(r"\w+", schema),
-            *re.findall(r"\w+", table),
+            *re.findall(r"\w+", schema_name),
+            *re.findall(r"\w+", table_name),
             *re.findall(r"\w+", comment),
-            *(tag[0] for tag in tags),
+            *(tag for tag in tags),
         )
     )
 
-    t.search = Func(Value(s), function="to_tsvector")
-    t.save()
+    table.search = Func(Value(s), function="to_tsvector")
+    table.save()
 
 
 def set_table_metadata(table_name: str, schema_name: str, metadata, cursor=None):

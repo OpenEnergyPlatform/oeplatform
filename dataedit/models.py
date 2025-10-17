@@ -18,6 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import json
 import logging
+import re
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -59,6 +60,53 @@ class Tagable(models.Model):
 
 class Topic(models.Model):
     name = CharField(max_length=128, primary_key=True)
+
+
+class Tag(models.Model):
+    name_normalized = CharField(max_length=40, primary_key=True)
+    usage_count = IntegerField(default=0, null=False)
+    name = CharField(max_length=40, null=False)
+    color = IntegerField(default=int("2E3638", 16), null=False)
+    usage_tracked_since = DateTimeField(null=False, default=timezone.now)
+
+    @classmethod
+    def get_name_normalized(cls, name: str) -> str | None:
+        name_norm = name or ""
+        name_norm = name_norm.lower()
+        name_norm = re.sub("[^a-z0-9]+", "_", name_norm)
+        name_norm = name_norm.strip("_")
+        name_norm = name_norm[:40]  # max len
+        if not name_norm:  # no empty string
+            name_norm = None
+        return name_norm
+
+    @classmethod
+    def get_name_clean(cls, name: str) -> str | None:
+        name_clean = name or ""
+        re.sub(r"\s+", " ", name_clean)
+        name_clean = name_clean.strip()
+        if not name_clean:  # no empty string
+            name_clean = None
+        return name_clean
+
+    def save(self, *args, **kwargs):
+        self.name = self.get_name_clean(self.name)
+        self.name_normalized = self.get_name_normalized(self.name)
+        if isinstance(self.color, str) and self.color[0] == "#":
+            self.color = self.color_from_hex(self.color)
+        super().save(*args, **kwargs)
+
+    @property
+    def color_hex(self) -> str:
+        return "#" + format(self.color, "06X")
+
+    @staticmethod
+    def color_from_hex(color_hex: str) -> int:
+        return int(color_hex[1:], 16)
+
+    def increment_usage_count(self):
+        self.usage_count += 1
+        self.save()
 
 
 class Schema(Tagable):
@@ -103,6 +151,7 @@ class Table(Tagable):
     human_readable_name = CharField(max_length=1000, null=True)
     is_sandbox = BooleanField(null=False, default=False)
     topics = models.ManyToManyField(Topic, related_name="tables")
+    tags = models.ManyToManyField(Tag, related_name="tables")
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})

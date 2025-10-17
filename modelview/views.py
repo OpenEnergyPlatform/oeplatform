@@ -42,11 +42,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 from django.views.generic import View
 
-# from scipy import stats
-from sqlalchemy.orm import sessionmaker
-
-from api.actions import _get_engine
-from dataedit.structures import Tag
+from dataedit.models import Tag
 
 from .forms import EnergyframeworkForm, EnergymodelForm
 from .models import Energyframework, Energymodel
@@ -72,23 +68,17 @@ def getClasses(sheettype):
     return c, f
 
 
-def load_tags():
-    engine = _get_engine()
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    tags = list(session.query(Tag))
-    d = {
-        tag.id: {
-            "id": tag.id,
+def load_tags() -> dict[str, dict]:
+    return {
+        tag.pk: {
+            "id": tag.pk,
             "name": tag.name,
-            "color": "#" + format(tag.color, "06X"),
+            "color": tag.color_hex,
             "usage_count": tag.usage_count,
             "usage_tracked_since": tag.usage_tracked_since,
         }
-        for tag in tags
+        for tag in Tag.objects.all()
     }
-    session.close()
-    return d
 
 
 def listsheets(request, sheettype):
@@ -193,14 +183,11 @@ def show(request, sheettype, model_name):
 
 def printable(model, field):
     if field == "tags":
-        tags = []
-        engine = _get_engine()
-        Session = sessionmaker(bind=engine)
-        session = Session()
+        tags: list[str] = []
         for tag_id in getattr(model, field):
-            tag = session.query(Tag).get(tag_id)
-            tags.append(tag.name)
-        session.close()
+            tag = Tag.objects.filter(pk=tag_id).first()
+            if tag:
+                tags.append(tag.name)
         return tags
     else:
         return getattr(model, field)

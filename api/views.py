@@ -350,7 +350,7 @@ class Metadata(APIView):
             # so we only copy the resulting keywords before storing the
             # metadata
             _metadata = get_tag_keywords_synchronized_metadata(
-                table=table, schema=schema, keywords_new=keywords
+                table_name=table, schema_name=schema, keywords_new=keywords
             )
             # TODO make this iter over all resources
             metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
@@ -361,7 +361,7 @@ class Metadata(APIView):
                 table_name=table, schema_name=schema, metadata=metadata, cursor=cursor
             )
             _metadata = get_tag_keywords_synchronized_metadata(
-                table=table, schema=schema, keywords_new=keywords
+                table_name=table, schema_name=schema, keywords_new=keywords
             )
             # TODO make this iter over all resources
             metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
