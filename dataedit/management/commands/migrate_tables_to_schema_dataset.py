@@ -1,5 +1,7 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
-# SPDX-FileCopyrightText: 2025 Christian Winger
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import logging
 
@@ -7,6 +9,7 @@ from django.core.management.base import BaseCommand
 
 from api.actions import _get_engine, get_schema_names, get_table_names
 from dataedit.models import Table
+from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 # from dataedit.views import schema_whitelist
 # copied from dataedit.views, because it may be removed later
@@ -26,8 +29,8 @@ schemas_whitelist = {
     "society",
     "supply",
 }
-schema_sandbox = "sandbox"
-schema_dataset = "dataset"
+schema_sandbox = SCHEMA_DEFAULT_TEST_SANDBOX
+schema_dataset = SCHEMA_DATA
 schemas_test = {"test"}
 schemas_special = {
     "public",

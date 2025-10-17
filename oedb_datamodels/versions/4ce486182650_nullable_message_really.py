@@ -1,14 +1,14 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 """Make message nullable
 
 Revision ID: 4ce486182650
 Revises: b4e662a73272
 Create Date: 2019-04-30 09:04:34.330485
 
-"""
+
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import sqlalchemy as sa
 from alembic import op
 

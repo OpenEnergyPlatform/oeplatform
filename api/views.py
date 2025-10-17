@@ -1,22 +1,24 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda> # noqa: E501
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import csv
 import itertools
@@ -77,13 +79,11 @@ from api.services.embargo import (
 )
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
-from api.utils import get_dataset_configs
+from api.utils import get_dataset_configs, validate_schema
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
-from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
-from dataedit.models import Topic
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
@@ -92,7 +92,7 @@ from oekg.utils import (
     process_datasets_sparql_query,
     validate_public_sparql_query,
 )
-from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
+from oeplatform.settings import USE_LOEP, USE_ONTOP
 
 if USE_LOEP:
     from oeplatform.settings import DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
@@ -100,6 +100,7 @@ if USE_LOEP:
 if USE_ONTOP:
     from oeplatform.settings import ONTOP_SPARQL_ENDPOINT_URL
 
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
 
@@ -258,7 +259,7 @@ def api_exception(f):
 
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", actions.DEFAULT_SCHEMA)
+        schema = kwargs.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
         table = kwargs.get("table") or kwargs.get("sequence")
         actions.assert_permission(request.user, table, permission, schema=schema)
         return f(caller, request, *args, **kwargs)
@@ -285,8 +286,7 @@ def conjunction(clauses):
 class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
+        schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
@@ -298,8 +298,7 @@ class Sequence(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
+        schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
@@ -359,7 +358,7 @@ class Metadata(APIView):
             # Write oemetadata json to dataedit.models.tables
             # and to SQL comment on table
             actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=cursor
+                table_name=table, schema_name=schema, metadata=metadata, cursor=cursor
             )
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
@@ -372,7 +371,7 @@ class Metadata(APIView):
             metadata.pop("cursor_id", None)
 
             actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=cursor
+                table_name=table, schema_name=schema, metadata=metadata, cursor=cursor
             )
             return JsonResponse(raw_input)
         else:
@@ -425,8 +424,7 @@ class Table(APIView):
         :param table:
         :return:
         """
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
+        schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         json_data = request.data
@@ -489,9 +487,8 @@ class Table(APIView):
             JsonResponse: A JSON response with the status code 201 CREATED
 
         """
+        schema = validate_schema(schema)
         # 1) Basic schema checks
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
@@ -500,7 +497,6 @@ class Table(APIView):
             raise APIError("Table already exists", 409)
 
         # 2) Validate identifiers
-        assert_valid_identifier_name(schema)
         assert_valid_identifier_name(table)
 
         # 3) Parse and validate payload
@@ -545,8 +541,8 @@ class Table(APIView):
             }
             cursor = sessions.load_cursor_from_context(ctx)
             actions.set_table_metadata(
-                table=table,
-                schema=schema,
+                table_name=table,
+                schema_name=schema,
                 metadata=metadata,
                 cursor=cursor,
             )
@@ -579,9 +575,8 @@ class Table(APIView):
 
     def oep_create_table_transaction(
         self,
-        django_schema_object,
-        schema,
-        table,
+        schema_name: str,
+        table_name: str,
         column_definitions,
         constraint_definitions,
     ):
@@ -609,25 +604,23 @@ class Table(APIView):
         try:
             with transaction.atomic():
                 # First create the table object in the django database.
-                table_object = self._create_table_object(django_schema_object, table)
+                table_object = self._create_table_object(table_name=table_name)
             # Then attempt to create the OEDB table to check
             # if creation will succeed - action includes checks
             # and will raise api errors
             actions.table_create(
-                schema, table, column_definitions, constraint_definitions
+                schema_name, table_name, column_definitions, constraint_definitions
             )
         except DatabaseError as e:
             # remove any oedb table artifacts left after table creation
             # transaction failed
             self.__remove_oedb_table_on_exception_raised_during_creation_transaction(
-                table, schema
+                table_name, schema_name
             )
 
             # also remove any django table object
             # find the created django table object
-            object_to_delete = DBTable.objects.filter(
-                name=table, schema=django_schema_object
-            )
+            object_to_delete = DBTable.objects.filter(name=table_name)
             # delete it if it exists
             if object_to_delete.exists():
                 object_to_delete.delete()
@@ -686,7 +679,6 @@ class Table(APIView):
         assert_valid_identifier_name(table)
         self.validate_column_names(column_definitions)
 
-        schema_object, _ = DBSchema.objects.get_or_create(name=schema)
         context = {
             "connection_id": actions.get_or_403(request.data, "connection_id"),
             "cursor_id": actions.get_or_403(request.data, "cursor_id"),
@@ -701,9 +693,8 @@ class Table(APIView):
 
         if embargo_payload_check:
             table_object = self.oep_create_table_transaction(
-                django_schema_object=schema_object,
-                table=table,
-                schema=schema,
+                table_name=table,
+                schema_name=schema,
                 column_definitions=column_definitions,
                 constraint_definitions=constraint_definitions,
             )
@@ -711,7 +702,10 @@ class Table(APIView):
 
             if metadata:
                 actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata, cursor=cursor
+                    table_name=table,
+                    schema_name=schema,
+                    metadata=metadata,
+                    cursor=cursor,
                 )
 
             try:
@@ -727,9 +721,8 @@ class Table(APIView):
 
         else:
             table_object = self.oep_create_table_transaction(
-                django_schema_object=schema_object,
-                table=table,
-                schema=schema,
+                table_name=table,
+                schema_name=schema,
                 column_definitions=column_definitions,
                 constraint_definitions=constraint_definitions,
             )
@@ -737,12 +730,15 @@ class Table(APIView):
 
             if metadata:
                 actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata, cursor=cursor
+                    table_name=table,
+                    schema_name=schema,
+                    metadata=metadata,
+                    cursor=cursor,
                 )
 
-    def _create_table_object(self, schema_object, table):
+    def _create_table_object(self, table_name: str):
         try:
-            table_object = DBTable.objects.create(name=table, schema=schema_object)
+            table_object = DBTable.objects.create(name=table_name)
         except IntegrityError:
             raise APIError("Table already exists")
         return table_object
@@ -1059,10 +1055,10 @@ class Rows(APIView):
                 content_type="text/csv",
                 session=session,
             )
-            response[
-                "Content-Disposition"
-            ] = 'attachment; filename="{schema}__{table}.csv"'.format(
-                schema=schema, table=table
+            response["Content-Disposition"] = (
+                'attachment; filename="{schema}__{table}.csv"'.format(
+                    schema=schema, table=table
+                )
             )
             return response
         elif format == "datapackage":
@@ -1093,10 +1089,10 @@ class Rows(APIView):
                 content_type="application/zip",
                 session=session,
             )
-            response[
-                "Content-Disposition"
-            ] = 'attachment; filename="{schema}__{table}.zip"'.format(
-                schema=schema, table=table
+            response["Content-Disposition"] = (
+                'attachment; filename="{schema}__{table}.zip"'.format(
+                    schema=schema, table=table
+                )
             )
             return response
         else:
@@ -1692,6 +1688,7 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     Used for the scenario bundles react app to be able to populate
     form select options with existing datasets from scenario topic.
     """
+
     queryset = DBTable.objects.filter(topics__name="scenario")
     serializer_class = ScenarioDataTablesSerializer
 

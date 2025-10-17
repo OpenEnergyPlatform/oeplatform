@@ -1,9 +1,10 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import webcolors
 from django import template
@@ -14,11 +15,11 @@ register = template.Library()
 
 
 @register.simple_tag
-def get_tags(schema=None, table=None, limit=None):
+def get_tags(schema: str | None = None, table: str | None = None, limit=None):
     if limit:
-        return get_popular_tags(schema=schema, table=table, limit=limit)
+        return get_popular_tags(table_name=table, limit=limit)
     else:
-        return get_all_tags(schema=schema, table=table)
+        return get_all_tags(table_name=table)
 
 
 @register.simple_tag()

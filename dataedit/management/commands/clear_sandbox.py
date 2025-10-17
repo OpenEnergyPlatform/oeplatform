@@ -1,6 +1,8 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 from typing import List
 
@@ -9,10 +11,7 @@ from django.core.management.base import BaseCommand
 
 from api.connection import _get_engine
 from dataedit.models import Table
-from oeplatform.securitysettings import PLAYGROUNDS
-
-SANDBOX_SCHEMA = "sandbox"
-assert SANDBOX_SCHEMA in PLAYGROUNDS, f"{SANDBOX_SCHEMA} not in playground schemas"
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 def get_sandbox_tables_django() -> List[Table]:
@@ -29,7 +28,7 @@ def get_sandbox_table_names_oedb() -> List[str]:
         List[str]: list of table names in oedb in sandbox schema
     """
     engine = _get_engine()
-    return sqla.inspect(engine).get_table_names(schema=SANDBOX_SCHEMA)
+    return sqla.inspect(engine).get_table_names(schema=SCHEMA_DEFAULT_TEST_SANDBOX)
 
 
 def get_sandbox_meta_table_names_oedb() -> List[str]:
@@ -38,7 +37,9 @@ def get_sandbox_meta_table_names_oedb() -> List[str]:
         List[str]: list of table names in oedb in sandbox meta schema
     """
     engine = _get_engine()
-    return sqla.inspect(engine).get_table_names(schema="_" + SANDBOX_SCHEMA)
+    return sqla.inspect(engine).get_table_names(
+        schema="_" + SCHEMA_DEFAULT_TEST_SANDBOX
+    )
 
 
 def clear_sandbox(output: bool = False) -> None:
@@ -61,13 +62,13 @@ def clear_sandbox(output: bool = False) -> None:
     # delete all from oedb
     engine = _get_engine()
     for table_name in get_sandbox_table_names_oedb():
-        sql = f'DROP TABLE "{SANDBOX_SCHEMA}"."{table_name}" CASCADE;'
+        sql = f'DROP TABLE "{SCHEMA_DEFAULT_TEST_SANDBOX}"."{table_name}" CASCADE;'
         if output:
             print(f"oedb: {sql}")
         engine.execute(sql)
 
     for table_name in get_sandbox_meta_table_names_oedb():
-        sql = f'DROP TABLE "_{SANDBOX_SCHEMA}"."{table_name}" CASCADE;'
+        sql = f'DROP TABLE "_{SCHEMA_DEFAULT_TEST_SANDBOX}"."{table_name}" CASCADE;'
         if output:
             print(f"oedb: {sql}")
         engine.execute(sql)
@@ -75,14 +76,14 @@ def clear_sandbox(output: bool = False) -> None:
     # delete all from django
     for table in get_sandbox_tables_django():
         if output:
-            print(f"django: delete {table.schema.name}.{table.name}")
+            print(f"django: delete {table.name}")
         table.delete()
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # ask for confirmation
-        answ = input(f"Delete all tables from {SANDBOX_SCHEMA} [y|n]: ")
+        answ = input(f"Delete all tables from {SCHEMA_DEFAULT_TEST_SANDBOX} [y|n]: ")
         if not answ == "y":
             print("Abort")
             return
