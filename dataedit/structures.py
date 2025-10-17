@@ -20,7 +20,6 @@ from sqlalchemy import (
     Text,
     text,
 )
-from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.schema import PrimaryKeyConstraint
 from sqlalchemy.sql.expression import func
 
@@ -132,11 +131,3 @@ class InsertBase(Base):
     _humancheck = Column("_humancheck", Boolean, server_default=text("false"))
     _type = Column("_type", String(8))
     _applied = Column("_applied", Boolean, server_default=text("false"))
-
-
-class MetaSearch(Base):
-    __table_args__ = {"schema": "public"}
-    __tablename__ = "meta_search"
-    schema = Column("schema", String(100), primary_key=True)
-    table = Column("table", String(100), primary_key=True)
-    comment = Column("comment", TSVECTOR)
