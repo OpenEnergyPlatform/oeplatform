@@ -1,5 +1,4 @@
-"""
-Add association between tags and labels
+"""Add association between tags and labels
 
 Revision ID: 3886946416ba
 Revises: c22f0a3643d0

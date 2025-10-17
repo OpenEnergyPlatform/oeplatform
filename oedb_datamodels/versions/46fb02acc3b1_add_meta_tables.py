@@ -1,5 +1,4 @@
-"""
-Add meta tables
+"""Add meta tables
 
 Revision ID: 46fb02acc3b1
 Revises:
