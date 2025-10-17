@@ -1347,7 +1347,7 @@ def get_tag_keywords_synchronized_metadata(
     keywords_old_ids = []
     keywords_new_ids = []
 
-    table = Table.objects.get(pk=table_name)
+    table = Table.objects.get(name=table_name)
     tags_new = list(Tag.objects.filter(pk__in=tag_ids_new))
     tags_old = list(table.tags)
 
@@ -1476,7 +1476,7 @@ def get_all_tags(
     """
     tags: Iterable[Tag]
     if table_name:
-        tags = Table.objects.get(pk=table_name).tags
+        tags = Table.objects.get(name=table_name).tags
     else:
         tags = Tag.objects.all()
 
