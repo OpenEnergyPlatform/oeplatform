@@ -23,8 +23,12 @@ def get_tags(schema: str | None = None, table: str | None = None, limit=None):
 
 
 @register.simple_tag()
-def readable_text_color(color_hex):
-    r, g, b = webcolors.hex_to_rgb(color_hex)
+def readable_text_color(color_hex: str) -> str:
+    try:
+        r, g, b = webcolors.hex_to_rgb(color_hex)
+    except Exception:
+        # TODO: when does this happen?
+        return "#FFFFFF"
     # Calculate brightness of the background and compare to threshold
     if 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.279 * 255:
         return "#FFFFFF"

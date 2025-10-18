@@ -84,7 +84,7 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
 from dataedit.models import Table as DBTable
-from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
+from dataedit.views import schema_whitelist, update_tags_from_keywords
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -339,39 +339,20 @@ class Metadata(APIView):
             metadata, error = actions.try_validate_metadata(metadata)
 
         if metadata is not None:
-            cursor = actions.load_cursor_from_context(request.data)
 
             # update/sync keywords with tags before saving metadata
             # TODO make this iter over all resources
             keywords = metadata["resources"][0].get("keywords", []) or []
-
-            # get_tag_keywords_synchronized_metadata returns the OLD metadata
-            # but with the now harmonized keywords (harmonized with tags)
-            # so we only copy the resulting keywords before storing the
-            # metadata
-            _metadata = get_tag_keywords_synchronized_metadata(
-                table_name=table, schema_name=schema, keywords_new=keywords
+            metadata["resources"][0]["keywords"] = update_tags_from_keywords(
+                table_name=table, keywords=keywords
             )
-            # TODO make this iter over all resources
-            metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
-
-            # Write oemetadata json to dataedit.models.tables
-            # and to SQL comment on table
-            actions.set_table_metadata(
-                table_name=table, schema_name=schema, metadata=metadata, cursor=cursor
-            )
-            _metadata = get_tag_keywords_synchronized_metadata(
-                table_name=table, schema_name=schema, keywords_new=keywords
-            )
-            # TODO make this iter over all resources
-            metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
 
             # make sure extra metadata is removed
             metadata.pop("connection_id", None)
             metadata.pop("cursor_id", None)
 
             actions.set_table_metadata(
-                table_name=table, schema_name=schema, metadata=metadata, cursor=cursor
+                table_name=table, schema_name=schema, metadata=metadata
             )
             return JsonResponse(raw_input)
         else:
@@ -535,16 +516,9 @@ class Table(APIView):
 
         metadata = payload.get("metadata")
         if metadata:
-            ctx = {
-                "connection_id": actions.get_or_403(request.data, "connection_id"),
-                "cursor_id": actions.get_or_403(request.data, "cursor_id"),
-            }
-            cursor = sessions.load_cursor_from_context(ctx)
+
             actions.set_table_metadata(
-                table_name=table,
-                schema_name=schema,
-                metadata=metadata,
-                cursor=cursor,
+                table_name=table, schema_name=schema, metadata=metadata
             )
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
@@ -679,12 +653,6 @@ class Table(APIView):
         assert_valid_identifier_name(table)
         self.validate_column_names(column_definitions)
 
-        context = {
-            "connection_id": actions.get_or_403(request.data, "connection_id"),
-            "cursor_id": actions.get_or_403(request.data, "cursor_id"),
-        }
-        cursor = sessions.load_cursor_from_context(context)
-
         embargo_error, embargo_payload_check = self._check_embargo_payload_valid(
             embargo_data
         )
@@ -702,10 +670,7 @@ class Table(APIView):
 
             if metadata:
                 actions.set_table_metadata(
-                    table_name=table,
-                    schema_name=schema,
-                    metadata=metadata,
-                    cursor=cursor,
+                    table_name=table, schema_name=schema, metadata=metadata
                 )
 
             try:
@@ -730,10 +695,7 @@ class Table(APIView):
 
             if metadata:
                 actions.set_table_metadata(
-                    table_name=table,
-                    schema_name=schema,
-                    metadata=metadata,
-                    cursor=cursor,
+                    table_name=table, schema_name=schema, metadata=metadata
                 )
 
     def _create_table_object(self, table_name: str):

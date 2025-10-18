@@ -312,7 +312,7 @@ class FSAdd(LoginRequiredMixin, View):
                 if model.license != "Other":
                     model.license_other_text = None
             ids = {
-                int(field[len("tag_") :])
+                field[len("tag_") :]
                 for field in request.POST
                 if field.startswith("tag_")
             }

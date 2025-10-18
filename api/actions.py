@@ -2396,7 +2396,7 @@ def update_meta_search(table_name: str, schema_name: str) -> None:
     table.save()
 
 
-def set_table_metadata(table_name: str, schema_name: str, metadata, cursor=None):
+def set_table_metadata(table_name: str, schema_name: str, metadata):
     """saves metadata as json string on table comment.
 
     Args:

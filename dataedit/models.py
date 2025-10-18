@@ -21,6 +21,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
@@ -90,10 +91,11 @@ class Tag(models.Model):
         return name_clean
 
     def save(self, *args, **kwargs):
-        self.name = self.get_name_clean(self.name)
-        self.name_normalized = self.get_name_normalized(self.name)
-        if isinstance(self.color, str) and self.color[0] == "#":
-            self.color = self.color_from_hex(self.color)
+        if not self.pk:  # create, not update
+            self.name = self.get_name_clean(self.name)
+            self.name_normalized = self.get_name_normalized(self.name)
+            if isinstance(self.color, str) and self.color[0] == "#":
+                self.color = self.color_from_hex(self.color)
         super().save(*args, **kwargs)
 
     @property
@@ -107,6 +109,31 @@ class Tag(models.Model):
     def increment_usage_count(self):
         self.usage_count += 1
         self.save()
+
+    @staticmethod
+    def increment_usage_count_many(tag_ids: list[str]) -> None:
+        if not tag_ids:
+            return
+        for tag_id in tag_ids:
+            tag = Tag.get_or_none(tag_id)
+            if not tag:
+                continue
+            tag.increment_usage_count()
+
+    @staticmethod
+    def get_or_none(pk: str) -> Union["Tag", None]:
+        return Tag.objects.filter(pk=pk).first()
+
+    @staticmethod
+    def get_or_create_from_name(name: str) -> "Tag":
+        pk = Tag.get_name_normalized(name)
+        if not pk:
+            raise ValueError("Invalid tag name")
+        tag = Tag.get_or_none(pk=pk)
+        if not tag:
+            tag = Tag(name=name)
+            tag.save()
+        return tag
 
 
 class Schema(Tagable):

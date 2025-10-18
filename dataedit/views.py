@@ -58,13 +58,11 @@ from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
 from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
-from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
 import oeplatform.securitysettings as sec
 from api import actions, utils
-from api.connection import _get_engine
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
     delete_peer_review,
@@ -274,19 +272,9 @@ def listschemas(request):
     """
 
     searched_query_string = request.GET.get("query")
+    searched_tag_ids = request.GET.getlist("tags")
 
-    try:
-        searched_tag_ids = list(
-            map(
-                lambda t: int(t),
-                request.GET.getlist("tags"),
-            )
-        )
-    except ValueError:
-        raise Http404
-
-    for tag_id in searched_tag_ids:
-        Tag.objects.get(pk=tag_id).increment_usage_count()
+    Tag.increment_usage_count_many(searched_tag_ids)
 
     # find all tables (layzy query set)
     tables = find_tables(query_string=searched_query_string, tag_ids=searched_tag_ids)
@@ -356,7 +344,9 @@ def get_session_query():
 
 
 def find_tables(
-    topic_name: str | None = None, query_string: str | None = None, tag_ids=None
+    topic_name: str | None = None,
+    query_string: str | None = None,
+    tag_ids: list[str] | None = None,
 ) -> QuerySet[Table]:
     """find tables given search criteria
 
@@ -416,15 +406,9 @@ def listtables(request, schema_name: str):
         raise Http404("Schema not accessible")
 
     searched_query_string = request.GET.get("query")
-    searched_tag_ids = list(
-        map(
-            int,
-            request.GET.getlist("tags"),
-        )
-    )
+    searched_tag_ids = request.GET.getlist("tags")
 
-    for tag_id in searched_tag_ids:
-        Tag.objects.get(pk=tag_id).increment_usage_count()
+    Tag.increment_usage_count_many(searched_tag_ids)
 
     # find all tables (layzy query set) in this schema
     tables = find_tables(
@@ -1210,192 +1194,28 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
 
-def check_is_table_tag(session, schema_name: str, table_name: str, tag_id: str) -> bool:
-    """
-    Check if a tag is existing in the table_tag table in schema public.
-    Tags are queried by tag id.
-
-    Args:
-        session (sqlachemy): sqlachemy session
-        tag_id (int): Tag ID
-
-    Returns:
-        bool: True if exists, False if not
-    """
-    return Table.objects.get(name=table_name).tags.filter(pk=tag_id).count() > 0
-
-
-def check_is_tag(session, tag_id: str) -> bool:
-    """
-    Check if a tag is existing in the tag table in schema public.
-    Tags are queried by tag_id.
-
-    Args:
-        session (sqlalchemy): Sqlalchemy session
-        tag_id (int): [description]
-
-    Returns:
-        bool: True if exists, False if not
-    """
-
-    # NOTE: .filter().first() does not raise Exception like .get()
-    # if no object exist
-    return bool(Tag.objects.filter(pk=tag_id).first())
-
-
-def get_tag_id_by_tag_name_normalized(session, name_normalized: str) -> str | None:
-    """
-    The name_normalized now IS the pk/ID
-
-    Args:
-        session ([type]): [description]
-        name_normalized ([type]): [description]
-
-    Returns:
-        int: Tag ID
-        None: If Tag ID does not exists.
-
-    """
-
-    tag = Tag.objects.filter(pk=name_normalized).first()
-    if tag:
-        return tag.pk
-    else:
-        return None
-
-
-def get_tag_name_normalized_by_id(session, tag_id):
-    """
-    The name_normalized now IS the pk/ID
-
-    Args:
-        session (sqlachemy): sqlalachemy session
-        tag_id (int): The Tag ID
-
-    Returns:
-        None: If tag id does not exists.
-        Str: Tag name normalized
-    """
-
-    return get_tag_id_by_tag_name_normalized(session, tag_id)
-
-
-def get_tag_name_by_id(session, tag_id: str) -> str | None:
-    """
-    Query the Tag table in schema public to get the tags.name.
-    Tags are queried by tag id.
-
-    Args:
-        session (sqlachemy): sqlalachemy session
-        tag_id (int): The Tag ID
-
-    Returns:
-        None: If tag id does not exists.
-        Str: Tag name
-    """
-
-    tag = Tag.objects.filter(pk=tag_id).first()
-    if tag:
-        return tag.name
-    else:
-        return None
-
-
-def add_existing_keyword_tag_to_table_tags(
-    session, schema_name, table_name, keyword_tag_id
-):
-    """
-    Add a tag from the oem-keywords to the table_tags for the current table.
-
-    Args:
-        session (sqlachemy): sqlalachemy session
-        schema (str): Name of the schema
-        table (str): Name of the table
-        keyword_tag_id (int): The tag id that machtes to keyword tag name
-            (by tag_name_normalized)
-
-    Returns:
-        any: Exception
-    """
-
-    if check_is_tag(session, keyword_tag_id):
-        Table.objects.get(name=table_name).tags.add(keyword_tag_id)
-
-
-def get_tag_keywords_synchronized_metadata(
-    table_name: str,
-    schema_name: str,
-    keywords_new: list[str] | None = None,
-    tag_ids_new: list[str] | None = None,
-) -> dict:
-    """synchronize tags and keywords, either by new metadata OR by set of tag ids
-    (from UI)
-
-    Args:
-        table (_type_): _description_
-        schema (_type_): _description_
-        metadata_new (_type_, optional): _description_. Defaults to None.
-        tag_ids_new (_type_, optional): _description_. Defaults to None.
-    """
-    keywords_new = keywords_new or []
-    tag_ids_new = tag_ids_new or []
-
-    metadata = load_metadata_from_db(schema_name=schema_name, table_name=table_name)
-    keywords_old = metadata["resources"][0].get("keywords", [])
-
-    id_to_keyword = {}
-    keywords_old_ids = []
-    keywords_new_ids = []
-
+def update_tags_from_keywords(table_name: str, keywords: list[str]) -> list[str]:
     table = Table.objects.get(name=table_name)
-    tags_new = list(Tag.objects.filter(pk__in=tag_ids_new))
-    tags_old = list(table.tags)
+    table.tags.clear()
+    keywords_new = set()
+    for keyword in keywords:
+        tag = Tag.get_or_create_from_name(keyword)
+        table.tags.add(tag)
+        keywords_new.add(tag.name_normalized)
+    table.save()
+    return list(keywords_new)
 
-    # create reverse mapping from id -> keyword
-    # user given keywords will have higher priority if their spelling is
-    # different than spelling in Tags
-    for tag in tags_new:
-        id_to_keyword[tag.pk] = tag.name
-    for tag in tags_old:
-        id_to_keyword[tag.pk] = tag.name
-    # id_to_keyword may be overwritten
-    # with keywords
-    for kw in keywords_old:
-        kid = Tag.get_name_normalized(kw)
-        id_to_keyword[kid] = kw
-        keywords_old_ids.append(kid)
-    for kw in keywords_new:
-        kid = Tag.get_name_normalized(kw)
-        id_to_keyword[kid] = kw
-        keywords_new_ids.append(kid)
 
-    set_keywords_new_ids = set(keywords_new_ids)
-    set_keywords_old_ids = set(keywords_old_ids)
-    set_tags_new = set(t.pk for t in tags_new)
-    set_tags_old = set(t.pk for t in tags_old)
+def update_keywords_from_tags(table: Table, schema_name: str) -> None:
+    """synchronize keywords in metadata with tags"""
 
-    remove_ids = (set_keywords_old_ids - set_keywords_new_ids) | (
-        set_tags_old - set_tags_new
+    metadata = table.oemetadata or {"resources": [{}]}
+    keywords = [tag.name_normalized for tag in table.tags.all()]
+    metadata["resources"][0]["keywords"] = keywords
+
+    actions.set_table_metadata(
+        table_name=table.name, schema_name=schema_name, metadata=metadata
     )
-    add_ids = (set_keywords_new_ids - set_keywords_old_ids) | (
-        set_tags_new - set_tags_old
-    )
-
-    keyword_ids = keywords_old_ids
-    for i in remove_ids:
-        table.tags.remove(i)
-        keyword_ids = [k for k in keyword_ids if k != i]
-    for i in add_ids:
-        table.tags.add(i)
-        keyword_ids.append(i)
-
-    keyword = [id_to_keyword[i] for i in keyword_ids]
-
-    # TODO: Fixed resource index will fail to produce good
-    # metadata for metadata with multiple resource
-    metadata["resources"][0]["keywords"] = keyword
-
-    return metadata
 
 
 @login_required
@@ -1413,39 +1233,27 @@ def update_table_tags(request):
     :return: Redirects to the previous page
     """
     # check if valid table / schema
-    schema, table = actions.get_table_name(
+    schema_name, table_name = actions.get_table_name(
         schema=request.POST["schema"],
         table=request.POST["table"],
         restrict_schemas=False,
     )
     # check write permission
     actions.assert_add_tag_permission(
-        request.user, table, login_models.WRITE_PERM, schema=schema
+        request.user, table_name, login_models.WRITE_PERM, schema=schema_name
     )
 
-    ids = {
-        int(field[len("tag_") :]) for field in request.POST if field.startswith("tag_")
+    tag_ids = {
+        field[len("tag_") :] for field in request.POST if field.startswith("tag_")
     }
+    tags = Tag.objects.filter(pk__in=tag_ids)
+    table = Table.objects.get(name=table_name)
+    table.tags.clear()
+    for tag in tags:
+        table.tags.add(tag)
+    table.save()  # TODO: we already do save in update_keywords_from_tags further down
 
-    with _get_engine().connect() as con:
-        with con.begin():
-            if not actions.assert_has_metadata(table=table, schema=schema):
-                actions.set_table_metadata(
-                    table_name=table,
-                    schema_name=schema,
-                    metadata=OEMETADATA_V20_TEMPLATE,
-                    cursor=con,
-                )
-                # update tags in db and harmonize metadata
-
-            metadata = get_tag_keywords_synchronized_metadata(
-                table_name=table, schema_name=schema, tag_ids_new=ids
-            )
-
-            # TODO Add metadata to table (JSONB field) somewhere here
-            actions.set_table_metadata(
-                table_name=table, schema_name=schema, metadata=metadata, cursor=con
-            )
+    update_keywords_from_tags(table, schema_name=schema_name)
 
     message = messages.success(
         request,
@@ -1456,7 +1264,7 @@ def update_table_tags(request):
     return render(
         request,
         "dataedit/dataview.html",
-        {"messages": message, "table": table, "schema": schema},
+        {"messages": message, "table": table_name, "schema": schema_name},
     )
 
 
@@ -1476,7 +1284,7 @@ def get_all_tags(
     """
     tags: Iterable[Tag]
     if table_name:
-        tags = Table.objects.get(name=table_name).tags
+        tags = Table.objects.get(name=table_name).tags.all()
     else:
         tags = Tag.objects.all()
 

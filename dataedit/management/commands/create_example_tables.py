@@ -18,7 +18,6 @@ from api.actions import (
 )
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
-from dataedit.views import get_tag_keywords_synchronized_metadata
 from oeplatform.securitysettings import SCHEMA_DATA
 
 User = get_user_model()
@@ -239,13 +238,6 @@ class Command(BaseCommand):
         metadata, error = try_validate_metadata(metadata)
         if error:
             raise Exception(f"Metadata validation error: {error}")
-
-        # Sync keywords with tag system
-        keywords = metadata["resources"][0].get("keywords", []) or []
-        synced = get_tag_keywords_synchronized_metadata(
-            table_name=table_name, schema_name=schema, keywords_new=keywords
-        )
-        metadata["resources"][0]["keywords"] = synced["resources"][0]["keywords"]
 
         # Save to Django's oemetadata JSONB field and comment
         set_table_metadata(table_name=table_name, schema_name=schema, metadata=metadata)
