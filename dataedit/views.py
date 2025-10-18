@@ -359,20 +359,20 @@ def find_tables(
         QuerySet of Table objetcs
     """
 
-    # define search filter (will be combined with AND):
-    # only show tables NOT in sandbox
-    filters = [Q(is_sandbox=False)]
+    tables = Table.objects
+
+    tables = tables.filter(is_sandbox=False)
 
     if topic_name:
         # TODO: WINGECHR: model_draft is not a topic, but currently,
         # frontend still usses it to filter / search for unpublished data
         if topic_name == TODO_PSEUDO_TOPIC_DRAFT:
-            filters.append(Q(is_publish=False))
+            tables = tables.filter(is_publish=False)
         else:
-            filters.append(Q(topics=topic_name))
+            tables = tables.filter(topics__pk=topic_name)
 
     if query_string:  # filter by search terms
-        filters.append(
+        tables = tables.filter(
             Q(
                 search=SearchQuery(
                     " & ".join(p + ":*" for p in re.findall(r"[\w]+", query_string)),
@@ -382,15 +382,11 @@ def find_tables(
         )
 
     if tag_ids:  # filter by tags:
-        # unfortunately, tags are no longer in django tables,
-        # so we cannot filter directly
-        # instead, we load all table names that match the given tags
-
         # find tables (in schema), that use all of the tags
+        # by adding a filter for each tag
+        # (instead of all at once, which would be OR)
         for tag_id in tag_ids:
-            filters.append(Q(tags__in=tag_id))
-
-    tables = Table.objects.filter(*filters)
+            tables = tables.filter(tags__pk=tag_id)
 
     return tables
 
@@ -417,24 +413,23 @@ def listtables(request, schema_name: str):
         tag_ids=searched_tag_ids,
     )
 
-    tables = [
+    tables = tables.order_by("human_readable_name")
+
+    table_label_tags = [
         (
             table.name,
             table.human_readable_name,
-            [t.name for t in table.tags.order_by("-usage_count")],
+            table.tags.all(),
         )
         for table in tables
     ]
-
-    # sort by name
-    tables = sorted(tables, key=lambda x: x[0])
 
     return render(
         request,
         "dataedit/dataedit_tablelist.html",
         {
             "schema": schema_name,
-            "tables": tables,
+            "table_label_tags": table_label_tags,
             "query": searched_query_string,
             "tags": searched_tag_ids,
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
