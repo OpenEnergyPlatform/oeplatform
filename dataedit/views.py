@@ -594,9 +594,9 @@ def tag_overview(request):
 
 @login_required
 def tag_editor(request, id: str = ""):
-    tag = Tag.objects.filter(pk=id).first()
+    tag = Tag.get_or_none(id)
     if tag:
-        assigned = bool(tag.tables)
+        assigned = tag.tables.count() > 0
         return render(
             request=request,
             template_name="dataedit/tag_editor.html",

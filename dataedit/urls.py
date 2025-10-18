@@ -92,7 +92,7 @@ urlpatterns = [
     re_path(r"^tags/?$", views.tag_overview),
     re_path(r"^tags/set/?$", views.change_tag),
     re_path(r"^tags/new/?$", views.tag_editor),
-    re_path(r"^tags/(?P<id>[0-9]+)/?$", views.tag_editor),
+    re_path(r"^tags/(?P<id>[a-z0-9]+)/?$", views.tag_editor),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/graph/new".format(
             qual=pgsql_qualifier
