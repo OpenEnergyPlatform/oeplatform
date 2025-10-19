@@ -4,7 +4,11 @@ Revision ID: 4a999e7a3f93
 Revises: 3c2369dfcc55
 Create Date: 2025-10-17 16:23:49.731335
 
-"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+"""  # noqa: 501
 
 import sqlalchemy as sa
 from alembic import op
