@@ -1,14 +1,13 @@
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 """Add association between tags and labels
 
 Revision ID: 3886946416ba
 Revises: c22f0a3643d0
 Create Date: 2019-04-25 15:43:17.074048
 
-"""
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import sqlalchemy as sa
 from alembic import op
 

@@ -15,7 +15,7 @@ SPDX-License-Identifier: CC0-1.0
 - Collaborative
 - Open Data
 
-## UI Library 
+## UI Library
 
 This [library :fontawesome-solid-arrow-up-right-from-square:](https://www.figma.com/design/EAvBg7KuO1oit5Dry0U6WJ/Components?node-id=4940-344&t=Hsboi5ScY2Kmr8SU-1){:target="_blank"} contains the main components and icons used in the OEP app.
 

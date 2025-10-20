@@ -1,17 +1,21 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+"""  # noqa: 501
 
 from django.test import TestCase
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from login.models import myuser
+from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
-from .models import PeerReview, Schema, Table
+from .models import PeerReview, Table
 
 
 # replicated functionality form dataedit migration 0033
@@ -20,9 +24,7 @@ def populate_peerreview_oemetadata():
     for review in PeerReview.objects.all():
         if not review.oemetadata or review.oemetadata == {}:
             # Logic to find a matching value from TableModel.
-            table = Table.objects.filter(
-                schema__name=review.schema, name=review.table
-            ).first()
+            table = Table.objects.filter(name=review.table).first()
             if table:
                 review.oemetadata = table.oemetadata
                 review.save()
@@ -31,10 +33,7 @@ def populate_peerreview_oemetadata():
 class MigrationTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        test_schema = Schema.objects.create(name="test")
-
         table = Table.objects.create(
-            schema=test_schema,
             name="test_table",
             oemetadata=OEMETADATA_V20_EXAMPLE,
         )
@@ -50,7 +49,7 @@ class MigrationTest(TestCase):
             # Make sure this assignment matches your model's expectations
             table=table.name,
             # Adjust based on how `schema` is related in `PeerReview`
-            schema=table.schema.name,
+            schema=SCHEMA_DEFAULT_TEST_SANDBOX,
             contributor=test_contributor,
             reviewer=test_reviewer,
             # Simulate a record that needs migration

@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
+"""
+SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 # # import toml
 # # import json
@@ -128,10 +128,9 @@
 # # --- REUSE.toml separat bearbeiten ---
 # process_reuse_toml()
 
-import os
 import json
+import os
 import re
-import toml
 
 # --- Lade E-Mail → GitHub-Handle Mapping ---
 with open("mail-to-github.json", "r", encoding="utf-8") as f:
@@ -139,6 +138,7 @@ with open("mail-to-github.json", "r", encoding="utf-8") as f:
 
 # Regex: Erkenne SPDX-Zeilen mit E-Mail in <...>
 spdx_regex = re.compile(r"(SPDX-FileCopyrightText:\s*\d{4}\s+[^<]+<)([^>]+)(>)")
+
 
 def process_file(path):
     try:
@@ -172,6 +172,7 @@ def process_file(path):
 
     return False
 
+
 # --- REUSE.toml anpassen ---
 # def process_reuse_toml(path="REUSE.toml"):
 #     if not os.path.exists(path):
@@ -204,6 +205,7 @@ def process_file(path):
 #     else:
 #         print("ℹ️ REUSE.toml unverändert.")
 
+
 def process_reuse_toml(path="REUSE.toml"):
     if not os.path.exists(path):
         print("⚠️ REUSE.toml nicht gefunden.")
@@ -229,9 +231,10 @@ def process_reuse_toml(path="REUSE.toml"):
     if changed:
         with open(path, "w", encoding="utf-8") as f:
             f.writelines(lines)
-        print(f"✅ REUSE.toml angepasst.")
+        print("✅ REUSE.toml angepasst.")
     else:
         print("ℹ️ REUSE.toml unverändert.")
+
 
 # --- Alle Dateien im Repo durchgehen ---
 for root, dirs, files in os.walk("."):

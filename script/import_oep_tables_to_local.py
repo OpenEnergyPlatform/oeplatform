@@ -1,6 +1,8 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 from copy import deepcopy
 from datetime import datetime
@@ -9,6 +11,8 @@ import requests
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from shapely import wkt
 from shapely.geometry import base as shapely_geom_base
+
+from oeplatform.securitysettings import SCHEMA_DATA
 
 # === CONFIG ===
 
@@ -20,7 +24,7 @@ LOCAL_TOKEN = ""  # UPDATE: Set your local API token here
 
 CHUNK_SIZE = 1000
 SKIP_GEOMETRY_COLUMNS = False  # Now we include geometry, converted to GeoJSON
-LOCAL_SCHEMA = "model_draft"
+LOCAL_SCHEMA = SCHEMA_DATA
 
 TABLES_TO_COPY = [
     {

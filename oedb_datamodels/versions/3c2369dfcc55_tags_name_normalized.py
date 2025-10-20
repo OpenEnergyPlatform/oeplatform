@@ -1,15 +1,16 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
-"""empty message
+"""Alter tags: add name_normalized
 
 Revision ID: 3c2369dfcc55
 Revises: 7dd42bf4925b
 Create Date: 2022-01-27 10:12:56.713893
 
-"""
+
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import sqlalchemy as sa
 from alembic import op
 
