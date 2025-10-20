@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
