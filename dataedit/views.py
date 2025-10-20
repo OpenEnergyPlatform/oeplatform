@@ -269,14 +269,14 @@ def TopicView(request: HttpRequest) -> HttpResponse:
     )
 
 
-def TablesView(request: HttpRequest, schema_name: str) -> HttpResponse:
+def TablesView(request: HttpRequest, schema: str) -> HttpResponse:
     """
     :param request: A HTTP-request object sent by the Django framework
     :param schema_name: Name of a schema
     :return: Renders the list of all tables in the specified schema
     """
 
-    if schema_name not in schema_whitelist or schema_name.startswith("_"):
+    if schema not in schema_whitelist or schema.startswith("_"):
         raise Http404("Schema not accessible")
 
     searched_query_string = request.GET.get("query")
@@ -286,7 +286,7 @@ def TablesView(request: HttpRequest, schema_name: str) -> HttpResponse:
 
     # find all tables (layzy query set) in this schema
     tables = find_tables(
-        topic_name=schema_name,
+        topic_name=schema,
         query_string=searched_query_string,
         tag_ids=searched_tag_ids,
     )
@@ -306,7 +306,7 @@ def TablesView(request: HttpRequest, schema_name: str) -> HttpResponse:
         request,
         "dataedit/dataedit_tablelist.html",
         {
-            "schema": schema_name,
+            "schema": schema,
             "table_label_tags": table_label_tags,
             "query": searched_query_string,
             "tags": searched_tag_ids,
@@ -316,11 +316,13 @@ def TablesView(request: HttpRequest, schema_name: str) -> HttpResponse:
 
 
 class RevisionView(View):
-    def get(self, request: HttpRequest, schema, table) -> HttpResponse:
+    def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         return redirect(f"/api/v0/schema/{schema}/tables/{table}/rows")
 
 
-def ShowRevisionView(request: HttpRequest, schema, table, date) -> HttpResponse:
+def ShowRevisionView(
+    request: HttpRequest, schema: str, table: str, date
+) -> HttpResponse:
     # global pending_dumps
 
     rev = TableRevision.objects.get(schema=schema, table=table, date=date)
@@ -392,7 +394,7 @@ def ChangeTagView(request: HttpRequest) -> HttpResponse:
     return redirect("/dataedit/tags/?status=" + status)
 
 
-def ViewSaveView(request: HttpRequest, schema, table) -> HttpResponse:
+def ViewSaveView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     post_name = request.POST.get("name")
     post_type = request.POST.get("type")
     post_id = request.POST.get("id")
@@ -477,7 +479,7 @@ def ViewSaveView(request: HttpRequest, schema, table) -> HttpResponse:
     return redirect("../../" + table + "?view=" + str(update_view.id))
 
 
-def ViewSetDefaultView(request: HttpRequest, schema, table) -> HttpResponse:
+def ViewSetDefaultView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     post_id = request.GET.get("id")
 
     for view in DBView.objects.filter(schema=schema, table=table):
@@ -489,7 +491,7 @@ def ViewSetDefaultView(request: HttpRequest, schema, table) -> HttpResponse:
     return redirect("/dataedit/view/" + schema + "/" + table)
 
 
-def ViewDeleteView(request: HttpRequest, schema, table) -> HttpResponse:
+def ViewDeleteView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     post_id = request.GET.get("id")
 
     view = DBView.objects.get(id=post_id, schema=schema, table=table)
@@ -499,14 +501,14 @@ def ViewDeleteView(request: HttpRequest, schema, table) -> HttpResponse:
 
 
 class GraphView(View):
-    def get(self, request: HttpRequest, schema, table) -> HttpResponse:
+    def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         # get the columns id from the schema and the table
         columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         formset = GraphViewForm(columns=columns)
 
         return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
 
-    def post(self, request: HttpRequest, schema, table) -> HttpResponse:
+    def post(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         # save an instance of View, look at GraphViewForm fields in forms.py
         # for information to the options
         opt = dict(x=request.POST.get("column_x"), y=request.POST.get("column_y"))
@@ -528,7 +530,9 @@ class GraphView(View):
 
 
 class MapView(View):
-    def get(self, request: HttpRequest, schema, table, maptype) -> HttpResponse:
+    def get(
+        self, request: HttpRequest, schema: str, table: str, maptype: str
+    ) -> HttpResponse:
         columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(columns=columns)
@@ -539,7 +543,9 @@ class MapView(View):
 
         return render(request, "dataedit/tablemap_form.html", {"form": form})
 
-    def post(self, request: HttpRequest, schema, table, maptype) -> HttpResponse:
+    def post(
+        self, request: HttpRequest, schema: str, table: str, maptype
+    ) -> HttpResponse:
         columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(request.POST, columns=columns)
@@ -575,7 +581,7 @@ class DataView(View):
 
     # TODO Check if this hits bad in performance
     @method_decorator(never_cache)
-    def get(self, request: HttpRequest, schema, table) -> HttpResponse:
+    def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         """
         Collects the following information on the specified table:
             * Postgresql comment on this table
@@ -734,7 +740,7 @@ class DataView(View):
 
         return render(request, "dataedit/dataview.html", context=context_dict)
 
-    def post(self, request: HttpRequest, schema, table) -> HttpResponse:
+    def post(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         """
         Handles the behaviour if a .csv-file is sent to the view of a table.
         The contained datasets are inserted into the corresponding table via
@@ -770,7 +776,7 @@ class PermissionView(View):
     Initialises the session data (if necessary)
     """
 
-    def get(self, request: HttpRequest, schema, table) -> HttpResponse:
+    def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         if schema not in schema_whitelist:
             raise Http404("Schema not accessible")
 
@@ -803,7 +809,7 @@ class PermissionView(View):
             },
         )
 
-    def post(self, request: HttpRequest, schema, table) -> HttpResponse:
+    def post(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         table_obj = Table.load(schema, table)
         if (
             request.user.is_anonymous
@@ -824,7 +830,7 @@ class PermissionView(View):
         if request.POST["mode"] == "remove_group":
             return self.__remove_group(request, schema, table)
 
-    def __add_user(self, request: HttpRequest, schema, table):
+    def __add_user(self, request: HttpRequest, schema: str, table: str):
         user_name = request.POST.get("name")
         # Check if the user name is empty
         if not user_name:
@@ -839,7 +845,7 @@ class PermissionView(View):
         p.save()
         return self.get(request, schema, table)
 
-    def __change_user(self, request: HttpRequest, schema, table):
+    def __change_user(self, request: HttpRequest, schema: str, table: str):
         user_id = request.POST.get("user_id")
         # Check if the user id is empty
         if not user_id:
@@ -853,7 +859,7 @@ class PermissionView(View):
         p.save()
         return self.get(request, schema, table)
 
-    def __remove_user(self, request: HttpRequest, schema, table):
+    def __remove_user(self, request: HttpRequest, schema: str, table: str):
         user_id = request.POST.get("user_id")
         # Check if the user id is empty
         if not user_id:
@@ -866,7 +872,7 @@ class PermissionView(View):
         p.delete()
         return self.get(request, schema, table)
 
-    def __add_group(self, request: HttpRequest, schema, table):
+    def __add_group(self, request: HttpRequest, schema: str, table: str):
         group_name = request.POST.get("name")
         # Check if the group name is empty
         if not group_name:
@@ -881,7 +887,7 @@ class PermissionView(View):
         p.save()
         return self.get(request, schema, table)
 
-    def __change_group(self, request: HttpRequest, schema, table):
+    def __change_group(self, request: HttpRequest, schema: str, table: str):
         group_id = request.POST.get("group_id")
         if not group_id:
             # Return an HTTP 400 Bad Request response
@@ -896,7 +902,7 @@ class PermissionView(View):
         p.save()
         return self.get(request, schema, table)
 
-    def __remove_group(self, request: HttpRequest, schema, table):
+    def __remove_group(self, request: HttpRequest, schema: str, table: str):
         group_id = request.POST.get("group_id")
         if not group_id:
             # Return an HTTP 400 Bad Request response
@@ -965,7 +971,9 @@ def RedirectAfterTableTagsUpdatedView(request: HttpRequest) -> HttpResponse:
 class WizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv)."""
 
-    def get(self, request: HttpRequest, schema=SCHEMA_DATA, table=None) -> HttpResponse:
+    def get(
+        self, request: HttpRequest, schema: str = SCHEMA_DATA, table: str = None
+    ) -> HttpResponse:
         """Handle GET request (render the page)."""
         engine = actions._get_engine()
         schema = utils.validate_schema(schema)
@@ -1017,7 +1025,7 @@ class WizardView(LoginRequiredMixin, View):
 class MetaEditView(LoginRequiredMixin, View):
     """Metadata editor (cliet side json forms)."""
 
-    def get(self, request: HttpRequest, schema, table) -> HttpResponse:
+    def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         columns = get_column_description(schema, table)
 
         can_add = False
@@ -1064,7 +1072,7 @@ class MetaEditView(LoginRequiredMixin, View):
 
 
 class StandaloneMetaEditView(View):
-    def get(self, request) -> HttpResponse:
+    def get(self, request: HttpRequest) -> HttpResponse:
         context_dict = {
             "config": json.dumps(
                 {"cancle_url": get_cancle_state(self.request), "standalone": True}
@@ -1086,7 +1094,7 @@ class PeerReviewView(LoginRequiredMixin, View):
     parsing, sorting metadata, and handling GET and POST requests for peer review.
     """
 
-    def load_json(self, schema, table, review_id=None):
+    def load_json(self, schema: str, table: str, review_id=None):
         """
         Load JSON metadata from the database. If the review_id is available
         then load the metadata form the peer review instance and not from the
@@ -1154,7 +1162,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             lines += [{"field": old[1:], "value": str(val)}]
         return lines
 
-    def sort_in_category(self, schema, table, oemetadata):
+    def sort_in_category(self, schema: str, table: str, oemetadata):
         """
         Group flattened OEMetadata v2 fields into thematic buckets and attach
         placeholders required by the review UI.
@@ -1280,7 +1288,9 @@ class PeerReviewView(LoginRequiredMixin, View):
         extract_descriptions(json_schema["properties"], prefix)
         return field_descriptions
 
-    def get(self, request: HttpRequest, schema, table, review_id=None) -> HttpResponse:
+    def get(
+        self, request: HttpRequest, schema: str, table: str, review_id=None
+    ) -> HttpResponse:
         """
         Handle GET requests for peer review.
         Loads necessary data and renders the review template.
@@ -1502,7 +1512,9 @@ class PeerRreviewContributorView(PeerReviewView):
     POST requests for contributor's review.
     """
 
-    def get(self, request: HttpRequest, schema, table, review_id) -> HttpResponse:
+    def get(
+        self, request: HttpRequest, schema: str, table: str, review_id
+    ) -> HttpResponse:
         """
         Handle GET requests for contributor's review. Loads necessary data and
         renders the contributor review template.
@@ -1566,7 +1578,9 @@ class PeerRreviewContributorView(PeerReviewView):
         }
         return render(request, "dataedit/opr_contributor.html", context=context_meta)
 
-    def post(self, request: HttpRequest, schema, table, review_id) -> HttpResponse:
+    def post(
+        self, request: HttpRequest, schema: str, table: str, review_id
+    ) -> HttpResponse:
         """
         Handle POST requests for contributor's review. Merges and updates
         the review data in the PeerReview table.

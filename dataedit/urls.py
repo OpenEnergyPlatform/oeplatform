@@ -53,7 +53,7 @@ urlpatterns = [
     re_path(r"^admin/constraints/", AdminConstraintsView, name="input"),
     re_path(r"^view/$", TopicView, name="index"),
     re_path(
-        r"^view/(?P<schema_name>{qual})$".format(qual=pgsql_qualifier),
+        r"^view/(?P<schema>{qual})$".format(qual=pgsql_qualifier),
         TablesView,
         name="input",
     ),
