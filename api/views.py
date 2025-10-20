@@ -877,14 +877,6 @@ class MovePublish(APIView):
         ) or json_data.get("embargo", {}).get("duration", None)
         actions.move_publish(schema, table, to_schema, embargo_period)
 
-        # tables = Table.objects.all()
-        # context = {
-        #     "draft_tables": [table for table in tables if not table.is_publish],
-        #     "published_tables": [table for table in tables if table.is_publish],
-        #     "schema_whitelist": schema_whitelist,
-        # }
-        # html = render_to_string("login/user_tables.html", context)
-        # return HttpResponse(html)
         return HttpResponse(status=status.HTTP_200_OK)
 
 
@@ -1738,7 +1730,7 @@ class TableSize(APIView):
 
 
 def update_tags_from_keywords(table_name: str, keywords: list[str]) -> list[str]:
-    table = Table.objects.get(name=table_name)
+    table = DBTable.objects.get(name=table_name)
     table.tags.clear()
     keywords_new = set()
     for keyword in keywords:

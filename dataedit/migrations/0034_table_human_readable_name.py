@@ -8,7 +8,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from django.db import migrations, models, transaction
 
-from dataedit.helper import get_readable_table_name
 from dataedit.models import Table
 
 
@@ -16,7 +15,7 @@ def add_human_readable_table_name_if_exists_in_oemetadata(apps, schema_editor):
     TableModel: Table = apps.get_model("dataedit", "Table")
     with transaction.atomic():
         for table in TableModel.objects.all():
-            table_title = get_readable_table_name(table)
+            table_title = table.get_readable_table_name()
 
             if table_title:
                 table.human_readable_name = table_title

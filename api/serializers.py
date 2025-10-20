@@ -10,7 +10,6 @@ from uuid import UUID
 from django.urls import reverse
 from rest_framework import serializers
 
-from dataedit.helper import get_readable_table_name
 from dataedit.models import Table
 from modelview.models import Energyframework, Energymodel
 from oeplatform.settings import URL
@@ -129,7 +128,7 @@ class DatasetSerializer(serializers.Serializer):
     def get_title(self, data):
         name = data.get("name")
         # ✅ Generate internal distribution label
-        full_label = get_readable_table_name(table_obj=Table.objects.get(name=name))
+        full_label = Table.objects.get(name=name).get_readable_table_name()
         if full_label:
             return full_label
         else:

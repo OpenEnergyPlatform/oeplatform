@@ -32,55 +32,6 @@ TODO_PSEUDO_TOPIC_DRAFT = "model_draft"
 
 
 ##############################################
-#          Table view related                #
-##############################################
-
-
-def read_label_only_for_first_resource_element(table, oemetadata) -> str:
-    """
-    Extracts the readable name from oemetadata and appends the real name in parens.
-    If oemetadata is not a JSON-dictionary or does not contain a field 'Name' None
-    is returned.
-
-    :param table: Name to append
-
-    :param comment: String containing a JSON-dictionary according to @Metadata
-
-    :return: Readable name appended by the true table name as string or None
-    """
-    try:
-        if oemetadata.get("resources")[0]:
-            return (
-                oemetadata.get("resources", [])[0]["title"].strip() + " (" + table + ")"
-            )
-
-        else:
-            return None
-
-    except Exception:
-        return None
-
-
-def get_readable_table_name(table_obj: Table) -> str:
-    """get readable table name from metadata
-
-    Args:
-        table_obj (object): django orm
-
-    Returns:
-        str
-    """
-
-    try:
-        label = read_label_only_for_first_resource_element(
-            table_obj.name, table_obj.oemetadata
-        )
-    except Exception as e:
-        raise e
-    return label
-
-
-##############################################
 #       Open Peer Review related             #
 ##############################################
 
@@ -335,6 +286,11 @@ def delete_peer_review(review_id):
             return JsonResponse({"error": "PeerReview not found."}, status=404)
     else:
         return JsonResponse({"error": "Review ID is required."}, status=400)
+
+
+##############################################
+#          Views related                     #
+##############################################
 
 
 def get_popular_tags(

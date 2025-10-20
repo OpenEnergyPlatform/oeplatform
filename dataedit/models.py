@@ -180,6 +180,9 @@ class Table(Tagable):
     topics = models.ManyToManyField(Topic, related_name="tables")
     tags = models.ManyToManyField(Tag, related_name="tables")
 
+    class Meta:
+        unique_together = (("name",),)
+
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
 
@@ -249,8 +252,53 @@ class Table(Tagable):
             self.human_readable_name = readable_table_name
             self.save()
 
-    class Meta:
-        unique_together = (("name",),)
+    def get_readable_table_name(self) -> str:
+        """get readable table name from metadata
+
+        Args:
+            table_obj (object): django orm
+
+        Returns:
+            str
+        """
+
+        def read_label_only_for_first_resource_element(
+            table_name: str, oemetadata: dict
+        ) -> str:
+            """
+            Extracts the readable name from oemetadata and appends the real name
+            in parenthesis.
+            If oemetadata is not a JSON-dictionary or does not contain a field 'Name'
+            None is returned.
+
+            :param table: Name to append
+
+            :param comment: String containing a JSON-dictionary according to @Metadata
+
+            :return: Readable name appended by the true table name as string or None
+            """
+            try:
+                if oemetadata.get("resources")[0]:
+                    return (
+                        oemetadata.get("resources", [])[0]["title"].strip()
+                        + " ("
+                        + table_name
+                        + ")"
+                    )
+
+                else:
+                    return None
+
+            except Exception:
+                return None
+
+        try:
+            label = read_label_only_for_first_resource_element(
+                self.name, self.oemetadata
+            )
+        except Exception as e:
+            raise e
+        return label
 
 
 class Embargo(models.Model):

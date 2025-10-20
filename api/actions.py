@@ -55,7 +55,6 @@ from api.sessions import (
     load_session_from_context,
 )
 from api.utils import check_if_oem_license_exists, validate_schema
-from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
 from login.utils import validate_open_data_license
@@ -2437,7 +2436,7 @@ def set_table_metadata(table_name: str, schema_name: str, metadata):
     # update the table human readable name after oemetadata is available
     # ---------------------------------------
 
-    readable_table_name = get_readable_table_name(django_table_obj)
+    readable_table_name = django_table_obj.get_readable_table_name()
     django_table_obj.set_human_readable_name(
         current_name=django_table_obj.human_readable_name,
         readable_table_name=readable_table_name,
