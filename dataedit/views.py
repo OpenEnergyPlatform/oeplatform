@@ -2119,38 +2119,29 @@ class PeerReviewView(LoginRequiredMixin, View):
             return result
 
         def nest_sublist_groups(items_for_one_parent):
-            """Within the first-level group ('Sources 1'),
-            separate sublists of the type '<sublist>.<idx>.*' into their own
-             sections. The rest goes in flat.
-            """
-            nested = {"flat": [], "grouped": defaultdict(list)}
+            from collections import defaultdict
+
+            grouped_map = defaultdict(lambda: {"flat": [], "grouped": {}})
+            flat = []
+
             for itm in items_for_one_parent:
                 field = itm["field"]
-                mm = re.match(r"^([^.]+)\.([0-9]+)(?:\.(.*))?$", field)
-                if mm:
-                    sublist_name, idx, tail = (
-                        mm.group(1),
-                        int(mm.group(2)),
-                        mm.group(3) or "value",
-                    )
-                    group_key = f"{sublist_name.capitalize()} {idx + 1}"
-                    enriched = dict(itm)
-                    enriched["display_field"] = tail
-                    enriched["display_prefix"] = group_key
-                    enriched["display_index"] = str(idx + 1)
-                    nested["grouped"][group_key].append(enriched)
+                m = re.match(r"^([^.]+)\.([0-9]+)(?:\.(.*))?$", field)
+                if m:
+                    head, idx, tail = m.group(1), int(m.group(2)), m.group(3)
+                    e = dict(itm)
+                    e["display_field"] = tail if (tail and tail.strip()) else str(idx)
+                    e["display_prefix"] = head
+                    e.pop("display_index", None)
+                    grouped_map[head.capitalize()]["flat"].append(e)
                 else:
-                    enriched = dict(itm)
+                    e = dict(itm)
                     trimmed = ".".join(field.split(".")[1:]) if "." in field else field
-                    enriched["display_field"] = _plus_one_if_digit(trimmed)
-                    nested["flat"].append(enriched)
-            nested["grouped"] = dict(
-                sorted(
-                    nested["grouped"].items(),
-                    key=lambda kv: (kv[0].split()[0], int(kv[0].split()[-1])),
-                )
-            )
-            return nested
+                    e["display_field"] = _plus_one_if_digit(trimmed)
+                    flat.append(e)
+
+            grouped = dict(sorted(grouped_map.items(), key=lambda kv: kv[0]))
+            return {"flat": flat, "grouped": grouped}
 
         def _strip_cat_prefix(items, cat_name):
             """spatial.extent.name → extent.name; temporal.period.start →
