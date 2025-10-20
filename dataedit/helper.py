@@ -11,9 +11,25 @@ SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoi
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from django.http import JsonResponse
+import re
+from typing import Iterable
+from wsgiref.util import FileWrapper
 
-from dataedit.models import PeerReview, Table
+from django.contrib.postgres.search import SearchQuery
+from django.db.models import Q, QuerySet
+from django.http import HttpResponse, JsonResponse
+from django.utils.encoding import smart_str
+from sqlalchemy.orm import sessionmaker
+
+import api.parser
+import oeplatform.securitysettings as sec
+from api import actions
+from dataedit.models import PeerReview, Table, Tag
+
+# TODO: WINGECHR: model_draft is not a topic, but currently,
+# frontend still usses it to filter / search for unpublished data
+TODO_PSEUDO_TOPIC_DRAFT = "model_draft"
+
 
 ##############################################
 #          Table view related                #
@@ -319,3 +335,401 @@ def delete_peer_review(review_id):
             return JsonResponse({"error": "PeerReview not found."}, status=404)
     else:
         return JsonResponse({"error": "Review ID is required."}, status=400)
+
+
+def get_popular_tags(
+    schema_name: str | None = None, table_name: str | None = None, limit=10
+):
+    tags = get_all_tags(table_name=table_name)
+    sort_tags_by_popularity(tags)
+
+    return tags[:limit]
+
+
+def get_all_tags(
+    schema_name: str | None = None, table_name: str | None = None
+) -> list[dict]:
+    """
+    Load all tags of a specific table
+    :param schema: Name of a schema
+    :param table: Name of a table
+    :return:
+    """
+    tags: Iterable[Tag]
+    if table_name:
+        tags = Table.objects.get(name=table_name).tags.all()
+    else:
+        tags = Tag.objects.all()
+
+    tag_dicts = [
+        {
+            "id": tag.pk,
+            "name": tag.name,
+            "name_normalized": tag.name_normalized,
+            "color": tag.color_hex,
+            "usage_count": tag.usage_count,
+            "usage_tracked_since": tag.usage_tracked_since,
+        }
+        for tag in tags
+    ]
+    return sort_tags_by_popularity(tag_dicts)
+
+
+def sort_tags_by_popularity(tags):
+    def key_func(tag):
+        # track_time = tag["usage_tracked_since"] - datetime.datetime.utcnow()
+        return tag["usage_count"]
+
+    tags.sort(reverse=True, key=key_func)
+    return tags
+
+
+def change_requests(schema, table):
+    """
+    Loads the dataedit admin interface
+    :param request:
+    :return:
+    """
+    # I want to display old and new data, if different.
+
+    display_message = None
+    api_columns = actions.get_column_changes(reviewed=False, schema=schema, table=table)
+    api_constraints = actions.get_constraints_changes(
+        reviewed=False, schema=schema, table=table
+    )
+
+    # print(api_columns)
+    # print(api_constraints)
+
+    # cache = dict()
+    data = dict()
+
+    data["api_columns"] = {}
+    data["api_constraints"] = {}
+
+    keyword_whitelist = [
+        "column_name",
+        "c_table",
+        "c_schema",
+        "reviewed",
+        "changed",
+        "id",
+    ]
+
+    old_description = actions.describe_columns(schema, table)
+
+    for change in api_columns:
+        name = change["column_name"]
+        id = change["id"]
+
+        # Identifing over 'new'.
+        if change.get("new_name") is not None:
+            change["column_name"] = change["new_name"]
+
+        old_cd = old_description.get(name)
+
+        data["api_columns"][id] = {}
+        data["api_columns"][id]["old"] = {}
+
+        if old_cd is not None:
+            old = api.parser.parse_scolumnd_from_columnd(
+                schema, table, name, old_description.get(name)
+            )
+
+            for key in list(change):
+                value = change[key]
+                if key not in keyword_whitelist and (
+                    value is None or value == old[key]
+                ):
+                    old.pop(key)
+                    change.pop(key)
+            data["api_columns"][id]["old"] = old
+        else:
+            data["api_columns"][id]["old"]["c_schema"] = schema
+            data["api_columns"][id]["old"]["c_table"] = table
+            data["api_columns"][id]["old"]["column_name"] = name
+
+        data["api_columns"][id]["new"] = change
+
+    for i in range(len(api_constraints)):
+        value = api_constraints[i]
+        id = value.get("id")
+        if (
+            value.get("reference_table") is None
+            or value.get("reference_column") is None
+        ):
+            value.pop("reference_table")
+            value.pop("reference_column")
+
+        data["api_constraints"][id] = value
+
+    display_style = [
+        "c_schema",
+        "c_table",
+        "column_name",
+        "not_null",
+        "data_type",
+        "reference_table",
+        "constraint_parameter",
+        "reference_column",
+        "action",
+        "constraint_type",
+        "constraint_name",
+    ]
+
+    return {
+        "data": data,
+        "display_items": display_style,
+        "display_message": display_message,
+    }
+
+
+def find_tables(
+    topic_name: str | None = None,
+    query_string: str | None = None,
+    tag_ids: list[str] | None = None,
+) -> QuerySet[Table]:
+    """find tables given search criteria
+
+    Args:
+        topic_name (str, optional): only tables in this topic
+        query_string (str, optional): user search term
+        tag_ids (list, optional): list of tag ids
+
+    Returns:
+        QuerySet of Table objetcs
+    """
+
+    tables = Table.objects
+
+    tables = tables.filter(is_sandbox=False)
+
+    if topic_name:
+        # TODO: WINGECHR: model_draft is not a topic, but currently,
+        # frontend still usses it to filter / search for unpublished data
+        if topic_name == TODO_PSEUDO_TOPIC_DRAFT:
+            tables = tables.filter(is_publish=False)
+        else:
+            tables = tables.filter(topics__pk=topic_name)
+
+    if query_string:  # filter by search terms
+        tables = tables.filter(
+            Q(
+                search=SearchQuery(
+                    " & ".join(p + ":*" for p in re.findall(r"[\w]+", query_string)),
+                    search_type="raw",
+                )
+            )
+        )
+
+    if tag_ids:  # filter by tags:
+        # find tables (in schema), that use all of the tags
+        # by adding a filter for each tag
+        # (instead of all at once, which would be OR)
+        for tag_id in tag_ids:
+            tables = tables.filter(tags__pk=tag_id)
+
+    return tables
+
+
+def _type_json(json_obj):
+    """
+    Recursively labels JSON-objects by their types. Singleton lists are handled
+    as elementary objects.
+
+    :param json_obj: An JSON-object - possibly a dictionary, a list
+        or an elementary JSON-object (e.g a string)
+
+    :return: An annotated JSON-object (type, object)
+
+    """
+    if isinstance(json_obj, dict):
+        return "dict", [(k, _type_json(json_obj[k])) for k in json_obj]
+    elif isinstance(json_obj, list):
+        if len(json_obj) == 1:
+            return _type_json(json_obj[0])
+        return "list", [_type_json(e) for e in json_obj]
+    else:
+        return str(type(json_obj)), json_obj
+
+
+def edit_tag(id: str, name: str, color: str) -> None:
+    """
+    Args:
+        id(int): tag id
+        name(str): max 40 character tag text
+        color(str): hexadecimal color code, eg #aaf0f0
+    Raises:
+        sqlalchemy.exc.IntegrityError if name is not ok
+
+    """
+    tag = Tag.objects.get(pk=id)
+    tag.name = name
+    tag.color = Tag.color_from_hex(color)
+    tag.save()
+
+
+def delete_tag(id: str) -> None:
+    Tag.objects.get(pk=id).delete()
+
+
+def add_tag(name: str, color: str) -> None:
+    """
+    Args:
+        name(str): max 40 character tag text
+        color(str): hexadecimal color code, eg #aaf0f0
+    """
+    Tag(name=name, color=Tag.color_from_hex(color)).save()
+
+
+def send_dump(schema, table, fname):
+    path = sec.MEDIA_ROOT + "/dumps/{schema}/{table}/{fname}.dump".format(
+        fname=fname, schema=schema, table=table
+    )
+    f = FileWrapper(open(path, "rb"))
+    response = HttpResponse(f, content_type="application/x-gzip")
+
+    response["Content-Disposition"] = "attachment; filename=%s" % smart_str(
+        "{schema}_{table}_{date}.tar.gz".format(date=fname, schema=schema, table=table)
+    )
+
+    # It's usually a good idea to set the 'Content-Length' header too.
+    # You can also set any other required headers: Cache-Control, etc.
+    return response
+
+
+def get_dependencies(schema, table, found=None):
+    if not found:
+        found = {(schema, table)}
+
+    query = "SELECT DISTINCT \
+        ccu.table_name AS foreign_table, \
+        ccu.table_schema AS foreign_schema \
+        FROM  \
+        information_schema.table_constraints AS tc \
+        JOIN information_schema.constraint_column_usage AS ccu \
+          ON ccu.constraint_name = tc.constraint_name \
+        WHERE constraint_type = 'FOREIGN KEY' AND tc.table_schema='{schema}'\
+        AND tc.table_name='{table}';".format(
+        schema=schema, table=table
+    )
+
+    engine = actions._get_engine()
+    # metadata = sqla.MetaData(bind=engine)
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    result = session.execute(query)
+    found_new = {
+        (row.foreign_schema, row.foreign_table)
+        for row in result
+        if (row.foreign_schema, row.foreign_table) not in found
+    }
+    found = found.union(found_new)
+    found.add((schema, table))
+    session.close()
+    for s, t in found_new:
+        found = found.union(get_dependencies(s, t, found))
+
+    return found
+
+
+def update_keywords_from_tags(table: Table, schema_name: str) -> None:
+    """synchronize keywords in metadata with tags"""
+
+    metadata = table.oemetadata or {"resources": [{}]}
+    keywords = [tag.name_normalized for tag in table.tags.all()]
+    metadata["resources"][0]["keywords"] = keywords
+
+    actions.set_table_metadata(
+        table_name=table.name, schema_name=schema_name, metadata=metadata
+    )
+
+
+def get_column_description(schema, table):
+    """Return list of column descriptions:
+    [{
+       "name": str,
+       "data_type": str,
+       "is_nullable': bool,
+       "is_pk": bool
+    }]
+
+    """
+
+    def get_datatype_str(column_def):
+        """get single string sql type definition.
+
+        We want the data type definition to be a simple string, e.g. decimal(10, 6)
+        or varchar(128), so we need to combine the various fields
+        (type, numeric_precision, numeric_scale, ...)
+        """
+        # for reverse validation, see also api.parser.parse_type(dt_string)
+        dt = column_def["data_type"].lower()
+        precisions = None
+        if dt.startswith("character"):
+            if dt == "character varying":
+                dt = "varchar"
+            else:
+                dt = "char"
+            precisions = [column_def["character_maximum_length"]]
+        elif dt.endswith(" without time zone"):  # this is the default
+            dt = dt.replace(" without time zone", "")
+        elif re.match("(numeric|decimal)", dt):
+            precisions = [column_def["numeric_precision"], column_def["numeric_scale"]]
+        elif dt == "interval":
+            precisions = [column_def["interval_precision"]]
+        elif re.match(".*int", dt) and re.match(
+            "nextval", column_def.get("column_default") or ""
+        ):
+            # dt = dt.replace('int', 'serial')
+            pass
+        elif dt.startswith("double"):
+            dt = "float"
+        if precisions:  # remove None
+            precisions = [x for x in precisions if x is not None]
+        if precisions:
+            dt += "(%s)" % ", ".join(str(x) for x in precisions)
+        return dt
+
+    def get_pk_fields(constraints):
+        """Get the column names that make up the primary key
+        from the constraints definitions.
+
+        NOTE: Currently, the wizard to create tables only supports
+            single fields primary keys (which is advisable anyways)
+        """
+        pk_fields = []
+        for _name, constraint in constraints.items():
+            if constraint.get("constraint_type") == "PRIMARY KEY":
+                m = re.match(
+                    r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition") or ""
+                )
+                if m:
+                    # "f1, f2" -> ["f1", "f2"]
+                    pk_fields = [x.strip() for x in m.groups()[0].split(",")]
+        return pk_fields
+
+    _columns = actions.describe_columns(schema, table)
+    _constraints = actions.describe_constraints(schema, table)
+    pk_fields = get_pk_fields(_constraints)
+    # order by ordinal_position
+    columns = []
+    for name, col in sorted(
+        _columns.items(), key=lambda kv: int(kv[1]["ordinal_position"])
+    ):
+        columns.append(
+            {
+                "name": name,
+                "data_type": get_datatype_str(col),
+                "is_nullable": col["is_nullable"],
+                "is_pk": name in pk_fields,
+                "unit": None,
+                "description": None,
+            }
+        )
+    return columns
+
+
+def get_cancle_state(request):
+    return request.META.get("HTTP_REFERER")

@@ -18,128 +18,151 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path, re_path
 from django.views.generic import RedirectView
 
-from dataedit import views
+from dataedit.views import (
+    AdminColumnView,
+    AdminConstraintsView,
+    ChangeTagView,
+    DataView,
+    GraphView,
+    MapView,
+    MetadataWidgetView,
+    MetaEditView,
+    PeerReviewView,
+    PeerRreviewContributorView,
+    PermissionView,
+    RedirectAfterTableTagsUpdatedView,
+    RevisionView,
+    ShowRevisionView,
+    StandaloneMetaEditView,
+    TablesView,
+    TagEditorView,
+    TagOverviewView,
+    TopicView,
+    ViewDeleteView,
+    ViewSaveView,
+    ViewSetDefaultView,
+    WizardView,
+)
 
 pgsql_qualifier = r"[\w\d_]+"
 app_name = "dataedit"
 urlpatterns = [
-    re_path(r"^schemas$", views.listschemas, name="topic-list"),
+    re_path(r"^schemas$", TopicView, name="topic-list"),
     re_path(r"^$", RedirectView.as_view(url="/dataedit/schemas")),
-    # re_path(r'^admin/$', views.admin, name='index'),
-    re_path(r"^admin/columns/", views.admin_columns, name="input"),
-    re_path(r"^admin/constraints/", views.admin_constraints, name="input"),
-    re_path(r"^view/$", views.listschemas, name="index"),
+    re_path(r"^admin/columns/", AdminColumnView, name="input"),
+    re_path(r"^admin/constraints/", AdminConstraintsView, name="input"),
+    re_path(r"^view/$", TopicView, name="index"),
     re_path(
         r"^view/(?P<schema_name>{qual})$".format(qual=pgsql_qualifier),
-        views.listtables,
+        TablesView,
         name="input",
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
-        views.DataView.as_view(),
+        DataView.as_view(),
         name="view",
     ),
     re_path(
         r"^tags/add/$",
-        views.redirect_after_table_tags_updated,
+        RedirectAfterTableTagsUpdatedView,
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/download$".format(
             qual=pgsql_qualifier
         ),
-        views.RevisionView.as_view(),
+        RevisionView.as_view(),
         name="input",
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/permissions$".format(
             qual=pgsql_qualifier
         ),
-        views.PermissionView.as_view(),
+        PermissionView.as_view(),
         name="input",
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/meta_edit$".format(
             qual=pgsql_qualifier
         ),
-        views.MetaEditView.as_view(),
+        MetaEditView.as_view(),
         name="meta_edit",
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/view/save$".format(
             qual=pgsql_qualifier
         ),
-        views.view_save,
+        ViewSaveView,
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/view/set-default".format(
             qual=pgsql_qualifier
         ),
-        views.view_set_default,
+        ViewSetDefaultView,
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/view/delete".format(
             qual=pgsql_qualifier
         ),
-        views.view_delete,
+        ViewDeleteView,
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/(?P<rev_id>\d+)$".format(
             qual=pgsql_qualifier
         ),
-        views.show_revision,
+        ShowRevisionView,
         name="input",
     ),
-    re_path(r"^tags/?$", views.tag_overview),
-    re_path(r"^tags/set/?$", views.change_tag),
-    re_path(r"^tags/new/?$", views.tag_editor),
-    re_path(r"^tags/(?P<id>[a-z0-9]+)/?$", views.tag_editor),
+    re_path(r"^tags/?$", TagOverviewView),
+    re_path(r"^tags/set/?$", ChangeTagView),
+    re_path(r"^tags/new/?$", TagEditorView),
+    re_path(r"^tags/(?P<id>[a-z0-9]+)/?$", TagEditorView),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/graph/new".format(
             qual=pgsql_qualifier
         ),
-        views.GraphView.as_view(),
+        GraphView.as_view(),
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/map/(?P<maptype>(latlon|geom))/new".format(  # noqa
             qual=pgsql_qualifier
         ),
-        views.MapView.as_view(),
+        MapView.as_view(),
     ),
     re_path(
         r"^wizard/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
-        views.WizardView.as_view(),
+        WizardView.as_view(),
         name="wizard_upload",
     ),
     re_path(
         r"^wizard/$",
-        views.WizardView.as_view(),
+        WizardView.as_view(),
         name="wizard_create",
     ),
     re_path(
         r"^oemetabuilder/$",
-        views.StandaloneMetaEditView.as_view(),
+        StandaloneMetaEditView.as_view(),
         name="oemetabuilder",
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/open_peer_review/(?P<review_id>\d*)/$".format(  # noqa
             qual=pgsql_qualifier
         ),
-        views.PeerReviewView.as_view(),
+        PeerReviewView.as_view(),
         name="peer_review_reviewer",
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/open_peer_review/$".format(
             qual=pgsql_qualifier
         ),
-        views.PeerReviewView.as_view(),
+        PeerReviewView.as_view(),
         name="peer_review_create",
     ),
     re_path(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/opr_contributor/(?P<review_id>\d*)/$".format(  # noqa
             qual=pgsql_qualifier
         ),
-        views.PeerRreviewContributorView.as_view(),
+        PeerRreviewContributorView.as_view(),
         name="peer_review_contributor",
     ),
-    path("metadata-viewer/", views.metadata_widget, name="metadata-widget"),
+    path("metadata-viewer/", MetadataWidgetView, name="metadata-widget"),
 ]

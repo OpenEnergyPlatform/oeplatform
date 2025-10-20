@@ -84,7 +84,8 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
 from dataedit.models import Table as DBTable
-from dataedit.views import schema_whitelist, update_tags_from_keywords
+from dataedit.models import Tag
+from dataedit.views import schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -1734,3 +1735,15 @@ class TableSize(APIView):
         # list mode (schema optional)
         data = actions.list_table_sizes(allowed_schemas=allowed, schema=schema)
         return Response(data, status=status.HTTP_200_OK)
+
+
+def update_tags_from_keywords(table_name: str, keywords: list[str]) -> list[str]:
+    table = Table.objects.get(name=table_name)
+    table.tags.clear()
+    keywords_new = set()
+    for keyword in keywords:
+        tag = Tag.get_or_create_from_name(keyword)
+        table.tags.add(tag)
+        keywords_new.add(tag.name_normalized)
+    table.save()
+    return list(keywords_new)

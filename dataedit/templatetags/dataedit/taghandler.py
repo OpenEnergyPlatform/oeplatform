@@ -9,7 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import webcolors
 from django import template
 
-from dataedit.views import get_all_tags, get_popular_tags
+from dataedit.helper import get_all_tags, get_popular_tags
 
 register = template.Library()
 
