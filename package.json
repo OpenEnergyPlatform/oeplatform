@@ -27,7 +27,7 @@
     "@react-hook/mouse-position": "^4.1.3",
     "@ts4nfdi/terminology-service-suite": "^6.0.4",
     "apollo-boost": "^0.4.9",
-    "axios": "^1.1.2",
+    "axios": "^1.12.2",
     "chart.js": "^4.4.3",
     "chartjs-plugin-datalabels": "^2.2.0",
     "date-fns": "^2.30.0",
