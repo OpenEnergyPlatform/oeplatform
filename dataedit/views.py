@@ -315,10 +315,8 @@ class RevisionView(View):
 
 
 def ShowRevisionView(
-    request: HttpRequest, schema: str, table: str, date
+    request: HttpRequest, schema: str, table: str, date: str
 ) -> HttpResponse:
-    # global pending_dumps
-
     rev = TableRevision.objects.get(schema=schema, table=table, date=date)
     rev.last_accessed = timezone.now()
     rev.save()
@@ -538,7 +536,7 @@ class MapView(View):
         return render(request, "dataedit/tablemap_form.html", {"form": form})
 
     def post(
-        self, request: HttpRequest, schema: str, table: str, maptype
+        self, request: HttpRequest, schema: str, table: str, maptype: str
     ) -> HttpResponse:
         columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         if maptype == "latlon":
@@ -961,7 +959,7 @@ class WizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv)."""
 
     def get(
-        self, request: HttpRequest, schema: str = SCHEMA_DATA, table: str = None
+        self, request: HttpRequest, schema: str = SCHEMA_DATA, table: str | None = None
     ) -> HttpResponse:
         """Handle GET request (render the page)."""
         engine = actions._get_engine()
@@ -1278,7 +1276,11 @@ class PeerReviewView(LoginRequiredMixin, View):
         return field_descriptions
 
     def get(
-        self, request: HttpRequest, schema: str, table: str, review_id=None
+        self,
+        request: HttpRequest,
+        schema: str,
+        table: str,
+        review_id: int | None = None,
     ) -> HttpResponse:
         """
         Handle GET requests for peer review.
@@ -1361,7 +1363,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         return render(request, "dataedit/opr_review.html", context=context_meta)
 
     def post(
-        self, request: HttpRequest, schema_name: str, table_name: str, review_id=None
+        self, request: HttpRequest, schema: str, table: str, review_id=None
     ) -> HttpResponse:
         """
         Handle POST requests for submitting reviews by the reviewer.
@@ -1425,26 +1427,22 @@ class PeerReviewView(LoginRequiredMixin, View):
             if review_post_type == "delete":
                 return delete_peer_review(review_id)
 
-            contributor = PeerReviewManager.load_contributor(schema_name, table_name)
+            contributor = PeerReviewManager.load_contributor(schema, table)
 
             if contributor is not None:
                 # Überprüfen, ob ein aktiver PeerReview existiert
-                active_peer_review = PeerReview.load(
-                    schema=schema_name, table=table_name
-                )
+                active_peer_review = PeerReview.load(schema=schema, table=table)
                 if active_peer_review is None or active_peer_review.is_finished:
                     # Kein aktiver PeerReview vorhanden
                     # oder der aktive PeerReview ist abgeschlossen
                     table_review = PeerReview(
-                        schema=schema_name,
-                        table=table_name,
+                        schema=schema,
+                        table=table,
                         is_finished=review_finished,
                         review=review_datamodel,
                         reviewer=request.user,
                         contributor=contributor,
-                        oemetadata=load_metadata_from_db(
-                            schema=schema_name, table=table_name
-                        ),
+                        oemetadata=load_metadata_from_db(schema=schema, table=table),
                     )
                     table_review.save(review_type=review_post_type)
                 else:
@@ -1462,21 +1460,19 @@ class PeerReviewView(LoginRequiredMixin, View):
             else:
                 error_msg = (
                     "Failed to retrieve any user that identifies "
-                    f"as table holder for the current table: {table_name}!"
+                    f"as table holder for the current table: {table}!"
                 )
                 return JsonResponse({"error": error_msg}, status=400)
 
             # TODO: Check for schema/topic as reviewed finished also indicates the table
             # needs to be or has to be moved.
             if review_finished is True:
-                review_table = Table.load(schema=schema_name, table=table_name)
+                review_table = Table.load(schema=schema, table=table)
                 review_table.set_is_reviewed()
-                metadata = self.load_json(schema_name, table_name, review_id=review_id)
+                metadata = self.load_json(schema, table, review_id=review_id)
                 updated_metadata = recursive_update(metadata, review_data)
-                save_metadata_to_db(schema_name, table_name, updated_metadata)
-                active_peer_review = PeerReview.load(
-                    schema=schema_name, table=table_name
-                )
+                save_metadata_to_db(schema, table, updated_metadata)
+                active_peer_review = PeerReview.load(schema=schema, table=table)
 
                 if active_peer_review:
                     updated_oemetadata = recursive_update(
@@ -1500,7 +1496,7 @@ class PeerRreviewContributorView(PeerReviewView):
     """
 
     def get(
-        self, request: HttpRequest, schema: str, table: str, review_id
+        self, request: HttpRequest, schema: str, table: str, review_id: int
     ) -> HttpResponse:
         """
         Handle GET requests for contributor's review. Loads necessary data and
@@ -1566,7 +1562,7 @@ class PeerRreviewContributorView(PeerReviewView):
         return render(request, "dataedit/opr_contributor.html", context=context_meta)
 
     def post(
-        self, request: HttpRequest, schema: str, table: str, review_id
+        self, request: HttpRequest, schema: str, table: str, review_id: int
     ) -> HttpResponse:
         """
         Handle POST requests for contributor's review. Merges and updates

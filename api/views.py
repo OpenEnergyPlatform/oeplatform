@@ -37,6 +37,7 @@ from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
+    HttpRequest,
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseServerError,
@@ -169,7 +170,7 @@ __all__ = [
 
 class SequenceAPIView(APIView):
     @api_exception
-    def put(self, request, schema, sequence):
+    def put(self, request: HttpRequest, schema: str, sequence: str) -> JsonResponse:
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
@@ -181,7 +182,7 @@ class SequenceAPIView(APIView):
 
     @api_exception
     @require_delete_permission
-    def delete(self, request, schema, sequence):
+    def delete(self, request: HttpRequest, schema: str, sequence: str) -> JsonResponse:
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
@@ -190,13 +191,13 @@ class SequenceAPIView(APIView):
         return self.__delete_sequence(request, schema, sequence, request.data)
 
     @load_cursor()
-    def __delete_sequence(self, request, schema, sequence, jsn):
+    def __delete_sequence(self, request: HttpRequest, schema: str, sequence: str, jsn):
         seq = sqla.schema.Sequence(sequence, schema=schema)
         seq.drop(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_200_OK)
 
     @load_cursor()
-    def __create_sequence(self, request, schema, sequence, jsn):
+    def __create_sequence(self, request: HttpRequest, schema: str, sequence: str, jsn):
         seq = sqla.schema.Sequence(sequence, schema=schema)
         seq.create(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_201_CREATED)
@@ -205,14 +206,14 @@ class SequenceAPIView(APIView):
 class MetadataAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request, schema, table):
+    def get(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
         metadata = actions.get_table_metadata(schema, table)
         return JsonResponse(metadata)
 
     @api_exception
     @require_write_permission
     @load_cursor()
-    def post(self, request, schema, table):
+    def post(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
 
@@ -250,7 +251,7 @@ class TableAPIView(APIView):
 
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request, schema, table):
+    def get(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
         """
         Returns a dictionary that describes the DDL-make-up of this table.
         Fields are:
@@ -279,7 +280,7 @@ class TableAPIView(APIView):
         )
 
     @api_exception
-    def post(self, request, schema, table):
+    def post(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
         """
         Changes properties of tables and table columns
         :param request:
@@ -327,7 +328,7 @@ class TableAPIView(APIView):
             )
 
     @api_exception
-    def put(self, request, schema, table):
+    def put(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
         """
         Creates a new table: physical table first, then metadata row.
         Applies embargo and permissions, and sets metadata if provided.
@@ -490,7 +491,7 @@ class TableAPIView(APIView):
         return table_object
 
     def __remove_oedb_table_on_exception_raised_during_creation_transaction(
-        self, table, schema
+        self, table: str, schema: str
     ):
         """
         This private method handles removing a table form the OEDB only for the case
@@ -522,9 +523,9 @@ class TableAPIView(APIView):
     @load_cursor()
     def __create_table(
         self,
-        request,
-        schema,
-        table,
+        request: HttpRequest,
+        schema: str,
+        table: str,
         column_definitions,
         constraint_definitions,
         metadata=None,
@@ -629,7 +630,7 @@ class TableAPIView(APIView):
                 )
             embargo.save()
 
-    def _assign_table_holder(self, user, schema, table):
+    def _assign_table_holder(self, user, schema: str, table: str):
         table_object = DBTable.load(schema, table)
         perm, _ = login_models.UserPermission.objects.get_or_create(
             table=table_object, holder=user
@@ -640,7 +641,7 @@ class TableAPIView(APIView):
 
     @api_exception
     @require_delete_permission
-    def delete(self, request, schema, table):
+    def delete(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table)
 
         meta_schema = actions.get_meta_schema_name(schema)
@@ -678,20 +679,22 @@ class TableAPIView(APIView):
 
 
 class IndexAPIView(APIView):
-    def get(self, request):
+    def get(self, request: HttpRequest):
         pass
 
-    def post(self, request):
+    def post(self, request: HttpRequest):
         pass
 
-    def put(self, request):
+    def put(self, request: HttpRequest):
         pass
 
 
 class ColumnAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request, schema, table, column=None):
+    def get(
+        self, request: HttpRequest, schema: str, table: str, column: str | None = None
+    ) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         response = actions.describe_columns(schema, table)
         if column:
@@ -705,7 +708,9 @@ class ColumnAPIView(APIView):
 
     @api_exception
     @require_write_permission
-    def post(self, request, schema, table, column):
+    def post(
+        self, request: HttpRequest, schema: str, table: str, column: str
+    ) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table)
         response = actions.column_alter(
             request.data["query"], {}, schema, table, column
@@ -714,7 +719,9 @@ class ColumnAPIView(APIView):
 
     @api_exception
     @require_write_permission
-    def put(self, request, schema, table, column):
+    def put(
+        self, request: HttpRequest, schema: str, table: str, column: str
+    ) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table)
         actions.column_add(schema, table, column, request.data["query"])
         return JsonResponse({}, status=201)
@@ -722,7 +729,14 @@ class ColumnAPIView(APIView):
 
 class FieldsAPIView(APIView):
     @method_decorator(never_cache)
-    def get(self, request, schema, table, id, column=None):
+    def get(
+        self,
+        request: HttpRequest,
+        schema: str,
+        table: str,
+        id,
+        column: str | None = None,
+    ) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         if (
             not parser.is_pg_qual(table)
@@ -739,17 +753,13 @@ class FieldsAPIView(APIView):
             status=(404 if returnValue is None else 200),
         )
 
-    def post(self, request):
-        pass
-
-    def put(self, request):
-        pass
-
 
 class MovePublishAPIView(APIView):
     @require_admin_permission
     @api_exception
-    def post(self, request, schema, table, to_schema):
+    def post(
+        self, request: HttpRequest, schema: str, table: str, to_schema: str
+    ) -> JsonResponse:
         # Make payload more friendly as users tend to use the query wrapper in payload
         json_data = request.data.get("query", {})
         embargo_period = request.data.get("embargo", {}).get(
@@ -763,7 +773,9 @@ class MovePublishAPIView(APIView):
 class MoveAPIView(APIView):
     @require_admin_permission
     @api_exception
-    def post(self, request, schema, table, to_schema):
+    def post(
+        self, request: HttpRequest, schema: str, table: str, to_schema: str
+    ) -> JsonResponse:
         if schema not in schema_whitelist or to_schema not in schema_whitelist:
             raise APIError("Invalid origin or target schema")
         actions.move(schema, table, to_schema)
@@ -773,7 +785,9 @@ class MoveAPIView(APIView):
 class RowsAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request, schema, table, row_id=None):
+    def get(
+        self, request: HttpRequest, schema: str, table: str, row_id: int | None = None
+    ) -> JsonResponse:
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -935,7 +949,14 @@ class RowsAPIView(APIView):
 
     @api_exception
     @require_write_permission
-    def post(self, request, schema, table, row_id=None, action=None):
+    def post(
+        self,
+        request: HttpRequest,
+        schema: str,
+        table: str,
+        row_id: int | None = None,
+        action: str | None = None,
+    ) -> JsonResponse:
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -960,7 +981,14 @@ class RowsAPIView(APIView):
 
     @api_exception
     @require_write_permission
-    def put(self, request, schema, table, row_id=None, action=None):
+    def put(
+        self,
+        request: HttpRequest,
+        schema: str,
+        table: str,
+        row_id: int | None = None,
+        action: str | None = None,
+    ) -> JsonResponse:
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -1009,7 +1037,9 @@ class RowsAPIView(APIView):
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
     @require_delete_permission
-    def delete(self, request, table, schema, row_id=None):
+    def delete(
+        self, request: HttpRequest, table: str, schema: str, row_id: int | None = None
+    ) -> JsonResponse:
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -1022,7 +1052,9 @@ class RowsAPIView(APIView):
         return JsonResponse(result)
 
     @load_cursor()
-    def __delete_rows(self, request, schema, table, row_id=None):
+    def __delete_rows(
+        self, request: HttpRequest, schema: str, table: str, row_id: int | None = None
+    ):
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -1079,7 +1111,14 @@ class RowsAPIView(APIView):
         return where_clauses
 
     @load_cursor()
-    def __insert_row(self, request, schema, table, row, row_id=None):
+    def __insert_row(
+        self,
+        request: HttpRequest,
+        schema: str,
+        table: str,
+        row,
+        row_id: int | None = None,
+    ):
         if row_id and row.get("id", int(row_id)) != int(row_id):
             return actions._response_error(
                 "The id given in the query does not " "match the id given in the url"
@@ -1106,7 +1145,14 @@ class RowsAPIView(APIView):
         return result
 
     @load_cursor()
-    def __update_rows(self, request, schema, table, row, row_id=None):
+    def __update_rows(
+        self,
+        request: HttpRequest,
+        schema: str,
+        table: str,
+        row,
+        row_id: int | None = None,
+    ) -> JsonResponse:
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -1143,7 +1189,7 @@ class RowsAPIView(APIView):
         return actions.data_update(query, context)
 
     @load_cursor(named=True)
-    def __get_rows(self, request, data):
+    def __get_rows(self, request: HttpRequest, data):
         table = actions._get_table(data["schema"], table=data["table"])
         # params = {}
         # params_count = 0
@@ -1182,13 +1228,13 @@ class RowsAPIView(APIView):
 
 
 class SessionAPIView(APIView):
-    def get(self, request, length=1):
+    def get(self, request: HttpRequest, length=1) -> JsonResponse:
         return request.session["resonse"]
 
 
 class AdvancedFetchAPIView(APIView):
     @api_exception
-    def post(self, request, fetchtype):
+    def post(self, request: HttpRequest, fetchtype) -> JsonResponse:
         if fetchtype == "all":
             return self.do_fetch(request, actions.fetchall)
         elif fetchtype == "many":
@@ -1196,7 +1242,7 @@ class AdvancedFetchAPIView(APIView):
         else:
             raise APIError("Unknown fetchtype: %s" % fetchtype)
 
-    def do_fetch(self, request, fetch):
+    def do_fetch(self, request: HttpRequest, fetch):
         context = {
             "connection_id": actions.get_or_403(request.data, "connection_id"),
             "cursor_id": actions.get_or_403(request.data, "cursor_id"),
@@ -1219,12 +1265,12 @@ class AdvancedFetchAPIView(APIView):
 
 
 class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
-    def get(self, request):
+    def get(self, request: HttpRequest) -> JsonResponse:
         sessions.close_all_for_user(request.user)
         return HttpResponse("All connections closed")
 
 
-def UsersAPIView(request):
+def UsersAPIView(request: HttpRequest) -> JsonResponse:
     query = request.GET.get("name", "")
 
     # Ensure query is not empty to proceed with filtering
@@ -1248,7 +1294,7 @@ def UsersAPIView(request):
     return JsonResponse(user_names, safe=False)
 
 
-def GroupsAPIView(request):
+def GroupsAPIView(request: HttpRequest) -> JsonResponse:
     """
     Return all Groups where this user is a member that match
     the current query. The query is input by the User.
@@ -1282,7 +1328,7 @@ def GroupsAPIView(request):
     return JsonResponse(group_names, safe=False)
 
 
-def OeoSsearchAPIView(request):
+def OeoSsearchAPIView(request: HttpRequest) -> JsonResponse:
     if USE_LOEP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         query = request.GET["query"]
@@ -1303,7 +1349,7 @@ class OekgSparqlAPIView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def post(self, request: HttpRequest) -> JsonResponse:
         sparql_query = request.data.get("query", "")
         response_format = request.data.get("format", "json")  # Default format
 
@@ -1323,7 +1369,7 @@ class OekgSparqlAPIView(APIView):
             return Response(content, content_type=content_type)
 
 
-def OevkgSearchAPIView(request):
+def OevkgSearchAPIView(request: HttpRequest) -> JsonResponse:
     if USE_ONTOP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         try:
@@ -1399,7 +1445,7 @@ class ManageOekgScenarioDatasetsAPIView(APIView):
     permission_classes = [IsAuthenticated]  # Require authentication
 
     @post_only_if_user_is_owner_of_scenario_bundle
-    def post(self, request):
+    def post(self, request: HttpRequest) -> JsonResponse:
         serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1427,7 +1473,7 @@ class TableSizeAPIView(APIView):
     """
 
     @api_exception
-    def get(self, request):
+    def get(self, request: HttpRequest) -> JsonResponse:
         schema = request.query_params.get("schema")
         table = request.query_params.get("table")
 
