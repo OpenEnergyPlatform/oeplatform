@@ -1,20 +1,32 @@
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 import React from "react";
 import { AutocompleteWidget } from "@ts4nfdi/terminology-service-suite";
+import { useTssConfig } from "../hooks/useTssConfig";
 
 export default function TssAutocomplete({
-  api = "https://api.terminology.tib.eu/api/",
+  api,                 // optional override
   placeholder = "Type to search...",
   onChange = () => { },
-  ontology,
+  ontology,            // optional override
 }) {
+  const { apiBase, ontology: cfgOntology } = useTssConfig();
+
+  const effectiveApi = api ?? apiBase;
+  const effectiveOntology = (ontology ?? cfgOntology)?.trim();
+
+  // Build the parameter string. The suite expects 'fieldList=...' and
+  // (optionally) 'ontologies=' to restrict by ontology.
   const parameter = [
-    "fieldList=description,label,iri,ontology_name,type,short_form&ontology=oeo",
-    ontology ? `ontologies=${encodeURIComponent(ontology)}` : null,
+    "fieldList=description,label,iri,ontology_name,type,short_form&",
+    effectiveOntology ? `ontology=${encodeURIComponent(effectiveOntology)}` : null,
   ].filter(Boolean).join("&");
 
   return (
     <AutocompleteWidget
-      api={api}
+      api={effectiveApi}
       placeholder={placeholder}
       parameter={parameter}
       hasShortSelectedLabel
@@ -27,6 +39,7 @@ export default function TssAutocomplete({
     />
   );
 }
+
 
 
 
@@ -45,7 +58,7 @@ export default function TssAutocomplete({
 // />
 
 
-// // /**
+// /**
 // * Global function which gets passed as selectionChangedEvent of AutocompleteWidget on several pages to navigate to the newly selected entity
 // * @param selectedOption    the passed on selectedOptions of the entity
 // * @param navigate          a function argument to pass the hook useNavigate() to use it outside a function component
