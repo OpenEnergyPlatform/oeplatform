@@ -8,8 +8,8 @@ const TssConfigCtx = createContext(null);
 export function TssConfigProvider({
     children,
     // read from Vite env (fallback to OLS API + OEO)
-    apiBase = import.meta.env.VITE_TSS_API_BASE ?? "https://api.terminology.tib.eu/api/",
-    ontology = import.meta.env.VITE_TSS_DEFAULT_ONTOLOGY ?? "oeo",
+    apiBase = import.meta.env.VITE_TSS_API_BASE ?? "",
+    ontology = import.meta.env.VITE_TSS_DEFAULT_ONTOLOGY ?? "",
     lang = import.meta.env.VITE_TSS_LANG ?? "en",
     requestHeaders = {},
 }) {
