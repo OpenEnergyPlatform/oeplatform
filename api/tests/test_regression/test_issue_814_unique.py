@@ -1,11 +1,11 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 """
 inserting the string "1000" in a varchar column
 that has unique constraint  leads to an error.
-"""
+
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 from api.tests import APITestCase
 
 

@@ -18,6 +18,7 @@ local
 .Python
 env/
 env-*
+.venv/
 /env
 build/
 develop-eggs/
@@ -51,6 +52,7 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+.vite_cache
 nosetests.xml
 coverage.xml
 *,cover
@@ -115,3 +117,6 @@ site/
 # Jenna fuseki graph db installation
 /apache-jena-fuseki*/
 /apache-jena-fuseki*.tar.gz*
+
+# NPM & VITE
+patches/

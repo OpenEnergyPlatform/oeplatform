@@ -1,14 +1,14 @@
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 """Add _insert_base
 
 Revision ID: 6887c442bbee
 Revises: 3886946416ba
 Create Date: 2019-04-25 16:09:20.572057
 
-"""
+
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import sqlalchemy as sa
 from alembic import op
 

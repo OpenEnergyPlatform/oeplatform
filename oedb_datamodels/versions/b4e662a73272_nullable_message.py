@@ -1,14 +1,13 @@
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 """Make message nullable
 
 Revision ID: b4e662a73272
 Revises: 1a73867b1e79
 Create Date: 2019-04-30 09:04:34.330485
 
-"""
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import sqlalchemy as sa
 from alembic import op
 

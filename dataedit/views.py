@@ -1,37 +1,37 @@
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import csv
 import json
-import logging
 import os
 import re
 from functools import reduce
@@ -42,42 +42,28 @@ from subprocess import call
 from wsgiref.util import FileWrapper
 
 import sqlalchemy as sqla
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.db.models import Count, Q
+from django.db.models import Count, Q, QuerySet
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
-
-# from oemetadata.v1.v160.template import OEMETADATA_V160_TEMPLATE
 from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
-
-# from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api.actions import describe_columns
-
-# from oemetadata.v1.v160.schema import OEMETADATA_V160_SCHEMA
-
-
-try:
-    import oeplatform.securitysettings as sec
-except Exception:
-    logging.error("No securitysettings found. Triggerd in dataedit/views.py")
-
-from django.contrib import messages
-from django.utils.decorators import method_decorator
-
-from api import actions as actions
+import oeplatform.securitysettings as sec
+from api import actions, utils
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
@@ -90,14 +76,19 @@ from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Table
+from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
+from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS
 
 from .models import TableRevision
 from .models import View as DataViewModel
+
+# TODO: WINGECHR: model_draft is not a topic, but currently,
+# frontend still usses it to filter / search for unpublished data
+TODO_PSEUDO_TOPIC_DRAFT = "model_draft"
 
 session = None
 
@@ -117,9 +108,8 @@ schema_whitelist = [
     "scenario",
     "society",
     "supply",
+    SCHEMA_DATA,
 ]
-
-schema_sandbox = "sandbox"
 
 
 def admin_constraints(request):
@@ -302,9 +292,6 @@ def listschemas(request):
     # find all tables (layzy query set)
     tables = find_tables(query_string=searched_query_string, tag_ids=searched_tag_ids)
 
-    # get table count per schema
-    response = tables.values("schema__name").annotate(tables_count=Count("name"))
-
     description = {
         "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",  # noqa
         "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",  # noqa
@@ -322,26 +309,38 @@ def listschemas(request):
         "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.",  # noqa
     }
 
-    schemas = [
+    # NOTE: tables maybe in mutliple topics, so
+    # total_table_count <= sum(count per topic)
+    total_table_count = tables.count()
+
+    topics_descriptions_tablecounts = []
+    # NOTE/TODO:WINGECHR: model_draft is not a proper topic
+    # but currently, all unpublished datastes are displayed in frontend
+    topics_descriptions_tablecounts.append(
         (
-            row["schema__name"],
-            description.get(row["schema__name"], "No description"),
-            row["tables_count"],  # number of tables in schema
+            TODO_PSEUDO_TOPIC_DRAFT,
+            description[TODO_PSEUDO_TOPIC_DRAFT],
+            tables.filter(is_publish=False).count(),
         )
-        for row in response
-    ]
+    )
 
-    # Count all tables
-    total_table_count = tables.aggregate(total=Count("name"))["total"]
+    # get a count of tables for each topics
+    topics = Topic.objects.filter(tables__in=tables).annotate(
+        table_count=Count("tables")
+    )
+    for topic in topics.order_by("name").all():
+        count = topic.table_count
+        total_table_count += count
+        topics_descriptions_tablecounts.append(
+            (topic.name, description[topic.name], count)
+        )
 
-    # sort by name
-    schemas = sorted(schemas, key=lambda x: x[0])
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
         {
             "total_table_count": total_table_count,
-            "schemas": schemas,
+            "schemas": topics_descriptions_tablecounts,
             "query": searched_query_string,
             "tags": searched_tag_ids,
             "doc_oem_builder_link": EXTERNAL_URLS["tutorials_oemetabuilder"],
@@ -357,11 +356,13 @@ def get_session_query():
     return session.query
 
 
-def find_tables(schema_name=None, query_string=None, tag_ids=None):
+def find_tables(
+    topic_name: str | None = None, query_string: str | None = None, tag_ids=None
+) -> QuerySet[Table]:
     """find tables given search criteria
 
     Args:
-        schema_name (str, optional): only tables in this schema
+        topic_name (str, optional): only tables in this topic
         query_string (str, optional): user search term
         tag_ids (list, optional): list of tag ids
 
@@ -370,13 +371,16 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     """
 
     # define search filter (will be combined with AND):
-    filters = []
+    # only show tables NOT in sandbox
+    filters = [Q(is_sandbox=False)]
 
-    # only whitelisted schemata:
-    filters.append(Q(schema__name__in=schema_whitelist))
-
-    if schema_name:  # only tables in schema
-        filters.append(Q(schema__name=schema_name))
+    if topic_name:
+        # TODO: WINGECHR: model_draft is not a topic, but currently,
+        # frontend still usses it to filter / search for unpublished data
+        if topic_name == TODO_PSEUDO_TOPIC_DRAFT:
+            filters.append(Q(is_publish=False))
+        else:
+            filters.append(Q(topics=topic_name))
 
     if query_string:  # filter by search terms
         filters.append(
@@ -394,34 +398,15 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
         # instead, we load all table names that match the given tags
 
         # find tables (in schema), that use all of the tags
-        filter_tags = [TableTags.tag.in_(tag_ids)]
-        if schema_name:
-            filter_tags.append(TableTags.schema_name == schema_name)
+        for tag_id in tag_ids:
 
-        tag_query = (
-            get_session_query()(
-                TableTags.schema_name,
-                TableTags.table_name,
-            )
-            .filter(*filter_tags)
-            .group_by(TableTags.schema_name, TableTags.table_name)
-            .having(
-                # only if number of matches == number of tags
-                sqla.func.count()
-                == len(tag_ids)
-            )
-        )
-
-        filter_tables = Q(pk__in=[])
-        # start with a "always false" condition, because we add OR statements
-        # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851   # noqa
-
-        for schema_name, table_name in tag_query:
-            filter_tables = filter_tables | (
-                Q(schema__name=schema_name) & Q(name=table_name)
-            )
-
-        filters.append(filter_tables)
+            table_names = [
+                x[0]
+                for x in get_session_query()(TableTags.table_name).filter(
+                    TableTags.tag == tag_id
+                )
+            ]
+            filters.append(Q(name__in=table_names))
 
     tables = Table.objects.filter(*filters)
 
@@ -451,7 +436,7 @@ def listtables(request, schema_name):
 
     # find all tables (layzy query set) in this schema
     tables = find_tables(
-        schema_name=schema_name,
+        topic_name=schema_name,
         query_string=searched_query_string,
         tag_ids=searched_tag_ids,
     )
@@ -465,7 +450,7 @@ def listtables(request, schema_name):
             array_agg(Tag.color),
             array_agg(Tag.usage_count),
         )
-        .filter(TableTags.schema_name == schema_name, TableTags.tag == Tag.id)  # join
+        .filter(TableTags.tag == Tag.id)  # join
         .group_by(TableTags.table_name)
     )
 
@@ -639,7 +624,7 @@ def send_dump(schema, table, fname):
 
 
 def show_revision(request, schema, table, date):
-    global pending_dumps
+    # global pending_dumps
 
     rev = TableRevision.objects.get(schema=schema, table=table, date=date)
     rev.last_accessed = timezone.now()
@@ -884,7 +869,7 @@ def view_delete(request, schema, table):
 class GraphView(View):
     def get(self, request, schema, table):
         # get the columns id from the schema and the table
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         formset = GraphViewForm(columns=columns)
 
         return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
@@ -912,7 +897,7 @@ class GraphView(View):
 
 class MapView(View):
     def get(self, request, schema, table, maptype):
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(columns=columns)
         elif maptype == "geom":
@@ -923,7 +908,7 @@ class MapView(View):
         return render(request, "dataedit/tablemap_form.html", {"form": form})
 
     def post(self, request, schema, table, maptype):
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(request.POST, columns=columns)
             options = dict(lat=request.POST.get("lat"), lon=request.POST.get("lon"))
@@ -972,16 +957,10 @@ class DataView(View):
         """
 
         if (
-            schema not in schema_whitelist and schema != schema_sandbox
+            schema not in schema_whitelist and schema != SCHEMA_DEFAULT_TEST_SANDBOX
         ) or schema.startswith("_"):
             raise Http404("Schema not accessible")
 
-        engine = actions._get_engine()
-
-        if not engine.dialect.has_table(engine, table, schema=schema):
-            raise Http404("Table does not exist in the database")
-
-        actions.create_meta(schema, table)
         metadata = load_metadata_from_db(schema, table)
         table_obj = Table.load(schema, table)
         if table_obj is None:
@@ -1057,7 +1036,7 @@ class DataView(View):
 
         opr_context = {
             "contributor": PeerReviewManager.load_contributor(
-                schema=schema, table=table
+                schema_name=schema, table_name=table
             ),
             "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
             "opr_enabled": False,
@@ -1449,7 +1428,7 @@ def get_tag_keywords_synchronized_metadata(
 
     session = create_oedb_session()
 
-    metadata = load_metadata_from_db(schema=schema, table=table)
+    metadata = load_metadata_from_db(schema_name=schema, table_name=table)
     # TODO: Fixed resource index will fail to produce good
     # metadata for metadata with multiple resource
     keywords_old = set(
@@ -1459,10 +1438,7 @@ def get_tag_keywords_synchronized_metadata(
     )  # remove empy
 
     tag_ids_old = set(
-        tt.tag
-        for tt in session.query(TableTags).filter(
-            TableTags.table_name == table, TableTags.schema_name == schema
-        )
+        tt.tag for tt in session.query(TableTags).filter(TableTags.table_name == table)
     )
     tags_old = session.query(Tag).filter(Tag.id.in_(tag_ids_old)).all()
 
@@ -1536,7 +1512,6 @@ def get_tag_keywords_synchronized_metadata(
             continue
         session.query(TableTags).filter(
             TableTags.table_name == table,
-            TableTags.schema_name == schema,
             TableTags.tag == tid,
         ).delete()
 
@@ -1598,8 +1573,8 @@ def update_table_tags(request):
         with con.begin():
             if not actions.assert_has_metadata(table=table, schema=schema):
                 actions.set_table_metadata(
-                    table=table,
-                    schema=schema,
+                    table_name=table,
+                    schema_name=schema,
                     metadata=OEMETADATA_V20_TEMPLATE,
                     cursor=con,
                 )
@@ -1611,7 +1586,7 @@ def update_table_tags(request):
 
             # TODO Add metadata to table (JSONB field) somewhere here
             actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=con
+                table_name=table, schema_name=schema, metadata=metadata, cursor=con
             )
 
     message = messages.success(
@@ -1632,7 +1607,7 @@ def redirect_after_table_tags_updated(request):
     return redirect(request.META["HTTP_REFERER"])
 
 
-def get_all_tags(schema=None, table=None):
+def get_all_tags(schema_name: str | None = None, table_name: str | None = None):
     """
     Load all tags of a specific table
     :param schema: Name of a schema
@@ -1644,7 +1619,7 @@ def get_all_tags(schema=None, table=None):
     Session = sessionmaker()
     session = Session(bind=engine)
     try:
-        if table is None:
+        if table_name is None:
             # Neither table, not schema are defined
             result = session.execute(sqla.select([Tag]).order_by("name"))
             session.commit()
@@ -1661,10 +1636,6 @@ def get_all_tags(schema=None, table=None):
             ]
             return sort_tags_by_popularity(r)
 
-        if schema is None:
-            # default schema is the public schema
-            schema = "public"
-
         result = session.execute(
             session.query(
                 Tag.name.label("name"),
@@ -1676,8 +1647,7 @@ def get_all_tags(schema=None, table=None):
                 TableTags.table_name,
             )
             .filter(TableTags.tag == Tag.id)
-            .filter(TableTags.table_name == table)
-            .filter(TableTags.schema_name == schema)
+            .filter(TableTags.table_name == table_name)
             .order_by("name")
         )
         session.commit()
@@ -1706,8 +1676,10 @@ def sort_tags_by_popularity(tags):
     return tags
 
 
-def get_popular_tags(schema=None, table=None, limit=10):
-    tags = get_all_tags(schema, table)
+def get_popular_tags(
+    schema_name: str | None = None, table_name: str | None = None, limit=10
+):
+    tags = get_all_tags(table_name=table_name)
     sort_tags_by_popularity(tags)
 
     return tags[:limit]
@@ -1821,9 +1793,10 @@ def get_column_description(schema, table):
 class WizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv)."""
 
-    def get(self, request, schema="model_draft", table=None):
+    def get(self, request, schema=SCHEMA_DATA, table=None):
         """Handle GET request (render the page)."""
         engine = actions._get_engine()
+        schema = utils.validate_schema(schema)
 
         can_add = False
         columns = None
@@ -1832,8 +1805,6 @@ class WizardView(LoginRequiredMixin, View):
         if table:
             # get information about the table
             # if upload: table must exist in schema model_draft
-            if schema != "model_draft":
-                raise Http404("Can only upload to schema model_draft")
             if not engine.dialect.has_table(engine, table, schema=schema):
                 raise Http404("Table does not exist")
             table_obj = Table.load(schema, table)
@@ -2224,7 +2195,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         }
         return render(request, "dataedit/opr_review.html", context=context_meta)
 
-    def post(self, request, schema, table, review_id=None):
+    def post(self, request, schema_name: str, table_name: str, review_id=None):
         """
         Handle POST requests for submitting reviews by the reviewer.
 
@@ -2287,22 +2258,26 @@ class PeerReviewView(LoginRequiredMixin, View):
             if review_post_type == "delete":
                 return delete_peer_review(review_id)
 
-            contributor = PeerReviewManager.load_contributor(schema, table)
+            contributor = PeerReviewManager.load_contributor(schema_name, table_name)
 
             if contributor is not None:
                 # Überprüfen, ob ein aktiver PeerReview existiert
-                active_peer_review = PeerReview.load(schema=schema, table=table)
+                active_peer_review = PeerReview.load(
+                    schema=schema_name, table=table_name
+                )
                 if active_peer_review is None or active_peer_review.is_finished:
                     # Kein aktiver PeerReview vorhanden
                     # oder der aktive PeerReview ist abgeschlossen
                     table_review = PeerReview(
-                        schema=schema,
-                        table=table,
+                        schema=schema_name,
+                        table=table_name,
                         is_finished=review_finished,
                         review=review_datamodel,
                         reviewer=request.user,
                         contributor=contributor,
-                        oemetadata=load_metadata_from_db(schema=schema, table=table),
+                        oemetadata=load_metadata_from_db(
+                            schema_name=schema_name, table_name=table_name
+                        ),
                     )
                     table_review.save(review_type=review_post_type)
                 else:
@@ -2320,19 +2295,23 @@ class PeerReviewView(LoginRequiredMixin, View):
             else:
                 error_msg = (
                     "Failed to retrieve any user that identifies "
-                    f"as table holder for the current table: {table}!"
+                    f"as table holder for the current table: {table_name}!"
                 )
                 return JsonResponse({"error": error_msg}, status=400)
 
             # TODO: Check for schema/topic as reviewed finished also indicates the table
             # needs to be or has to be moved.
             if review_finished is True:
-                review_table = Table.load(schema=schema, table=table)
+                review_table = Table.load(
+                    schema_name=schema_name, table_name=table_name
+                )
                 review_table.set_is_reviewed()
-                metadata = self.load_json(schema, table, review_id=review_id)
+                metadata = self.load_json(schema_name, table_name, review_id=review_id)
                 updated_metadata = recursive_update(metadata, review_data)
-                save_metadata_to_db(schema, table, updated_metadata)
-                active_peer_review = PeerReview.load(schema=schema, table=table)
+                save_metadata_to_db(schema_name, table_name, updated_metadata)
+                active_peer_review = PeerReview.load(
+                    schema=schema_name, table=table_name
+                )
 
                 if active_peer_review:
                     updated_oemetadata = recursive_update(

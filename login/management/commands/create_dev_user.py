@@ -1,6 +1,7 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 # login/management/commands/create_dev_user.py
 

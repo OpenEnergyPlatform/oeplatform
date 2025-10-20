@@ -1,17 +1,22 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import logging
 import os
 
 from django.apps import AppConfig
 
-from oeplatform.settings import DOCUMENTATION_LINKS, OPEN_ENERGY_ONTOLOGY_FOLDER, OEO_EXT_OWL_PATH
+from oeplatform.settings import (
+    DOCUMENTATION_LINKS,
+    OEO_EXT_OWL_PATH,
+    OPEN_ENERGY_ONTOLOGY_FOLDER,
+)
 
 
 class OntologyConfig(AppConfig):
@@ -34,15 +39,17 @@ class OntologyConfig(AppConfig):
         documentation.
         """
         # Specify the file to check
-        self.check_file(OPEN_ENERGY_ONTOLOGY_FOLDER, 'oeo release', 'oeo_setup')
-        self.check_file(OEO_EXT_OWL_PATH, 'oeo extended', 'oeo_ext_setup')
+        self.check_file(OPEN_ENERGY_ONTOLOGY_FOLDER, "oeo release", "oeo_setup")
+        self.check_file(OEO_EXT_OWL_PATH, "oeo extended", "oeo_ext_setup")
 
     def check_file(self, file_to_check, file_label, documentation_key):
         # Check if the file exists during app startup
         if not os.path.exists(file_to_check):
-            msg = f"The {file_label} files in '{file_to_check}' are missing! " \
-            "The app can`t start. Please refer to the documentation: " \
-            f"{DOCUMENTATION_LINKS.get(documentation_key)}"
+            msg = (
+                f"The {file_label} files in '{file_to_check}' are missing! "
+                "The app can`t start. Please refer to the documentation: "
+                f"{DOCUMENTATION_LINKS.get(documentation_key)}"
+            )
 
             self.logger.error(msg)
             raise ImportError(msg)

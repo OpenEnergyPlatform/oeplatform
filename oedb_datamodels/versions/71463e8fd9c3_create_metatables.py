@@ -1,16 +1,16 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 """create metatables
 
 Revision ID: 71463e8fd9c3
 Revises:
 Create Date: 2017-09-18 17:48:59.971501
 
-"""
+
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.orm import sessionmaker

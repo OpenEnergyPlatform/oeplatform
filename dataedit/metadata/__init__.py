@@ -1,16 +1,17 @@
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 # TODO: This might have t be removed fully
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
@@ -42,7 +43,7 @@ METADATA_HIDDEN_FIELDS = [
 ]
 
 
-def save_metadata_to_db(schema, table, updated_metadata):
+def save_metadata_to_db(schema_name: str, table_name: str, updated_metadata):
     """
     Save updated metadata for a specific table in the OEP database.
 
@@ -60,7 +61,7 @@ def save_metadata_to_db(schema, table, updated_metadata):
     from dataedit.models import Table
 
     # Load the table object
-    table_obj = Table.load(schema=schema, table=table)
+    table_obj = Table.load(schema_name=schema_name, table_name=table_name)
 
     # Update the oemetadata field
     table_obj.oemetadata = updated_metadata
@@ -69,7 +70,7 @@ def save_metadata_to_db(schema, table, updated_metadata):
     table_obj.save()
 
 
-def load_metadata_from_db(schema, table):
+def load_metadata_from_db(schema_name: str, table_name: str):
     """
     Load metadata for a specific table from the OEP database.
 
@@ -88,7 +89,7 @@ def load_metadata_from_db(schema, table):
 
     from dataedit.models import Table
 
-    metadata = Table.load(schema=schema, table=table).oemetadata
+    metadata = Table.load(schema_name=schema_name, table_name=table_name).oemetadata
     if not metadata:
         metadata = OEMETADATA_V20_TEMPLATE
     return metadata
