@@ -110,11 +110,11 @@ if USE_ONTOP:
 from api.helper import api_exception
 
 __all__ = [
-    "CloseAllAPIView",
+    "AdvancedCloseAllAPIView",
     "ColumnAPIView",
     "EnergyframeworkFactsheetListAPIView",
     "EnergymodelFactsheetListAPIView",
-    "FetchAPIView",
+    "AdvancedFetchAPIView",
     "FieldsAPIView",
     "GroupsAPIView",
     "IndexAPIView",
@@ -126,6 +126,7 @@ __all__ = [
     "OeoSsearchAPIView",
     "OevkgSearchAPIView",
     "RowsAPIView",
+    "SessionAPIView",
     "ScenarioDataTablesListAPIView",
     "SequenceAPIView",
     "TableAPIView",
@@ -1188,7 +1189,7 @@ class SessionAPIView(APIView):
         return request.session["resonse"]
 
 
-class FetchAPIView(APIView):
+class AdvancedFetchAPIView(APIView):
     @api_exception
     def post(self, request, fetchtype):
         if fetchtype == "all":
@@ -1220,7 +1221,7 @@ class FetchAPIView(APIView):
         )
 
 
-class CloseAllAPIView(LoginRequiredMixin, APIView):
+class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
     def get(self, request):
         sessions.close_all_for_user(request.user)
         return HttpResponse("All connections closed")
