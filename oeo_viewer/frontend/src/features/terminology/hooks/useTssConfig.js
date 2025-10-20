@@ -1,6 +1,6 @@
+import { useTssConfigCtx } from "../config/TssConfigProvider";
+
 export function useTssConfig() {
-  // could be extended to include auth headers, selected ontologies, etc.
-  return {
-    apiBase: import.meta.env.VITE_TSS_API_BASE || "https://api.terminology.tib.eu/api/",
-  };
+  // later you can read from env and merge, but for now just return the ctx
+  return useTssConfigCtx();
 }

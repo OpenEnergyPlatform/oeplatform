@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { EuiProvider } from "@elastic/eui";
 
+import { TssConfigProvider } from "./features/terminology/config/TssConfigProvider";
 
 
 
@@ -27,7 +28,9 @@ function mount() {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <EuiProvider colorMode="light">
-          <App />
+          <TssConfigProvider>
+            <App />
+          </TssConfigProvider>
         </EuiProvider>
       </QueryClientProvider>
     </StrictMode>

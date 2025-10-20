@@ -1,8 +1,17 @@
-export function buildTssOptions({ apiBase, ontology = "oeo", lang = "en" } = {}) {
-  // These option names mirror the Storybook props; adjust names once you confirm in the docs.
+import axios from "axios";
+
+// Small helper to build a client bound to the current config
+export function makeTssClient({ apiBase, requestHeaders = {} }) {
+  const http = axios.create({
+    baseURL: apiBase.replace(/\/+$/, "/"), // ensure trailing slash
+    headers: { ...requestHeaders },
+    timeout: 20_000,
+  });
+
   return {
-    apiBase,     // base URL for TS4NFDI gateway
-    ontology,    // e.g., "SNOMED", "LOINC", "HPO" (depends on your use case)
-    lang,        // UI / query language if supported
+    // Example endpoints – adjust to the suite/gateway you use
+    search: (params) => http.get("search", { params }),
+    concept: (iri) => http.get("concept", { params: { iri } }),
+    hierarchy: (iri) => http.get("hierarchy", { params: { iri } }),
   };
 }
