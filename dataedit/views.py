@@ -155,9 +155,6 @@ def AdminConstraintsView(request: HttpRequest) -> HttpResponse:
     schema = post_dict.get("schema")[0]
     table = post_dict.get("table")[0]
 
-    print("action: " + action)
-    print("id: " + id)
-
     if "deny" in action:
         actions.remove_queued_constraint(id)
     elif "apply" in action:
@@ -180,9 +177,6 @@ def AdminColumnView(request: HttpRequest) -> HttpResponse:
     id = post_dict.get("id")[0]
     schema = post_dict.get("schema")[0]
     table = post_dict.get("table")[0]
-
-    print("action: " + action)
-    print("id: " + id)
 
     if "deny" in action:
         actions.remove_queued_column(id)
@@ -674,7 +668,7 @@ class DataView(View):
 
         opr_context = {
             "contributor": PeerReviewManager.load_contributor(
-                schema_name=schema, table_name=table
+                schema=schema, table=table
             ),
             "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
             "opr_enabled": False,
@@ -932,39 +926,34 @@ def RedirectAfterTableTagsUpdatedView(request: HttpRequest) -> HttpResponse:
     :return: Redirects to the previous page
     """
     # check if valid table / schema
-    schema_name, table_name = actions.get_table_name(
+    schema_name, table = actions.get_table_name(
         schema=request.POST["schema"],
         table=request.POST["table"],
         restrict_schemas=False,
     )
     # check write permission
     actions.assert_add_tag_permission(
-        request.user, table_name, login_models.WRITE_PERM, schema=schema_name
+        request.user, table, login_models.WRITE_PERM, schema=schema_name
     )
 
     tag_ids = {
         field[len("tag_") :] for field in request.POST if field.startswith("tag_")
     }
     tags = Tag.objects.filter(pk__in=tag_ids)
-    table = Table.objects.get(name=table_name)
-    table.tags.clear()
+    table_obj = Table.objects.get(name=table)
+    table_obj.tags.clear()
     for tag in tags:
-        table.tags.add(tag)
-    table.save()  # TODO: we already do save in update_keywords_from_tags further down
+        table_obj.tags.add(tag)
+    # TODO: we already do save in update_keywords_from_tags further down
+    table_obj.save()
 
-    update_keywords_from_tags(table, schema_name=schema_name)
+    update_keywords_from_tags(table_obj, schema=schema_name)
 
     messages.success(
         request,
         'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
-        # noqa
     )
 
-    # return render(
-    #    request,
-    #    "dataedit/dataview.html",
-    #    {"messages": message, "table": table_name, "schema": schema_name},
-    # )
     return redirect(request.META["HTTP_REFERER"])
 
 
@@ -1454,7 +1443,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                         reviewer=request.user,
                         contributor=contributor,
                         oemetadata=load_metadata_from_db(
-                            schema_name=schema_name, table_name=table_name
+                            schema=schema_name, table=table_name
                         ),
                     )
                     table_review.save(review_type=review_post_type)
@@ -1480,9 +1469,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             # TODO: Check for schema/topic as reviewed finished also indicates the table
             # needs to be or has to be moved.
             if review_finished is True:
-                review_table = Table.load(
-                    schema_name=schema_name, table_name=table_name
-                )
+                review_table = Table.load(schema=schema_name, table=table_name)
                 review_table.set_is_reviewed()
                 metadata = self.load_json(schema_name, table_name, review_id=review_id)
                 updated_metadata = recursive_update(metadata, review_data)

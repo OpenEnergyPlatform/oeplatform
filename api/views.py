@@ -228,16 +228,14 @@ class MetadataAPIView(APIView):
             # TODO make this iter over all resources
             keywords = metadata["resources"][0].get("keywords", []) or []
             metadata["resources"][0]["keywords"] = update_tags_from_keywords(
-                table_name=table, keywords=keywords
+                table=table, keywords=keywords
             )
 
             # make sure extra metadata is removed
             metadata.pop("connection_id", None)
             metadata.pop("cursor_id", None)
 
-            actions.set_table_metadata(
-                table_name=table, schema_name=schema, metadata=metadata
-            )
+            actions.set_table_metadata(table=table, schema=schema, metadata=metadata)
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
@@ -386,8 +384,8 @@ class TableAPIView(APIView):
         # 4) Create the table (physical → metadata) atomically
         orchestrator = TableCreationOrchestrator()
         table_obj = orchestrator.create_table(
-            schema_name=schema,
-            table_name=table,
+            schema=schema,
+            table=table,
             column_defs=columns,
             constraint_defs=constraints,
         )
@@ -401,9 +399,7 @@ class TableAPIView(APIView):
         metadata = payload.get("metadata")
         if metadata:
 
-            actions.set_table_metadata(
-                table_name=table, schema_name=schema, metadata=metadata
-            )
+            actions.set_table_metadata(table=table, schema=schema, metadata=metadata)
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
@@ -433,8 +429,8 @@ class TableAPIView(APIView):
 
     def oep_create_table_transaction(
         self,
-        schema_name: str,
-        table_name: str,
+        schema: str,
+        table: str,
         column_definitions,
         constraint_definitions,
     ):
@@ -462,23 +458,23 @@ class TableAPIView(APIView):
         try:
             with transaction.atomic():
                 # First create the table object in the django database.
-                table_object = self._create_table_object(table_name=table_name)
+                table_object = self._create_table_object(table=table)
             # Then attempt to create the OEDB table to check
             # if creation will succeed - action includes checks
             # and will raise api errors
             actions.table_create(
-                schema_name, table_name, column_definitions, constraint_definitions
+                schema, table, column_definitions, constraint_definitions
             )
         except DatabaseError as e:
             # remove any oedb table artifacts left after table creation
             # transaction failed
             self.__remove_oedb_table_on_exception_raised_during_creation_transaction(
-                table_name, schema_name
+                table, schema
             )
 
             # also remove any django table object
             # find the created django table object
-            object_to_delete = DBTable.objects.filter(name=table_name)
+            object_to_delete = DBTable.objects.filter(name=table)
             # delete it if it exists
             if object_to_delete.exists():
                 object_to_delete.delete()
@@ -545,8 +541,8 @@ class TableAPIView(APIView):
 
         if embargo_payload_check:
             table_object = self.oep_create_table_transaction(
-                table_name=table,
-                schema_name=schema,
+                table=table,
+                schema=schema,
                 column_definitions=column_definitions,
                 constraint_definitions=constraint_definitions,
             )
@@ -554,7 +550,7 @@ class TableAPIView(APIView):
 
             if metadata:
                 actions.set_table_metadata(
-                    table_name=table, schema_name=schema, metadata=metadata
+                    table=table, schema=schema, metadata=metadata
                 )
 
             try:
@@ -570,8 +566,8 @@ class TableAPIView(APIView):
 
         else:
             table_object = self.oep_create_table_transaction(
-                table_name=table,
-                schema_name=schema,
+                table=table,
+                schema=schema,
                 column_definitions=column_definitions,
                 constraint_definitions=constraint_definitions,
             )
@@ -579,12 +575,12 @@ class TableAPIView(APIView):
 
             if metadata:
                 actions.set_table_metadata(
-                    table_name=table, schema_name=schema, metadata=metadata
+                    table=table, schema=schema, metadata=metadata
                 )
 
-    def _create_table_object(self, table_name: str):
+    def _create_table_object(self, table: str):
         try:
-            table_object = DBTable.objects.create(name=table_name)
+            table_object = DBTable.objects.create(name=table)
         except IntegrityError:
             raise APIError("Table already exists")
         return table_object
@@ -650,6 +646,7 @@ class TableAPIView(APIView):
         meta_schema = actions.get_meta_schema_name(schema)
 
         edit_table = actions.get_edit_table_name(schema, table)
+
         actions._get_engine().execute(
             'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
                 schema=meta_schema, table=edit_table
@@ -669,12 +666,12 @@ class TableAPIView(APIView):
                 schema=meta_schema, table=edit_table
             )
         )
-
         actions._get_engine().execute(
             'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
                 schema=schema, table=table
             )
         )
+
         table_object = DBTable.objects.get(name=table)
         table_object.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)

@@ -354,10 +354,6 @@ def change_requests(schema, table):
         reviewed=False, schema=schema, table=table
     )
 
-    # print(api_columns)
-    # print(api_constraints)
-
-    # cache = dict()
     data = dict()
 
     data["api_columns"] = {}
@@ -590,16 +586,14 @@ def get_dependencies(schema, table, found=None):
     return found
 
 
-def update_keywords_from_tags(table: Table, schema_name: str) -> None:
+def update_keywords_from_tags(table: Table, schema: str) -> None:
     """synchronize keywords in metadata with tags"""
 
     metadata = table.oemetadata or {"resources": [{}]}
     keywords = [tag.name_normalized for tag in table.tags.all()]
     metadata["resources"][0]["keywords"] = keywords
 
-    actions.set_table_metadata(
-        table_name=table.name, schema_name=schema_name, metadata=metadata
-    )
+    actions.set_table_metadata(table=table.name, schema=schema, metadata=metadata)
 
 
 def get_column_description(schema, table):

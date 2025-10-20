@@ -341,13 +341,13 @@ def stream(data, allow_cors=False, status_code=status.HTTP_200_OK, session=None)
     return response
 
 
-def update_tags_from_keywords(table_name: str, keywords: list[str]) -> list[str]:
-    table = DBTable.objects.get(name=table_name)
-    table.tags.clear()
+def update_tags_from_keywords(table: str, keywords: list[str]) -> list[str]:
+    table_obj = DBTable.objects.get(name=table)
+    table_obj.tags.clear()
     keywords_new = set()
     for keyword in keywords:
         tag = Tag.get_or_create_from_name(keyword)
-        table.tags.add(tag)
+        table_obj.tags.add(tag)
         keywords_new.add(tag.name_normalized)
-    table.save()
+    table_obj.save()
     return list(keywords_new)

@@ -119,7 +119,6 @@ class GeomViewForm(MapViewForm):
     def __init__(self, *args, **kwargs):
         super(GeomViewForm, self).__init__(*args, **kwargs)
         if self.columns is not None:
-            print(self.columns)
             self.fields["geom"] = forms.ChoiceField(
                 choices=[(c, c) for c in self.columns]
             )

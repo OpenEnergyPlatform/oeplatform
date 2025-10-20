@@ -348,18 +348,18 @@ def parse_from_item(d):
 __PARSER_META = MetaData(bind=_get_engine())
 
 
-def load_table_from_metadata(table_name, schema_name=None):
-    ext_name = table_name
-    schema_name = validate_schema(schema_name)
-    if schema_name:
-        ext_name = schema_name + "." + ext_name
+def load_table_from_metadata(table, schema=None):
+    ext_name = table
+    schema = validate_schema(schema)
+    if schema:
+        ext_name = schema + "." + ext_name
     if ext_name and ext_name in __PARSER_META.tables:
         return __PARSER_META.tables[ext_name]
     else:
         if _get_engine().dialect.has_table(
-            _get_engine().connect(), table_name, schema=schema_name
+            _get_engine().connect(), table, schema=schema
         ):
-            return Table(table_name, __PARSER_META, autoload=True, schema=schema_name)
+            return Table(table, __PARSER_META, autoload=True, schema=schema)
 
 
 def parse_column(d, mapper):
@@ -378,7 +378,7 @@ def parse_column(d, mapper):
         schema_name = read_pgid(do_map(d["schema"])) if "schema" in d else None
         schema_name = validate_schema(schema_name)
 
-        table = load_table_from_metadata(table_name, schema_name=schema_name)
+        table = load_table_from_metadata(table_name, schema=schema_name)
     if table is not None and name in table.c:
         col = table.c[name]
         if isinstance(col.type, INTERVAL):

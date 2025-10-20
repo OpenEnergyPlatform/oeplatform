@@ -187,7 +187,7 @@ class Table(Tagable):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
 
     @classmethod
-    def load(cls, schema_name: str, table_name: str):
+    def load(cls, schema: str, table: str):
         """
         Load a table object from the database given its schema and table name.
 
@@ -203,7 +203,7 @@ class Table(Tagable):
             in the database.
         """
 
-        table_obj = Table.objects.get(name=table_name)
+        table_obj = Table.objects.get(name=table)
 
         return table_obj
 
@@ -453,14 +453,6 @@ class PeerReview(models.Model):
         if not self.contributor == self.reviewer:
             super().save(*args, **kwargs)
             # TODO: This causes errors if review list ist empty
-            # prev_review, next_review = self.get_prev_and_next_reviews(
-            #   self.schema, self.table
-            # )
-
-            # print(prev_review.id, next_review)
-            # print(prev_review, next_review)
-            # Create a new PeerReviewManager entry for this PeerReview
-            # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
 
             if review_type == "save":
                 pm_new = PeerReviewManager(
@@ -469,7 +461,7 @@ class PeerReview(models.Model):
 
             elif review_type == "submit":
                 result = self.set_version_of_metadata_for_review(
-                    schema_name=self.schema, table_name=self.table
+                    schema=self.schema, table=self.table
                 )
                 if result[0]:
                     logging.info(result[1])
@@ -483,7 +475,7 @@ class PeerReview(models.Model):
 
             elif review_type == "finished":
                 result = self.set_version_of_metadata_for_review(
-                    schema_name=self.schema, table_name=self.table
+                    schema=self.schema, table=self.table
                 )
                 if result[0]:
                     logging.info(result[1])
@@ -539,7 +531,7 @@ class PeerReview(models.Model):
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
     def set_version_of_metadata_for_review(
-        self, table_name: str, schema_name: str, *args, **kwargs
+        self, table: str, schema: str, *args, **kwargs
     ):
         """
         Once the peer review is started, we save the current version of the
@@ -558,9 +550,7 @@ class PeerReview(models.Model):
             a version of oemetadata available for this review & readable
             status message.
         """
-        table_oemetdata = Table.load(
-            schema_name=schema_name, table_name=table_name
-        ).oemetadata
+        table_oemetdata = Table.load(schema=schema, table=table).oemetadata
 
         if self.oemetadata is None:
             self.oemetadata = table_oemetdata
@@ -568,13 +558,12 @@ class PeerReview(models.Model):
 
             return (
                 True,
-                f"Set current version of table's: '{table_name}' "
-                "oemetadata for review.",
+                f"Set current version of table's: '{table}' " "oemetadata for review.",
             )
 
         return (
             False,
-            f"This tables (name: {table_name}) review "
+            f"This tables (name: {table}) review "
             "already got a version of oemetadata.",
         )
 
@@ -692,7 +681,6 @@ class PeerReviewManager(models.Model):
             days_open = peer_review.days_open
             if days_open is not None:
                 self.is_open_since = str(days_open)
-        # print(self.is_open_since, self.status)
         # Call the parent class's save method to save the PeerReviewManager instance
         super().save(*args, **kwargs)
 
@@ -748,7 +736,7 @@ class PeerReviewManager(models.Model):
         return role, result
 
     @staticmethod
-    def load_contributor(schema_name: str, table_name: str):
+    def load_contributor(schema: str, table: str):
         """
         Get the contributor for the table a review is started.
 
@@ -759,7 +747,7 @@ class PeerReviewManager(models.Model):
         Returns:
             User: The contributor user.
         """
-        current_table = Table.load(schema_name=schema_name, table_name=table_name)
+        current_table = Table.load(schema=schema, table=table)
         try:
             table_holder = (
                 current_table.userpermission_set.filter(table=current_table.id)

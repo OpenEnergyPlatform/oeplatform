@@ -16,7 +16,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.urls import include, path, re_path
-from django.views.generic import RedirectView
 
 from dataedit.views import (
     AdminColumnView,
@@ -48,7 +47,6 @@ pgsql_qualifier = r"[\w\d_]+"
 app_name = "dataedit"
 
 urlpatterns_view = [
-    re_path(r"^$", TopicView, name="index"),
     re_path(
         r"^(?P<schema>{qual})$".format(qual=pgsql_qualifier),
         TablesView,
@@ -138,8 +136,9 @@ urlpatterns_view = [
 
 urlpatterns = [
     path("view/", include(urlpatterns_view)),
+    re_path(r"^view$", TopicView, name="index"),
     re_path(r"^schemas$", TopicView, name="topic-list"),
-    re_path(r"^$", RedirectView.as_view(url="/dataedit/schemas")),
+    re_path(r"^$", TopicView),
     re_path(r"^admin/columns/", AdminColumnView, name="input"),
     re_path(r"^admin/constraints/", AdminConstraintsView, name="input"),
     re_path(

@@ -35,7 +35,7 @@ METADATA_HIDDEN_FIELDS = [
 ]
 
 
-def save_metadata_to_db(schema_name: str, table_name: str, updated_metadata):
+def save_metadata_to_db(schema: str, table: str, updated_metadata):
     """
     Save updated metadata for a specific table in the OEP database.
 
@@ -50,10 +50,8 @@ def save_metadata_to_db(schema_name: str, table_name: str, updated_metadata):
         table object back to the database.
     """
 
-    from dataedit.models import Table
-
     # Load the table object
-    table_obj = Table.load(schema_name=schema_name, table_name=table_name)
+    table_obj = Table.load(schema=schema, table=table)
 
     # Update the oemetadata field
     table_obj.oemetadata = updated_metadata
@@ -62,7 +60,7 @@ def save_metadata_to_db(schema_name: str, table_name: str, updated_metadata):
     table_obj.save()
 
 
-def load_metadata_from_db(schema_name: str, table_name: str):
+def load_metadata_from_db(schema: str, table: str):
     """
     Load metadata for a specific table from the OEP database.
 
@@ -79,7 +77,7 @@ def load_metadata_from_db(schema_name: str, table_name: str):
         or keep the old functionality (TODO).
     """
 
-    metadata = Table.load(schema_name=schema_name, table_name=table_name).oemetadata
+    metadata = Table.load(schema=schema, table=table).oemetadata
     if not metadata:
         metadata = OEMETADATA_V20_TEMPLATE
     return metadata
