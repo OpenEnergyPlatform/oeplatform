@@ -193,7 +193,7 @@ def _translate_sqla_type(column):
         return column.data_type
 
 
-def try_parse_metadata(inp):
+def try_parse_metadata(inp) -> tuple[dict | None, str | None]:
     """
 
     Args:
@@ -1160,14 +1160,14 @@ ACTIONS FROM OLD API
 """
 
 
-def _get_table(schema, table):
+def _get_table(schema, table) -> Table:
     engine = _get_engine()
     metadata = MetaData(bind=_get_engine())
 
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
 
-def get_table_metadata(schema: str, table: str):
+def get_table_metadata(schema: str, table: str) -> dict:
     django_obj = DBTable.load(schema=schema, table=table)
     oemetadata = django_obj.oemetadata
     return oemetadata if oemetadata else {}
@@ -1567,14 +1567,7 @@ def count_all(request, context=None):
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
     t = _get_table(schema, table)
-    return session.query(t).count()  # _get_count(session.query(t))
-
-
-def _get_header(results):
-    header = []
-    for field in results.cursor.description:
-        header.append({"id": field[0], "type": field[1]})  # .decode('utf-8'),
-    return header
+    return session.query(t).count()
 
 
 def analyze_columns(schema, table):

@@ -25,6 +25,7 @@ import itertools
 import json
 import re
 from datetime import datetime, timedelta
+from typing import cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import requests
@@ -37,7 +38,6 @@ from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
-    HttpRequest,
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseServerError,
@@ -50,6 +50,7 @@ from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -118,7 +119,6 @@ __all__ = [
     "AdvancedFetchAPIView",
     "FieldsAPIView",
     "GroupsAPIView",
-    "IndexAPIView",
     "ManageOekgScenarioDatasetsAPIView",
     "MetadataAPIView",
     "MoveAPIView",
@@ -170,7 +170,7 @@ __all__ = [
 
 class SequenceAPIView(APIView):
     @api_exception
-    def put(self, request: HttpRequest, schema: str, sequence: str) -> JsonResponse:
+    def put(self, request: Request, schema: str, sequence: str) -> JsonResponse:
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
@@ -178,26 +178,26 @@ class SequenceAPIView(APIView):
             raise APIError("User is anonymous", 401)
         if actions.has_table(dict(schema=schema, sequence_name=sequence), {}):
             raise APIError("Sequence already exists", 409)
-        return self.__create_sequence(request, schema, sequence, request.data)
+        return self.__create_sequence(request, schema, sequence)
 
     @api_exception
     @require_delete_permission
-    def delete(self, request: HttpRequest, schema: str, sequence: str) -> JsonResponse:
+    def delete(self, request: Request, schema: str, sequence: str) -> JsonResponse:
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
-        return self.__delete_sequence(request, schema, sequence, request.data)
+        return self.__delete_sequence(request, schema, sequence)
 
     @load_cursor()
-    def __delete_sequence(self, request: HttpRequest, schema: str, sequence: str, jsn):
+    def __delete_sequence(self, request: Request, schema: str, sequence: str):
         seq = sqla.schema.Sequence(sequence, schema=schema)
         seq.drop(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_200_OK)
 
     @load_cursor()
-    def __create_sequence(self, request: HttpRequest, schema: str, sequence: str, jsn):
+    def __create_sequence(self, request: Request, schema: str, sequence: str):
         seq = sqla.schema.Sequence(sequence, schema=schema)
         seq.create(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_201_CREATED)
@@ -206,14 +206,14 @@ class SequenceAPIView(APIView):
 class MetadataAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
+    def get(self, request: Request, schema: str, table: str) -> JsonResponse:
         metadata = actions.get_table_metadata(schema, table)
         return JsonResponse(metadata)
 
     @api_exception
     @require_write_permission
     @load_cursor()
-    def post(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
+    def post(self, request: Request, schema: str, table: str) -> JsonResponse:
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
 
@@ -251,7 +251,7 @@ class TableAPIView(APIView):
 
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
+    def get(self, request: Request, schema: str, table: str) -> JsonResponse:
         """
         Returns a dictionary that describes the DDL-make-up of this table.
         Fields are:
@@ -280,7 +280,7 @@ class TableAPIView(APIView):
         )
 
     @api_exception
-    def post(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
+    def post(self, request: Request, schema: str, table: str) -> JsonResponse:
         """
         Changes properties of tables and table columns
         :param request:
@@ -291,7 +291,7 @@ class TableAPIView(APIView):
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
-        json_data = request.data
+        json_data = cast(dict, request.data)
 
         if "column" in json_data["type"]:
             column_definition = api.parser.parse_scolumnd_from_columnd(
@@ -328,7 +328,7 @@ class TableAPIView(APIView):
             )
 
     @api_exception
-    def put(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
+    def put(self, request: Request, schema: str, table: str) -> JsonResponse:
         """
         Creates a new table: physical table first, then metadata row.
         Applies embargo and permissions, and sets metadata if provided.
@@ -523,7 +523,7 @@ class TableAPIView(APIView):
     @load_cursor()
     def __create_table(
         self,
-        request: HttpRequest,
+        request: Request,
         schema: str,
         table: str,
         column_definitions,
@@ -641,7 +641,7 @@ class TableAPIView(APIView):
 
     @api_exception
     @require_delete_permission
-    def delete(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
+    def delete(self, request: Request, schema: str, table: str) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table)
 
         meta_schema = actions.get_meta_schema_name(schema)
@@ -678,22 +678,11 @@ class TableAPIView(APIView):
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
-class IndexAPIView(APIView):
-    def get(self, request: HttpRequest):
-        pass
-
-    def post(self, request: HttpRequest):
-        pass
-
-    def put(self, request: HttpRequest):
-        pass
-
-
 class ColumnAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(
-        self, request: HttpRequest, schema: str, table: str, column: str | None = None
+        self, request: Request, schema: str, table: str, column: str | None = None
     ) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         response = actions.describe_columns(schema, table)
@@ -709,7 +698,7 @@ class ColumnAPIView(APIView):
     @api_exception
     @require_write_permission
     def post(
-        self, request: HttpRequest, schema: str, table: str, column: str
+        self, request: Request, schema: str, table: str, column: str
     ) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table)
         response = actions.column_alter(
@@ -720,7 +709,7 @@ class ColumnAPIView(APIView):
     @api_exception
     @require_write_permission
     def put(
-        self, request: HttpRequest, schema: str, table: str, column: str
+        self, request: Request, schema: str, table: str, column: str
     ) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table)
         actions.column_add(schema, table, column, request.data["query"])
@@ -731,7 +720,7 @@ class FieldsAPIView(APIView):
     @method_decorator(never_cache)
     def get(
         self,
-        request: HttpRequest,
+        request: Request,
         schema: str,
         table: str,
         id,
@@ -758,7 +747,7 @@ class MovePublishAPIView(APIView):
     @require_admin_permission
     @api_exception
     def post(
-        self, request: HttpRequest, schema: str, table: str, to_schema: str
+        self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonResponse:
         # Make payload more friendly as users tend to use the query wrapper in payload
         json_data = request.data.get("query", {})
@@ -774,7 +763,7 @@ class MoveAPIView(APIView):
     @require_admin_permission
     @api_exception
     def post(
-        self, request: HttpRequest, schema: str, table: str, to_schema: str
+        self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonResponse:
         if schema not in schema_whitelist or to_schema not in schema_whitelist:
             raise APIError("Invalid origin or target schema")
@@ -786,7 +775,7 @@ class RowsAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(
-        self, request: HttpRequest, schema: str, table: str, row_id: int | None = None
+        self, request: Request, schema: str, table: str, row_id: int | None = None
     ) -> JsonResponse:
         if check_embargo(schema, table):
             return JsonResponse(
@@ -951,7 +940,7 @@ class RowsAPIView(APIView):
     @require_write_permission
     def post(
         self,
-        request: HttpRequest,
+        request: Request,
         schema: str,
         table: str,
         row_id: int | None = None,
@@ -983,7 +972,7 @@ class RowsAPIView(APIView):
     @require_write_permission
     def put(
         self,
-        request: HttpRequest,
+        request: Request,
         schema: str,
         table: str,
         row_id: int | None = None,
@@ -1038,7 +1027,7 @@ class RowsAPIView(APIView):
 
     @require_delete_permission
     def delete(
-        self, request: HttpRequest, table: str, schema: str, row_id: int | None = None
+        self, request: Request, table: str, schema: str, row_id: int | None = None
     ) -> JsonResponse:
         if check_embargo(schema, table):
             return JsonResponse(
@@ -1053,7 +1042,7 @@ class RowsAPIView(APIView):
 
     @load_cursor()
     def __delete_rows(
-        self, request: HttpRequest, schema: str, table: str, row_id: int | None = None
+        self, request: Request, schema: str, table: str, row_id: int | None = None
     ):
         if check_embargo(schema, table):
             return JsonResponse(
@@ -1113,7 +1102,7 @@ class RowsAPIView(APIView):
     @load_cursor()
     def __insert_row(
         self,
-        request: HttpRequest,
+        request: Request,
         schema: str,
         table: str,
         row,
@@ -1147,7 +1136,7 @@ class RowsAPIView(APIView):
     @load_cursor()
     def __update_rows(
         self,
-        request: HttpRequest,
+        request: Request,
         schema: str,
         table: str,
         row,
@@ -1189,7 +1178,7 @@ class RowsAPIView(APIView):
         return actions.data_update(query, context)
 
     @load_cursor(named=True)
-    def __get_rows(self, request: HttpRequest, data):
+    def __get_rows(self, request: Request, data):
         table = actions._get_table(data["schema"], table=data["table"])
         # params = {}
         # params_count = 0
@@ -1228,13 +1217,13 @@ class RowsAPIView(APIView):
 
 
 class SessionAPIView(APIView):
-    def get(self, request: HttpRequest, length=1) -> JsonResponse:
+    def get(self, request: Request, length=1) -> JsonResponse:
         return request.session["resonse"]
 
 
 class AdvancedFetchAPIView(APIView):
     @api_exception
-    def post(self, request: HttpRequest, fetchtype) -> JsonResponse:
+    def post(self, request: Request, fetchtype) -> JsonResponse:
         if fetchtype == "all":
             return self.do_fetch(request, actions.fetchall)
         elif fetchtype == "many":
@@ -1242,7 +1231,7 @@ class AdvancedFetchAPIView(APIView):
         else:
             raise APIError("Unknown fetchtype: %s" % fetchtype)
 
-    def do_fetch(self, request: HttpRequest, fetch):
+    def do_fetch(self, request: Request, fetch):
         context = {
             "connection_id": actions.get_or_403(request.data, "connection_id"),
             "cursor_id": actions.get_or_403(request.data, "cursor_id"),
@@ -1265,12 +1254,12 @@ class AdvancedFetchAPIView(APIView):
 
 
 class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
-    def get(self, request: HttpRequest) -> JsonResponse:
+    def get(self, request: Request) -> JsonResponse:
         sessions.close_all_for_user(request.user)
         return HttpResponse("All connections closed")
 
 
-def UsersAPIView(request: HttpRequest) -> JsonResponse:
+def UsersAPIView(request: Request) -> JsonResponse:
     query = request.GET.get("name", "")
 
     # Ensure query is not empty to proceed with filtering
@@ -1294,7 +1283,7 @@ def UsersAPIView(request: HttpRequest) -> JsonResponse:
     return JsonResponse(user_names, safe=False)
 
 
-def GroupsAPIView(request: HttpRequest) -> JsonResponse:
+def GroupsAPIView(request: Request) -> JsonResponse:
     """
     Return all Groups where this user is a member that match
     the current query. The query is input by the User.
@@ -1328,7 +1317,7 @@ def GroupsAPIView(request: HttpRequest) -> JsonResponse:
     return JsonResponse(group_names, safe=False)
 
 
-def OeoSsearchAPIView(request: HttpRequest) -> JsonResponse:
+def OeoSsearchAPIView(request: Request) -> JsonResponse:
     if USE_LOEP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         query = request.GET["query"]
@@ -1349,7 +1338,7 @@ class OekgSparqlAPIView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def post(self, request: HttpRequest) -> JsonResponse:
+    def post(self, request: Request) -> JsonResponse:
         sparql_query = request.data.get("query", "")
         response_format = request.data.get("format", "json")  # Default format
 
@@ -1369,7 +1358,7 @@ class OekgSparqlAPIView(APIView):
             return Response(content, content_type=content_type)
 
 
-def OevkgSearchAPIView(request: HttpRequest) -> JsonResponse:
+def OevkgSearchAPIView(request: Request) -> JsonResponse:
     if USE_ONTOP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         try:
@@ -1445,7 +1434,7 @@ class ManageOekgScenarioDatasetsAPIView(APIView):
     permission_classes = [IsAuthenticated]  # Require authentication
 
     @post_only_if_user_is_owner_of_scenario_bundle
-    def post(self, request: HttpRequest) -> JsonResponse:
+    def post(self, request: Request) -> JsonResponse:
         serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1473,7 +1462,7 @@ class TableSizeAPIView(APIView):
     """
 
     @api_exception
-    def get(self, request: HttpRequest) -> JsonResponse:
+    def get(self, request: Request) -> JsonResponse:
         schema = request.query_params.get("schema")
         table = request.query_params.get("table")
 

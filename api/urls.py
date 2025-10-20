@@ -56,7 +56,6 @@ from api.views import (
     EnergymodelFactsheetListAPIView,
     FieldsAPIView,
     GroupsAPIView,
-    IndexAPIView,
     ManageOekgScenarioDatasetsAPIView,
     MetadataAPIView,
     MoveAPIView,
@@ -115,16 +114,12 @@ urlpatterns_v0_schema = [
         FieldsAPIView.as_view(),
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/indexes/(?P<index>[\w\d_\s]+)$",  # noqa
-        IndexAPIView.as_view(),
-    ),
-    re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",  # noqa
         RowsAPIView.as_view(),
         name="api_rows",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$",  # noqa
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$",
         RowsAPIView.as_view(),
         {"action": "new"},
         name="api_rows_new",

@@ -14,7 +14,7 @@ from api.actions import _get_engine
 class Command(BaseCommand):
     help = "migrate tags from oedb to oep"
 
-    def handle(self, migrate: bool = False, *args, **options):
+    def handle(self, *args, **options):
         # copy data from oedb
         TagOEP = apps.get_model("dataedit", "Tag")
         TableOEP = apps.get_model("dataedit", "Table")

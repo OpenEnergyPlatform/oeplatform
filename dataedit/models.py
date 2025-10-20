@@ -35,6 +35,7 @@ from django.db.models import (
     ForeignKey,
     IntegerField,
     JSONField,
+    QuerySet,
 )
 from django.urls import reverse
 from django.utils import timezone
@@ -860,7 +861,7 @@ class PeerReviewManager(models.Model):
             return None
 
     @staticmethod
-    def filter_opr_by_table(schema, table):
+    def filter_opr_by_table(schema, table) -> QuerySet[PeerReview]:
         """
         Filter peer reviews by schema and table.
 
@@ -874,5 +875,5 @@ class PeerReviewManager(models.Model):
         return PeerReview.objects.filter(schema=schema, table=table)
 
     @staticmethod
-    def filter_opr_by_id(opr_id):
-        return PeerReview.objects.filter(id=opr_id).first()
+    def get_opr_by_id(opr_id) -> PeerReview:
+        return PeerReview.objects.get(id=opr_id)

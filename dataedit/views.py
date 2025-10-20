@@ -37,12 +37,12 @@ from collections import defaultdict
 from io import TextIOWrapper
 from itertools import chain
 
-import sqlalchemy as sqla
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Count
+from django.db.utils import IntegrityError
 from django.http import (
     Http404,
     HttpRequest,
@@ -149,11 +149,10 @@ def AdminConstraintsView(request: HttpRequest) -> HttpResponse:
     :param request:
     :return:
     """
-    post_dict = dict(request.POST)
-    action = post_dict.get("action")[0]
-    id = post_dict.get("id")[0]
-    schema = post_dict.get("schema")[0]
-    table = post_dict.get("table")[0]
+    action = request.POST.get("action")
+    id = request.POST.get("id")
+    schema = request.POST.get("schema")
+    table = request.POST.get("table")
 
     if "deny" in action:
         actions.remove_queued_constraint(id)
@@ -172,11 +171,10 @@ def AdminColumnView(request: HttpRequest) -> HttpResponse:
     :return:
     """
 
-    post_dict = dict(request.POST)
-    action = post_dict.get("action")[0]
-    id = post_dict.get("id")[0]
-    schema = post_dict.get("schema")[0]
-    table = post_dict.get("table")[0]
+    action = request.POST.get("action")
+    id = request.POST.get("id")
+    schema = request.POST.get("schema")
+    table = request.POST.get("table")
 
     if "deny" in action:
         actions.remove_queued_column(id)
@@ -244,7 +242,7 @@ def TopicView(request: HttpRequest) -> HttpResponse:
         table_count=Count("tables")
     )
     for topic in topics.order_by("name").all():
-        count = topic.table_count
+        count = topic.table_count  # type: ignore (see annotate above)
         total_table_count += count
         topics_descriptions_tablecounts.append(
             (topic.name, description[topic.name], count)
@@ -341,7 +339,7 @@ def TagOverviewView(request: HttpRequest) -> HttpResponse:
 def TagEditorView(request: HttpRequest, id: str = "") -> HttpResponse:
     tag = Tag.get_or_none(id)
     if tag:
-        assigned = tag.tables.count() > 0
+        assigned = tag.tables.count() > 0  # type: ignore (related name)
         return render(
             request=request,
             template_name="dataedit/tag_editor.html",
@@ -375,7 +373,7 @@ def ChangeTagView(request: HttpRequest) -> HttpResponse:
                 name = request.POST["tag_text"]
                 color = request.POST["tag_color"]
                 add_tag(name, color)
-        except sqla.exc.IntegrityError:
+        except IntegrityError:
             # requested changes are not valid because of name conflicts
             status = "invalid"
 
@@ -419,7 +417,8 @@ def ViewSaveView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     # update or create corresponding view
     if post_id:
         update_view = DBView.objects.filter(id=post_id).get()
-        update_view.name = post_name
+        if post_name:
+            update_view.name = post_name
         update_view.options = post_options
     else:
         update_view = DBView(
@@ -434,10 +433,11 @@ def ViewSaveView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
 
     # create and update filters
     post_filter_json = request.POST.get("filter")
-    if post_filter_json != "":
+    if post_filter_json:
         post_filter = json.loads(post_filter_json)
 
-        for db_filter in update_view.filter.all():
+        db_filter: DBFilter
+        for db_filter in update_view.filter.all():  # type: ignore (related name )
             # look for filters in the database, that aren't used anymore and delete them
             db_filter_is_used = False
             for defined_filter in post_filter:
@@ -475,7 +475,7 @@ def ViewSetDefaultView(request: HttpRequest, schema: str, table: str) -> HttpRes
     post_id = request.GET.get("id")
 
     for view in DBView.objects.filter(schema=schema, table=table):
-        if str(view.id) == post_id:
+        if str(view.pk) == post_id:
             view.is_default = True
         else:
             view.is_default = False
@@ -559,7 +559,9 @@ class MapView(View):
                 )
             )
         else:
-            return self.get(request, schema, table)
+            return self.get(
+                request=request, schema=schema, table=table, maptype=maptype
+            )
 
 
 class DataView(View):
@@ -618,9 +620,10 @@ class DataView(View):
 
         is_admin = False
         can_add = False
+        user: login_models.myuser = request.user  # type: ignore
         if request.user and not request.user.is_anonymous:
-            is_admin = request.user.has_admin_permissions(schema, table)
-            level = request.user.get_table_permission_level(table_obj)
+            is_admin = user.has_admin_permissions(schema, table)
+            level = user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
         table_label = table_obj.human_readable_name
@@ -630,7 +633,7 @@ class DataView(View):
         view_id = request.GET.get("view")
 
         embargo = Embargo.objects.filter(table=table_obj).first()
-        if embargo:
+        if embargo and embargo.date_ended:
             now = timezone.now()
             if embargo.date_ended > now:
                 embargo_time_left = embargo.date_ended - now
@@ -676,26 +679,26 @@ class DataView(View):
 
         opr_result_context = {}
         if reviews.exists():
-            latest_review = reviews.last()
+            latest_review: PeerReview = reviews.last()  # type:ignore (reviews.exists())
             opr_manager.update_open_since(opr=latest_review)
             current_reviewer = opr_manager.load(latest_review).current_reviewer
             opr_context.update(
                 {
-                    "opr_id": latest_review.id,
+                    "opr_id": latest_review.pk,
                     "opr_current_reviewer": current_reviewer,
                     "is_finished": latest_review.is_finished,
                 }
             )
 
             if latest_review.is_finished:
-                badge = latest_review.review.get("badge")
+                badge = (latest_review.review or {}).get("badge")
                 date_finished = latest_review.date_finished
                 opr_result_context.update(
                     {
                         "badge": badge,
                         "review_url": None,
                         "date_finished": date_finished,
-                        "review_id": latest_review.id,
+                        "review_id": latest_review.pk,
                         "finished": latest_review.is_finished,
                         "review_exists": True,
                     }
@@ -780,8 +783,9 @@ class PermissionView(View):
         can_add = False
         can_remove = False
         level = login_models.NO_PERM
-        if not request.user.is_anonymous:
-            level = request.user.get_table_permission_level(table_obj)
+        user: login_models.myuser = request.user  # type: ignore
+        if not user.is_anonymous:
+            level = user.get_table_permission_level(table_obj)
             is_admin = level >= login_models.ADMIN_PERM
             can_add = level >= login_models.WRITE_PERM
             can_remove = level >= login_models.DELETE_PERM
@@ -803,10 +807,10 @@ class PermissionView(View):
 
     def post(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         table_obj = Table.load(schema, table)
+        user: login_models.myuser = request.user  # type: ignore
         if (
-            request.user.is_anonymous
-            or request.user.get_table_permission_level(table_obj)
-            < login_models.ADMIN_PERM
+            user.is_anonymous
+            or user.get_table_permission_level(table_obj) < login_models.ADMIN_PERM
         ):
             raise PermissionDenied
         if request.POST["mode"] == "add_user":
@@ -975,9 +979,10 @@ class WizardView(LoginRequiredMixin, View):
             if not engine.dialect.has_table(engine, table, schema=schema):
                 raise Http404("Table does not exist")
             table_obj = Table.load(schema, table)
-            if not request.user.is_anonymous:
+            user: login_models.myuser = request.user  # type: ignore
+            if not user.is_anonymous:
                 # user_perms = login_models.UserPermission.objects.filter(table=table_obj)  # noqa
-                level = request.user.get_table_permission_level(table_obj)
+                level = user.get_table_permission_level(table_obj)
                 can_add = level >= login_models.WRITE_PERM
             columns = get_column_description(schema, table)
             # get number of rows
@@ -1017,8 +1022,9 @@ class MetaEditView(LoginRequiredMixin, View):
 
         can_add = False
         table_obj = Table.load(schema, table)
-        if not request.user.is_anonymous:
-            level = request.user.get_table_permission_level(table_obj)
+        user: login_models.myuser = request.user  # type: ignore
+        if not user.is_anonymous:
+            level = user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
         url_table_id = request.build_absolute_uri(
@@ -1099,7 +1105,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         if review_id is None:
             metadata = load_metadata_from_db(schema, table)
         elif review_id:
-            opr = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
+            opr = PeerReviewManager.get_opr_by_id(opr_id=review_id)
             metadata = opr.oemetadata
 
         return metadata
@@ -1139,7 +1145,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             if not val:
                 # handles empty list
                 lines += [{"field": old[1:], "value": str(val)}]
-                # pass
             else:
                 for i, k in enumerate(val):
                     lines += self.parse_keys(
@@ -1302,8 +1307,9 @@ class PeerReviewView(LoginRequiredMixin, View):
         field_descriptions = self.get_all_field_descriptions(json_schema)
 
         # Check user permissions
-        if not request.user.is_anonymous:
-            level = request.user.get_table_permission_level(table_obj)
+        user: login_models.myuser = request.user  # type: ignore
+        if not user.is_anonymous:
+            level = user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
         oemetadata = self.load_json(schema, table, review_id)
@@ -1315,7 +1321,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "dataedit:peer_review_reviewer",
                 kwargs={"schema": schema, "table": table, "review_id": review_id},
             )
-            opr_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
+            opr_review = PeerReviewManager.get_opr_by_id(opr_id=review_id)
             existing_review = opr_review.review.get("reviews", [])
             review_finished = opr_review.is_finished
             categories = [
@@ -1405,85 +1411,84 @@ class PeerReviewView(LoginRequiredMixin, View):
             can be moved to a different schema or topic (TODO).
         """
         context = {}
-        if request.method == "POST":
-            # get the review data and additional application metadata
-            # from user peer review submit/save
-            review_data = json.loads(request.body)
-            if review_id:
-                contributor_review = PeerReview.objects.filter(id=review_id).first()
-                if contributor_review:
-                    contributor_review_data = contributor_review.review.get(
-                        "reviews", []
-                    )
-                    review_data["reviewData"]["reviews"].extend(contributor_review_data)
+        user: login_models.myuser = request.user  # type: ignore
 
-            # The type can be "save" or "submit" as this triggers different behavior
-            review_post_type = review_data.get("reviewType")
-            # The opr datamodel that includes the field review data and metadata
-            review_datamodel = review_data.get("reviewData")
-            review_finished = review_datamodel.get("reviewFinished")
-            # TODO: Send a notification to the user that he can't review tables
-            # he is the table holder.
-            if review_post_type == "delete":
-                return delete_peer_review(review_id)
+        # get the review data and additional application metadata
+        # from user peer review submit/save
+        review_data = json.loads(request.body)
+        if review_id:
+            contributor_review = PeerReview.objects.filter(id=review_id).first()
+            if contributor_review:
+                contributor_review_data = contributor_review.review.get("reviews", [])
+                review_data["reviewData"]["reviews"].extend(contributor_review_data)
 
-            contributor = PeerReviewManager.load_contributor(schema, table)
+        # The type can be "save" or "submit" as this triggers different behavior
+        review_post_type = review_data.get("reviewType")
+        # The opr datamodel that includes the field review data and metadata
+        review_datamodel = review_data.get("reviewData")
+        review_finished = review_datamodel.get("reviewFinished")
+        # TODO: Send a notification to the user that he can't review tables
+        # he is the table holder.
+        if review_post_type == "delete":
+            return delete_peer_review(review_id)
 
-            if contributor is not None:
-                # Überprüfen, ob ein aktiver PeerReview existiert
-                active_peer_review = PeerReview.load(schema=schema, table=table)
-                if active_peer_review is None or active_peer_review.is_finished:
-                    # Kein aktiver PeerReview vorhanden
-                    # oder der aktive PeerReview ist abgeschlossen
-                    table_review = PeerReview(
-                        schema=schema,
-                        table=table,
-                        is_finished=review_finished,
-                        review=review_datamodel,
-                        reviewer=request.user,
-                        contributor=contributor,
-                        oemetadata=load_metadata_from_db(schema=schema, table=table),
-                    )
-                    table_review.save(review_type=review_post_type)
-                else:
-                    # Aktiver PeerReview ist vorhanden ... aktualisieren
-                    current_review_data = active_peer_review.review
-                    merged_review_data = merge_field_reviews(
-                        current_json=current_review_data, new_json=review_datamodel
-                    )
+        contributor = PeerReviewManager.load_contributor(schema, table)
 
-                    # Set new review values and update existing review
-                    active_peer_review.review = merged_review_data
-                    active_peer_review.reviewer = request.user
-                    active_peer_review.contributor = contributor
-                    active_peer_review.update(review_type=review_post_type)
-            else:
-                error_msg = (
-                    "Failed to retrieve any user that identifies "
-                    f"as table holder for the current table: {table}!"
+        if contributor is not None:
+            # Überprüfen, ob ein aktiver PeerReview existiert
+            active_peer_review = PeerReview.load(schema=schema, table=table)
+            if active_peer_review is None or active_peer_review.is_finished:
+                # Kein aktiver PeerReview vorhanden
+                # oder der aktive PeerReview ist abgeschlossen
+                table_review = PeerReview(
+                    schema=schema,
+                    table=table,
+                    is_finished=review_finished,
+                    review=review_datamodel,
+                    reviewer=user,
+                    contributor=contributor,
+                    oemetadata=load_metadata_from_db(schema=schema, table=table),
                 )
-                return JsonResponse({"error": error_msg}, status=400)
+                table_review.save(review_type=review_post_type)
+            else:
+                # Aktiver PeerReview ist vorhanden ... aktualisieren
+                current_review_data = active_peer_review.review
+                merged_review_data = merge_field_reviews(
+                    current_json=current_review_data, new_json=review_datamodel
+                )
 
-            # TODO: Check for schema/topic as reviewed finished also indicates the table
-            # needs to be or has to be moved.
-            if review_finished is True:
-                review_table = Table.load(schema=schema, table=table)
-                review_table.set_is_reviewed()
-                metadata = self.load_json(schema, table, review_id=review_id)
-                updated_metadata = recursive_update(metadata, review_data)
-                save_metadata_to_db(schema, table, updated_metadata)
-                active_peer_review = PeerReview.load(schema=schema, table=table)
+                # Set new review values and update existing review
+                active_peer_review.review = merged_review_data
+                active_peer_review.reviewer = user  # type: ignore
+                active_peer_review.contributor = contributor
+                active_peer_review.update(review_type=review_post_type)
+        else:
+            error_msg = (
+                "Failed to retrieve any user that identifies "
+                f"as table holder for the current table: {table}!"
+            )
+            return JsonResponse({"error": error_msg}, status=400)
 
-                if active_peer_review:
-                    updated_oemetadata = recursive_update(
-                        active_peer_review.oemetadata, review_data
-                    )
-                    active_peer_review.oemetadata = updated_oemetadata
-                    active_peer_review.save()
+        # TODO: Check for schema/topic as reviewed finished also indicates the table
+        # needs to be or has to be moved.
+        if review_finished is True:
+            review_table = Table.load(schema=schema, table=table)
+            review_table.set_is_reviewed()
+            metadata = self.load_json(schema, table, review_id=review_id)
+            updated_metadata = recursive_update(metadata, review_data)
+            save_metadata_to_db(schema, table, updated_metadata)
+            active_peer_review = PeerReview.load(schema=schema, table=table)
 
-                # TODO: also update reviewFinished in review datamodel json
-                # logging.INFO(f"Table {table.name} is now reviewed and can be moved
-                # to the destination schema.")
+            if active_peer_review:
+                updated_oemetadata = recursive_update(
+                    active_peer_review.oemetadata, review_data
+                )
+                active_peer_review.oemetadata = updated_oemetadata
+                active_peer_review.save()
+
+            # TODO: also update reviewFinished in review datamodel json
+            # logging.INFO(f"Table {table.name} is now reviewed and can be moved
+            # to the destination schema.")
 
         return render(request, "dataedit/opr_review.html", context=context)
 
@@ -1514,14 +1519,15 @@ class PeerRreviewContributorView(PeerReviewView):
         can_add = False
         peer_review = PeerReview.objects.get(id=review_id)
         table_obj = Table.load(peer_review.schema, peer_review.table)
-        if not request.user.is_anonymous:
-            level = request.user.get_table_permission_level(table_obj)
+        user: login_models.myuser = request.user  # type: ignore
+        if not user.is_anonymous:
+            level = user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
         oemetadata = self.load_json(schema, table, review_id)
         metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)
         json_schema = self.load_json_schema()
         field_descriptions = self.get_all_field_descriptions(json_schema)
-        review_data = peer_review.review.get("reviews", [])
+        review_data = (peer_review.review or {}).get("reviews", [])
 
         categories = [
             "general",
@@ -1584,9 +1590,7 @@ class PeerRreviewContributorView(PeerReviewView):
             review_data = json.loads(request.body)
             review_post_type = review_data.get("reviewType")
             review_datamodel = review_data.get("reviewData")
-            # unused
-            # review_state = review_data.get("reviewFinished")
-            current_opr = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
+            current_opr = PeerReviewManager.get_opr_by_id(opr_id=review_id)
             existing_reviews = current_opr.review
             merged_review = merge_field_reviews(
                 current_json=existing_reviews, new_json=review_datamodel
@@ -1623,6 +1627,5 @@ def MetadataWidgetView(request: HttpRequest) -> HttpResponse:
             "api:api_table_meta", kwargs={"schema": schema, "table": table}
         )
     }
-    # context = {"meta": OEMETADATA_V20_EXAMPLE}
 
     return render(request, "partials/metadata_viewer.html", context=context)

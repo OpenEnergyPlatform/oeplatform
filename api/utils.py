@@ -19,7 +19,7 @@ def get_dataset_configs(validated_data) -> list[DatasetConfig]:
     ]
 
 
-def check_if_oem_license_exists(metadata: dict):
+def check_if_oem_license_exists(metadata: dict) -> tuple[dict | None, str | None]:
     # already parsed but need to check if metaMetadata version exists
 
     if "metaMetadata" not in metadata:
