@@ -1,6 +1,5 @@
 """
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
@@ -66,6 +65,7 @@ class ScenarioDataTablesSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "human_readable_name", "url"]
 
 
+# TODO jh-RLI: Its called deserializer!!
 class DatasetSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255, required=True)
     external_url = serializers.URLField(
@@ -136,6 +136,7 @@ class DatasetSerializer(serializers.Serializer):
             return None
 
 
+# TODO jh-RLI: Its called deserializer!!
 class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
     scenario_bundle = serializers.UUIDField(
         required=True
