@@ -23,19 +23,15 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import csv
 import itertools
 import json
-import logging
 import re
-from datetime import datetime, timedelta  # noqa
-from decimal import Decimal
+from datetime import datetime, timedelta
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
-import psycopg2
 import requests
 import sqlalchemy as sqla
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.db.utils import IntegrityError
@@ -45,9 +41,7 @@ from django.http import (
     HttpResponseBadRequest,
     HttpResponseServerError,
     JsonResponse,
-    StreamingHttpResponse,
 )
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
@@ -61,10 +55,23 @@ from rest_framework.views import APIView
 import api.parser
 import login.models as login_models
 from api import actions, parser, sessions
-
-# from api.actions import assert_valid_identifier_name
-from api.encode import Echo, GeneratorJSONEncoder
+from api.encode import Echo
 from api.error import APIError
+from api.helper import (
+    MAX_COL_NAME_LENGTH,
+    WHERE_EXPRESSION,
+    OEPStream,
+    check_embargo,
+    conjunction,
+    create_ajax_handler,
+    date_handler,
+    load_cursor,
+    require_admin_permission,
+    require_delete_permission,
+    require_write_permission,
+    stream,
+    update_tags_from_keywords,
+)
 from api.helpers.http import ModHttpResponse
 from api.serializers import (
     EnergyframeworkSerializer,
@@ -84,7 +91,6 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
 from dataedit.models import Table as DBTable
-from dataedit.models import Tag
 from dataedit.views import schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
@@ -101,190 +107,66 @@ if USE_LOEP:
 if USE_ONTOP:
     from oeplatform.settings import ONTOP_SPARQL_ENDPOINT_URL
 
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from api.helper import api_exception
 
-logger = logging.getLogger("oeplatform")
-
-MAX_COL_NAME_LENGTH = 50
-
-WHERE_EXPRESSION = re.compile(
-    r"^(?P<first>[\w\d_\.]+)\s*(?P<operator>"
-    + r"|".join(parser.sql_operators)
-    + r")\s*(?P<second>(?![>=]).+)$"
-)
-
-
-def transform_results(cursor, triggers, trigger_args):
-    row = cursor.fetchone() if not cursor.closed else None
-    while row is not None:
-        yield list(map(actions._translate_fetched_cell, row))
-        row = cursor.fetchone()
-    for t, targs in zip(triggers, trigger_args):
-        t(*targs)
-
-
-class OEPStream(StreamingHttpResponse):
-    def __init__(self, *args, session=None, **kwargs):
-        self.session = session
-        super(OEPStream, self).__init__(*args, **kwargs)
-
-    def __del__(self):
-        if self.session:
-            self.session.close()
-
-
-def load_cursor(named=False):
-    def inner(f):
-        def wrapper(*args, **kwargs):
-            artificial_connection = "connection_id" not in args[1].data
-            fetch_all = "cursor_id" not in args[1].data
-            triggered_close = False
-            if fetch_all:
-                # django_restframework passes different data dictionaries depending
-                # on the request type: PUT -> Mutable, POST -> Immutable
-                # Thus, we have to replace the data dictionary by one we can mutate.
-                if hasattr(args[1].data, "_mutable"):
-                    args[1].data._mutable = True
-                context = {}
-                context["user"] = args[1].user
-                if not artificial_connection:
-                    context["connection_id"] = args[1].data["connection_id"]
-                else:
-                    context.update(actions.open_raw_connection({}, context))
-                    args[1].data["connection_id"] = context["connection_id"]
-                if "cursor_id" in args[1].data:
-                    context["cursor_id"] = args[1].data["cursor_id"]
-                else:
-                    context.update(actions.open_cursor({}, context, named=named))
-                    args[1].data["cursor_id"] = context["cursor_id"]
-            try:
-                result = f(*args, **kwargs)
-                if fetch_all:
-                    cursor = actions.load_cursor_from_context(context)
-                    session = actions.load_session_from_context(context)
-                    if not result:
-                        result = {}
-                    # Initial server-side cursors do not contain any description before
-                    # the first row is fetched. Therefore, we have to try to fetch the
-                    # first one - if successful, we a description if not,
-                    # nothing is returned.
-                    # But: After the last row the cursor will 'forget' its description.
-                    # Therefore we have to fetch the remaining data later.
-
-                    # Set of triggers after all the data was fetched.
-                    # The cursor must not be closed earlier!
-                    triggers = [
-                        actions.close_cursor,
-                        actions.close_raw_connection,
-                        session.connection.commit,
-                    ]
-                    trigger_args = [({}, context), ({}, context), tuple()]
-                    first = None
-                    if not named or cursor.statusmessage:
-                        try:
-                            first = cursor.fetchone()
-                        except psycopg2.ProgrammingError as e:
-                            if not e.args or e.args[0] != "no results to fetch":
-                                raise e
-                        except psycopg2.errors.InvalidCursorName as e:
-                            print(e)
-                    if first:
-                        first = map(actions._translate_fetched_cell, first)
-                        if cursor.description:
-                            description = [
-                                [
-                                    col.name,
-                                    col.type_code,
-                                    col.display_size,
-                                    col.internal_size,
-                                    col.precision,
-                                    col.scale,
-                                    col.null_ok,
-                                ]
-                                for col in cursor.description
-                            ]
-                            result["data"] = (
-                                x
-                                for x in itertools.chain(
-                                    [first],
-                                    transform_results(cursor, triggers, trigger_args),
-                                )
-                            )
-                            result["description"] = description
-                            result["context"] = context
-                            result["rowcount"] = cursor.rowcount
-                            triggered_close = True
-                    if not triggered_close and artificial_connection:
-                        session.connection.commit()
-            finally:
-                if not triggered_close:
-                    if fetch_all and not artificial_connection:
-                        actions.close_cursor({}, context)
-                    if artificial_connection:
-                        actions.close_raw_connection({}, context)
-            return result
-
-        return wrapper
-
-    return inner
+__all__ = [
+    "CloseAllAPIView",
+    "ColumnAPIView",
+    "EnergyframeworkFactsheetListAPIView",
+    "EnergymodelFactsheetListAPIView",
+    "FetchAPIView",
+    "FieldsAPIView",
+    "GroupsAPIView",
+    "IndexAPIView",
+    "ManageOekgScenarioDatasetsAPIView",
+    "MetadataAPIView",
+    "MoveAPIView",
+    "MovePublishAPIView",
+    "OekgSparqlAPIView",
+    "OeoSsearchAPIView",
+    "OevkgSearchAPIView",
+    "RowsAPIView",
+    "ScenarioDataTablesListAPIView",
+    "SequenceAPIView",
+    "TableAPIView",
+    "TableSizeAPIView",
+    "UsersAPIView",
+    "AdvancedSearchAPIView",
+    "AdvancedInsertAPIView",
+    "AdvancedDeleteAPIView",
+    "AdvancedUpdateAPIView",
+    "AdvancedInfoAPIView",
+    "AdvancedHasSchemaAPIView",
+    "AdvancedHasTableAPIView",
+    "AdvancedHasSequenceAPIView",
+    "AdvancedHasTypeAPIView",
+    "AdvancedGetSchemaNamesAPIView",
+    "AdvancedGetTableNamesAPIView",
+    "AdvancedGetViewNamesAPIView",
+    "AdvancedGetViewDefinitionAPIView",
+    "AdvancedGetColumnsAPIView",
+    "AdvancedGetPkConstraintAPIView",
+    "AdvancedGetForeignKeysAPIView",
+    "AdvancedGetIndexesAPIView",
+    "AdvancedGetUniqueConstraintsAPIView",
+    "AdvancedConnectionOpenAPIView",
+    "AdvancedConnectionCloseAPIView",
+    "AdvancedConnectionCommitAPIView",
+    "AdvancedConnectionRollbackAPIView",
+    "AdvancedCursorOpenAPIView",
+    "AdvancedCursorCloseAPIView",
+    "AdvancedCursorFetchOneAPIView",
+    "AdvancedSetIsolationLevelAPIView",
+    "AdvancedGetIsolationLevelAPIView",
+    "AdvancedDoBeginTwophaseAPIView",
+    "AdvancedDoPrepareTwophaseAPIView",
+    "AdvancedDoRollbackTwophaseAPIView",
+    "AdvancedDoCommitTwophaseAPIView",
+    "AdvancedDoRecoverTwophaseAPIView",
+]
 
 
-def cors(allow):
-    def doublewrapper(f):
-        def wrapper(*args, **kwargs):
-            response = f(*args, **kwargs)
-            if allow:
-                response["Access-Control-Allow-Origin"] = "*"
-                response["Access-Control-Allow-Methods"] = "POST"
-                response["Access-Control-Allow-Headers"] = "Content-Type"
-            return response
-
-        return wrapper
-
-    return doublewrapper
-
-
-def api_exception(f):
-    def wrapper(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except actions.APIError as e:
-            return JsonResponse({"reason": e.message}, status=e.status)
-        except KeyError as e:
-            return JsonResponse({"reason": e}, status=400)
-        except DBTable.DoesNotExist:
-            return JsonResponse({"reason": "table does not exist"}, status=404)
-
-    return wrapper
-
-
-def permission_wrapper(permission, f):
-    def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-        table = kwargs.get("table") or kwargs.get("sequence")
-        actions.assert_permission(request.user, table, permission, schema=schema)
-        return f(caller, request, *args, **kwargs)
-
-    return wrapper
-
-
-def require_write_permission(f):
-    return permission_wrapper(login_models.WRITE_PERM, f)
-
-
-def require_delete_permission(f):
-    return permission_wrapper(login_models.DELETE_PERM, f)
-
-
-def require_admin_permission(f):
-    return permission_wrapper(login_models.ADMIN_PERM, f)
-
-
-def conjunction(clauses):
-    return {"type": "operator", "operator": "AND", "operands": clauses}
-
-
-class Sequence(APIView):
+class SequenceAPIView(APIView):
     @api_exception
     def put(self, request, schema, sequence):
         schema = validate_schema(schema)
@@ -319,7 +201,7 @@ class Sequence(APIView):
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
 
-class Metadata(APIView):
+class MetadataAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(self, request, schema, table):
@@ -360,7 +242,7 @@ class Metadata(APIView):
             raise APIError(error)
 
 
-class Table(APIView):
+class TableAPIView(APIView):
     """
     Handles the creation of tables and serves information on existing tables
     """
@@ -797,7 +679,7 @@ class Table(APIView):
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
-class Index(APIView):
+class IndexAPIView(APIView):
     def get(self, request):
         pass
 
@@ -808,7 +690,7 @@ class Index(APIView):
         pass
 
 
-class Column(APIView):
+class ColumnAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(self, request, schema, table, column=None):
@@ -840,7 +722,7 @@ class Column(APIView):
         return JsonResponse({}, status=201)
 
 
-class Fields(APIView):
+class FieldsAPIView(APIView):
     @method_decorator(never_cache)
     def get(self, request, schema, table, id, column=None):
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
@@ -866,7 +748,7 @@ class Fields(APIView):
         pass
 
 
-class MovePublish(APIView):
+class MovePublishAPIView(APIView):
     @require_admin_permission
     @api_exception
     def post(self, request, schema, table, to_schema):
@@ -880,7 +762,7 @@ class MovePublish(APIView):
         return HttpResponse(status=status.HTTP_200_OK)
 
 
-class Move(APIView):
+class MoveAPIView(APIView):
     @require_admin_permission
     @api_exception
     def post(self, request, schema, table, to_schema):
@@ -890,18 +772,7 @@ class Move(APIView):
         return HttpResponse(status=status.HTTP_200_OK)
 
 
-def check_embargo(schema, table):
-    try:
-        table_obj = DBTable.objects.get(name=table)
-        embargo = Embargo.objects.filter(table=table_obj).first()
-        if embargo and embargo.date_ended > timezone.now():
-            return True
-        return False
-    except ObjectDoesNotExist:
-        return False
-
-
-class Rows(APIView):
+class RowsAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(self, request, schema, table, row_id=None):
@@ -1312,105 +1183,12 @@ class Rows(APIView):
         actions._execute_sqla(query, cursor)
 
 
-class Session(APIView):
+class SessionAPIView(APIView):
     def get(self, request, length=1):
         return request.session["resonse"]
 
 
-def date_handler(obj):
-    """
-    Implements a handler to serialize dates in JSON-strings
-    :param obj: An object
-    :return: The str method is called (which is the default serializer for JSON)
-        unless the object has an attribute  *isoformat*
-    """
-    if isinstance(obj, Decimal):
-        return str(obj)
-    if hasattr(obj, "isoformat"):
-        return obj.isoformat()
-    else:
-        return str(obj)
-
-
-# Create your views here.
-
-
-def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
-    """
-    Implements a mapper from api pages to the corresponding functions in
-    api/actions.py
-    :param func: The name of the callable function
-    :return: A JSON-Response that contains a dictionary with
-      the corresponding response stored in *content*
-    """
-
-    class AJAX_View(APIView):
-        @cors(allow_cors)
-        @api_exception
-        def options(self, request, *args, **kwargs):
-            response = HttpResponse()
-
-            return response
-
-        @cors(allow_cors)
-        @api_exception
-        def post(self, request):
-            result = self.execute(request)
-            session = (
-                sessions.load_session_from_context(result.pop("context"))
-                if "context" in result
-                else None
-            )
-            return stream(
-                result,
-                allow_cors=allow_cors and request.user.is_anonymous,
-                session=session,
-            )
-
-        def execute(self, request):
-            if requires_cursor:
-                return load_cursor()(self._internal_execute)(self, request)
-            else:
-                return self._internal_execute(request, request)
-
-        def _internal_execute(self, *args):
-            request = args[1]
-            content = request.data
-            context = {"user": request.user}
-            if "cursor_id" in request.data:
-                context["cursor_id"] = request.data["cursor_id"]
-            if "connection_id" in request.data:
-                context["connection_id"] = request.data["connection_id"]
-            query = content.get("query", ["{}"])
-            try:
-                if isinstance(query, list):
-                    query = query[0]
-                if isinstance(query, str):
-                    query = json.loads(query)
-            except Exception:
-                raise APIError("Your query is not properly formated.")
-            data = func(query, context)
-
-            # This must be done in order to clean the structure of non-serializable
-            # objects (e.g. datetime)
-            if isinstance(data, dict) and "domains" in data:
-                data["domains"] = {
-                    (".".join(key) if isinstance(key, tuple) else key): val
-                    for key, val in data["domains"].items()
-                }
-            response_data = json.loads(json.dumps(data, default=date_handler))
-
-            result = {"content": response_data}
-
-            if "cursor_id" in context:
-                result["cursor_id"] = context["cursor_id"]
-
-            return result
-
-    return AJAX_View.as_view()
-
-
-class FetchView(APIView):
+class FetchAPIView(APIView):
     @api_exception
     def post(self, request, fetchtype):
         if fetchtype == "all":
@@ -1442,34 +1220,13 @@ class FetchView(APIView):
         )
 
 
-def stream(data, allow_cors=False, status_code=status.HTTP_200_OK, session=None):
-    encoder = GeneratorJSONEncoder()
-    response = OEPStream(
-        encoder.iterencode(data),
-        content_type="application/json",
-        status=status_code,
-        session=session,
-    )
-    if allow_cors:
-        response["Access-Control-Allow-Origin"] = "*"
-    return response
-
-
-class CloseAll(LoginRequiredMixin, APIView):
+class CloseAllAPIView(LoginRequiredMixin, APIView):
     def get(self, request):
         sessions.close_all_for_user(request.user)
         return HttpResponse("All connections closed")
 
 
-# def get_users(request):
-#     string = request.GET["name"]
-#     users = login_models.myuser.objects.filter(
-#         Q(name__trigram_similar=string) | Q(name__istartswith=string)
-#     )
-#     return JsonResponse([user.name for user in users], safe=False)
-
-
-def get_users(request):
+def UsersAPIView(request):
     query = request.GET.get("name", "")
 
     # Ensure query is not empty to proceed with filtering
@@ -1493,15 +1250,7 @@ def get_users(request):
     return JsonResponse(user_names, safe=False)
 
 
-# def get_groups(request):
-# string = request.GET["name"]
-# users = login_models.Group.objects.filter(
-#     Q(name__trigram_similar=string) | Q(name__istartswith=string)
-# )
-# return JsonResponse([user.name for user in users], safe=False)
-
-
-def get_groups(request):
+def GroupsAPIView(request):
     """
     Return all Groups where this user is a member that match
     the current query. The query is input by the User.
@@ -1535,7 +1284,7 @@ def get_groups(request):
     return JsonResponse(group_names, safe=False)
 
 
-def oeo_search(request):
+def OeoSsearchAPIView(request):
     if USE_LOEP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         query = request.GET["query"]
@@ -1576,7 +1325,7 @@ class OekgSparqlAPIView(APIView):
             return Response(content, content_type=content_type)
 
 
-def oevkg_search(request):
+def OevkgSearchAPIView(request):
     if USE_ONTOP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         try:
@@ -1648,7 +1397,7 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     serializer_class = ScenarioDataTablesSerializer
 
 
-class ManageOekgScenarioDatasets(APIView):
+class ManageOekgScenarioDatasetsAPIView(APIView):
     permission_classes = [IsAuthenticated]  # Require authentication
 
     @post_only_if_user_is_owner_of_scenario_bundle
@@ -1670,38 +1419,8 @@ class ManageOekgScenarioDatasets(APIView):
 
         return Response(response_data, status=status.HTTP_200_OK)
 
-    # @post_only_if_user_is_owner_of_scenario_bundle
-    # def delete(self, request):
-    #     serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         scenario_uuid = serializer.validated_data["scenario"]
-    #         datasets = serializer.validated_data["datasets"]
 
-    #         # Iterate over each dataset to process it properly
-    #         for dataset in datasets:
-    #             dataset_name = dataset["name"]
-    #             dataset_type = dataset["type"]
-
-    #             # Remove the dataset from the scenario in the bundle
-    #             success = remove_datasets_from_scenario(
-    #                 scenario_uuid, dataset_name, dataset_type
-    #             )
-
-    #             if not success:
-    #                 return Response(
-    #                     {"error": f"Failed to remove dataset {dataset_name}"},
-    #                     status=status.HTTP_400_BAD_REQUEST,
-    #                 )
-
-    #         return Response(
-    #             {"message": "Datasets removed successfully"},
-    #             status=status.HTTP_200_OK,
-    #         )
-
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class TableSize(APIView):
+class TableSizeAPIView(APIView):
     """
     GET /api/v0/db/table-sizes/?schema=<schema>&table=<table>
     - schema+table -> single relation (detailed)
@@ -1729,13 +1448,39 @@ class TableSize(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-def update_tags_from_keywords(table_name: str, keywords: list[str]) -> list[str]:
-    table = DBTable.objects.get(name=table_name)
-    table.tags.clear()
-    keywords_new = set()
-    for keyword in keywords:
-        tag = Tag.get_or_create_from_name(keyword)
-        table.tags.add(tag)
-        keywords_new.add(tag.name_normalized)
-    table.save()
-    return list(keywords_new)
+AdvancedSearchAPIView = create_ajax_handler(
+    actions.data_search, allow_cors=True, requires_cursor=True
+)
+AdvancedInsertAPIView = create_ajax_handler(actions.data_insert, requires_cursor=True)
+AdvancedDeleteAPIView = create_ajax_handler(actions.data_delete, requires_cursor=True)
+AdvancedUpdateAPIView = create_ajax_handler(actions.data_update, requires_cursor=True)
+AdvancedInfoAPIView = create_ajax_handler(actions.data_info)
+AdvancedHasSchemaAPIView = create_ajax_handler(actions.has_schema)
+AdvancedHasTableAPIView = create_ajax_handler(actions.has_table)
+AdvancedHasSequenceAPIView = create_ajax_handler(actions.has_sequence)
+AdvancedHasTypeAPIView = create_ajax_handler(actions.has_type)
+AdvancedGetSchemaNamesAPIView = create_ajax_handler(actions.get_schema_names)
+AdvancedGetTableNamesAPIView = create_ajax_handler(actions.get_table_names)
+AdvancedGetViewNamesAPIView = create_ajax_handler(actions.get_view_names)
+AdvancedGetViewDefinitionAPIView = create_ajax_handler(actions.get_view_definition)
+AdvancedGetColumnsAPIView = create_ajax_handler(actions.get_columns)
+AdvancedGetPkConstraintAPIView = create_ajax_handler(actions.get_pk_constraint)
+AdvancedGetForeignKeysAPIView = create_ajax_handler(actions.get_foreign_keys)
+AdvancedGetIndexesAPIView = create_ajax_handler(actions.get_indexes)
+AdvancedGetUniqueConstraintsAPIView = create_ajax_handler(
+    actions.get_unique_constraints
+)
+AdvancedConnectionOpenAPIView = create_ajax_handler(actions.open_raw_connection)
+AdvancedConnectionCloseAPIView = create_ajax_handler(actions.close_raw_connection)
+AdvancedConnectionCommitAPIView = create_ajax_handler(actions.commit_raw_connection)
+AdvancedConnectionRollbackAPIView = create_ajax_handler(actions.rollback_raw_connection)
+AdvancedCursorOpenAPIView = create_ajax_handler(actions.open_cursor)
+AdvancedCursorCloseAPIView = create_ajax_handler(actions.close_cursor)
+AdvancedCursorFetchOneAPIView = create_ajax_handler(actions.fetchone)
+AdvancedSetIsolationLevelAPIView = create_ajax_handler(actions.set_isolation_level)
+AdvancedGetIsolationLevelAPIView = create_ajax_handler(actions.get_isolation_level)
+AdvancedDoBeginTwophaseAPIView = create_ajax_handler(actions.do_begin_twophase)
+AdvancedDoPrepareTwophaseAPIView = create_ajax_handler(actions.do_prepare_twophase)
+AdvancedDoRollbackTwophaseAPIView = create_ajax_handler(actions.do_rollback_twophase)
+AdvancedDoCommitTwophaseAPIView = create_ajax_handler(actions.do_commit_twophase)
+AdvancedDoRecoverTwophaseAPIView = create_ajax_handler(actions.do_recover_twophase)
