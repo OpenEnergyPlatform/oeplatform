@@ -46,7 +46,7 @@ from dataedit.views import (
 pgsql_qualifier = r"[\w\d_]+"
 app_name = "dataedit"
 
-urlpatterns_view = [
+urlpatterns_view_schema = [
     re_path(
         r"^(?P<schema>{qual})$".format(qual=pgsql_qualifier),
         TablesView,
@@ -134,21 +134,25 @@ urlpatterns_view = [
     ),
 ]
 
-urlpatterns = [
-    path("view/", include(urlpatterns_view)),
-    re_path(r"^view$", TopicView, name="index"),
-    re_path(r"^schemas$", TopicView, name="topic-list"),
-    re_path(r"^$", TopicView),
-    re_path(r"^admin/columns/", AdminColumnView, name="input"),
-    re_path(r"^admin/constraints/", AdminConstraintsView, name="input"),
+urlpatterns_tag = [
     re_path(
-        r"^tags/add/$",
+        r"^add/$",
         RedirectAfterTableTagsUpdatedView,
     ),
-    re_path(r"^tags/?$", TagOverviewView),
-    re_path(r"^tags/set/?$", ChangeTagView),
-    re_path(r"^tags/new/?$", TagEditorView),
-    re_path(r"^tags/(?P<id>[a-z0-9]+)/?$", TagEditorView),
+    re_path(r"^$", TagOverviewView),
+    re_path(r"^set/?$", ChangeTagView),
+    re_path(r"^new/?$", TagEditorView),
+    re_path(r"^edit/(?P<id>[a-z0-9]+)/?$", TagEditorView),
+]
+
+urlpatterns = [
+    path("view/", include(urlpatterns_view_schema)),
+    re_path(r"^view$", TopicView, name="index"),
+    re_path(r"^schemas$", TopicView, name="topic-list"),
+    path("tags/", include(urlpatterns_tag)),
+    re_path(r"^$", TopicView),
+    re_path(r"^admin/columns/", AdminColumnView, name="admin-columns"),
+    re_path(r"^admin/constraints/", AdminConstraintsView, name="admin-contraints"),
     re_path(
         r"^wizard/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
         WizardView.as_view(),
