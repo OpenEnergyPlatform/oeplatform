@@ -200,9 +200,8 @@ def api_exception(f):
 
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
         table = kwargs.get("table") or kwargs.get("sequence")
-        actions.assert_permission(request.user, table, permission, schema=schema)
+        actions.assert_permission(user=request.user, table=table, permission=permission)
         return f(caller, request, *args, **kwargs)
 
     return wrapper

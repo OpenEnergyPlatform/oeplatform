@@ -57,6 +57,7 @@ from api.sessions import (
 from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
+from login.models import myuser as User
 from login.utils import validate_open_data_license
 from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
@@ -111,9 +112,7 @@ class ResponsiveException(Exception):
     pass
 
 
-def assert_permission(user, table: str, permission, schema=None):
-    if schema is None:
-        schema = SCHEMA_DEFAULT_TEST_SANDBOX
+def assert_permission(user: User, table: str, permission: int):
     if user.is_anonymous:
         raise APIError("User is anonymous", 401)
 
@@ -1291,7 +1290,9 @@ def data_delete(request, context=None):
     if schema is None:
         schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
-    assert_permission(context["user"], table, login_models.DELETE_PERM, schema=schema)
+    assert_permission(
+        user=context["user"], table=table, permission=login_models.DELETE_PERM
+    )
 
     target_table = get_delete_table_name(orig_schema, orig_table)
     setter = []
@@ -1315,7 +1316,9 @@ def data_update(request, context=None):
     if schema is None:
         schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
-    assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
+    assert_permission(
+        user=context["user"], table=table, permission=login_models.WRITE_PERM
+    )
 
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(request, "values")
@@ -1440,7 +1443,7 @@ def data_insert(request, context=None):
     schema_name, table_name = get_table_name(schema_name, table_name)
 
     assert_permission(
-        context["user"], table_name, login_models.WRITE_PERM, schema=schema_name
+        user=context["user"], table=table_name, permission=login_models.WRITE_PERM
     )
 
     # mapper = {orig_schema: schema, orig_table: table}
@@ -2377,12 +2380,11 @@ def update_meta_search(table: str) -> None:
     table_obj.save()
 
 
-def set_table_metadata(table: str, schema: str, metadata):
+def set_table_metadata(table: str, metadata):
     """saves metadata as json string on table comment.
 
     Args:
         table(str): name of table
-        schema(str): schema of table
         metadata: OEPMetadata or metadata object (dict) or metadata str
         cursor: sql alchemy connection cursor
     """

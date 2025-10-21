@@ -593,7 +593,7 @@ def update_keywords_from_tags(table: Table, schema: str) -> None:
     keywords = [tag.name_normalized for tag in table.tags.all()]
     metadata["resources"][0]["keywords"] = keywords
 
-    actions.set_table_metadata(table=table.name, schema=schema, metadata=metadata)
+    actions.set_table_metadata(table=table.name, metadata=metadata)
 
 
 def get_column_description(schema, table):

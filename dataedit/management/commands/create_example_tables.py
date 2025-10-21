@@ -240,7 +240,7 @@ class Command(BaseCommand):
             raise Exception(f"Metadata validation error: {error}")
 
         # Save to Django's oemetadata JSONB field and comment
-        set_table_metadata(table=table, schema=schema, metadata=metadata)
+        set_table_metadata(table=table, metadata=metadata)
 
         self.stdout.write(
             self.style.SUCCESS(f"✔ Metadata saved and tags synced for {schema}.{table}")

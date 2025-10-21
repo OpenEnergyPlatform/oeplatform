@@ -235,7 +235,7 @@ class MetadataAPIView(APIView):
             metadata.pop("connection_id", None)
             metadata.pop("cursor_id", None)
 
-            actions.set_table_metadata(table=table, schema=schema, metadata=metadata)
+            actions.set_table_metadata(table=table, metadata=metadata)
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
@@ -399,7 +399,7 @@ class TableAPIView(APIView):
         metadata = payload.get("metadata")
         if metadata:
 
-            actions.set_table_metadata(table=table, schema=schema, metadata=metadata)
+            actions.set_table_metadata(table=table, metadata=metadata)
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
@@ -549,15 +549,13 @@ class TableAPIView(APIView):
             self._apply_embargo(table_object, embargo_data)
 
             if metadata:
-                actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata
-                )
+                actions.set_table_metadata(table=table, metadata=metadata)
 
             try:
-                self._assign_table_holder(request.user, schema, table)
+                self._assign_table_holder(user=request.user, table=table)
             except ValueError as e:
                 # Ensure the user is assigned as the table holder
-                self._assign_table_holder(request.user, schema, table)
+                self._assign_table_holder(user=request.user, table=table)
                 raise APIError(
                     "Table was created without embargo due to an unexpected "
                     "error during embargo setup."
@@ -571,12 +569,10 @@ class TableAPIView(APIView):
                 column_definitions=column_definitions,
                 constraint_definitions=constraint_definitions,
             )
-            self._assign_table_holder(request.user, schema, table)
+            self._assign_table_holder(user=request.user, table=table)
 
             if metadata:
-                actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata
-                )
+                actions.set_table_metadata(table=table, metadata=metadata)
 
     def _create_table_object(self, table: str):
         try:
@@ -629,7 +625,7 @@ class TableAPIView(APIView):
                 )
             embargo.save()
 
-    def _assign_table_holder(self, user, schema: str, table: str):
+    def _assign_table_holder(self, user, table: str):
         table_object = DBTable.load(name=table)
         perm, _ = login_models.UserPermission.objects.get_or_create(
             table=table_object, holder=user
