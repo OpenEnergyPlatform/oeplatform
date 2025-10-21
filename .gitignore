@@ -117,3 +117,6 @@ site/
 # Jenna fuseki graph db installation
 /apache-jena-fuseki*/
 /apache-jena-fuseki*.tar.gz*
+
+# NPM & VITE
+patches/

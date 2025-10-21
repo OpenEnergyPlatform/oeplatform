@@ -39,6 +39,11 @@ SPDX-License-Identifier: CC0-1.0
 ## Changes
 
 - tag ids switched from numerical to (normalized) string
+- Rework oeo-view app using the
+  [Terminology Service Suite Widget library](https://ts4nfdi.github.io/terminology-service-suite/comp/latest/?path=/docs/overview--docs)
+  using the [TIB-Terminology Service API](https://api.terminology.tib.eu/api/)
+  to query the OEO contents
+  [(#2105)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2105)
 
 ## Features
 
