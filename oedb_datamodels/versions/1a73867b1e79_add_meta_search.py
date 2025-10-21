@@ -33,12 +33,6 @@ def upgrade():
         sa.PrimaryKeyConstraint("schema", "table"),
         schema="public",
     )
-    conn = op.get_bind()
-    meta = sa.MetaData(bind=conn)
-    meta.reflect()
-
-    for table in meta.tables.values():
-        update_meta_search(table=table.name)
 
 
 def downgrade():
