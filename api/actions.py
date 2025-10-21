@@ -115,13 +115,13 @@ class ResponsiveException(Exception):
     pass
 
 
-def assert_permission(user, table, permission, schema=None):
+def assert_permission(user, table: str, permission, schema=None):
     if schema is None:
         schema = SCHEMA_DEFAULT_TEST_SANDBOX
     if user.is_anonymous:
         raise APIError("User is anonymous", 401)
 
-    if user.get_table_permission_level(DBTable.load(schema, table)) < permission:
+    if user.get_table_permission_level(DBTable.load(name=table)) < permission:
         raise PermissionDenied
 
 
@@ -142,19 +142,15 @@ def assert_add_tag_permission(user, table, permission, schema):
         PermissionDenied: _description_
 
     """
-    # if not request.user.is_anonymous:
-    #         level = request.user.get_table_permission_level(table)
-    #         can_add = level >= login_models.WRITE_PERM
-
     if user.is_anonymous:
         raise APIError("User is anonymous", 401)
 
-    if user.get_table_permission_level(DBTable.load(schema, table)) < permission:
+    if user.get_table_permission_level(DBTable.load(name=table)) < permission:
         raise PermissionDenied
 
 
 def assert_has_metadata(table: str, schema: str):
-    table_obj = DBTable.load(schema, table)
+    table_obj = DBTable.load(name=table)
     if table_obj.oemetadata is None:
         result = False
     else:
@@ -1168,7 +1164,7 @@ def _get_table(schema, table) -> Table:
 
 
 def get_table_metadata(schema: str, table: str) -> dict:
-    django_obj = DBTable.load(schema=schema, table=table)
+    django_obj = DBTable.load(name=table)
     oemetadata = django_obj.oemetadata
     return oemetadata if oemetadata else {}
 
@@ -1660,10 +1656,10 @@ def move_publish(from_schema, table, to_schema, embargo_period):
             reset_embargo = Embargo.objects.get(table=t)
             reset_embargo.delete()
 
-    all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
+    all_peer_reviews = PeerReview.objects.filter(table=t)
 
     for peer_review in all_peer_reviews:
-        peer_review.update_all_table_peer_reviews_after_table_moved(to_schema=to_schema)
+        peer_review.update_all_table_peer_reviews_after_table_moved(topic=to_schema)
 
     t.set_is_published(topic_name=to_schema)
 
@@ -2421,7 +2417,7 @@ def set_table_metadata(table: str, schema: str, metadata):
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.load(table=table, schema=schema)
+    django_table_obj = DBTable.load(name=table)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
 

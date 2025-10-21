@@ -631,7 +631,7 @@ class TableAPIView(APIView):
             embargo.save()
 
     def _assign_table_holder(self, user, schema: str, table: str):
-        table_object = DBTable.load(schema, table)
+        table_object = DBTable.load(name=table)
         perm, _ = login_models.UserPermission.objects.get_or_create(
             table=table_object, holder=user
         )
@@ -900,7 +900,7 @@ class RowsAPIView(APIView):
                     for x in itertools.chain([cols], return_obj["data"])
                 ),
             )
-            django_table = DBTable.load(schema, table)
+            django_table = DBTable.load(name=table)
             if django_table and django_table.oemetadata:
                 zf.writestr(
                     "datapackage.json",

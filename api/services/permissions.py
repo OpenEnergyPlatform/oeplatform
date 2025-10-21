@@ -6,7 +6,7 @@ def assign_table_holder(user, schema: str, table: str):
     """
     Grant ADMIN permission level to user for the specified table.
     """
-    table_obj = DBTable.load(schema, table)
+    table_obj = DBTable.load(name=table)
 
     perm, created = UserPermission.objects.get_or_create(
         table=table_obj,

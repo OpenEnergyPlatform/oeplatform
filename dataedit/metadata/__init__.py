@@ -51,7 +51,7 @@ def save_metadata_to_db(schema: str, table: str, updated_metadata):
     """
 
     # Load the table object
-    table_obj = Table.load(schema=schema, table=table)
+    table_obj = Table.load(name=table)
 
     # Update the oemetadata field
     table_obj.oemetadata = updated_metadata
@@ -77,7 +77,7 @@ def load_metadata_from_db(schema: str, table: str):
         or keep the old functionality (TODO).
     """
 
-    metadata = Table.load(schema=schema, table=table).oemetadata
+    metadata = Table.load(name=table).oemetadata
     if not metadata:
         metadata = OEMETADATA_V20_TEMPLATE
     return metadata

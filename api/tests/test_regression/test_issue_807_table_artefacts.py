@@ -1,5 +1,5 @@
 """Some api actions run `assert_permission`, which calls
-DBTable.load(schema, table), which used get_or_create().
+DBTable.load(table), which used get_or_create().
 
 This caused the creation of an artefact entry in django tables.
 

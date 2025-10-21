@@ -53,8 +53,6 @@ class MigrationTest(TestCase):
         PeerReview.objects.create(
             # Make sure this assignment matches your model's expectations
             table=table.name,
-            # Adjust based on how `schema` is related in `PeerReview`
-            schema=SCHEMA_DEFAULT_TEST_SANDBOX,
             contributor=test_contributor,
             reviewer=test_reviewer,
             # Simulate a record that needs migration

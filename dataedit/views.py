@@ -78,7 +78,9 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import (
+    Embargo,
+)
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -594,11 +596,9 @@ class TableDataView(View):
             raise Http404("Schema not accessible")
 
         metadata = load_metadata_from_db(schema, table)
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
         if table_obj is None:
             raise Http404("Table object could not be loaded")
-
-        # oemetadata = table_obj.oemetadata
 
         # TODO: Adapt this stuff to v2
         from dataedit.metadata import TEMPLATE_V1_5
@@ -622,14 +622,14 @@ class TableDataView(View):
         can_add = False
         user: login_models.myuser = request.user  # type: ignore
         if request.user and not request.user.is_anonymous:
-            is_admin = user.has_admin_permissions(schema, table)
+            is_admin = user.has_admin_permissions(table=table)
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
         table_label = table_obj.human_readable_name
 
-        table_views = DBView.objects.filter(table=table).filter(schema=schema)
-        default = DBView(name="default", type="table", table=table, schema=schema)
+        table_views = DBView.objects.filter(table=table)
+        default = DBView(name="default", type="table", table=table)
         view_id = request.GET.get("view")
 
         embargo = Embargo.objects.filter(table=table_obj).first()
@@ -665,13 +665,11 @@ class TableDataView(View):
         opr_result_context = {}
         # maybe call the update also on this view to show the days open on page
         opr_manager = PeerReviewManager()
-        reviews = opr_manager.filter_opr_by_table(schema=schema, table=table)
+        reviews = opr_manager.filter_opr_by_table(table=table)
 
         opr_context = {
-            "contributor": PeerReviewManager.load_contributor(
-                schema=schema, table=table
-            ),
-            "reviewer": PeerReviewManager.load_reviewer(schema=schema, table=table),
+            "contributor": PeerReviewManager.load_contributor(table=table),
+            "reviewer": PeerReviewManager.load_reviewer(table=table),
             "opr_enabled": False,
             # oemetadata
             # is not None,  # check if the table has the metadata
@@ -775,7 +773,7 @@ class TablePermissionView(View):
         if schema not in schema_whitelist:
             raise Http404("Schema not accessible")
 
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
 
         user_perms = login_models.UserPermission.objects.filter(table=table_obj)
         group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
@@ -806,7 +804,7 @@ class TablePermissionView(View):
         )
 
     def post(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
         user: login_models.myuser = request.user  # type: ignore
         if (
             user.is_anonymous
@@ -834,7 +832,7 @@ class TablePermissionView(View):
             return HttpResponseBadRequest("User name is required.")
 
         user = login_models.myuser.objects.filter(name=user_name).first()
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
         p, _ = login_models.UserPermission.objects.get_or_create(
             holder=user, table=table_obj
         )
@@ -849,7 +847,7 @@ class TablePermissionView(View):
             return HttpResponseBadRequest("User id is required.")
 
         user = login_models.myuser.objects.filter(id=user_id).first()
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.level = request.POST["level"]
         p.save()
@@ -863,7 +861,7 @@ class TablePermissionView(View):
             return HttpResponseBadRequest("User id is required.")
 
         user = get_object_or_404(login_models.myuser, id=user_id)
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.delete()
         return self.get(request, schema, table)
@@ -876,7 +874,7 @@ class TablePermissionView(View):
             return HttpResponseBadRequest("Group name is required.")
 
         group = get_object_or_404(login_models.UserGroup, name=group_name)
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
         p, _ = login_models.GroupPermission.objects.get_or_create(
             holder=group, table=table_obj
         )
@@ -890,7 +888,7 @@ class TablePermissionView(View):
             return HttpResponseBadRequest("Group id is required.")
 
         group = get_object_or_404(login_models.UserGroup, id=group_id)
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
         )
@@ -905,7 +903,7 @@ class TablePermissionView(View):
             return HttpResponseBadRequest("Group id is required.")
 
         group = get_object_or_404(login_models.UserGroup, id=group_id)
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
         )
@@ -1015,7 +1013,7 @@ class TableMetaEditView(LoginRequiredMixin, View):
         columns = get_column_description(schema, table)
 
         can_add = False
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
         user: login_models.myuser = request.user  # type: ignore
         if not user.is_anonymous:
             level = user.get_table_permission_level(table_obj)
@@ -1297,7 +1295,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
-        table_obj = Table.load(schema, table)
+        table_obj = Table.load(name=table)
         field_descriptions = self.get_all_field_descriptions(json_schema)
 
         # Check user permissions
@@ -1426,16 +1424,15 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         if review_post_type == "delete":
             return delete_peer_review(review_id)
 
-        contributor = PeerReviewManager.load_contributor(schema, table)
+        contributor = PeerReviewManager.load_contributor(table=table)
 
         if contributor is not None:
             # Überprüfen, ob ein aktiver PeerReview existiert
-            active_peer_review = PeerReview.load(schema=schema, table=table)
+            active_peer_review = PeerReview.load(table=table)
             if active_peer_review is None or active_peer_review.is_finished:
                 # Kein aktiver PeerReview vorhanden
                 # oder der aktive PeerReview ist abgeschlossen
                 table_review = PeerReview(
-                    schema=schema,
                     table=table,
                     is_finished=review_finished,
                     review=review_datamodel,
@@ -1466,12 +1463,12 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         # TODO: Check for schema/topic as reviewed finished also indicates the table
         # needs to be or has to be moved.
         if review_finished is True:
-            review_table = Table.load(schema=schema, table=table)
+            review_table = Table.load(name=table)
             review_table.set_is_reviewed()
             metadata = self.load_json(schema, table, review_id=review_id)
             updated_metadata = recursive_update(metadata, review_data)
             save_metadata_to_db(schema, table, updated_metadata)
-            active_peer_review = PeerReview.load(schema=schema, table=table)
+            active_peer_review = PeerReview.load(table=table)
 
             if active_peer_review:
                 updated_oemetadata = recursive_update(
@@ -1512,7 +1509,7 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         """
         can_add = False
         peer_review = PeerReview.objects.get(id=review_id)
-        table_obj = Table.load(peer_review.schema, peer_review.table)
+        table_obj = Table.load(peer_review.table)
         user: login_models.myuser = request.user  # type: ignore
         if not user.is_anonymous:
             level = user.get_table_permission_level(table_obj)
