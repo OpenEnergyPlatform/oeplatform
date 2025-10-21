@@ -51,7 +51,7 @@ def table_exists_in_oedb(table, schema=None):
     return result
 
 
-def table_exists_in_django(table_name: str):
+def table_exists_in_django(table: str):
     """check if table exists in django
 
     Args:
@@ -62,7 +62,7 @@ def table_exists_in_django(table_name: str):
         bool
     """
     try:
-        Table.objects.get(name=table_name)
+        Table.objects.get(name=table)
         return True
     except Table.DoesNotExist:
         return False

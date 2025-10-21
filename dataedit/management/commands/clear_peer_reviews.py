@@ -86,9 +86,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"Entry with ID {entry_id} does not exist.")
 
             peer_review = PeerReview.objects.get(id=entry_id)
-            table_id = Table.load(
-                schema_name=peer_review.schema, table_name=peer_review.table
-            )
+            table_id = Table.load(schema=peer_review.schema, table=peer_review.table)
 
             try:
                 # Update the specific row by ID to set is_reviewed to False

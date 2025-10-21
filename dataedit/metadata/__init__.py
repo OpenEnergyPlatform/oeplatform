@@ -16,16 +16,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 # TODO: This might have t be removed fully
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
 
-# from dataedit.metadata.v1_3 import TEMPLATE_v1_3
-# from dataedit.metadata.v1_4 import TEMPLATE_V1_4
 from dataedit.metadata.v1_5 import TEMPLATE_V1_5
-
-# import omi
-# import omi.validation
-# from dataedit.metadata import v1_5 as __LATEST
-
-
-# from .error import MetadataException
+from dataedit.models import Table
 
 METADATA_TEMPLATE = {
     5: TEMPLATE_V1_5,
@@ -43,7 +35,7 @@ METADATA_HIDDEN_FIELDS = [
 ]
 
 
-def save_metadata_to_db(schema_name: str, table_name: str, updated_metadata):
+def save_metadata_to_db(schema: str, table: str, updated_metadata):
     """
     Save updated metadata for a specific table in the OEP database.
 
@@ -58,10 +50,8 @@ def save_metadata_to_db(schema_name: str, table_name: str, updated_metadata):
         table object back to the database.
     """
 
-    from dataedit.models import Table
-
     # Load the table object
-    table_obj = Table.load(schema_name=schema_name, table_name=table_name)
+    table_obj = Table.load(schema=schema, table=table)
 
     # Update the oemetadata field
     table_obj.oemetadata = updated_metadata
@@ -70,7 +60,7 @@ def save_metadata_to_db(schema_name: str, table_name: str, updated_metadata):
     table_obj.save()
 
 
-def load_metadata_from_db(schema_name: str, table_name: str):
+def load_metadata_from_db(schema: str, table: str):
     """
     Load metadata for a specific table from the OEP database.
 
@@ -87,9 +77,7 @@ def load_metadata_from_db(schema_name: str, table_name: str):
         or keep the old functionality (TODO).
     """
 
-    from dataedit.models import Table
-
-    metadata = Table.load(schema_name=schema_name, table_name=table_name).oemetadata
+    metadata = Table.load(schema=schema, table=table).oemetadata
     if not metadata:
         metadata = OEMETADATA_V20_TEMPLATE
     return metadata

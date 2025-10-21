@@ -78,12 +78,12 @@ class APITestCase(TestCase):
     def api_req(
         self,
         method: str,
-        table: str = None,
-        schema: str = None,
-        path: str = None,
-        data: dict = None,
+        table: str | None = None,
+        schema: str | None = None,
+        path: str | None = None,
+        data: dict | None = None,
         auth=None,
-        exp_code: int = None,
+        exp_code: int | None = None,
         exp_res=None,
     ):
         path = path or ""

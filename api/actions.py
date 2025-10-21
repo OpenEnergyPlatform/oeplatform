@@ -55,11 +55,8 @@ from api.sessions import (
     load_session_from_context,
 )
 from api.utils import check_if_oem_license_exists, validate_schema
-from dataedit.helper import get_readable_table_name
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
-from dataedit.structures import TableTags as OEDBTableTags
-from dataedit.structures import Tag as OEDBTag
 from login.utils import validate_open_data_license
 from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
@@ -156,9 +153,9 @@ def assert_add_tag_permission(user, table, permission, schema):
         raise PermissionDenied
 
 
-def assert_has_metadata(table, schema):
-    table = DBTable.load(schema, table)
-    if table.oemetadata is None:
+def assert_has_metadata(table: str, schema: str):
+    table_obj = DBTable.load(schema, table)
+    if table_obj.oemetadata is None:
         result = False
     else:
         result = True
@@ -196,7 +193,7 @@ def _translate_sqla_type(column):
         return column.data_type
 
 
-def try_parse_metadata(inp):
+def try_parse_metadata(inp) -> tuple[dict | None, str | None]:
     """
 
     Args:
@@ -1163,15 +1160,15 @@ ACTIONS FROM OLD API
 """
 
 
-def _get_table(schema, table):
+def _get_table(schema, table) -> Table:
     engine = _get_engine()
     metadata = MetaData(bind=_get_engine())
 
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
 
-def get_table_metadata(schema_name: str, table_name: str):
-    django_obj = DBTable.load(schema_name=schema_name, table_name=table_name)
+def get_table_metadata(schema: str, table: str) -> dict:
+    django_obj = DBTable.load(schema=schema, table=table)
     oemetadata = django_obj.oemetadata
     return oemetadata if oemetadata else {}
 
@@ -1570,14 +1567,7 @@ def count_all(request, context=None):
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
     t = _get_table(schema, table)
-    return session.query(t).count()  # _get_count(session.query(t))
-
-
-def _get_header(results):
-    header = []
-    for field in results.cursor.description:
-        header.append({"id": field[0], "type": field[1]})  # .decode('utf-8'),
-    return header
+    return session.query(t).count()
 
 
 def analyze_columns(schema, table):
@@ -1605,13 +1595,13 @@ def move(from_schema, table, to_schema):
     """
     move_publish(
         from_schema=from_schema,
-        table_name=table,
+        table=table,
         to_schema=to_schema,
         embargo_period="none",
     )
 
 
-def move_publish(from_schema, table_name, to_schema, embargo_period):
+def move_publish(from_schema, table, to_schema, embargo_period):
     """
     The issue about publishing datatables  in the context of the OEP
     is that tables must be moved physically in the postgreSQL database.
@@ -1635,7 +1625,7 @@ def move_publish(from_schema, table_name, to_schema, embargo_period):
 
     """
 
-    t = DBTable.objects.get(name=table_name)
+    t = DBTable.objects.get(name=table)
     license_check, license_error = validate_open_data_license(t)
 
     if not license_check:
@@ -2376,33 +2366,29 @@ def apply_deletion(session, table, rows, rids):
         set_applied(session, table, [rid], __DELETE)
 
 
-def update_meta_search(table, schema):
+def update_meta_search(table: str, schema: str) -> None:
     """
     TODO: also update JSONB index fields
     """
     schema = validate_schema(schema)
 
-    t = DBTable.objects.get(name=table)
+    table_obj = DBTable.objects.get(name=table)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
-    session = sessionmaker()(bind=_get_engine())
-    tags = session.query(OEDBTag.name).filter(
-        OEDBTableTags.table_name == table,
-        OEDBTableTags.tag == OEDBTag.id,
-    )
+    tags = [t.name for t in table_obj.tags.all()]
     s = " ".join(
         (
             *re.findall(r"\w+", schema),
             *re.findall(r"\w+", table),
             *re.findall(r"\w+", comment),
-            *(tag[0] for tag in tags),
+            *(tag for tag in tags),
         )
     )
 
-    t.search = Func(Value(s), function="to_tsvector")
-    t.save()
+    table_obj.search = Func(Value(s), function="to_tsvector")
+    table_obj.save()
 
 
-def set_table_metadata(table_name: str, schema_name: str, metadata, cursor=None):
+def set_table_metadata(table: str, schema: str, metadata):
     """saves metadata as json string on table comment.
 
     Args:
@@ -2435,7 +2421,7 @@ def set_table_metadata(table_name: str, schema_name: str, metadata, cursor=None)
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.load(table_name=table_name, schema_name=schema_name)
+    django_table_obj = DBTable.load(table=table, schema=schema)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
 
@@ -2443,7 +2429,7 @@ def set_table_metadata(table_name: str, schema_name: str, metadata, cursor=None)
     # update the table human readable name after oemetadata is available
     # ---------------------------------------
 
-    readable_table_name = get_readable_table_name(django_table_obj)
+    readable_table_name = django_table_obj.get_readable_table_name()
     django_table_obj.set_human_readable_name(
         current_name=django_table_obj.human_readable_name,
         readable_table_name=readable_table_name,
@@ -2453,7 +2439,7 @@ def set_table_metadata(table_name: str, schema_name: str, metadata, cursor=None)
     # update search index
     # ---------------------------------------
 
-    update_meta_search(table_name, schema_name)
+    update_meta_search(table, schema)
 
 
 def get_single_table_size(

@@ -144,7 +144,7 @@ class Command(BaseCommand):
         "to migrate data to single schema"
     )
 
-    def handle(self, migrate: bool = False, *args, **options):
+    def handle(self, *args, **options):
         sql = get_migration_sql()
         logging.info("Here is the proposed migration sql code")
         print(sql)  # print so we could pipe it into psql or file
