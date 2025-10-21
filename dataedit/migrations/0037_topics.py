@@ -12,7 +12,7 @@ from django.db import migrations, models
 
 from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
-TOPICS = [  # from dataedit/views.py:schema_whitelist
+TOPICS = [
     "boundaries",
     "climate",
     "demand",

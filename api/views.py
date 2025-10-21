@@ -93,7 +93,6 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
 from dataedit.models import Table as DBTable
-from dataedit.views import schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -765,8 +764,6 @@ class MoveAPIView(APIView):
     def post(
         self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonResponse:
-        if schema not in schema_whitelist or to_schema not in schema_whitelist:
-            raise APIError("Invalid origin or target schema")
         actions.move(schema, table, to_schema)
         return HttpResponse(status=status.HTTP_200_OK)
 
@@ -1463,21 +1460,16 @@ class TableSizeAPIView(APIView):
 
     @api_exception
     def get(self, request: Request) -> JsonResponse:
-        schema = request.query_params.get("schema")
         table = request.query_params.get("table")
 
-        allowed = schema_whitelist  # reuse existing whitelist
-
-        if schema and table:
-            if schema not in allowed:
-                raise APIError(f"Schema '{schema}' is not allowed.", status=403)
-            data = actions.get_single_table_size(schema, table, allowed)
+        if table:
+            data = actions.get_single_table_size(table=table)
             if not data:
-                raise APIError(f"Relation {schema}.{table} not found.", status=404)
+                raise APIError(f"Relation {table} not found.", status=404)
             return Response(data)
 
-        # list mode (schema optional)
-        data = actions.list_table_sizes(allowed_schemas=allowed, schema=schema)
+        # list mode
+        data = actions.list_table_sizes()
         return Response(data, status=status.HTTP_200_OK)
 
 

@@ -37,10 +37,16 @@ from django.views.generic.edit import DeleteView, UpdateView
 from rest_framework.authtoken.models import Token
 
 import login.models as models
-
-# from dataedit.helper import delete_peer_review
-from dataedit.models import PeerReview, PeerReviewManager
-from dataedit.views import schema_whitelist
+from dataedit.models import PeerReview, PeerReviewManager, Topic
+from login.forms import (
+    CreateUserForm,
+    DetachForm,
+    EditUserForm,
+    GroupForm,
+    OEPPasswordChangeForm,
+)
+from login.models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
+from login.models import myuser as OepUser
 from login.utils import (
     get_badge_icon_path,
     get_review_badge_from_table_metadata,
@@ -50,17 +56,7 @@ from login.utils import (
 )
 from oeplatform.securitysettings import SCHEMA_DATA
 
-from .forms import (
-    CreateUserForm,
-    DetachForm,
-    EditUserForm,
-    GroupForm,
-    OEPPasswordChangeForm,
-)
-
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
-from .models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
-from .models import myuser as OepUser
 
 ###########################################################################
 #            User Tables related views & partial views for htmx           #
@@ -141,7 +137,7 @@ class TablesView(View):
             "profile_user": user,
             "draft_tables_page": draft_page_obj,
             "published_tables_page": published_page_obj,
-            "schema_whitelist": schema_whitelist,
+            "topics": [t.name for t in Topic.objects.all()],
         }
 
         # TODO: Fix this is_ajax as it is outdated according to django documentation ...

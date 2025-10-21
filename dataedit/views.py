@@ -1,4 +1,5 @@
-"""
+"""This is the initial view that initialises the database connection.
+
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
@@ -93,7 +94,7 @@ from dataedit.models import (
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from login import models as login_models
-from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.securitysettings import SCHEMA_DATA
 from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS
 
 __all__ = [
@@ -121,26 +122,6 @@ __all__ = [
     "TableViewSetDefaultView",
     "TableWizardView",
 ]  # mark views as used (by urls.py)
-
-
-""" This is the initial view that initialises the database connection """
-schema_whitelist = [
-    "boundaries",
-    "climate",
-    "demand",
-    "economy",
-    "emission",
-    "environment",
-    "grid",
-    "model_draft",
-    "openstreetmap",
-    "policy",
-    "reference",
-    "scenario",
-    "society",
-    "supply",
-    SCHEMA_DATA,
-]
 
 
 def AdminConstraintsView(request: HttpRequest) -> HttpResponse:
@@ -267,9 +248,6 @@ def TablesView(request: HttpRequest, schema: str) -> HttpResponse:
     :param schema_name: Name of a schema
     :return: Renders the list of all tables in the specified schema
     """
-
-    if schema not in schema_whitelist or schema.startswith("_"):
-        raise Http404("Schema not accessible")
 
     searched_query_string = request.GET.get("query")
     searched_tag_ids = request.GET.getlist("tags")
@@ -590,12 +568,7 @@ class TableDataView(View):
         :return:
         """
 
-        if (
-            schema not in schema_whitelist and schema != SCHEMA_DEFAULT_TEST_SANDBOX
-        ) or schema.startswith("_"):
-            raise Http404("Schema not accessible")
-
-        metadata = load_metadata_from_db(schema, table)
+        metadata = load_metadata_from_db(table=table)
         table_obj = Table.load(name=table)
         if table_obj is None:
             raise Http404("Table object could not be loaded")
@@ -770,8 +743,6 @@ class TablePermissionView(View):
     """
 
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
-        if schema not in schema_whitelist:
-            raise Http404("Schema not accessible")
 
         table_obj = Table.load(name=table)
 
@@ -1095,7 +1066,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
         metadata = {}
         if review_id is None:
-            metadata = load_metadata_from_db(schema, table)
+            metadata = load_metadata_from_db(table=table)
         elif review_id:
             opr = PeerReviewManager.get_opr_by_id(opr_id=review_id)
             metadata = opr.oemetadata
@@ -1438,7 +1409,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
                     review=review_datamodel,
                     reviewer=user,
                     contributor=contributor,
-                    oemetadata=load_metadata_from_db(schema=schema, table=table),
+                    oemetadata=load_metadata_from_db(table=table),
                 )
                 table_review.save(review_type=review_post_type)
             else:

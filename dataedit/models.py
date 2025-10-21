@@ -26,8 +26,6 @@ from typing import Union
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
 from django.db import models
-
-# django.contrib.postgres.fields.JSONField is deprecated.
 from django.db.models import (
     BooleanField,
     CharField,
@@ -40,7 +38,7 @@ from django.db.models import (
 from django.urls import reverse
 from django.utils import timezone
 
-# Create your models here.
+from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class TableRevision(models.Model):
@@ -169,6 +167,10 @@ class Table(Tagable):
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
+
+    @property
+    def oedb_schema(self) -> str:
+        return SCHEMA_DEFAULT_TEST_SANDBOX if self.is_sandbox else SCHEMA_DATA
 
     @classmethod
     def load(cls, name: str) -> "Table":

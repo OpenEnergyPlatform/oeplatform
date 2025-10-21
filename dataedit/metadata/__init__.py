@@ -60,12 +60,11 @@ def save_metadata_to_db(schema: str, table: str, updated_metadata):
     table_obj.save()
 
 
-def load_metadata_from_db(schema: str, table: str):
+def load_metadata_from_db(table: str) -> dict:
     """
     Load metadata for a specific table from the OEP database.
 
     Args:
-        schema (str): The name of the OEP schema.
         table (str): The name of the table in the OEP schema.
 
     Returns:

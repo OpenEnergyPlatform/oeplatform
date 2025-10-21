@@ -58,7 +58,7 @@ from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
 from login.utils import validate_open_data_license
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -101,10 +101,6 @@ def get_table_name(schema, table, restrict_schemas=True):
     if schema.startswith("_") or schema == "public" or schema is None:
         raise PermissionDenied
 
-    # TODO check if table in schema_whitelist but circular import
-    # from dataedit.views import schema_whitelist
-    # if schema not in schema_whitelist
-    #     raise PermissionDenied
     return schema, table
 
 
@@ -2362,18 +2358,15 @@ def apply_deletion(session, table, rows, rids):
         set_applied(session, table, [rid], __DELETE)
 
 
-def update_meta_search(table: str, schema: str) -> None:
+def update_meta_search(table: str) -> None:
     """
     TODO: also update JSONB index fields
     """
-    schema = validate_schema(schema)
-
     table_obj = DBTable.objects.get(name=table)
-    comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
+    comment = str(dataedit.metadata.load_metadata_from_db(table=table))
     tags = [t.name for t in table_obj.tags.all()]
     s = " ".join(
         (
-            *re.findall(r"\w+", schema),
             *re.findall(r"\w+", table),
             *re.findall(r"\w+", comment),
             *(tag for tag in tags),
@@ -2435,15 +2428,14 @@ def set_table_metadata(table: str, schema: str, metadata):
     # update search index
     # ---------------------------------------
 
-    update_meta_search(table, schema)
+    update_meta_search(table=table)
 
 
-def get_single_table_size(
-    schema: str, table: str, allowed_schemas: list[str]
-) -> dict | None:
+def get_single_table_size(table: str) -> dict | None:
     """
     Return size details for one schema.table or None if not found.
     """
+
     sql = sa.text(
         """
         SELECT
@@ -2458,8 +2450,7 @@ def get_single_table_size(
     """  # noqa: E501
     )
 
-    if schema not in allowed_schemas:
-        raise APIError(f"Schema '{schema}' is not allowed.", status=403)
+    schema = DBTable.load(name=table).oedb_schema
     sess = create_oedb_session()
     try:
         res = sess.execute(sql, {"schema": schema, "table": table})
@@ -2474,25 +2465,11 @@ def get_single_table_size(
         sess.close()
 
 
-def list_table_sizes(
-    allowed_schemas: list[str], schema: str | None = None
-) -> list[dict]:
+def list_table_sizes() -> list[dict]:
     """
-    List table sizes limited to a whitelist. If `schema` provided, restrict to it.
+    List table sizes
     """
-    if schema and schema not in allowed_schemas:
-        # Let the view map this to 403 cleanly
-        from .error import APIError
-
-        raise APIError(f"Schema '{schema}' is not allowed.", status=403)
-
-    if schema:
-        filter_sql = "table_schema = :schema"
-        params = {"schema": schema}
-    else:
-        filter_sql = "table_schema = ANY(:schemas)"
-        params = {"schemas": allowed_schemas}
-
+    oedb_schema = SCHEMA_DATA
     sql = sa.text(
         f"""
         SELECT
@@ -2503,7 +2480,7 @@ def list_table_sizes(
             pg_total_relation_size(format('%I.%I', table_schema, table_name)) AS total_bytes,
             pg_size_pretty(pg_total_relation_size(format('%I.%I', table_schema, table_name))) AS total_pretty
         FROM information_schema.tables
-        WHERE {filter_sql}
+        WHERE table_schema="{oedb_schema}"
           AND table_type = 'BASE TABLE'
         ORDER BY pg_total_relation_size(format('%I.%I', table_schema, table_name)) DESC
     """  # noqa: E501
@@ -2511,7 +2488,7 @@ def list_table_sizes(
 
     sess = create_oedb_session()
     try:
-        res = sess.execute(sql, params)
+        res = sess.execute(sql)
         rows = res.fetchall()
         out = []
         for r in rows:
