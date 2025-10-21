@@ -137,18 +137,6 @@ class Tag(models.Model):
         return tag
 
 
-class Schema(Tagable):
-    """
-    Represents a schema in the database.
-
-    Attributes:
-        name (str): The name of the schema. Must be unique.
-    """
-
-    class Meta:
-        unique_together = (("name"),)
-
-
 class Table(Tagable):
     """
     Represents a table within a schema in the database.
@@ -165,9 +153,6 @@ class Table(Tagable):
         The oemetadata field helps avoid performance issues due to
         JSON string parsing.
     """
-
-    # TODO: will be deleted in second phase of migration to dataset schema
-    schema = models.ForeignKey(Schema, on_delete=models.CASCADE, null=True)
 
     search = SearchVectorField(default="")
 
