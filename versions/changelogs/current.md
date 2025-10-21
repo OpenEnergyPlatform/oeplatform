@@ -38,6 +38,8 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- tag ids switched from numerical to (normalized) string
+
 ## Features
 
 ## Bugs
