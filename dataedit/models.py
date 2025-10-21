@@ -69,7 +69,7 @@ class Tag(models.Model):
     usage_tracked_since = DateTimeField(null=False, default=timezone.now)
 
     @classmethod
-    def get_name_normalized(cls, name: str) -> str | None:
+    def get_name_normalized(cls, name: str | None) -> str | None:
         name_norm = name or ""
         name_norm = name_norm.lower()
         name_norm = re.sub("[^a-z0-9]+", "_", name_norm)
@@ -80,7 +80,7 @@ class Tag(models.Model):
         return name_norm
 
     @classmethod
-    def get_name_clean(cls, name: str) -> str | None:
+    def get_name_clean(cls, name: str | None) -> str | None:
         name_clean = name or ""
         re.sub(r"\s+", " ", name_clean)
         name_clean = name_clean.strip()
@@ -406,7 +406,7 @@ class PeerReview(models.Model):
 
         current_index = None
         for index, review in enumerate(peer_reviews):
-            if review.id == self.id:
+            if review.pk == self.pk:
                 current_index = index
                 break
 
@@ -713,7 +713,7 @@ class PeerReviewManager(models.Model):
         current_table = Table.load(name=table)
         try:
             table_holder = (
-                current_table.userpermission_set.filter(table=current_table.id)
+                current_table.userpermission_set.filter(table=current_table.pk)
                 .first()
                 .holder
             )

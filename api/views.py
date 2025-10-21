@@ -126,7 +126,6 @@ __all__ = [
     "OeoSsearchAPIView",
     "OevkgSearchAPIView",
     "RowsAPIView",
-    "SessionAPIView",
     "ScenarioDataTablesListAPIView",
     "SequenceAPIView",
     "TableAPIView",
@@ -1207,11 +1206,6 @@ class RowsAPIView(APIView):
 
         cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)
-
-
-class SessionAPIView(APIView):
-    def get(self, request: Request, length=1) -> JsonResponse:
-        return request.session["resonse"]
 
 
 class AdvancedFetchAPIView(APIView):

@@ -41,7 +41,6 @@ from api.error import APIError
 from dataedit.models import Embargo
 from dataedit.models import Table as DBTable
 from dataedit.models import Tag
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
 

@@ -19,7 +19,6 @@ from django.contrib.postgres.search import SearchQuery
 from django.db.models import Q, QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.utils.encoding import smart_str
-from sqlalchemy.orm import sessionmaker
 
 import api.parser
 import oeplatform.securitysettings as sec
@@ -548,42 +547,6 @@ def send_dump(schema, table, fname):
     # It's usually a good idea to set the 'Content-Length' header too.
     # You can also set any other required headers: Cache-Control, etc.
     return response
-
-
-def get_dependencies(schema, table, found=None):
-    if not found:
-        found = {(schema, table)}
-
-    query = "SELECT DISTINCT \
-        ccu.table_name AS foreign_table, \
-        ccu.table_schema AS foreign_schema \
-        FROM  \
-        information_schema.table_constraints AS tc \
-        JOIN information_schema.constraint_column_usage AS ccu \
-          ON ccu.constraint_name = tc.constraint_name \
-        WHERE constraint_type = 'FOREIGN KEY' AND tc.table_schema='{schema}'\
-        AND tc.table_name='{table}';".format(
-        schema=schema, table=table
-    )
-
-    engine = actions._get_engine()
-    # metadata = sqla.MetaData(bind=engine)
-    Session = sessionmaker()
-    session = Session(bind=engine)
-
-    result = session.execute(query)
-    found_new = {
-        (row.foreign_schema, row.foreign_table)
-        for row in result
-        if (row.foreign_schema, row.foreign_table) not in found
-    }
-    found = found.union(found_new)
-    found.add((schema, table))
-    session.close()
-    for s, t in found_new:
-        found = found.union(get_dependencies(s, t, found))
-
-    return found
 
 
 def update_keywords_from_tags(table: Table, schema: str) -> None:
