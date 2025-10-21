@@ -84,3 +84,7 @@ class TableCreationOrchestrator:
             self.oedb_svc.drop(schema, table)
         if metadata_created:
             self.django_svc.delete(table=table)
+
+    def drop_table(self, schema, table):
+        self.oedb_svc.drop(schema, table)
+        self.django_svc.delete(table=table)

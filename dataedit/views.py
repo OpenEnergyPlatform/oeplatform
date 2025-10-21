@@ -78,9 +78,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import (
-    Embargo,
-)
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -99,27 +97,27 @@ from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS
 __all__ = [
     "AdminColumnView",
     "AdminConstraintsView",
-    "ChangeTagView",
-    "DataView",
-    "GraphView",
-    "MapView",
+    "TagUpdateView",
+    "TableDataView",
+    "TableGraphView",
+    "TableMapView",
     "MetadataWidgetView",
-    "MetaEditView",
-    "PeerReviewView",
-    "PeerRreviewContributorView",
-    "PermissionView",
-    "RedirectAfterTableTagsUpdatedView",
-    "RevisionView",
-    "ShowRevisionView",
+    "TableMetaEditView",
+    "TablePeerReviewView",
+    "TablePeerRreviewContributorView",
+    "TablePermissionView",
+    "TageTableAddView",
+    "TableRevisionView",
+    "TableShowRevisionView",
     "StandaloneMetaEditView",
     "TablesView",
     "TagEditorView",
     "TagOverviewView",
     "TopicView",
-    "ViewDeleteView",
-    "ViewSaveView",
-    "ViewSetDefaultView",
-    "WizardView",
+    "TableViewDeleteView",
+    "TableViewSaveView",
+    "TableViewSetDefaultView",
+    "TableWizardView",
 ]  # mark views as used (by urls.py)
 
 
@@ -307,12 +305,12 @@ def TablesView(request: HttpRequest, schema: str) -> HttpResponse:
     )
 
 
-class RevisionView(View):
+class TableRevisionView(View):
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         return redirect(f"/api/v0/schema/{schema}/tables/{table}/rows")
 
 
-def ShowRevisionView(
+def TableShowRevisionView(
     request: HttpRequest, schema: str, table: str, date: str
 ) -> HttpResponse:
     rev = TableRevision.objects.get(schema=schema, table=table, date=date)
@@ -359,7 +357,7 @@ def TagEditorView(request: HttpRequest, id: str = "") -> HttpResponse:
 
 
 @login_required
-def ChangeTagView(request: HttpRequest) -> HttpResponse:
+def TagUpdateView(request: HttpRequest) -> HttpResponse:
     status = ""  # error status if operation fails
 
     if "submit_save" in request.POST:
@@ -384,7 +382,7 @@ def ChangeTagView(request: HttpRequest) -> HttpResponse:
     return redirect("/dataedit/tags/?status=" + status)
 
 
-def ViewSaveView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
+def TableViewSaveView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     post_name = request.POST.get("name")
     post_type = request.POST.get("type")
     post_id = request.POST.get("id")
@@ -471,7 +469,9 @@ def ViewSaveView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     return redirect("../../" + table + "?view=" + str(update_view.id))
 
 
-def ViewSetDefaultView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
+def TableViewSetDefaultView(
+    request: HttpRequest, schema: str, table: str
+) -> HttpResponse:
     post_id = request.GET.get("id")
 
     for view in DBView.objects.filter(schema=schema, table=table):
@@ -483,7 +483,7 @@ def ViewSetDefaultView(request: HttpRequest, schema: str, table: str) -> HttpRes
     return redirect("/dataedit/view/" + schema + "/" + table)
 
 
-def ViewDeleteView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
+def TableViewDeleteView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     post_id = request.GET.get("id")
 
     view = DBView.objects.get(id=post_id, schema=schema, table=table)
@@ -492,7 +492,7 @@ def ViewDeleteView(request: HttpRequest, schema: str, table: str) -> HttpRespons
     return redirect("/dataedit/view/" + schema + "/" + table)
 
 
-class GraphView(View):
+class TableGraphView(View):
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         # get the columns id from the schema and the table
         columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
@@ -521,7 +521,7 @@ class GraphView(View):
         )
 
 
-class MapView(View):
+class TableMapView(View):
     def get(
         self, request: HttpRequest, schema: str, table: str, maptype: str
     ) -> HttpResponse:
@@ -564,7 +564,7 @@ class MapView(View):
             )
 
 
-class DataView(View):
+class TableDataView(View):
     """This class handles the GET and POST requests for the main page of data edit.
 
     This view is displayed when a table is clicked on after choosing a schema
@@ -766,7 +766,7 @@ class DataView(View):
         )
 
 
-class PermissionView(View):
+class TablePermissionView(View):
     """This method handles the GET requests for the main page of data edit.
     Initialises the session data (if necessary)
     """
@@ -914,7 +914,7 @@ class PermissionView(View):
 
 
 @login_required
-def RedirectAfterTableTagsUpdatedView(request: HttpRequest) -> HttpResponse:
+def TageTableAddView(request: HttpRequest) -> HttpResponse:
     """
     Updates the tags on a table according to the tag values in request.
     The update will delete all tags that are not present
@@ -959,14 +959,14 @@ def RedirectAfterTableTagsUpdatedView(request: HttpRequest) -> HttpResponse:
     return redirect(request.META["HTTP_REFERER"])
 
 
-class WizardView(LoginRequiredMixin, View):
+class TableWizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv)."""
 
     def get(
         self, request: HttpRequest, schema: str = SCHEMA_DATA, table: str | None = None
     ) -> HttpResponse:
         """Handle GET request (render the page)."""
-        engine = actions._get_engine()
+
         schema = utils.validate_schema(schema)
 
         can_add = False
@@ -974,16 +974,10 @@ class WizardView(LoginRequiredMixin, View):
         # pk_fields = None
         n_rows = None
         if table:
-            # get information about the table
-            # if upload: table must exist in schema model_draft
-            if not engine.dialect.has_table(engine, table, schema=schema):
-                raise Http404("Table does not exist")
-            table_obj = Table.load(schema, table)
+            table_obj = Table.objects.get(name=table)
             user: login_models.myuser = request.user  # type: ignore
-            if not user.is_anonymous:
-                # user_perms = login_models.UserPermission.objects.filter(table=table_obj)  # noqa
-                level = user.get_table_permission_level(table_obj)
-                can_add = level >= login_models.WRITE_PERM
+            level = user.get_table_permission_level(table_obj)
+            can_add = level >= login_models.WRITE_PERM
             columns = get_column_description(schema, table)
             # get number of rows
             sql = "SELECT COUNT(*) FROM {schema}.{table}".format(
@@ -1014,7 +1008,7 @@ class WizardView(LoginRequiredMixin, View):
         return render(request, "dataedit/wizard.html", context=context)
 
 
-class MetaEditView(LoginRequiredMixin, View):
+class TableMetaEditView(LoginRequiredMixin, View):
     """Metadata editor (cliet side json forms)."""
 
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
@@ -1081,7 +1075,7 @@ class StandaloneMetaEditView(View):
         )
 
 
-class PeerReviewView(LoginRequiredMixin, View):
+class TablePeerReviewView(LoginRequiredMixin, View):
     """
     A view handling the peer review of metadata. This view supports loading,
     parsing, sorting metadata, and handling GET and POST requests for peer review.
@@ -1493,7 +1487,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         return render(request, "dataedit/opr_review.html", context=context)
 
 
-class PeerRreviewContributorView(PeerReviewView):
+class TablePeerRreviewContributorView(TablePeerReviewView):
     """
     A view handling the contributor's side of the peer review process.
     This view supports rendering the review template and handling GET and

@@ -208,6 +208,10 @@ class Table(Tagable):
 
         return table_obj
 
+    @classmethod
+    def get_or_none(cls, name: str) -> Union["Table", None]:
+        return Table.objects.filter(name=name).first()
+
     def set_is_reviewed(self):
         """
         Mark the table as reviewed and save the change to the database.
