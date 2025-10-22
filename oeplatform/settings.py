@@ -363,7 +363,7 @@ CAPTCHA_IMAGE_SIZE = (300, 80)  # width, height in pixels
 CAPTCHA_FONT_SIZE = 52
 
 # dynamic variable to check if code is run in test or not
-IS_TEST = "test" in sys.argv or os.getenv("PYTEST_CURRENT_TEST") is not None
+IS_TEST = "test" in sys.argv
 IS_SANDBOX = IS_TEST
 SCHEMA_DEFAULT = SCHEMA_DEFAULT_TEST_SANDBOX if IS_SANDBOX else SCHEMA_DATA
 
