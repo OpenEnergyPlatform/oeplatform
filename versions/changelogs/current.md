@@ -49,6 +49,8 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- issue #2041: sort json columns
+
 ## Removed
 
 ## Documentation updates
