@@ -3,11 +3,11 @@ from django.db import transaction
 from api import actions
 from api.error import APIError
 from dataedit.models import Table as DBTable
-from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import IS_SANDBOX, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class DjangoTableService:
-    def create(self, table: str, is_sandbox: bool = True):
+    def create(self, table: str, is_sandbox: bool = IS_SANDBOX):
         return DBTable.objects.create(name=table, is_sandbox=is_sandbox)
 
     def delete(self, table: str):
