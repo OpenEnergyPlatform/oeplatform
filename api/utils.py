@@ -35,7 +35,7 @@ def check_if_oem_license_exists(metadata: dict) -> tuple[dict | None, str | None
     return metadata["metaMetadata"]["metadataVersion"], None
 
 
-def validate_schema(schema: str | None) -> str:
+def validate_schema(schema: str) -> str:
     schema = schema or SCHEMA_DEFAULT_TEST_SANDBOX  # default fallback
     if schema.startswith("_"):
         prefix = "_"

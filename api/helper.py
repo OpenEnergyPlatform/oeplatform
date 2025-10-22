@@ -29,7 +29,7 @@ from decimal import Decimal
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpRequest, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
@@ -262,14 +262,14 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     class AJAX_View(APIView):
         @cors(allow_cors)
         @api_exception
-        def options(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        def options(self, request, *args, **kwargs):
             response = HttpResponse()
 
             return response
 
         @cors(allow_cors)
         @api_exception
-        def post(self, request: HttpRequest) -> JsonResponse:
+        def post(self, request):
             result = self.execute(request)
             session = (
                 sessions.load_session_from_context(result.pop("context"))
@@ -282,7 +282,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
                 session=session,
             )
 
-        def execute(self, request: HttpRequest):
+        def execute(self, request):
             if requires_cursor:
                 return load_cursor()(self._internal_execute)(self, request)
             else:
