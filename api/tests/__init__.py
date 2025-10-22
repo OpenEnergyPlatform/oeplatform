@@ -81,19 +81,21 @@ class APITestCase(TestCase):
         table: str | None = None,
         schema: str | None = None,
         path: str | None = None,
+        url: str | None = None,
         data: dict | None = None,
         auth=None,
         exp_code: int | None = None,
         exp_res=None,
     ):
-        path = path or ""
-        if path.startswith("/"):
-            assert not table and not schema
-            url = f"/api/v0{path}"
-        else:
-            table = table or self.test_table
-            schema = schema or self.test_schema
-            url = f"/api/v0/schema/{schema}/tables/{table}/{path}"
+        if not url:
+            path = path or ""
+            if path.startswith("/"):
+                assert not table and not schema
+                url = f"/api/v0{path}"
+            else:
+                table = table or self.test_table
+                schema = schema or self.test_schema
+                url = f"/api/v0/schema/{schema}/tables/{table}/{path}"
 
         data = json.dumps(data) if data else ""  # IMPORTANT: keep empty string
 
