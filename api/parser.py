@@ -43,15 +43,14 @@ from sqlalchemy.exc import ArgumentError
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun
 from sqlalchemy.sql.elements import Slice
-from sqlalchemy.sql.expression import CompoundSelect
-from sqlalchemy.sql.sqltypes import Interval
+from sqlalchemy.sql.expression import ColumnClause, CompoundSelect
+from sqlalchemy.sql.sqltypes import Interval, Text
 
+from api import actions
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
 from api.utils import validate_schema
-from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
-
-__KNOWN_TABLES = {}
+from oeplatform.settings import SCHEMA_DEFAULT, SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -182,7 +181,18 @@ def parse_insert(d, context, message=None, mapper=None):
     return query, values
 
 
-def parse_select(d):
+def get_json_columns(table: str, schema: str | None = None, **_kwargs) -> set[str]:
+    """Get set of json/jsonb column names in table"""
+    schema = schema or SCHEMA_DEFAULT
+    column_descriptions = actions.describe_columns(schema=schema, table=table)
+    return {
+        name
+        for name, spec in column_descriptions.items()
+        if "json" in spec["data_type"]
+    }
+
+
+def parse_select(d: dict):
     """
     Defintion of a select query according to
     http://www.postgresql.org/docs/9.3/static/sql-select.html
@@ -193,6 +203,7 @@ def parse_select(d):
         [ FOR { UPDATE | NO KEY UPDATE | SHARE | KEY SHARE }
             [ OF table_name [, ...] ] [ NOWAIT ] [...] ]
     """
+
     distinct = d.get("distinct", False)
 
     L = None
@@ -259,8 +270,22 @@ def parse_select(d):
             elif type.lower() == "except":
                 query.except_(subquery)
     if "order_by" in d:
+
+        # issue #2041: order by on json columns fails,
+        # so we try to find json columns and cast them as text for ordering
+        if "from" in d:
+            json_columns = get_json_columns(**d["from"])
+        else:
+            json_columns = set()
+
         for ob in d["order_by"]:
+
             expr = parse_expression(ob)
+
+            if expr.name in json_columns:
+                # cannot order json fields, so we cast them to string
+                expr = cast(expr, Text)
+
             if isinstance(ob, dict):
                 desc = ob.get("ordering", "asc").lower() == "desc"
                 if desc:
@@ -362,8 +387,9 @@ def load_table_from_metadata(table, schema=None):
             return Table(table, __PARSER_META, autoload=True, schema=schema)
 
 
-def parse_column(d, mapper):
+def parse_column(d, mapper) -> ColumnClause:
     name = get_or_403(d, "column")
+
     is_literal = parse_single(d.get("is_literal", False), bool)
     table_name = d.get("table")
     table = None
@@ -379,6 +405,7 @@ def parse_column(d, mapper):
         schema_name = validate_schema(schema_name)
 
         table = load_table_from_metadata(table_name, schema=schema_name)
+
     if table is not None and name in table.c:
         col = table.c[name]
         if isinstance(col.type, INTERVAL):
@@ -488,8 +515,9 @@ _POSTGIS_MAP = {
 }
 
 
-def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=True):
-    # TODO: Implement
+def parse_expression(
+    d: dict | list | str, mapper=None, allow_untyped_dicts=False, escape_quotes=True
+) -> dict | list | str:
     if isinstance(d, dict):
         if allow_untyped_dicts and "type" not in d:
             return d
@@ -542,7 +570,6 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
                 read_pgid(d["schema"]) if "schema" in d else SCHEMA_DEFAULT_TEST_SANDBOX
             )
             schema_name = validate_schema(schema_name)
-            # s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
             return Sequence(get_or_403(d, "sequence"), schema=schema_name)
         if dtype == "select":
             return parse_select(d)
