@@ -41,6 +41,7 @@ from api.error import APIError
 from dataedit.models import Embargo
 from dataedit.models import Table as DBTable
 from dataedit.models import Tag
+from oeplatform.settings import SCHEMA_DEFAULT
 
 logger = logging.getLogger("oeplatform")
 
@@ -348,3 +349,14 @@ def update_tags_from_keywords(table: str, keywords: list[str]) -> list[str]:
         keywords_new.add(tag.name_normalized)
     table_obj.save()
     return list(keywords_new)
+
+
+def get_json_columns(table: str, schema: str | None = None, **_kwargs) -> set[str]:
+    """Get set of json/jsonb column names in table"""
+    schema = schema or SCHEMA_DEFAULT
+    column_descriptions = actions.describe_columns(schema=schema, table=table)
+    return {
+        name
+        for name, spec in column_descriptions.items()
+        if "json" in spec["data_type"]
+    }

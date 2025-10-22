@@ -131,10 +131,7 @@ urlpatterns_v0_schema = urlpatterns_v0_schema_table + [
 
 
 urlpatterns_v0_advanced = [
-    re_path(
-        r"^search",
-        AdvancedSearchAPIView,
-    ),
+    re_path(r"^search", AdvancedSearchAPIView, name="advenced-search"),
     re_path(
         r"^insert",
         AdvancedInsertAPIView,
