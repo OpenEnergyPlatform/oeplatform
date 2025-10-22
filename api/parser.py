@@ -50,7 +50,6 @@ from api.error import APIError, APIKeyError
 from api.utils import validate_schema
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
-
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 
@@ -266,15 +265,12 @@ def parse_select(d):
             json_columns = set()
 
         for ob in d["order_by"]:
-
             expr = parse_expression(ob)
 
+            # cannot order json fields, so we cast them to string
             if expr.name in json_columns:
-                # cannot order json fields, so we cast them to string
                 expr = cast(expr, Text)
 
-        for ob in d["order_by"]:
-            expr = parse_expression(ob)
             if isinstance(ob, dict):
                 desc = ob.get("ordering", "asc").lower() == "desc"
                 if desc:
