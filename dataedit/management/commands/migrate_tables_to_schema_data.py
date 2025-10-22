@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 
 from api.actions import _get_engine, get_schema_names, get_table_names
 from dataedit.models import Table
-from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 # copied from dataedit.views, because it may be removed later
 schemas_whitelist = {

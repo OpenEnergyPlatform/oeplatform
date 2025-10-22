@@ -94,8 +94,7 @@ from dataedit.models import (
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from login import models as login_models
-from oeplatform.securitysettings import SCHEMA_DATA
-from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS
+from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SCHEMA_DATA
 
 __all__ = [
     "AdminColumnView",

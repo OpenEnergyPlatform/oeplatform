@@ -18,7 +18,7 @@ from api.actions import (
 )
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
-from oeplatform.securitysettings import SCHEMA_DATA
+from oeplatform.settings import SCHEMA_DATA
 
 User = get_user_model()
 
@@ -85,7 +85,6 @@ class Command(BaseCommand):
             name="test", defaults={"email": "test@mail.com", "is_staff": True}
         )
 
-        print("Hello  world")
         orchestrator = TableCreationOrchestrator()
 
         for spec in TABLE_DEFS:

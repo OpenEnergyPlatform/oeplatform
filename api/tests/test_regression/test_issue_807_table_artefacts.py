@@ -11,7 +11,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from api.actions import assert_permission
 from api.connection import table_exists_in_django, table_exists_in_oedb
 from api.tests import APITestCase
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class Test_issue_807_table_artefacts(APITestCase):

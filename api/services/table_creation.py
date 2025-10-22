@@ -3,7 +3,7 @@ from django.db import transaction
 from api import actions
 from api.error import APIError
 from dataedit.models import Table as DBTable
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class DjangoTableService:

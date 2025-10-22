@@ -54,7 +54,7 @@ from login.utils import (
     get_user_tables,
     validate_open_data_license,
 )
-from oeplatform.securitysettings import SCHEMA_DATA
+from oeplatform.settings import SCHEMA_DATA
 
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
 

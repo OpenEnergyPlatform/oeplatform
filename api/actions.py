@@ -59,7 +59,7 @@ from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
 from login.models import myuser as User
 from login.utils import validate_open_data_license
-from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 

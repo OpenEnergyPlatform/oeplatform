@@ -44,7 +44,6 @@ from dataedit.models import Tag
 
 logger = logging.getLogger("oeplatform")
 
-MAX_COL_NAME_LENGTH = 50
 
 WHERE_EXPRESSION = re.compile(
     r"^(?P<first>[\w\d_\.]+)\s*(?P<operator>"

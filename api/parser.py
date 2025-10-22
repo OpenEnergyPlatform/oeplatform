@@ -49,7 +49,7 @@ from sqlalchemy.sql.sqltypes import Interval
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
 from api.utils import validate_schema
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 __KNOWN_TABLES = {}
 

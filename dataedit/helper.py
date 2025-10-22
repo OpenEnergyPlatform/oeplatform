@@ -21,9 +21,9 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.encoding import smart_str
 
 import api.parser
-import oeplatform.securitysettings as sec
 from api import actions
 from dataedit.models import PeerReview, Table, Tag
+from oeplatform.settings import MEDIA_ROOT
 
 # TODO: WINGECHR: model_draft is not a topic, but currently,
 # frontend still usses it to filter / search for unpublished data
@@ -534,7 +534,7 @@ def add_tag(name: str, color: str) -> None:
 
 
 def send_dump(schema, table, fname):
-    path = sec.MEDIA_ROOT + "/dumps/{schema}/{table}/{fname}.dump".format(
+    path = MEDIA_ROOT + "/dumps/{schema}/{table}/{fname}.dump".format(
         fname=fname, schema=schema, table=table
     )
     f = FileWrapper(open(path, "rb"))

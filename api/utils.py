@@ -8,7 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from oekg.sparqlModels import DatasetConfig
-from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 def get_dataset_configs(validated_data) -> list[DatasetConfig]:

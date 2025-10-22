@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 
 from api.actions import update_meta_search
 from api.connection import _get_engine
-from oeplatform.securitysettings import SCHEMA_DATA
+from oeplatform.settings import SCHEMA_DATA
 
 
 class Command(BaseCommand):

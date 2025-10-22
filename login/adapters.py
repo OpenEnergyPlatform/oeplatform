@@ -24,7 +24,7 @@ class AccountAdapter(DefaultAccountAdapter):
     """
 
     def is_open_for_signup(self, request: HttpRequest) -> bool:
-        return getattr(settings, "ACCOUNT_ALLOW_REGISTRATION", True)
+        return settings.ACCOUNT_ALLOW_REGISTRATION
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -35,7 +35,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(
         self, request: HttpRequest, sociallogin: SocialLogin
     ) -> bool:
-        return getattr(settings, "ACCOUNT_ALLOW_REGISTRATION", True)
+        return settings.ACCOUNT_ALLOW_REGISTRATION
 
     def populate_user(
         self,

@@ -38,7 +38,7 @@ from django.db.models import (
 from django.urls import reverse
 from django.utils import timezone
 
-from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class TableRevision(models.Model):

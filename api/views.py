@@ -60,7 +60,6 @@ from api import actions, parser, sessions
 from api.encode import Echo
 from api.error import APIError
 from api.helper import (
-    MAX_COL_NAME_LENGTH,
     WHERE_EXPRESSION,
     OEPStream,
     check_embargo,
@@ -89,7 +88,7 @@ from api.services.embargo import (
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs, validate_schema
-from api.validators.column import validate_column_names
+from api.validators.column import MAX_COL_NAME_LENGTH, validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
 from dataedit.models import Table as DBTable

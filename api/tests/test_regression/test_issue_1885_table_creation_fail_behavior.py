@@ -7,7 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from api import actions
 from api.actions import has_table
 from api.tests import APITestCase
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class TestTableNameUnique(APITestCase):

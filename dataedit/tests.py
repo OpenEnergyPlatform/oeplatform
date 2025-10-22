@@ -20,7 +20,7 @@ from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from dataedit.models import PeerReview, Table
 from login.models import myuser as User
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import IS_TEST, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 # replicated functionality form dataedit migration 0033
@@ -99,8 +99,12 @@ class TestViews(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        # ensure IS_TEST is set correctly
+        if not IS_TEST:
+            raise Exception("IS_TEST is not True")
+
         # create test user
-        cls.user1 = User.objects.create_user(
+        cls.user1 = User.objects.create_user(  # type: ignore
             name="test", email="test@test.test", affiliation="test"
         )
 
@@ -125,6 +129,7 @@ class TestViews(TestCase):
 
     @classmethod
     def tearDownClass(cls):
+
         cls.orchestrator.drop_table(
             schema=cls.kwargs_w_table["schema"],
             table=cls.kwargs_w_table["table"],

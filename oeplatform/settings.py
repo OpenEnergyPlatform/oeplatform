@@ -33,20 +33,94 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import os
+import sys
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from pathlib import Path
 
-try:
-    from .securitysettings import *  # noqa
-except ImportError:
-    import logging
-    import os
+from oeplatform.securitysettings import (
+    ALLOWED_HOSTS,
+    ANON_CONNECTION_LIMIT,
+    BASE_DIR,
+    CONTACT_ADDRESSES,
+    CORS_ORIGIN_ALLOW_ALL,
+    DATABASES,
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL,
+    DEBUG,
+    DEFAULT_FROM_EMAIL,
+    DJANGO_VITE,
+    EMAIL_BACKEND,
+    EMAIL_PORT,
+    LOGGING,
+    MEDIA_ROOT,
+    MEDIA_URL,
+    OEKG_SPARQL_ENDPOINT_URL,
+    ONTOLOGY_FOLDER,
+    ONTOLOGY_ROOT,
+    ONTOP_SPARQL_ENDPOINT_URL,
+    RDF_DATABASES,
+    SCHEMA_DATA,
+    SCHEMA_DEFAULT_TEST_SANDBOX,
+    SECRET_KEY,
+    SILENCED_SYSTEM_CHECKS,
+    SOCIALACCOUNT_PROVIDERS,
+    STATIC_ROOT,
+    STATIC_URL,
+    STATICFILES_DIRS,
+    TIME_OUT,
+    URL,
+    USE_DOCKER,
+    USER_CONNECTION_LIMIT,
+    VITE_DEV_SERVER_URL,
+    dbhost,
+    dbname,
+    dbpasswd,
+    dbport,
+    dbuser,
+)
 
-    logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
-    SECRET_KEY = os.environ.get("SECRET_KEY", "0")
-    DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
-    URL = os.environ.get("URL")
-    DEBUG = os.environ.get("DEBUG", "True")
+__all__ = [  # mark imports as "used"
+    "ALLOWED_HOSTS",
+    "ANON_CONNECTION_LIMIT",
+    "BASE_DIR",
+    "CONTACT_ADDRESSES",
+    "CORS_ORIGIN_ALLOW_ALL",
+    "DATABASES",
+    "DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL",
+    "DEBUG",
+    "DEFAULT_FROM_EMAIL",
+    "DJANGO_VITE",
+    "EMAIL_BACKEND",
+    "EMAIL_PORT",
+    "LOGGING",
+    "MEDIA_ROOT",
+    "MEDIA_URL",
+    "OEKG_SPARQL_ENDPOINT_URL",
+    "ONTOLOGY_FOLDER",
+    "ONTOLOGY_ROOT",
+    "ONTOP_SPARQL_ENDPOINT_URL",
+    "RDF_DATABASES",
+    "SCHEMA_DATA",
+    "SCHEMA_DEFAULT_TEST_SANDBOX",
+    "SECRET_KEY",
+    "SILENCED_SYSTEM_CHECKS",
+    "SOCIALACCOUNT_PROVIDERS",
+    "STATIC_ROOT",
+    "STATIC_URL",
+    "STATICFILES_DIRS",
+    "TIME_OUT",
+    "URL",
+    "USE_DOCKER",
+    "USER_CONNECTION_LIMIT",
+    "VITE_DEV_SERVER_URL",
+    "dbhost",
+    "dbname",
+    "dbpasswd",
+    "dbport",
+    "dbuser",
+]
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -179,42 +253,14 @@ GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
-# from security settings
-try:
-    ONTOLOGY_FOLDER  # noqa F405
-except NameError:
-    ONTOLOGY_FOLDER = "/tmp"
 
-# from security settings
-try:
-    BASE_DIR  # noqa F405
-except NameError:
-    BASE_DIR = ""
-
-# from security settings
-try:
-    MEDIA_ROOT  # noqa F405
-except NameError:
-    MEDIA_ROOT = "/media"
-
-try:
-    ONTOLOGY_ROOT  # noqa F405
-except NameError:
-    if BASE_DIR:
-        ONTOLOGY_ROOT = Path(BASE_DIR, ONTOLOGY_FOLDER)
-
-if ONTOLOGY_ROOT:
-    OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
-    OPEN_ENERGY_ONTOLOGY_FOLDER = Path(
-        ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME  # noqa:F405
-    )
-    OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME = "oeo-full.owl"
-
-if MEDIA_ROOT:
-    OEO_EXT_PATH = Path(MEDIA_ROOT, "oeo_ext")
-    OEO_EXT_NAME = "oeox"
-    OEO_EXT_OWL_NAME = "oeo_ext.owl"
-    OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
+OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
+OPEN_ENERGY_ONTOLOGY_FOLDER = Path(ONTOLOGY_ROOT) / OPEN_ENERGY_ONTOLOGY_NAME
+OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME = "oeo-full.owl"
+OEO_EXT_PATH = Path(MEDIA_ROOT) / "oeo_ext"
+OEO_EXT_NAME = "oeox"
+OEO_EXT_OWL_NAME = "oeo_ext.owl"
+OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -315,3 +361,10 @@ AXES_ONLY_USER_FAILURES = True  # Only track failures per user
 
 CAPTCHA_IMAGE_SIZE = (300, 80)  # width, height in pixels
 CAPTCHA_FONT_SIZE = 52
+
+# dynamic variable to check if code is run in test or not
+IS_TEST = "test" in sys.argv or os.getenv("PYTEST_CURRENT_TEST") is not None
+
+
+USE_ONTOP = bool(ONTOP_SPARQL_ENDPOINT_URL)
+USE_LOEP = bool(DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL)
