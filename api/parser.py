@@ -44,13 +44,12 @@ from sqlalchemy.sql.elements import Slice
 from sqlalchemy.sql.expression import CompoundSelect
 from sqlalchemy.sql.sqltypes import Interval, Text
 
-import api  # TODO: we need functions from api.actions but get circular imports
+import api  # TODO: we need functions from api.helper but get circular imports
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
 from api.utils import validate_schema
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
-__KNOWN_TABLES = {}
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -262,7 +261,7 @@ def parse_select(d):
         # issue #2041: order by on json columns fails,
         # so we try to find json columns and cast them as text for ordering
         if "from" in d:
-            json_columns = api.actions.get_json_columns(**d["from"])
+            json_columns = api.helper.get_json_columns(**d["from"])
         else:
             json_columns = set()
 
