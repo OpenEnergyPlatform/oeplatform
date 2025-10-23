@@ -112,7 +112,7 @@
             {
                 {% for d in fields.values %}
                     model_name: '<a href="{{model.id}}">{{model.model_name}}</a>',
-                    tags: [ {% for tag in model.tags %} {id:'{{tag.id}}', name:'{{tag.name}}', color:'{{tag.color}}',  textcolor:'{% readable_text_color tag.color %}'}, {%endfor%} ],
+                    tags: [ {% for tag in model.tags %} {id:'{{tag.pk}}', name:'{{tag.name}}', color:'{{tag.color_hex}}',  textcolor:'{% readable_text_color tag.color_hex %}'}, {%endfor%} ],
 
                     {% for group in d.values %}
                         {% for field in group %}
@@ -130,7 +130,7 @@
         for(var i in data){
             if(i <= 4) {
                 var tag = data[i];
-                s += '<a href="" class="btn tag" style="background:' + tag.color + '; color:' + tag.textcolor + '; display:inline-block;">' + tag.name + '</a>'
+                s += '<a href="" class="btn tag" style="background:' + tag.color_hex + '; color:' + tag.textcolor + '; display:inline-block;">' + tag.name + '</a>'
             }
         }
         return s;
@@ -207,7 +207,7 @@
                     return false;
                 }
                 for (var tag of tags) {
-                    if (required === 'select_'+tag.id) {
+                    if (required === 'select_'+tag.pk) {
                         matches=true
                     }
                 }

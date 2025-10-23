@@ -1,6 +1,5 @@
 """
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
@@ -10,7 +9,6 @@ from uuid import UUID
 from django.urls import reverse
 from rest_framework import serializers
 
-from dataedit.helper import get_readable_table_name
 from dataedit.models import Table
 from modelview.models import Energyframework, Energymodel
 from oeplatform.settings import URL
@@ -66,6 +64,7 @@ class ScenarioDataTablesSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "human_readable_name", "url"]
 
 
+# TODO jh-RLI: Its called deserializer!!
 class DatasetSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255, required=True)
     external_url = serializers.URLField(
@@ -129,13 +128,14 @@ class DatasetSerializer(serializers.Serializer):
     def get_title(self, data):
         name = data.get("name")
         # ✅ Generate internal distribution label
-        full_label = get_readable_table_name(table_obj=Table.objects.get(name=name))
+        full_label = Table.objects.get(name=name).get_readable_table_name()
         if full_label:
             return full_label
         else:
             return None
 
 
+# TODO jh-RLI: Its called deserializer!!
 class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
     scenario_bundle = serializers.UUIDField(
         required=True

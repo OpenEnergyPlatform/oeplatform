@@ -10,9 +10,6 @@ DEBUG = True
 # Runs on localhost only
 URL = '127.0.0.1'
 
-# This token is the token the test user is identified with during API-tests
-token_test_user = None
-
 USE_DOCKER = True
 
 # Setting of your django database
@@ -82,17 +79,14 @@ RDF_DATABASES = {
 
 # The RDF database brings a server that provides a web api.
 # This service is part of the internal network.
-if RDF_DATABASES:
-    OEKG_SPARQL_ENDPOINT_URL = f"http://{RDF_DATABASES['knowledge']['host']}:{RDF_DATABASES['knowledge']['port']}/{RDF_DATABASES['knowledge']['name']}/sparql"
+OEKG_SPARQL_ENDPOINT_URL = f"http://{RDF_DATABASES['knowledge']['host']}:{RDF_DATABASES['knowledge']['port']}/{RDF_DATABASES['knowledge']['name']}/sparql"
 
 # The ontop-vkg is used to translate sparql to sql queries
 # https://ontop-vkg.org/guide/cli.html#ontop-endpoint
 # This service is part of the internal network.
 # It depends on a mapping that maps concepts to the relational data structure
 # We use it to implement quantitative scenario comparison
-USE_ONTOP = False
-if USE_ONTOP:
-    ONTOP_SPARQL_ENDPOINT_URL = "http://localhost:8080/sparql"
+ONTOP_SPARQL_ENDPOINT_URL = "http://localhost:8080/sparql"
 
 # The LOEP provides lookup (autocomplete search) functionality implemented
 # using Apache Lucene.
@@ -100,14 +94,7 @@ if USE_ONTOP:
 # This service is part of the internal network.
 # It can find classes from the OEO and return similar concepts based on
 # the text an user inputs to a search field
-USE_LOEP = False
-if USE_LOEP:
-    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL = (
-        "http://localhost:8082/lookup-application/api/search?query="
-    )
-else:
-    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL = ""
-
+DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL = "http://localhost:8082/lookup-application/api/search?query="
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 

@@ -40,7 +40,7 @@ class GraphViewForm(ModelForm):
     class Meta:
         model = View
         fields = "__all__"
-        exclude = ("table", "schema", "VIEW_TYPES", "options", "type")
+        exclude = ("table", "VIEW_TYPES", "options", "type")
 
     def __init__(self, *args, **kwargs):
         columns = kwargs.pop("columns", None)
@@ -59,13 +59,12 @@ class MapViewForm(ModelForm):
     class Meta:
         model = View
         fields = "__all__"
-        exclude = ("table", "schema", "VIEW_TYPES", "options", "type")
+        exclude = ("table", "VIEW_TYPES", "options", "type")
 
     def save(self, commit=True):
         view = View.objects.create(
             name=self.data["name"],
             table=self.table,
-            schema=self.schema,
             type="map",
             options=self.options,
             is_default=self.data.get("is_default", "off") == "on",
@@ -119,7 +118,6 @@ class GeomViewForm(MapViewForm):
     def __init__(self, *args, **kwargs):
         super(GeomViewForm, self).__init__(*args, **kwargs)
         if self.columns is not None:
-            print(self.columns)
             self.fields["geom"] = forms.ChoiceField(
                 choices=[(c, c) for c in self.columns]
             )

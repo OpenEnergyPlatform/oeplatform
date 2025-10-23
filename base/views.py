@@ -22,8 +22,8 @@ from django.core.mail import send_mail
 from django.shortcuts import render
 from django.views.generic import View
 
-import oeplatform.securitysettings as sec
 from base.forms import ContactForm
+from oeplatform.settings import CONTACT_ADDRESSES, DEFAULT_FROM_EMAIL, STATIC_ROOT
 
 # Create your views here.
 
@@ -103,7 +103,7 @@ class ContactView(View):
     def post(self, request):
         form = ContactForm(data=request.POST)
         if form.is_valid():
-            receps = sec.CONTACT_ADDRESSES.get(
+            receps = CONTACT_ADDRESSES.get(
                 request.POST["contact_category"], "technical"
             )
             send_mail(
@@ -111,7 +111,7 @@ class ContactView(View):
                 f"{request.POST.get('contact_name')} "
                 + f"({request.POST.get('contact_email')}) wrote: \n"
                 + request.POST.get("content"),
-                sec.DEFAULT_FROM_EMAIL,
+                DEFAULT_FROM_EMAIL,
                 receps,
                 fail_silently=False,
             )
@@ -185,7 +185,7 @@ def get_json_content(path, json_id=None):
 class AboutPage(View):
     # docstring
     projects_content_static = "project_detail_pages_content"
-    projects_content_path = os.path.join(sec.STATIC_ROOT, projects_content_static)
+    projects_content_path = os.path.join(STATIC_ROOT, projects_content_static)
 
     def get(self, request, projects_content_path=projects_content_path):
         projects = get_json_content(path=projects_content_path)

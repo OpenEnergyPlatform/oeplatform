@@ -1,5 +1,5 @@
 """Some api actions run `assert_permission`, which calls
-DBTable.load(schema, table), which used get_or_create().
+DBTable.load(table), which used get_or_create().
 
 This caused the creation of an artefact entry in django tables.
 
@@ -11,7 +11,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from api.actions import assert_permission
 from api.connection import table_exists_in_django, table_exists_in_oedb
 from api.tests import APITestCase
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class Test_issue_807_table_artefacts(APITestCase):
@@ -22,7 +22,6 @@ class Test_issue_807_table_artefacts(APITestCase):
         try:
             assert_permission(
                 user=self.user,  # created in APITestCase
-                schema=self.schema,
                 table=self.table,
                 permission=0,  # any value will do
             )

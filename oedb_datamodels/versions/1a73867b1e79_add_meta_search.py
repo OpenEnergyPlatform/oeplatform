@@ -14,9 +14,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-from api.actions import update_meta_search
-from dataedit.views import schema_whitelist
-
 # revision identifiers, used by Alembic.
 revision = "1a73867b1e79"
 down_revision = "1c6e2fb3d3b6"
@@ -34,13 +31,6 @@ def upgrade():
         sa.PrimaryKeyConstraint("schema", "table"),
         schema="public",
     )
-    conn = op.get_bind()
-    meta = sa.MetaData(bind=conn)
-    meta.reflect()
-
-    for table in meta.tables.values():
-        if table.schema in schema_whitelist:
-            update_meta_search(table.name, table.schema)
 
 
 def downgrade():

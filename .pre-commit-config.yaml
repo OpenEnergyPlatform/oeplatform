@@ -1,4 +1,4 @@
-exclude: ^.*(.min.js|.min.css|.html|.js|.js.map|docs/.*|mkdocs.yml|/dist/.*)$
+exclude: ^.*(.min.js|.min.css|.js.map|html|js|jsx|tsx|jsonc|yaml|yml|scss|docs/.*|mkdocs.yml|/dist/.*)$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -33,4 +33,6 @@ repos:
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
-        files: \.(css|less|md|json|sql)$
+        additional_dependencies:
+          - prettier-plugin-jinja-template
+          - prettier-plugin-sql

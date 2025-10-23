@@ -16,7 +16,7 @@ from rest_framework.authtoken.models import Token
 
 from api import actions
 from login.models import myuser
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 from .utils import load_content_as_json
 
@@ -26,13 +26,25 @@ class APITestCase(TestCase):
     test_table = "test_table"
 
     @classmethod
-    def setUpClass(cls):
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS {cls.test_schema} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA {cls.test_schema}")
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS _{cls.test_schema} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA _{cls.test_schema}")
+    def empty_test_schema(cls):
+        actions.perform_sql(
+            f'DROP SCHEMA IF EXISTS "{SCHEMA_DEFAULT_TEST_SANDBOX}" CASCADE'
+        )
+        actions.perform_sql(f"CREATE SCHEMA {SCHEMA_DEFAULT_TEST_SANDBOX}")
+        actions.perform_sql(
+            f"DROP SCHEMA IF EXISTS _{SCHEMA_DEFAULT_TEST_SANDBOX} CASCADE"
+        )
+        actions.perform_sql(f"CREATE SCHEMA _{SCHEMA_DEFAULT_TEST_SANDBOX}")
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.empty_test_schema()
+        super(APITestCase, cls).tearDownClass()
+
+    @classmethod
+    def setUpClass(cls):
         super(APITestCase, cls).setUpClass()
+        cls.empty_test_schema()
         cls.user, _ = myuser.objects.get_or_create(
             name="MrTest",
             email="mrtest@test.com",
@@ -78,22 +90,24 @@ class APITestCase(TestCase):
     def api_req(
         self,
         method: str,
-        table: str = None,
-        schema: str = None,
-        path: str = None,
-        data: dict = None,
+        table: str | None = None,
+        schema: str | None = None,
+        path: str | None = None,
+        url: str | None = None,
+        data: dict | None = None,
         auth=None,
-        exp_code: int = None,
+        exp_code: int | None = None,
         exp_res=None,
     ):
-        path = path or ""
-        if path.startswith("/"):
-            assert not table and not schema
-            url = f"/api/v0{path}"
-        else:
-            table = table or self.test_table
-            schema = schema or self.test_schema
-            url = f"/api/v0/schema/{schema}/tables/{table}/{path}"
+        if not url:
+            path = path or ""
+            if path.startswith("/"):
+                assert not table and not schema
+                url = f"/api/v0{path}"
+            else:
+                table = table or self.test_table
+                schema = schema or self.test_schema
+                url = f"/api/v0/schema/{schema}/tables/{table}/{path}"
 
         data = json.dumps(data) if data else ""  # IMPORTANT: keep empty string
 
@@ -201,5 +215,5 @@ class APITestCaseWithTable(APITestCase):
         self.create_table(structure=self.test_structure, data=self.test_data)
 
     def tearDown(self) -> None:
-        super().tearDown()
         self.drop_table()
+        super().tearDown()

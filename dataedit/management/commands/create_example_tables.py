@@ -18,8 +18,7 @@ from api.actions import (
 )
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
-from dataedit.views import get_tag_keywords_synchronized_metadata
-from oeplatform.securitysettings import SCHEMA_DATA
+from oeplatform.settings import SCHEMA_DATA
 
 User = get_user_model()
 
@@ -36,7 +35,7 @@ TABLE_DEFS = [
             },
             {
                 "name": "technology",
-                "type": "text",
+                "type": "json",
                 "options": {"nullable": True},
             },
             {
@@ -56,7 +55,7 @@ TABLE_DEFS = [
             },
             {
                 "name": "value",
-                "type": "numeric",
+                "type": "float",
                 "options": {"nullable": True},
             },
             {
@@ -86,7 +85,6 @@ class Command(BaseCommand):
             name="test", defaults={"email": "test@mail.com", "is_staff": True}
         )
 
-        print("Hello  world")
         orchestrator = TableCreationOrchestrator()
 
         for spec in TABLE_DEFS:
@@ -118,8 +116,8 @@ class Command(BaseCommand):
             try:
                 # 4) Create physical table → Django metadata
                 orchestrator.create_table(
-                    schema_name=schema_name,
-                    table_name=table_name,
+                    schema=schema_name,
+                    table=table_name,
                     column_defs=column_defs,
                     constraint_defs=constraint_defs,
                 )
@@ -160,14 +158,14 @@ class Command(BaseCommand):
                     )
                 )
 
-    def _seed_data(self, schema, table_name, csv_file):
+    def _seed_data(self, schema, table, csv_file):
         engine = _get_engine()
         Session = sessionmaker(bind=engine)
         session = Session()
         metadata = MetaData(schema=schema)
         metadata.reflect(bind=engine, schema=schema)
 
-        full_table_name = f"{schema}.{table_name}"
+        full_table_name = f"{schema}.{table}"
         table = metadata.tables.get(full_table_name)
 
         print(table)
@@ -218,7 +216,7 @@ class Command(BaseCommand):
             finally:
                 session.close()
 
-    def _set_metadata(self, schema, table_name, metadata_file):
+    def _set_metadata(self, schema, table, metadata_file):
         metadata_path = Path(metadata_file)
         metadata: dict = {}
 
@@ -240,18 +238,9 @@ class Command(BaseCommand):
         if error:
             raise Exception(f"Metadata validation error: {error}")
 
-        # Sync keywords with tag system
-        keywords = metadata["resources"][0].get("keywords", []) or []
-        synced = get_tag_keywords_synchronized_metadata(
-            table=table_name, schema=schema, keywords_new=keywords
-        )
-        metadata["resources"][0]["keywords"] = synced["resources"][0]["keywords"]
-
         # Save to Django's oemetadata JSONB field and comment
-        set_table_metadata(table_name=table_name, schema_name=schema, metadata=metadata)
+        set_table_metadata(table=table, metadata=metadata)
 
         self.stdout.write(
-            self.style.SUCCESS(
-                f"✔ Metadata saved and tags synced for {schema}.{table_name}"
-            )
+            self.style.SUCCESS(f"✔ Metadata saved and tags synced for {schema}.{table}")
         )

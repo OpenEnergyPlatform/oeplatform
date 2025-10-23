@@ -11,14 +11,20 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
-import oeplatform.securitysettings as sec
 from dataedit.models import Table
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import (
+    SCHEMA_DEFAULT_TEST_SANDBOX,
+    dbhost,
+    dbname,
+    dbpasswd,
+    dbport,
+    dbuser,
+)
 
 
 def get_connection_string():
     return "postgresql://{0}:{1}@{2}:{3}/{4}".format(
-        sec.dbuser, sec.dbpasswd, sec.dbhost, sec.dbport, sec.dbname
+        dbuser, dbpasswd, dbhost, dbport, dbname
     )
 
 
@@ -51,7 +57,7 @@ def table_exists_in_oedb(table, schema=None):
     return result
 
 
-def table_exists_in_django(table_name: str):
+def table_exists_in_django(table: str):
     """check if table exists in django
 
     Args:
@@ -62,7 +68,7 @@ def table_exists_in_django(table_name: str):
         bool
     """
     try:
-        Table.objects.get(name=table_name)
+        Table.objects.get(name=table)
         return True
     except Table.DoesNotExist:
         return False
