@@ -33,7 +33,6 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import os
 import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)

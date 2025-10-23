@@ -14,8 +14,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-from api.actions import update_meta_search
-
 # revision identifiers, used by Alembic.
 revision = "1a73867b1e79"
 down_revision = "1c6e2fb3d3b6"
