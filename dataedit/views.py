@@ -322,8 +322,8 @@ def TagEditorView(request: HttpRequest, id: str = "") -> HttpResponse:
             template_name="dataedit/tag_editor.html",
             context={
                 "name": tag.name,
-                "id": tag.pk,
-                "color": tag.color,
+                "pk": tag.pk,
+                "color_hex": tag.color_hex,
                 "assigned": assigned,
             },
         )
@@ -331,7 +331,7 @@ def TagEditorView(request: HttpRequest, id: str = "") -> HttpResponse:
         return render(
             request=request,
             template_name="dataedit/tag_editor.html",
-            context={"name": "", "color": "#000000", "assigned": False},
+            context={"name": "", "color_hex": "#000000", "assigned": False},
         )
 
 

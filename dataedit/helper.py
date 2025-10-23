@@ -12,7 +12,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import re
-from typing import Iterable
 from wsgiref.util import FileWrapper
 
 from django.contrib.postgres.search import SearchQuery
@@ -303,40 +302,23 @@ def get_popular_tags(
 
 def get_all_tags(
     schema_name: str | None = None, table_name: str | None = None
-) -> list[dict]:
+) -> QuerySet[Tag]:
     """
     Load all tags of a specific table
     :param schema: Name of a schema
     :param table: Name of a table
     :return:
     """
-    tags: Iterable[Tag]
     if table_name:
         tags = Table.objects.get(name=table_name).tags.all()
     else:
         tags = Tag.objects.all()
 
-    tag_dicts = [
-        {
-            "id": tag.pk,
-            "name": tag.name,
-            "name_normalized": tag.name_normalized,
-            "color": tag.color_hex,
-            "usage_count": tag.usage_count,
-            "usage_tracked_since": tag.usage_tracked_since,
-        }
-        for tag in tags
-    ]
-    return sort_tags_by_popularity(tag_dicts)
-
-
-def sort_tags_by_popularity(tags):
-    def key_func(tag):
-        # track_time = tag["usage_tracked_since"] - datetime.datetime.utcnow()
-        return tag["usage_count"]
-
-    tags.sort(reverse=True, key=key_func)
     return tags
+
+
+def sort_tags_by_popularity(tags: QuerySet[Tag]) -> QuerySet[Tag]:
+    return tags.order_by("-usage_count")
 
 
 def change_requests(schema, table):

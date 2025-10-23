@@ -1,0 +1,27 @@
+"""
+SPDX-FileCopyrightText: 2025 wingechr
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("dataedit", "0042_delete_schema_remove_peerreview_schema_and_more"),
+        ("modelview", "0061_merge_0060_auto_20231016_1624_0060_auto_20231018_1642"),
+    ]
+
+    operations = [
+        migrations.RenameField(
+            model_name="basicfactsheet",
+            old_name="tags",
+            new_name="tags_TODO_deprecated",
+        ),
+        migrations.AddField(
+            model_name="basicfactsheet",
+            name="tags",
+            field=models.ManyToManyField(related_name="factsheets", to="dataedit.tag"),
+        ),
+    ]
