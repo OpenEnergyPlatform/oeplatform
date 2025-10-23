@@ -67,6 +67,7 @@ class Tag(models.Model):
     name = CharField(max_length=40, null=False)
     color = IntegerField(default=int("2E3638", 16), null=False)
     usage_tracked_since = DateTimeField(null=False, default=timezone.now)
+    category = CharField(max_length=40, null=True)
 
     @classmethod
     def get_name_normalized(cls, name: str | None) -> str | None:

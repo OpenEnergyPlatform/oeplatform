@@ -37,6 +37,7 @@ class Tag(Base):
     usage_tracked_since = Column(DateTime(), server_default=func.now())
     name_normalized = Column(String(40), nullable=False, unique=True)
     default_color = int("2E3638", 16)
+    category = Column(String(40), nullable=True)
 
     def __init__(self, **kwargs):
         # sanitize name, auto fill name_normalized
