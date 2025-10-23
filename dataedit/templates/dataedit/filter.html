@@ -12,7 +12,7 @@
 <!-- TODO looks out of place -->
 <div class="controls-container controls-container--horizontal">
     {% load dataedit.taghandler %}
-    {% get_tags None None None as all_tags %}
+    {% get_tags as all_tags %}
     <div class="controls-container__filters">
         <form id="form-filter" action="{{ request.path }}" method="get">
             <div class="controls-container__input">

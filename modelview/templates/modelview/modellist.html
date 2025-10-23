@@ -112,7 +112,7 @@
             {
                 {% for d in fields.values %}
                     model_name: '<a href="{{model.id}}">{{model.model_name}}</a>',
-                    tags: [ {% for tag in model.tags.all %} {id:'{{tag.pk}}', name:'{{tag.name}}', color:'{{tag.color_hex}}',  textcolor:'{% readable_text_color tag.color_hex %}'}, {%endfor%} ],
+                    tags: [ {% for tag in model.tags.all %} {pk:'{{tag.pk}}', name:'{{tag.name}}', color_hex:'{{tag.color_hex}}',  textcolor_hex:'{% readable_text_color tag.color_hex %}'}, {%endfor%} ],
 
                     {% for group in d.values %}
                         {% for field in group %}
@@ -126,11 +126,12 @@
     ]
 
     var render_tag = function (data, type, row){
+        console.log("render_tag", data, type, row)
         var s = '';
         for(var i in data){
             if(i <= 4) {
                 var tag = data[i];
-                s += '<a href="" class="btn tag" style="background:' + tag.color_hex + '; color:' + tag.textcolor + '; display:inline-block;">' + tag.name + '</a>'
+                s += '<a href="" class="btn tag" style="background:' + tag.color_hex + '; color:' + tag.textcolor_hex + '; display:inline-block;">' + tag.name + '</a>'
             }
         }
         return s;
@@ -183,7 +184,7 @@
             if(id>=0){
                 active_tags.splice(id, 1);
             }
-        }
+        }        
         set_csv_link();
         dt.draw();
     }

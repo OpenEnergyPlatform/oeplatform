@@ -15,12 +15,12 @@
         <h4>Choose tags to attach:</h4>
         {% for t in all_tags %}
         <span>
-                    <input type="checkbox" class="hidden" name="tag_{{t.id}}"
-                           id="select_{{t.id}}"
+                    <input type="checkbox" class="hidden" name="tag_{{t.pk}}"
+                           id="select_{{t.pk}}"
                            {% if t in tags %} checked {% endif %}>
                     <label class="form-label" style="background:{{t.color_hex}};color:{% readable_text_color t.color_hex %}"
                            class="btn tag"
-                           for="select_{{t.id}}">{{t.name}}</label>
+                           for="select_{{t.pk}}">{{t.name}}</label>
                 </span>
         {% endfor %}
         <input type="hidden" name="schema" value="{{schema}}"/>

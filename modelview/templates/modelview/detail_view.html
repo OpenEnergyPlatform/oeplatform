@@ -45,7 +45,7 @@
   <hr>
 
   <h3>Tags</h3>
-  {% for t in model.tags %}
+  {% for t in model.tags.all %}
       <a href="" class="btn tag"
          style="background:{{ t.color_hex }};color:{% readable_text_color t.color_hex %}; display:inline-block;">{{ t.name }}</a>
   {% endfor %}

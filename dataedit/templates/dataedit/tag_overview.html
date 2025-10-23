@@ -27,7 +27,7 @@
 <h3>Current Tags:</h3>
 <div style="overflow: hidden;">
     {% for t in all_tags %}
-        <a href="/dataedit/tags/edit/{{ t.id }}" class="btn tag"
+        <a href="/dataedit/tags/edit/{{ t.pk }}" class="btn tag"
            style="margin:0 5px 5px 0; color:{% readable_text_color t.color_hex %}; display:inline; float: left; background:{{ t.color_hex }}">
             {{ t.name }}
         </a>

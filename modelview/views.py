@@ -24,6 +24,7 @@ import urllib3
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
+from django.db.models import Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -90,8 +91,10 @@ def listsheets(request, sheettype):
         label = "Model"
 
     models = c.objects.all()
-    # tags that are used by factsheets
-    tags = Tag.objects.filter(factsheets__isnull=False)
+
+    tags = Tag.objects.none()
+    for model in models:
+        tags |= model.tags.all()
 
     return render(
         request,
@@ -245,7 +248,7 @@ def editModel(request, model_name, sheettype):
             "form": form,
             "name": model_name,
             "method": "update",
-            "tags": Tag.objects.all(),
+            "tags": tags,
         },
     )
 
