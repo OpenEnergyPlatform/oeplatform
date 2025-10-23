@@ -57,8 +57,9 @@ from api.sessions import (
 from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
+from login.models import myuser as User
 from login.utils import validate_open_data_license
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -91,7 +92,7 @@ def get_column_obj(table, column):
         raise APIError("Column '%s' does not exist." % column)
 
 
-def get_table_name(schema, table, restrict_schemas=True):
+def get_table_name(schema: str | None, table: str, restrict_schemas: bool = True):
     schema = validate_schema(schema)
 
     if not has_schema(dict(schema=schema)):
@@ -101,10 +102,6 @@ def get_table_name(schema, table, restrict_schemas=True):
     if schema.startswith("_") or schema == "public" or schema is None:
         raise PermissionDenied
 
-    # TODO check if table in schema_whitelist but circular import
-    # from dataedit.views import schema_whitelist
-    # if schema not in schema_whitelist
-    #     raise PermissionDenied
     return schema, table
 
 
@@ -115,13 +112,11 @@ class ResponsiveException(Exception):
     pass
 
 
-def assert_permission(user, table, permission, schema=None):
-    if schema is None:
-        schema = SCHEMA_DEFAULT_TEST_SANDBOX
+def assert_permission(user: User, table: str, permission: int):
     if user.is_anonymous:
         raise APIError("User is anonymous", 401)
 
-    if user.get_table_permission_level(DBTable.load(schema, table)) < permission:
+    if user.get_table_permission_level(DBTable.load(name=table)) < permission:
         raise PermissionDenied
 
 
@@ -142,19 +137,15 @@ def assert_add_tag_permission(user, table, permission, schema):
         PermissionDenied: _description_
 
     """
-    # if not request.user.is_anonymous:
-    #         level = request.user.get_table_permission_level(table)
-    #         can_add = level >= login_models.WRITE_PERM
-
     if user.is_anonymous:
         raise APIError("User is anonymous", 401)
 
-    if user.get_table_permission_level(DBTable.load(schema, table)) < permission:
+    if user.get_table_permission_level(DBTable.load(name=table)) < permission:
         raise PermissionDenied
 
 
 def assert_has_metadata(table: str, schema: str):
-    table_obj = DBTable.load(schema, table)
+    table_obj = DBTable.load(name=table)
     if table_obj.oemetadata is None:
         result = False
     else:
@@ -1168,7 +1159,7 @@ def _get_table(schema, table) -> Table:
 
 
 def get_table_metadata(schema: str, table: str) -> dict:
-    django_obj = DBTable.load(schema=schema, table=table)
+    django_obj = DBTable.load(name=table)
     oemetadata = django_obj.oemetadata
     return oemetadata if oemetadata else {}
 
@@ -1299,7 +1290,9 @@ def data_delete(request, context=None):
     if schema is None:
         schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
-    assert_permission(context["user"], table, login_models.DELETE_PERM, schema=schema)
+    assert_permission(
+        user=context["user"], table=table, permission=login_models.DELETE_PERM
+    )
 
     target_table = get_delete_table_name(orig_schema, orig_table)
     setter = []
@@ -1323,7 +1316,9 @@ def data_update(request, context=None):
     if schema is None:
         schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
-    assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
+    assert_permission(
+        user=context["user"], table=table, permission=login_models.WRITE_PERM
+    )
 
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(request, "values")
@@ -1448,7 +1443,7 @@ def data_insert(request, context=None):
     schema_name, table_name = get_table_name(schema_name, table_name)
 
     assert_permission(
-        context["user"], table_name, login_models.WRITE_PERM, schema=schema_name
+        user=context["user"], table=table_name, permission=login_models.WRITE_PERM
     )
 
     # mapper = {orig_schema: schema, orig_table: table}
@@ -1660,10 +1655,10 @@ def move_publish(from_schema, table, to_schema, embargo_period):
             reset_embargo = Embargo.objects.get(table=t)
             reset_embargo.delete()
 
-    all_peer_reviews = PeerReview.objects.filter(table=t, schema=from_schema)
+    all_peer_reviews = PeerReview.objects.filter(table=t)
 
     for peer_review in all_peer_reviews:
-        peer_review.update_all_table_peer_reviews_after_table_moved(to_schema=to_schema)
+        peer_review.update_all_table_peer_reviews_after_table_moved(topic=to_schema)
 
     t.set_is_published(topic_name=to_schema)
 
@@ -1706,18 +1701,17 @@ def connect():
     return insp
 
 
-def has_schema(request, context=None):
+def has_schema(request: dict, context=None) -> bool:
     engine = _get_engine()
     conn = engine.connect()
     try:
         result = engine.dialect.has_schema(conn, get_or_403(request, "schema"))
     finally:
         conn.close()
-    return result
+    return bool(result)
 
 
 def has_table(request, context=None):
-    """TODO: should check in all (whitelisted) schemas"""
     engine = _get_engine()
     schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
     schema = validate_schema(schema)
@@ -2366,18 +2360,15 @@ def apply_deletion(session, table, rows, rids):
         set_applied(session, table, [rid], __DELETE)
 
 
-def update_meta_search(table: str, schema: str) -> None:
+def update_meta_search(table: str) -> None:
     """
     TODO: also update JSONB index fields
     """
-    schema = validate_schema(schema)
-
     table_obj = DBTable.objects.get(name=table)
-    comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
+    comment = str(dataedit.metadata.load_metadata_from_db(table=table))
     tags = [t.name for t in table_obj.tags.all()]
     s = " ".join(
         (
-            *re.findall(r"\w+", schema),
             *re.findall(r"\w+", table),
             *re.findall(r"\w+", comment),
             *(tag for tag in tags),
@@ -2388,12 +2379,11 @@ def update_meta_search(table: str, schema: str) -> None:
     table_obj.save()
 
 
-def set_table_metadata(table: str, schema: str, metadata):
+def set_table_metadata(table: str, metadata):
     """saves metadata as json string on table comment.
 
     Args:
         table(str): name of table
-        schema(str): schema of table
         metadata: OEPMetadata or metadata object (dict) or metadata str
         cursor: sql alchemy connection cursor
     """
@@ -2421,7 +2411,7 @@ def set_table_metadata(table: str, schema: str, metadata):
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.load(table=table, schema=schema)
+    django_table_obj = DBTable.load(name=table)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
 
@@ -2439,15 +2429,14 @@ def set_table_metadata(table: str, schema: str, metadata):
     # update search index
     # ---------------------------------------
 
-    update_meta_search(table, schema)
+    update_meta_search(table=table)
 
 
-def get_single_table_size(
-    schema: str, table: str, allowed_schemas: list[str]
-) -> dict | None:
+def get_single_table_size(table: str) -> dict | None:
     """
     Return size details for one schema.table or None if not found.
     """
+
     sql = sa.text(
         """
         SELECT
@@ -2462,8 +2451,7 @@ def get_single_table_size(
     """  # noqa: E501
     )
 
-    if schema not in allowed_schemas:
-        raise APIError(f"Schema '{schema}' is not allowed.", status=403)
+    schema = DBTable.load(name=table).oedb_schema
     sess = create_oedb_session()
     try:
         res = sess.execute(sql, {"schema": schema, "table": table})
@@ -2478,25 +2466,11 @@ def get_single_table_size(
         sess.close()
 
 
-def list_table_sizes(
-    allowed_schemas: list[str], schema: str | None = None
-) -> list[dict]:
+def list_table_sizes() -> list[dict]:
     """
-    List table sizes limited to a whitelist. If `schema` provided, restrict to it.
+    List table sizes
     """
-    if schema and schema not in allowed_schemas:
-        # Let the view map this to 403 cleanly
-        from .error import APIError
-
-        raise APIError(f"Schema '{schema}' is not allowed.", status=403)
-
-    if schema:
-        filter_sql = "table_schema = :schema"
-        params = {"schema": schema}
-    else:
-        filter_sql = "table_schema = ANY(:schemas)"
-        params = {"schemas": allowed_schemas}
-
+    oedb_schema = SCHEMA_DATA
     sql = sa.text(
         f"""
         SELECT
@@ -2507,7 +2481,7 @@ def list_table_sizes(
             pg_total_relation_size(format('%I.%I', table_schema, table_name)) AS total_bytes,
             pg_size_pretty(pg_total_relation_size(format('%I.%I', table_schema, table_name))) AS total_pretty
         FROM information_schema.tables
-        WHERE {filter_sql}
+        WHERE table_schema="{oedb_schema}"
           AND table_type = 'BASE TABLE'
         ORDER BY pg_total_relation_size(format('%I.%I', table_schema, table_name)) DESC
     """  # noqa: E501
@@ -2515,7 +2489,7 @@ def list_table_sizes(
 
     sess = create_oedb_session()
     try:
-        res = sess.execute(sql, params)
+        res = sess.execute(sql)
         rows = res.fetchall()
         out = []
         for r in rows:

@@ -40,7 +40,7 @@ class GraphViewForm(ModelForm):
     class Meta:
         model = View
         fields = "__all__"
-        exclude = ("table", "schema", "VIEW_TYPES", "options", "type")
+        exclude = ("table", "VIEW_TYPES", "options", "type")
 
     def __init__(self, *args, **kwargs):
         columns = kwargs.pop("columns", None)
@@ -59,13 +59,12 @@ class MapViewForm(ModelForm):
     class Meta:
         model = View
         fields = "__all__"
-        exclude = ("table", "schema", "VIEW_TYPES", "options", "type")
+        exclude = ("table", "VIEW_TYPES", "options", "type")
 
     def save(self, commit=True):
         view = View.objects.create(
             name=self.data["name"],
             table=self.table,
-            schema=self.schema,
             type="map",
             options=self.options,
             is_default=self.data.get("is_default", "off") == "on",

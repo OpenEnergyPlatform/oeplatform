@@ -41,11 +41,10 @@ from api.error import APIError
 from dataedit.models import Embargo
 from dataedit.models import Table as DBTable
 from dataedit.models import Tag
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT
 
 logger = logging.getLogger("oeplatform")
 
-MAX_COL_NAME_LENGTH = 50
 
 WHERE_EXPRESSION = re.compile(
     r"^(?P<first>[\w\d_\.]+)\s*(?P<operator>"
@@ -200,9 +199,8 @@ def api_exception(f):
 
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
         table = kwargs.get("table") or kwargs.get("sequence")
-        actions.assert_permission(request.user, table, permission, schema=schema)
+        actions.assert_permission(user=request.user, table=table, permission=permission)
         return f(caller, request, *args, **kwargs)
 
     return wrapper
@@ -351,3 +349,14 @@ def update_tags_from_keywords(table: str, keywords: list[str]) -> list[str]:
         keywords_new.add(tag.name_normalized)
     table_obj.save()
     return list(keywords_new)
+
+
+def get_json_columns(table: str, schema: str | None = None, **_kwargs) -> set[str]:
+    """Get set of json/jsonb column names in table"""
+    schema = schema or SCHEMA_DEFAULT
+    column_descriptions = actions.describe_columns(schema=schema, table=table)
+    return {
+        name
+        for name, spec in column_descriptions.items()
+        if "json" in spec["data_type"]
+    }

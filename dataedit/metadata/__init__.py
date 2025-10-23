@@ -51,7 +51,7 @@ def save_metadata_to_db(schema: str, table: str, updated_metadata):
     """
 
     # Load the table object
-    table_obj = Table.load(schema=schema, table=table)
+    table_obj = Table.load(name=table)
 
     # Update the oemetadata field
     table_obj.oemetadata = updated_metadata
@@ -60,12 +60,11 @@ def save_metadata_to_db(schema: str, table: str, updated_metadata):
     table_obj.save()
 
 
-def load_metadata_from_db(schema: str, table: str):
+def load_metadata_from_db(table: str) -> dict:
     """
     Load metadata for a specific table from the OEP database.
 
     Args:
-        schema (str): The name of the OEP schema.
         table (str): The name of the table in the OEP schema.
 
     Returns:
@@ -77,7 +76,7 @@ def load_metadata_from_db(schema: str, table: str):
         or keep the old functionality (TODO).
     """
 
-    metadata = Table.load(schema=schema, table=table).oemetadata
+    metadata = Table.load(name=table).oemetadata
     if not metadata:
         metadata = OEMETADATA_V20_TEMPLATE
     return metadata

@@ -11,14 +11,20 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
-import oeplatform.securitysettings as sec
 from dataedit.models import Table
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import (
+    SCHEMA_DEFAULT_TEST_SANDBOX,
+    dbhost,
+    dbname,
+    dbpasswd,
+    dbport,
+    dbuser,
+)
 
 
 def get_connection_string():
     return "postgresql://{0}:{1}@{2}:{3}/{4}".format(
-        sec.dbuser, sec.dbpasswd, sec.dbhost, sec.dbport, sec.dbname
+        dbuser, dbpasswd, dbhost, dbport, dbname
     )
 
 

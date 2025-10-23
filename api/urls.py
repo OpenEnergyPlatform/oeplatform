@@ -78,30 +78,26 @@ equal_qualifier = r"[\w\d\s\'\=]"
 structures = r"table|sequence"
 
 
-urlpatterns_v0_schema = [
+urlpatterns_v0_schema_table = [
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/$",
         TableAPIView.as_view(),
         name="api_table",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/sequences/(?P<sequence>[\w\d_\s]+)/$",  # noqa
-        SequenceAPIView.as_view(),
-    ),
-    re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/meta/$",  # noqa
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/meta/$",
         MetadataAPIView.as_view(),
         name="api_table_meta",
     ),
     # TODO: Remove this endpoint later on - MovePublish includes optional
     # embargo time and marks table as published
-    path(
-        "<str:schema>/tables/<str:table>/move/<str:to_schema>/",
+    re_path(
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<to_schema>[\w\d_\s]+)/",  # noqa
         MoveAPIView.as_view(),
         name="move",
     ),
-    path(
-        "<str:schema>/tables/<str:table>/move_publish/<str:to_schema>/",  # noqa
+    re_path(
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move_publish/(?P<to_schema>[\w\d_\s]+)/",  # noqa
         MovePublishAPIView.as_view(),
         name="move_publish",
     ),
@@ -126,12 +122,16 @@ urlpatterns_v0_schema = [
     ),
 ]
 
+urlpatterns_v0_schema = urlpatterns_v0_schema_table + [
+    re_path(
+        r"^(?P<schema>[\w\d_\s]+)/sequences/(?P<sequence>[\w\d_\s]+)/$",
+        SequenceAPIView.as_view(),
+    ),
+]
+
 
 urlpatterns_v0_advanced = [
-    re_path(
-        r"^search",
-        AdvancedSearchAPIView,
-    ),
+    re_path(r"^search", AdvancedSearchAPIView, name="advenced-search"),
     re_path(
         r"^insert",
         AdvancedInsertAPIView,

@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 
 from api.connection import _get_engine
 from dataedit.models import Table
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 def get_sandbox_tables_django() -> List[Table]:

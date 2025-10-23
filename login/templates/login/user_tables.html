@@ -300,7 +300,7 @@
 </section>
 {% endif %}
 
-<div id="schemaWhitelistData" style="display: none;">{{ schema_whitelist|json_script:"schemaWhitelistData" }}</div>
+<div id="topics" style="display: none;">{{ topics|json_script:"topics" }}</div>
 
 
 <!-- Modal for publishing functionality (after pressing publish button) -->
@@ -373,13 +373,13 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-        let schemaWhitelist = [];
+        let topics = [];
         let relatedButton;
         let publishModalInstance; // Declare publishModalInstance in a higher scope
 
-        const schemaDataElement = document.querySelector('#schemaWhitelistData');
-        if (schemaDataElement) {
-            schemaWhitelist = JSON.parse(schemaDataElement.textContent);
+        const topicsDiv = document.querySelector('#topics');
+        if (topicsDiv) {
+            topics = JSON.parse(topicsDiv.textContent);
         }
 
         // Event listener for modal show event
@@ -390,7 +390,7 @@
             relatedButton = event.relatedTarget;
             const dropdown = this.querySelector('.schema-dropdown');
             dropdown.innerHTML = '';
-            schemaWhitelist.forEach(schema => {
+            topics.forEach(schema => {
                 dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
             });
         });

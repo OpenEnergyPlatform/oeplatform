@@ -35,23 +35,20 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy import types as sqltypes
-from sqlalchemy import (
-    util,
-)
+from sqlalchemy import util
 from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun
 from sqlalchemy.sql.elements import Slice
 from sqlalchemy.sql.expression import CompoundSelect
-from sqlalchemy.sql.sqltypes import Interval
+from sqlalchemy.sql.sqltypes import Interval, Text
 
+import api  # TODO: we need functions from api.helper but get circular imports
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
 from api.utils import validate_schema
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
-
-__KNOWN_TABLES = {}
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -259,8 +256,21 @@ def parse_select(d):
             elif type.lower() == "except":
                 query.except_(subquery)
     if "order_by" in d:
+
+        # issue #2041: order by on json columns fails,
+        # so we try to find json columns and cast them as text for ordering
+        if "from" in d:
+            json_columns = api.helper.get_json_columns(**d["from"])
+        else:
+            json_columns = set()
+
         for ob in d["order_by"]:
             expr = parse_expression(ob)
+
+            # cannot order json fields, so we cast them to string
+            if expr.name in json_columns:
+                expr = cast(expr, Text)
+
             if isinstance(ob, dict):
                 desc = ob.get("ordering", "asc").lower() == "desc"
                 if desc:

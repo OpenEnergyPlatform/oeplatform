@@ -17,25 +17,14 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import csv
-
-# import datetime
-# import json
-# import os
 import re
 from collections import OrderedDict
 
-# import matplotlib
-# import matplotlib.pyplot as plt
-# import numpy
 import urllib3
-
-# from django.conf import settings as djangoSettings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
-
-# from django.contrib.staticfiles import finders
-from django.http import Http404, HttpResponse  # noqa
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.cache import never_cache

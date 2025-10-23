@@ -19,12 +19,11 @@ from django.contrib.postgres.search import SearchQuery
 from django.db.models import Q, QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.utils.encoding import smart_str
-from sqlalchemy.orm import sessionmaker
 
 import api.parser
-import oeplatform.securitysettings as sec
 from api import actions
 from dataedit.models import PeerReview, Table, Tag
+from oeplatform.settings import MEDIA_ROOT
 
 # TODO: WINGECHR: model_draft is not a topic, but currently,
 # frontend still usses it to filter / search for unpublished data
@@ -535,7 +534,7 @@ def add_tag(name: str, color: str) -> None:
 
 
 def send_dump(schema, table, fname):
-    path = sec.MEDIA_ROOT + "/dumps/{schema}/{table}/{fname}.dump".format(
+    path = MEDIA_ROOT + "/dumps/{schema}/{table}/{fname}.dump".format(
         fname=fname, schema=schema, table=table
     )
     f = FileWrapper(open(path, "rb"))
@@ -550,42 +549,6 @@ def send_dump(schema, table, fname):
     return response
 
 
-def get_dependencies(schema, table, found=None):
-    if not found:
-        found = {(schema, table)}
-
-    query = "SELECT DISTINCT \
-        ccu.table_name AS foreign_table, \
-        ccu.table_schema AS foreign_schema \
-        FROM  \
-        information_schema.table_constraints AS tc \
-        JOIN information_schema.constraint_column_usage AS ccu \
-          ON ccu.constraint_name = tc.constraint_name \
-        WHERE constraint_type = 'FOREIGN KEY' AND tc.table_schema='{schema}'\
-        AND tc.table_name='{table}';".format(
-        schema=schema, table=table
-    )
-
-    engine = actions._get_engine()
-    # metadata = sqla.MetaData(bind=engine)
-    Session = sessionmaker()
-    session = Session(bind=engine)
-
-    result = session.execute(query)
-    found_new = {
-        (row.foreign_schema, row.foreign_table)
-        for row in result
-        if (row.foreign_schema, row.foreign_table) not in found
-    }
-    found = found.union(found_new)
-    found.add((schema, table))
-    session.close()
-    for s, t in found_new:
-        found = found.union(get_dependencies(s, t, found))
-
-    return found
-
-
 def update_keywords_from_tags(table: Table, schema: str) -> None:
     """synchronize keywords in metadata with tags"""
 
@@ -593,7 +556,7 @@ def update_keywords_from_tags(table: Table, schema: str) -> None:
     keywords = [tag.name_normalized for tag in table.tags.all()]
     metadata["resources"][0]["keywords"] = keywords
 
-    actions.set_table_metadata(table=table.name, schema=schema, metadata=metadata)
+    actions.set_table_metadata(table=table.name, metadata=metadata)
 
 
 def get_column_description(schema, table):

@@ -3,11 +3,11 @@ from django.db import transaction
 from api import actions
 from api.error import APIError
 from dataedit.models import Table as DBTable
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import IS_SANDBOX, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class DjangoTableService:
-    def create(self, table: str, is_sandbox: bool = True):
+    def create(self, table: str, is_sandbox: bool = IS_SANDBOX):
         return DBTable.objects.create(name=table, is_sandbox=is_sandbox)
 
     def delete(self, table: str):
@@ -21,19 +21,30 @@ class OEDBTableService:
         actions.table_create(schema, table, columns, constraints)
 
     def drop(self, schema, table):
-        if not actions.has_table({"schema": schema, "table": table}):
+        try:
+            real_schema, real_table = actions.get_table_name(schema, table)
+        except Exception:
+            # does not exist
             return
-
-        real_schema, real_table = actions.get_table_name(schema, table)
         meta_schema = actions.get_meta_schema_name(real_schema)
 
         edit_table = actions.get_edit_table_name(real_schema, real_table)
+        insert_table = actions.get_insert_table_name(real_schema, real_table)
+        delete_table = actions.get_delete_table_name(real_schema, real_table)
+
         engine = actions._get_engine()
 
-        # drop the revision table
-        engine.execute(f'DROP TABLE "{meta_schema}"."{edit_table}" CASCADE;')
+        # drop the revision tables
+        engine.execute(f'DROP TABLE IF EXISTS "{meta_schema}"."{edit_table}" CASCADE;')
+        engine.execute(
+            f'DROP TABLE IF EXISTS "{meta_schema}"."{insert_table}" CASCADE;'
+        )
+        engine.execute(
+            f'DROP TABLE IF EXISTS "{meta_schema}"."{delete_table}" CASCADE;'
+        )
+
         # drop the actual data table
-        engine.execute(f'DROP TABLE "{real_schema}"."{real_table}" CASCADE;')
+        engine.execute(f'DROP TABLE IF EXISTS "{real_schema}"."{real_table}" CASCADE;')
 
 
 class TableCreationOrchestrator:
@@ -84,3 +95,7 @@ class TableCreationOrchestrator:
             self.oedb_svc.drop(schema, table)
         if metadata_created:
             self.django_svc.delete(table=table)
+
+    def drop_table(self, schema, table):
+        self.oedb_svc.drop(schema, table)
+        self.django_svc.delete(table=table)

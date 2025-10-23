@@ -60,7 +60,6 @@ from api import actions, parser, sessions
 from api.encode import Echo
 from api.error import APIError
 from api.helper import (
-    MAX_COL_NAME_LENGTH,
     WHERE_EXPRESSION,
     OEPStream,
     check_embargo,
@@ -89,11 +88,10 @@ from api.services.embargo import (
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs, validate_schema
-from api.validators.column import validate_column_names
+from api.validators.column import MAX_COL_NAME_LENGTH, validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo
 from dataedit.models import Table as DBTable
-from dataedit.views import schema_whitelist
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -127,7 +125,6 @@ __all__ = [
     "OeoSsearchAPIView",
     "OevkgSearchAPIView",
     "RowsAPIView",
-    "SessionAPIView",
     "ScenarioDataTablesListAPIView",
     "SequenceAPIView",
     "TableAPIView",
@@ -236,7 +233,7 @@ class MetadataAPIView(APIView):
             metadata.pop("connection_id", None)
             metadata.pop("cursor_id", None)
 
-            actions.set_table_metadata(table=table, schema=schema, metadata=metadata)
+            actions.set_table_metadata(table=table, metadata=metadata)
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
@@ -400,7 +397,7 @@ class TableAPIView(APIView):
         metadata = payload.get("metadata")
         if metadata:
 
-            actions.set_table_metadata(table=table, schema=schema, metadata=metadata)
+            actions.set_table_metadata(table=table, metadata=metadata)
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
@@ -550,15 +547,13 @@ class TableAPIView(APIView):
             self._apply_embargo(table_object, embargo_data)
 
             if metadata:
-                actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata
-                )
+                actions.set_table_metadata(table=table, metadata=metadata)
 
             try:
-                self._assign_table_holder(request.user, schema, table)
+                self._assign_table_holder(user=request.user, table=table)
             except ValueError as e:
                 # Ensure the user is assigned as the table holder
-                self._assign_table_holder(request.user, schema, table)
+                self._assign_table_holder(user=request.user, table=table)
                 raise APIError(
                     "Table was created without embargo due to an unexpected "
                     "error during embargo setup."
@@ -572,12 +567,10 @@ class TableAPIView(APIView):
                 column_definitions=column_definitions,
                 constraint_definitions=constraint_definitions,
             )
-            self._assign_table_holder(request.user, schema, table)
+            self._assign_table_holder(user=request.user, table=table)
 
             if metadata:
-                actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata
-                )
+                actions.set_table_metadata(table=table, metadata=metadata)
 
     def _create_table_object(self, table: str):
         try:
@@ -630,8 +623,8 @@ class TableAPIView(APIView):
                 )
             embargo.save()
 
-    def _assign_table_holder(self, user, schema: str, table: str):
-        table_object = DBTable.load(schema, table)
+    def _assign_table_holder(self, user, table: str):
+        table_object = DBTable.load(name=table)
         perm, _ = login_models.UserPermission.objects.get_or_create(
             table=table_object, holder=user
         )
@@ -642,39 +635,11 @@ class TableAPIView(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request: Request, schema: str, table: str) -> JsonResponse:
+        orchestrator = TableCreationOrchestrator()
+
         schema, table = actions.get_table_name(schema, table)
+        orchestrator.drop_table(schema=schema, table=table)
 
-        meta_schema = actions.get_meta_schema_name(schema)
-
-        edit_table = actions.get_edit_table_name(schema, table)
-
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=meta_schema, table=edit_table
-            )
-        )
-
-        edit_table = actions.get_insert_table_name(schema, table)
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=meta_schema, table=edit_table
-            )
-        )
-
-        edit_table = actions.get_delete_table_name(schema, table)
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=meta_schema, table=edit_table
-            )
-        )
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=schema, table=table
-            )
-        )
-
-        table_object = DBTable.objects.get(name=table)
-        table_object.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
@@ -765,8 +730,6 @@ class MoveAPIView(APIView):
     def post(
         self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonResponse:
-        if schema not in schema_whitelist or to_schema not in schema_whitelist:
-            raise APIError("Invalid origin or target schema")
         actions.move(schema, table, to_schema)
         return HttpResponse(status=status.HTTP_200_OK)
 
@@ -900,7 +863,7 @@ class RowsAPIView(APIView):
                     for x in itertools.chain([cols], return_obj["data"])
                 ),
             )
-            django_table = DBTable.load(schema, table)
+            django_table = DBTable.load(name=table)
             if django_table and django_table.oemetadata:
                 zf.writestr(
                     "datapackage.json",
@@ -1216,11 +1179,6 @@ class RowsAPIView(APIView):
         actions._execute_sqla(query, cursor)
 
 
-class SessionAPIView(APIView):
-    def get(self, request: Request, length=1) -> JsonResponse:
-        return request.session["resonse"]
-
-
 class AdvancedFetchAPIView(APIView):
     @api_exception
     def post(self, request: Request, fetchtype) -> JsonResponse:
@@ -1463,21 +1421,16 @@ class TableSizeAPIView(APIView):
 
     @api_exception
     def get(self, request: Request) -> JsonResponse:
-        schema = request.query_params.get("schema")
         table = request.query_params.get("table")
 
-        allowed = schema_whitelist  # reuse existing whitelist
-
-        if schema and table:
-            if schema not in allowed:
-                raise APIError(f"Schema '{schema}' is not allowed.", status=403)
-            data = actions.get_single_table_size(schema, table, allowed)
+        if table:
+            data = actions.get_single_table_size(table=table)
             if not data:
-                raise APIError(f"Relation {schema}.{table} not found.", status=404)
+                raise APIError(f"Relation {table} not found.", status=404)
             return Response(data)
 
-        # list mode (schema optional)
-        data = actions.list_table_sizes(allowed_schemas=allowed, schema=schema)
+        # list mode
+        data = actions.list_table_sizes()
         return Response(data, status=status.HTTP_200_OK)
 
 

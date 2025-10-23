@@ -9,9 +9,10 @@ import os
 import tarfile
 from subprocess import call
 
-import securitysettings as sec
 import sqlalchemy as sqla
+from securitysettings import dbhost, dbname, dbpasswd, dbport, dbuser
 
+datarepowc = ""
 excluded_schemas = ["information_schema", "public", "topology", "reference"]
 
 
@@ -23,7 +24,7 @@ def connect():
 def _get_engine():
     engine = sqla.create_engine(
         "postgresql://{0}:{1}@{2}:{3}/{4}".format(
-            sec.dbuser, sec.dbpasswd, sec.dbhost, sec.dbport, sec.dbname
+            dbuser, dbpasswd, dbhost, dbport, dbname
         )
     )
     return engine
@@ -37,24 +38,24 @@ def make_tarfile(output_filename, source_dir):
 insp = connect()
 for schema in insp.get_schema_names():
     if schema not in excluded_schemas:
-        if not os.path.exists(sec.datarepowc + schema):
-            os.mkdir(sec.datarepowc + schema)
+        if not os.path.exists(datarepowc + schema):
+            os.mkdir(datarepowc + schema)
         for table in insp.get_table_names(schema=schema):
             if not table.startswith("_"):
-                if not os.path.exists(sec.datarepowc + schema + "/" + table):
-                    os.mkdir(sec.datarepowc + schema + "/" + table)
+                if not os.path.exists(datarepowc + schema + "/" + table):
+                    os.mkdir(datarepowc + schema + "/" + table)
                 L = [
                     "pg_dump",
                     "-h",
-                    sec.dbhost,
+                    dbhost,
                     "-U",
-                    sec.dbuser,
+                    dbuser,
                     "-d",
-                    sec.dbname,
+                    dbname,
                     "-F",
                     "d",
                     "-f",
-                    sec.datarepowc + schema + "/" + table,
+                    datarepowc + schema + "/" + table,
                     "-t",
                     schema + "." + table,
                     "-w",
@@ -63,12 +64,12 @@ for schema in insp.get_schema_names():
                 L = [
                     "tar",
                     "-zcf",
-                    sec.datarepowc + schema + "/" + table + ".tar.gz",
+                    datarepowc + schema + "/" + table + ".tar.gz",
                     "-C",
-                    sec.datarepowc + schema + "/",
+                    datarepowc + schema + "/",
                     table + "/",
                 ]
                 call(L)
-                L = ["rm", "-r", sec.datarepowc + schema + "/" + table]
+                L = ["rm", "-r", datarepowc + schema + "/" + table]
 
                 call(L)

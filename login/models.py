@@ -116,28 +116,26 @@ class OEPUserManager(UserManager):
 
 
 class PermissionHolder:
-    def has_write_permissions(self, schema, table):
+    def has_write_permissions(self, table: str):
         """
-        This function returns the authorization given the schema and table.
+        This function returns the authorization given the table.
         """
-        return self.__get_perm(schema, table) >= WRITE_PERM
+        return self.__get_perm(table=table) >= WRITE_PERM
 
-    def has_delete_permissions(self, schema, table):
+    def has_delete_permissions(self, table: str):
         """
-        This function returns the authorization given the schema and table.
+        This function returns the authorization given the table.
         """
-        return self.__get_perm(schema, table) >= DELETE_PERM
+        return self.__get_perm(table=table) >= DELETE_PERM
 
-    def has_admin_permissions(self, schema, table):
+    def has_admin_permissions(self, table: str):
         """
-        This function returns the authorization given the schema and table.
+        This function returns the authorization given the table.
         """
-        return self.__get_perm(schema, table) >= ADMIN_PERM
+        return self.__get_perm(table=table) >= ADMIN_PERM
 
-    def __get_perm(self, schema, table):
-        perm = self.table_permissions.filter(
-            table__name=table, table__schema__name=schema
-        ).first()
+    def __get_perm(self, table: str):
+        perm = self.table_permissions.filter(table__name=table).first()
         if perm:
             return perm.level
         else:

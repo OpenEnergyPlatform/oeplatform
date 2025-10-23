@@ -10,9 +10,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from django.db import migrations, models
 
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
-TOPICS = [  # from dataedit/views.py:schema_whitelist
+TOPICS = [
     "boundaries",
     "climate",
     "demand",
