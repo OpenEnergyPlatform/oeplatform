@@ -921,7 +921,12 @@ def TageTableAddView(request: HttpRequest) -> HttpResponse:
 
     messages.success(
         request,
-        'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
+        (
+            "Successfully updated table tags! "
+            "Please note that OEMetadata keywords and table tags are synchronized. "
+            "When submitting new tags, you may notice automatic changes to the table "
+            'tags on the OEP and/or the "Keywords" field in the metadata.'
+        ),
     )
 
     return redirect(request.META["HTTP_REFERER"])
