@@ -1,4 +1,7 @@
-"""empty message
+"""
+SPDX-FileCopyrightText: 2025 wingechr
+SPDX-License-Identifier: AGPL-3.0-or-later
+
 
 Revision ID: 9f80bb4b215a
 Revises: 4a999e7a3f93
