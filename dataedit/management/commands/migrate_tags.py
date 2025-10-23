@@ -43,13 +43,13 @@ class Command(BaseCommand):
             usage_tracked_since = timezone.make_aware(
                 usage_tracked_since, timezone.get_current_timezone()
             )
-            TagOEP(
+            TagOEP.objects.get_or_create(
                 name_normalized=name_normalized,
                 usage_count=usage_count,
                 name=name,
                 color=color,
                 usage_tracked_since=usage_tracked_since,
-            ).save()
+            )
 
         for table_name, tag_id in con.execute(
             text(
@@ -60,8 +60,15 @@ class Command(BaseCommand):
                 """
             )
         ).fetchall():
-            tag = tag_names[tag_id]
-            table = TableOEP.objects.get(name=table_name)
+            table = TableOEP.objects.filter(name=table_name).first()
+            if not table:
+                print(f"Warning: table does not exist: {table_name}")
+                continue
+            tag_name_normalized = tag_names[tag_id]
+            tag = TagOEP.objects.filter(name_normalized=tag_name_normalized)
+            if not tag:
+                print(f"Warning: tag does not exist: {tag_id} / {tag_name_normalized}")
+                continue
             table.tags.add(tag)  # type: ignore
             print(table_name, tag)
             table.save()
