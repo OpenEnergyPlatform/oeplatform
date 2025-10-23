@@ -50,6 +50,8 @@ SPDX-License-Identifier: CC0-1.0
 ## Bugs
 
 - issue #2041: sort json columns
+- issue #2003: Infinity and NaN values in json for frontend
+- issue #1987: Warnings stay visible
 
 ## Removed
 

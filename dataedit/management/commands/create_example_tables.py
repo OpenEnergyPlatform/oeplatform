@@ -35,7 +35,7 @@ TABLE_DEFS = [
             },
             {
                 "name": "technology",
-                "type": "text",
+                "type": "json",
                 "options": {"nullable": True},
             },
             {
@@ -55,7 +55,7 @@ TABLE_DEFS = [
             },
             {
                 "name": "value",
-                "type": "numeric",
+                "type": "float",
                 "options": {"nullable": True},
             },
             {
