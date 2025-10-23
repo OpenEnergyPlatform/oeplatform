@@ -38,7 +38,7 @@
                 <select id="tag-select" name="tags" class="form-control controls-container__tags selectpicker" multiple data-live-search="true"
                     title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
                     {% for t in all_tags %}
-                    <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
+                    <option data-content='<i class="fa fa-circle" style="color: {{t.color_hex}};"></i> {{ t.name }}' value="{{ t.pk }}" {% if t.pk in tags %}selected{% endif %}>
                         {{ t.name }}
                     </option>
                     {% endfor %}

@@ -48,8 +48,8 @@
   <h3>Tags</h3>
   <div style="display: flex; flex-flow: wrap">
       {% for t in tags %}
-          <label class="tag-checkbox-container form-label {% if t.id in tags %} tag-checkbox-checked {% endif %}" style="background:{{ t.color }};color:{% readable_text_color t.color %}">
-              <input {% if t.id in tags %} checked="checked" {% endif %} type="checkbox" class="tag-checkbox" name="tags" id="select_{{ t.id }}" value="{{ t.id }}" onchange="apply_tag_filter(event.target)">
+          <label class="tag-checkbox-container form-label {% if t.pk in tags %} tag-checkbox-checked {% endif %}" style="background:{{ t.color_hex }};color:{% readable_text_color t.color_hex %}">
+              <input {% if t.pk in tags %} checked="checked" {% endif %} type="checkbox" class="tag-checkbox" name="tags" id="select_{{ t.pk }}" value="{{ t.pk }}" onchange="apply_tag_filter(event.target)">
               <span>{{ t.name }}</span>
               <span class="tag-checkbox-icon fas fa-check"></span>
           </label>
@@ -112,7 +112,7 @@
             {
                 {% for d in fields.values %}
                     model_name: '<a href="{{model.id}}">{{model.model_name}}</a>',
-                    tags: [ {% for tag in model.tags %} {id:'{{tag.pk}}', name:'{{tag.name}}', color:'{{tag.color_hex}}',  textcolor:'{% readable_text_color tag.color_hex %}'}, {%endfor%} ],
+                    tags: [ {% for tag in model.tags.all %} {id:'{{tag.pk}}', name:'{{tag.name}}', color:'{{tag.color_hex}}',  textcolor:'{% readable_text_color tag.color_hex %}'}, {%endfor%} ],
 
                     {% for group in d.values %}
                         {% for field in group %}

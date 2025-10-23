@@ -57,19 +57,6 @@ def getClasses(sheettype):
     return c, f
 
 
-def load_tags() -> dict[str, dict]:
-    return {
-        tag.pk: {
-            "id": tag.pk,
-            "name": tag.name,
-            "color": tag.color_hex,
-            "usage_count": tag.usage_count,
-            "usage_tracked_since": tag.usage_tracked_since,
-        }
-        for tag in Tag.objects.all()
-    }
-
-
 def listsheets(request, sheettype):
     """
     Lists all available model, framework factsheet objects.
@@ -87,7 +74,6 @@ def listsheets(request, sheettype):
             {"sheettype_error_message": sheettype_error_message},
         )
 
-    tags = []
     fields = {}
     defaults = set()
 
@@ -97,18 +83,15 @@ def listsheets(request, sheettype):
     defaults = (
         FRAMEWORK_DEFAULT_COLUMNS if sheettype == "framework" else MODEL_DEFAULT_COLUMNS
     )
-    d = load_tags()
-    tags = sorted(d.values(), key=lambda d: d["name"])
-    models = []
-
-    for model in c.objects.all():
-        model.tags = [d[tag_id] for tag_id in model.tags]
-        models.append(model)
 
     if sheettype == "framework":
         label = "Framework"
     else:
         label = "Model"
+
+    models = c.objects.all()
+    # tags that are used by factsheets
+    tags = Tag.objects.filter(factsheets__isnull=False)
 
     return render(
         request,
@@ -136,9 +119,6 @@ def show(request, sheettype, model_name):
         )
 
     model = get_object_or_404(c, pk=model_name)
-
-    d = load_tags()
-    model.tags = [d[tag_id] for tag_id in model.tags]
 
     user_agent = {"user-agent": "oeplatform"}
     urllib3.PoolManager(headers=user_agent)
@@ -171,30 +151,19 @@ def show(request, sheettype, model_name):
 
 
 def printable(model, field):
-    if field == "tags":
-        tags: list[str] = []
-        for tag_id in getattr(model, field):
-            tag = Tag.objects.filter(pk=tag_id).first()
-            if tag:
-                tags.append(tag.name)
-        return tags
-    else:
-        return getattr(model, field)
+    return getattr(model, field)
 
 
 def model_to_csv(request, sheettype):
-    tags = []
-    tag_ids = request.GET.get("tags")
-    if tag_ids:
-        for label in tag_ids.split(","):
-            match = re.match(r"^select_(?P<tid>\d+)$", label)
-            tags.append(int(match.group("tid")))
     c, f = getClasses(sheettype)
-
     if not c:
         raise Http404(
             "We dropped the scenario factsheets in favor of scenario bundles."
         )
+
+    tag_ids = request.GET.get("tags")
+    if tag_ids:
+        tag_ids = tag_ids.split(",")
 
     header = list(
         field.attname
@@ -209,9 +178,16 @@ def model_to_csv(request, sheettype):
 
     writer = csv.writer(response, quoting=csv.QUOTE_ALL)
     writer.writerow(header)
-    for model in c.objects.all().order_by("id"):
-        if all(tid in model.tags for tid in tags):
-            writer.writerow([printable(model, col) for col in header])
+
+    models = c.objects.all()
+    # if tags are specified: filter models for ALL of the tags
+
+    if tag_ids:
+        for tag_id in tag_ids:
+            models = models.filter(tags__pk=tag_id)
+
+    for model in models.order_by("pk"):
+        writer.writerow([printable(model, col) for col in header])
 
     return response
 
@@ -258,15 +234,19 @@ def editModel(request, model_name, sheettype):
 
     model = get_object_or_404(c, pk=model_name)
 
-    d = load_tags()
-    tags = [d[tag_id] for tag_id in model.tags]
-
     form = f(instance=model)
+
+    tags = Tag.objects.all()
 
     return render(
         request,
         "modelview/edit{}.html".format(sheettype),
-        {"form": form, "name": model_name, "method": "update", "tags": tags},
+        {
+            "form": form,
+            "name": model_name,
+            "method": "update",
+            "tags": Tag.objects.all(),
+        },
     )
 
 

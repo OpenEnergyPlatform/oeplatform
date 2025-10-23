@@ -69,6 +69,9 @@ class Tag(models.Model):
     usage_tracked_since = DateTimeField(null=False, default=timezone.now)
     category = CharField(max_length=40, null=True)
 
+    def __str__(self) -> str:
+        return str(self.name)
+
     @classmethod
     def get_name_normalized(cls, name: str | None) -> str | None:
         name_norm = name or ""

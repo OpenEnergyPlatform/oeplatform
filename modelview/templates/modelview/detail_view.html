@@ -47,7 +47,7 @@
   <h3>Tags</h3>
   {% for t in model.tags %}
       <a href="" class="btn tag"
-         style="background:{{ t.color }};color:{% readable_text_color t.color %}; display:inline-block;">{{ t.name }}</a>
+         style="background:{{ t.color_hex }};color:{% readable_text_color t.color_hex %}; display:inline-block;">{{ t.name }}</a>
   {% endfor %}
 
 {% endblock main-right-sidebar-content-before %}
