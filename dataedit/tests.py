@@ -99,6 +99,7 @@ class TestViews(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(TestCase, cls).setUpClass()
         # ensure IS_TEST is set correctly
         if not IS_TEST:
             raise Exception("IS_TEST is not True")
@@ -129,11 +130,11 @@ class TestViews(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-
         cls.orchestrator.drop_table(
             schema=cls.kwargs_w_table["schema"],
             table=cls.kwargs_w_table["table"],
         )
+        super(TestCase, cls).tearDownClass()
 
     def test_views_wizard_TODO_UNFINISHED(self):
         # GET without table

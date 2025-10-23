@@ -4,7 +4,6 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from api import actions
 from api.actions import has_table
 from api.tests import APITestCase
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
@@ -16,10 +15,6 @@ class TestTableNameUnique(APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS {cls.schema_sandbox} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA {cls.schema_sandbox}")
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS _{cls.schema_sandbox} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA _{cls.schema_sandbox}")
 
     def test_tables_should_not_exists_on_error(self):
         test_duplicate_column_table_name = "table_column_duplicate"

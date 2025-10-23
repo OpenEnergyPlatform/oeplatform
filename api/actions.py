@@ -92,7 +92,7 @@ def get_column_obj(table, column):
         raise APIError("Column '%s' does not exist." % column)
 
 
-def get_table_name(schema, table, restrict_schemas=True):
+def get_table_name(schema: str | None, table: str, restrict_schemas: bool = True):
     schema = validate_schema(schema)
 
     if not has_schema(dict(schema=schema)):
@@ -1701,18 +1701,17 @@ def connect():
     return insp
 
 
-def has_schema(request, context=None):
+def has_schema(request: dict, context=None) -> bool:
     engine = _get_engine()
     conn = engine.connect()
     try:
         result = engine.dialect.has_schema(conn, get_or_403(request, "schema"))
     finally:
         conn.close()
-    return result
+    return bool(result)
 
 
 def has_table(request, context=None):
-    """TODO: should check in all (whitelisted) schemas"""
     engine = _get_engine()
     schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
     schema = validate_schema(schema)

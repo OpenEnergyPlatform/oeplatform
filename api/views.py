@@ -635,39 +635,11 @@ class TableAPIView(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request: Request, schema: str, table: str) -> JsonResponse:
+        orchestrator = TableCreationOrchestrator()
+
         schema, table = actions.get_table_name(schema, table)
+        orchestrator.drop_table(schema=schema, table=table)
 
-        meta_schema = actions.get_meta_schema_name(schema)
-
-        edit_table = actions.get_edit_table_name(schema, table)
-
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=meta_schema, table=edit_table
-            )
-        )
-
-        edit_table = actions.get_insert_table_name(schema, table)
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=meta_schema, table=edit_table
-            )
-        )
-
-        edit_table = actions.get_delete_table_name(schema, table)
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=meta_schema, table=edit_table
-            )
-        )
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=schema, table=table
-            )
-        )
-
-        table_object = DBTable.objects.get(name=table)
-        table_object.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 

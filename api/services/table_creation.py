@@ -21,19 +21,30 @@ class OEDBTableService:
         actions.table_create(schema, table, columns, constraints)
 
     def drop(self, schema, table):
-        if not actions.has_table({"schema": schema, "table": table}):
+        try:
+            real_schema, real_table = actions.get_table_name(schema, table)
+        except Exception:
+            # does not exist
             return
-
-        real_schema, real_table = actions.get_table_name(schema, table)
         meta_schema = actions.get_meta_schema_name(real_schema)
 
         edit_table = actions.get_edit_table_name(real_schema, real_table)
+        insert_table = actions.get_insert_table_name(real_schema, real_table)
+        delete_table = actions.get_delete_table_name(real_schema, real_table)
+
         engine = actions._get_engine()
 
-        # drop the revision table
-        engine.execute(f'DROP TABLE "{meta_schema}"."{edit_table}" CASCADE;')
+        # drop the revision tables
+        engine.execute(f'DROP TABLE IF EXISTS "{meta_schema}"."{edit_table}" CASCADE;')
+        engine.execute(
+            f'DROP TABLE IF EXISTS "{meta_schema}"."{insert_table}" CASCADE;'
+        )
+        engine.execute(
+            f'DROP TABLE IF EXISTS "{meta_schema}"."{delete_table}" CASCADE;'
+        )
+
         # drop the actual data table
-        engine.execute(f'DROP TABLE "{real_schema}"."{real_table}" CASCADE;')
+        engine.execute(f'DROP TABLE IF EXISTS "{real_schema}"."{real_table}" CASCADE;')
 
 
 class TableCreationOrchestrator:
