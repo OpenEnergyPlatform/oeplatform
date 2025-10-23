@@ -12,13 +12,13 @@ Django views.
 
 View for the reviewer role of the Open Peer Review process.
 
-#### ::: dataedit.views.PeerReviewView
+#### ::: dataedit.views.TablePeerReviewView
 
 ### PeerRreviewContributorView
 
 View for the contributor role of the Open Peer Review process.
 
-#### ::: dataedit.views.PeerRreviewContributorView
+#### ::: dataedit.views.TablePeerRreviewContributorView
 
 ## Helper Functions
 
