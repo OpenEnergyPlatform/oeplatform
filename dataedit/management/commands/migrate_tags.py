@@ -65,10 +65,9 @@ class Command(BaseCommand):
                 print(f"Warning: table does not exist: {table_name}")
                 continue
             tag_name_normalized = tag_names[tag_id]
-            tag = TagOEP.objects.filter(name_normalized=tag_name_normalized)
+            tag = TagOEP.objects.filter(name_normalized=tag_name_normalized).first()
             if not tag:
                 print(f"Warning: tag does not exist: {tag_id} / {tag_name_normalized}")
                 continue
             table.tags.add(tag)  # type: ignore
-            print(table_name, tag)
             table.save()
