@@ -18,9 +18,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import include, path, re_path
 
 from dataedit.views import (
-    AdminColumnView,
-    AdminConstraintsView,
-    MetadataWidgetView,
     StandaloneMetaEditView,
     TableDataView,
     TableGraphView,
@@ -30,17 +27,20 @@ from dataedit.views import (
     TablePeerRreviewContributorView,
     TablePermissionView,
     TableRevisionView,
-    TableShowRevisionView,
-    TablesView,
-    TableViewDeleteView,
-    TableViewSaveView,
-    TableViewSetDefaultView,
     TableWizardView,
-    TagEditorView,
-    TageTableAddView,
-    TagOverviewView,
-    TagUpdateView,
-    TopicView,
+    admin_column_view,
+    admin_constraints_view,
+    metadata_widget_view,
+    table_show_revision_view,
+    table_view_delete_view,
+    table_view_save_view,
+    table_view_set_default_view,
+    tables_view,
+    tag_editor_view,
+    tag_overview_view,
+    tag_update_view,
+    tage_table_add_view,
+    topic_view,
 )
 
 pgsql_qualifier = r"[\w\d_]+"
@@ -49,7 +49,7 @@ app_name = "dataedit"
 urlpatterns_view_schema = [
     re_path(
         r"^(?P<schema>{qual})$".format(qual=pgsql_qualifier),
-        TablesView,
+        tables_view,
         name="input",
     ),
     re_path(
@@ -80,25 +80,25 @@ urlpatterns_view_schema = [
         r"^(?P<schema>{qual})/(?P<table>{qual})/view/save$".format(
             qual=pgsql_qualifier
         ),
-        TableViewSaveView,
+        table_view_save_view,
     ),
     re_path(
         r"^(?P<schema>{qual})/(?P<table>{qual})/view/set-default".format(
             qual=pgsql_qualifier
         ),
-        TableViewSetDefaultView,
+        table_view_set_default_view,
     ),
     re_path(
         r"^(?P<schema>{qual})/(?P<table>{qual})/view/delete".format(
             qual=pgsql_qualifier
         ),
-        TableViewDeleteView,
+        table_view_delete_view,
     ),
     re_path(
         r"^(?P<schema>{qual})/(?P<table>{qual})/(?P<rev_id>\d+)$".format(
             qual=pgsql_qualifier
         ),
-        TableShowRevisionView,
+        table_show_revision_view,
         name="input",
     ),
     re_path(
@@ -137,22 +137,22 @@ urlpatterns_view_schema = [
 urlpatterns_tag = [
     re_path(
         r"^add/$",
-        TageTableAddView,
+        tage_table_add_view,
     ),
-    re_path(r"^$", TagOverviewView),
-    re_path(r"^set/?$", TagUpdateView),
-    re_path(r"^new/?$", TagEditorView),
-    re_path(r"^edit/(?P<id>[a-z0-9]+)/?$", TagEditorView),
+    re_path(r"^$", tag_overview_view),
+    re_path(r"^set/?$", tag_update_view),
+    re_path(r"^new/?$", tag_editor_view),
+    re_path(r"^edit/(?P<id>[a-z0-9]+)/?$", tag_editor_view),
 ]
 
 urlpatterns = [
     path("view/", include(urlpatterns_view_schema)),
-    re_path(r"^view$", TopicView, name="index"),
-    re_path(r"^schemas$", TopicView, name="topic-list"),
+    re_path(r"^view$", topic_view, name="index"),
+    re_path(r"^schemas$", topic_view, name="topic-list"),
     path("tags/", include(urlpatterns_tag)),
-    re_path(r"^$", TopicView),
-    re_path(r"^admin/columns/", AdminColumnView, name="admin-columns"),
-    re_path(r"^admin/constraints/", AdminConstraintsView, name="admin-contraints"),
+    re_path(r"^$", topic_view),
+    re_path(r"^admin/columns/", admin_column_view, name="admin-columns"),
+    re_path(r"^admin/constraints/", admin_constraints_view, name="admin-contraints"),
     re_path(
         r"^wizard/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
         TableWizardView.as_view(),
@@ -168,5 +168,5 @@ urlpatterns = [
         StandaloneMetaEditView.as_view(),
         name="oemetabuilder",
     ),
-    path("metadata-viewer/", MetadataWidgetView, name="metadata-widget"),
+    path("metadata-viewer/", metadata_widget_view, name="metadata-widget"),
 ]

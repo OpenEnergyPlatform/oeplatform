@@ -55,20 +55,20 @@ from api.views import (
     EnergyframeworkFactsheetListAPIView,
     EnergymodelFactsheetListAPIView,
     FieldsAPIView,
-    GroupsAPIView,
     ManageOekgScenarioDatasetsAPIView,
     MetadataAPIView,
     MoveAPIView,
     MovePublishAPIView,
     OekgSparqlAPIView,
-    OeoSsearchAPIView,
     OevkgSearchAPIView,
     RowsAPIView,
     ScenarioDataTablesListAPIView,
     SequenceAPIView,
     TableAPIView,
     TableSizeAPIView,
-    UsersAPIView,
+    groups_api_view,
+    oeo_search_api_view,
+    users_api_view,
 )
 
 app_name = "api"
@@ -298,8 +298,8 @@ urlpatterns_v0 = [
 
 urlpatterns = [
     path("v0/", include(urlpatterns_v0)),
-    path("usrprop/", UsersAPIView),
-    path("grpprop/", GroupsAPIView),
-    path("oeo-search", OeoSsearchAPIView),
+    path("usrprop/", users_api_view),
+    path("grpprop/", groups_api_view),
+    path("oeo-search", oeo_search_api_view),
     path("oevkg-query", OevkgSearchAPIView),
 ]

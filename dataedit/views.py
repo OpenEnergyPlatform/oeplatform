@@ -97,33 +97,33 @@ from login import models as login_models
 from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SCHEMA_DATA
 
 __all__ = [
-    "AdminColumnView",
-    "AdminConstraintsView",
-    "TagUpdateView",
+    "admin_column_view",
+    "admin_constraints_view",
+    "tag_update_view",
     "TableDataView",
     "TableGraphView",
     "TableMapView",
-    "MetadataWidgetView",
+    "metadata_widget_view",
     "TableMetaEditView",
     "TablePeerReviewView",
     "TablePeerRreviewContributorView",
     "TablePermissionView",
-    "TageTableAddView",
+    "tage_table_add_view",
     "TableRevisionView",
-    "TableShowRevisionView",
+    "table_show_revision_view",
     "StandaloneMetaEditView",
-    "TablesView",
-    "TagEditorView",
-    "TagOverviewView",
-    "TopicView",
-    "TableViewDeleteView",
-    "TableViewSaveView",
-    "TableViewSetDefaultView",
+    "tables_view",
+    "tag_editor_view",
+    "tag_overview_view",
+    "topic_view",
+    "table_view_delete_view",
+    "table_view_save_view",
+    "table_view_set_default_view",
     "TableWizardView",
 ]  # mark views as used (by urls.py)
 
 
-def AdminConstraintsView(request: HttpRequest) -> HttpResponse:
+def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     """
     Way to apply changes
     :param request:
@@ -144,7 +144,7 @@ def AdminConstraintsView(request: HttpRequest) -> HttpResponse:
     )
 
 
-def AdminColumnView(request: HttpRequest) -> HttpResponse:
+def admin_column_view(request: HttpRequest) -> HttpResponse:
     """
     Way to apply changes
     :param request:
@@ -166,7 +166,7 @@ def AdminColumnView(request: HttpRequest) -> HttpResponse:
     )
 
 
-def TopicView(request: HttpRequest) -> HttpResponse:
+def topic_view(request: HttpRequest) -> HttpResponse:
     """
     Loads all schemas that are present in the external database specified in
     oeplatform/securitysettings.py. Only schemas that are present in the
@@ -241,7 +241,7 @@ def TopicView(request: HttpRequest) -> HttpResponse:
     )
 
 
-def TablesView(request: HttpRequest, schema: str) -> HttpResponse:
+def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
     """
     :param request: A HTTP-request object sent by the Django framework
     :param schema_name: Name of a schema
@@ -289,7 +289,7 @@ class TableRevisionView(View):
         return redirect(f"/api/v0/schema/{schema}/tables/{table}/rows")
 
 
-def TableShowRevisionView(
+def table_show_revision_view(
     request: HttpRequest, schema: str, table: str, date: str
 ) -> HttpResponse:
     rev = TableRevision.objects.get(schema=schema, table=table, date=date)
@@ -299,7 +299,7 @@ def TableShowRevisionView(
 
 
 @login_required
-def TagOverviewView(request: HttpRequest) -> HttpResponse:
+def tag_overview_view(request: HttpRequest) -> HttpResponse:
     # if rename or adding of tag fails: display error message
     context = {
         "errorMsg": (
@@ -313,7 +313,7 @@ def TagOverviewView(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-def TagEditorView(request: HttpRequest, id: str = "") -> HttpResponse:
+def tag_editor_view(request: HttpRequest, id: str = "") -> HttpResponse:
     tag = Tag.get_or_none(id)
     if tag:
         assigned = tag.tables.count() > 0  # type: ignore (related name)
@@ -336,7 +336,7 @@ def TagEditorView(request: HttpRequest, id: str = "") -> HttpResponse:
 
 
 @login_required
-def TagUpdateView(request: HttpRequest) -> HttpResponse:
+def tag_update_view(request: HttpRequest) -> HttpResponse:
     status = ""  # error status if operation fails
 
     if "submit_save" in request.POST:
@@ -361,7 +361,7 @@ def TagUpdateView(request: HttpRequest) -> HttpResponse:
     return redirect("/dataedit/tags/?status=" + status)
 
 
-def TableViewSaveView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
+def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     post_name = request.POST.get("name")
     post_type = request.POST.get("type")
     post_id = request.POST.get("id")
@@ -448,7 +448,7 @@ def TableViewSaveView(request: HttpRequest, schema: str, table: str) -> HttpResp
     return redirect("../../" + table + "?view=" + str(update_view.id))
 
 
-def TableViewSetDefaultView(
+def table_view_set_default_view(
     request: HttpRequest, schema: str, table: str
 ) -> HttpResponse:
     post_id = request.GET.get("id")
@@ -462,7 +462,9 @@ def TableViewSetDefaultView(
     return redirect("/dataedit/view/" + schema + "/" + table)
 
 
-def TableViewDeleteView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
+def table_view_delete_view(
+    request: HttpRequest, schema: str, table: str
+) -> HttpResponse:
     post_id = request.GET.get("id")
 
     view = DBView.objects.get(id=post_id, schema=schema, table=table)
@@ -882,7 +884,7 @@ class TablePermissionView(View):
 
 
 @login_required
-def TageTableAddView(request: HttpRequest) -> HttpResponse:
+def tage_table_add_view(request: HttpRequest) -> HttpResponse:
     """
     Updates the tags on a table according to the tag values in request.
     The update will delete all tags that are not present
@@ -1568,7 +1570,7 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         return render(request, "dataedit/opr_contributor.html", context=context)
 
 
-def MetadataWidgetView(request: HttpRequest) -> HttpResponse:
+def metadata_widget_view(request: HttpRequest) -> HttpResponse:
     """
     A view to render the metadata widget for the dataedit app.
     The metadata widget is a small widget that can be embedded in other

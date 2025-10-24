@@ -116,20 +116,20 @@ __all__ = [
     "EnergymodelFactsheetListAPIView",
     "AdvancedFetchAPIView",
     "FieldsAPIView",
-    "GroupsAPIView",
+    "groups_api_view",
     "ManageOekgScenarioDatasetsAPIView",
     "MetadataAPIView",
     "MoveAPIView",
     "MovePublishAPIView",
     "OekgSparqlAPIView",
-    "OeoSsearchAPIView",
+    "oeo_search_api_view",
     "OevkgSearchAPIView",
     "RowsAPIView",
     "ScenarioDataTablesListAPIView",
     "SequenceAPIView",
     "TableAPIView",
     "TableSizeAPIView",
-    "UsersAPIView",
+    "users_api_view",
     "AdvancedSearchAPIView",
     "AdvancedInsertAPIView",
     "AdvancedDeleteAPIView",
@@ -1217,7 +1217,7 @@ class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
         return HttpResponse("All connections closed")
 
 
-def UsersAPIView(request: Request) -> JsonResponse:
+def users_api_view(request: Request) -> JsonResponse:
     query = request.GET.get("name", "")
 
     # Ensure query is not empty to proceed with filtering
@@ -1241,7 +1241,7 @@ def UsersAPIView(request: Request) -> JsonResponse:
     return JsonResponse(user_names, safe=False)
 
 
-def GroupsAPIView(request: Request) -> JsonResponse:
+def groups_api_view(request: Request) -> JsonResponse:
     """
     Return all Groups where this user is a member that match
     the current query. The query is input by the User.
@@ -1275,7 +1275,7 @@ def GroupsAPIView(request: Request) -> JsonResponse:
     return JsonResponse(group_names, safe=False)
 
 
-def OeoSsearchAPIView(request: Request) -> JsonResponse:
+def oeo_search_api_view(request: Request) -> JsonResponse:
     if USE_LOEP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         query = request.GET["query"]
