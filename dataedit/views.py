@@ -98,7 +98,8 @@ from dataedit.models import View as DataViewModel
 from login import models as login_models
 from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SCHEMA_DATA
 
-TABLES_PER_PAGE = 2  # how many table per page should be dosplayed
+ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
+
 
 __all__ = [
     "admin_column_view",
@@ -267,7 +268,7 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
     tables = tables.order_by("human_readable_name")
 
     # paginate tables
-    paginator = Paginator(tables, TABLES_PER_PAGE)
+    paginator = Paginator(tables, ITEMS_PER_PAGE)
     tables_paginated = paginator.get_page(get_page(request))
 
     return render(
