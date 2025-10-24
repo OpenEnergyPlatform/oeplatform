@@ -18,14 +18,14 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import json
 import logging
+import re
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
 from django.db import models
-
-# django.contrib.postgres.fields.JSONField is deprecated.
 from django.db.models import (
     BooleanField,
     CharField,
@@ -33,16 +33,16 @@ from django.db.models import (
     ForeignKey,
     IntegerField,
     JSONField,
+    QuerySet,
 )
 from django.urls import reverse
 from django.utils import timezone
 
-# Create your models here.
+from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class TableRevision(models.Model):
     table = CharField(max_length=1000, null=False)
-    schema = CharField(max_length=1000, null=False)
     date = DateTimeField(max_length=1000, null=False, default=timezone.now)
     created = DateTimeField(null=False, default=timezone.now)
     path = CharField(max_length=1000, null=False)
@@ -61,24 +61,88 @@ class Topic(models.Model):
     name = CharField(max_length=128, primary_key=True)
 
 
-class Schema(Tagable):
-    """
-    Represents a schema in the database.
+class Tag(models.Model):
+    name_normalized = CharField(max_length=40, primary_key=True)
+    usage_count = IntegerField(default=0, null=False)
+    name = CharField(max_length=40, null=False)
+    color = IntegerField(default=int("2E3638", 16), null=False)
+    usage_tracked_since = DateTimeField(null=False, default=timezone.now)
+    category = CharField(max_length=40, null=True)
 
-    Attributes:
-        name (str): The name of the schema. Must be unique.
-    """
+    def __str__(self) -> str:
+        return str(self.name)
 
-    class Meta:
-        unique_together = (("name"),)
+    @classmethod
+    def get_name_normalized(cls, name: str | None) -> str | None:
+        name_norm = name or ""
+        name_norm = name_norm.lower()
+        name_norm = re.sub("[^a-z0-9]+", "_", name_norm)
+        name_norm = name_norm.strip("_")
+        name_norm = name_norm[:40]  # max len
+        if not name_norm:  # no empty string
+            name_norm = None
+        return name_norm
+
+    @classmethod
+    def get_name_clean(cls, name: str | None) -> str | None:
+        name_clean = name or ""
+        re.sub(r"\s+", " ", name_clean)
+        name_clean = name_clean.strip()
+        if not name_clean:  # no empty string
+            name_clean = None
+        return name_clean
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # create, not update
+            self.name = self.get_name_clean(self.name)
+            self.name_normalized = self.get_name_normalized(self.name)
+            if isinstance(self.color, str) and self.color[0] == "#":
+                self.color = self.color_from_hex(self.color)
+        super().save(*args, **kwargs)
+
+    @property
+    def color_hex(self) -> str:
+        return "#" + format(self.color, "06X")
+
+    @staticmethod
+    def color_from_hex(color_hex: str) -> int:
+        return int(color_hex[1:], 16)
+
+    def increment_usage_count(self):
+        self.usage_count += 1
+        self.save()
+
+    @staticmethod
+    def increment_usage_count_many(tag_ids: list[str]) -> None:
+        if not tag_ids:
+            return
+        for tag_id in tag_ids:
+            tag = Tag.get_or_none(tag_id)
+            if not tag:
+                continue
+            tag.increment_usage_count()
+
+    @staticmethod
+    def get_or_none(pk: str) -> Union["Tag", None]:
+        return Tag.objects.filter(pk=pk).first()
+
+    @staticmethod
+    def get_or_create_from_name(name: str) -> "Tag":
+        pk = Tag.get_name_normalized(name)
+        if not pk:
+            raise ValueError("Invalid tag name")
+        tag = Tag.get_or_none(pk=pk)
+        if not tag:
+            tag = Tag(name=name)
+            tag.save()
+        return tag
 
 
 class Table(Tagable):
     """
-    Represents a table within a schema in the database.
+    Represents a table within the database.
 
     Attributes:
-        schema (Schema): The schema to which the table belongs.
         search (SearchVectorField): A field for full-text search.
         oemetadata (JSONField): A field to store oemetadata related
             to the table.
@@ -90,9 +154,6 @@ class Table(Tagable):
         JSON string parsing.
     """
 
-    # TODO: will be deleted in second phase of migration to dataset schema
-    schema = models.ForeignKey(Schema, on_delete=models.CASCADE, null=True)
-
     search = SearchVectorField(default="")
 
     # TODO: Maybe oemetadata should be stored in a separate table and
@@ -103,30 +164,41 @@ class Table(Tagable):
     human_readable_name = CharField(max_length=1000, null=True)
     is_sandbox = BooleanField(null=False, default=False)
     topics = models.ManyToManyField(Topic, related_name="tables")
+    tags = models.ManyToManyField(Tag, related_name="tables")
+
+    class Meta:
+        unique_together = (("name",),)
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
 
+    @property
+    def oedb_schema(self) -> str:
+        return SCHEMA_DEFAULT_TEST_SANDBOX if self.is_sandbox else SCHEMA_DATA
+
     @classmethod
-    def load(cls, schema_name: str, table_name: str):
+    def load(cls, name: str) -> "Table":
         """
-        Load a table object from the database given its schema and table name.
+        Load a table object from the database given its name.
 
         Args:
-            schema (str): The name of the schema.
-            table (str): The name of the table.
+            name (str): The name of the table.
 
         Returns:
             Table: The loaded table object.
 
         Raises:
-            DoesNotExist: If no table with the given schema and name exists
+            DoesNotExist: If no table with the given name exists
             in the database.
         """
 
-        table_obj = Table.objects.get(name=table_name)
+        table_obj = Table.objects.get(name=name)
 
         return table_obj
+
+    @classmethod
+    def get_or_none(cls, name: str) -> Union["Table", None]:
+        return Table.objects.filter(name=name).first()
 
     def set_is_reviewed(self):
         """
@@ -138,7 +210,7 @@ class Table(Tagable):
     # TODO: Use function when implementing the publish button
     def set_is_published(self, topic_name: str):
         """
-        Mark the table as published (ready for destination schema & public)
+        Mark the table as published
         and save the change to the database.
         """
         topic = Topic.objects.get(name=topic_name)
@@ -173,8 +245,53 @@ class Table(Tagable):
             self.human_readable_name = readable_table_name
             self.save()
 
-    class Meta:
-        unique_together = (("name",),)
+    def get_readable_table_name(self) -> str:
+        """get readable table name from metadata
+
+        Args:
+            table_obj (object): django orm
+
+        Returns:
+            str
+        """
+
+        def read_label_only_for_first_resource_element(
+            table_name: str, oemetadata: dict
+        ) -> str:
+            """
+            Extracts the readable name from oemetadata and appends the real name
+            in parenthesis.
+            If oemetadata is not a JSON-dictionary or does not contain a field 'Name'
+            None is returned.
+
+            :param table: Name to append
+
+            :param comment: String containing a JSON-dictionary according to @Metadata
+
+            :return: Readable name appended by the true table name as string or None
+            """
+            try:
+                if oemetadata.get("resources")[0]:
+                    return (
+                        oemetadata.get("resources", [])[0]["title"].strip()
+                        + " ("
+                        + table_name
+                        + ")"
+                    )
+
+                else:
+                    return None
+
+            except Exception:
+                return None
+
+        try:
+            label = read_label_only_for_first_resource_element(
+                self.name, self.oemetadata
+            )
+        except Exception as e:
+            raise e
+        return label
 
 
 class Embargo(models.Model):
@@ -213,16 +330,13 @@ class Embargo(models.Model):
 class View(models.Model):
     name = CharField(max_length=50, null=False)
     table = CharField(max_length=1000, null=False)
-    schema = CharField(max_length=1000, null=False)
     VIEW_TYPES = (("table", "table"), ("map", "map"), ("graph", "graph"))
     type = CharField(max_length=10, null=False, choices=VIEW_TYPES)
     options = JSONField(null=False, default=dict)
     is_default = BooleanField(default=False)
 
     def __str__(self):
-        return '{}/{}--"{}"({})'.format(
-            self.schema, self.table, self.name, self.type.upper()
-        )
+        return '{}--"{}"({})'.format(self.table, self.name, self.type.upper())
 
 
 class Filter(models.Model):
@@ -239,7 +353,6 @@ class PeerReview(models.Model):
 
     Attributes:
         table (CharField): Name of the table being reviewed.
-        schema (CharField): Name of the schema where the table is located.
         reviewer (ForeignKey): The user who reviews.
         contributor (ForeignKey): The user who contributes.
         is_finished (BooleanField): Whether the review is finished.
@@ -250,7 +363,6 @@ class PeerReview(models.Model):
     """
 
     table = CharField(max_length=1000, null=False)
-    schema = CharField(max_length=1000, null=False)
     reviewer = ForeignKey(
         "login.myuser", on_delete=models.CASCADE, related_name="reviewed_by", null=True
     )
@@ -271,42 +383,34 @@ class PeerReview(models.Model):
 
     # laden
     @classmethod
-    def load(cls, schema, table):
+    def load(cls, table: str) -> Union["PeerReview", None]:
         """
         Load the current reviewer user.
         The current review is review is determened by the latest date started.
 
         Args:
-            schema (string): Schema name
             table (string): Table name
 
         Returns:
             opr (PeerReview): PeerReview object related to the latest
             date started.
         """
-        opr = (
-            PeerReview.objects.filter(table=table, schema=schema)
-            .order_by("-date_started")
-            .first()
-        )
+        opr = PeerReview.objects.filter(table=table).order_by("-date_started").first()
         return opr
 
     # TODO: CAUTION unfinished work ... fix: includes all id´s and not just the
     # related ones (reviews on same table) .. procedures false results
-    def get_prev_and_next_reviews(self, schema, table):
+    def get_prev_and_next_reviews(self, table: str):
         """
         Sets the prev_review and next_review fields based on the date_started
         field of the PeerReview objects associated with the same table.
         """
-        # Get all the PeerReview objects associated with the same schema
-        # and table name
-        peer_reviews = PeerReview.objects.filter(table=table, schema=schema).order_by(
-            "date_started"
-        )
+        # Get all the PeerReview objects associated with the same table name
+        peer_reviews = PeerReview.objects.filter(table=table).order_by("date_started")
 
         current_index = None
         for index, review in enumerate(peer_reviews):
-            if review.id == self.id:
+            if review.pk == self.pk:
                 current_index = index
                 break
 
@@ -329,14 +433,6 @@ class PeerReview(models.Model):
         if not self.contributor == self.reviewer:
             super().save(*args, **kwargs)
             # TODO: This causes errors if review list ist empty
-            # prev_review, next_review = self.get_prev_and_next_reviews(
-            #   self.schema, self.table
-            # )
-
-            # print(prev_review.id, next_review)
-            # print(prev_review, next_review)
-            # Create a new PeerReviewManager entry for this PeerReview
-            # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
 
             if review_type == "save":
                 pm_new = PeerReviewManager(
@@ -344,9 +440,7 @@ class PeerReview(models.Model):
                 )
 
             elif review_type == "submit":
-                result = self.set_version_of_metadata_for_review(
-                    schema_name=self.schema, table_name=self.table
-                )
+                result = self.set_version_of_metadata_for_review(table=self.table)
                 if result[0]:
                     logging.info(result[1])
                 elif result[0] is False:
@@ -358,9 +452,7 @@ class PeerReview(models.Model):
                 pm_new.set_next_reviewer()
 
             elif review_type == "finished":
-                result = self.set_version_of_metadata_for_review(
-                    schema_name=self.schema, table_name=self.table
-                )
+                result = self.set_version_of_metadata_for_review(table=self.table)
                 if result[0]:
                     logging.info(result[1])
                 elif result[0] is False:
@@ -414,9 +506,7 @@ class PeerReview(models.Model):
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
-    def set_version_of_metadata_for_review(
-        self, table_name: str, schema_name: str, *args, **kwargs
-    ):
+    def set_version_of_metadata_for_review(self, table: str, *args, **kwargs):
         """
         Once the peer review is started, we save the current version of the
         oemetadata that is present on the table to the peer review instance
@@ -427,16 +517,13 @@ class PeerReview(models.Model):
 
         Args:
             table (str): Table name
-            schema (str): Table database schema aka data topic
 
         Returns:
             State (tuple): Bool value that indicates weather there is already
             a version of oemetadata available for this review & readable
             status message.
         """
-        table_oemetdata = Table.load(
-            schema_name=schema_name, table_name=table_name
-        ).oemetadata
+        table_oemetdata = Table.load(name=table).oemetadata
 
         if self.oemetadata is None:
             self.oemetadata = table_oemetdata
@@ -444,30 +531,24 @@ class PeerReview(models.Model):
 
             return (
                 True,
-                f"Set current version of table's: '{table_name}' "
-                "oemetadata for review.",
+                f"Set current version of table's: '{table}' " "oemetadata for review.",
             )
 
         return (
             False,
-            f"This tables (name: {table_name}) review "
+            f"This tables (name: {table}) review "
             "already got a version of oemetadata.",
         )
 
-    def update_all_table_peer_reviews_after_table_moved(
-        self, *args, to_schema, **kwargs
-    ):
-        # all_peer_reviews = self.objects.filter(table=table, schema=from_schema)
-        # for peer_review in all_peer_reviews:
+    def update_all_table_peer_reviews_after_table_moved(self, *args, topic, **kwargs):
         if isinstance(self.review, str):
             review_data = json.loads(self.review)
         else:
             review_data = self.review
 
-        review_data["topic"] = to_schema
+        review_data["topic"] = topic
 
         self.review = review_data
-        self.schema = to_schema
 
         super().save(*args, **kwargs)
 
@@ -568,7 +649,6 @@ class PeerReviewManager(models.Model):
             days_open = peer_review.days_open
             if days_open is not None:
                 self.is_open_since = str(days_open)
-        # print(self.is_open_since, self.status)
         # Call the parent class's save method to save the PeerReviewManager instance
         super().save(*args, **kwargs)
 
@@ -624,21 +704,20 @@ class PeerReviewManager(models.Model):
         return role, result
 
     @staticmethod
-    def load_contributor(schema_name: str, table_name: str):
+    def load_contributor(table: str):
         """
         Get the contributor for the table a review is started.
 
         Args:
-            schema (str): Schema name.
             table (str): Table name.
 
         Returns:
             User: The contributor user.
         """
-        current_table = Table.load(schema_name=schema_name, table_name=table_name)
+        current_table = Table.load(name=table)
         try:
             table_holder = (
-                current_table.userpermission_set.filter(table=current_table.id)
+                current_table.userpermission_set.filter(table=current_table.pk)
                 .first()
                 .holder
             )
@@ -647,18 +726,17 @@ class PeerReviewManager(models.Model):
         return table_holder
 
     @staticmethod
-    def load_reviewer(schema, table):
+    def load_reviewer(table: str):
         """
-            Get the reviewer for the table a review is started.
-        .
-            Args:
-                schema (str): Schema name.
-                table (str): Table name.
+        Get the reviewer for the table a review is started.
 
-            Returns:
-                User: The reviewer user.
+        Args:
+            table (str): Table name.
+
+        Returns:
+            User: The reviewer user.
         """
-        current_review = PeerReview.load(schema=schema, table=table)
+        current_review = PeerReview.load(table=table)
         if current_review and hasattr(current_review, "reviewer"):
             return current_review.reviewer
         else:
@@ -748,19 +826,18 @@ class PeerReviewManager(models.Model):
             return None
 
     @staticmethod
-    def filter_opr_by_table(schema, table):
+    def filter_opr_by_table(table: str) -> QuerySet[PeerReview]:
         """
-        Filter peer reviews by schema and table.
+        Filter peer reviews by table.
 
         Args:
-            schema (str): Schema name.
             table (str): Table name.
 
         Returns:
             QuerySet: Filtered peer reviews.
         """
-        return PeerReview.objects.filter(schema=schema, table=table)
+        return PeerReview.objects.filter(table=table)
 
     @staticmethod
-    def filter_opr_by_id(opr_id):
-        return PeerReview.objects.filter(id=opr_id).first()
+    def get_opr_by_id(opr_id) -> PeerReview:
+        return PeerReview.objects.get(id=opr_id)

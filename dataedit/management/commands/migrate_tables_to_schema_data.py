@@ -9,9 +9,8 @@ from django.core.management.base import BaseCommand
 
 from api.actions import _get_engine, get_schema_names, get_table_names
 from dataedit.models import Table
-from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
-# from dataedit.views import schema_whitelist
 # copied from dataedit.views, because it may be removed later
 schemas_whitelist = {
     "boundaries",
@@ -144,7 +143,7 @@ class Command(BaseCommand):
         "to migrate data to single schema"
     )
 
-    def handle(self, migrate: bool = False, *args, **options):
+    def handle(self, *args, **options):
         sql = get_migration_sql()
         logging.info("Here is the proposed migration sql code")
         print(sql)  # print so we could pipe it into psql or file

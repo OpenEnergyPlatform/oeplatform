@@ -8,7 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from oekg.sparqlModels import DatasetConfig
-from oeplatform.securitysettings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 def get_dataset_configs(validated_data) -> list[DatasetConfig]:
@@ -19,7 +19,7 @@ def get_dataset_configs(validated_data) -> list[DatasetConfig]:
     ]
 
 
-def check_if_oem_license_exists(metadata: dict):
+def check_if_oem_license_exists(metadata: dict) -> tuple[dict | None, str | None]:
     # already parsed but need to check if metaMetadata version exists
 
     if "metaMetadata" not in metadata:
@@ -35,7 +35,7 @@ def check_if_oem_license_exists(metadata: dict):
     return metadata["metaMetadata"]["metadataVersion"], None
 
 
-def validate_schema(schema: str) -> str:
+def validate_schema(schema: str | None) -> str:
     schema = schema or SCHEMA_DEFAULT_TEST_SANDBOX  # default fallback
     if schema.startswith("_"):
         prefix = "_"

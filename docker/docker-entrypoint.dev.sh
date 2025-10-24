@@ -70,7 +70,7 @@ echo "Applying Django migrations…"
 python manage.py migrate --no-input
 
 echo "Applying Alembic migrations…"
-python -m alembic upgrade head
+python manage.py alembic upgrade head
 
 # ————————————————————
 # 4) Static & compress

@@ -4,7 +4,6 @@
 
 // My idea v0´s code :)
 function initMetadataViewer() {
-  console.log("hi");
   console.log(window.meta_api);
   const metadataViewer = document.getElementById("metadata-viewer");
   if (!metadataViewer) return;
@@ -13,29 +12,33 @@ function initMetadataViewer() {
 
   // First fetch the schema to get field descriptions
   fetch("/static/metaedit/schema.json")
-    .then(response => {
+    .then((response) => {
       if (!response.ok) {
-        console.warn("Could not fetch schema, proceeding without field descriptions");
+        console.warn(
+          "Could not fetch schema, proceeding without field descriptions"
+        );
         return null;
       }
       return response.json();
     })
-    .then(schema => {
+    .then((schema) => {
       // Store schema globally for use in rendering
       window.metadataSchema = schema;
-      
+
       // Now fetch the actual metadata
       return fetch(window.meta_api);
     })
     .then((response) => {
       if (!response.ok) {
-        throw new Error(`Failed to fetch metadata: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch metadata: ${response.status} ${response.statusText}`
+        );
       }
       return response.json();
     })
     .then((metadata) => {
       renderMetadataViewer(metadata, metadataViewer);
-      
+
       // Initialize tooltips after rendering
       initializeTooltips();
     })
@@ -52,11 +55,16 @@ function initMetadataViewer() {
 
 // Initialize Bootstrap tooltips
 function initializeTooltips() {
-  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
-    html: true,
-    placement: 'right'
-  }));
+  const tooltipTriggerList = document.querySelectorAll(
+    '[data-bs-toggle="tooltip"]'
+  );
+  const tooltipList = [...tooltipTriggerList].map(
+    (tooltipTriggerEl) =>
+      new bootstrap.Tooltip(tooltipTriggerEl, {
+        html: true,
+        placement: "right",
+      })
+  );
 }
 
 if (document.readyState === "loading") {
@@ -68,22 +76,26 @@ if (document.readyState === "loading") {
 // Helper function to get field description from schema
 function getFieldDescription(fieldPath) {
   if (!window.metadataSchema) return null;
-  
+
   try {
     // Navigate through the schema to find the field description
-    const pathParts = fieldPath.split('.');
+    const pathParts = fieldPath.split(".");
     let current = window.metadataSchema;
-    
+
     for (const part of pathParts) {
       if (current.properties && current.properties[part]) {
         current = current.properties[part];
-      } else if (current.items && current.items.properties && current.items.properties[part]) {
+      } else if (
+        current.items &&
+        current.items.properties &&
+        current.items.properties[part]
+      ) {
         current = current.items.properties[part];
       } else {
         return null;
       }
     }
-    
+
     return current.description || null;
   } catch (error) {
     console.warn(`Error getting description for ${fieldPath}:`, error);
@@ -94,9 +106,9 @@ function getFieldDescription(fieldPath) {
 // Helper function to create info icon with tooltip
 function createInfoIcon(fieldPath, title) {
   const description = getFieldDescription(fieldPath);
-  
-  if (!description) return '';
-  
+
+  if (!description) return "";
+
   return `
     <span class="info-icon ms-1" data-bs-toggle="tooltip" data-bs-title="${description}">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
@@ -109,7 +121,7 @@ function createInfoIcon(fieldPath, title) {
 
 // Update the overview tab to remove metadata version and add licenses to resource summary
 function renderOverviewTab(metadata) {
-  let html = '<div class="row">'
+  let html = '<div class="row">';
 
   // Basic information card
   html += `
@@ -120,16 +132,19 @@ function renderOverviewTab(metadata) {
         </div>
         <div class="card-body metadata-card-body">
           <dl>
-            <dt>Name ${createInfoIcon('name', 'Dataset Name')}</dt>
+            <dt>Name ${createInfoIcon("name", "Dataset Name")}</dt>
             <dd>${metadata.name || "-"}</dd>
             
-            <dt>Title ${createInfoIcon('title', 'Dataset Title')}</dt>
+            <dt>Title ${createInfoIcon("title", "Dataset Title")}</dt>
             <dd>${metadata.title || "-"}</dd>
             
-            <dt>Description ${createInfoIcon('description', 'Dataset Description')}</dt>
+            <dt>Description ${createInfoIcon(
+              "description",
+              "Dataset Description"
+            )}</dt>
             <dd>${metadata.description || "-"}</dd>
             
-            <dt>Identifier ${createInfoIcon('@id', 'Dataset Identifier')}</dt>
+            <dt>Identifier ${createInfoIcon("@id", "Dataset Identifier")}</dt>
             <dd>
               ${
                 metadata["@id"]
@@ -147,7 +162,7 @@ function renderOverviewTab(metadata) {
         </div>
       </div>
     </div>
-  `
+  `;
 
   // Resources summary card with licenses
   if (metadata.resources && metadata.resources.length > 0) {
@@ -160,12 +175,14 @@ function renderOverviewTab(metadata) {
           <div class="card-body metadata-card-body">
             <p>This dataset contains <strong>${metadata.resources.length}</strong> resource(s).</p>
             <div class="list-group">
-    `
+    `;
 
     metadata.resources.forEach((resource, index) => {
       html += `
         <div class="list-group-item">
-          <h6 class="mb-1">${resource.title || resource.name || `Resource ${index + 1}`}</h6>
+          <h6 class="mb-1">${
+            resource.title || resource.name || `Resource ${index + 1}`
+          }</h6>
           <p class="mb-1 text-muted small">${
             resource.description
               ? resource.description.length > 150
@@ -173,19 +190,21 @@ function renderOverviewTab(metadata) {
                 : resource.description
               : "No description available"
           }</p>
-      `
+      `;
 
       // Add licenses for each resource
       if (resource.licenses && resource.licenses.length > 0) {
-        html += `<div class="mb-2"><strong class="small">Licenses:</strong> `
+        html += `<div class="mb-2"><strong class="small">Licenses:</strong> `;
         resource.licenses.forEach((license, licenseIndex) => {
           html += `
-            <a href="${license.path}" target="_blank" rel="noopener noreferrer" class="badge bg-light text-dark me-1">
+            <a href="${
+              license.path
+            }" target="_blank" rel="noopener noreferrer" class="badge bg-light text-dark me-1">
               ${license.name || license.title || `License ${licenseIndex + 1}`}
             </a>
-          `
-        })
-        html += `</div>`
+          `;
+        });
+        html += `</div>`;
       }
 
       html += `
@@ -193,34 +212,36 @@ function renderOverviewTab(metadata) {
             View details
           </button>
         </div>
-      `
-    })
+      `;
+    });
 
     html += `
             </div>
           </div>
         </div>
       </div>
-    `
+    `;
   }
 
-  html += "</div>" // End of row
+  html += "</div>"; // End of row
 
-  return html
+  return html;
 }
 
 function renderResourcesTab(metadata) {
   if (!metadata.resources || metadata.resources.length === 0) {
-    return '<div class="metadata-empty">No resources available</div>'
+    return '<div class="metadata-empty">No resources available</div>';
   }
 
-  let html = ""
+  let html = "";
 
   metadata.resources.forEach((resource, resourceIndex) => {
     html += `
       <div class="card metadata-card" id="resource-${resourceIndex}">
         <div class="card-header metadata-card-header">
-          <h5 class="card-title mb-0">${resource.title || resource.name || `Resource ${resourceIndex + 1}`}</h5>
+          <h5 class="card-title mb-0">${
+            resource.title || resource.name || `Resource ${resourceIndex + 1}`
+          }</h5>
           <p class="mb-0 text-muted small">${resource.description || ""}</p>
         </div>
         <div class="card-body metadata-card-body">
@@ -228,10 +249,16 @@ function renderResourcesTab(metadata) {
             <div class="col-md-6">
               <h6 class="metadata-section-title">Basic Information</h6>
               <dl>
-                <dt>Name ${createInfoIcon('resources.name', 'Resource Name')}</dt>
+                <dt>Name ${createInfoIcon(
+                  "resources.name",
+                  "Resource Name"
+                )}</dt>
                 <dd>${resource.name || "-"}</dd>
                 
-                <dt>Path ${createInfoIcon('resources.path', 'Resource Path')}</dt>
+                <dt>Path ${createInfoIcon(
+                  "resources.path",
+                  "Resource Path"
+                )}</dt>
                 <dd>
                   ${
                     resource.path
@@ -246,21 +273,33 @@ function renderResourcesTab(metadata) {
                   }
                 </dd>
                 
-                <dt>Type ${createInfoIcon('resources.type', 'Resource Type')}</dt>
+                <dt>Type ${createInfoIcon(
+                  "resources.type",
+                  "Resource Type"
+                )}</dt>
                 <dd>${resource.type || "-"}</dd>
                 
-                <dt>Format ${createInfoIcon('resources.format', 'Resource Format')}</dt>
+                <dt>Format ${createInfoIcon(
+                  "resources.format",
+                  "Resource Format"
+                )}</dt>
                 <dd>${resource.format || "-"}</dd>
                 
-                <dt>Publication Date ${createInfoIcon('resources.publicationDate', 'Publication Date')}</dt>
+                <dt>Publication Date ${createInfoIcon(
+                  "resources.publicationDate",
+                  "Publication Date"
+                )}</dt>
                 <dd>${resource.publicationDate || "-"}</dd>
 
-                <dt>Databus Identifier ${createInfoIcon('resources.@id', 'Databus Identifier')}</dt>
+                <dt>Databus Identifier ${createInfoIcon(
+                  "resources.@id",
+                  "Databus Identifier"
+                )}</dt>
                 <dd>
                   ${
                     resource["@id"]
-                      ? `<a href="${ resource["@id"]}" target="_blank" rel="noopener noreferrer">
-                      ${ resource["@id"]}
+                      ? `<a href="${resource["@id"]}" target="_blank" rel="noopener noreferrer">
+                      ${resource["@id"]}
                       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
                         <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
@@ -274,175 +313,198 @@ function renderResourcesTab(metadata) {
             
             <div class="col-md-6">
               <h6 class="metadata-section-title">Topics & Languages</h6>
-    `
+    `;
 
     // Topics
     if (resource.topics && resource.topics.length > 0) {
       html += `
         <div class="mb-3">
-          <h6 class="small text-muted mb-2">Topics ${createInfoIcon('resources.topics', 'Topics')}</h6>
+          <h6 class="small text-muted mb-2">Topics ${createInfoIcon(
+            "resources.topics",
+            "Topics"
+          )}</h6>
           <div>
-      `
+      `;
 
       resource.topics.forEach((topic) => {
-        html += `<span class="metadata-badge metadata-badge-blue">${topic}</span> `
-      })
+        html += `<span class="metadata-badge metadata-badge-blue">${topic}</span> `;
+      });
 
       html += `
           </div>
         </div>
-      `
+      `;
     }
 
     // Languages
     if (resource.languages && resource.languages.length > 0) {
       html += `
         <div class="mb-3">
-          <h6 class="small text-muted mb-2">Languages ${createInfoIcon('resources.languages', 'Languages')}</h6>
+          <h6 class="small text-muted mb-2">Languages ${createInfoIcon(
+            "resources.languages",
+            "Languages"
+          )}</h6>
           <div>
-      `
+      `;
 
       resource.languages.forEach((lang) => {
-        html += `<span class="metadata-badge metadata-badge-green">${lang}</span> `
-      })
+        html += `<span class="metadata-badge metadata-badge-green">${lang}</span> `;
+      });
 
       html += `
           </div>
         </div>
-      `
+      `;
     }
 
     // Keywords
     if (resource.keywords && resource.keywords.length > 0) {
       html += `
         <div class="mb-3">
-          <h6 class="small text-muted mb-2">Keywords ${createInfoIcon('resources.keywords', 'Keywords')}</h6>
+          <h6 class="small text-muted mb-2">Keywords ${createInfoIcon(
+            "resources.keywords",
+            "Keywords"
+          )}</h6>
           <div>
-      `
+      `;
 
       resource.keywords.forEach((keyword) => {
-        html += `<span class="metadata-badge metadata-badge-gray">${keyword}</span> `
-      })
+        html += `<span class="metadata-badge metadata-badge-gray">${keyword}</span> `;
+      });
 
       html += `
           </div>
         </div>
-      `
+      `;
     }
 
     html += `
             </div>
           </div>
-    `
+    `;
 
     // Collapsible sections
 
     // Subject
     if (resource.subject && resource.subject.length > 0) {
       html += createCollapsibleSection(
-        `Subject ${createInfoIcon('resources.subject', 'Subject')}`,
+        `Subject ${createInfoIcon("resources.subject", "Subject")}`,
         `resource-${resourceIndex}-subject`,
-        renderSubjectContent(resource.subject),
-      )
+        renderSubjectContent(resource.subject)
+      );
     }
 
     // Context
     if (resource.context) {
       html += createCollapsibleSection(
-        `Context ${createInfoIcon('resources.context', 'Context')}`,
+        `Context ${createInfoIcon("resources.context", "Context")}`,
         `resource-${resourceIndex}-context`,
-        renderContextContent(resource.context),
-      )
+        renderContextContent(resource.context)
+      );
     }
 
     // Spatial
     if (resource.spatial) {
       html += createCollapsibleSection(
-        `Spatial Information ${createInfoIcon('resources.spatial', 'Spatial Information')}`,
+        `Spatial Information ${createInfoIcon(
+          "resources.spatial",
+          "Spatial Information"
+        )}`,
         `resource-${resourceIndex}-spatial`,
-        renderSpatialContent(resource.spatial),
-      )
+        renderSpatialContent(resource.spatial)
+      );
     }
 
     // Temporal
     if (resource.temporal) {
       html += createCollapsibleSection(
-        `Temporal Information ${createInfoIcon('resources.temporal', 'Temporal Information')}`,
+        `Temporal Information ${createInfoIcon(
+          "resources.temporal",
+          "Temporal Information"
+        )}`,
         `resource-${resourceIndex}-temporal`,
-        renderTemporalContent(resource.temporal),
-      )
+        renderTemporalContent(resource.temporal)
+      );
     }
 
     // Sources
     if (resource.sources && resource.sources.length > 0) {
       html += createCollapsibleSection(
-        `Sources ${createInfoIcon('resources.sources', 'Sources')}`,
+        `Sources ${createInfoIcon("resources.sources", "Sources")}`,
         `resource-${resourceIndex}-sources`,
-        renderSourcesContent(resource.sources),
-      )
+        renderSourcesContent(resource.sources)
+      );
     }
 
     // Licenses
     if (resource.licenses && resource.licenses.length > 0) {
       html += createCollapsibleSection(
-        `Licenses ${createInfoIcon('resources.licenses', 'Licenses')}`,
+        `Licenses ${createInfoIcon("resources.licenses", "Licenses")}`,
         `resource-${resourceIndex}-licenses`,
-        renderLicensesContent(resource.licenses),
-      )
+        renderLicensesContent(resource.licenses)
+      );
     }
 
     // Contributors
     if (resource.contributors && resource.contributors.length > 0) {
       html += createCollapsibleSection(
-        `Contributors ${createInfoIcon('resources.contributors', 'Contributors')}`,
+        `Contributors ${createInfoIcon(
+          "resources.contributors",
+          "Contributors"
+        )}`,
         `resource-${resourceIndex}-contributors`,
-        renderContributorsContent(resource.contributors),
-      )
+        renderContributorsContent(resource.contributors)
+      );
     }
 
     // Review
     if (resource.review) {
       html += createCollapsibleSection(
-        `Review ${createInfoIcon('resources.review', 'Review')}`,
+        `Review ${createInfoIcon("resources.review", "Review")}`,
         `resource-${resourceIndex}-review`,
-        renderReviewContent(resource.review),
-      )
+        renderReviewContent(resource.review)
+      );
     }
 
     html += `
         </div>
       </div>
-    `
-  })
+    `;
+  });
 
-  return html
+  return html;
 }
 
 // Update the schema tab (now data model) to rename Field Details and add search
 function renderSchemaTab(metadata) {
   if (!metadata.resources || metadata.resources.length === 0) {
-    return '<div class="metadata-empty">No data model information available</div>'
+    return '<div class="metadata-empty">No data model information available</div>';
   }
 
-  let html = ""
-  let hasSchema = false
+  let html = "";
+  let hasSchema = false;
 
   metadata.resources.forEach((resource, resourceIndex) => {
-    if (!resource.schema) return
+    if (!resource.schema) return;
 
-    hasSchema = true
+    hasSchema = true;
     html += `
       <div class="card metadata-card">
         <div class="card-header metadata-card-header">
-          <h5 class="card-title mb-0">${resource.title || resource.name || `Resource ${resourceIndex + 1}`} Data Model</h5>
+          <h5 class="card-title mb-0">${
+            resource.title || resource.name || `Resource ${resourceIndex + 1}`
+          } Data Model</h5>
         </div>
         <div class="card-body metadata-card-body">
-    `
+    `;
 
     // Fields table with search
     if (resource.schema.fields && resource.schema.fields.length > 0) {
       html += `
-        <h6 class="metadata-section-title">Fields ${createInfoIcon('resources.schema.fields', 'Fields')}</h6>
+        <h6 class="metadata-section-title">Fields ${createInfoIcon(
+          "resources.schema.fields",
+          "Fields"
+        )}</h6>
         
         <div class="mb-3">
           <input type="text" id="field-search-${resourceIndex}" class="form-control" placeholder="Search fields...">
@@ -452,15 +514,30 @@ function renderSchemaTab(metadata) {
           <table class="table table-striped metadata-table" id="fields-table-${resourceIndex}">
             <thead>
               <tr>
-                <th>Name ${createInfoIcon('resources.schema.fields.name', 'Field Name')}</th>
-                <th>Type ${createInfoIcon('resources.schema.fields.type', 'Field Type')}</th>
-                <th>Description ${createInfoIcon('resources.schema.fields.description', 'Description')}</th>
-                <th>Nullable ${createInfoIcon('resources.schema.fields.nullable', 'Nullable')}</th>
-                <th>Unit ${createInfoIcon('resources.schema.fields.unit', 'Unit')}</th>
+                <th>Name ${createInfoIcon(
+                  "resources.schema.fields.name",
+                  "Field Name"
+                )}</th>
+                <th>Type ${createInfoIcon(
+                  "resources.schema.fields.type",
+                  "Field Type"
+                )}</th>
+                <th>Description ${createInfoIcon(
+                  "resources.schema.fields.description",
+                  "Description"
+                )}</th>
+                <th>Nullable ${createInfoIcon(
+                  "resources.schema.fields.nullable",
+                  "Nullable"
+                )}</th>
+                <th>Unit ${createInfoIcon(
+                  "resources.schema.fields.unit",
+                  "Unit"
+                )}</th>
               </tr>
             </thead>
             <tbody>
-      `
+      `;
 
       resource.schema.fields.forEach((field) => {
         html += `
@@ -468,20 +545,26 @@ function renderSchemaTab(metadata) {
             <td>${field.name || "-"} </td>
             <td>${field.type || "-"} </td>
             <td>${field.description || "-"}</td>
-            <td>${field.nullable !== undefined ? (field.nullable ? "Yes" : "No") : "-"} </td>
+            <td>${
+              field.nullable !== undefined
+                ? field.nullable
+                  ? "Yes"
+                  : "No"
+                : "-"
+            } </td>
             <td>${field.unit || "-"} </td>
           </tr>
-        `
-      })
+        `;
+      });
 
       html += `
             </tbody>
           </table>
         </div>
-      `
+      `;
 
       // Primary and Foreign Keys
-      html += '<div class="row mt-4">'
+      html += '<div class="row mt-4">';
 
       // Primary Key
       if (resource.schema.primaryKey && resource.schema.primaryKey.length > 0) {
@@ -489,89 +572,107 @@ function renderSchemaTab(metadata) {
           <div class="col-md-6 mb-4">
             <div class="card">
               <div class="card-header">
-                <h6 class="card-title mb-0">Primary Key ${createInfoIcon('resources.schema.primaryKey', 'Primary Key')}</h6>
+                <h6 class="card-title mb-0">Primary Key ${createInfoIcon(
+                  "resources.schema.primaryKey",
+                  "Primary Key"
+                )}</h6>
               </div>
               <div class="card-body">
                 <div>
-        `
+        `;
 
         resource.schema.primaryKey.forEach((key) => {
-          html += `<span class="metadata-badge metadata-badge-blue">${key}</span> `
-        })
+          html += `<span class="metadata-badge metadata-badge-blue">${key}</span> `;
+        });
 
         html += `
                 </div>
               </div>
             </div>
           </div>
-        `
+        `;
       }
 
       // Foreign Keys
-      if (resource.schema.foreignKeys && resource.schema.foreignKeys.length > 0) {
+      if (
+        resource.schema.foreignKeys &&
+        resource.schema.foreignKeys.length > 0
+      ) {
         html += `
           <div class="col-md-6 mb-4">
             <div class="card">
               <div class="card-header">
-                <h6 class="card-title mb-0">Foreign Keys ${createInfoIcon('resources.schema.foreignKeys', 'Foreign Keys')}</h6>
+                <h6 class="card-title mb-0">Foreign Keys ${createInfoIcon(
+                  "resources.schema.foreignKeys",
+                  "Foreign Keys"
+                )}</h6>
               </div>
               <div class="card-body">
                 <div class="list-group list-group-flush">
-        `
+        `;
 
         resource.schema.foreignKeys.forEach((fk) => {
           html += `
             <div class="list-group-item px-0">
               <div><strong>Fields:</strong> ${fk.fields.join(", ")}</div>
-              <div><strong>References:</strong> ${fk.reference.resource} (${fk.reference.fields.join(", ")})</div>
+              <div><strong>References:</strong> ${
+                fk.reference.resource
+              } (${fk.reference.fields.join(", ")})</div>
             </div>
-          `
-        })
+          `;
+        });
 
         html += `
                 </div>
               </div>
             </div>
           </div>
-        `
+        `;
       }
 
-      html += "</div>" // End of row
+      html += "</div>"; // End of row
 
       // Dialect
       if (resource.dialect) {
         html += `
           <div class="card mt-4">
             <div class="card-header">
-              <h6 class="card-title mb-0">Dialect ${createInfoIcon('resources.dialect', 'Dialect')}</h6>
+              <h6 class="card-title mb-0">Dialect ${createInfoIcon(
+                "resources.dialect",
+                "Dialect"
+              )}</h6>
             </div>
             <div class="card-body">
               <dl class="row">
-        `
+        `;
 
         Object.entries(resource.dialect).forEach(([key, value]) => {
           html += `
-            <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.dialect.${key}`, key)}</dt>
+            <dt class="col-sm-3">${
+              key.charAt(0).toUpperCase() + key.slice(1)
+            } ${createInfoIcon(`resources.dialect.${key}`, key)}</dt>
             <dd class="col-sm-9">${value}</dd>
-          `
-        })
+          `;
+        });
 
         html += `
               </dl>
             </div>
           </div>
-        `
+        `;
       }
 
       // Renamed from Field Details to Ontological Data Annotation
       html += `
         <h6 class="metadata-section-title mt-4">Ontological Data Annotation</h6>
         <div class="accordion" id="fieldAccordion-${resourceIndex}">
-      `
+      `;
 
       resource.schema.fields.forEach((field, fieldIndex) => {
         html += `
-          <div class="accordion-item field-item" data-field-name="${field.name?.toLowerCase() || ""}">
+          <div class="accordion-item field-item" data-field-name="${
+            field.name?.toLowerCase() || ""
+          }">
             <h2 class="accordion-header" id="fieldHeading-${resourceIndex}-${fieldIndex}">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fieldCollapse-${resourceIndex}-${fieldIndex}" aria-expanded="false" aria-controls="fieldCollapse-${resourceIndex}-${fieldIndex}">
                 ${field.name}
@@ -583,24 +684,38 @@ function renderSchemaTab(metadata) {
                 
                 <div class="row mb-3">
                   <div class="col-md-4">
-                    <strong>Type ${createInfoIcon('resources.schema.fields.type', 'Field Type')}:</strong> ${field.type || "-"}
+                    <strong>Type ${createInfoIcon(
+                      "resources.schema.fields.type",
+                      "Field Type"
+                    )}:</strong> ${field.type || "-"}
                   </div>
                   <div class="col-md-4">
-                    <strong>Nullable ${createInfoIcon('resources.schema.fields.nullable', 'Nullable')}:</strong> ${field.nullable !== undefined ? (field.nullable ? "Yes" : "No") : "-"}
+                    <strong>Nullable ${createInfoIcon(
+                      "resources.schema.fields.nullable",
+                      "Nullable"
+                    )}:</strong> ${
+          field.nullable !== undefined ? (field.nullable ? "Yes" : "No") : "-"
+        }
                   </div>
                   <div class="col-md-4">
-                    <strong>Unit ${createInfoIcon('resources.schema.fields.unit', 'Unit')}:</strong> ${field.unit || "-"}
+                    <strong>Unit ${createInfoIcon(
+                      "resources.schema.fields.unit",
+                      "Unit"
+                    )}:</strong> ${field.unit || "-"}
                   </div>
                 </div>
-        `
+        `;
 
         // Is About
         if (field.isAbout && field.isAbout.length > 0) {
           html += `
             <div class="mb-3">
-              <h6 class="small text-muted mb-2">Is About ${createInfoIcon('resources.schema.fields.isAbout', 'Is About')}</h6>
+              <h6 class="small text-muted mb-2">Is About ${createInfoIcon(
+                "resources.schema.fields.isAbout",
+                "Is About"
+              )}</h6>
               <div class="list-group">
-          `
+          `;
 
           field.isAbout.forEach((about) => {
             html += `
@@ -618,34 +733,47 @@ function renderSchemaTab(metadata) {
                     : ""
                 }
               </div>
-            `
-          })
+            `;
+          });
 
           html += `
               </div>
             </div>
-          `
+          `;
         }
 
         // Value Reference
         if (
           field.valueReference &&
           field.valueReference.length > 0 &&
-          field.valueReference.some((ref) => ref.value || ref.name || ref["@id"])
+          field.valueReference.some(
+            (ref) => ref.value || ref.name || ref["@id"]
+          )
         ) {
           html += `
             <div class="mb-3">
-              <h6 class="small text-muted mb-2">Value References ${createInfoIcon('resources.schema.fields.valueReference', 'Value References')}</h6>
+              <h6 class="small text-muted mb-2">Value References ${createInfoIcon(
+                "resources.schema.fields.valueReference",
+                "Value References"
+              )}</h6>
               <div class="list-group">
-          `
+          `;
 
           field.valueReference
             .filter((ref) => ref.value || ref.name || ref["@id"])
             .forEach((ref) => {
               html += `
                 <div class="list-group-item">
-                  ${ref.value ? `<div><strong>Value:</strong> ${ref.value}</div>` : ""}
-                  ${ref.name ? `<div><strong>Name:</strong> ${ref.name}</div>` : ""}
+                  ${
+                    ref.value
+                      ? `<div><strong>Value:</strong> ${ref.value}</div>`
+                      : ""
+                  }
+                  ${
+                    ref.name
+                      ? `<div><strong>Name:</strong> ${ref.name}</div>`
+                      : ""
+                  }
                   ${
                     ref["@id"]
                       ? `<a href="${ref["@id"]}" target="_blank" rel="noopener noreferrer" class="small">
@@ -658,44 +786,44 @@ function renderSchemaTab(metadata) {
                       : ""
                   }
                 </div>
-              `
-            })
+              `;
+            });
 
           html += `
               </div>
             </div>
-          `
+          `;
         }
 
         html += `
               </div>
             </div>
           </div>
-        `
-      })
+        `;
+      });
 
       html += `
         </div>
-      `
+      `;
     }
 
     html += `
         </div>
       </div>
-    `
-  })
+    `;
+  });
 
   if (!hasSchema) {
-    return '<div class="metadata-empty">No data model information available</div>'
+    return '<div class="metadata-empty">No data model information available</div>';
   }
 
-  return html
+  return html;
 }
 
 // Update the metadata tab (formerly meta metadata) to include the metadata version
 function renderMetadataTab(metadata) {
   if (!metadata.metaMetadata) {
-    return '<div class="metadata-empty">No metadata version information available</div>'
+    return '<div class="metadata-empty">No metadata version information available</div>';
   }
 
   let html = `
@@ -711,21 +839,30 @@ function renderMetadataTab(metadata) {
             </svg>
           </div>
           <div>
-            <p class="mb-1">This dataset uses OEMetadata version <strong>${metadata.metaMetadata.metadataVersion || "Unknown"}</strong></p>
+            <p class="mb-1">This dataset uses OEMetadata version <strong>${
+              metadata.metaMetadata.metadataVersion || "Unknown"
+            }</strong></p>
           </div>
         </div>
         
         <dl class="row">
-  `
+  `;
 
   if (metadata.metaMetadata.metadataLicense) {
     html += `
-          <dt class="col-sm-3">Metadata License ${createInfoIcon('metaMetadata.metadataLicense', 'Metadata License')}</dt>
+          <dt class="col-sm-3">Metadata License ${createInfoIcon(
+            "metaMetadata.metadataLicense",
+            "Metadata License"
+          )}</dt>
           <dd class="col-sm-9">
             <div class="card">
               <div class="card-body">
-                <h6 class="card-subtitle mb-2">${metadata.metaMetadata.metadataLicense.title || "-"}</h6>
-                <a href="${metadata.metaMetadata.metadataLicense.path}" target="_blank" rel="noopener noreferrer" class="card-link">
+                <h6 class="card-subtitle mb-2">${
+                  metadata.metaMetadata.metadataLicense.title || "-"
+                }</h6>
+                <a href="${
+                  metadata.metaMetadata.metadataLicense.path
+                }" target="_blank" rel="noopener noreferrer" class="card-link">
                   ${metadata.metaMetadata.metadataLicense.name || "-"}
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
@@ -735,28 +872,30 @@ function renderMetadataTab(metadata) {
               </div>
             </div>
           </dd>
-    `
+    `;
   }
 
   // Add any other meta metadata properties
   Object.entries(metadata.metaMetadata).forEach(([key, value]) => {
     if (key !== "metadataVersion" && key !== "metadataLicense") {
       html += `
-        <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`metaMetadata.${key}`, key)}</dt>
+        <dt class="col-sm-3">${
+          key.charAt(0).toUpperCase() + key.slice(1)
+        } ${createInfoIcon(`metaMetadata.${key}`, key)}</dt>
         <dd class="col-sm-9">
           ${typeof value === "object" ? JSON.stringify(value, null, 2) : value}
         </dd>
-      `
+      `;
     }
-  })
+  });
 
   html += `
         </dl>
       </div>
     </div>
-  `
+  `;
 
-  return html
+  return html;
 }
 
 // Add event listener setup for field search
@@ -766,33 +905,37 @@ document.addEventListener("DOMContentLoaded", () => {
   // After rendering the metadata viewer, set up the field search functionality
   document.querySelectorAll('[id^="field-search-"]').forEach((searchInput) => {
     searchInput.addEventListener("input", function () {
-      const resourceIndex = this.id.split("-")[2]
-      const searchTerm = this.value.toLowerCase()
+      const resourceIndex = this.id.split("-")[2];
+      const searchTerm = this.value.toLowerCase();
 
       // Filter table rows
-      const tableRows = document.querySelectorAll(`#fields-table-${resourceIndex} tbody tr`)
+      const tableRows = document.querySelectorAll(
+        `#fields-table-${resourceIndex} tbody tr`
+      );
       tableRows.forEach((row) => {
-        const text = row.textContent.toLowerCase()
+        const text = row.textContent.toLowerCase();
         if (text.includes(searchTerm)) {
-          row.style.display = ""
+          row.style.display = "";
         } else {
-          row.style.display = "none"
+          row.style.display = "none";
         }
-      })
+      });
 
       // Filter accordion items
-      const fieldItems = document.querySelectorAll(`#fieldAccordion-${resourceIndex} .field-item`)
+      const fieldItems = document.querySelectorAll(
+        `#fieldAccordion-${resourceIndex} .field-item`
+      );
       fieldItems.forEach((item) => {
-        const fieldName = item.dataset.fieldName
+        const fieldName = item.dataset.fieldName;
         if (fieldName && fieldName.includes(searchTerm)) {
-          item.style.display = ""
+          item.style.display = "";
         } else {
-          item.style.display = "none"
+          item.style.display = "none";
         }
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});
 
 // Helper functions for rendering collapsible sections
 function createCollapsibleSection(title, id, contentHTML) {
@@ -808,16 +951,19 @@ function createCollapsibleSection(title, id, contentHTML) {
         ${contentHTML}
       </div>
     </div>
-  `
+  `;
 }
 
 function renderSubjectContent(subjects) {
-  let html = '<div class="list-group">'
+  let html = '<div class="list-group">';
 
   subjects.forEach((subject) => {
     html += `
       <div class="list-group-item">
-        <div class="fw-bold">${subject.name || "-"} ${createInfoIcon('resources.subject.name', 'Subject Name')}</div>
+        <div class="fw-bold">${subject.name || "-"} ${createInfoIcon(
+      "resources.subject.name",
+      "Subject Name"
+    )}</div>
         ${
           subject["@id"]
             ? `<a href="${subject["@id"]}" target="_blank" rel="noopener noreferrer" class="small">
@@ -830,19 +976,21 @@ function renderSubjectContent(subjects) {
             : ""
         }
       </div>
-    `
-  })
+    `;
+  });
 
-  html += "</div>"
-  return html
+  html += "</div>";
+  return html;
 }
 
 function renderContextContent(context) {
-  let html = '<dl class="row">'
+  let html = '<dl class="row">';
 
   Object.entries(context).forEach(([key, value]) => {
     html += `
-      <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.context.${key}`, key)}</dt>
+      <dt class="col-sm-3">${
+        key.charAt(0).toUpperCase() + key.slice(1)
+      } ${createInfoIcon(`resources.context.${key}`, key)}</dt>
       <dd class="col-sm-9">
         ${
           typeof value === "string" && value.startsWith("http")
@@ -856,26 +1004,31 @@ function renderContextContent(context) {
             : value
         }
       </dd>
-    `
-  })
+    `;
+  });
 
-  html += "</dl>"
-  return html
+  html += "</dl>";
+  return html;
 }
 
 function renderSpatialContent(spatial) {
-  let html = ""
+  let html = "";
 
   if (spatial.location) {
     html += `
       <div class="mb-4">
-        <h6 class="fw-bold mb-2">Location ${createInfoIcon('resources.spatial.location', 'Location')}</h6>
+        <h6 class="fw-bold mb-2">Location ${createInfoIcon(
+          "resources.spatial.location",
+          "Location"
+        )}</h6>
         <dl class="row">
-    `
+    `;
 
     Object.entries(spatial.location).forEach(([key, value]) => {
       html += `
-        <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.spatial.location.${key}`, key)}</dt>
+        <dt class="col-sm-3">${
+          key.charAt(0).toUpperCase() + key.slice(1)
+        } ${createInfoIcon(`resources.spatial.location.${key}`, key)}</dt>
         <dd class="col-sm-9">
           ${
             typeof value === "string" && value.startsWith("http")
@@ -889,27 +1042,32 @@ function renderSpatialContent(spatial) {
               : value
           }
         </dd>
-      `
-    })
+      `;
+    });
 
     html += `
         </dl>
       </div>
-    `
+    `;
   }
 
   if (spatial.extent) {
     html += `
       <div>
-        <h6 class="fw-bold mb-2">Extent ${createInfoIcon('resources.spatial.extent', 'Extent')}</h6>
+        <h6 class="fw-bold mb-2">Extent ${createInfoIcon(
+          "resources.spatial.extent",
+          "Extent"
+        )}</h6>
         <dl class="row">
-    `
+    `;
 
     Object.entries(spatial.extent)
       .filter(([key]) => key !== "boundingBox")
       .forEach(([key, value]) => {
         html += `
-          <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.spatial.extent.${key}`, key)}</dt>
+          <dt class="col-sm-3">${
+            key.charAt(0).toUpperCase() + key.slice(1)
+          } ${createInfoIcon(`resources.spatial.extent.${key}`, key)}</dt>
           <dd class="col-sm-9">
             ${
               typeof value === "string" && value.startsWith("http")
@@ -923,92 +1081,112 @@ function renderSpatialContent(spatial) {
                 : value
             }
           </dd>
-        `
-      })
+        `;
+      });
 
     html += `
         </dl>
-    `
+    `;
 
     if (spatial.extent.boundingBox) {
       html += `
         <div class="mt-3">
-          <h6 class="small text-muted mb-2">Bounding Box ${createInfoIcon('resources.spatial.extent.boundingBox', 'Bounding Box')}</h6>
+          <h6 class="small text-muted mb-2">Bounding Box ${createInfoIcon(
+            "resources.spatial.extent.boundingBox",
+            "Bounding Box"
+          )}</h6>
           <div class="p-2 bg-light rounded">
             <code>[${spatial.extent.boundingBox.join(", ")}]</code>
           </div>
         </div>
-      `
+      `;
     }
 
-    html += `</div>`
+    html += `</div>`;
   }
 
-  return html
+  return html;
 }
 
 function renderTemporalContent(temporal) {
-  let html = ""
+  let html = "";
 
   if (temporal.referenceDate) {
     html += `
       <div class="mb-4">
-        <h6 class="small text-muted mb-2">Reference Date ${createInfoIcon('resources.temporal.referenceDate', 'Reference Date')}</h6>
+        <h6 class="small text-muted mb-2">Reference Date ${createInfoIcon(
+          "resources.temporal.referenceDate",
+          "Reference Date"
+        )}</h6>
         <p>${temporal.referenceDate}</p>
       </div>
-    `
+    `;
   }
 
   if (temporal.timeseries && temporal.timeseries.length > 0) {
     html += `
       <div>
-        <h6 class="small text-muted mb-2">Time Series ${createInfoIcon('resources.temporal.timeseries', 'Time Series')}</h6>
+        <h6 class="small text-muted mb-2">Time Series ${createInfoIcon(
+          "resources.temporal.timeseries",
+          "Time Series"
+        )}</h6>
         <div class="list-group">
-    `
+    `;
 
     temporal.timeseries.forEach((series) => {
       html += `
         <div class="list-group-item">
           <dl class="row mb-0">
-      `
+      `;
 
       Object.entries(series).forEach(([key, value]) => {
         html += `
-          <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.temporal.timeseries.${key}`, key)}</dt>
+          <dt class="col-sm-3">${
+            key.charAt(0).toUpperCase() + key.slice(1)
+          } ${createInfoIcon(`resources.temporal.timeseries.${key}`, key)}</dt>
           <dd class="col-sm-9">${value}</dd>
-        `
-      })
+        `;
+      });
 
       html += `
           </dl>
         </div>
-      `
-    })
+      `;
+    });
 
     html += `
         </div>
       </div>
-    `
+    `;
   }
 
-  return html
+  return html;
 }
 
 function renderSourcesContent(sources) {
-  let html = '<div class="list-group">'
+  let html = '<div class="list-group">';
 
   sources.forEach((source) => {
     html += `
       <div class="list-group-item">
-        <h6 class="mb-2">${source.title || "-"} ${createInfoIcon('resources.sources.title', 'Source Title')}</h6>
+        <h6 class="mb-2">${source.title || "-"} ${createInfoIcon(
+      "resources.sources.title",
+      "Source Title"
+    )}</h6>
         <p class="small text-muted mb-3">${source.description || "-"}</p>
         
         <div class="row mb-3">
           <div class="col-md-6">
-            <strong>Publication Year ${createInfoIcon('resources.sources.publicationYear', 'Publication Year')}:</strong> ${source.publicationYear || "-"}
+            <strong>Publication Year ${createInfoIcon(
+              "resources.sources.publicationYear",
+              "Publication Year"
+            )}:</strong> ${source.publicationYear || "-"}
           </div>
           <div class="col-md-6">
-            <strong>Path ${createInfoIcon('resources.sources.path', 'Path')}:</strong> 
+            <strong>Path ${createInfoIcon(
+              "resources.sources.path",
+              "Path"
+            )}:</strong> 
             ${
               source.path
                 ? `<a href="${source.path}" target="_blank" rel="noopener noreferrer">
@@ -1022,78 +1200,110 @@ function renderSourcesContent(sources) {
             }
           </div>
         </div>
-    `
+    `;
 
     if (source.authors && source.authors.length > 0) {
       html += `
         <div class="mb-3">
-          <h6 class="small text-muted mb-2">Authors ${createInfoIcon('resources.sources.authors', 'Authors')}</h6>
+          <h6 class="small text-muted mb-2">Authors ${createInfoIcon(
+            "resources.sources.authors",
+            "Authors"
+          )}</h6>
           <div>
-      `
+      `;
 
       source.authors.forEach((author) => {
-        html += `<span class="metadata-badge metadata-badge-gray">${author}</span> `
-      })
+        html += `<span class="metadata-badge metadata-badge-gray">${author}</span> `;
+      });
 
       html += `
           </div>
         </div>
-      `
+      `;
     }
 
     if (source.sourceLicenses && source.sourceLicenses.length > 0) {
       html += `
         <div>
-          <h6 class="small text-muted mb-2">Licenses ${createInfoIcon('resources.sources.sourceLicenses', 'Source Licenses')}</h6>
+          <h6 class="small text-muted mb-2">Licenses ${createInfoIcon(
+            "resources.sources.sourceLicenses",
+            "Source Licenses"
+          )}</h6>
           <div class="list-group">
-      `
+      `;
 
       source.sourceLicenses.forEach((license) => {
         html += `
           <div class="list-group-item">
-            <div class="fw-bold">${license.title || "-"} ${createInfoIcon('resources.sources.sourceLicenses.title', 'License Title')}</div>
-            <a href="${license.path}" target="_blank" rel="noopener noreferrer" class="small">
+            <div class="fw-bold">${license.title || "-"} ${createInfoIcon(
+          "resources.sources.sourceLicenses.title",
+          "License Title"
+        )}</div>
+            <a href="${
+              license.path
+            }" target="_blank" rel="noopener noreferrer" class="small">
               ${license.name || "-"}
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
                 <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
               </svg>
             </a>
-            ${license.instruction ? `<p class="small mt-2">${license.instruction}</p>` : ""}
-            ${license.attribution ? `<p class="small text-muted">Attribution: ${license.attribution}</p>` : ""}
+            ${
+              license.instruction
+                ? `<p class="small mt-2">${license.instruction}</p>`
+                : ""
+            }
+            ${
+              license.attribution
+                ? `<p class="small text-muted">Attribution: ${license.attribution}</p>`
+                : ""
+            }
           </div>
-        `
-      })
+        `;
+      });
 
       html += `
           </div>
         </div>
-      `
+      `;
     }
 
-    html += "</div>"
-  })
+    html += "</div>";
+  });
 
-  html += "</div>"
-  return html
+  html += "</div>";
+  return html;
 }
 
 function renderLicensesContent(licenses) {
-  let html = '<div class="list-group">'
+  let html = '<div class="list-group">';
 
   licenses.forEach((license) => {
     html += `
       <div class="list-group-item">
-        <h6 class="mb-2">${license.title || "-"} ${createInfoIcon('resources.licenses.title', 'License Title')}</h6>
-        <a href="${license.path}" target="_blank" rel="noopener noreferrer" class="small">
+        <h6 class="mb-2">${license.title || "-"} ${createInfoIcon(
+      "resources.licenses.title",
+      "License Title"
+    )}</h6>
+        <a href="${
+          license.path
+        }" target="_blank" rel="noopener noreferrer" class="small">
           ${license.name || "-"}
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
             <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
           </svg>
         </a>
-        ${license.instruction ? `<p class="small mt-2">${license.instruction}</p>` : ""}
-        ${license.attribution ? `<p class="small text-muted">Attribution: ${license.attribution}</p>` : ""}
+        ${
+          license.instruction
+            ? `<p class="small mt-2">${license.instruction}</p>`
+            : ""
+        }
+        ${
+          license.attribution
+            ? `<p class="small text-muted">Attribution: ${license.attribution}</p>`
+            : ""
+        }
         ${
           license.copyrightStatement
             ? `<p class="small text-muted">
@@ -1109,22 +1319,27 @@ function renderLicensesContent(licenses) {
             : ""
         }
       </div>
-    `
-  })
+    `;
+  });
 
-  html += "</div>"
-  return html
+  html += "</div>";
+  return html;
 }
 
 function renderContributorsContent(contributors) {
-  let html = '<div class="list-group">'
+  let html = '<div class="list-group">';
 
   contributors.forEach((contributor) => {
     html += `
       <div class="list-group-item">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="mb-0">${contributor.title || "-"} ${createInfoIcon('resources.contributors.title', 'Contributor Title')}</h6>
-          <span class="metadata-badge metadata-badge-blue">${contributor.organization || "-"}</span>
+          <h6 class="mb-0">${contributor.title || "-"} ${createInfoIcon(
+      "resources.contributors.title",
+      "Contributor Title"
+    )}</h6>
+          <span class="metadata-badge metadata-badge-blue">${
+            contributor.organization || "-"
+          }</span>
         </div>
         
         <div class="row mb-3">
@@ -1132,8 +1347,13 @@ function renderContributorsContent(contributors) {
             contributor.path
               ? `
             <div class="col-md-6">
-              <strong>Path ${createInfoIcon('resources.contributors.path', 'Path')}:</strong> 
-              <a href="${contributor.path}" target="_blank" rel="noopener noreferrer" class="small">
+              <strong>Path ${createInfoIcon(
+                "resources.contributors.path",
+                "Path"
+              )}:</strong> 
+              <a href="${
+                contributor.path
+              }" target="_blank" rel="noopener noreferrer" class="small">
                 ${contributor.path}
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
                   <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
@@ -1149,7 +1369,10 @@ function renderContributorsContent(contributors) {
             contributor.date
               ? `
             <div class="col-md-6">
-              <strong>Date ${createInfoIcon('resources.contributors.date', 'Date')}:</strong> ${contributor.date}
+              <strong>Date ${createInfoIcon(
+                "resources.contributors.date",
+                "Date"
+              )}:</strong> ${contributor.date}
             </div>
           `
               : ""
@@ -1159,48 +1382,56 @@ function renderContributorsContent(contributors) {
             contributor.object
               ? `
             <div class="col-md-6">
-              <strong>Object ${createInfoIcon('resources.contributors.object', 'Object')}:</strong> ${contributor.object}
+              <strong>Object ${createInfoIcon(
+                "resources.contributors.object",
+                "Object"
+              )}:</strong> ${contributor.object}
             </div>
           `
               : ""
           }
         </div>
-    `
+    `;
 
     if (contributor.roles && contributor.roles.length > 0) {
       html += `
         <div class="mb-3">
-          <h6 class="small text-muted mb-2">Roles ${createInfoIcon('resources.contributors.roles', 'Roles')}</h6>
+          <h6 class="small text-muted mb-2">Roles ${createInfoIcon(
+            "resources.contributors.roles",
+            "Roles"
+          )}</h6>
           <div>
-      `
+      `;
 
       contributor.roles.forEach((role) => {
-        html += `<span class="metadata-badge metadata-badge-gray">${role}</span> `
-      })
+        html += `<span class="metadata-badge metadata-badge-gray">${role}</span> `;
+      });
 
       html += `
           </div>
         </div>
-      `
+      `;
     }
 
     if (contributor.comment) {
-      html += `<p class="small text-muted">${contributor.comment}</p>`
+      html += `<p class="small text-muted">${contributor.comment}</p>`;
     }
 
-    html += "</div>"
-  })
+    html += "</div>";
+  });
 
-  html += "</div>"
-  return html
+  html += "</div>";
+  return html;
 }
 
 function renderReviewContent(review) {
-  let html = '<dl class="row">'
+  let html = '<dl class="row">';
 
   Object.entries(review).forEach(([key, value]) => {
     html += `
-      <dt class="col-sm-3">${key.charAt(0).toUpperCase() + key.slice(1)} ${createInfoIcon(`resources.review.${key}`, key)}</dt>
+      <dt class="col-sm-3">${
+        key.charAt(0).toUpperCase() + key.slice(1)
+      } ${createInfoIcon(`resources.review.${key}`, key)}</dt>
       <dd class="col-sm-9">
         ${
           typeof value === "string" && value.startsWith("http")
@@ -1214,11 +1445,11 @@ function renderReviewContent(review) {
             : value
         }
       </dd>
-    `
-  })
+    `;
+  });
 
-  html += "</dl>"
-  return html
+  html += "</dl>";
+  return html;
 }
 
 // Main function to render the metadata viewer
@@ -1228,7 +1459,9 @@ function renderMetadataViewer(metadata, container) {
     <div class="metadata-container">
       <!-- Header with title and download button -->
       <div class="d-flex justify-content-between align-items-center metadata-header">
-        <h1>Dataset: ${metadata.title || metadata.name || "Metadata Specification"}</h1>
+        <h1>Dataset: ${
+          metadata.title || metadata.name || "Metadata Specification"
+        }</h1>
         <!-- 
         <button id="download-json" class="btn btn-primary">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
@@ -1279,10 +1512,10 @@ function renderMetadataViewer(metadata, container) {
         </div>
       </div>
     </div>
-  `
+  `;
 
   // Set the HTML content
-  container.innerHTML = html
+  container.innerHTML = html;
 
   // Add event listener for download button
   // document.getElementById("download-json").addEventListener("click", () => {
@@ -1290,125 +1523,142 @@ function renderMetadataViewer(metadata, container) {
   // })
 
   // Add event listeners for collapsible sections
-  setupCollapsibleSections()
+  setupCollapsibleSections();
 
   // Add event listeners for resource detail links
-  setupResourceDetailLinks()
+  setupResourceDetailLinks();
 }
 
 function downloadJson(metadata) {
-  const dataStr = JSON.stringify(metadata, null, 2)
-  const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`
+  const dataStr = JSON.stringify(metadata, null, 2);
+  const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(
+    dataStr
+  )}`;
 
-  const downloadAnchorNode = document.createElement("a")
-  downloadAnchorNode.setAttribute("href", dataUri)
-  downloadAnchorNode.setAttribute("download", `${metadata.name || "metadata"}.json`)
-  document.body.appendChild(downloadAnchorNode)
-  downloadAnchorNode.click()
-  downloadAnchorNode.remove()
+  const downloadAnchorNode = document.createElement("a");
+  downloadAnchorNode.setAttribute("href", dataUri);
+  downloadAnchorNode.setAttribute(
+    "download",
+    `${metadata.name || "metadata"}.json`
+  );
+  document.body.appendChild(downloadAnchorNode);
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
 }
 
 function setupCollapsibleSections() {
-  document.querySelectorAll(".metadata-collapsible-header").forEach((header) => {
-    header.addEventListener("click", function () {
-      // Toggle the content visibility
-      const content = this.nextElementSibling
-      const isVisible = content.style.display !== "none"
+  document
+    .querySelectorAll(".metadata-collapsible-header")
+    .forEach((header) => {
+      header.addEventListener("click", function () {
+        // Toggle the content visibility
+        const content = this.nextElementSibling;
+        const isVisible = content.style.display !== "none";
 
-      // Toggle the chevron icon
-      const chevron = this.querySelector(".chevron-icon")
+        // Toggle the chevron icon
+        const chevron = this.querySelector(".chevron-icon");
 
-      if (isVisible) {
-        content.style.display = "none"
-        chevron.classList.remove("expanded")
-      } else {
-        content.style.display = "block"
-        chevron.classList.add("expanded")
-      }
-    })
-  })
+        if (isVisible) {
+          content.style.display = "none";
+          chevron.classList.remove("expanded");
+        } else {
+          content.style.display = "block";
+          chevron.classList.add("expanded");
+        }
+      });
+    });
 }
 
 function setupResourceDetailLinks() {
   document.querySelectorAll(".resource-details-link").forEach((link) => {
     link.addEventListener("click", function () {
-      const resourceIndex = this.dataset.resourceIndex
+      const resourceIndex = this.dataset.resourceIndex;
 
       // Switch to resources tab
-      const resourcesTab = document.querySelector("#resources-tab")
+      const resourcesTab = document.querySelector("#resources-tab");
       // Use Bootstrap's Tab API to show the tab
-      const bootstrapTab = new bootstrap.Tab(resourcesTab)
-      bootstrapTab.show()
+      const bootstrapTab = new bootstrap.Tab(resourcesTab);
+      bootstrapTab.show();
 
       // Scroll to the resource after a short delay to allow the tab to render
       setTimeout(() => {
-        const resourceElement = document.querySelector(`#resource-${resourceIndex}`)
+        const resourceElement = document.querySelector(
+          `#resource-${resourceIndex}`
+        );
         if (resourceElement) {
-          resourceElement.scrollIntoView({ behavior: "smooth" })
+          resourceElement.scrollIntoView({ behavior: "smooth" });
         }
-      }, 300)
-    })
-  })
+      }, 300);
+    });
+  });
 }
 
 // Add event listener setup for field search
 document.addEventListener("DOMContentLoaded", () => {
   // Get the metadata viewer container
-  const metadataViewer = document.getElementById("metadata-viewer")
-  if (!metadataViewer) return
+  const metadataViewer = document.getElementById("metadata-viewer");
+  if (!metadataViewer) return;
 
   // Get the metadata ID from the data attribute
-  const metadataId = metadataViewer.dataset.metadataId
+  const metadataId = metadataViewer.dataset.metadataId;
 
   // Fetch the metadata
-  fetch(`/api/v0/schema/${window.meta_widget_config.schema}/tables/${window.meta_widget_config.table}/meta`)
+  fetch(
+    `/api/v0/schema/${window.meta_widget_config.schema}/tables/${window.meta_widget_config.table}/meta`
+  )
     .then((response) => {
       if (!response.ok) {
-        throw new Error(`Failed to fetch metadata: ${response.status} ${response.statusText}`)
+        throw new Error(
+          `Failed to fetch metadata: ${response.status} ${response.statusText}`
+        );
       }
-      return response.json()
+      return response.json();
     })
     .then((metadata) => {
       // Render the metadata viewer
-      renderMetadataViewer(metadata, metadataViewer)
+      renderMetadataViewer(metadata, metadataViewer);
     })
     .catch((error) => {
-      console.error("Error fetching metadata:", error)
+      console.error("Error fetching metadata:", error);
       metadataViewer.innerHTML = `
         <div class="alert alert-danger" role="alert">
           <h4 class="alert-heading">Error loading metadata</h4>
           <p>${error.message}</p>
         </div>
-      `
-    })
+      `;
+    });
 
   // After rendering the metadata viewer, set up the field search functionality
   document.querySelectorAll('[id^="field-search-"]').forEach((searchInput) => {
     searchInput.addEventListener("input", function () {
-      const resourceIndex = this.id.split("-")[2]
-      const searchTerm = this.value.toLowerCase()
+      const resourceIndex = this.id.split("-")[2];
+      const searchTerm = this.value.toLowerCase();
 
       // Filter table rows
-      const tableRows = document.querySelectorAll(`#fields-table-${resourceIndex} tbody tr`)
+      const tableRows = document.querySelectorAll(
+        `#fields-table-${resourceIndex} tbody tr`
+      );
       tableRows.forEach((row) => {
-        const text = row.textContent.toLowerCase()
+        const text = row.textContent.toLowerCase();
         if (text.includes(searchTerm)) {
-          row.style.display = ""
+          row.style.display = "";
         } else {
-          row.style.display = "none"
+          row.style.display = "none";
         }
-      })
+      });
 
       // Filter accordion items
-      const fieldItems = document.querySelectorAll(`#fieldAccordion-${resourceIndex} .field-item`)
+      const fieldItems = document.querySelectorAll(
+        `#fieldAccordion-${resourceIndex} .field-item`
+      );
       fieldItems.forEach((item) => {
-        const fieldName = item.dataset.fieldName
+        const fieldName = item.dataset.fieldName;
         if (fieldName && fieldName.includes(searchTerm)) {
-          item.style.display = ""
+          item.style.display = "";
         } else {
-          item.style.display = "none"
+          item.style.display = "none";
         }
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

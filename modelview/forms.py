@@ -18,7 +18,11 @@ from modelview.models import Energyframework, Energymodel
 class EnergymodelForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(EnergymodelForm, self).__init__(*args, **kwargs)
+        # set some as required
         for key in self.fields:
+            if key == "tags":
+                # foreign key many to many does not work like the other fields
+                continue
             f = [not f.null for f in Energymodel._meta.fields if f.name == key][0]
             self.fields[key].required = (
                 f and self.fields[key].widget.__class__.__name__ != "CheckboxInput"
@@ -33,6 +37,9 @@ class EnergyframeworkForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(EnergyframeworkForm, self).__init__(*args, **kwargs)
         for key in self.fields:
+            if key == "tags":
+                # foreign key many to many does not work like the other fields
+                continue
             f = [not f.null for f in Energyframework._meta.fields if f.name == key][0]
             self.fields[key].required = (
                 f and self.fields[key].widget.__class__.__name__ != "CheckboxInput"

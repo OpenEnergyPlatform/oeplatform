@@ -11,6 +11,8 @@ from unittest.mock import patch
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
+
 
 class SparqlEndpointTest(TestCase):
     def setUp(self):
@@ -18,6 +20,10 @@ class SparqlEndpointTest(TestCase):
         self.endpoint_url = reverse("sparql_endpoint")
 
     @patch("oekg.utils.execute_sparql_query")
+    @unittest.skipIf(
+        not OEKG_SPARQL_ENDPOINT_URL,
+        reason="Skipping test: OEKG_SPARQL_ENDPOINT_URL not set",
+    )
     def test_valid_sparql_query(self, mock_execute_sparql_query):
         mock_execute_sparql_query.return_value = (
             '{"head": {"vars": ["sub", "pred", "obj"]}, "results": {"bindings": []}}',

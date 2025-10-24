@@ -4,7 +4,7 @@
 </div>
 <div style="display:inline-block; width:40%;">
     {% for t in tags %}
-        <button class="btn tag" style="background:{{ t.color }};color:{% readable_text_color t.color %}">
+        <button class="btn tag" style="background:{{ t.color_hex }};color:{% readable_text_color t.color_hex %}">
             {{t.name}}
         </button>
     {%endfor%}

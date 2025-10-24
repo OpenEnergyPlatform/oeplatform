@@ -28,6 +28,8 @@ from django.db.models import (
     TextField,
 )
 
+from dataedit.models import Tag
+
 
 class BasicFactsheet(models.Model):
     model_name = CharField(
@@ -322,7 +324,8 @@ class BasicFactsheet(models.Model):
         null=True,
     )
 
-    tags = ArrayField(IntegerField(), default=list, null=True)
+    tags_TODO_deprecated = ArrayField(IntegerField(), default=list, null=True)
+    tags = models.ManyToManyField(Tag, related_name="factsheets")
 
 
 class Energymodel(BasicFactsheet):

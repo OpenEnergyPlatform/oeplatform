@@ -11,7 +11,7 @@ from dataedit.management.commands.clear_sandbox import (
     get_sandbox_table_names_oedb,
     get_sandbox_tables_django,
 )
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 from . import APITestCase
 

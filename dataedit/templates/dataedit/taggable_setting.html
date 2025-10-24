@@ -7,7 +7,7 @@
         No tags were added, yet.
     {% endif %}
     {% for t in selected %}
-        <a href="/dataedit/view/{{ schema }}?query=&tags={{ t.id }}" class="btn tag" style="background:{{t.color}};color:{% readable_text_color t.color %}">{{ t.name }}</a>
+        <a href="/dataedit/view/{{ schema }}?query=&tags={{ t.pk }}" class="btn tag" style="background:{{t.color_hex}};color:{% readable_text_color t.color_hex %}">{{ t.name }}</a>
     {% endfor %}
     <button data-bs-toggle="collapse"  data-bs-target="#tag_handler" class="btn btn-add btn-circle">
         {% fa5_icon 'plus' 'fas' %}
@@ -18,8 +18,8 @@
             <h4>Choose tags to attach:</h4>
             {% for t in all_tags %}
                 <span  >
-                    <input type="checkbox" class="hidden" name="tag_{{t.id}}" id="select_{{t.id}}" {% if t in selected %} checked {% endif %}>
-                    <label class="form-label" style="background:{{t.color}};color:{% readable_text_color t.color %}" class="btn tag" for="select_{{t.id}}">{{t.name}}</label>
+                    <input type="checkbox" class="hidden" name="tag_{{t.pk}}" id="select_{{t.pk}}" {% if t in selected %} checked {% endif %}>
+                    <label class="form-label" style="background:{{t.color_hex}};color:{% readable_text_color t.color_hex %}" class="btn tag" for="select_{{t.pk}}">{{t.name}}</label>
                 </span>
             {% endfor %}
             <input type="hidden" name="schema" value="{{schema}}"/>

@@ -44,14 +44,13 @@ from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun
 from sqlalchemy.sql.elements import Slice
 from sqlalchemy.sql.expression import CompoundSelect
-from sqlalchemy.sql.sqltypes import Interval
+from sqlalchemy.sql.sqltypes import Interval, Text
 
+import api  # TODO: we need functions from api.helper but get circular imports
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
 from api.utils import validate_schema
-from oeplatform.securitysettings import SCHEMA_DEFAULT_TEST_SANDBOX
-
-__KNOWN_TABLES = {}
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -259,8 +258,21 @@ def parse_select(d):
             elif type.lower() == "except":
                 query.except_(subquery)
     if "order_by" in d:
+
+        # issue #2041: order by on json columns fails,
+        # so we try to find json columns and cast them as text for ordering
+        if "from" in d:
+            json_columns = api.helper.get_json_columns(**d["from"])
+        else:
+            json_columns = set()
+
         for ob in d["order_by"]:
             expr = parse_expression(ob)
+
+            # cannot order json fields, so we cast them to string
+            if expr.name in json_columns:
+                expr = cast(expr, Text)
+
             if isinstance(ob, dict):
                 desc = ob.get("ordering", "asc").lower() == "desc"
                 if desc:
@@ -348,18 +360,18 @@ def parse_from_item(d):
 __PARSER_META = MetaData(bind=_get_engine())
 
 
-def load_table_from_metadata(table_name, schema_name=None):
-    ext_name = table_name
-    schema_name = validate_schema(schema_name)
-    if schema_name:
-        ext_name = schema_name + "." + ext_name
+def load_table_from_metadata(table, schema=None):
+    ext_name = table
+    schema = validate_schema(schema)
+    if schema:
+        ext_name = schema + "." + ext_name
     if ext_name and ext_name in __PARSER_META.tables:
         return __PARSER_META.tables[ext_name]
     else:
         if _get_engine().dialect.has_table(
-            _get_engine().connect(), table_name, schema=schema_name
+            _get_engine().connect(), table, schema=schema
         ):
-            return Table(table_name, __PARSER_META, autoload=True, schema=schema_name)
+            return Table(table, __PARSER_META, autoload=True, schema=schema)
 
 
 def parse_column(d, mapper):
@@ -378,7 +390,7 @@ def parse_column(d, mapper):
         schema_name = read_pgid(do_map(d["schema"])) if "schema" in d else None
         schema_name = validate_schema(schema_name)
 
-        table = load_table_from_metadata(table_name, schema_name=schema_name)
+        table = load_table_from_metadata(table_name, schema=schema_name)
     if table is not None and name in table.c:
         col = table.c[name]
         if isinstance(col.type, INTERVAL):
