@@ -16,7 +16,7 @@ from wsgiref.util import FileWrapper
 
 from django.contrib.postgres.search import SearchQuery
 from django.db.models import Q, QuerySet
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.utils.encoding import smart_str
 
 import api.parser
@@ -628,3 +628,10 @@ def get_column_description(schema, table):
 
 def get_cancle_state(request):
     return request.META.get("HTTP_REFERER")
+
+
+def get_page(request: HttpRequest) -> int:
+    try:
+        return int(request.GET.get("page", "1"))
+    except Exception:
+        return 1
