@@ -1,4 +1,4 @@
-exclude: ^.*(.min.js|.min.css|.js.map|html|js|jsx|tsx|jsonc|yaml|yml|scss|docs/.*|mkdocs.yml|/dist/.*)$
+exclude: ^.*(.min.js|.min.css|.js.map|js|jsx|tsx|jsonc|yaml|yml|scss|docs/.*|mkdocs.yml|/dist/.*)$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
