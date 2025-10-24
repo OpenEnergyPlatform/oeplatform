@@ -56,6 +56,10 @@ from login.utils import (
 )
 from oeplatform.settings import SCHEMA_DATA
 
+# Pagination
+ITEMS_PER_PAGE = 8
+
+
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
 
 ###########################################################################
@@ -111,9 +115,6 @@ class TablesView(View):
                     published_tables.append(table_data)
                 else:
                     draft_tables.append(table_data)
-
-        # Pagination
-        ITEMS_PER_PAGE = 8
 
         # Paginate tables
         published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)

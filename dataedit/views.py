@@ -42,6 +42,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.paginator import Paginator
 from django.db.models import Count
 from django.db.utils import IntegrityError
 from django.http import (
@@ -71,6 +72,7 @@ from dataedit.helper import (
     find_tables,
     get_cancle_state,
     get_column_description,
+    get_page,
     merge_field_reviews,
     process_review_data,
     recursive_update,
@@ -95,6 +97,8 @@ from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from login import models as login_models
 from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SCHEMA_DATA
+
+ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
 
 __all__ = [
     "admin_column_view",
@@ -262,21 +266,16 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
 
     tables = tables.order_by("human_readable_name")
 
-    table_label_tags = [
-        (
-            table.name,
-            table.human_readable_name,
-            table.tags.all(),
-        )
-        for table in tables
-    ]
+    # paginate tables
+    paginator = Paginator(tables, ITEMS_PER_PAGE)
+    tables_paginated = paginator.get_page(get_page(request))
 
     return render(
         request,
         "dataedit/dataedit_tablelist.html",
         {
             "schema": schema,
-            "table_label_tags": table_label_tags,
+            "tables_paginated": tables_paginated,
             "query": searched_query_string,
             "tags": searched_tag_ids,
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
