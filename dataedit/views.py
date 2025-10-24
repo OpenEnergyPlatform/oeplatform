@@ -100,7 +100,6 @@ from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SCHEMA_DATA
 
 ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
 
-
 __all__ = [
     "admin_column_view",
     "admin_constraints_view",
