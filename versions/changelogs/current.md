@@ -10,6 +10,8 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- tables per topic are paginated
+
 ## Features
 
 ## Bugs
