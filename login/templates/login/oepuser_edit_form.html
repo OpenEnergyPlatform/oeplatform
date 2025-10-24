@@ -1,23 +1,18 @@
 {% extends "base/base.html" %}
 {% block main-content-body %}
-<h3>
-    Update account profile
-</h3>
-<form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+  <h3>Update account profile</h3>
+  <form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
     {% for field in form %}
-    <div class="mb-3">
+      <div class="mb-3">
         {{ field.label_tag }}
         {% for error in field.errors %}
-            <div class="alert alert-danger">
-                {{ error }}
-            </div>
+          <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
         {{ field }}
-    </div>
-
+      </div>
     {% endfor %}
 
     <input type="submit" class="btn btn-success" value="Submit" />
-</form>
-
+  </form>
 {% endblock %}

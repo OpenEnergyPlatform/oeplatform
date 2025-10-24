@@ -39,7 +39,8 @@ class Command(BaseCommand):
             text(
                 """
                 select
-                id, name_normalized, usage_count, name, color, usage_tracked_since, category
+                id, name_normalized, usage_count, name, color, usage_tracked_since,
+                category
                 from public.tags
                 """
             )

@@ -1,5 +1,4 @@
 {% extends "account/base.html" %}
-
 {% load i18n %}
 
 {% block head_title %}
@@ -10,19 +9,23 @@
     <div class="login__wrap" class="signup" id="logout_form">
       <!-- Logo -->
       <div class="login__logo">
-          <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo">
+        <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo" />
       </div>
-       <!-- Be sure to use h1 for the heading -->
+      <!-- Be sure to use h1 for the heading -->
       <h1 class="login__heading">{% translate "Sign Out" %}</h1>
       <p>{% translate "Are you sure you want to sign out?" %}</p>
       <form method="post" action="{% url 'account_logout' %}">
         {% csrf_token %}
         {% if redirect_field_value %}
-          <input type="hidden"
-                name="{{ redirect_field_name }}"
-                value="{{ redirect_field_value }}" />
+          <input
+            type="hidden"
+            name="{{ redirect_field_name }}"
+            value="{{ redirect_field_value }}"
+          />
         {% endif %}
-        <button class="login__button login__button--warning" type="submit">{% translate "Sign Out" %}</button>
+        <button class="login__button login__button--warning" type="submit">
+          {% translate "Sign Out" %}
+        </button>
       </form>
     </div>
   </div>

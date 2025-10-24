@@ -5,52 +5,63 @@
 {% load dataedit.taghandler %}
 {% load compress %}
 
-
 {% block main-right-sidebar-content-actions %}
   <a class="btn btn-info" href="edit">Edit</a>
-  <a class="btn btn-danger"
+  <a
+    class="btn btn-danger"
     hx-delete="{% url 'modelview:delete-factsheet' sheettype='framework' pk=model.pk %}"
     hx-confirm="Are you sure you want to delete this entry?"
-    >
+  >
     Delete
   </a>
-
 {% endblock main-right-sidebar-content-actions %}
 
 {% block factsheets_content %}
   <!-- Bootstrap 5 Toast Container -->
   <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto" id="toastTitle"></strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="toastBody"></div>
+    <div
+      id="liveToast"
+      class="toast hide"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="toast-header">
+        <strong class="me-auto" id="toastTitle"></strong>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="toast"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="toast-body" id="toastBody"></div>
     </div>
   </div>
 
   <div class="card-container">
     <div class="card ">
       <div class="card-header">
-        <a class="fill-div" data-bs-toggle="collapse" href="#Overview">Overview</a>
+        <a class="fill-div" data-bs-toggle="collapse" href="#Overview"
+          >Overview</a
+        >
       </div>
       <div id="Overview" class="title= expand in  in">
-
         <div class="container" style="padding:0">
-
           <table class="profiletable">
             {% include 'modelview/model_snippet.html' with model=model field='last_updated' %}
-{#            {% include 'modelview/model_snippet.html' with model=model field='version'  %} #}
+            {#            {% include 'modelview/model_snippet.html' with model=model field='version'  %} #}
             {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
             {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
             <tr>
-              <th>
-
-              </th>
+              <th></th>
               <td>
                 {% if model.logo %}
-                  <img src="{{ model.logo.url }}" alt="{{ model.logo.url }}"
-                       style="max-width:30%;max-height:500px;">
+                  <img
+                    src="{{ model.logo.url }}"
+                    alt="{{ model.logo.url }}"
+                    style="max-width:30%;max-height:500px;"
+                  />
                 {% endif %}
               </td>
             </tr>
@@ -60,34 +71,41 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a class="fill-div" data-bs-toggle="collapse" href="#GeneralInformation">General Information</a>
+        <a class="fill-div" data-bs-toggle="collapse" href="#GeneralInformation"
+          >General Information</a
+        >
       </div>
       <div id="GeneralInformation" class="title= collapse in  in">
-
         <div class="container" style="padding:0">
-
           <table class="profiletable">
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='model_name' fieldNameOverride='Framework Name' %} </tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='acronym' %} </tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='contact_email' %} </tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %} </tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='website' %} </tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='institutions' %} </tr>
             <tr>
-              <td class="sheetlabel">
-                Geographical Scope
-              </td>
+              {% include 'modelview/model_snippet.html' with model=model field='model_name' fieldNameOverride='Framework Name' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='acronym' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='contact_email' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='website' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='institutions' %}
+            </tr>
+            <tr>
+              <td class="sheetlabel">Geographical Scope</td>
               <td>
                 <table>
                   {% checklist model "gs_global,gs_regional,gs_national,gs_local,gs_single_project,gs_other=gs_other" %}
-
                 </table>
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Sectoral Scope
-              </td>
+              <td class="sheetlabel">Sectoral Scope</td>
               <td>
                 <table>
                   {% checklist model "ss_electricity,ss_heat,ss_transport,ss_other,ss_overall,ss_other_text=ss_other_text" %}
@@ -95,9 +113,7 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                General Problem Scope
-              </td>
+              <td class="sheetlabel">General Problem Scope</td>
               <td>
                 <table>
                   {% checklist model "gps_forecast,gps_explore,gps_backcast,gps_other=gps_other" %}
@@ -105,40 +121,52 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Specific Problem Scope
-              </td>
+              <td class="sheetlabel">Specific Problem Scope</td>
               <td>
                 <table>
                   {% checklist model "sps_energydemand,sps_energysupply,sps_impacts,sps_environmental,sps_appraisal,sps_integrated_approach,sps_modular_buildup,sps_energy_dispatch,sps_capacity_expansion,sps_unit_commitment,sps_rule_based,sps_sector_coupling,sps_other=sps_other" %}
                 </table>
               </td>
             </tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='inital_purpose' %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='inital_purpose_change' %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='research_questions' %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='inital_release_date' %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='parent_framework' %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='version' %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='source_of_funding' %}</tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='inital_purpose' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='inital_purpose_change' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='research_questions' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='inital_release_date' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='parent_framework' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='version' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='source_of_funding' %}
+            </tr>
           </table>
         </div>
       </div>
     </div>
     <div class="card ">
       <div class="card-header">
-        <a data-bs-toggle="collapse" href="#MathematicalDescription">Mathematical Description</a>
+        <a data-bs-toggle="collapse" href="#MathematicalDescription"
+          >Mathematical Description</a
+        >
       </div>
       <div id="MathematicalDescription" class="title= collapse in ">
-
         <div class="container" style="padding:0">
-
           <table class="profiletable">
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='gui' %}</tr>
             <tr>
-              <td class="sheetlabel">
-                Programming Framework
-              </td>
+              {% include 'modelview/model_snippet.html' with model=model field='gui' %}
+            </tr>
+            <tr>
+              <td class="sheetlabel">Programming Framework</td>
               <td>
                 <table>
                   {% checklist model "pf_Python,pf_C,pf_PHP,pf_GNU,pf_R,pf_VBA,pf_Java,pf_Fortran,pf_Modelica,pf_Matlab,pf_Ruby,pf_GAMS,pf_other=pf_other" %}
@@ -146,9 +174,7 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                External Solver
-              </td>
+              <td class="sheetlabel">External Solver</td>
               <td>
                 <table>
                   {% checklist model "es_CPLEX,es_Gurobi,es_Coin,es_GLPK,es_MOSEK,es_other=es_other" %}
@@ -156,45 +182,49 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Input Data Format
-              </td>
+              <td class="sheetlabel">Input Data Format</td>
               <td>
                 <table>
                   {% checklist model "idf_Python_dicts,idf_XLSX,idf_Plots,idf_CSV,idf_XML,idf_txt,idf_db,idf_GAMS,idf_other=idf_other" %}
                 </table>
               </td>
             </tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='auto_model_generator' %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='data_preprocessing' add=model.data_preprocessing_other %}</tr>
             <tr>
-              <td class="sheetlabel">
-                Output Data Format
-              </td>
+              {% include 'modelview/model_snippet.html' with model=model field='auto_model_generator' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='data_preprocessing' add=model.data_preprocessing_other %}
+            </tr>
+            <tr>
+              <td class="sheetlabel">Output Data Format</td>
               <td>
                 <table>
                   {% checklist model "odf_Python_dicts,odf_XLSX,odf_Plots,odf_CSV,odf_XML,odf_txt,odf_db,odf_GAMS,odf_other=odf_other" %}
                 </table>
               </td>
             </tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='data_postprocessing' add=model.data_postprocessing_other %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='plotting_functionalities' %}</tr>
             <tr>
-              <td class="sheetlabel">
-                The analytical approach
-              </td>
+              {% include 'modelview/model_snippet.html' with model=model field='data_postprocessing' add=model.data_postprocessing_other %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='plotting_functionalities' %}
+            </tr>
+            <tr>
+              <td class="sheetlabel">The analytical approach</td>
               <td>
                 <table>
                   {% checklist model "ap_TopDown,ap_BottomUp,ap_Hybrid,ap_Other=ap_Other" %}
                 </table>
               </td>
             </tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='additional_software' %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='interfaces' %}</tr>
             <tr>
-              <td class="sheetlabel">
-                The mathematical approach
-              </td>
+              {% include 'modelview/model_snippet.html' with model=model field='additional_software' %}
+            </tr>
+            <tr>
+              {% include 'modelview/model_snippet.html' with model=model field='interfaces' %}
+            </tr>
+            <tr>
+              <td class="sheetlabel">The mathematical approach</td>
               <td>
                 <table>
                   {% checklist model "ma_mip,ma_dp,ma_fl,ma_abp,ma_lp,ma_other=ma_other" %}
@@ -202,9 +232,7 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                The underlying methodology
-              </td>
+              <td class="sheetlabel">The underlying methodology</td>
               <td>
                 <table>
                   {% checklist model "um_econometric,um_me,um_ee,um_optimization,um_simulation,um_stochastic,um_gis,um_st,um_bc,um_mc,um_Accounting,um_other=um_other" %}
@@ -212,13 +240,11 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Objective function type
-              </td>
+              <td class="sheetlabel">Objective function type</td>
               <td>
-               <table>
-                 {% checklist model "oft_mtsc,oft_mce,oft_mlce,oft_msw,oft_other=oft_other" %}
-               </table>
+                <table>
+                  {% checklist model "oft_mtsc,oft_mce,oft_mlce,oft_msw,oft_other=oft_other" %}
+                </table>
               </td>
             </tr>
           </table>
@@ -230,9 +256,7 @@
         <a href="#Openness" data-bs-toggle="collapse">Openness</a>
       </div>
       <div id="Openness" class="title= collapse in ">
-
         <div class="container" style="padding:0">
-
           <table class="profiletable">
             {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
             {% if not model.open_source %}
@@ -245,9 +269,7 @@
               {% include 'modelview/model_snippet.html' with model=model field='open_to_developers' %}
             {% endif %}
             <tr>
-              <td class="sheetlabel">
-                Support
-              </td>
+              <td class="sheetlabel">Support</td>
               <td>
                 <table>
                   {% checklist model "support_forum,support_community,support_workshop,support_mail,support_modelExamples,support_other_text=support_other_text" %}
@@ -267,7 +289,6 @@
             {% include 'modelview/model_snippet.html' with model=model field='additional_software' %}
             {% include 'modelview/model_snippet.html' with model=model field='gui' %} -->
           </table>
-
         </div>
       </div>
     </div>
@@ -276,16 +297,13 @@
         <a data-bs-toggle="collapse" href="#ModelBuilding">Model Building</a>
       </div>
       <div id="ModelBuilding" class="card-body collapse  ">
-
         <div class="container" style="padding:0">
           <table class="profiletable">
             <tr>
               {% include 'modelview/model_snippet.html' with model=model field='fixed_units' %}
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Renewable Technology Inclusion
-              </td>
+              <td class="sheetlabel">Renewable Technology Inclusion</td>
               <td>
                 <table>
                   {% checklist model "Hydro,Solar,Geothermal,Wind,Wave,Biomass,Tidal" %}
@@ -293,9 +311,7 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Storage Technology Inclusion
-              </td>
+              <td class="sheetlabel">Storage Technology Inclusion</td>
               <td>
                 <table>
                   {% checklist model "st_hydro,st_battery,st_air,st_hydrogen" %}
@@ -303,9 +319,7 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Transport Demand
-              </td>
+              <td class="sheetlabel">Transport Demand</td>
               <td>
                 <table>
                   {% checklist model "dc_combustion,dc_battery,dc_v2grid,dc_hydrogen,dc_rail,dc_aviation" %}
@@ -313,9 +327,7 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Residential Demand
-              </td>
+              <td class="sheetlabel">Residential Demand</td>
               <td>
                 <table>
                   {% checklist model "rd_Heating,rd_Lighting,rd_Cooking,rd_ApplianceUsage,rd_SmartAppliances" %}
@@ -323,9 +335,7 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Commercial Demand
-              </td>
+              <td class="sheetlabel">Commercial Demand</td>
               <td>
                 <table>
                   {% checklist model "cd_Offices,cd_Warehouses,cd_Retail" %}
@@ -334,9 +344,7 @@
             </tr>
             {% include 'modelview/model_snippet.html' with model=model field='agricultural_demand' %}
             <tr>
-              <td class="sheetlabel">
-                Grid model
-              </td>
+              <td class="sheetlabel">Grid model</td>
               <td>
                 <table>
                   {% checklist model "gm_singleNode,gm_TranshipmentModel,gm_LinearOptimal" %}
@@ -344,9 +352,7 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Cost Inclusion
-              </td>
+              <td class="sheetlabel">Cost Inclusion</td>
               <td>
                 <table>
                   {% checklist model "ci_FuelPrices,ci_FuelHandling,ci_Investment,ci_FixedOperation,ci_VariableOperation,ci_CO2" %}
@@ -357,9 +363,7 @@
             {% include 'modelview/model_snippet.html' with model=model field='variable_time_step' %}
             {% include 'modelview/model_snippet.html' with model=model field='variable_rolling_horizon' %}
             <tr>
-              <td class="sheetlabel">
-                Commonly used time step
-              </td>
+              <td class="sheetlabel">Commonly used time step</td>
               <td>
                 <table>
                   {% checklist model "ts_Minutely,ts_Hourly,ts_Monthly,ts_Yearly,ts_FiveYearly,ts_other=ts_other" %}
@@ -367,9 +371,7 @@
               </td>
             </tr>
             <tr>
-              <td class="sheetlabel">
-                Commonly modelled time horizon
-              </td>
+              <td class="sheetlabel">Commonly modelled time horizon</td>
               <td>
                 <table>
                   {% checklist model "th_st,th_mt,th_lt,th_other=th_other" %}
@@ -385,9 +387,7 @@
         <a data-bs-toggle="collapse" href="#References">References</a>
       </div>
       <div id="References" class="card-body collapse in ">
-
         <div class="container" style="padding:0">
-
           <table class="profiletable">
             {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model' %}
             {% include 'modelview/model_snippet.html' with model=model field='citation_reference' %}
@@ -395,7 +395,6 @@
             {% include 'modelview/model_snippet.html' with model=model field='fw_appliance' %}
             {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage' %}
           </table>
-
         </div>
       </div>
     </div>
@@ -403,30 +402,31 @@
 {% endblock %}
 
 {% block after-body-bottom-js %}
-<script>
-  document.body.addEventListener('htmx:configRequest', (event) => {
-    event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-  })
+  <script>
+    document.body.addEventListener("htmx:configRequest", (event) => {
+      event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
+    });
 
-  document.addEventListener('htmx:responseError', function (event) {
-    var target = event.detail.target;
-    var messageContainer = document.getElementById('toastBody');
-    var toastTitle = document.getElementById('toastTitle');
-    var liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+    document.addEventListener("htmx:responseError", function (event) {
+      var target = event.detail.target;
+      var messageContainer = document.getElementById("toastBody");
+      var toastTitle = document.getElementById("toastTitle");
+      var liveToast = new bootstrap.Toast(document.getElementById("liveToast"));
 
-    // Show error message in the toast
-    toastTitle.innerHTML = 'Error';
-    messageContainer.innerHTML = 'Error deleting entry. You have to be logged in!';
+      // Show error message in the toast
+      toastTitle.innerHTML = "Error";
+      messageContainer.innerHTML =
+        "Error deleting entry. You have to be logged in!";
 
-    // Set red color to the toast
-    liveToast._element.classList.add('bg-danger', 'text-white');
+      // Set red color to the toast
+      liveToast._element.classList.add("bg-danger", "text-white");
 
-    liveToast.show();
+      liveToast.show();
+    });
+  </script>
 
-  });
-</script>
 
-{% compress js %}
-  <script src="/static/modelview/htmx.min.js"></script>
-{% endcompress %}
+  {% compress js %}
+    <script src="/static/modelview/htmx.min.js"></script>
+  {% endcompress %}
 {% endblock after-body-bottom-js %}

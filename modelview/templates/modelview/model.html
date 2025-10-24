@@ -7,53 +7,65 @@
 
 {% block main-right-sidebar-content-actions %}
   <a class="btn btn-info" href="edit">Edit</a>
-  <a class="btn btn-danger"
+  <a
+    class="btn btn-danger"
     hx-delete="{% url 'modelview:delete-factsheet' sheettype='model' pk=model.pk %}"
     hx-confirm="Are you sure you want to delete this entry?"
     hx-target="#liveToast"
     hx-swap="innerHTML"
   >
-  Delete
+    Delete
   </a>
 {% endblock main-right-sidebar-content-actions %}
-
-
 
 {% block factsheets_content %}
   <!-- Bootstrap 5 Toast Container -->
   <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto" id="toastTitle"></strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="toastBody"></div>
+    <div
+      id="liveToast"
+      class="toast hide"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="toast-header">
+        <strong class="me-auto" id="toastTitle"></strong>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="toast"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="toast-body" id="toastBody"></div>
     </div>
   </div>
 
   <div class="card-container">
     <div class="card ">
       <div class="card-header">
-            <a class="fill-div" data-bs-toggle="collapse" href="#GeneralInformation">General Information</a>
+        <a class="fill-div" data-bs-toggle="collapse" href="#GeneralInformation"
+          >General Information</a
+        >
       </div>
       <div id="GeneralInformation" class="card-body expand in  in">
-
-
         <table class="profiletable">
           {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
           {% include 'modelview/model_snippet.html' with model=model field='acronym' %}
           <tr>
             <td class="sheetlabel">
               {% get_field_attr model 'methodical_focus_1' 'verbose_name' %}
-              <i data-bs-toggle='tooltip'
-                 title="{% get_field_attr model 'methodical_focus_1' 'help_text' %}">
-                <span class='fas fa-question'></span>
+              <i
+                data-bs-toggle="tooltip"
+                title="{% get_field_attr model 'methodical_focus_1' 'help_text' %}"
+              >
+                <span class="fas fa-question"></span>
               </i>
             </td>
             <td>
               {{ model.methodical_focus_1 }}
-              {% if model.methodical_focus_2 %}, {{ model.methodical_focus_2 }} {% endif %}
-              {% if model.methodical_focus_3 %}, {{ model.methodical_focus_3 }} {% endif %}
+              {% if model.methodical_focus_2 %}, {{ model.methodical_focus_2 }}{% endif %}
+              {% if model.methodical_focus_3 %}, {{ model.methodical_focus_3 }}{% endif %}
             </td>
           </tr>
           {% include 'modelview/model_snippet.html' with model=model field='institutions' %}
@@ -62,13 +74,14 @@
           {% include 'modelview/model_snippet.html' with model=model field='contact_email' %}
           {% include 'modelview/model_snippet.html' with model=model field='website' %}
           <tr>
-            <th>
-              Logo
-            </th>
+            <th>Logo</th>
             <td>
               {% if model.logo %}
-                <img src="{% static model.logo.url %}" alt="{{ model.logo.url }}"
-                     style="max-width:30%;max-height:500px;">
+                <img
+                  src="{% static model.logo.url %}"
+                  alt="{{ model.logo.url }}"
+                  style="max-width:30%;max-height:500px;"
+                />
                 {# {% include 'modelview/model_snippet.html' with model=model field='logo' %} #}
               {% endif %}
             </td>
@@ -84,7 +97,6 @@
           {% include 'modelview/model_snippet.html' with model=model field='number_of_devolopers' %}
           {% include 'modelview/model_snippet.html' with model=model field='number_of_users' %}
         </table>
-
       </div>
     </div>
     <div class="card ">
@@ -105,27 +117,32 @@
             {% include 'modelview/model_snippet.html' with model=model field='data_provided' %}
             {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming' %}
           {% endif %}
-
         </table>
         {% if model.gitHub %}
-
-
           <table class="profiletable">
             <tr>
               <td class="sheetlabel">GitHub Organisation</td>
               <td>
-                <div data-theme="default" data-height="150" data-width="400" data-github="{{ gh_org }}/{{ gh_repo }}"
-                     class="github-card"></div>
+                <div
+                  data-theme="default"
+                  data-height="150"
+                  data-width="400"
+                  data-github="{{ gh_org }}/{{ gh_repo }}"
+                  class="github-card"
+                ></div>
                 <script src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script>
-              <td>
+              </td>
+
+              <td></td>
             </tr>
             <tr>
               <td class="sheetlabel">GitHub Contributions Graph</td>
               <td>
-                <img src="/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png">
+                <img
+                  src="/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png"
+                />
               </td>
             </tr>
-
           </table>
         {% endif %}
       </div>
@@ -151,38 +168,30 @@
       <div id="Coverage" class="card-body collapse  ">
         <table class="profiletable">
           <tr>
-            <td class="sheetlabel">
-              Modeled energy sectors (final energy)
-            </td>
+            <td class="sheetlabel">Modeled energy sectors (final energy)</td>
             <td>
               <table>
                 {% checklist model "energy_sectors_electricity,energy_sectors_heat,energy_sectors_others=energy_sectors_others_text" %}
-
               </table>
             </td>
           </tr>
           <tr>
-            <td class="sheetlabel">
-              Modeled demand sectors
-            </td>
+            <td class="sheetlabel">Modeled demand sectors</td>
             <td>
               <table>
                 {% checklist model "demand_sectors_households,demand_sectors_industry,demand_sectors_commercial_sector,demand_sectors_transport" %}
-
-
               </table>
             </td>
           </tr>
           <tr>
             <td class="sheetlabel">
-              Modeled technologies: components for power generation or conversion
+              Modeled technologies: components for power generation or
+              conversion
             </td>
             <td>
               <table class="profiletable">
                 <tr>
-                  <td class="sheetlabel">
-                    Renewables
-                  </td>
+                  <td class="sheetlabel">Renewables</td>
                   <td>
                     <table>
                       {% checklist model "generation_renewables_PV,generation_renewables_wind,generation_renewables_hydro,generation_renewables_bio,generation_renewables_solar_thermal,generation_renewables_geothermal" %}
@@ -190,9 +199,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td class="sheetlabel">
-                    Conventional
-                  </td>
+                  <td class="sheetlabel">Conventional</td>
                   <td>
                     <table>
                       {% checklist model "generation_conventional_gas,generation_conventional_lignite,generation_conventional_hard_coal,generation_conventional_oil,generation_conventional_liquid_fuels,generation_conventional_nuclear" %}
@@ -204,14 +211,13 @@
           </tr>
           <tr>
             <td class="sheetlabel">
-              Modeled technologies: components for transfer, infrastructure or grid
+              Modeled technologies: components for transfer, infrastructure or
+              grid
             </td>
             <td>
               <table class="profiletable">
                 <tr>
-                  <td class="sheetlabel">
-                    Electricity
-                  </td>
+                  <td class="sheetlabel">Electricity</td>
                   <td>
                     <table>
                       {% checklist model "transfer_electricity_distribution,transfer_electricity_transition" %}
@@ -219,9 +225,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td class="sheetlabel">
-                    Gas
-                  </td>
+                  <td class="sheetlabel">Gas</td>
                   <td>
                     <table>
                       {% checklist model "transfer_gas_distribution,transfer_gas_transition" %}
@@ -229,9 +233,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td class="sheetlabel">
-                    Heat
-                  </td>
+                  <td class="sheetlabel">Heat</td>
                   <td>
                     <table>
                       {% checklist model "transfer_heat_distribution,transfer_heat_transition" %}
@@ -242,9 +244,7 @@
             </td>
           </tr>
           <tr>
-            <td class="sheetlabel">
-              Properties electrical grid
-            </td>
+            <td class="sheetlabel">Properties electrical grid</td>
             <td>
               <table>
                 {% checklist model "network_coverage_AC,network_coverage_DC,network_coverage_TM,network_coverage_SN,network_coverage_other=network_coverage_other_text" %}
@@ -258,7 +258,6 @@
             <td>
               <table>
                 {% checklist model "storage_electricity_battery,storage_electricity_kinetic,storage_electricity_CAES,storage_electricity_PHS,storage_electricity_chemical,storage_heat,storage_gas" %}
-
               </table>
             </td>
           </tr>
@@ -268,9 +267,7 @@
           {% include 'modelview/model_snippet.html' with model=model field='market_models' %}
           {% include 'modelview/model_snippet.html' with model=model field='geographical_coverage' %}
           <tr>
-            <td class="sheetlabel">
-              Geographic (spatial) resolution
-            </td>
+            <td class="sheetlabel">Geographic (spatial) resolution</td>
             <td>
               <table>
                 {% checklist model "geo_resolution_global,geo_resolution_continents,geo_resolution_national_states,geo_resolution_TSO_regions,geo_resolution_federal_states,geo_resolution_regions,geo_resolution_NUTS_3,geo_resolution_municipalities,geo_resolution_districts,geo_resolution_households,geo_resolution_power_stations,geo_resolution_others=geo_resolution_others_text" %}
@@ -278,76 +275,59 @@
             </td>
           </tr>
           <tr>
-            <td class="sheetlabel">
-              Time resolution
-            </td>
+            <td class="sheetlabel">Time resolution</td>
             <td>
               {% checklist model "time_resolution_anual,time_resolution_hour,time_resolution_15_min,time_resolution_1_min,time_resolution_other=time_resolution_other_text" %}
             </td>
           </tr>
           {% include 'modelview/model_snippet.html' with model=model field='comment_on_geo_resolution' %}
           <tr>
-            <td class="sheetlabel">
-              Observation period
-            </td>
+            <td class="sheetlabel">Observation period</td>
             <td>
               {% checklist model "observation_period_less_1_year,observation_period_1_year,observation_period_more_1_year,observation_period_other=observation_period_other_text" %}
-
             </td>
           </tr>
           <tr>
-            <td class="sheetlabel">
-              Additional dimensions (sector)
-            </td>
+            <td class="sheetlabel">Additional dimensions (sector)</td>
             <td>
               <table>
                 {% checklist model "additional_dimensions_sector_ecological,additional_dimensions_sector_ecological_text,additional_dimensions_sector_economic,additional_dimensions_sector_economic_text,additional_dimensions_sector_social,additional_dimensions_sector_social_text,additional_dimensions_sector_others=additional_dimensions_sector_others_text" %}
-
               </table>
             </td>
           </tr>
-
-
         </table>
       </div>
     </div>
     <div class="card ">
       <div class="card-header">
-        <a data-bs-toggle="collapse" href="#MathematicalProperties">Mathematical Properties</a>
+        <a data-bs-toggle="collapse" href="#MathematicalProperties"
+          >Mathematical Properties</a
+        >
       </div>
       <div id="MathematicalProperties" class="card-body collapse ">
         <table class="profiletable">
           <tr>
-            <td class="sheetlabel">
-              Model class (optimisation)
-            </td>
+            <td class="sheetlabel">Model class (optimisation)</td>
             <td>
               {% checklist model "model_class_optimization_LP,model_class_optimization_MILP,model_class_optimization_Nonlinear=model_class_optimization_LP_MILP_Nonlinear_text" %}
             </td>
           </tr>
           <tr>
-            <td class="sheetlabel">
-              Model class (simulation)
-            </td>
+            <td class="sheetlabel">Model class (simulation)</td>
             <td>
               {% checklist model "model_class_simulation_Agentbased,model_class_simulation_System_Dynamics,model_class_simulation_Accounting_Framework,model_class_simulation_Game_Theoretic_Model,model_class_simulation_bottom_up,model_class_simulation_top_down" %}
-
             </td>
           </tr>
           {% include 'modelview/model_snippet.html' with model=model field='model_class_other' add=model.model_class_other_text %}
           {% include 'modelview/model_snippet.html' with model=model field='short_description_of_mathematical_model_class' %}
           <tr>
-            <td class="sheetlabel">
-              Mathematical objective
-            </td>
+            <td class="sheetlabel">Mathematical objective</td>
             <td>
               {% checklist model "mathematical_objective_cO2,mathematical_objective_costs,mathematical_objective_rEshare,mathematical_objective_other=mathematical_objective_other_text" %}
             </td>
           </tr>
           <tr>
-            <td class="sheetlabel">
-              Approach to uncertainty
-            </td>
+            <td class="sheetlabel">Approach to uncertainty</td>
             <td>
               {% checklist model "uncertainty_deterministic,uncertainty_Stochastic,uncertainty_Other=uncertainty_Other_text" %}
             </td>
@@ -362,7 +342,9 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a class="fill-div" data-bs-toggle="collapse" href="#Integration">Model Integration</a>
+        <a class="fill-div" data-bs-toggle="collapse" href="#Integration"
+          >Model Integration</a
+        >
       </div>
       <div id="Integration" class="card-body collapse in  in">
         <table class="profiletable">
@@ -389,13 +371,10 @@
             {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage' %}
 
             <tr>
-              <td class="sheetlabel">
-                Model validation
-              </td>
+              <td class="sheetlabel">Model validation</td>
               <td>
                 <table>
                   {% checklist model "validation_models,validation_measurements,validation_others=validation_others_text" %}
-
                 </table>
               </td>
             </tr>
@@ -412,25 +391,25 @@
 
 {% block after-body-bottom-js %}
   <script>
-    document.body.addEventListener('htmx:configRequest', (event) => {
-        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-    })
+    document.body.addEventListener("htmx:configRequest", (event) => {
+      event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
+    });
 
-    document.addEventListener('htmx:responseError', function (event) {
+    document.addEventListener("htmx:responseError", function (event) {
       var target = event.detail.target;
-      var messageContainer = document.getElementById('toastBody');
-      var toastTitle = document.getElementById('toastTitle');
-      var liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+      var messageContainer = document.getElementById("toastBody");
+      var toastTitle = document.getElementById("toastTitle");
+      var liveToast = new bootstrap.Toast(document.getElementById("liveToast"));
 
       // Show error message in the toast
-      toastTitle.innerHTML = 'Error';
-      messageContainer.innerHTML = 'Error deleting entry. You have to be logged in!';
+      toastTitle.innerHTML = "Error";
+      messageContainer.innerHTML =
+        "Error deleting entry. You have to be logged in!";
 
       // Set red color to the toast
-      liveToast._element.classList.add('bg-danger', 'text-white');
+      liveToast._element.classList.add("bg-danger", "text-white");
 
       liveToast.show();
-
     });
   </script>
   {% compress js %}
