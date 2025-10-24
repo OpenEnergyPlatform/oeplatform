@@ -1,49 +1,59 @@
 <div class="">
-    <!-- <div class="card-header"> -->
-        {{ ontology_description }}
-    <!-- </div> -->
+  <!-- <div class="card-header"> -->
+  {{ ontology_description }}
+  <!-- </div> -->
 </div>
-<br>
+<br />
 
 {% comment %}
-<div id="accordion">
+  <div id="accordion">
     {% for module, about in submodules %}
-    <div class="card">
+      <div class="card">
         <div class="card-header">
-            <a class="card-link" data-bs-toggle="collapse" href="#collapse{{ forloop.counter }}">
-                {{module}}
-            </a>
-
+          <a
+            class="card-link"
+            data-bs-toggle="collapse"
+            href="#collapse{{ forloop.counter }}"
+          >
+            {{ module }}
+          </a>
         </div>
-        <div id="collapse{{ forloop.counter }}" class="collapse" data-bs-parent="#accordion">
-            <div class="card-body">
-                {{ about.comment }}
-            </div>
+        <div
+          id="collapse{{ forloop.counter }}"
+          class="collapse"
+          data-bs-parent="#accordion"
+        >
+          <div class="card-body">{{ about.comment }}</div>
         </div>
-    </div>
+      </div>
     {% endfor %}
-</div>
+  </div>
 
-<hr>
+  <hr />
 
-<h3>Imports</h3><br>
+  <h3>Imports</h3>
+  <br />
 
-<div id="imports_accordion">
+  <div id="imports_accordion">
     {% for module, about in imports %}
-    <div class="card">
+      <div class="card">
         <div class="card-header">
-            <a class="card-link" data-bs-toggle="collapse" href="#imports_collapse{{ forloop.counter }}">
-                {{module}}
-            </a>
-
+          <a
+            class="card-link"
+            data-bs-toggle="collapse"
+            href="#imports_collapse{{ forloop.counter }}"
+          >
+            {{ module }}
+          </a>
         </div>
-        <div id="imports_collapse{{ forloop.counter }}" class="collapse" data-bs-parent="#imports_accordion">
-            <div class="card-body">
-                {{ about.comment }}
-            </div>
+        <div
+          id="imports_collapse{{ forloop.counter }}"
+          class="collapse"
+          data-bs-parent="#imports_accordion"
+        >
+          <div class="card-body">{{ about.comment }}</div>
         </div>
-    </div>
+      </div>
     {% endfor %}
-</div>
-</div>
+  </div>
 {% endcomment %}
