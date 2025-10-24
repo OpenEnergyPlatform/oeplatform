@@ -4,6 +4,7 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+
 import json
 from functools import wraps
 
@@ -48,7 +49,7 @@ def only_if_user_is_owner_of_scenario_bundle(view_func):
             )
 
         # Check if the current user is the owner (creator) of the Scenario bundle.
-        if request.user == scenario_bundle_access.owner_user:
+        if request.user == scenario_bundle_access.owner_user or request.user.is_admin:
             return view_func(request, *args, **kwargs)
         else:
             return HttpResponseForbidden("Access Denied")
@@ -99,7 +100,7 @@ def post_only_if_user_is_owner_of_scenario_bundle(view_func):
             )
 
         # Check if the current user is the owner (creator) of the Scenario bundle.
-        if request.user == scenario_bundle_access.owner_user:
+        if request.user == scenario_bundle_access.owner_user or request.user.is_admin:
             return view_func(view_instance, request, *args, **kwargs)
         else:
             return HttpResponseForbidden("Access Denied")
