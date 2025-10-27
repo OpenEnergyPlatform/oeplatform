@@ -28,18 +28,6 @@ from oeplatform.settings import (
     STATIC_ROOT,
 )
 
-__all__ = [
-    "AboutPageView",
-    "AboutProjectDetailView",
-    "ContactView",
-    "WelcomeView",
-    "redir_view",
-    "redirect_tutorial_view",
-    "robot_view",
-    "handler404",
-    "handler500",
-]
-
 
 class WelcomeView(View):
     def get(self, request):

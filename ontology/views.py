@@ -36,16 +36,10 @@ LOGGER.info("Start loading the oeo from local static files.")
 OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
 OEO_PATH = OEO_BASE_PATH / OEO_VERSION
-# OEO_GLOSSARY_PATH = OEO_PATH / "glossary"
-# OEO_GLOSSARY_FILE_CSV = OEO_GLOSSARY_PATH / "glossary.csv"
-# OEO_GLOSSARY_FILE_MD = OEO_GLOSSARY_PATH / "glossary.md"
 OEO_MODULES_MAIN = collect_modules(OEO_PATH)
 OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
 OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
 OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
-OEOX_COMMON_DATA = get_common_data(
-    OEO_EXT_NAME, file=OEO_EXT_OWL_NAME, path=OEO_EXT_PATH
-)
 LOGGER.info(
     "Loading completed! The content form the oeo files is parse into python data types."
 )
@@ -136,12 +130,6 @@ class PartialOntologyAboutSidebarContentView(View):
         return HttpResponse(partial)
 
 
-def initial_for_pageload(request):
-    if request.headers.get("HTTP_HX_REQUEST") == "true":
-        if request.method == "GET":
-            return render(request, "ontology/initial_response_htmx.html")
-
-
 class OntologyViewClassesView(View):
     def get(
         self,
@@ -160,7 +148,6 @@ class OntologyViewClassesView(View):
         if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
             ontology_data = OEO_COMMON_DATA
         elif ontology in [OEO_EXT_NAME]:
-            # ontology_data = OEOX_COMMON_DATA
             ontology_data = get_common_data(
                 OEO_EXT_NAME, file=OEO_EXT_OWL_NAME, path=OEO_EXT_PATH
             )

@@ -16,8 +16,6 @@ from oeo_ext.forms import ComposedUnitFormWrapper, UnitEntryForm
 from oeo_ext.utils import create_new_unit
 from oeplatform.settings import EXTERNAL_URLS
 
-__all__ = ["OeoExtPluginView", "add_unit_element_view"]
-
 
 # Suggested views maybe you will use other ones @adel
 class OeoExtPluginView(View, LoginRequiredMixin):

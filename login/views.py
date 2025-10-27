@@ -20,7 +20,6 @@ from itertools import groupby
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.http import (
@@ -33,18 +32,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import RedirectView, View
-from django.views.generic.edit import DeleteView, UpdateView
+from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
 import login.models as models
 from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
-from login.forms import (
-    CreateUserForm,
-    DetachForm,
-    EditUserForm,
-    GroupForm,
-    OEPPasswordChangeForm,
-)
+from login.forms import CreateUserForm, DetachForm, EditUserForm, GroupForm
 from login.models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
 from login.models import myuser as OepUser
 from login.utils import (
@@ -58,27 +51,6 @@ from oeplatform.settings import SCHEMA_DATA
 
 # Pagination
 ITEMS_PER_PAGE = 8
-
-__all__ = [
-    "CreateUserView",
-    "DetachView",
-    "EditUserView",
-    "GroupManagementView",
-    "GroupsView",
-    "PartialGroupEditFormView",
-    "PartialGroupInviteView",
-    "PartialGroupMemberManagementView",
-    "PartialGroupsView",
-    "ReviewsView",
-    "SettingsView",
-    "TablesView",
-    "delete_peer_review_simple_view",
-    "group_leave_view",
-    "group_member_count_view",
-    "metadata_review_badge_indicator_icon_file_view",
-    "token_reset_view",
-    "user_redirect_view",
-]
 
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
 
@@ -845,16 +817,6 @@ class PartialGroupInviteView(View, LoginRequiredMixin):
 ##############################################################################
 
 
-class ProfileUpdateView(UpdateView, LoginRequiredMixin):
-    """
-    Autogenerate a update form for users.
-    """
-
-    model = OepUser
-    fields = ["name", "affiliation", "email"]
-    template_name_suffix = "_update_form"
-
-
 class EditUserView(View):
     def get(self, request, user_id):
         if not request.user.id == int(user_id):
@@ -920,13 +882,7 @@ class DetachView(LoginRequiredMixin, View):
             return render(request, "login/detach.html", {"form": form})
 
 
-class OEPPasswordChangeView(PasswordChangeView):
-    template_name = "login/generic_form.html"
-    success_url = "/"
-    form_class = OEPPasswordChangeForm
-
-
-class AccountDeleteView(LoginRequiredMixin, DeleteView):
+class AccountDeleteView_TODO_UNUSED(LoginRequiredMixin, DeleteView):
     """
     TODO: implement tests before we allow user deletion
     see: https://github.com/OpenEnergyPlatform/oeplatform/pull/1181

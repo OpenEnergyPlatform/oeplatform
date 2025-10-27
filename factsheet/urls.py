@@ -10,41 +10,74 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from django.urls import path, re_path
 
-from factsheet import views
+from factsheet.views import (
+    add_a_fact_view,
+    add_entities_view,
+    check_ownership_view,
+    create_factsheet_view,
+    delete_factsheet_by_id_view,
+    factsheet_by_id_view,
+    factsheet_by_name_view,
+    factsheets_index_view,
+    filter_scenario_bundles_view,
+    get_all_factsheets_as_json_ld_view,
+    get_all_factsheets_as_turtle_view,
+    get_all_factsheets_view,
+    get_entities_by_type_view,
+    get_oekg_modifications_view,
+    get_scenarios_view,
+    is_logged_in_view,
+    populate_factsheets_elements_view,
+    test_query_view,
+    update_an_entity_view,
+    update_factsheet_view,
+)
 
 app_name = "factsheet"
+
 urlpatterns = [
-    path(r"", views.factsheets_index),
-    path(r"main", views.factsheets_index, name="factsheets_index"),
-    re_path(r"^id/*", views.factsheets_index, name="bundle-id-page"),
-    re_path(r"^compare/*", views.factsheets_index),
-    re_path(r"^oekg_history/*", views.factsheets_index),
-    re_path(r"^oekg_modifications/*", views.factsheets_index),
-    path(r"add/", views.create_factsheet),
-    path(r"get_oekg_history/", views.get_history),
-    path(r"update/", views.update_factsheet),
-    path(r"name/", views.factsheet_by_name),
-    path(r"get/", views.factsheet_by_id),
-    path(r"get_entities_by_type/", views.get_entities_by_type),
-    path(r"add_entities/", views.add_entities),
-    # path(r"delete_entities/", views.delete_entities),
-    path(r"delete/", views.delete_factsheet_by_id),
-    path(r"all/", views.get_all_factsheets),
-    path(r"all_in_turtle/", views.get_all_factsheets_as_turtle),
-    path(r"all_in_jsonld/", views.get_all_factsheets_as_json_ld),
-    path(r"add_a_fact/", views.add_a_fact),
-    path(r"populate_factsheets_elements/", views.populate_factsheets_elements),
-    path(r"update_an_entity/", views.update_an_entity),
-    path(r"get_scenarios/", views.get_scenarios),
-    path(r"test_query/", views.test_query),
-    path(r"get_oekg_modifications/", views.get_oekg_modifications),
+    path(r"", factsheets_index_view, name="index"),
+    path(r"main", factsheets_index_view, name="factsheets_index"),
+    re_path(r"^id/*", factsheets_index_view, name="bundle-id-page"),
+    re_path(r"^compare/*", factsheets_index_view, name="compare"),
+    re_path(r"^oekg_history/*", factsheets_index_view, name="oekg-history"),
+    re_path(r"^oekg_modifications/*", factsheets_index_view, name="oekg-modifications"),
+    path(r"add/", create_factsheet_view, name="add"),
+    # path(
+    #    r"get_oekg_history/",
+    #    get_history_view_TODO_MISSING_MODEL,
+    #    name="get-oekg-history",
+    # ), # REMOVED because model HistoryOfOEKG missing
+    path(r"update/", update_factsheet_view, name="update"),
+    path(r"name/", factsheet_by_name_view, name="name"),
+    path(r"get/", factsheet_by_id_view, name="get"),
     path(
-        r"check-owner/<str:bundle_id>/", views.check_ownership, name="check_ownership"
+        r"get_entities_by_type/", get_entities_by_type_view, name="get-entities-by-type"
     ),
+    path(r"add_entities/", add_entities_view, name="add-entities"),
+    path(r"delete/", delete_factsheet_by_id_view, name="delete"),
+    path(r"all/", get_all_factsheets_view, name="all"),
+    path(r"all_in_turtle/", get_all_factsheets_as_turtle_view, name="all-in-turtle"),
+    path(r"all_in_jsonld/", get_all_factsheets_as_json_ld_view, name="all-in-jsonld"),
+    path(r"add_a_fact/", add_a_fact_view, name="add-a-fact"),
+    path(
+        r"populate_factsheets_elements/",
+        populate_factsheets_elements_view,
+        name="populate-factsheets-elements",
+    ),
+    path(r"update_an_entity/", update_an_entity_view, name="update-an-entity"),
+    path(r"get_scenarios/", get_scenarios_view, name="get-scenarios"),
+    path(r"test_query/", test_query_view, name="test-query"),
+    path(
+        r"get_oekg_modifications/",
+        get_oekg_modifications_view,
+        name="get-oekg-modifications",
+    ),
+    path(r"check-owner/<str:bundle_id>/", check_ownership_view, name="check_ownership"),
     path(
         r"filter-oekg-scenarios/",
-        views.filter_scenario_bundles_view,
+        filter_scenario_bundles_view,
         name="filter_bundles_view",
     ),
-    path(r"is_logged_in/", views.is_logged_in),
+    path(r"is_logged_in/", is_logged_in_view, name="is-logged-in"),
 ]

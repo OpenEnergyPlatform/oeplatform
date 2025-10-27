@@ -101,32 +101,6 @@ from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SCHEMA_DATA
 
 ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
 
-__all__ = [
-    "admin_column_view",
-    "admin_constraints_view",
-    "tag_update_view",
-    "TableDataView",
-    "TableGraphView",
-    "TableMapView",
-    "metadata_widget_view",
-    "TableMetaEditView",
-    "TablePeerReviewView",
-    "TablePeerRreviewContributorView",
-    "TablePermissionView",
-    "tage_table_add_view",
-    "TableRevisionView",
-    "table_show_revision_view",
-    "StandaloneMetaEditView",
-    "tables_view",
-    "tag_editor_view",
-    "tag_overview_view",
-    "topic_view",
-    "table_view_delete_view",
-    "table_view_save_view",
-    "table_view_set_default_view",
-    "TableWizardView",
-]  # mark views as used (by urls.py)
-
 
 @require_POST
 def admin_constraints_view(request: HttpRequest) -> HttpResponse:
