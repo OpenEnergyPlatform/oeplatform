@@ -18,8 +18,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import re
 from collections import OrderedDict
+from typing import Type
 
 from django.contrib.postgres.fields import ArrayField
+from django.db.models import Model
+from django.forms import ModelForm
 from django.shortcuts import get_object_or_404
 
 from modelview.forms import EnergyframeworkForm, EnergymodelForm
@@ -431,24 +434,24 @@ FRAMEWORK_DEFAULT_COLUMNS = {
 }
 
 
-def getClasses(sheettype):
+def getClasses(sheettype: str) -> tuple[Type[Model] | None, Type[ModelForm] | None]:
     """
     Returns the model and form class w.r.t sheettype.
     """
     allowed_sheet_types = ["model", "framework"]
-    c = None
-    f = None
+    cls = None
+    frm = None
 
     if isinstance(sheettype, str):
         if sheettype in allowed_sheet_types:
             if sheettype == "model":
-                c = Energymodel
-                f = EnergymodelForm
+                cls = Energymodel
+                frm = EnergymodelForm
             elif sheettype == "framework":
-                c = Energyframework
-                f = EnergyframeworkForm
+                cls = Energyframework
+                frm = EnergyframeworkForm
 
-    return c, f
+    return cls, frm
 
 
 def printable(model, field):

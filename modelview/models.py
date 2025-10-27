@@ -329,9 +329,7 @@ class BasicFactsheet(models.Model):
 
 
 class Energymodel(BasicFactsheet):
-    energy_sectors_electricity = BooleanField(
-        default=False, verbose_name="electricity"
-    )  # noqa
+    energy_sectors_electricity = BooleanField(default=False, verbose_name="electricity")
     energy_sectors_heat = BooleanField(default=False, verbose_name="heat")
     energy_sectors_liquid_fuels = BooleanField(
         default=False, verbose_name="liquid fuels"

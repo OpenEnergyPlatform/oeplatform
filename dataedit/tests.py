@@ -146,6 +146,7 @@ class TestViews(TestCase):
             schema=cls.kwargs_w_table["schema"],
             table=cls.kwargs_w_table["table"],
         )
+        cls.user1.delete()
         super(TestCase, cls).tearDownClass()
 
     def test_views_wizard_TODO_UNFINISHED(self):

@@ -44,7 +44,7 @@ def get_app_reverse_lookup_names_and_kwargs(app_name: str) -> dict[str, list[str
     for pattern in recursively_get_patterns(resolver):
         name = pattern.name
         if not name:
-            logging.warning("no reverse lookup name for %s", pattern)
+            logging.warning("no reverse lookup name for %s: %s", app_name, pattern)
             continue
         name = f"{app_name}:{name}"
         if name in results:
