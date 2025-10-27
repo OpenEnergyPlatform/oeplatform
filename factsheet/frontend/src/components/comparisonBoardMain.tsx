@@ -537,9 +537,9 @@ const ComparisonBoardMain = (props) => {
   const sendGetScenariosQuery = async () => {
     setLoading(true);
 
-    const get_scenarios_query = `PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
-              SELECT DISTINCT ?scenario WHERE {
-              ?s oeo:OEO_00020226 ?scenario .
+    const get_scenarios_query = `PREFIX oeo:  <https://openenergyplatform.org/ontology/oeo/>
+    SELECT DISTINCT ?scenario WHERE {
+      ?s oeo:OEO_00020226 ?scenario .
     }`
 
     const response = await axios.post(
@@ -581,12 +581,12 @@ const ComparisonBoardMain = (props) => {
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
 
-    const get_categories_query = `PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
-    SELECT DISTINCT ?category ?table_name WHERE {
-      ?s oeo:has_sector_division ?category .
-      ?s oeo:OEO_00000504 ?table_name .
-      FILTER(?table_name IN ( ${data_tabels} ) ).
-    }`
+    const get_categories_query = `PREFIX oeo:  <https://openenergyplatform.org/ontology/oeo/>
+      SELECT DISTINCT ?category ?table_name WHERE {
+        ?s oeo:OEO_00390079 ?category .       # ← was has_sector_division
+        ?s oeo:OEO_00000504 ?table_name .
+        FILTER(?table_name IN (${data_tabels})) .
+      }`
 
     const response = await axios.post(
       conf.obdi,
@@ -646,12 +646,12 @@ const ComparisonBoardMain = (props) => {
 
     selectedOutputDatasets.map(elem  => data_tabels.push('"' + elem + '"'));
 
-    const get_gas_query = `PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
-    SELECT DISTINCT ?gas ?table_name WHERE {
-      ?s oeo:OEO_00010121 ?gas .
-      ?s oeo:OEO_00000504 ?table_name .
-      FILTER(?table_name IN ( ${data_tabels} ) ).
-    }`
+    const get_gas_query = `PREFIX oeo:  <https://openenergyplatform.org/ontology/oeo/>
+      SELECT DISTINCT ?gas ?table_name WHERE {
+        ?s oeo:OEO_00010121 ?gas .
+        ?s oeo:OEO_00000504 ?table_name .
+        FILTER(?table_name IN (${data_tabels})) .
+      }`
 
     const response = await axios.post(
       conf.obdi,
@@ -794,23 +794,28 @@ const sendQuery = async (index) => {
         }
     }
 
-    const main_query = `PREFIX obo: <http://purl.obolibrary.org/obo/>
-    PREFIX ou: <http://opendata.unex.es/def/ontouniversidad#>
-    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    const main_query = `
+    # main_query
+    PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
-    PREFIX llc:  <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/>
+    PREFIX oeo:  <https://openenergyplatform.org/ontology/oeo/>
+    PREFIX oekg: <https://openenergyplatform.org/ontology/oekg/>
 
-    SELECT DISTINCT ?s ?value ?country_code ?year ?category ?gas ?table_name ?unit WHERE {
-      ?s oeo:OEO_00020221 ?country_code .
-      ?s oeo:OEO_00020440 ?year .
+    SELECT DISTINCT ?s ?value ?country ?year ?category ?gas ?table_name ?unit WHERE {
+      ?s oeo:OEO_00020221 ?country .
+      ?s oeo:OEO_00020224 ?year .           # ← was OEO_00020440
       ?s oeo:OEO_00140178 ?value .
       ?s oeo:OEO_00000504 ?table_name .
-      ?s oeo:has_sector_division ?category .
+      ?s oeo:OEO_00390079 ?category .       # ← was has_sector_division
       ?s oeo:OEO_00020226 ?scenario .
       ?s oeo:OEO_00010121 ?gas .
       ?s oeo:OEO_00040010 ?unit .
-      FILTER(?table_name IN (${data_tabels}) && ?scenario IN (${scenariosFilter}) && ?category IN (${categories})  && ?gas IN (${gases}) ) .
+      FILTER(
+        ?table_name IN (${data_tabels}) &&
+        ?scenario   IN (${scenariosFilter}) &&
+        ?category   IN (${categories}) &&
+        ?gas        IN (${gases})
+      ) .
     }`;
 
     const response = await axios.post(
