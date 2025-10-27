@@ -21,6 +21,7 @@ from django.utils.encoding import smart_str
 
 import api.parser
 from api import actions
+from dataedit.metadata import load_metadata_from_db
 from dataedit.models import PeerReview, Table, Tag
 from oeplatform.settings import MEDIA_ROOT
 
@@ -534,7 +535,8 @@ def send_dump(schema, table, fname):
 def update_keywords_from_tags(table: Table, schema: str) -> None:
     """synchronize keywords in metadata with tags"""
 
-    metadata = table.oemetadata or {"resources": [{}]}
+    metadata = load_metadata_from_db(table=table.name)
+
     keywords = [tag.name_normalized for tag in table.tags.all()]
     metadata["resources"][0]["keywords"] = keywords
 
