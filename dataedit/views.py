@@ -57,6 +57,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
 from django.views.generic import View
 from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 
@@ -81,9 +82,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import (
-    Embargo,
-)
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -127,6 +126,7 @@ __all__ = [
 ]  # mark views as used (by urls.py)
 
 
+@require_POST
 def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     """
     Way to apply changes
@@ -148,6 +148,7 @@ def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     )
 
 
+@require_POST
 def admin_column_view(request: HttpRequest) -> HttpResponse:
     """
     Way to apply changes
@@ -334,6 +335,7 @@ def tag_editor_view(request: HttpRequest, id: str = "") -> HttpResponse:
         )
 
 
+@require_POST
 @login_required
 def tag_update_view(request: HttpRequest) -> HttpResponse:
     status = ""  # error status if operation fails
@@ -360,6 +362,7 @@ def tag_update_view(request: HttpRequest) -> HttpResponse:
     return redirect("/dataedit/tags/?status=" + status)
 
 
+@require_POST
 def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     post_name = request.POST.get("name")
     post_type = request.POST.get("type")
@@ -882,6 +885,7 @@ class TablePermissionView(View):
         return self.get(request, schema, table)
 
 
+@require_POST
 @login_required
 def tage_table_add_view(request: HttpRequest) -> HttpResponse:
     """
