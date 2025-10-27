@@ -18,6 +18,7 @@ from django.contrib.auth.views import (
 )
 from django.urls import path, re_path
 
+from base.views import handler404
 from login.views import (
     CreateUserView,
     DetachView,
@@ -102,11 +103,12 @@ urlpatterns = [
         name="settings",
     ),
     # TODO: implement tests before we allow user deletion
-    # re_path(
-    #    r"^profile/(?P<user_id>[\d]+)/delete_acc$",
-    #    AccountDeleteView.as_view(),
-    #    name="account-delete",
-    # ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/delete_acc$",
+        # AccountDeleteView.as_view(),
+        handler404,
+        name="account-delete",
+    ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/partial_groups$",
         PartialGroupsView.as_view(),

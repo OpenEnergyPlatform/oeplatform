@@ -20,6 +20,7 @@ from base.views import (
     robot_view,
 )
 
+app_name = "base"
 urlpatterns = [
     path("", WelcomeView.as_view(), name="home"),
     re_path(r"^robots.txt$", robot_view, name="robots"),

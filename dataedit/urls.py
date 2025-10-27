@@ -43,8 +43,9 @@ from dataedit.views import (
     topic_view,
 )
 
-pgsql_qualifier = r"[\w\d_]+"
 app_name = "dataedit"
+pgsql_qualifier = r"[\w\d_]+"
+
 
 urlpatterns_view_schema = [
     re_path(

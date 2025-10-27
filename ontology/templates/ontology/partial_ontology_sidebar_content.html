@@ -39,7 +39,9 @@
     <h3 class="ontology-side__title">Get the latest OEO release</h3>
     <p>
       Get the
-      <a class=" " href="{% url 'oeo-latest-glossary' ontology='oeo' %}"
+      <a
+        class=" "
+        href="{% url 'ontology:oeo-latest-glossary' ontology='oeo' %}"
         >Glossary</a
       >
       to get an overview of the OEO contents.
@@ -48,7 +50,7 @@
     <a
       class="ontology-side__btn-main"
       id="popoverTrigger"
-      href="{% url 'oeo-latest-full-zip' ontology='oeo' %}"
+      href="ontology:oeo-latest-full-zip' ontology='oeo' %}"
       data-bs-toggle="popover"
       data-bs-trigger="hover"
       title="oeo release"
@@ -234,15 +236,6 @@
       </div>
     </div>
   </div>
-
-  <!-- <div class="row">
-        <h1>Welcome to Your SPA</h1>
-        <div id="updateable-content"> -->
-  <!-- Content that will be updated -->
-  <!-- </div>
-        <button hx-get="{% url 'partial-page-content' %}" hx-swap="outerHTML" hx-target="#content" id="content">Update Content</button> -->
-  <!-- Add other htmx-enabled elements as needed -->
-  <!-- </div> -->
 </div>
 <script>
   var popoverTriggerList = [].slice.call(

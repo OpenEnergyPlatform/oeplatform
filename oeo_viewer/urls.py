@@ -8,4 +8,5 @@ from django.urls import path
 
 from oeo_viewer.views import viewer_index_view
 
+app_name = "oeo_viewer"
 urlpatterns = [path(r"", viewer_index_view, name="index")]

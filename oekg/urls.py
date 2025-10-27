@@ -13,6 +13,7 @@ from oekg.views import (
     sparql_metadata_view,
 )
 
+app_name = "oekg"
 urlpatterns = [
     path("gui/", main_view, name="main"),
     path("sparql/", sparql_endpoint_view, name="sparql_endpoint"),

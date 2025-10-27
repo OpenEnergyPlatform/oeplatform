@@ -21,7 +21,7 @@
   <div class="container">
     <div class="row">
       <div
-        hx-get="{% url 'partial-page-sidebar-content' %}"
+        hx-get="{% url 'ontology:partial-page-sidebar-content' %}"
         hx-swap="outerHTML"
         hx-target="#content-sidebar"
         hx-trigger="load"
@@ -110,7 +110,7 @@
 
     <div
       class="ontology__content"
-      hx-get="{% url 'partial-page-content' %}"
+      hx-get="{% url 'ontology:partial-page-content' %}"
       hx-swap="outerHTML"
       hx-target="#content"
       hx-trigger="load"
@@ -253,7 +253,8 @@
       </p>
 
       <p>
-        The <a href="{% url 'oeo-s-c' %}">OEO steering committee</a> was
+        The
+        <a href="{% url 'ontology:oeo-s-c' %}">OEO steering committee</a> was
         established in autumn 2019.
       </p>
     </div>

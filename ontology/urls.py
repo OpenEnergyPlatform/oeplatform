@@ -19,6 +19,7 @@ from ontology.views import (
     PartialOntologyAboutSidebarContentView,
 )
 
+app_name = "ontology"
 urlpatterns = [
     # oeo-extended
     re_path(r"^$", OntologyAboutView.as_view()),

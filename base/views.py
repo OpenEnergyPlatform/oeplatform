@@ -88,7 +88,7 @@ def handler404(request, exception):
 
 
 class AboutPageView(View):
-    # docstring
+
     projects_content_static = "project_detail_pages_content"
     projects_content_path = os.path.join(STATIC_ROOT, projects_content_static)
 
@@ -99,7 +99,6 @@ class AboutPageView(View):
 
 
 class AboutProjectDetailView(AboutPageView):
-    # docstring
 
     def get(self, request, project_id):
         project = get_json_content(path=self.projects_content_path, json_id=project_id)

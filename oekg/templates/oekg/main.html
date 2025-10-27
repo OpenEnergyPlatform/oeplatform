@@ -66,7 +66,7 @@
       const yasgui = new Yasgui(document.getElementById("yasgui"), {
         // Specify request configuration, including endpoint and headers
         requestConfig: {
-          endpoint: "{% url 'sparql_endpoint' %}", // "http://127.0.0.1:8000/oekg/sparql/"
+          endpoint: "{% url 'oekg:sparql_endpoint' %}", // "http://127.0.0.1:8000/oekg/sparql/"
           method: "POST",
           headers: () => ({
             "X-CSRFToken": csrftoken,

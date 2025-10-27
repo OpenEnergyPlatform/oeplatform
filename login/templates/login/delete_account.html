@@ -12,7 +12,7 @@
     <a href="{% url 'login:tables' profile_user.id %}">Tables</a>
   {% endif %}
   {% if profile_user %}
-    <a href="{% url 'login:review' profile_user.id %}">Reviews</a>
+    <a href="{% url 'login:reviews' profile_user.id %}">Reviews</a>
   {% endif %}
   {% if request.user.is_authenticated and profile_user == request.user %}
     <a href="{% url 'login:settings' profile_user.id %}">Settings</a>

@@ -44,7 +44,7 @@
             >
               <a
                 class="btn btn-primary"
-                href="{% url 'oeo-classes' ontology=ontology module_or_id=super_class.ID %}"
+                href="{% url 'ontology:oeo-classes' ontology=ontology module_or_id=super_class.ID %}"
               >
                 view
               </a>
@@ -140,7 +140,7 @@
             >
               <a
                 class="btn btn-primary"
-                href="{% url 'oeo-classes' ontology=ontology module_or_id=sub_class.ID %}"
+                href="{% url 'ontology:oeo-classes' ontology=ontology module_or_id=sub_class.ID %}"
               >
                 view
               </a>
