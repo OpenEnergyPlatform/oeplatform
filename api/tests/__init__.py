@@ -16,7 +16,7 @@ from rest_framework.authtoken.models import Token
 
 from api import actions
 from login.models import myuser
-from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import IS_TEST, SCHEMA_DEFAULT_TEST_SANDBOX
 
 from .utils import load_content_as_json
 
@@ -43,6 +43,9 @@ class APITestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        # ensure IS_TEST is set correctly
+        if not IS_TEST:
+            raise Exception("IS_TEST is not True")
         super(APITestCase, cls).setUpClass()
         cls.empty_test_schema()
         cls.user, _ = myuser.objects.get_or_create(

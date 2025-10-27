@@ -94,7 +94,7 @@ class MigrationTest(TestCase):
         pass
 
 
-class TestViews(TestCase):
+class TestViewsDataedit(TestCase):
     """Call all (most) views (after creation of some test data)"""
 
     kwargs_w_table = {"table": "test_table", "schema": SCHEMA_DEFAULT_TEST_SANDBOX}
@@ -102,10 +102,10 @@ class TestViews(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestCase, cls).setUpClass()
         # ensure IS_TEST is set correctly
         if not IS_TEST:
             raise Exception("IS_TEST is not True")
+        super(TestCase, cls).setUpClass()
 
         # create test user
         cls.user1 = User.objects.create_user(  # type: ignore
@@ -200,8 +200,8 @@ class TestViews(TestCase):
 
             kwargs = {k: default_kwargs[k] for k in kwarg_names}
 
-            url = reverse(name, kwargs=kwargs)
             # also: pass kwargs as query data for views that use request.GET
+            url = reverse(name, kwargs=kwargs)
             query_string = urlencode(default_kwargs)
             url += f"?{query_string}"
 

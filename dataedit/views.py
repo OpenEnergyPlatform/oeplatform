@@ -456,6 +456,7 @@ def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpR
 def table_view_set_default_view(
     request: HttpRequest, schema: str, table: str
 ) -> HttpResponse:
+    # TODO: shouldnt this be POST only?
     post_id = request.GET.get("id")
 
     for view in DBView.objects.filter(schema=schema, table=table):
@@ -470,6 +471,7 @@ def table_view_set_default_view(
 def table_view_delete_view(
     request: HttpRequest, schema: str, table: str
 ) -> HttpResponse:
+    # TODO: shouldnt this be POST only?
     post_id = request.GET.get("id")
 
     view = DBView.objects.get(id=post_id, schema=schema, table=table)
@@ -1588,6 +1590,7 @@ def metadata_widget_view(request: HttpRequest) -> HttpResponse:
     Returns:
         HttpResponse: Rendered HTML response for the metadata widget.
     """
+    # TODO: schema and table should be in path?
     schema = request.GET.get("schema")
     table = request.GET.get("table")
 

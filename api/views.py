@@ -688,19 +688,19 @@ class FieldsAPIView(APIView):
         request: Request,
         schema: str,
         table: str,
-        id,
+        column_id: int,
         column: str | None = None,
     ) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         if (
             not parser.is_pg_qual(table)
             or not parser.is_pg_qual(schema)
-            or not parser.is_pg_qual(id)
+            or not parser.is_pg_qual(column_id)
             or not parser.is_pg_qual(column)
         ):
             return ModHttpResponse({"error": "Bad Request", "http_status": 400})
 
-        returnValue = actions.getValue(schema, table, column, id)
+        returnValue = actions.getValue(schema, table, column, column_id)
 
         return HttpResponse(
             returnValue if returnValue is not None else "",
