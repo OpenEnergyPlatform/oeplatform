@@ -102,7 +102,7 @@ def list_sheets_view(request, sheettype):
 
 
 @never_cache
-def show_view(request, sheettype, model_name):
+def show_view(request, sheettype, pk):
     """
     Loads the requested factsheet
     """
@@ -113,7 +113,7 @@ def show_view(request, sheettype, model_name):
             "We dropped the scenario factsheets in favor of scenario bundles."
         )
 
-    model = get_object_or_404(c, pk=model_name)
+    model = get_object_or_404(c, pk=pk)
 
     user_agent = {"user-agent": "oeplatform"}
     urllib3.PoolManager(headers=user_agent)
@@ -157,15 +157,13 @@ def model_to_csv_view(request, sheettype):
         tag_ids = tag_ids.split(",")
 
     header = list(
-        field.attname
-        for field in c._meta.get_fields()
-        if hasattr(field, "attname")  # noqa
+        field.attname for field in c._meta.get_fields() if hasattr(field, "attname")
     )
 
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="{filename}s.csv"'.format(
         filename=c.__name__
-    )  # noqa
+    )
 
     writer = csv.writer(response, quoting=csv.QUOTE_ALL)
     writer.writerow(header)
@@ -185,13 +183,13 @@ def model_to_csv_view(request, sheettype):
 
 @login_required
 @never_cache
-def edit_model_view(request, model_name, sheettype):
+def edit_model_view(request, pk, sheettype):
     """
     Constructs a form accoring to existing model
     """
     c, f = getClasses(sheettype)
 
-    model = get_object_or_404(c, pk=model_name)
+    model = get_object_or_404(c, pk=pk)
 
     form = f(instance=model)
 
@@ -202,7 +200,7 @@ def edit_model_view(request, model_name, sheettype):
         "modelview/edit{}.html".format(sheettype),
         {
             "form": form,
-            "name": model_name,
+            "name": pk,
             "method": "update",
             "tags": tags,
         },
@@ -211,6 +209,8 @@ def edit_model_view(request, model_name, sheettype):
 
 class FSAddView(LoginRequiredMixin, View):
     def get(self, request, sheettype, method="add"):
+        # TODO: pk not used, but defined in urls.py
+        # this should be POST,not GET?
         c, f = getClasses(sheettype)
         if method == "add":
             form = f()
@@ -221,7 +221,7 @@ class FSAddView(LoginRequiredMixin, View):
                 {"form": form, "method": method},
             )
         else:
-            raise NotImplementedError()  # FIXME: model_name not defined
+            raise NotImplementedError(method)  # FIXME: model_name not defined
 
     def post(self, request, sheettype, method="add", pk=None):
         c, f = getClasses(sheettype)

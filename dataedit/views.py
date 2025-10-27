@@ -57,6 +57,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
 from django.views.generic import View
 from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 
@@ -127,6 +128,7 @@ __all__ = [
 ]  # mark views as used (by urls.py)
 
 
+@require_POST
 def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     """
     Way to apply changes
@@ -148,6 +150,7 @@ def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     )
 
 
+@require_POST
 def admin_column_view(request: HttpRequest) -> HttpResponse:
     """
     Way to apply changes
@@ -285,6 +288,7 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
 
 class TableRevisionView(View):
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
+        # TODO: why is this a redirect to API? do we still need it?
         return redirect(f"/api/v0/schema/{schema}/tables/{table}/rows")
 
 
@@ -312,8 +316,8 @@ def tag_overview_view(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-def tag_editor_view(request: HttpRequest, id: str = "") -> HttpResponse:
-    tag = Tag.get_or_none(id)
+def tag_editor_view(request: HttpRequest, tag_pk: str | None = None) -> HttpResponse:
+    tag = Tag.get_or_none(tag_pk or "")
     if tag:
         assigned = tag.tables.count() > 0  # type: ignore (related name)
         return render(
@@ -334,6 +338,7 @@ def tag_editor_view(request: HttpRequest, id: str = "") -> HttpResponse:
         )
 
 
+@require_POST
 @login_required
 def tag_update_view(request: HttpRequest) -> HttpResponse:
     status = ""  # error status if operation fails
@@ -360,6 +365,7 @@ def tag_update_view(request: HttpRequest) -> HttpResponse:
     return redirect("/dataedit/tags/?status=" + status)
 
 
+@require_POST
 def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     post_name = request.POST.get("name")
     post_type = request.POST.get("type")
@@ -450,6 +456,7 @@ def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpR
 def table_view_set_default_view(
     request: HttpRequest, schema: str, table: str
 ) -> HttpResponse:
+    # TODO: shouldnt this be POST only?
     post_id = request.GET.get("id")
 
     for view in DBView.objects.filter(schema=schema, table=table):
@@ -464,6 +471,7 @@ def table_view_set_default_view(
 def table_view_delete_view(
     request: HttpRequest, schema: str, table: str
 ) -> HttpResponse:
+    # TODO: shouldnt this be POST only?
     post_id = request.GET.get("id")
 
     view = DBView.objects.get(id=post_id, schema=schema, table=table)
@@ -882,6 +890,7 @@ class TablePermissionView(View):
         return self.get(request, schema, table)
 
 
+@require_POST
 @login_required
 def tage_table_add_view(request: HttpRequest) -> HttpResponse:
     """
@@ -1581,6 +1590,7 @@ def metadata_widget_view(request: HttpRequest) -> HttpResponse:
     Returns:
         HttpResponse: Rendered HTML response for the metadata widget.
     """
+    # TODO: schema and table should be in path?
     schema = request.GET.get("schema")
     table = request.GET.get("table")
 

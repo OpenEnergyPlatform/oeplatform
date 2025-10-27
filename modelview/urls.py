@@ -33,13 +33,13 @@ urlpatterns = [
         fs_delete_view,
         name="delete-factsheet",
     ),
-    path("<str:sheettype>s/download/", model_to_csv_view, name="index"),
-    path("<str:sheettype>s/<int:model_name>/", show_view, name="show-factsheet"),
-    path("<str:sheettype>s/<int:model_name>/edit/", edit_model_view, name="index"),
+    path("<str:sheettype>s/download/", model_to_csv_view, name="download"),
+    path("<str:sheettype>s/<int:pk>/", show_view, name="show-factsheet"),
+    path("<str:sheettype>s/<int:pk>/edit/", edit_model_view, name="edit"),
     path(
         "<str:sheettype>s/<int:pk>/update/",
         FSAddView.as_view(),
         {"method": "update"},
-        name="index",
+        name="update",
     ),
 ]

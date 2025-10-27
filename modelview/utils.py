@@ -9,7 +9,7 @@ from modelview.models import Energyframework, Energymodel
 
 
 def get_url(sheettype, obj_id):
-    kwargs = {"sheettype": sheettype, "model_name": obj_id}
+    kwargs = {"sheettype": sheettype, "pk": obj_id}
     detail_url = reverse(
         "modelview:show-factsheet",
         kwargs=kwargs,

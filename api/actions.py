@@ -1822,6 +1822,8 @@ def get_columns(request, context=None):
     engine = _get_engine()
     connection = engine.connect()
 
+    print(request.GET)
+
     table_name = get_or_403(request, "table")
     schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
 
@@ -2481,7 +2483,7 @@ def list_table_sizes() -> list[dict]:
             pg_total_relation_size(format('%I.%I', table_schema, table_name)) AS total_bytes,
             pg_size_pretty(pg_total_relation_size(format('%I.%I', table_schema, table_name))) AS total_pretty
         FROM information_schema.tables
-        WHERE table_schema="{oedb_schema}"
+        WHERE table_schema='{oedb_schema}'
           AND table_type = 'BASE TABLE'
         ORDER BY pg_total_relation_size(format('%I.%I', table_schema, table_name)) DESC
     """  # noqa: E501
