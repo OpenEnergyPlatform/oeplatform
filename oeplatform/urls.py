@@ -35,22 +35,21 @@ from django.urls import path, re_path
 
 from oeplatform import settings
 
-from .views import redirect_tutorial
-
 handler500 = "base.views.handler500"
 handler404 = "base.views.handler404"
 
 urlpatterns = [
-    re_path(r"^api/", include("api.urls")),
     path("", include("base.urls")),
+    re_path(r"^api/", include("api.urls")),
     re_path(r"^user/", include("login.urls")),
-    path("accounts/", include("allauth.urls")),
     re_path(r"^oeo_ext/", include("oeo_ext.urls")),
     re_path(r"^factsheets/", include("modelview.urls")),
     re_path(r"^dataedit/", include("dataedit.urls")),
     re_path(r"^ontology/", include("ontology.urls")),
     re_path(r"^viewer/oeo/", include("oeo_viewer.urls")),
     re_path(r"^scenario-bundles/", include("factsheet.urls")),
-    re_path(r"^tutorials/.*", redirect_tutorial),
     re_path(r"^oekg/", include("oekg.urls")),
+    # external
+    re_path(r"^accounts/", include("allauth.urls")),
+    re_path(r"^captcha/", include("captcha.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

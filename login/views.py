@@ -37,7 +37,7 @@ from django.views.generic.edit import DeleteView, UpdateView
 from rest_framework.authtoken.models import Token
 
 import login.models as models
-from dataedit.models import PeerReview, PeerReviewManager, Topic
+from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
 from login.forms import (
     CreateUserForm,
     DetachForm,
@@ -59,6 +59,26 @@ from oeplatform.settings import SCHEMA_DATA
 # Pagination
 ITEMS_PER_PAGE = 8
 
+__all__ = [
+    "CreateUserView",
+    "DetachView",
+    "EditUserView",
+    "GroupManagementView",
+    "GroupsView",
+    "PartialGroupEditFormView",
+    "PartialGroupInviteView",
+    "PartialGroupMemberManagementView",
+    "PartialGroupsView",
+    "ReviewsView",
+    "SettingsView",
+    "TablesView",
+    "delete_peer_review_simple_view",
+    "group_leave_view",
+    "group_member_count_view",
+    "metadata_review_badge_indicator_icon_file_view",
+    "token_reset_view",
+    "user_redirect_view",
+]
 
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
 
@@ -335,7 +355,7 @@ class ReviewsView(View):
 
 
 @require_POST
-def delete_peer_review_simple(request):
+def delete_peer_review_simple_view(request):
     """
     Удаление Peer Review по review_id (упрощённый вариант),
     считывая review_id из тела запроса (JSON).
@@ -414,7 +434,7 @@ class GroupsView(View):
         )
 
 
-def group_member_count(request, group_id: int):
+def group_member_count_view(request, group_id: int):
     """
     Return the member count for the current group.
 
@@ -431,7 +451,7 @@ def group_member_count(request, group_id: int):
 
 
 @login_required
-def group_leave(request, group_id: int):
+def group_leave_view(request, group_id: int):
     """ """
     user: OepUser = request.user
     user_id: int = request.user.id
@@ -482,7 +502,7 @@ class PartialGroupsView(View):
         )
 
 
-class GroupManagement(View, LoginRequiredMixin):
+class GroupManagementView(View, LoginRequiredMixin):
     form_is_valid = False
 
     def get(self, request, group_id=None):
@@ -598,7 +618,7 @@ class GroupManagement(View, LoginRequiredMixin):
                 return response
 
 
-class PartialGroupMemberManagement(View, LoginRequiredMixin):
+class PartialGroupMemberManagementView(View, LoginRequiredMixin):
     def get(self, request, group_id: int):
         """
         Renders the group detail page component for user invites and
@@ -709,7 +729,7 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
 
 
 # TODO: Post should not return render ... Get might never be used
-class PartialGroupEditForm(View, LoginRequiredMixin):
+class PartialGroupEditFormView(View, LoginRequiredMixin):
     def get(self, request, group_id):
         """
         Returns a edit form component for a group.
@@ -762,7 +782,7 @@ class PartialGroupEditForm(View, LoginRequiredMixin):
                 )
 
 
-class PartialGroupInvite(View, LoginRequiredMixin):
+class PartialGroupInviteView(View, LoginRequiredMixin):
     def get(self, request, group_id):
         group = get_object_or_404(UserGroup, pk=group_id)
         is_admin = False
@@ -921,7 +941,7 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
         return render(request, "login/delete_account.html", {"profile_user": user})
 
 
-def token_reset(request):
+def token_reset_view(request):
     if request.user.is_authenticated:
         user_token = get_object_or_404(
             Token, user=request.user.id
@@ -933,3 +953,27 @@ def token_reset(request):
         return HttpResponse(new_token)
     else:
         return HttpResponseForbidden("You are not authorized to reset the token.")
+
+
+def metadata_review_badge_indicator_icon_file_view(request, user_id, table_name):
+    # is_badge : bool , msg : string -> either error msg or badge name
+    table = get_object_or_404(Table, name=table_name)
+    is_badge, msg = get_review_badge_from_table_metadata(table)
+
+    icon_path = None
+    err_msg = None
+    if is_badge:
+        icon_path = get_badge_icon_path(msg)
+        badge_name = msg
+    else:
+        badge_name = None
+        err_msg = msg
+
+    context = {
+        "is_badge": is_badge,
+        "err_msg": err_msg,
+        "badge_name": badge_name,
+        "icon_path": icon_path,
+    }
+
+    return render(request, "login/partials/badge_icon.html", context)

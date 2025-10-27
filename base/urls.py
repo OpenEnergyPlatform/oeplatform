@@ -8,28 +8,36 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from django.conf.urls import include
 from django.urls import path, re_path
 
-from base import views
+from base.views import (
+    AboutPageView,
+    AboutProjectDetailView,
+    ContactView,
+    WelcomeView,
+    redir_view,
+    redirect_tutorial_view,
+    robot_view,
+)
 
 urlpatterns = [
-    re_path(r"^robots.txt$", views.robot),
-    path("", views.Welcome.as_view(), name="home"),
-    re_path(r"^about/$", views.AboutPage.as_view(), name="index"),
+    path("", WelcomeView.as_view(), name="home"),
+    re_path(r"^robots.txt$", robot_view, name="robots"),
+    re_path(r"^about/$", AboutPageView.as_view(), name="about"),
     re_path(
         r"^about/project-detail/(?P<project_id>[\w\-]+)/$",
-        views.AboutProjectDetail.as_view(),
+        AboutProjectDetailView.as_view(),
         name="project_detail",
     ),
-    re_path(r"^faq/$", views.redir, {"target": "faq"}, name="index"),
-    re_path(r"^discussion/$", views.redir, {"target": "discussion"}, name="index"),
-    re_path(r"^contact/$", views.ContactView.as_view(), name="index"),
+    re_path(r"^contact/$", ContactView.as_view(), name="contact"),
+    re_path(r"^faq/$", redir_view, {"target": "faq"}, name="faq"),
+    re_path(r"^discussion/$", redir_view, {"target": "discussion"}, name="discussion"),
     re_path(
         r"^legal/privacy_policy/$",
-        views.redir,
+        redir_view,
         {"target": "privacy_policy"},
-        name="index",
+        name="legal-privacy-policy",
     ),
-    re_path(r"^legal/tou/$", views.redir, {"target": "terms_of_use"}, name="index"),
-] + [path("captcha/", include("captcha.urls"))]
+    re_path(r"^legal/tou/$", redir_view, {"target": "terms_of_use"}, name="legal-tou"),
+    re_path(r"^tutorials/.*", redirect_tutorial_view, name="tutorials"),
+]

@@ -51,7 +51,7 @@ LOGGER.info(
 )
 
 
-class OntologyAbout(View):
+class OntologyAboutView(View):
     def get(self, request, ontology="oeo", version=None):
         onto_base_path = Path(ONTOLOGY_ROOT, ontology)
 
@@ -72,7 +72,7 @@ class OntologyAbout(View):
         )
 
 
-class PartialOntologyAboutContent(View):
+class PartialOntologyAboutContentView(View):
     def get(self, request):
         if request.headers.get("HX-Request") == "true":
             if request.method == "GET":
@@ -108,7 +108,7 @@ class PartialOntologyAboutContent(View):
                 return HttpResponse(partial)
 
 
-class PartialOntologyAboutSidebarContent(View):
+class PartialOntologyAboutSidebarContentView(View):
     def get(self, request):
         version = OEO_VERSION
         main_module = OEO_MODULES_MAIN
@@ -142,7 +142,7 @@ def initial_for_pageload(request):
             return render(request, "ontology/initial_response_htmx.html")
 
 
-class OntologyViewClasses(View):
+class OntologyViewClassesView(View):
     def get(
         self,
         request,
@@ -279,7 +279,7 @@ class OntologyViewClasses(View):
         )
 
 
-class OntologyStatics(View):
+class OntologyStaticsView(View):
     def get(
         self,
         request,
@@ -400,7 +400,7 @@ class OntologyStatics(View):
                 return response
 
 
-class OeoExtendedFileServe(View):
+class OeoExtendedFileServeView(View):
     def __init__(self) -> None:
         self.oeo_ext_static = self.read_owl_file()
         self.file_extension = "owl"
