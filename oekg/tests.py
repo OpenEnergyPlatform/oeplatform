@@ -5,19 +5,21 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import logging
 import unittest
 from unittest.mock import patch
 
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from base.tests import get_app_reverse_lookup_names_and_kwargs
 from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
 
 
 class SparqlEndpointTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.endpoint_url = reverse("sparql_endpoint")
+        self.endpoint_url = reverse("oekg:sparql_endpoint")
 
     @patch("oekg.utils.execute_sparql_query")
     @unittest.skipIf(
@@ -44,6 +46,30 @@ class SparqlEndpointTest(TestCase):
         json_response = response.json()
         self.assertIn("head", json_response)
         self.assertIn("results", json_response)
+
+
+class TestViewsOekg(TestCase):
+    """Call all (most) views"""
+
+    def test_views(self):
+        """Call all (most) views that can be found with reverse lookup.
+        We only test method GET
+        """
+
+        default_kwargs = {}
+
+        for name, kwarg_names in sorted(
+            get_app_reverse_lookup_names_and_kwargs("oekg").items()
+        ):
+
+            kwargs = {k: default_kwargs[k] for k in kwarg_names}
+            url = reverse(name, kwargs=kwargs)
+
+            try:
+                resp = self.client.get(path=url)
+                self.assertTrue(resp.status_code < 400)
+            except Exception as exc:
+                logging.error(exc)
 
 
 if __name__ == "__main__":

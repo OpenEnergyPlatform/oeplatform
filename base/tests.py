@@ -75,10 +75,6 @@ class TestViewsBase(TestCase):
             get_app_reverse_lookup_names_and_kwargs("base").items()
         ):
 
-            if name in {"sparql_endpoint"}:
-                # skip because POST
-                continue
-
             kwargs = {k: default_kwargs[k] for k in kwarg_names}
             url = reverse(name, kwargs=kwargs)
 

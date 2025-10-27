@@ -1116,15 +1116,6 @@ def is_logged_in_view(request, *args, **kwargs):
     return response
 
 
-def factsheet_by_name_view(request, *args, **kwargs):
-    name = request.GET.get("name")
-    factsheet = Factsheet.objects.get(name=name)  # noqa
-    factsheet_json = serializers.serialize("json", factsheet)
-    response = JsonResponse(factsheet_json, safe=False, content_type="application/json")
-    patch_response_headers(response, cache_timeout=1)
-    return response
-
-
 def factsheet_by_id_view(request, *args, **kwargs):
     uid = request.GET.get("id")
     study_URI = URIRef("https://openenergyplatform.org/ontology/oekg/" + uid)

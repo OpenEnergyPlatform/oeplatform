@@ -1,5 +1,5 @@
 """
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
@@ -9,25 +9,9 @@ from django.test import TestCase
 from django.urls import reverse
 
 from base.tests import get_app_reverse_lookup_names_and_kwargs
-from login.models import myuser as User
 
 
-class AuthTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            name="testuser",
-            email="test123@mail.com",
-            affiliation="Test",
-        )
-
-        self.user.set_password("password")
-        self.user.save()
-        # self.factory = RequestFactory()
-
-        self.credentials = {"name": self.user.name, "password": "password"}
-
-
-class TestViewsLogin(TestCase):
+class TestViewsFactsheet(TestCase):
     """Call all (most) views"""
 
     def test_views(self):
@@ -35,10 +19,10 @@ class TestViewsLogin(TestCase):
         We only test method GET
         """
 
-        default_kwargs = {"user_id": 1, "group_id": 1}
+        default_kwargs = {"bundle_id": "1234"}
 
         for name, kwarg_names in sorted(
-            get_app_reverse_lookup_names_and_kwargs("login").items()
+            get_app_reverse_lookup_names_and_kwargs("factsheet").items()
         ):
 
             try:

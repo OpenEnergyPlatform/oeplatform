@@ -17,7 +17,6 @@ from factsheet.views import (
     create_factsheet_view,
     delete_factsheet_by_id_view,
     factsheet_by_id_view,
-    factsheet_by_name_view,
     factsheets_index_view,
     filter_scenario_bundles_view,
     get_all_factsheets_as_json_ld_view,
@@ -49,7 +48,8 @@ urlpatterns = [
     #    name="get-oekg-history",
     # ), # REMOVED because model HistoryOfOEKG missing
     path(r"update/", update_factsheet_view, name="update"),
-    path(r"name/", factsheet_by_name_view, name="name"),
+    # path(r"name/", factsheet_by_name_view, name="name"),
+    #  REMOVED because model Factsheet missing
     path(r"get/", factsheet_by_id_view, name="get"),
     path(
         r"get_entities_by_type/", get_entities_by_type_view, name="get-entities-by-type"
