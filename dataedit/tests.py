@@ -21,7 +21,7 @@ from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from base.tests import get_app_reverse_lookup_names_and_kwargs
-from dataedit.models import PeerReview, PeerReviewManager, Table
+from dataedit.models import PeerReview, PeerReviewManager, Table, Tag
 from login.models import myuser as User
 from oeplatform.settings import IS_TEST, SCHEMA_DEFAULT_TEST_SANDBOX
 
@@ -131,6 +131,8 @@ class TestViews(TestCase):
             table=cls.kwargs_w_table["table"],
         )
 
+        cls.tag = Tag.objects.create(name="tag1")
+
         # create test PeerReview # TODO: not sure how to do this correctly
         cls.peerreview = PeerReview.objects.create(
             table=cls.table.name, reviewer=cls.user1, review={}
@@ -179,11 +181,19 @@ class TestViews(TestCase):
             "schema": SCHEMA_DEFAULT_TEST_SANDBOX,
             "table": self.table.name,
             "review_id": self.peerreview.pk,
+            "tag_pk": self.tag.pk,
+            "maptype": "latlon",
         }
         for name, kwarg_names in sorted(
             get_app_reverse_lookup_names_and_kwargs("dataedit").items()
         ):
-            if name in {"dataedit:admin-columns", "dataedit:admin-contraints"}:
+            if name in {
+                "dataedit:tags-add",
+                "dataedit:tags-set",
+                "dataedit:table-view-save",
+                "dataedit:table-view-set-default",
+                "dataedit:table-view-delete-default",
+            }:
                 # ignore these (POST)
                 continue
 
@@ -193,8 +203,6 @@ class TestViews(TestCase):
             # also: pass kwargs as query data for views that use request.GET
             query_string = urlencode(default_kwargs)
             url += f"?{query_string}"
-
-            logging.info(url)
 
             expected_status = 200
             self.client.force_login(self.user1)

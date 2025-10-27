@@ -82,7 +82,9 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import (
+    Embargo,
+)
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -286,6 +288,7 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
 
 class TableRevisionView(View):
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
+        # TODO: why is this a redirect to API? do we still need it?
         return redirect(f"/api/v0/schema/{schema}/tables/{table}/rows")
 
 
@@ -313,8 +316,8 @@ def tag_overview_view(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-def tag_editor_view(request: HttpRequest, id: str = "") -> HttpResponse:
-    tag = Tag.get_or_none(id)
+def tag_editor_view(request: HttpRequest, tag_pk: str | None = None) -> HttpResponse:
+    tag = Tag.get_or_none(tag_pk or "")
     if tag:
         assigned = tag.tables.count() > 0  # type: ignore (related name)
         return render(
