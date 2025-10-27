@@ -939,7 +939,8 @@ def tage_table_add_view(request: HttpRequest) -> HttpResponse:
         ),
     )
 
-    return redirect(request.META["HTTP_REFERER"])
+    redirect_url = request.META.get("HTTP_REFERER") or reverse("dataedit:index")
+    return redirect(redirect_url)
 
 
 class TableWizardView(LoginRequiredMixin, View):

@@ -15,6 +15,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # TODO: This might have t be removed fully
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
+from omi.validation import validate_metadata
 
 from dataedit.metadata.v1_5 import TEMPLATE_V1_5
 from dataedit.models import Table
@@ -76,7 +77,22 @@ def load_metadata_from_db(table: str) -> dict:
         or keep the old functionality (TODO).
     """
 
-    metadata = Table.load(name=table).oemetadata
+    table_obj = Table.load(name=table)
+    metadata = table_obj.oemetadata
     if not metadata:
-        metadata = OEMETADATA_V20_TEMPLATE
+        # empty / new metadata
+
+        # TODO: the template is full of empty strings, which are not valid metadata
+        # so we use only parts of it
+
+        metaMetadata = OEMETADATA_V20_TEMPLATE["metaMetadata"]
+        name = table_obj.name
+
+        metadata = {
+            "name": name,
+            "resources": [{"name": name}],
+            "metaMetadata": metaMetadata,
+        }
+        validate_metadata(metadata, check_license=False)
+
     return metadata
