@@ -23,4 +23,6 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- #2136: new tables cannot add tags
+
 ## Documentation updates
