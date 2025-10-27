@@ -2,80 +2,87 @@
 {% load static %}
 
 {% block after-head %}
-<link rel="stylesheet" href="{% static 'sparql_ui/vendor/yasgui-4.2.28/css/yasgui.min.css' %}" />
+  <link
+    rel="stylesheet"
+    href="{% static 'sparql_ui/vendor/yasgui-4.2.28/css/yasgui.min.css' %}"
+  />
 {% endblock after-head %}
 
 {% block site-header %}
-<div class="main-header">
+  <div class="main-header">
     <h1 class="main-header__title">
-        <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg" width="16" height="16" alt="OEO">
-        OEKG Sparql Query
-
+      <img
+        src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg"
+        width="16"
+        height="16"
+        alt="OEO"
+      />
+      OEKG Sparql Query
     </h1>
-    Here you can query the Open Energy Knowledge Graph (OEKG) using SPARQL. You can also use our http api, have a look at the <a href="{{oekg_api}}" target="_blank">documentation</a>.
-</div>
-
+    Here you can query the Open Energy Knowledge Graph (OEKG) using SPARQL. You
+    can also use our http api, have a look at the
+    <a href="{{ oekg_api }}" target="_blank">documentation</a>.
+  </div>
 {% endblock site-header %}
 
 {% block main-content-body %}
-<div class="container" id="yasgui"></div>
+  <div class="container" id="yasgui"></div>
 
-</div>
-<style>
+  <style>
     .yasgui .autocompleteWrapper {
       display: none !important;
     }
     .yasgui .controlBar {
-            display: none !important;
+      display: none !important;
     }
-</style>
+  </style>
 {% endblock main-content-body %}
 
 {% block after-body-bottom-js %}
-<script src="{% static 'sparql_ui/vendor/yasgui-4.2.28/js/yasgui.min.js' %}"></script>
-<script>
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        function getCookie(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-                }
+  <script src="{% static 'sparql_ui/vendor/yasgui-4.2.28/js/yasgui.min.js' %}"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          var cookies = document.cookie.split(";");
+          for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
             }
-            return cookieValue;
+          }
         }
+        return cookieValue;
+      }
 
-        const csrftoken = getCookie('csrftoken');
+      const csrftoken = getCookie("csrftoken");
 
-        // Initialize Yasgui with specific endpoint
-        const yasgui = new Yasgui(document.getElementById("yasgui"), {
-            // Specify request configuration, including endpoint and headers
-            requestConfig: {
-                endpoint: "{% url 'sparql_endpoint' %}", // "http://127.0.0.1:8000/oekg/sparql/"
-                method: "POST",
-                headers: () => ({
-                    'X-CSRFToken': csrftoken
-                })
-            },
-            copyEndpointOnNewTab: true,
-            yasqe: {
-                // Additional Yasqe-specific configurations can go here
-            }
-        });
+      // Initialize Yasgui with specific endpoint
+      const yasgui = new Yasgui(document.getElementById("yasgui"), {
+        // Specify request configuration, including endpoint and headers
+        requestConfig: {
+          endpoint: "{% url 'sparql_endpoint' %}", // "http://127.0.0.1:8000/oekg/sparql/"
+          method: "POST",
+          headers: () => ({
+            "X-CSRFToken": csrftoken,
+          }),
+        },
+        copyEndpointOnNewTab: true,
+        yasqe: {
+          // Additional Yasqe-specific configurations can go here
+        },
+      });
 
-        // Verify that the endpoint is set correctly
-        console.log("Endpoint:", yasgui.getTab().getYasqe().config.requestConfig.endpoint);
+      // Verify that the endpoint is set correctly
+      console.log(
+        "Endpoint:",
+        yasgui.getTab().getYasqe().config.requestConfig.endpoint
+      );
     });
-
-
-
-</script>
+  </script>
 {% endblock after-body-bottom-js %}

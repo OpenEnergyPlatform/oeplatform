@@ -3,47 +3,68 @@
 
 {% block data_content %}
 
-{% if pk != None %}
+  {% if pk != None %}
     <h3>Edit Tag</h3>
-{% else %}
+  {% else %}
     <h3>Create Tag</h3>
-{% endif %}
+  {% endif %}
 
-<form action="/dataedit/tags/set" method="post">
-{% csrf_token %}
+  <form action="/dataedit/tags/set" method="post">
+    {% csrf_token %}
 
-{% if pk != None %}
-<input name="tag_id" type="hidden" value="{{ pk }}"/>
-{% endif %}
+    {% if pk != None %}
+      <input name="tag_id" type="hidden" value="{{ pk }}" />
+    {% endif %}
 
-<table style="table-layout:fixed; width:100%">
-    <tr>
-        <td style="padding:15px 15px 15px 15px; width:20%;"> Name</td>
-        <td style="width:80%"><input name="tag_text" type="text" class="form-control" value="{{ name }}"/></td>
-    </tr>
-    <tr>
+    <table style="table-layout:fixed; width:100%">
+      <tr>
+        <td style="padding:15px 15px 15px 15px; width:20%;">Name</td>
+        <td style="width:80%">
+          <input
+            name="tag_text"
+            type="text"
+            class="form-control"
+            value="{{ name }}"
+          />
+        </td>
+      </tr>
+      <tr>
         <td style="padding:15px 15px 15px 15px;">Color</td>
-        <td><input name="tag_color" type="color" class="form-control" value="{{ color_hex }}"/></td>
-    </tr>
+        <td>
+          <input
+            name="tag_color"
+            type="color"
+            class="form-control"
+            value="{{ color_hex }}"
+          />
+        </td>
+      </tr>
 
-    <tr>
+      <tr>
         <td></td>
         <td style="padding-top:15px;">
-            {% if assigned %}
+          {% if assigned %}
             <div style="padding-bottom: 15px">
-                This Tag is assigned to at least one object.
+              This Tag is assigned to at least one object.
             </div>
-            {% endif %}
-            <input type="submit" name="submit_save" class="btn btn-success" value="Save"/>
-            <a href="/dataedit/tags" class="btn btn-primary">Cancel</a>
-            {% if pk != None and is_admin %}
-            <input type="submit" name="submit_delete" class="btn btn-warning" value="Delete"/>
-            {% endif %}
+          {% endif %}
+          <input
+            type="submit"
+            name="submit_save"
+            class="btn btn-success"
+            value="Save"
+          />
+          <a href="/dataedit/tags" class="btn btn-primary">Cancel</a>
+          {% if pk != None and is_admin %}
+            <input
+              type="submit"
+              name="submit_delete"
+              class="btn btn-warning"
+              value="Delete"
+            />
+          {% endif %}
         </td>
-    </tr>
-</table>
-
-
-</form>
-
+      </tr>
+    </table>
+  </form>
 {% endblock %}

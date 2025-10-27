@@ -1,33 +1,42 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% block main-content-body %}
-{% block title %} - {{group.name}} {% endblock %}
+  {% block title %}- {{ group.name }}{% endblock %}
 
-<h2>Group Management </h2>
-{% if user == request.user%}
+  <h2>Group Management</h2>
+  {% if user == request.user %}
     <div style="float:left; padding-right:15px">
-    	<a href="/user/{{ user.pk }}/group/new/" class="btn btn-info">Create new Group</a>
-	</div>
-	<div style="clear:right">
-	    <a style="padding-left:15px; clear:right" href="/user/profile/{{ user.pk }}" class="btn btn-primary">Back to Profile</a>
-	</div>
+      <a href="/user/{{ user.pk }}/group/new/" class="btn btn-info"
+        >Create new Group</a
+      >
+    </div>
+    <div style="clear:right">
+      <a
+        style="padding-left:15px; clear:right"
+        href="/user/profile/{{ user.pk }}"
+        class="btn btn-primary"
+        >Back to Profile</a
+      >
+    </div>
     <h3>Select Group to change:</h3>
-	<div class="list-group">
-	{% for group in groupresult %}
-	    <a class="list-group-item list-group-item-action" href="/user/{{ user.pk }}/group/edit/{{group.id}}" >
-	        <div style="display: inline-block;">
-			    {{group}}
-			</div>
-	    </a>
-	{% endfor %}
-	</div>
-
-{% endif %}
+    <div class="list-group">
+      {% for group in groupresult %}
+        <a
+          class="list-group-item list-group-item-action"
+          href="/user/{{ user.pk }}/group/edit/{{ group.id }}"
+        >
+          <div style="display: inline-block;">{{ group }}</div>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
 {% endblock %}
 {% block main-right-sidebar-content %}
-<hr>
-<h3>Manage Groups</h3>
-<div style="overflow: hidden;">
-	<a href="/user/{{ user.pk }}/group/" class="btn btn-primary">Manage Groups</a>
-</div>
+  <hr />
+  <h3>Manage Groups</h3>
+  <div style="overflow: hidden;">
+    <a href="/user/{{ user.pk }}/group/" class="btn btn-primary"
+      >Manage Groups</a
+    >
+  </div>
 {% endblock %}

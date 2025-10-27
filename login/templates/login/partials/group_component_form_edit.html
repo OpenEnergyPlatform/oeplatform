@@ -1,28 +1,44 @@
 {% load django_bootstrap5 %}
 
 <section class="profile-category htmxFormComponent">
-    {% if group %}
-    <h2 class="header">Edit {{group}}</h2>
-    {% else %}
+  {% if group %}
+    <h2 class="header">Edit {{ group }}</h2>
+  {% else %}
     <h2 class="header">Create Group</h2>
-    {% endif %}
-    <h2 class="profile-category__heading profile-category__heading--border-btm">Details</h2>
+  {% endif %}
+  <h2 class="profile-category__heading profile-category__heading--border-btm">
+    Details
+  </h2>
 
-
-    {% if group %}
-    <form id="group-form" hx-post="{% url 'login:group-partial-edit-form' group_id=group.id %}" hx-target=".htmxFormComponent">
-        {% csrf_token %}
-        {% bootstrap_form form %}
-        <!-- <input form="group-form" class="btn btn-success" type="submit" value="Submit"> -->
+  {% if group %}
+    <form
+      id="group-form"
+      hx-post="{% url 'login:group-partial-edit-form' group_id=group.id %}"
+      hx-target=".htmxFormComponent"
+    >
+      {% csrf_token %}
+      {% bootstrap_form form %}
+      <!-- <input form="group-form" class="btn btn-success" type="submit" value="Submit"> -->
     </form>
-    {% else %}
-    <form id="group-form" hx-post="{% url 'login:group-create' %}" hx-trigger="submit" hx-target=".htmxFormComponent">
-        {% csrf_token %}
-        {% bootstrap_form form %}
+  {% else %}
+    <form
+      id="group-form"
+      hx-post="{% url 'login:group-create' %}"
+      hx-trigger="submit"
+      hx-target=".htmxFormComponent"
+    >
+      {% csrf_token %}
+      {% bootstrap_form form %}
     </form>
-    {% endif %}
-    <div class="profile-category__btns">
-        <button form="group-form" type="submit" value="Submit" class="profile-category__btn  profile-category__btn--save">Save</button>
-    </div>
-
+  {% endif %}
+  <div class="profile-category__btns">
+    <button
+      form="group-form"
+      type="submit"
+      value="Submit"
+      class="profile-category__btn  profile-category__btn--save"
+    >
+      Save
+    </button>
+  </div>
 </section>

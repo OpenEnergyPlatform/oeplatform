@@ -103,7 +103,7 @@ def check_ownership(request, bundle_id):
 
     if not request.user.is_authenticated:
         return JsonResponse({"isOwner": False}, status=401)
-    
+
     if request.user.is_admin:
         return JsonResponse({"isOwner": True})
 

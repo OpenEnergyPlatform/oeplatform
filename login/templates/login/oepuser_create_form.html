@@ -1,22 +1,29 @@
 {% extends "base/base.html" %}
 {% block main-content-body %}
-<h3>
-    Create new user
-</h3>
-<form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+  <h3>Create new user</h3>
+  <form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
     {% for field in form %}
-    <div class="mb-3">
+      <div class="mb-3">
         {{ field.label_tag }}
         {% for error in field.errors %}
-            <div class="alert alert-danger">
-                {{ error }}
-            </div>
+          <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
         {{ field }}
-    </div>
+      </div>
     {% endfor %}
-    <p>We process your personal data in accordance with our <a href="/legal/privacy_policy/">Privacy Policy</a>. Also, make sure you've read our <a href="/legal/privacy_policy/">Terms of Use</a>. After creating an account, you will be able to upload data. The OEP allows the upload of open data only. If you are unsure what licenses are allowed and which to use, take a look at our help page on <a href="https://github.com/OpenEnergyPlatform/tutorial/blob/master/other/tutorial_open-data-licenses.ipynb">open data licenses</a>.</p>
+    <p>
+      We process your personal data in accordance with our
+      <a href="/legal/privacy_policy/">Privacy Policy</a>. Also, make sure
+      you've read our <a href="/legal/privacy_policy/">Terms of Use</a>. After
+      creating an account, you will be able to upload data. The OEP allows the
+      upload of open data only. If you are unsure what licenses are allowed and
+      which to use, take a look at our help page on
+      <a
+        href="https://github.com/OpenEnergyPlatform/tutorial/blob/master/other/tutorial_open-data-licenses.ipynb"
+        >open data licenses</a
+      >.
+    </p>
     <input type="submit" class="btn btn-success" value="Submit" />
-</form>
-
+  </form>
 {% endblock %}
