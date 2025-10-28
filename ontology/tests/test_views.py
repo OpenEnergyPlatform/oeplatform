@@ -3,13 +3,10 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from django.test import TestCase
-from django.urls import reverse
-
-from base.tests import get_app_reverse_lookup_names_and_kwargs
+from base.tests import TestViewsTestCase
 
 
-class TestViewsOntology(TestCase):
+class TestViewsOntology(TestViewsTestCase):
     """Call all (most) views"""
 
     def test_views(self):
@@ -17,28 +14,19 @@ class TestViewsOntology(TestCase):
         We only test method GET
         """
 
-        default_kwargs = {
-            "ontology": "oeo",
-            "module_or_id": "BFO_0000001",
-            "version": "2.7.0",
-            "file": "oeo",
-            "extension": "owl",
-        }
-        errors = []
+        # "ontology:oeo-static"  # TODO: why does reverse not work?
 
-        for name, kwarg_names in sorted(
-            get_app_reverse_lookup_names_and_kwargs("ontology").items()
-        ):
-            if name in {"ontology:oeo-static"}:  # TODO: why does reverse not work?
-                continue
-
-            try:
-                kwargs = {k: default_kwargs[k] for k in kwarg_names}
-                url = reverse(name, kwargs=kwargs)
-                resp = self.client.get(path=url)
-                self.assertTrue(resp.status_code < 400)
-            except Exception as exc:
-                errors.append(f"Failed view {name}: {exc}")
-
-        if errors:
-            raise Exception("\n".join(errors))
+        self.get("ontology:index")
+        self.get(
+            "ontology:oeo-classes",
+            kwargs={"ontology": "oeo", "module_or_id": "BFO_0000001"},
+        )
+        self.get("ontology:oeo-initializer", kwargs={"ontology": "oeo"})
+        self.get("ontology:oeo-latest-full-zip", kwargs={"ontology": "oeo"})
+        self.get("ontology:oeo-latest-glossary", kwargs={"ontology": "oeo"})
+        self.get("ontology:oeo-s-c")
+        self.get("ontology:oeo-steering-committee")
+        self.get("ontology:oeox")
+        self.get("ontology:partial-page-content")
+        self.get("ontology:partial-page-sidebar-content")
+        self.get("ontology:releases")

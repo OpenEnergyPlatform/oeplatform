@@ -8,32 +8,27 @@ import logging
 import re
 from pathlib import Path
 
-from django.test import TestCase
-from django.urls import reverse
-
-from base.tests import get_app_reverse_lookup_names_and_kwargs
+from base.tests import TestViewsTestCase, get_app_reverse_lookup_names_and_kwargs
 from oeplatform.settings import BASE_DIR
 
 
-class TestViewsBase(TestCase):
+class TestViewsBase(TestViewsTestCase):
     """Call all (most) views"""
 
     def test_views(self):
         """Call all (most) views that can be found with reverse lookup.
         We only test method GET
         """
-
-        default_kwargs = {"project_id": "sirop"}
-
-        for name, kwarg_names in sorted(
-            get_app_reverse_lookup_names_and_kwargs("base").items()
-        ):
-
-            kwargs = {k: default_kwargs[k] for k in kwarg_names}
-            url = reverse(name, kwargs=kwargs)
-
-            resp = self.client.get(path=url)
-            self.assertTrue(resp.status_code < 400)
+        self.get("base:about")
+        self.get("base:contact")
+        self.get("base:discussion")
+        self.get("base:faq")
+        self.get("base:home")
+        self.get("base:legal-privacy-policy")
+        self.get("base:legal-tou")
+        self.get("base:robots")
+        self.get("base:tutorials")
+        self.get("base:project_detail", kwargs={"project_id": "sirop"})
 
     def test_urls_in_templates(self):
         resolvers = {}

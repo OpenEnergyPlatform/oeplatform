@@ -9,23 +9,19 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 """  # noqa: 501
 
-import logging
 from typing import cast
-from urllib.parse import urlencode
 
 from django.http import HttpResponse, HttpResponseRedirect
-from django.test import TestCase
 from django.urls import reverse
 
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
-from base.tests import get_app_reverse_lookup_names_and_kwargs
+from base.tests import TestViewsTestCase
 from dataedit.models import PeerReview, PeerReviewManager, Tag
-from login.models import myuser as User
-from oeplatform.settings import IS_TEST, SCHEMA_DEFAULT_TEST_SANDBOX
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
-class TestViewsDataedit(TestCase):
+class TestViewsDataedit(TestViewsTestCase):
     """Call all (most) views (after creation of some test data)"""
 
     kwargs_w_table = {"table": "test_table", "schema": SCHEMA_DEFAULT_TEST_SANDBOX}
@@ -33,15 +29,7 @@ class TestViewsDataedit(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # ensure IS_TEST is set correctly
-        if not IS_TEST:
-            raise Exception("IS_TEST is not True")
-        super(TestCase, cls).setUpClass()
-
-        # create test user
-        cls.user1 = User.objects.create_user(  # type: ignore
-            name="test", email="test@test.test", affiliation="test"
-        )
+        super(TestViewsDataedit, cls).setUpClass()
 
         # create a test table
         cls.orchestrator = TableCreationOrchestrator()
@@ -57,7 +45,7 @@ class TestViewsDataedit(TestCase):
             constraint_defs=[],
         )
         assign_table_holder(
-            cls.user1,
+            cls.user,
             schema=cls.kwargs_w_table["schema"],
             table=cls.kwargs_w_table["table"],
         )
@@ -66,7 +54,7 @@ class TestViewsDataedit(TestCase):
 
         # create test PeerReview # TODO: not sure how to do this correctly
         cls.peerreview = PeerReview.objects.create(
-            table=cls.table.name, reviewer=cls.user1, review={}
+            table=cls.table.name, reviewer=cls.user, review={}
         )
         PeerReviewManager.objects.create(opr=cls.peerreview)
 
@@ -77,8 +65,7 @@ class TestViewsDataedit(TestCase):
             schema=cls.kwargs_w_table["schema"],
             table=cls.kwargs_w_table["table"],
         )
-        cls.user1.delete()
-        super(TestCase, cls).tearDownClass()
+        super(TestViewsDataedit, cls).tearDownClass()
 
     def test_views_wizard(self):
         # GET without table
@@ -89,7 +76,7 @@ class TestViewsDataedit(TestCase):
         self.assert_redirect_to_login(response)
 
         # with logged in user
-        self.client.force_login(self.user1)
+        self.client.force_login(self.user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -109,40 +96,48 @@ class TestViewsDataedit(TestCase):
         """Call all (most) views that can be found with reverse lookup.
         We only test method GET
         """
-        default_kwargs = {
-            "schema": SCHEMA_DEFAULT_TEST_SANDBOX,
-            "table": self.table.name,
-            "review_id": self.peerreview.pk,
-            "tag_pk": self.tag.pk,
-            "maptype": "latlon",
-        }
-        for name, kwarg_names in sorted(
-            get_app_reverse_lookup_names_and_kwargs("dataedit").items()
-        ):
-            if name in {
-                "dataedit:tags-add",
-                "dataedit:tags-set",
-                "dataedit:table-view-save",
-                "dataedit:table-view-set-default",
-                "dataedit:table-view-delete-default",
-            }:
-                # ignore these (POST)
-                continue
 
-            kwargs = {k: default_kwargs[k] for k in kwarg_names}
-
-            # also: pass kwargs as query data for views that use request.GET
-            url = reverse(name, kwargs=kwargs)
-            query_string = urlencode(default_kwargs)
-            url += f"?{query_string}"
-
-            expected_status = 200
-            self.client.force_login(self.user1)
-
-            try:
-
-                resp = self.client.get(url)
-                self.assertEqual(resp.status_code, expected_status)
-            except Exception:
-                logging.error("Test failed for url: (%s) %s", name, url)
-                raise
+        self.get("dataedit:index")
+        self.get("dataedit:index-view")
+        self.get(
+            "dataedit:meta_edit", kwargs={"schema": "sandbox", "table": "test_table"}
+        )
+        self.get(
+            "dataedit:metadata-widget",
+            query={"schema": "sandbox", "table": "test_table"},
+        )
+        self.get("dataedit:oemetabuilder")
+        self.get(
+            "dataedit:peer_review_contributor",
+            kwargs={"schema": "sandbox", "table": "test_table", "review_id": 1},
+        )
+        self.get(
+            "dataedit:peer_review_create",
+            kwargs={"schema": "sandbox", "table": "test_table"},
+        )
+        self.get(
+            "dataedit:peer_review_reviewer",
+            kwargs={"schema": "sandbox", "table": "test_table", "review_id": 1},
+        )
+        self.get(
+            "dataedit:table-graph", kwargs={"schema": "sandbox", "table": "test_table"}
+        )
+        self.get(
+            "dataedit:table-map",
+            kwargs={"schema": "sandbox", "table": "test_table", "maptype": "latlon"},
+        )
+        self.get(
+            "dataedit:table-permission",
+            kwargs={"schema": "sandbox", "table": "test_table"},
+        )
+        self.get("dataedit:tables", kwargs={"schema": "sandbox"})
+        self.get("dataedit:tags")
+        self.get("dataedit:tags-edit", kwargs={"tag_pk": "tag1"})
+        self.get("dataedit:tags-new")
+        self.get("dataedit:topic-list")
+        self.get("dataedit:view", kwargs={"schema": "sandbox", "table": "test_table"})
+        self.get("dataedit:wizard_create")
+        self.get(
+            "dataedit:wizard_upload",
+            kwargs={"schema": "sandbox", "table": "test_table"},
+        )

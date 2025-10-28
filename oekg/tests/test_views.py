@@ -5,40 +5,18 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from django.test import TestCase
-from django.urls import reverse
-
-from base.tests import get_app_reverse_lookup_names_and_kwargs
+from base.tests import TestViewsTestCase
 
 
-class TestViewsOekg(TestCase):
+class TestViewsOekg(TestViewsTestCase):
     """Call all (most) views"""
 
     def test_views(self):
         """Call all (most) views that can be found with reverse lookup.
         We only test method GET
         """
+        # "oekg:sparql_endpoint": POST
+        # "oekg:filter_oekg_by_scenario_bundles_attributes": POST
 
-        default_kwargs = {}
-
-        errors = []
-        for name, kwarg_names in sorted(
-            get_app_reverse_lookup_names_and_kwargs("oekg").items()
-        ):
-            if name in {
-                "oekg:sparql_endpoint",
-                "oekg:filter_oekg_by_scenario_bundles_attributes",
-            }:
-                # POST
-                continue
-
-            try:
-                kwargs = {k: default_kwargs[k] for k in kwarg_names}
-                url = reverse(name, kwargs=kwargs)
-                resp = self.client.get(path=url)
-                self.assertTrue(resp.status_code < 400)
-            except Exception as exc:
-                errors.append(f"Failed view {name}: {exc}")
-
-        if errors:
-            raise Exception("\n".join(errors))
+        self.get("oekg:main")
+        self.get("oekg:sparql_endpoint_info")
