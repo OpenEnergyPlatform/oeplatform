@@ -156,11 +156,11 @@
     <script src="{% static 'modelview/htmx.min.js' %}"></script>
   {% endcompress %}
   <!-- fix imports below - we dont use cdn anymore -->
-  <script src="https://unpkg.com/@trevoreyre/autocomplete-js"></script>
+  <script src="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js }}"></script>
 
   <link
     rel="stylesheet"
-    href="https://unpkg.com/@trevoreyre/autocomplete-js/dist/style.css"
+    href="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js_dist_style_css }}"
   />
 
   <script>

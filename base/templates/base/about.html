@@ -22,7 +22,8 @@
   <p>
     The Open Energy Family promotes quality, transparency, and reproducibility
     in energy system research through a
-    <a href="https://openenergyplatform.github.io/organisation/family_members/"
+    <a
+      href="{{ EXTERNAL_URLS.openenergyplatform_github_organisation_family_members }}"
       >collection of tools</a
     >, all developed openly. The primary module, the Open Energy Platform (OEP),
     offers a web interface for accessing various tools and the community
@@ -50,24 +51,26 @@
   <h3 id="how-open-science">How? Open Science</h3>
   <p>
     The OEP adheres to
-    <a href="https://en.wikipedia.org/wiki/Open_science"
+    <a href="{{ EXTERNAL_URLS.en_wikipedia_wiki_open_science }}"
       >Open Science principles</a
     >
     by offering an open research data infrastructure for climate and energy
     system research, emphasising the publishing of data and information under
     open licenses. The platform uses an extensive metadata set,
-    <a href="https://github.com/OpenEnergyPlatform/oemetadata">OEMetadata</a>,
-    to adhere to the
-    <a href="https://www.go-fair.org/fair-principles/">FAIR principles</a>: the
-    findability, accessibility, interoperability, and reuse of digital assets.
+    <a href="{{ EXTERNAL_URLS.github_openenergyplatform_oemetadata }}"
+      >OEMetadata</a
+    >, to adhere to the
+    <a href="{{ EXTERNAL_URLS.go_fair_fair_principles }}">FAIR principles</a>:
+    the findability, accessibility, interoperability, and reuse of digital
+    assets.
   </p>
 
   <h3 id="who-oep-community">Who? OEP-Community</h3>
   <p>
     The Open Energy Family is a collaborative project involving various
     universities and institutes, with all source code available on
-    <a href="https://github.com/OpenEnergyPlatform/">GitHub</a>. The project
-    encourages community involvement and contributions.
+    <a href="{{ EXTERNAL_URLS.github_openenergyplatform }}">GitHub</a>. The
+    project encourages community involvement and contributions.
   </p>
 
   <h3 id="Supported-By">Supported By</h3>
@@ -97,7 +100,7 @@
 
   <h4 id="who-partners">Partners</h4>
   <div class="d-flex justify-content-between flex-md-wrap">
-    <a class="logo" href="http://iks.cs.ovgu.de/IKS.html" target="_blank">
+    <a class="logo" href="{{ EXTERNAL_URLS.iks_cs_ovgu_iks }}" target="_blank">
       <img
         class="flex-item"
         src="{% static 'logos/partner/OvGU.png' %}"
@@ -109,7 +112,7 @@
     </a>
     <a
       class="logo"
-      href="http://reiner-lemoine-institut.de/en/"
+      href="{{ EXTERNAL_URLS.reiner_lemoine_institut_en }}"
       target="_blank"
     >
       <img
@@ -121,7 +124,7 @@
         border="0"
       />
     </a>
-    <a class="logo" href="https://www.uni-flensburg.de/en/" target="_blank">
+    <a class="logo" href="{{ EXTERNAL_URLS.uni_flensburg_en }}" target="_blank">
       <img
         class="flex-item"
         src="{% static 'logos/partner/EUF.png' %}"
@@ -129,7 +132,7 @@
         width="250px"
       />
     </a>
-    <a class="logo" href="http://www.znes-flensburg.de/" target="_blank">
+    <a class="logo" href="{{ EXTERNAL_URLS.znes_flensburg }}" target="_blank">
       <img
         class="flex-item"
         src="{% static 'logos/partner/ZNES.png' %}"
@@ -137,7 +140,7 @@
         width="250px"
       />
     </a>
-    <a class="logo" href="https://www.dlr.de/" target="_blank">
+    <a class="logo" href="{{ EXTERNAL_URLS.dlr }}" target="_blank">
       <img
         class="flex-item"
         src="{% static 'logos/partner/DLR-VE.png' %}"
@@ -147,7 +150,7 @@
         border="0"
       />
     </a>
-    <a class="logo" href="https://www.hereon.de/" target="_blank">
+    <a class="logo" href="{{ EXTERNAL_URLS.hereon }}" target="_blank">
       <img
         class="flex-item"
         src="{% static 'logos/partner/partner_logo_hereon.png' %}"
@@ -159,7 +162,7 @@
     </a>
     <a
       class="logo"
-      href="https://www.iee.fraunhofer.de/en.html"
+      href="{{ EXTERNAL_URLS.iee_fraunhofer_en }}"
       target="_blank"
     >
       <img
@@ -169,7 +172,7 @@
         width="250px"
       />
     </a>
-    <a class="logo" href="https://www.oeko.de/en/" target="_blank">
+    <a class="logo" href="{{ EXTERNAL_URLS.oeko_en }}" target="_blank">
       <img
         class="flex-item"
         src="{% static 'logos/partner/OEI.png' %}"
@@ -177,7 +180,7 @@
         width="250px"
       />
     </a>
-    <a class="logo" href="https://www.fz-juelich.de" target="_blank">
+    <a class="logo" href="{{ EXTERNAL_URLS.fz_juelich_de }}" target="_blank">
       <img
         class="flex-item"
         src="{% static 'logos/partner/FZJuelich-1.jpg' %}"
@@ -185,7 +188,7 @@
         width="250px"
       />
     </a>
-    <a class="logo" href="https://infai.org/" target="_blank">
+    <a class="logo" href="{{ EXTERNAL_URLS.infai }}" target="_blank">
       <img
         class="flex-item"
         src="{% static 'logos/partner/InfAI-Logo.png' %}"
@@ -193,7 +196,7 @@
         width="250px"
       />
     </a>
-    <a class="logo" href="https://www.pik-potsdam.de/" target="_blank">
+    <a class="logo" href="{{ EXTERNAL_URLS.pik_potsdam }}" target="_blank">
       <img
         class="flex-item"
         src="{% static 'logos/partner/pik_logo.png' %}"
@@ -201,7 +204,11 @@
         width="250px"
       />
     </a>
-    <a class="logo" href="https://www.ier.uni-stuttgart.de/" target="_blank">
+    <a
+      class="logo"
+      href="{{ EXTERNAL_URLS.ier_uni_stuttgart }}"
+      target="_blank"
+    >
       <img
         class="flex-item"
         src="{% static 'logos/partner/Logo_IER_UniStuttgart-1200x386.png' %}"
@@ -213,7 +220,7 @@
     <a
       class="logo"
       style="margin-left: 150px;"
-      href="https://www.fortiss.org/"
+      href="{{ EXTERNAL_URLS.fortiss }}"
       target="_blank"
     >
       <img
@@ -226,7 +233,7 @@
     <a
       class="logo"
       style="margin-right: 150px;"
-      href="https://nfdi4energy.uol.de/"
+      href="{{ EXTERNAL_URLS.nfdi4energy }}"
       target="_blank"
     >
       <img
