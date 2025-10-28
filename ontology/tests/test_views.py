@@ -28,7 +28,6 @@ class TestViewsOntology(TestViewsTestCase):
         self.get("ontology:oeo-steering-committee")
         self.get("ontology:oeox")
         self.get("ontology:partial-page-content")
-        self.get("ontology:partial-page-sidebar-content")
         self.get("ontology:releases")
 
         # these tests only work if local ontology exists
@@ -36,3 +35,4 @@ class TestViewsOntology(TestViewsTestCase):
             self.get("ontology:oeo-latest-glossary", kwargs={"ontology": TEST_ONTOLOGY})
             self.get("ontology:oeo-initializer", kwargs={"ontology": TEST_ONTOLOGY})
             self.get("ontology:oeo-latest-full-zip", kwargs={"ontology": TEST_ONTOLOGY})
+            self.get("ontology:partial-page-sidebar-content")

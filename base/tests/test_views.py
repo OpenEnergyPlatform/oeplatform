@@ -45,6 +45,7 @@ class TestViewsBase(TestViewsTestCase):
 
             # find all url lookup
             for match in re.findall(r"\{% url [\"']([^\"']*)", text):
+                logging.info(match)
                 app = match.split(":")[0] if ":" in match else None
 
                 if app not in resolvers:
