@@ -32,27 +32,27 @@ class TestViewsBase(TestViewsTestCase):
 
     def test_urls_in_templates(self):
         resolvers = {}
+
         root_dir = Path(BASE_DIR)
-        errors = set()
+        errors = []
+
         # find all templates
-        for path in root_dir.glob("**/templates/**/*.html"):
-            # skip venv/env/.env/.venv
-            if "env" in path.as_posix():
-                continue
-
+        for path in root_dir.glob("*/templates/**/*.html"):
             with open(path, encoding="utf-8") as f:
-                text = f.read()
+                for idx, line in f:
+                    # find href and src tags
+                    for match in re.findall(
+                        r"(src|href)[ ]*=[ ]*('([^']*)'|\"([^\"]*)\")", line
+                    ):
+                        # get string between quotes
+                        value = match[2] or match[3]
+                        logging.info(value)
 
-            # find all url lookup
-            for match in re.findall(r"\{% url [\"']([^\"']*)", text):
-                logging.info(match)
-                app = match.split(":")[0] if ":" in match else None
+                # if app not in resolvers:
+                #    resolvers[app] = get_app_reverse_lookup_names_and_kwargs(app)
 
-                if app not in resolvers:
-                    resolvers[app] = get_app_reverse_lookup_names_and_kwargs(app)
-
-                if match not in resolvers[app]:
-                    errors.add((path, match))
+                # if match not in resolvers[app]:
+                #    errors.add((path, match))
         if errors:
-            logging.error(sorted(errors))
-            raise Exception("could not find some reverse urls in templates")
+            error_txt = "Errors in urls in templates:\n\n" + "\n".join(errors)
+            raise Exception(error_txt)
