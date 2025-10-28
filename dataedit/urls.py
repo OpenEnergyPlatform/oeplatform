@@ -61,7 +61,7 @@ urlpatterns_view_schema = [
     re_path(
         r"^(?P<schema>{qual})/(?P<table>{qual})/download$".format(qual=pgsql_qualifier),
         TableRevisionView.as_view(),
-        # name="table-revision-TODO",  # do we actually need this?
+        name="table-revision-download",  # TODO: do we actually need this?
     ),
     re_path(
         r"^(?P<schema>{qual})/(?P<table>{qual})/permissions$".format(
@@ -103,6 +103,7 @@ urlpatterns_view_schema = [
             qual=pgsql_qualifier
         ),
         table_show_revision_view,
+        name="table-revision",
         # TODO: do we need it??, also: rev_id (int) in args, but view wants a date?
     ),
     re_path(
@@ -157,12 +158,12 @@ urlpatterns = [
     re_path(
         r"^admin/columns/",
         admin_column_view,
-        # name="admin-columns" # TODO: do we need this
+        name="admin-columns",  # TODO: do we need this
     ),
     re_path(
         r"^admin/constraints/",
         admin_constraints_view,
-        # name="admin-contraints" # TODO: do we need this
+        name="admin-contraints",  # TODO: do we need this
     ),
     re_path(
         r"^wizard/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
