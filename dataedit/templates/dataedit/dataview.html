@@ -667,7 +667,7 @@
     <div class="table-sidebar__section">
       <h2 class="table-sidebar__heading">Downloads</h2>
       <a
-        href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=csv"
+        href="{% url 'api:api_rows' schema=schema table=table %}?form=csv"
         type="button"
         class="table-sidebar__btn"
       >
@@ -689,7 +689,7 @@
         CSV
       </a>
       <a
-        href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=datapackage"
+        href="{% url 'api:api_rows' schema=schema table=table %}?form=datapackage"
         type="button"
         class="table-sidebar__btn"
       >
@@ -801,7 +801,7 @@
           <textarea class="form-control" id="apiContent" rows="6" cols="50">
 from requests import get
 
-result = get('https://{{ host }}/api/v0/schema/{{ schema }}/tables/{{ table }}/rows')
+result = get("https://{{host}}{% url 'api:api_rows' schema=schema table=table %}")
 for row in result.json():
   # Process the row
         </textarea>
