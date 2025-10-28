@@ -37,10 +37,10 @@
 {% block main-right-sidebar-content %}
   <hr>
   <h3>Actions</h3>
-    <a role="button" class="btn btn-success" href="add">
+    <a role="button" class="btn btn-success" href="{% url 'modelview:modeladd' sheettype %}">
       <span class="fas fa-plus"></span> Add {{ label }}
     </a>
-    <a id="dlcsv" role="button"  class="btn btn-info" href="download">
+    <a id="dlcsv" role="button"  class="btn btn-info" href="{% url 'modelview:download' sheettype %}">
       <span class="fas fa-download"></span> Download CSV
     </a>
   <hr>
@@ -190,7 +190,7 @@
     }
 
     var set_csv_link = function (){
-        var href='download?';
+        var href="{% url 'modelview:download' sheettype %}?";
         href += 'tags=';
         href += active_tags.join([separator = ',']);
         document.getElementById("dlcsv").setAttribute("href", href);

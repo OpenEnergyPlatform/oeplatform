@@ -6,7 +6,9 @@
 {% load compress %}
 
 {% block main-right-sidebar-content-actions %}
-  <a class="btn btn-info" href="edit">Edit</a>
+  <a class="btn btn-info" href="{% url 'modelview:edit' 'model' model.pk %}"
+    >Edit</a
+  >
   <a
     class="btn btn-danger"
     hx-delete="{% url 'modelview:delete-factsheet' sheettype='model' pk=model.pk %}"
