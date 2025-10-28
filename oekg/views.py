@@ -70,6 +70,7 @@ def sparql_metadata_view(request):
 
 
 # @login_required
+@require_POST
 def filter_oekg_by_scenario_bundles_attributes_view(request):
     """
     This function takes filter objects provided by the user and utilises

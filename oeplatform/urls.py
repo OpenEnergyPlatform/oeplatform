@@ -41,10 +41,10 @@ handler404 = "base.views.handler404"
 urlpatterns = [
     path("", include("base.urls")),
     re_path(r"^api/", include("api.urls")),
+    re_path(r"^dataedit/", include("dataedit.urls")),
     re_path(r"^user/", include("login.urls")),
     re_path(r"^oeo_ext/", include("oeo_ext.urls")),
     re_path(r"^factsheets/", include("modelview.urls")),
-    re_path(r"^dataedit/", include("dataedit.urls")),
     re_path(r"^ontology/", include("ontology.urls")),
     re_path(r"^viewer/oeo/", include("oeo_viewer.urls")),
     re_path(r"^scenario-bundles/", include("factsheet.urls")),

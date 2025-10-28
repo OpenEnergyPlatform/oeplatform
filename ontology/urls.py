@@ -22,9 +22,9 @@ from ontology.views import (
 app_name = "ontology"
 urlpatterns = [
     # oeo-extended
-    re_path(r"^$", OntologyAboutView.as_view()),
-    path("oeox/", OeoExtendedFileServeView.as_view()),
-    path("releases/oeox/", OeoExtendedFileServeView.as_view()),
+    re_path(r"^$", OntologyAboutView.as_view(), name="index"),
+    path("oeox/", OeoExtendedFileServeView.as_view(), name="oeox"),
+    path("releases/oeox/", OeoExtendedFileServeView.as_view(), name="releases"),
     path(
         "partial/page-content/",
         PartialOntologyAboutContentView.as_view(),

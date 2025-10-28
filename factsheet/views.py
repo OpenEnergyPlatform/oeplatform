@@ -22,6 +22,7 @@ from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils.cache import patch_response_headers
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
 from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.compare import graph_diff, to_isomorphic
 
@@ -95,6 +96,7 @@ def get_oekg_modifications_view(request, *args, **kwargs):
 
 
 # @login_required
+@require_POST
 def create_factsheet_view(request, *args, **kwargs):
     """
     Creates a scenario bundle based on user's data. Currently, the minimum requirement
@@ -1563,7 +1565,7 @@ def get_all_factsheets_view(request, *args, **kwargs):
     for f in factsheets:
         data = bundle_scenarios_filter(
             f"https://openenergyplatform.org/ontology/oekg/{f['uid']}"
-        )  # noqa:E501
+        )
 
         def bval(row, key):
             cell = row.get(key)

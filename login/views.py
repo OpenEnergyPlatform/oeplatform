@@ -431,7 +431,7 @@ def group_leave_view(request, group_id: int):
     membership = get_object_or_404(GroupMembership, group=group, user=request.user)
 
     errors: dict = {}
-    members = GroupMembership.objects.filter(group=group).exclude(user=user.id).count()
+    members = GroupMembership.objects.filter(group=group).exclude(user=user.pk).count()
     if members == 0:
         errors["err_leave"] = (
             "Please delete the group instead (you are the only member)."
@@ -441,7 +441,7 @@ def group_leave_view(request, group_id: int):
     if membership.level >= ADMIN_PERM:
         admins = (
             GroupMembership.objects.filter(group=group, level=ADMIN_PERM)
-            .exclude(user=user.id)
+            .exclude(user=user.pk)
             .count()
         )
         if admins == 0:
@@ -520,7 +520,7 @@ class GroupManagementView(View, LoginRequiredMixin):
 
         # Redirect if the request is not triggered using htmx methods
         if "HX-Request" not in request.headers:
-            return redirect("groups", user_id=request.user.id)
+            return redirect("login:groups", user_id=request.user.id)
 
         return render(
             request,

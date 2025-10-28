@@ -16,82 +16,13 @@ from urllib.parse import urlencode
 from django.http import HttpResponse, HttpResponseRedirect
 from django.test import TestCase
 from django.urls import reverse
-from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from base.tests import get_app_reverse_lookup_names_and_kwargs
-from dataedit.models import PeerReview, PeerReviewManager, Table, Tag
+from dataedit.models import PeerReview, PeerReviewManager, Tag
 from login.models import myuser as User
 from oeplatform.settings import IS_TEST, SCHEMA_DEFAULT_TEST_SANDBOX
-
-
-# replicated functionality from dataedit migration 0033
-# avoid setting up full migration test framework
-def populate_peerreview_oemetadata():
-    for review in PeerReview.objects.all():
-        if not review.oemetadata or review.oemetadata == {}:
-            # Logic to find a matching value from TableModel.
-            table = Table.objects.filter(name=review.table).first()
-            if table:
-                review.oemetadata = table.oemetadata
-                review.save()
-
-
-class MigrationTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        table = Table.objects.create(
-            name="test_table",
-            oemetadata=OEMETADATA_V20_EXAMPLE,
-        )
-
-        test_contributor = User.objects.create(
-            name="test_user_contributor", email="contributor@test.de"
-        )
-        test_reviewer = User.objects.create(
-            name="test_user_reviewer", email="reviewer@test.de"
-        )
-
-        PeerReview.objects.create(
-            # Make sure this assignment matches your model's expectations
-            table=table.name,
-            contributor=test_contributor,
-            reviewer=test_reviewer,
-            # Simulate a record that needs migration
-            oemetadata={},
-        )
-
-    def test_migration(self):
-        # Apply the migration
-        # executor = MigrationExecutor(connection)
-        # app = "dataedit"
-        # migration_name = "0033_peerreview_oemetadata"
-        # executor.migrate([(app, migration_name)])
-
-        # Make sure at least one PeerReview instance exists for testing
-        self.assertTrue(PeerReview.objects.exists(), "PeerReview instance should exist")
-
-        # Re-fetch records from the database
-        review = PeerReview.objects.first()
-        if not review:
-            raise Exception("no review")
-        self.assertEqual(review.oemetadata, {})
-
-        populate_peerreview_oemetadata()
-
-        # Update Re-fetch records from the database
-        review = PeerReview.objects.first()
-        if not review:
-            raise Exception("no review")
-
-        # Since the 'oemetadata' field is added by the migration, it will exist here
-        # Now perform your checks on 'oemetadata'
-        self.assertEqual(review.oemetadata, OEMETADATA_V20_EXAMPLE)
-
-    def test_migration_rollback(self):
-        # Implement if needed
-        pass
 
 
 class TestViewsDataedit(TestCase):
@@ -149,7 +80,7 @@ class TestViewsDataedit(TestCase):
         cls.user1.delete()
         super(TestCase, cls).tearDownClass()
 
-    def test_views_wizard_TODO_UNFINISHED(self):
+    def test_views_wizard(self):
         # GET without table
         url = reverse("dataedit:wizard_create")
 

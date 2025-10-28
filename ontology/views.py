@@ -15,7 +15,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-from django.http import Http404
+from django.http import Http404, HttpRequest
 from django.shortcuts import HttpResponse, render
 from django.views import View
 
@@ -67,39 +67,39 @@ class OntologyAboutView(View):
 
 
 class PartialOntologyAboutContentView(View):
-    def get(self, request):
+    def get(self, request: HttpRequest) -> HttpResponse:
         if request.headers.get("HX-Request") == "true":
-            if request.method == "GET":
-                ontology_data = OEO_COMMON_DATA
+            ontology_data = OEO_COMMON_DATA
 
-                submodules = OEO_MODULES_SUBMODULES
+            submodules = OEO_MODULES_SUBMODULES
 
-                desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
+            desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
 
-                relevant_modules = {
-                    key: value
-                    for key, value in submodules.items()
-                    if key in desired_keys
-                }
+            relevant_modules = {
+                key: value for key, value in submodules.items() if key in desired_keys
+            }
 
-                # Collect all file names
-                imports = OEO_MODULES_IMPORTS
+            # Collect all file names
+            imports = OEO_MODULES_IMPORTS
 
-                partial = render(
-                    request,
-                    "ontology/partial_ontology_content.html",
-                    dict(
-                        ontology=ontology_data["ontology"],
-                        version=ontology_data["version"],
-                        submodules=relevant_modules.items(),
-                        imports=imports.items(),
-                        ontology_description=ontology_data["oeo_context_data"][
-                            "ontology_description"
-                        ],
-                    ),
-                ).content.decode("utf-8")
+            partial = render(
+                request,
+                "ontology/partial_ontology_content.html",
+                dict(
+                    ontology=ontology_data["ontology"],
+                    version=ontology_data["version"],
+                    submodules=relevant_modules.items(),
+                    imports=imports.items(),
+                    ontology_description=ontology_data["oeo_context_data"][
+                        "ontology_description"
+                    ],
+                ),
+            ).content.decode("utf-8")
 
-                return HttpResponse(partial)
+            return HttpResponse(partial)
+        else:
+            # TODO: why do we only return response for HTMX?
+            return HttpResponse(b"")
 
 
 class PartialOntologyAboutSidebarContentView(View):
