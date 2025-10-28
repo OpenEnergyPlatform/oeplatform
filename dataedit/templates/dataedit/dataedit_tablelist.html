@@ -21,7 +21,7 @@
       Database
     </h1>
     <div class="main-header__wizard">
-      <a href="/dataedit/schemas">Topics</a> / {{ schema }}
+      <a href="{% url 'dataedit:topic-list' %}">Topics</a> / {{ schema }}
     </div>
   </div>
 {% endblock site-header %}

@@ -54,7 +54,9 @@
             class="btn btn-success"
             value="Save"
           />
-          <a href="/dataedit/tags" class="btn btn-primary">Cancel</a>
+          <a href="{% url 'dataedit:topic-list' %}" class="btn btn-primary"
+            >Cancel</a
+          >
           {% if pk != None and is_admin %}
             <input
               type="submit"

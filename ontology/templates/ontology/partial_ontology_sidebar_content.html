@@ -7,7 +7,11 @@
         <span>Version</span>
       </div>
       <div class="ontology-side__versions-row">
-        <span><a href="/viewer/oeo/">Open Energy Ontology (OEO)</a></span>
+        <span
+          ><a href="{% url 'oeo_viewer:index' %}"
+            >Open Energy Ontology (OEO)</a
+          ></span
+        >
         <span>{{ version }}</span>
       </div>
       <div class="ontology-side__versions-row">
@@ -31,7 +35,9 @@
           Browse oeo classes
         </a>
       </div>
-      <a class="btn btn-light" href="/viewer/oeo/"> Graphical oeo viewer </a>
+      <a class="btn btn-light" href="{% url 'oeo_viewer:index' %}">
+        Graphical oeo viewer
+      </a>
     </div>
   {% endcomment %}
 
@@ -111,13 +117,17 @@
               </p>
               <ul>
                 <li>
-                  <a href="/ontology/oeo/" target="_blank"
-                    >https://openenergyplatform.org/ontology/oeo/</a
+                  <a
+                    href="{% url 'ontology:oeo-initializer' 'oeo' %}"
+                    target="_blank"
+                    >{% url 'ontology:oeo-initializer' 'oeo' %}</a
                   >
                 </li>
                 <li>
-                  <a href="/ontology/oeo/releases/oeo-full.owl" target="_blank"
-                    >https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl</a
+                  <a
+                    href="{% url 'ontology:oeo-static' 'oeo' 'oeo-full.owl' %}"
+                    target="_blank"
+                    >{% url 'ontology:oeo-static' 'oeo' 'oeo-full.owl' %}</a
                   >
                 </li>
               </ul>
@@ -189,9 +199,9 @@
               <ul>
                 <li>
                   <a
-                    href="/ontology/oeo/releases/oeo-closure.owl"
+                    href="{% url 'ontology:oeo-static' 'oeo' 'oeo-closure.owl' %}"
                     target="_blank"
-                    >https://openenergyplatform.org/ontology/oeo/releases/oeo-closure.owl</a
+                    >{% url 'ontology:oeo-static' 'oeo' 'oeo-closure.owl' %}</a
                   >
                 </li>
               </ul>

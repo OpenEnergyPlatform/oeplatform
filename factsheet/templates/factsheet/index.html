@@ -6,8 +6,6 @@
   <!-- The following must stay before the vite_asset tag -->
   {% vite_react_refresh nonce="{{ request.csp_nonce }}" %}
   {% vite_asset "factsheet/frontend/src/index.jsx" %}
-
-  <!-- <script src="factsheet/frontend/src/index.jsx"></script> -->
 {% endblock after-head %}
 
 {% block main-content-body %}

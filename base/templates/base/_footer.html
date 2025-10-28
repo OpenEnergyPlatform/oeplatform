@@ -3,13 +3,15 @@
     <div class="container-fluid justify-content-end">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <a class="nav-link" href="/contact/">Contact</a>
+          <a class="nav-link" href="{% url 'base:contact' %}">Contact</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/legal/privacy_policy/">Privacy Policy</a>
+          <a class="nav-link" href="{% url 'base:legal-privacy-policy' %}"
+            >Privacy Policy</a
+          >
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/legal/tou/">Terms of Use</a>
+          <a class="nav-link" href="{% url 'base:legal-tou' %}">Terms of Use</a>
         </li>
       </ul>
     </div>
