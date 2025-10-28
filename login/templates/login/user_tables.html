@@ -115,10 +115,10 @@
                           <div class="profile-table-card__badge">
                             <img
                               style="width:112px;height: 23px;"
-                              src="/static/img/badges/badge_iron.png"
+                              src="{% static 'img/badges/badge_iron.png' %}"
                             />
-                            <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_bronze.png"> -->
-                            <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_platinum.png"> -->
+                            <!-- <img style="width:112px;height: 23px;" src="{% static 'img/badges/badge_bronze.png' %}"> -->
+                            <!-- <img style="width:112px;height: 23px;" src="{% static 'img/badges/badge_platinum.png' %}"> -->
                           </div>
                         {% else %}
                           <div
@@ -386,8 +386,8 @@
                               hx-trigger="load"
                               hx-swap="outerHTML"
                             ></div>
-                            <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_bronze.png"> -->
-                            <!-- <img style="width:112px;height: 23px;" src="/static/img/badges/badge_platinum.png"> -->
+                            <!-- <img style="width:112px;height: 23px;" src="{% static 'img/badges/badge_bronze.png' %}"> -->
+                            <!-- <img style="width:112px;height: 23px;" src="{% static 'img/badges/badge_platinum.png' %}"> -->
                           </div>
                         {% else %}
                           <div

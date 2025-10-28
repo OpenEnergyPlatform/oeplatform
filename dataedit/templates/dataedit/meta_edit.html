@@ -4,7 +4,7 @@
 {% load django_bootstrap5 %}
 
 {% block after-head %}
-  <link href="/static/metaedit/metaedit.css" rel="stylesheet" />
+  <link href="{% static 'metaedit/metaedit.css' %}" rel="stylesheet" />
 {% endblock after-head %}
 
 {% block site-header %}
@@ -151,8 +151,8 @@
     }
   </style>
   {% compress js %}
-    <script src="/static/metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js"></script>
-    <script src="/static/metaedit/metaedit.js"></script>
+    <script src="{% static 'metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js' %}"></script>
+    <script src="{% static 'metaedit/metaedit.js' %}"></script>
     <script src="{% static 'modelview/htmx.min.js' %}"></script>
   {% endcompress %}
   <!-- fix imports below - we dont use cdn anymore -->

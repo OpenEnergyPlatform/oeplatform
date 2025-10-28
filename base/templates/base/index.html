@@ -1,8 +1,8 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
+{% load static %}
 
 {% block after-head %}
-  {% load static %}
   <link
     rel="stylesheet"
     type="text/css"
@@ -11,26 +11,6 @@
 {% endblock %}
 
 {% block main %}
-  {% load static %}
-  <!-- This banner can be used to communicate latest developments / changes to the user -->
-  <!-- <div class="alert alert-warning mb-4">
-        <div class="container">
-            <div class="d-flex align-items-center py-2">
-            <div class="me-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="var(--bs-primary)" class="bi bi-info-circle-fill text-white" viewBox="0 0 16 16">
-                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                </svg>
-            </div>
-            <div>
-                <h5 class="mb-0">OEMetadata version 2.0 migration</h5>
-                <p class="mb-0">We have migrated to OEMetadata version 2.0.</p>
-                <p class="mb-0">New metadata is created in v2.0; existing and API-submitted older metadata is auto-converted.</p>
-                <br>
-                <p class="mb-0">Read more about the <a href="{{ EXTERNAL_URLS.oemetadata_key_description }}" target="_blank">OEMetadata v2.0</a> release.</p>
-            </div>
-            </div>
-        </div>
-    </div> -->
   <div class="index-home">
     <div class="index-group">
       <div class="index-padding">
@@ -42,7 +22,7 @@
         <div class="index-tile-container">
           <div class="index-tile index-tile-colored index-tile-color-1">
             <img
-              src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg"
+              src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg' %}"
               alt="OEDB"
             />
             {% comment %}
@@ -76,8 +56,11 @@
             {% endcomment %}
           </div>
           <div class="index-tile index-tile-colored index-tile-color-2">
-            <!-- <img src="/static/img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg" alt="Factsheets"> -->
-            <img src="/static/img/welcome/bundles.png" alt="Scenario Bundle" />
+            <!-- <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg' %}" alt="Factsheets"> -->
+            <img
+              src="{% static 'img/welcome/bundles.png' %}"
+              alt="Scenario Bundle"
+            />
             <div class="inner-index-tile">
               <div class="panel-description">
                 <h2>Scenario Bundles</h2>
@@ -99,12 +82,12 @@
             >
           </div>
           {#    <div class="index-tile index-tile-colored index-tile-color-3">#}
-          {#    <img src="/static/img/welcome/bundles.png" alt="">#}
+          {#    <img src="{% static 'img/welcome/bundles.png' %}" alt="">#}
           {#    <a role="button" class="btn btn-primary" href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform_issues_568 }}">Bundles</a>#}
           {#    </div>#}
           <div class="index-tile index-tile-colored index-tile-color-3">
             <img
-              src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg"
+              src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
               alt="OEO"
             />
             {% comment %}
@@ -134,7 +117,7 @@
           </div>
           <div class="index-tile index-tile-colored index-tile-color-4">
             <img
-              src="/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg"
+              src="{% static 'img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg' %}"
               alt="Academy"
             />
             <div class="inner-index-tile">
@@ -163,7 +146,10 @@
     <div class="index-about-container-background">
       <div class="index-about-container">
         <div class="index-about-column">
-          <img src="/static/img/welcome/about-process-modelling.svg" alt="" />
+          <img
+            src="{% static 'img/welcome/about-process-modelling.svg' %}"
+            alt=""
+          />
           <b>API</b>
           <span class="alternative">
             Learn how to download and publish open data on the OEP using the
@@ -177,7 +163,7 @@
           >
         </div>
         <div class="index-about-column">
-          <img src="/static/img/welcome/about-openscience.svg" alt="" />
+          <img src="{% static 'img/welcome/about-openscience.svg' %}" alt="" />
           <b>Open Science</b>
           <span class="alternative">
             Good scientific practice needs open licenses for software, data and
@@ -191,7 +177,7 @@
           >
         </div>
         <div class="index-about-column">
-          <img src="/static/img/welcome/about-community.svg" alt="" />
+          <img src="{% static 'img/welcome/about-community.svg' %}" alt="" />
           <b>Open Energy Community</b>
           <span class="alternative">
             Collaborate and contribute to the development on GitHub.

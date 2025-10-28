@@ -1,7 +1,7 @@
 {% extends "account/base.html" %}
 {% load i18n %}
 {% load account socialaccount %}
-
+{% load static %}
 {% block head_title %}
   {% translate "" %}
 {% endblock head_title %}
@@ -12,7 +12,7 @@
     <div class="login__wrap">
       <!-- Logo -->
       <div class="login__logo">
-        <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo" />
+        <img src="{% static 'OEP_logo_2_no_text.svg' %}" alt="OEP Logo" />
       </div>
 
       <!-- Heading -->

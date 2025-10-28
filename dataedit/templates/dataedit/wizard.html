@@ -4,7 +4,7 @@
 {% load compress %}
 
 {% block after-head %}
-  <link href="/static/wizard/wizard.css" rel="stylesheet" />
+  <link href="{% static 'wizard/wizard.css' %}" rel="stylesheet" />
 {% endblock after-head %}
 
 {% block site-header %}
@@ -552,10 +552,10 @@
     </div>
   </div>
 
-  <script src="/static/wizard/vendor/papaparse-5.0.2/papaparse.min.js"></script>
+  <script src="{% static 'wizard/vendor/papaparse-5.0.2/papaparse.min.js' %}"></script>
 
   {% compress js %}
-    <script src="/static/wizard/wizard.js?v=latest"></script>
+    <script src="{% static 'wizard/wizard.js?v=latest' %}"></script>
   {% endcompress %}
 
   <script>

@@ -4,7 +4,6 @@
 {% load compress %}
 
 {% block after-head %}
-  <!-- <link href="/static/peer_review/peer_review.css" rel="stylesheet"> -->
 {% endblock after-head %}
 
 {% block site-header %}
@@ -694,6 +693,6 @@
     ></script>
     <script type="module" src="{% static '/peer_review/main.js' %}"></script>
 
-    {#  <script type="module" src="/static/peer_review/opr_contributor.js"></script>#}
+    {#  <script type="module" src="{% static 'peer_review/opr_contributor.js' %}"></script>#}
   {% endcompress %}
 {% endblock after-body-bottom-js %}
