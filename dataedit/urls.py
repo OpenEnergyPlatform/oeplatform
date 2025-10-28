@@ -144,7 +144,7 @@ urlpatterns_view_schema = [
 urlpatterns_tag = [
     re_path(r"^$", tag_overview_view, name="tags"),
     re_path(r"^new/?$", tag_editor_view, name="tags-new"),
-    re_path(r"^edit/(?P<tag_pk>[a-z0-9]+)/?$", tag_editor_view, name="tags-edit"),
+    re_path(r"^edit/(?P<tag_pk>[a-z0-9_]+)/?$", tag_editor_view, name="tags-edit"),
     re_path(r"^add/?$", tage_table_add_view, name="tags-add"),
     re_path(r"^set/?$", tag_update_view, name="tags-set"),
 ]
