@@ -95,7 +95,6 @@ class TestViewsTestCase(TestCase):
     ) -> HttpResponse:
 
         # construct url
-        logging.info((view_name, kwargs))
         url = reverse(view_name, args=args, kwargs=kwargs)
         if query:
             url += f"?{urlencode(query)}"
