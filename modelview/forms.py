@@ -21,12 +21,12 @@ class EnergymodelForm(ModelForm):
         # set some as required
         for key in self.fields:
             if key == "tags":
-                # foreign key many to many does not work like the other fields
-                continue
-            f = [not f.null for f in Energymodel._meta.fields if f.name == key][0]
-            self.fields[key].required = (
-                f and self.fields[key].widget.__class__.__name__ != "CheckboxInput"
-            )
+                self.fields[key].required = False
+            else:
+                f = [not f.null for f in Energymodel._meta.fields if f.name == key][0]
+                self.fields[key].required = (
+                    f and self.fields[key].widget.__class__.__name__ != "CheckboxInput"
+                )
 
     class Meta:
         model = Energymodel
@@ -38,12 +38,14 @@ class EnergyframeworkForm(ModelForm):
         super(EnergyframeworkForm, self).__init__(*args, **kwargs)
         for key in self.fields:
             if key == "tags":
-                # foreign key many to many does not work like the other fields
-                continue
-            f = [not f.null for f in Energyframework._meta.fields if f.name == key][0]
-            self.fields[key].required = (
-                f and self.fields[key].widget.__class__.__name__ != "CheckboxInput"
-            )
+                self.fields[key].required = False
+            else:
+                f = [not f.null for f in Energyframework._meta.fields if f.name == key][
+                    0
+                ]
+                self.fields[key].required = (
+                    f and self.fields[key].widget.__class__.__name__ != "CheckboxInput"
+                )
             if "help_text" in self.fields[key].__dict__:
                 self.fields[key].help_text = self.fields[key].help_text.replace(
                     "model", "framework"

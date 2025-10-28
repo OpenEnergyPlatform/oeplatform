@@ -24,7 +24,6 @@ from django.db.models import (
     DateField,
     EmailField,
     ImageField,
-    IntegerField,
     TextField,
 )
 
@@ -324,7 +323,6 @@ class BasicFactsheet(models.Model):
         null=True,
     )
 
-    tags_TODO_deprecated = ArrayField(IntegerField(), default=list, null=True)
     tags = models.ManyToManyField(Tag, related_name="factsheets")
 
 

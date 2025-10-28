@@ -88,6 +88,7 @@ def list_sheets_view(request, sheettype):
             "tags": tags,
             "fields": fields,
             "default": defaults,
+            "sheettype": sheettype,
         },
     )
 
@@ -223,19 +224,25 @@ class FSAddView(LoginRequiredMixin, View):
             if hasattr(model, "license") and model.license:
                 if model.license != "Other":
                     model.license_other_text = None
+
+            prefix = "tag_"
+            prefix_len = len(prefix)
             ids = {
-                field[len("tag_") :]
-                for field in request.POST
-                if field.startswith("tag_")
+                field[prefix_len:] for field in request.POST if field.startswith(prefix)
             }
 
-            model.tags = sorted(list(ids))
+            model.tags.clear()
+            for tag_id in list(ids):
+                tag = Tag.objects.get(pk=tag_id)
+                model.tags.add(tag)
+
             model.save()
 
             return redirect(
-                "/factsheets/{sheettype}s/{model}".format(
-                    sheettype=sheettype, model=model.pk
-                )
+                reverse("modelview:show-factsheet", args=(sheettype, model.pk))
+                # "/factsheets/{sheettype}s/{model}".format(
+                #    sheettype=sheettype, model=model.pk
+                # )
             )
         else:
             errors = []
