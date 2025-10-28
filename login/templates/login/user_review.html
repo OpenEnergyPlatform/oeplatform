@@ -470,7 +470,7 @@
                     >
                   {% else %}
                     <a
-                      href=" {% url 'dataedit:peer_review_reviewer' table=review.table schema=review.schema review_id=review.id %}"
+                      href="{% url 'dataedit:peer_review_reviewer' table=review.table schema=review.schema review_id=review.id %}"
                       >{{ review.schema }} - {{ review.table }}</a
                     >
                   {% endif %}
@@ -580,7 +580,7 @@
                     >
                   {% else %}
                     <a
-                      href=" {% url 'dataedit:peer_review_contributor' table=review.table schema=review.schema review_id=review.id %}"
+                      href="{% url 'dataedit:peer_review_contributor' table=review.table schema=review.schema review_id=review.id %}"
                       >{{ review.schema }} - {{ review.table }}</a
                     >
                   {% endif %}

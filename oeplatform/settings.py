@@ -223,7 +223,7 @@ def external_urls_context_processor(request):
     Use in templates like this: {{ EXTERNAL_URLS.<name_of_url> }}
     Also, you may want to add an icon indicating external links, e.g.
     """
-    return {"EXTERNAL_URLS": EXTERNAL_URLS}
+    return {"EXTERNAL_URLS": EXTERNAL_URLS, "CONTACT_ADDRESSES": CONTACT_ADDRESSES}
 
 
 SITE_ID = 1

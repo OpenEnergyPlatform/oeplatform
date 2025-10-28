@@ -20,7 +20,6 @@ from oeplatform.settings import IS_TEST
 
 def recursively_get_patterns(resolver: URLResolver) -> Iterable[URLPattern]:
     for p in resolver.url_patterns:
-        logging.info(p)
         if isinstance(p, URLPattern):
             yield p
         elif isinstance(p, URLResolver):
