@@ -9,7 +9,10 @@
     is listed as input dataset in scenario bundle(s)
   {% endif %}
   {% for acronym, uid in input_dataset_bundles %}
-    <a class="table-sidebar__btn" href="/scenario-bundles/id/{{ uid }}">
+    <a
+      class="table-sidebar__btn"
+      href="{% url 'factsheet:bundle-id-page' uid %}"
+    >
       <svg
         width="14"
         height="14"
@@ -42,7 +45,10 @@
     is listed as input dataset in scenario bundle(s)
   {% endif %}
   {% for acronym, uid in output_dataset_bundles %}
-    <a class="table-sidebar__btn" href="/scenario-bundles/id/{{ uid }}">
+    <a
+      class="table-sidebar__btn"
+      href="{% url 'factsheet:bundle-id-page' uid %}"
+    >
       <svg
         width="14"
         height="14"

@@ -38,7 +38,9 @@ urlpatterns = [
     path(r"", factsheets_index_view, name="index"),
     path(r"main", factsheets_index_view, name="factsheets_index"),
     re_path(r"^id/*", factsheets_index_view, name="bundle-id-page"),
-    re_path(r"^compare/*", factsheets_index_view, name="compare"),
+    re_path(
+        r"^compare/*", factsheets_index_view, name="compare"
+    ),  # TODO: how is this different from bundle-id-page
     re_path(r"^oekg_history/*", factsheets_index_view, name="oekg-history"),
     re_path(r"^oekg_modifications/*", factsheets_index_view, name="oekg-modifications"),
     path(r"add/", create_factsheet_view, name="add"),

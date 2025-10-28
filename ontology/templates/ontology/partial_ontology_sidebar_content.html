@@ -31,7 +31,10 @@
         View the oeo version {{ version }}
       </h3>
       <div class="btn-group float-end" role="group" aria-label="Basic example">
-        <a class="btn btn-light" href="/ontology/{{ ontology }}/BFO_0000001/">
+        <a
+          class="btn btn-light"
+          href="{% url 'ontology:oeo-classes' ontology 'BFO_0000001' %}"
+        >
           Browse oeo classes
         </a>
       </div>
@@ -68,7 +71,7 @@
     <a
       id="popoverTrigger"
       class="ontology-side__btn-link"
-      href="/ontology/{{ ontology }}/releases/oeo-full.owl"
+      href="{% url 'ontology:oeo-static' ontology 'oeo-full.owl' %}"
       data-bs-toggle="popover"
       data-bs-trigger="hover"
       title="full-oeo-owl"
@@ -151,7 +154,7 @@
           <a
             id="popoverTrigger"
             class="ontology-side__btn-link"
-            href="/ontology/{{ ontology }}/releases/oeo-closure.owl"
+            href="{% url 'ontology:oeo-static' ontology 'oeo-closure.owl' %}"
             data-bs-toggle="popover"
             data-bs-trigger="hover focus"
             title="closure"

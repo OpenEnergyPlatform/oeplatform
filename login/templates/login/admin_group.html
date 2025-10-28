@@ -13,7 +13,7 @@
     <div style="clear:right">
       <a
         style="padding-left:15px; clear:right"
-        href="/user/profile/{{ user.pk }}"
+        href="{% url 'login:profile' user.pk %}"
         class="btn btn-primary"
         >Back to Profile</a
       >
