@@ -39,7 +39,7 @@ class TestViewsBase(TestViewsTestCase):
         # find all templates
         for path in root_dir.glob("*/templates/**/*.html"):
             with open(path, encoding="utf-8") as f:
-                for idx, line in f:
+                for idx, line in enumerate(f):
                     # find href and src tags
                     for match in re.findall(
                         r"(src|href)[ ]*=[ ]*('([^']*)'|\"([^\"]*)\")", line
