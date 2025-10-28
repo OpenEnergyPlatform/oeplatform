@@ -26,3 +26,9 @@ SPDX-License-Identifier: CC0-1.0
 - #2136: new tables cannot add tags
 
 ## Documentation updates
+
+## Code Quality
+
+- all apps have cleaned up `views.py` and `urls.py` with names for reverse
+  lookup
+- all apps have minimal tests some of those views
