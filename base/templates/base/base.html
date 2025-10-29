@@ -52,14 +52,13 @@
     {% block main %}
       <main class="main">
         {% block site-header %}
-          {% include 'account/messages/messages.html' %}
         {% endblock site-header %}
         <div class="content">
           <div class="content__container">
             {% block main-left-sidebar %}{% endblock main-left-sidebar %}
             {% block main-content %}
               <section class="content__main">
-                {% include 'messages.html' %}
+                {% include 'base/messages.html' %}
                 {% block main-content-body %}
                 {% endblock %}
               </section>
