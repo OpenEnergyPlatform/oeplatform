@@ -51,6 +51,8 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.highlight:
       use_pygments: true
+  # support pad width = 2, as formatted with prettier
+  - mdx_truly_sane_lists
   - toc:
       permalink: "#"
 

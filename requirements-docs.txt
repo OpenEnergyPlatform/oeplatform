@@ -8,4 +8,8 @@ mkdocs-material~=9.1
 mkdocstrings~=0.22
 mkdocstrings-python
 mike
+
+# include md files outside of docs folder
 mkdocs-include-markdown-plugin
+# better support for prettier formatter
+mdx-truly-sane-lists
