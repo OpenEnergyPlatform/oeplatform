@@ -239,7 +239,9 @@ class FSAddView(LoginRequiredMixin, View):
             model.save()
 
             return redirect(
-                reverse("modelview:show-factsheet", args=(sheettype, model.pk))
+                "modelview:show-factsheet",
+                sheettype,
+                model.pk,
                 # "/factsheets/{sheettype}s/{model}".format(
                 #    sheettype=sheettype, model=model.pk
                 # )

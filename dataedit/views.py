@@ -119,9 +119,7 @@ def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     elif "apply" in action:
         actions.apply_queued_constraint(id)
 
-    return redirect(
-        "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-    )
+    return redirect("dataedit:view", schema=schema, table=table)
 
 
 @require_POST
@@ -142,9 +140,7 @@ def admin_column_view(request: HttpRequest) -> HttpResponse:
     elif "apply" in action:
         actions.apply_queued_column(id)
 
-    return redirect(
-        "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-    )
+    return redirect("dataedit:view", schema=schema, table=table)
 
 
 def topic_view(request: HttpRequest) -> HttpResponse:
@@ -263,7 +259,7 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
 class TableRevisionView(View):
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         # TODO: why is this a redirect to API? do we still need it?
-        return redirect(f"/api/v0/schema/{schema}/tables/{table}/rows")
+        return redirect("api:api_rows", schema=schema, table=table)
 
 
 def table_show_revision_view(
@@ -336,7 +332,7 @@ def tag_update_view(request: HttpRequest) -> HttpResponse:
         id = request.POST["tag_id"]
         delete_tag(id)
 
-    return redirect("/dataedit/tags/?status=" + status)
+    return redirect(reverse("dataedit:tags") + f"?status={status}")
 
 
 @require_POST
@@ -423,8 +419,11 @@ def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpR
                     value=filter["value"],
                 )
                 curr_filter.save()
-
-    return redirect("../../" + table + "?view=" + str(update_view.id))
+    print("REDIRECTING")
+    return redirect(
+        reverse("dataedit:view", kwargs={"schema": schema, "table": table})
+        + f"?view={update_view.pk}"
+    )
 
 
 def table_view_set_default_view(
@@ -439,7 +438,7 @@ def table_view_set_default_view(
         else:
             view.is_default = False
         view.save()
-    return redirect("/dataedit/view/" + schema + "/" + table)
+    return redirect("dataedit:view", schema=schema, table=table)
 
 
 def table_view_delete_view(
@@ -451,7 +450,7 @@ def table_view_delete_view(
     view = DBView.objects.get(id=post_id, schema=schema, table=table)
     view.delete()
 
-    return redirect("/dataedit/view/" + schema + "/" + table)
+    return redirect("dataedit:view", schema=schema, table=table)
 
 
 class TableGraphView(View):
@@ -469,7 +468,6 @@ class TableGraphView(View):
         gview = DataViewModel.objects.create(
             name=request.POST.get("name"),
             table=table,
-            schema=schema,
             type="graph",
             options=opt,
             is_default=request.POST.get("is_default", False),
@@ -477,9 +475,8 @@ class TableGraphView(View):
         gview.save()
 
         return redirect(
-            "/dataedit/view/{schema}/{table}?view={view_id}".format(
-                schema=schema, table=table, view_id=gview.id
-            )
+            reverse("dataedit:view", kwargs={"schema": schema, "table": table})
+            + f"?view={gview.pk}"
         )
 
 
@@ -516,9 +513,8 @@ class TableMapView(View):
         if form.is_valid():
             view_id = form.save(commit=True)
             return redirect(
-                "/dataedit/view/{schema}/{table}?view={view_id}".format(
-                    schema=schema, table=table, view_id=view_id
-                )
+                reverse("dataedit:view", kwargs={"schema": schema, "table": table})
+                + f"?view={view_id}"
             )
         else:
             return self.get(
@@ -714,9 +710,7 @@ class TableDataView(View):
                 },
                 {"user": request.user},
             )
-        return redirect(
-            "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-        )
+        return redirect("dataedit:view", schema=schema, table=table)
 
 
 class TablePermissionView(View):

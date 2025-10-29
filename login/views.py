@@ -834,12 +834,13 @@ class EditUserView(View):
         )
         if form.is_valid():
             form.save()
-            return redirect("/user/profile/{id}".format(id=request.user.id))
+            return redirect("login:profile", request.user.id)
         else:
             return render(request, "login/oepuser_edit_form.html", {"form": form})
 
 
 class CreateUserView(View):
+    # TODO: duplicate user create form, and not working?
     def get(self, request):
         form = CreateUserForm()
         return render(request, "login/oepuser_create_form.html", {"form": form})
@@ -876,7 +877,7 @@ class DetachView(LoginRequiredMixin, View):
         form = DetachForm(request.user, request.POST)
         if form.is_valid():
             form.save()
-            return redirect("/")
+            return redirect("base:home")
         else:
             print(form.errors)
             return render(request, "login/detach.html", {"form": form})
