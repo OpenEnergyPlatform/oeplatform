@@ -39,19 +39,21 @@
     <tbody>
       {% for table in tables_paginated %}
         <tr>
-          {% if label %}
-            <td
-              onclick="window.open('{% url 'dataedit:tables' schema=schema %}/{{ table.name }}', name='_blank')"
-            >
+          <td
+            onclick="window.open('{% url 'dataedit:tables' schema=schema %}/{{ table.name }}', name='_blank')"
+          >
+            {% if table.human_readable_name %}
               {{ table.human_readable_name }}
-            </td>
-          {% else %}
-            <td
-              onclick="window.open('{% url 'dataedit:tables' schema=schema %}/{{ table.name }}', name='_blank')"
-            >
+            {% else %}
               {{ table.name }}
-            </td>
-          {% endif %}
+            {% endif %}
+            {% if table.date_updated %}
+              <span class="text-muted mx-3">
+                {{ table.date_updated.date.isoformat }}
+              </span>
+            {% endif %}
+          </td>
+
           <td>
             {% for tag in table.tags.all %}
               <a
