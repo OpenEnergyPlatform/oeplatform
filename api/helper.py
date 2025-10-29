@@ -30,7 +30,7 @@ from typing import Callable
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import HttpRequest, JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
@@ -199,7 +199,7 @@ def api_exception(f: Callable) -> Callable:
 
 
 def permission_wrapper(permission: int, f: Callable):
-    def wrapper(caller, request, *args, **kwargs):
+    def wrapper(caller, request: HttpRequest, *args, **kwargs):
         table = kwargs.get("table") or kwargs.get("sequence")
         actions.assert_permission(user=request.user, table=table, permission=permission)
         return f(caller, request, *args, **kwargs)
@@ -249,9 +249,6 @@ def date_handler(obj):
         return str(obj)
 
 
-# Create your views here.
-
-
 def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     """
     Implements a mapper from api pages to the corresponding functions in
@@ -264,14 +261,12 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     class AJAX_View(APIView):
         @cors(allow_cors)
         @api_exception
-        def options(self, request, *args, **kwargs):
-            response = HttpResponse()
-
-            return response
+        def options(self, request: HttpRequest, *args, **kwargs) -> JsonResponse:
+            return JsonResponse({})
 
         @cors(allow_cors)
         @api_exception
-        def post(self, request):
+        def post(self, request: HttpRequest) -> OEPStream:
             result = self.execute(request)
             session = (
                 sessions.load_session_from_context(result.pop("context"))
@@ -284,7 +279,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
                 session=session,
             )
 
-        def execute(self, request):
+        def execute(self, request: HttpRequest):
             if requires_cursor:
                 return load_cursor()(self._internal_execute)(self, request)
             else:
@@ -327,7 +322,9 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     return AJAX_View.as_view()
 
 
-def stream(data, allow_cors=False, status_code=status.HTTP_200_OK, session=None):
+def stream(
+    data, allow_cors=False, status_code=status.HTTP_200_OK, session=None
+) -> OEPStream:
     encoder = GeneratorJSONEncoder()
     response = OEPStream(
         encoder.iterencode(data),
