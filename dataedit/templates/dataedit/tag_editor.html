@@ -9,7 +9,7 @@
     <h3>Create Tag</h3>
   {% endif %}
 
-  <form action="/dataedit/tags/set" method="post">
+  <form action="{% url 'dataedit:tags-set' %}" method="post">
     {% csrf_token %}
 
     {% if pk != None %}

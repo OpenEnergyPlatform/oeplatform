@@ -22,7 +22,7 @@
     {% fa5_icon 'plus' 'fas' %}
   </button>
   <div id="tag_handler" class="collapse">
-    <form action="/dataedit/tags/add/" method="post">
+    <form action="{% url 'dataedit:tags-add' %}" method="post">
       {% csrf_token %}
       <h4>Choose tags to attach:</h4>
       {% for t in all_tags %}
