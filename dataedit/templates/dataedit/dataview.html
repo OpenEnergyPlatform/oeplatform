@@ -942,14 +942,14 @@ for row in result.json():
     load_view(schema, table, csrftoken, view);
 
     var downloadMetadata = function () {
-      var metaUrl = "/api/v0/schema/{{ schema }}/tables/{{ table }}/meta";
+      var metaUrl = "{% url 'api:api_table_meta' schema=schema table=table %}";
       $.get(metaUrl).then(function (json) {
         console.log(json);
         // create data url
         var json = JSON.stringify(json, null, 1);
         console.log(json);
-        (blob = new Blob([json], { type: "application/json" })),
-          (dataUrl = URL.createObjectURL(blob));
+        ((blob = new Blob([json], { type: "application/json" })),
+          (dataUrl = URL.createObjectURL(blob)));
         // create link
         var a = document.createElement("a");
         document.body.appendChild(a);
@@ -965,7 +965,7 @@ for row in result.json():
     };
 
     var openMetadataApiPage = function () {
-      var metaUrl = "/api/v0/schema/{{ schema }}/tables/{{ table }}/meta";
+      var metaUrl = "{% url 'api:api_table_meta' schema=schema table=table %}";
       window.open(metaUrl, "_blank");
     };
 

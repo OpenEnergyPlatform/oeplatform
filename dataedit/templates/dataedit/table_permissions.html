@@ -245,7 +245,7 @@
         $("#group_field").autocomplete({
           source: function (request, response) {
             $.ajax({
-              url: "/api/grpprop/",
+              url: "{% url 'api:usrprop' %}",
               dataType: "json",
               data: { name: request.term },
               success: function (data) {
@@ -280,7 +280,7 @@
         $("#user_field").autocomplete({
           source: function (request, response) {
             $.ajax({
-              url: "/api/usrprop/",
+              url: "{% url 'api:usrprop' %}",
               dataType: "json",
               data: { name: request.term },
               success: function (data) {
