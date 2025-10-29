@@ -33,7 +33,7 @@
             <div class="topic-card">
               <div
                 class="topic-card__header"
-                onclick="window.location='/dataedit/view/{{ schema }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'"
+                onclick="window.location='{% url 'dataedit:tables' schema=schema %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'"
               >
                 <div class="topic-card__header-top">
                   <div class="topic-card__title topic-card__title--large">
@@ -105,7 +105,7 @@
             <div class="topic-card">
               <div
                 class="topic-card__header"
-                onclick="window.location='/dataedit/view/{{ schema }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'"
+                onclick="window.location='{% url 'dataedit:tables' schema=schema %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'"
               >
                 <div class="topic-card__header-top">
                   <div class="topic-card__title topic-card__title--large">
@@ -152,7 +152,7 @@
               <div class="topic-card">
                 <div
                   class="topic-card__header"
-                  onclick="window.location='/dataedit/view/{{ schema }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'"
+                  onclick="window.location='{% url 'dataedit:tables' schema=schema %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'"
                 >
                   <div class="topic-card__header-top">
                     <div class="topic-card__title">

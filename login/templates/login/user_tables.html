@@ -133,7 +133,7 @@
                       {% endcomment %}
                       <div class="profile-table-card__link">
                         <a
-                          href="/dataedit/view/{{ table.schema }}/{{ table.name }}"
+                          href="{% url 'dataedit:view' schema=table.schema table=table.name %}"
                           >{% if table.table_label %}{{ table.table_label }}{% else %}{{ table.name }}{% endif %}</a
                         >
                       </div>
@@ -402,7 +402,7 @@
                       {% endcomment %}
                       <div class="profile-table-card__link">
                         <a
-                          href="/dataedit/view/{{ table.schema }}/{{ table.name }}"
+                          href="{% url 'dataedit:view' schema=table.schema table=table.name %}"
                           >{% if table.table_label %}{{ table.table_label }}{% else %}{{ table.name }}{% endif %}</a
                         >
                       </div>

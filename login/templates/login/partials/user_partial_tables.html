@@ -17,7 +17,7 @@
                       {{ table.name }} - {{ table.schema }}
                     </h5>
                     <a
-                      href="/dataedit/view/{{ table.schema }}/{{ table.name }}"
+                      href="{% url 'dataedit:view' schema=table.schema table=table.name %}"
                       class="card-link"
                       >View Table</a
                     >
@@ -39,7 +39,7 @@
                       {{ table.name }} - {{ table.schema }}
                     </h5>
                     <a
-                      href="/dataedit/view/{{ table.schema }}/{{ table.name }}"
+                      href="{% url 'dataedit:view' schema=table.schema table=table.name %}"
                       class="card-link"
                       >View Table</a
                     >

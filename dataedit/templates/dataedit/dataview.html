@@ -25,7 +25,7 @@
     </h1>
     <div class="main-header__wizard">
       <a href="{% url 'dataedit:topic-list' %}">Topics</a> /
-      <a href="/dataedit/view/{{ schema }}">{{ schema }}</a> /
+      <a href="{% url 'dataedit:tables' schema=schema %}">{{ schema }}</a> /
       {% if table_label %}{{ table_label }}{% else %}{{ table }}{% endif %}
       <!-- Indicate weather the user got permissions fot this table -->
       {% if can_add %}
@@ -149,7 +149,7 @@
             <li class="nav-item data-view__tab">
               <a
                 class="nav-link data-view__link {% if current_view.type == " table" %}active{% endif %}"
-                href="/dataedit/view/{{ schema }}/{{ table }}"
+                href="{% url 'dataedit:view' schema=schema table=table %}"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +204,7 @@
                 <div class="dropdown-divider"></div>
                 <a
                   class="dropdown-item"
-                  href="/dataedit/view/{{ schema }}/{{ table }}/graph/new"
+                  href="{% url 'dataedit:table-graph' schema=schema table=table %}"
                   >Add Graph View</a
                 >
               </div>
@@ -246,12 +246,12 @@
                 <div class="dropdown-divider"></div>
                 <a
                   class="dropdown-item"
-                  href="/dataedit/view/{{ schema }}/{{ table }}/map/geom/new"
+                  href="{% url 'dataedit:table-map' schema=schema table=table maptype='geom' %}"
                   >Add gis view</a
                 >
                 <a
                   class="dropdown-item"
-                  href="/dataedit/view/{{ schema }}/{{ table }}/map/latlon/new"
+                  href="{% url 'dataedit:table-map' schema=schema table=table maptype='latlon' %}"
                   >Add lat/lon view</a
                 >
               </div>
@@ -654,7 +654,7 @@
       <div class="table-sidebar__section">
         <div
           id="filteredScenariosContainer"
-          hx-get="{% url 'factsheet:filter_bundles_view' %}?table_iri=/dataedit/view/{{ schema }}/{{ table }}"
+          hx-get="{% url 'factsheet:filter_bundles_view' %}?table_iri={% url 'dataedit:view' schema=schema table=table %}"
           hx-target="#filteredScenariosContainer"
           hx-swap="outerHTML"
           hx-trigger="load"
@@ -801,7 +801,7 @@
           <textarea class="form-control" id="apiContent" rows="6" cols="50">
 from requests import get
 
-result = get("https://{{host}}{% url 'api:api_rows' schema=schema table=table %}")
+result = get("https://{{ host }}{% url 'api:api_rows' schema=schema table=table %}")
 for row in result.json():
   # Process the row
         </textarea>
@@ -948,8 +948,8 @@ for row in result.json():
         // create data url
         var json = JSON.stringify(json, null, 1);
         console.log(json);
-        (blob = new Blob([json], { type: "application/json" })),
-          (dataUrl = URL.createObjectURL(blob));
+        ((blob = new Blob([json], { type: "application/json" })),
+          (dataUrl = URL.createObjectURL(blob)));
         // create link
         var a = document.createElement("a");
         document.body.appendChild(a);

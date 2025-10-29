@@ -41,13 +41,13 @@
         <tr>
           {% if label %}
             <td
-              onclick="window.open('/dataedit/view/{{ schema }}/{{ table.name }}', name='_blank')"
+              onclick="window.open('{% url 'dataedit:tables' schema=schema %}/{{ table.name }}', name='_blank')"
             >
               {{ table.human_readable_name }}
             </td>
           {% else %}
             <td
-              onclick="window.open('/dataedit/view/{{ schema }}/{{ table.name }}', name='_blank')"
+              onclick="window.open('{% url 'dataedit:tables' schema=schema %}/{{ table.name }}', name='_blank')"
             >
               {{ table.name }}
             </td>
@@ -56,7 +56,7 @@
             {% for tag in table.tags.all %}
               <a
                 class="btn tag"
-                href="/dataedit/view/{{ schema }}?query=&tags={{ tag.pk }}"
+                href="{% url 'dataedit:tables' schema=schema %}?query=&tags={{ tag.pk }}"
                 style="background:{{ tag.color_hex }};color:{% readable_text_color tag.color_hex %}"
                 >{{ tag.name }}</a
               >

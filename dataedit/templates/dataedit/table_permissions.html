@@ -26,7 +26,7 @@
       <span class="main-header__wizard-process">Permissions :</span>
       <span class="main-header__wizard-path"
         ><a href="{% url 'dataedit:topic-list' %}">Topics</a> /
-        <a href="/dataedit/view/{{ schema }}">{{ schema }}</a> /
+        <a href="{% url 'dataedit:tables' schema=schema %}">{{ schema }}</a> /
         <a href="{% url 'dataedit:view' schema table %}">{{ table }}</a></span
       >
     </div>

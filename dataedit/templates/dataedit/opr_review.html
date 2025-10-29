@@ -37,7 +37,7 @@
         <span class="main-header__wizard-process">Review :</span>
         <span class="main-header__wizard-path"
           ><a href="{% url 'dataedit:topic-list' %}">Topics</a> /
-          <a href="/dataedit/view/{{ topic }}">{{ topic }}</a> /
+          <a href="{% url 'dataedit:tables' topic %}">{{ topic }}</a> /
           {{ table }}</span
         >
       </div>

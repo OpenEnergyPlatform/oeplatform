@@ -465,7 +465,7 @@
                 <div class="profile-rvw__item-name">
                   {% if review.is_finished == True %}
                     <a
-                      href="/dataedit/view/{{ review.schema }}/{{ review.table }}"
+                      href="{% url 'dataedit:view' schema=review.schema table=review.table %}"
                       >{{ review.schema }} - {{ review.table }}</a
                     >
                   {% else %}
@@ -575,7 +575,7 @@
                 <div class="profile-rvw__item-name">
                   {% if review.is_finished == True %}
                     <a
-                      href="/dataedit/view/{{ review.schema }}/{{ review.table }}"
+                      href="{% url 'dataedit:view' schema=review.schema table=review.table %}"
                       >{{ review.schema }} - {{ review.table }}</a
                     >
                   {% else %}

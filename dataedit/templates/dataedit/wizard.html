@@ -34,11 +34,13 @@
       {% if table %}
         Edit Table : {{ schema }} /
         {% if table_label %}
-          <a href="/dataedit/view/{{ schema }}/{{ table }}"
+          <a href="{% url 'dataedit:view' schema=schema table=table %}"
             >{{ table_label }}</a
           >
         {% else %}
-          <a href="/dataedit/view/{{ schema }}/{{ table }}">{{ table }}</a>
+          <a href="{% url 'dataedit:view' schema=schema table=table %}"
+            >{{ table }}</a
+          >
         {% endif %}
       {% else %}
         <a href="{% url 'dataedit:topic-list' %}">Topics</a> / Wizard
