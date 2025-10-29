@@ -17,6 +17,7 @@ from base.views import (
     WelcomeView,
     redir_view,
     redirect_tutorial_view,
+    reverse_url_view,
     robot_view,
 )
 
@@ -40,5 +41,6 @@ urlpatterns = [
         name="legal-privacy-policy",
     ),
     re_path(r"^legal/tou/$", redir_view, {"target": "terms_of_use"}, name="legal-tou"),
+    re_path(r"^reverse-url/(?P<name>.*)", reverse_url_view, name="reverse-url"),
     re_path(r"^tutorials/.*", redirect_tutorial_view, name="tutorials"),
 ]

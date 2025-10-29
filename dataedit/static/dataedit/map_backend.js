@@ -4,7 +4,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-var getMapData = function(schema, table, column, bounds, callback) {
+var getMapData = function (schema, table, column, bounds, callback) {
   let left = bounds.getEast();
   let right = bounds.getWest();
   let top = bounds.getNorth();
@@ -19,107 +19,107 @@ var getMapData = function(schema, table, column, bounds, callback) {
   //    LIMIT 250
   //  ) AS stuff
 
-  $.ajax({
-    url: "/api/v0/advanced/search",
-    type: "POST",
-    contentType: 'application/json',
-    data:
-            JSON.stringify({
-              "query": {
-                "fields": [
-                  {
-                    "type": "function",
-                    "function": "ST_AsGeoJson",
-                    "operands": [
-                      {
-                        "type": "function",
-                        "function": "ST_Transform",
-                        "operands": [
-                          {
-                            "type": "column",
-                            "column": column,
-                          },
-                          {
-                            "type": "value",
-                            "value": 4326,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-                "from": {
-                  "type": "table",
-                  "schema": schema,
-                  "table": table,
+  window.reverseUrl("api:advanced-search").then((url) => {
+    $.ajax({
+      url: url,
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({
+        query: {
+          fields: [
+            {
+              type: "function",
+              function: "ST_AsGeoJson",
+              operands: [
+                {
+                  type: "function",
+                  function: "ST_Transform",
+                  operands: [
+                    {
+                      type: "column",
+                      column: column,
+                    },
+                    {
+                      type: "value",
+                      value: 4326,
+                    },
+                  ],
                 },
-                "where": [
-                  {
-                    "type": "function",
-                    "function": "ST_IsValid",
-                    "operands": [
-                      {
-                        "type": "column",
-                        "column": column,
-                      },
-                    ],
-                  },
-                  {
-                    "type": "function",
-                    "function": "ST_Intersects",
-                    "operands": [
-                      {
-                        "type": "function",
-                        "function": "ST_Transform",
-                        "operands": [
-                          {
-                            "type": "column",
-                            "column": column,
-                          },
-                          {
-                            "type": "value",
-                            "value": 4326,
-                          },
-                        ],
-                      },
-                      {
-                        "type": "function",
-                        "function": "ST_SetSRID",
-                        "operands": [
-                          {
-                            "type": "function",
-                            "function": "ST_GeomFromGeoJson",
-                            "operands": [
-                              {
-                                "type": "value",
-                                "value": JSON.stringify({
-                                  "type": "Polygon",
-                                  "coordinates": [
-                                    [
-                                      [left, top],
-                                      [right, top],
-                                      [right, bottom],
-                                      [left, bottom],
-                                      [left, top],
-                                    ],
-                                  ],
-                                }),
-                              },
+              ],
+            },
+          ],
+          from: {
+            type: "table",
+            schema: schema,
+            table: table,
+          },
+          where: [
+            {
+              type: "function",
+              function: "ST_IsValid",
+              operands: [
+                {
+                  type: "column",
+                  column: column,
+                },
+              ],
+            },
+            {
+              type: "function",
+              function: "ST_Intersects",
+              operands: [
+                {
+                  type: "function",
+                  function: "ST_Transform",
+                  operands: [
+                    {
+                      type: "column",
+                      column: column,
+                    },
+                    {
+                      type: "value",
+                      value: 4326,
+                    },
+                  ],
+                },
+                {
+                  type: "function",
+                  function: "ST_SetSRID",
+                  operands: [
+                    {
+                      type: "function",
+                      function: "ST_GeomFromGeoJson",
+                      operands: [
+                        {
+                          type: "value",
+                          value: JSON.stringify({
+                            type: "Polygon",
+                            coordinates: [
+                              [
+                                [left, top],
+                                [right, top],
+                                [right, bottom],
+                                [left, bottom],
+                                [left, top],
+                              ],
                             ],
-                          },
-                          {
-                            "type": "value",
-                            "value": 4326,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-                "limit": 250,
-
-              },
-            }),
-    success: callback,
+                          }),
+                        },
+                      ],
+                    },
+                    {
+                      type: "value",
+                      value: 4326,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          limit: 250,
+        },
+      }),
+      success: callback,
+    });
   });
 };

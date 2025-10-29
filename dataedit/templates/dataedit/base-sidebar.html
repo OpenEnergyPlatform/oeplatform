@@ -20,6 +20,10 @@
   {% endblock %}
 {% endblock %}
 
+{% block before-body-bottom-js %}
+  {% include 'base/reverseUrl.html' %}
+{% endblock before-body-bottom-js %}
+
 {% block after-body-bottom-js %}
   <script
     type="text/javascript"

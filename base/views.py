@@ -12,11 +12,13 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import logging
 import os
 
 from django.core.mail import send_mail
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.generic import View
 
 from base.forms import ContactForm
@@ -109,3 +111,22 @@ class AboutProjectDetailView(AboutPageView):
 def redirect_tutorial_view(request: HttpRequest) -> HttpResponse:
     """all old links totutorials: redirect to new (external) page"""
     return redirect(EXTERNAL_URLS["tutorials_index"])
+
+
+def reverse_url_view(request: HttpRequest, name: str) -> JsonResponse:
+    """for pure javascript, we need to resolve urls dynamically"""
+
+    def to_str(x: list | str) -> str:
+        if isinstance(x, list):
+            return x[0]
+        return x
+
+    try:
+        # convert GET into dict[str,str]
+        kwargs = {k: to_str(v) for k, v in request.GET.items()}
+        url = reverse(name, kwargs=kwargs)
+        return JsonResponse({"url": url})
+    except Exception as exc:
+        logging.error(f"reverse url failed for {name},{request.GET}: {exc}")
+        raise  # FXME: remove after tests
+        return JsonResponse({"message": "invalid reverse request"}, status=400)

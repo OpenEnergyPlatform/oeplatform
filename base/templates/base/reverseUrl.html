@@ -1,0 +1,25 @@
+<script>
+  /* statically get base url (with empty name) for reverse lookup */
+  const reverseApiBaseUrl = "{% url 'base:reverse-url' '' %}";
+  window.reverseUrl = function (name, kwargs) {
+    const url =
+      reverseApiBaseUrl +
+      name +
+      "?" +
+      Object.entries(kwargs || {})
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join("&");
+
+    console.log(url);
+    return fetch(url)
+      .then((result) => result.json())
+      .then((data) => {
+        console.log(data);
+        const reversedUrl = data.url;
+        if (!reversedUrl) {
+          console.error("Failed to reverse url".name, kwargs);
+        }
+        return reversedUrl;
+      });
+  };
+</script>

@@ -149,53 +149,55 @@ function request_data(data, callback, settings) {
     select_query.where = where;
   }
   var draw = Number(data.draw);
-  $.when(
-    $.ajax({
-      type: "POST",
-      url: "/api/v0/advanced/search",
-      dataType: "json",
-      data: {
-        csrfmiddlewaretoken: csrftoken,
-        query: JSON.stringify(count_query),
-      },
-    }),
-    $.ajax({
-      type: "POST",
-      url: "/api/v0/advanced/search",
-      dataType: "text" /* use custom json parser for Infinity, NaN */,
-      data: {
-        csrfmiddlewaretoken: csrftoken,
-        query: JSON.stringify(select_query),
-      },
-    })
-  )
-    .done(function (count_response, select_response) {
-      $("#loading-indicator").hide();
+  window.reverseUrl("api:advanced-search").then((urlSearch) => {
+    $.when(
+      $.ajax({
+        type: "POST",
+        url: urlSearch,
+        dataType: "json",
+        data: {
+          csrfmiddlewaretoken: csrftoken,
+          query: JSON.stringify(count_query),
+        },
+      }),
+      $.ajax({
+        type: "POST",
+        url: urlSearch,
+        dataType: "text" /* use custom json parser for Infinity, NaN */,
+        data: {
+          csrfmiddlewaretoken: csrftoken,
+          query: JSON.stringify(select_query),
+        },
+      })
+    )
+      .done(function (count_response, select_response) {
+        $("#loading-indicator").hide();
 
-      /* fix missing data (on successful query)
+        /* fix missing data (on successful query)
       NOTE: select_response is triple (data, status, response)
       */
-      select_response[0] = customParseJSON(select_response[0]);
+        select_response[0] = customParseJSON(select_response[0]);
 
-      select_response[0].data = select_response[0].data || [];
+        select_response[0].data = select_response[0].data || [];
 
-      if (map !== undefined) {
-        build_map(select_response[0].data, select_response[0].description);
-      }
+        if (map !== undefined) {
+          build_map(select_response[0].data, select_response[0].description);
+        }
 
-      if (view.type === "map") {
-        build_map(select_response[0].data, select_response[0].description);
-      } else if (view.type === "graph") {
-        build_graph(select_response[0].data);
-      }
-      callback({
-        data: select_response[0].data,
-        draw: draw,
-        recordsFiltered: count_response[0].data[0][0],
-        recordsTotal: table_info.rows,
-      });
-    })
-    .fail(fail_handler);
+        if (view.type === "map") {
+          build_map(select_response[0].data, select_response[0].description);
+        } else if (view.type === "graph") {
+          build_graph(select_response[0].data);
+        }
+        callback({
+          data: select_response[0].data,
+          draw: draw,
+          recordsFiltered: count_response[0].data[0][0],
+          recordsTotal: table_info.rows,
+        });
+      })
+      .fail(fail_handler);
+  });
 }
 
 function build_map(data, description) {
@@ -296,8 +298,6 @@ function flash_handler(i) {
   };
 }
 
-function load_graph(schema, table, csrftoken) {}
-
 function load_view(schema, table, csrftoken, current_view) {
   view = current_view;
   table_info.name = table;
@@ -316,67 +316,73 @@ function load_view(schema, table, csrftoken, current_view) {
       },
     ],
   };
-  $.when(
-    $.ajax({
-      url: "/api/v0/schema/" + schema + "/tables/" + table + "/columns/",
-    }),
-    $.ajax({
-      type: "POST",
-      url: "/api/v0/advanced/search",
-      dataType: "json",
-      data: {
-        csrfmiddlewaretoken: csrftoken,
-        query: JSON.stringify(count_query),
-      },
-    })
-  )
-    .done(function (column_response, count_response) {
-      for (var colname in column_response[0]) {
-        var str = "<th>" + colname + "</th>";
-        $(str).appendTo("#datatable" + ">thead>tr");
-        table_info.columns.push(colname);
-        var dt = column_response[0][colname]["data_type"];
-        var mapped_dt;
-        if (dt in type_maps) {
-          mapped_dt = type_maps[dt];
-        } else {
-          if (valid_types.includes(dt)) {
-            mapped_dt = dt;
-          } else {
-            mapped_dt = "string";
-          }
-        }
-        filters.push({ id: colname, type: mapped_dt });
-      }
-      if (view.type === "map") {
-        map = L.map("map");
-        tile_layer = L.tileLayer(
-          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          {
-            attribution:
-              'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende',
-            useCache: true,
-          }
-        );
-        tile_layer.addTo(map);
-      }
 
-      table_info.rows = count_response[0].data[0][0];
-      table_container = $("#datatable").DataTable({
-        ajax: request_data,
-        serverSide: true,
-        scrollY: true,
-        scrollX: true,
-        searching: false,
-        search: {},
-      });
-      query_builder = $("#builder").queryBuilder({
-        filters: filters,
-      });
-      $("#btn-set").on("click", apply_filters);
-      $("#btn-download-view").on("click", parse_download);
-    })
-    .fail(fail_handler);
+  Promise.all([
+    window.reverseUrl("api:advanced-search"),
+    window.reverseUrl("api:table-columns", { schema: schema, table: table }),
+  ]).then(([urlSearch, urlColumns]) => {
+    $.when(
+      $.ajax({
+        url: urlColumns,
+      }),
+      $.ajax({
+        type: "POST",
+        url: urlSearch,
+        dataType: "json",
+        data: {
+          csrfmiddlewaretoken: csrftoken,
+          query: JSON.stringify(count_query),
+        },
+      })
+    )
+      .done(function (column_response, count_response) {
+        for (var colname in column_response[0]) {
+          var str = "<th>" + colname + "</th>";
+          $(str).appendTo("#datatable" + ">thead>tr");
+          table_info.columns.push(colname);
+          var dt = column_response[0][colname]["data_type"];
+          var mapped_dt;
+          if (dt in type_maps) {
+            mapped_dt = type_maps[dt];
+          } else {
+            if (valid_types.includes(dt)) {
+              mapped_dt = dt;
+            } else {
+              mapped_dt = "string";
+            }
+          }
+          filters.push({ id: colname, type: mapped_dt });
+        }
+        if (view.type === "map") {
+          map = L.map("map");
+          tile_layer = L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+              attribution:
+                'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende',
+              useCache: true,
+            }
+          );
+          tile_layer.addTo(map);
+        }
+
+        table_info.rows = count_response[0].data[0][0];
+        table_container = $("#datatable").DataTable({
+          ajax: request_data,
+          serverSide: true,
+          scrollY: true,
+          scrollX: true,
+          searching: false,
+          search: {},
+        });
+        query_builder = $("#builder").queryBuilder({
+          filters: filters,
+        });
+        $("#btn-set").on("click", apply_filters);
+        $("#btn-download-view").on("click", parse_download);
+      })
+      .fail(fail_handler);
+  });
 }
 
 function parse_download() {
@@ -394,33 +400,35 @@ function parse_download() {
     return;
   }
   base_query.where = parse_filter(rules);
-  $.ajax({
-    type: "POST",
-    url: "/api/v0/advanced/search",
-    dataType: "json",
-    data: {
-      csrfmiddlewaretoken: csrftoken,
-      query: JSON.stringify(base_query),
-    },
-  }).done((response) => {
-    var regex = new RegExp(/\[|\]/, "gmi");
-    var temp = [];
-    var head = [];
-    response.content.description.forEach((col_id) => {
-      head.push(col_id[0]);
-    });
-    temp.push(JSON.stringify(head).replace(regex, ""));
-    temp.push("\n");
-    response.data.forEach((element) => {
-      temp.push(JSON.stringify(element).replace(regex, ""));
+  window.reverseUrl("api:advanced-search").then((urlSearch) => {
+    $.ajax({
+      type: "POST",
+      url: urlSearch,
+      dataType: "json",
+      data: {
+        csrfmiddlewaretoken: csrftoken,
+        query: JSON.stringify(base_query),
+      },
+    }).done((response) => {
+      var regex = new RegExp(/\[|\]/, "gmi");
+      var temp = [];
+      var head = [];
+      response.content.description.forEach((col_id) => {
+        head.push(col_id[0]);
+      });
+      temp.push(JSON.stringify(head).replace(regex, ""));
       temp.push("\n");
+      response.data.forEach((element) => {
+        temp.push(JSON.stringify(element).replace(regex, ""));
+        temp.push("\n");
+      });
+      var responseBlob = new Blob(temp);
+      var tempElement = document.createElement("a");
+      tempElement.href = window.URL.createObjectURL(responseBlob);
+      tempElement.download = "Partial_" + schema + "_" + table + ".csv";
+      tempElement.click();
+      tempElement.remove();
     });
-    var responseBlob = new Blob(temp);
-    var tempElement = document.createElement("a");
-    tempElement.href = window.URL.createObjectURL(responseBlob);
-    tempElement.download = "Partial_" + schema + "_" + table + ".csv";
-    tempElement.click();
-    tempElement.remove();
   });
 }
 

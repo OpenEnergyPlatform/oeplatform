@@ -65,27 +65,6 @@ window.Wizard = function (config) {
    * Helper functions to use the API
    ***************************************/
 
-  function getApiTableUrl(tablename) {
-    tablename = tablename || state.table;
-    return (
-      "/api/" +
-      state.apiVersion +
-      "/schema/" +
-      state.schema +
-      "/tables/" +
-      tablename
-    );
-  }
-
-  function getApiAdvancedUrl(path) {
-    return "/api/" + state.apiVersion + "/advanced/" + path;
-  }
-
-  function getWizardUrl(tablename) {
-    tablename = tablename || state.table;
-    return "/dataedit/wizard/" + state.schema + "/" + tablename;
-  }
-
   function getErrorMsg(x) {
     try {
       x = "Upload failed: " + JSON.parse(x.responseJSON).reason;
@@ -588,14 +567,14 @@ window.Wizard = function (config) {
     });
   }
 
-  function rollback(message) {
+  function rollback(message, urlConRollback, urlConClose) {
     message = message || "upload failed";
     if (state.connection_id) {
       var ctx = createContext();
       state.connection_id = null;
-      sendJson("POST", getApiAdvancedUrl("connection/rollback"), ctx)
+      sendJson("POST", urlConRollback, ctx)
         .then(function () {
-          return sendJson("POST", getApiAdvancedUrl("connection/close"), ctx);
+          return sendJson("POST", urlConClose, ctx);
         })
         .then(function () {
           setStatusUpload("danger", false, message, false);
@@ -626,133 +605,141 @@ window.Wizard = function (config) {
    * We read the csv in chunks (set size in state variable)
    *   on each chunk we pause and and post the data. on success we resume the csv parser
    *
+   ,
+   
+   
+   * 
    */
   function csvUpload() {
-    // update/reset file stats
-    updateFile();
-    if (!state.file) {
-      return;
-    }
-    state.csvParser = null;
-    state.connection_id = null;
-    state.cursor_id = null;
-    state.uploadProgressBytes = 0;
-    state.skippedHeader = state.header ? false : true;
-    state.uploadedRows = 0;
-    state.cancel = false;
-    $("#wizard-table-upload").hide();
-    $("#wizard-table-upload-cancel").show();
-    setStatusUpload("primary", 0, "starting upload...", true);
-    // get connection and cursor
-    sendJson("POST", getApiAdvancedUrl("connection/open"))
-      .then(function (res) {
-        state.connection_id = getJSONBigintKey("connection_id", res);
-        return sendJson(
-          "POST",
-          getApiAdvancedUrl("cursor/open"),
-          createContext()
-        );
-      })
-      .then(function (res) {
-        state.cursor_id = getJSONBigintKey("cursor_id", res);
-        state.file.parse({
-          config: {
-            encoding: state.encoding,
-            skipEmptyLines: state.skipEmptyLines,
-            delimiter: state.delimiter,
-            newline: state.newline,
-            chunkSize: state.uploadChunkSize,
-            chunk: function (data, parser) {
-              // got one chunk from csv
-              if (state.cancel) {
-                rollback("cancel");
-                return;
-              }
-              state.uploadProgressBytes = data.meta.cursor;
-              removeNewline(data.data);
-              if (data.data.length > 0 && !state.skippedHeader) {
-                state.skippedHeader = true;
-                data.data = data.data.slice(1);
-              }
-              if (data.data.length > 0) {
-                // if chunk size is too small, you can get a chunk with 0 complete rows, but the database does not allow empty insert
-                state.csvParser = parser;
-                // pause the csv parser
-                state.csvParser.pause();
-                // convert data
-                console.error(data.data);
-                console.error(state.columns);
-                var insertData = data.data.map(state.rowMapperUpload);
-                console.error(insertData);
-                // start insert
-                sendJson(
-                  "POST",
-                  getApiAdvancedUrl("insert"),
-                  createContext(insertData)
-                )
-                  .then(function (res) {
-                    if (state.cancel) {
-                      rollback("cancel");
-                      return;
-                    }
-                    // successful insert
-                    var nRows = JSON.parse(res).content.rowcount;
-                    state.uploadedRows += nRows;
-                    var p =
-                      (state.uploadProgressBytes / state.fileSizeBytes) * 100;
-                    p = p || 0;
-                    p = Math.round(p);
-                    var status = p + "% rows: " + state.uploadedRows;
-                    setStatusUpload("primary", p, status, true);
-                    // continue parsing the csv file
-                    state.csvParser.resume();
-                  })
-                  .catch(function (err) {
-                    rollback(getErrorMsg(err));
-                  });
-              }
-            },
-            complete: function () {
-              if (state.cancel) {
-                rollback("cancel");
-                return;
-              }
-              setStatusUpload("primary", 100, "finishing upload...", true);
-              sendJson(
-                "POST",
-                getApiAdvancedUrl("connection/commit"),
-                createContext()
-              )
-                .then(function () {
-                  return sendJson(
-                    "POST",
-                    getApiAdvancedUrl("connection/close"),
-                    createContext()
-                  );
-                })
-                .then(function () {
-                  // setStatusUpload("success", false, "Upload ok: " + state.uploadedRows + " rows", false);
-                  resetUpload(); // reset or reload page
-                  setStatusUpload(
-                    "success",
-                    false,
-                    "Upload ok: " +
-                      state.uploadedRows +
-                      " rows, reloading page...",
-                    true
-                  );
-                  location.reload();
-                });
-            },
-            error: function (error) {
-              rollback(getErrorMsg(error));
-            },
-          },
-        });
-      })
-      .catch(function (err) {
-        console.error("catch", err);
-      });
+    Promise.all([
+      window.reverseUrl("api:advanced-connection-commit"),
+      window.reverseUrl("api:advanced-connection-rollback"),
+      window.reverseUrl("api:advanced-connection-close"),
+      window.reverseUrl("api:advanced-connection-open"),
+      window.reverseUrl("api:advanced-cursor-open"),
+      window.reverseUrl("api:advanced-insert"),
+    ]).then(
+      ([
+        urlConCommit,
+        urlConRollback,
+        urlConClose,
+        urlConOpen,
+        urlCurOpen,
+        urlInsert,
+      ]) => {
+        // update/reset file stats
+        updateFile();
+        if (!state.file) {
+          return;
+        }
+        state.csvParser = null;
+        state.connection_id = null;
+        state.cursor_id = null;
+        state.uploadProgressBytes = 0;
+        state.skippedHeader = state.header ? false : true;
+        state.uploadedRows = 0;
+        state.cancel = false;
+        $("#wizard-table-upload").hide();
+        $("#wizard-table-upload-cancel").show();
+        setStatusUpload("primary", 0, "starting upload...", true);
+
+        // get connection and cursor
+        sendJson("POST", urlConOpen)
+          .then(function (res) {
+            state.connection_id = getJSONBigintKey("connection_id", res);
+            return sendJson("POST", urlCurOpen, createContext());
+          })
+          .then(function (res) {
+            state.cursor_id = getJSONBigintKey("cursor_id", res);
+            state.file.parse({
+              config: {
+                encoding: state.encoding,
+                skipEmptyLines: state.skipEmptyLines,
+                delimiter: state.delimiter,
+                newline: state.newline,
+                chunkSize: state.uploadChunkSize,
+                chunk: function (data, parser) {
+                  // got one chunk from csv
+                  if (state.cancel) {
+                    rollback("cancel", urlConRollback, urlConClose);
+                    return;
+                  }
+                  state.uploadProgressBytes = data.meta.cursor;
+                  removeNewline(data.data);
+                  if (data.data.length > 0 && !state.skippedHeader) {
+                    state.skippedHeader = true;
+                    data.data = data.data.slice(1);
+                  }
+                  if (data.data.length > 0) {
+                    // if chunk size is too small, you can get a chunk with 0 complete rows, but the database does not allow empty insert
+                    state.csvParser = parser;
+                    // pause the csv parser
+                    state.csvParser.pause();
+                    // convert data
+                    console.error(data.data);
+                    console.error(state.columns);
+                    var insertData = data.data.map(state.rowMapperUpload);
+                    console.error(insertData);
+                    // start insert
+                    sendJson("POST", urlInsert, createContext(insertData))
+                      .then(function (res) {
+                        if (state.cancel) {
+                          rollback("cancel", urlConRollback, urlConClose);
+                          return;
+                        }
+                        // successful insert
+                        var nRows = JSON.parse(res).content.rowcount;
+                        state.uploadedRows += nRows;
+                        var p =
+                          (state.uploadProgressBytes / state.fileSizeBytes) *
+                          100;
+                        p = p || 0;
+                        p = Math.round(p);
+                        var status = p + "% rows: " + state.uploadedRows;
+                        setStatusUpload("primary", p, status, true);
+                        // continue parsing the csv file
+                        state.csvParser.resume();
+                      })
+                      .catch(function (err) {
+                        rollback(getErrorMsg(err), urlConRollback, urlConClose);
+                      });
+                  }
+                },
+                complete: function () {
+                  if (state.cancel) {
+                    rollback("cancel", urlConRollback, urlConClose);
+                    return;
+                  }
+                  setStatusUpload("primary", 100, "finishing upload...", true);
+                  sendJson("POST", urlConCommit, createContext())
+                    .then(function () {
+                      return sendJson("POST", urlConClose, createContext());
+                    })
+                    .then(function () {
+                      // setStatusUpload("success", false, "Upload ok: " + state.uploadedRows + " rows", false);
+                      resetUpload(); // reset or reload page
+                      setStatusUpload(
+                        "success",
+                        false,
+                        "Upload ok: " +
+                          state.uploadedRows +
+                          " rows, reloading page...",
+                        true
+                      );
+                      location.reload();
+                    });
+                },
+                error: function (error) {
+                  rollback(getErrorMsg(error), urlConRollback, urlConClose);
+                },
+              },
+            });
+          })
+          .catch(function (err) {
+            console.error("catch", err);
+          });
+      }
+    );
   }
 
   /**
@@ -780,8 +767,6 @@ window.Wizard = function (config) {
     var embargoValue = $("#wizard-embargo").val();
     // var embargoData = calculateEmbargoPeriod(embargoValue);
 
-    var url = getApiTableUrl(tablename) + "/";
-    var urlSuccess = getWizardUrl(tablename);
     var data = {
       query: {
         columns: colDefs,
@@ -790,22 +775,31 @@ window.Wizard = function (config) {
       },
     };
 
-    sendJson("PUT", url, JSON.stringify(data))
-      .then(function () {
-        setStatusCreate(
-          "success",
-          true,
-          "Table created successfully, reloading page..."
-        );
-        window.location = urlSuccess;
-      })
-      .catch(function (err) {
-        setStatusCreate(
-          "danger",
-          false,
-          "Failed to create table: " + getErrorMsg(err)
-        );
-      });
+    Promise.all([
+      window.reverseUrl("api:api_table", { schema: "data", table: tablename }),
+      window.reverseUrl("dataedit:wizard_upload", {
+        table: tablename,
+        schema: "data",
+      }),
+    ]).then(([urlTable, urlSuccess]) => {
+      sendJson("PUT", urlTable, JSON.stringify(data))
+        .then(function () {
+          setStatusCreate(
+            "success",
+            true,
+            "Table created successfully, reloading page..."
+          );
+
+          window.location = urlSuccess;
+        })
+        .catch(function (err) {
+          setStatusCreate(
+            "danger",
+            false,
+            "Failed to create table: " + getErrorMsg(err)
+          );
+        });
+    });
   }
 
   // unused until we might want to enable custom embargo periods
@@ -832,16 +826,20 @@ window.Wizard = function (config) {
     $("#wizard-confirm-delete").modal("hide");
     setStatusCreate("primary", true, "deleting table...");
     var tablename = $("#wizard-tablename").val();
-    var url = getApiTableUrl(tablename) + "/";
-    var urlSuccess = "/dataedit/wizard";
-    sendJson("DELETE", url)
-      .then(function () {
-        setStatusCreate("success", true, "ok, reloading page...");
-        window.location = urlSuccess;
-      })
-      .catch(function (err) {
-        setStatusCreate("danger", false, getErrorMsg(err));
-      });
+
+    Promise.all([
+      window.reverseUrl("api:api_table", { schema: "data", table: tablename }),
+      window.reverseUrl("dataedit:wizard_create"),
+    ]).then(([urlTable, urlSuccess]) => {
+      sendJson("DELETE", urlTable)
+        .then(function () {
+          setStatusCreate("success", true, "ok, reloading page...");
+          window.location = urlSuccess;
+        })
+        .catch(function (err) {
+          setStatusCreate("danger", false, getErrorMsg(err));
+        });
+    });
   }
 
   function resetUpload() {
@@ -859,16 +857,24 @@ window.Wizard = function (config) {
       data_type: "bigserial",
       is_nullable: false,
     });
-    new bootstrap.Collapse('#wizard-container-create', {'toggle': false}).show();
-    new bootstrap.Collapse('#wizard-container-upload', {'toggle': false}).hide();
+    new bootstrap.Collapse("#wizard-container-create", {
+      toggle: false,
+    }).show();
+    new bootstrap.Collapse("#wizard-container-upload", {
+      toggle: false,
+    }).hide();
     $("#wizard-table-delete").hide();
     $("#wizard-container-upload").find(".btn").hide();
     $("#wizard-container-upload").find("input").prop("readonly", true);
   }
 
   function showUpload() {
-    new bootstrap.Collapse('#wizard-container-create', {'toggle': false}).hide();
-    new bootstrap.Collapse('#wizard-container-upload', {'toggle': false}).show();
+    new bootstrap.Collapse("#wizard-container-create", {
+      toggle: false,
+    }).hide();
+    new bootstrap.Collapse("#wizard-container-upload", {
+      toggle: false,
+    }).show();
     $("#wizard-table-delete").show();
 
     $("#wizard-container-create").find(".btn").hide();

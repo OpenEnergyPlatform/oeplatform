@@ -579,27 +579,34 @@
         ? { embargo: { duration: embargoPeriod } }
         : {};
 
-      return fetch(
-        `/api/v0/schema/${schema}/tables/${tableName}/move_publish/${toSchema}/`,
-        {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": getCookie("csrftoken"),
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      ).then((response) => {
-        if (response.ok) {
-          alert("Table moved successfully.");
-          window.location.reload();
-        } else {
-          response.text().then((text) => {
-            alert(`Error moving table: ${text}`);
+      /* dynamically reverse url */
+      return window
+        .reverseUrl("api:move_publish", {
+          schema: schema,
+          table: tableName,
+          to_schema: toSchema,
+        })
+        .then((apiUrl) => {
+          return fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify(data),
           });
-        }
-      });
+        })
+        .then((response) => {
+          if (response.ok) {
+            alert("Table moved successfully.");
+            window.location.reload();
+          } else {
+            response.text().then((text) => {
+              alert(`Error moving table: ${text}`);
+            });
+          }
+        });
     }
 
     document.body.addEventListener("htmx:configRequest", function (event) {
