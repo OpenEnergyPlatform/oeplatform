@@ -230,7 +230,7 @@ class BasicFactsheet(models.Model):
         verbose_name="Collaborative programming",
         help_text="Is it possible to join the coding group?",
     )
-    number_of_devolopers = CharField(
+    number_of_developers = CharField(
         max_length=1000,
         verbose_name="Number of developers",
         help_text="How many people are involved in the model development?",
