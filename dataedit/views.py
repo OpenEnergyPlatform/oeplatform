@@ -665,6 +665,7 @@ class TableDataView(View):
             "revisions": revisions,
             "kinds": ["table", "map", "graph"],
             "table": table,
+            "table_obj": table_obj,
             "schema": schema,
             "table_label": table_label,
             # "tags": tags,

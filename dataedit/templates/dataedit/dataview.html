@@ -211,7 +211,7 @@
             </li>
             <li class="nav-item dropdown data-view__tab">
               <a
-                class="nav-link data-view__link dropdown-toggle {% if current_view.type == " map" %}active{% endif %}"
+                class="nav-link data-view__link dropdown-toggle {% if current_view.type == 'map' %}active{% endif %}"
                 data-bs-toggle="dropdown"
                 href="#"
                 role="button"
@@ -835,7 +835,7 @@ for row in result.json():
         Permissions
       </a>
       {% if can_add %}
-        {% if schema == "model_draft" %}
+        {% if not table_obj.is_publish %}
           <button
             class="table-sidebar__btn-danger {% if not can_add %}disabled{% endif %}"
             id="dataview-table-delete"
