@@ -25,8 +25,3 @@ Please contact us if you need access.
 
 (Reusable solutions to common goals or issues.)
 
-# Guidelines
-
-## Accessibility
-
-See [main page](/dev/design-system/accessibility).

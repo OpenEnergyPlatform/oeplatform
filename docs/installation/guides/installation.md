@@ -8,7 +8,7 @@ Below we describe the manual installation of the oeplatform code and infrastruct
 
     [Find the installation instructions that get you started with development here](./installation-docker-dev.md)
 
-    [Find the (old) instructions related to our docker image mainly used for testing as part of the CI](../../../docker/README.md)
+    [Find the (old) instructions related to our docker image mainly used for testing as part of the CI](docker.md)
 
 !!! danger
     Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features.
@@ -28,7 +28,7 @@ Below we describe the manual installation of the oeplatform code and infrastruct
         - `pip install -r requirements.txt`
 
     2. Setup the OEO integration
-        - Instructions on [Section 4](#41-include-the-full-oeo)
+        - Instructions on [Section 4](#31-include-the-full-oeo)
         - Automatically added in docker container
 
     3. Loading and compressing static assets

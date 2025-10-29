@@ -20,7 +20,7 @@ The entire productive system and the databases are replicated in a test environm
 !!! Note
     The diagram shows the software architecture of openenergyplatform.org.
 
-![test](../../../img/draft-infrastructure-oep-2023-10-24-1338.png)
+![test](../../img/draft-infrastructure-oep-2023-10-24-1338.png)
 
 ## Technologies
 

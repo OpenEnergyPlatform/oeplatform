@@ -254,4 +254,4 @@ dbname = os.environ.get("LOCAL_DB_NAME", "oedb")
 
 To complete the database installation, the table structures must then be installed. [Step 3](./installation.md#3-setup-the-openenergyontology-integration) & [Step 4](./installation.md#4-loading-and-compressing-static-assets-from-the-oeplattform-applications) must be completed first so that the necessary commands can be executed after.
 
-After that Proceed with the next steps in section [4.2 Create the database table structures](installation.md#32-create-the-database-table-structures) of the oeplatform installation guide.
+After that Proceed with the next steps in section [4.2 Create the database table structures](installation.md#52-create-the-database-table-structures) of the oeplatform installation guide.

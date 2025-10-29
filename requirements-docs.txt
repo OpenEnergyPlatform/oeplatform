@@ -8,3 +8,4 @@ mkdocs-material~=9.1
 mkdocstrings~=0.22
 mkdocstrings-python
 mike
+mkdocs-include-markdown-plugin

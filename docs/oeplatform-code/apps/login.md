@@ -46,8 +46,8 @@ The components of each app implement the django app structure and implement a MV
 
 ### Views
 
-**ProfileUpdateView**
-::: login.views.ProfileUpdateView
+**EditUserView**
+::: login.views
 
 ### Forms
 
