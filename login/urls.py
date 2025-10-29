@@ -20,8 +20,6 @@ from django.urls import path, re_path
 
 from base.views import handler404
 from login.views import (
-    CreateUserView,
-    DetachView,
     EditUserView,
     GroupManagementView,
     GroupsView,
@@ -150,8 +148,6 @@ urlpatterns = [
         group_leave_view,
         name="group-leave",
     ),
-    re_path(r"^register$", CreateUserView.as_view(), name="register"),
-    re_path(r"^detach$", DetachView.as_view(), name="detach"),
     re_path(r"^reset/token$", token_reset_view, name="reset-token"),
     path("~redirect/", view=user_redirect_view, name="redirect"),
     path(
