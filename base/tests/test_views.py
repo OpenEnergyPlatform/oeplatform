@@ -62,6 +62,12 @@ class TestViewsBase(TestViewsTestCase):
             value = unquote(url)
             if not value:
                 return None
+            elif match := re.match(r".*EXTERNAL_URLS\.([^ }]+)", value):
+                key = match.groups()[0]
+                if key not in EXTERNAL_URLS:
+                    return f"not defined in EXTERNAL_URLS: {key} in {location}"
+                else:
+                    return None
             elif re.match(r"^({%|#|\?|{{|mailto:|javascript:)", value):
                 # find reverse url pattern
                 match_url = re.match(".*{% url[ ]+(.*)%}", value)
