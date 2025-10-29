@@ -32,3 +32,4 @@ SPDX-License-Identifier: CC0-1.0
 - all apps have cleaned up `views.py` and `urls.py` with names for reverse
   lookup
 - all apps have minimal tests some of those views
+- reverse lookup instead of hardcoded urls in frontend and backend
