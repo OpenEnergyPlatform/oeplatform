@@ -10,11 +10,9 @@
         .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
         .join("&");
 
-    console.log(url);
     return fetch(url)
       .then((result) => result.json())
       .then((data) => {
-        console.log(data);
         const reversedUrl = data.url;
         if (!reversedUrl) {
           console.error("Failed to reverse url".name, kwargs);
