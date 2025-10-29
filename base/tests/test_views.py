@@ -93,7 +93,8 @@ class TestViewsBase(TestViewsTestCase):
                 for idx, line in enumerate(f):
                     # find href and src tags
                     for match in re.findall(
-                        r"(src|href|action)[ ]*=[ ]*('([^']+)'|\"([^\"]+)\")", line
+                        r"(src|href|action|hx-post)[ ]*=[ ]*('([^']+)'|\"([^\"]+)\")",
+                        line,
                     ):
                         error = find_url_problem(
                             url=match[1], location=f"{path}:{idx+1}"

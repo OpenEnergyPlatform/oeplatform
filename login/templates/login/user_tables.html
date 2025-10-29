@@ -81,7 +81,7 @@
                     <div class="profile-table-card__content--right">
                       <button
                         class="profile-table-card__btn profile-table-card__btn--sm publish-button"
-                        hx-post="/api/v0/schema/{{ table.schema }}/tables/{{ table.name }}/move_publish/model_draft/"
+                        hx-post="{% url 'api:move_publish' schema=table.schema table=table.name to_schema='model_draft' %}"
                         hx-confirm="Are you sure you want to move the table back to the model_draft topic to indicate that this table is a draft?"
                         hx-target=""
                       >

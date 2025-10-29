@@ -67,7 +67,7 @@
                         </label>
                         <button
                           class="btn btn-secondary confirm-publish"
-                          hx-post="/api/v0/schema/{{ table.schema }}/tables/{{ table.name }}/move_publish/{{ toSchema }}/"
+                          hx-post="{% url 'api:move_publish' schema=table.schema table=table.name to_schema=toSchema %}"
                           hx-target="#tableContainer"
                           hx-swap="outerHTML"
                           hx-include="#publish-options-{{ table.name }}"

@@ -277,27 +277,6 @@
         let validSelection = false;
         let autocompleteSource = []; // This will be filled with your autocomplete data
 
-        // $('#user_field').bind('input', function() {
-        //     var dfd = new $.Deferred();
-        //     var request = $.ajax({type: 'GET',
-        //         url:'/api/usrprop/', dataType:'json',
-        //         data: {
-        //             name: $(this).val()
-        //         },
-        //         success: function(data) {
-        //             autocompleteSource = data; // Assuming 'data' is an array of strings
-        //         }
-        //     });
-        //     request.done(function(users)
-        //     {
-        //         console.log(users);
-        //         $('#user_field').autocomplete({
-        //             source: users
-        //         });
-        //         dfd.resolve({})
-        //     });
-        // });
-
         $("#user_field").autocomplete({
           source: function (request, response) {
             $.ajax({
