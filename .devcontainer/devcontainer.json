@@ -3,7 +3,7 @@
   "dockerComposeFile": ["../docker-compose.dev.yaml"],
   "service": "web",
   "workspaceFolder": "/home/appuser/app",
-  "forwardPorts": [8000, 5678],
+  "forwardPorts": [8000, 5678, 5500],
   "shutdownAction": "stopCompose",
   "remoteUser": "appuser",
 

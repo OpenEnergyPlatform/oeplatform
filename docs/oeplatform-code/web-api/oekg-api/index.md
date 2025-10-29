@@ -7,13 +7,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## OEKG web based access
 
-In this document we describe how you can access the contents of the OEKG via Web based Requests using HTTP
+In this document we describe how you can access the contents of the OEKG via Web
+based Requests using HTTP
 
 ### The SPARQL endpoint for OEKG
 
 `https://openenergyplatform.org/api/v0/oekg/sparql/`
 
-Here is an example of how to query the Open Energy Knowledge Graph (OEKG) using SPARQL using python and the requests library for http requests.
+Here is an example of how to query the Open Energy Knowledge Graph (OEKG) using
+SPARQL using python and the requests library for http requests.
 
 !!! Info "OEP-API Token"
 
@@ -42,7 +44,8 @@ print(r.json())
 
 ## Open API
 
-Below you see a draft version of the OpenAPI-based. It is the documentation for all HTTP-API endpoints and in the future it can be used to test out the API.
+Below you see a draft version of the OpenAPI-based. It is the documentation for
+all HTTP-API endpoints and in the future it can be used to test out the API.
 
 <!DOCTYPE html>
 <html lang="en">

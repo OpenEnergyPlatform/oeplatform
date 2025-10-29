@@ -11,6 +11,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from api.tests import APITestCase, APITestCaseWithTable
+from dataedit.models import Table
 
 _TYPES = [
     "bigint",
@@ -309,6 +310,9 @@ class TestMovePublish(APITestCaseWithTable):
     target_schema = "scenario"
 
     def test_move_publish(self):
+
+        self.assertFalse(Table.objects.get(name=self.test_table).is_publish)
+
         # this will fail, because the licenses check fails
         self.api_req(
             "post", path=f"move_publish/{self.target_schema}/", exp_code=400, exp_res={}
@@ -340,3 +344,13 @@ class TestMovePublish(APITestCaseWithTable):
             data={"embargo": {"duration": embargo_duration}},
             exp_code=200,
         )
+
+        self.assertTrue(Table.objects.get(name=self.test_table).is_publish)
+
+        # test unpublish
+        self.api_req(
+            "post",
+            path="unpublish",
+            exp_code=200,
+        )
+        self.assertFalse(Table.objects.get(name=self.test_table).is_publish)

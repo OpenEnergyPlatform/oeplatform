@@ -81,8 +81,8 @@
                     <div class="profile-table-card__content--right">
                       <button
                         class="profile-table-card__btn profile-table-card__btn--sm publish-button"
-                        hx-post="{% url 'api:move_publish' schema=table.schema table=table.name to_schema='model_draft' %}"
-                        hx-confirm="Are you sure you want to move the table back to the model_draft topic to indicate that this table is a draft?"
+                        hx-post="{% url 'api:table-unpublish' schema=table.schema table=table.name %}"
+                        hx-confirm="Are you sure you want to mark the table as draft?"
                         hx-target=""
                       >
                         Unpublish
@@ -354,6 +354,14 @@
                           Publish
                         </button>
                       {% endif %}
+                      <button
+                        class="profile-table-card__btn profile-table-card__btn--sm"
+                        hx-delete="{% url 'api:api_table' schema=table.schema table=table.name %}"
+                        hx-confirm="Are you sure you want to delete the table?"
+                        hx-target=""
+                      >
+                        Delete
+                      </button>
                     </div>
                     <div class="profile-table-card__content--title">
                       <!-- Add as soon as the open peer review is finalized -->
