@@ -49,7 +49,7 @@ BASE_VIEW_PROPS = OrderedDict(
                     ("code documentation", ["code_documentation"]),
                     ("documentation quality", ["documentation_quality"]),
                     ("source of funding", ["source_of_funding"]),
-                    ("number of", ["number_of_devolopers", "number_of_users"]),
+                    ("number of", ["number_of_developers", "number_of_users"]),
                 ]
             ),
         ),
@@ -430,7 +430,7 @@ FRAMEWORK_DEFAULT_COLUMNS = {
     "tags",
     "license",
     "support",
-    "number_of_devolopers",
+    "number_of_developers",
 }
 
 
