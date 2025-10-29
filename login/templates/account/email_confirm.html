@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load account %}
 {% load allauth %}
+{% load static %}
 {% block head_title %}
   {% trans "Confirm Email Address" %}
 {% endblock head_title %}
@@ -10,7 +11,7 @@
     <div class="login__wrap" class="signup" id="logout_form">
       <!-- Logo -->
       <div class="login__logo">
-        <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo" />
+        <img src="{% static 'OEP_logo_2_no_text.svg' %}" alt="OEP Logo" />
       </div>
       <!-- Be sure to use h1 for the heading -->
       <h1 class="login__heading">{% trans "Confirm Email Address" %}</h1>

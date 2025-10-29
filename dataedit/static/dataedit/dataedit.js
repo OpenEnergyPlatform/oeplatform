@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-var DataEdit = function(table, schema) {
+var DataEdit = function (table, schema) {
   var state = {
     schema: schema,
     apiVersion: "v0",
@@ -22,43 +22,46 @@ var DataEdit = function(table, schema) {
   }
 
   /**
-     * delete table
-     */
+   * delete table
+   */
   function deleteTable() {
-    $('#dataview-confirm-delete').modal('hide');
+    $("#dataview-confirm-delete").modal("hide");
     setStatusCreate("primary", true, "deleting table...");
     var tablename = table;
-    var url = getApiTableUrl(tablename) + "/";
-    var urlSuccess = '/dataedit/schemas';
-    sendJson("DELETE", url).then(function() {
-      setStatusCreate("success", true, "ok, reloading page...");
-      window.location = urlSuccess;
-    }).catch(function(err) {
-      setStatusCreate("danger", false, getErrorMsg(err));
+
+    Promise.all([
+      window.reverseUrl("api:api_table", { schema: "data", table: tablename }),
+      window.reverseUrl("dataedit:topic-list"),
+    ]).then(([urlTable, urlTopics]) => {
+      sendJson("DELETE", urlTable)
+        .then(function () {
+          setStatusCreate("success", true, "ok, reloading page...");
+          /* redirect to topic page*/
+          window.location = urlTopics;
+        })
+        .catch(function (err) {
+          setStatusCreate("danger", false, getErrorMsg(err));
+        });
     });
   }
 
   // bind buttons
   /* delete table */
-  $("#dataview-table-delete").bind("click", function() {
-    $('#dataview-confirm-delete').modal('show');
+  $("#dataview-table-delete").bind("click", function () {
+    $("#dataview-confirm-delete").modal("show");
   });
-  $("#dataview-confirm-delete-cancel").bind("click", function() {
-    $('#dataview-confirm-delete').modal('hide');
+  $("#dataview-confirm-delete-cancel").bind("click", function () {
+    $("#dataview-confirm-delete").modal("hide");
   });
   $("#dataview-confirm-delete-delete").bind("click", deleteTable);
 
-
   /** *************************************
-     * Helper functions to use the API
-     ***************************************/
-  function getApiTableUrl(tablename) {
-    return "/api/" + state.apiVersion + "/schema/" + state.schema + "/tables/" + tablename;
-  }
+   * Helper functions to use the API
+   ***************************************/
 
   function getErrorMsg(x) {
     try {
-      x = 'Upload failed: ' + JSON.parse(x.responseJSON).reason;
+      x = "Upload failed: " + JSON.parse(x.responseJSON).reason;
     } catch (e) {
       x = x.statusText;
     }
@@ -74,7 +77,7 @@ var DataEdit = function(table, schema) {
     var token = getCsrfToken();
     return $.ajax({
       url: url,
-      headers: {"X-CSRFToken": token},
+      headers: { "X-CSRFToken": token },
       data_type: "json",
       cache: false,
       contentType: "application/json; charset=utf-8",
@@ -82,7 +85,7 @@ var DataEdit = function(table, schema) {
       data: data,
       type: method,
       converters: {
-        "text json": function(data) {
+        "text json": function (data) {
           return data;
         },
       },

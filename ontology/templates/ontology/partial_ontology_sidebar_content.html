@@ -7,12 +7,16 @@
         <span>Version</span>
       </div>
       <div class="ontology-side__versions-row">
-        <span><a href="/viewer/oeo/">Open Energy Ontology (OEO)</a></span>
+        <span
+          ><a href="{% url 'oeo_viewer:index' %}"
+            >Open Energy Ontology (OEO)</a
+          ></span
+        >
         <span>{{ version }}</span>
       </div>
       <div class="ontology-side__versions-row">
         <span
-          ><a href="https://github.com/OpenEnergyPlatform/oeo-extended"
+          ><a href="{{ EXTERNAL_URLS.oeo_extended_github }}"
             >Open Energy Ontology Extended (OEOX)</a
           ></span
         >
@@ -27,11 +31,16 @@
         View the oeo version {{ version }}
       </h3>
       <div class="btn-group float-end" role="group" aria-label="Basic example">
-        <a class="btn btn-light" href="/ontology/{{ ontology }}/BFO_0000001/">
+        <a
+          class="btn btn-light"
+          href="{% url 'ontology:oeo-classes' ontology 'BFO_0000001' %}"
+        >
           Browse oeo classes
         </a>
       </div>
-      <a class="btn btn-light" href="/viewer/oeo/"> Graphical oeo viewer </a>
+      <a class="btn btn-light" href="{% url 'oeo_viewer:index' %}">
+        Graphical oeo viewer
+      </a>
     </div>
   {% endcomment %}
 
@@ -39,7 +48,9 @@
     <h3 class="ontology-side__title">Get the latest OEO release</h3>
     <p>
       Get the
-      <a class=" " href="{% url 'oeo-latest-glossary' ontology='oeo' %}"
+      <a
+        class=" "
+        href="{% url 'ontology:oeo-latest-glossary' ontology='oeo' %}"
         >Glossary</a
       >
       to get an overview of the OEO contents.
@@ -48,7 +59,7 @@
     <a
       class="ontology-side__btn-main"
       id="popoverTrigger"
-      href="{% url 'oeo-latest-full-zip' ontology='oeo' %}"
+      href="{% url 'ontology:oeo-latest-full-zip' ontology='oeo' %}"
       data-bs-toggle="popover"
       data-bs-trigger="hover"
       title="oeo release"
@@ -60,7 +71,7 @@
     <a
       id="popoverTrigger"
       class="ontology-side__btn-link"
-      href="/ontology/{{ ontology }}/releases/oeo-full.owl"
+      href="{% url 'ontology:oeo-static' ontology 'oeo-full.owl' %}"
       data-bs-toggle="popover"
       data-bs-trigger="hover"
       title="full-oeo-owl"
@@ -109,13 +120,17 @@
               </p>
               <ul>
                 <li>
-                  <a href="/ontology/oeo/" target="_blank"
-                    >https://openenergyplatform.org/ontology/oeo/</a
+                  <a
+                    href="{% url 'ontology:oeo-initializer' 'oeo' %}"
+                    target="_blank"
+                    >{% url 'ontology:oeo-initializer' 'oeo' %}</a
                   >
                 </li>
                 <li>
-                  <a href="/ontology/oeo/releases/oeo-full.owl" target="_blank"
-                    >https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl</a
+                  <a
+                    href="{% url 'ontology:oeo-static' 'oeo' 'oeo-full.owl' %}"
+                    target="_blank"
+                    >{% url 'ontology:oeo-static' 'oeo' 'oeo-full.owl' %}</a
                   >
                 </li>
               </ul>
@@ -139,7 +154,7 @@
           <a
             id="popoverTrigger"
             class="ontology-side__btn-link"
-            href="/ontology/{{ ontology }}/releases/oeo-closure.owl"
+            href="{% url 'ontology:oeo-static' ontology 'oeo-closure.owl' %}"
             data-bs-toggle="popover"
             data-bs-trigger="hover focus"
             title="closure"
@@ -187,9 +202,9 @@
               <ul>
                 <li>
                   <a
-                    href="/ontology/oeo/releases/oeo-closure.owl"
+                    href="{% url 'ontology:oeo-static' 'oeo' 'oeo-closure.owl' %}"
                     target="_blank"
-                    >https://openenergyplatform.org/ontology/oeo/releases/oeo-closure.owl</a
+                    >{% url 'ontology:oeo-static' 'oeo' 'oeo-closure.owl' %}</a
                   >
                 </li>
               </ul>
@@ -217,7 +232,7 @@
     </span>
     <a
       class="ontology-side__btn-link"
-      href="https://github.com/OpenEnergyPlatform/ontology/releases"
+      href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology_releases }}"
       target="_blank"
     >
       <i class="fas fa-external-link-alt"></i>
@@ -234,15 +249,6 @@
       </div>
     </div>
   </div>
-
-  <!-- <div class="row">
-        <h1>Welcome to Your SPA</h1>
-        <div id="updateable-content"> -->
-  <!-- Content that will be updated -->
-  <!-- </div>
-        <button hx-get="{% url 'partial-page-content' %}" hx-swap="outerHTML" hx-target="#content" id="content">Update Content</button> -->
-  <!-- Add other htmx-enabled elements as needed -->
-  <!-- </div> -->
 </div>
 <script>
   var popoverTriggerList = [].slice.call(

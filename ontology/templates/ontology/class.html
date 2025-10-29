@@ -7,7 +7,7 @@
   <div class="main-header">
     <h1 class="main-header__title">
       <img
-        src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg"
+        src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
         width="16"
         height="16"
         alt="OEO"
@@ -15,9 +15,11 @@
       Ontology
     </h1>
     <div class="main-header__wizard">
-      <a href="/ontology/">Overview</a> /
-      <a href="/ontology/oeo/BFO_0000001/">Open Energy Ontology</a> / Class -
-      {{ class_name }}
+      <a href="{% url 'ontology:index' %}">Overview</a> /
+      <a href="{% url 'ontology:oeo-classes' 'oeo' 'BFO_0000001' %}"
+        >Open Energy Ontology</a
+      >
+      / Class - {{ class_name }}
     </div>
   </div>
 {% endblock site-header %}
@@ -44,7 +46,7 @@
             >
               <a
                 class="btn btn-primary"
-                href="{% url 'oeo-classes' ontology=ontology module_or_id=super_class.ID %}"
+                href="{% url 'ontology:oeo-classes' ontology=ontology module_or_id=super_class.ID %}"
               >
                 view
               </a>
@@ -140,7 +142,7 @@
             >
               <a
                 class="btn btn-primary"
-                href="{% url 'oeo-classes' ontology=ontology module_or_id=sub_class.ID %}"
+                href="{% url 'ontology:oeo-classes' ontology=ontology module_or_id=sub_class.ID %}"
               >
                 view
               </a>

@@ -465,12 +465,12 @@
                 <div class="profile-rvw__item-name">
                   {% if review.is_finished == True %}
                     <a
-                      href="/dataedit/view/{{ review.schema }}/{{ review.table }}"
+                      href="{% url 'dataedit:view' schema=review.schema table=review.table %}"
                       >{{ review.schema }} - {{ review.table }}</a
                     >
                   {% else %}
                     <a
-                      href=" {% url 'dataedit:peer_review_reviewer' table=review.table schema=review.schema review_id=review.id %}"
+                      href="{% url 'dataedit:peer_review_reviewer' table=review.table schema=review.schema review_id=review.id %}"
                       >{{ review.schema }} - {{ review.table }}</a
                     >
                   {% endif %}
@@ -575,12 +575,12 @@
                 <div class="profile-rvw__item-name">
                   {% if review.is_finished == True %}
                     <a
-                      href="/dataedit/view/{{ review.schema }}/{{ review.table }}"
+                      href="{% url 'dataedit:view' schema=review.schema table=review.table %}"
                       >{{ review.schema }} - {{ review.table }}</a
                     >
                   {% else %}
                     <a
-                      href=" {% url 'dataedit:peer_review_contributor' table=review.table schema=review.schema review_id=review.id %}"
+                      href="{% url 'dataedit:peer_review_contributor' table=review.table schema=review.schema review_id=review.id %}"
                       >{{ review.schema }} - {{ review.table }}</a
                     >
                   {% endif %}

@@ -86,6 +86,7 @@
 
     {% block body-bottom-js %}
       {% block before-body-bottom-js %}
+        {% include 'base/reverseUrl.html' %}
       {% endblock before-body-bottom-js %}
       {% compress js %}
         <script src="{% static 'js/jquery.min.js' %}"></script>

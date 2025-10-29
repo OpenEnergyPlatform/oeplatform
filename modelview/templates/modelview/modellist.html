@@ -37,10 +37,10 @@
 {% block main-right-sidebar-content %}
   <hr>
   <h3>Actions</h3>
-    <a role="button" class="btn btn-success" href="add">
+    <a role="button" class="btn btn-success" href="{% url 'modelview:modeladd' sheettype %}">
       <span class="fas fa-plus"></span> Add {{ label }}
     </a>
-    <a id="dlcsv" role="button"  class="btn btn-info" href="download">
+    <a id="dlcsv" role="button"  class="btn btn-info" href="{% url 'modelview:download' sheettype %}">
       <span class="fas fa-download"></span> Download CSV
     </a>
   <hr>
@@ -82,13 +82,13 @@
 
     {% if label == "Model" %}
         <div>
-            The <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000277">model factsheet</a> characterise models used in energy system analysis in a
-            structured way regarding important characteristics, such as their scope and <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020015">licence</a>
-            and their developing <a href="https://openenergyplatform.org/ontology/oeo/OEO_00030022">institutions</a>. You are developing a model? Then you can inform
-            about its characteristics here. The models available as a factsheet can be integrated as an element into a <a href="https://openenergyplatform.org/scenario-bundles/main">scenario bundle</a>
-            which weave together important information about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00000364">scenarios</a>, such as the model used for conducting a
-            <a href="https://openenergyplatform.org/ontology/oeo/OEO_00010262">scenario projection</a>, <a href="https://openenergyplatform.org/ontology/oeo/IAO_0000027">data</a>
-            provided on the OEP, and <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020012">publications</a>.
+            The <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00000277' %}">model factsheet</a> characterise models used in energy system analysis in a
+            structured way regarding important characteristics, such as their scope and <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00020015' %}">licence</a>
+            and their developing <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00030022' %}">institutions</a>. You are developing a model? Then you can inform
+            about its characteristics here. The models available as a factsheet can be integrated as an element into a <a href="{% url 'factsheet:factsheets_index' %}">scenario bundle</a>
+            which weave together important information about <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00000364' %}">scenarios</a>, such as the model used for conducting a
+            <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00010262' %}">scenario projection</a>, <a href="{% url 'ontology:oeo-classes' 'oeo' 'IAO_0000027' %}">data</a>
+            provided on the OEP, and <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00020012' %}">publications</a>.
         </div>
         <br>
     {% endif %}
@@ -190,7 +190,7 @@
     }
 
     var set_csv_link = function (){
-        var href='download?';
+        var href="{% url 'modelview:download' sheettype %}?";
         href += 'tags=';
         href += active_tags.join([separator = ',']);
         document.getElementById("dlcsv").setAttribute("href", href);

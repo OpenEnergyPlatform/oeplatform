@@ -9,7 +9,7 @@ import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import render  # noqa:F401
+from django.shortcuts import render
 from django.views.generic import View
 
 from oeo_ext.forms import ComposedUnitFormWrapper, UnitEntryForm
@@ -96,7 +96,7 @@ class OeoExtPluginView(View, LoginRequiredMixin):
             return JsonResponse(response_data, status=400)
 
 
-def add_unit_element(request):
+def add_unit_element_view(request):
     unit_id = None
     unit_id = request.session.get("unit_id_counter", 0)
     # Increment the counter
@@ -107,14 +107,3 @@ def add_unit_element(request):
     return render(
         request, "oeo_ext/partials/unit_element.html", context={"unit_id": str(unit_id)}
     )
-
-
-# def search_units(request):
-# can only be implemented if there is a way to get all classes form the oeo
-# that are a unit
-#     query = request.GET.get("query", "")
-#     results = []
-#     if query:
-#         results = ["search_ontology(query)"]
-
-#     return JsonResponse({"data": results})

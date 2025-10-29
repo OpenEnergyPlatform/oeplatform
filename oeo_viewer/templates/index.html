@@ -12,7 +12,7 @@
   <div class="main-header">
     <h1 class="main-header__title">
       <img
-        src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg"
+        src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
         width="16"
         height="16"
         alt="OEO"
@@ -20,7 +20,7 @@
       Open Energy Ontology Viewer
     </h1>
     <div class="main-header__wizard">
-      <a href="/ontology/">Open Energy Ontology</a> / OEO viewer
+      <a href="{% url 'ontology:index' %}">Open Energy Ontology</a> / OEO viewer
     </div>
     <br />
     <div>

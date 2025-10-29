@@ -15,7 +15,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-from django.http import Http404
+from django.http import Http404, HttpRequest
 from django.shortcuts import HttpResponse, render
 from django.views import View
 
@@ -36,22 +36,16 @@ LOGGER.info("Start loading the oeo from local static files.")
 OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
 OEO_PATH = OEO_BASE_PATH / OEO_VERSION
-# OEO_GLOSSARY_PATH = OEO_PATH / "glossary"
-# OEO_GLOSSARY_FILE_CSV = OEO_GLOSSARY_PATH / "glossary.csv"
-# OEO_GLOSSARY_FILE_MD = OEO_GLOSSARY_PATH / "glossary.md"
 OEO_MODULES_MAIN = collect_modules(OEO_PATH)
 OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
 OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
 OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
-OEOX_COMMON_DATA = get_common_data(
-    OEO_EXT_NAME, file=OEO_EXT_OWL_NAME, path=OEO_EXT_PATH
-)
 LOGGER.info(
     "Loading completed! The content form the oeo files is parse into python data types."
 )
 
 
-class OntologyAbout(View):
+class OntologyAboutView(View):
     def get(self, request, ontology="oeo", version=None):
         onto_base_path = Path(ONTOLOGY_ROOT, ontology)
 
@@ -72,43 +66,43 @@ class OntologyAbout(View):
         )
 
 
-class PartialOntologyAboutContent(View):
-    def get(self, request):
+class PartialOntologyAboutContentView(View):
+    def get(self, request: HttpRequest) -> HttpResponse:
         if request.headers.get("HX-Request") == "true":
-            if request.method == "GET":
-                ontology_data = OEO_COMMON_DATA
+            ontology_data = OEO_COMMON_DATA
 
-                submodules = OEO_MODULES_SUBMODULES
+            submodules = OEO_MODULES_SUBMODULES
 
-                desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
+            desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
 
-                relevant_modules = {
-                    key: value
-                    for key, value in submodules.items()
-                    if key in desired_keys
-                }
+            relevant_modules = {
+                key: value for key, value in submodules.items() if key in desired_keys
+            }
 
-                # Collect all file names
-                imports = OEO_MODULES_IMPORTS
+            # Collect all file names
+            imports = OEO_MODULES_IMPORTS
 
-                partial = render(
-                    request,
-                    "ontology/partial_ontology_content.html",
-                    dict(
-                        ontology=ontology_data["ontology"],
-                        version=ontology_data["version"],
-                        submodules=relevant_modules.items(),
-                        imports=imports.items(),
-                        ontology_description=ontology_data["oeo_context_data"][
-                            "ontology_description"
-                        ],
-                    ),
-                ).content.decode("utf-8")
+            partial = render(
+                request,
+                "ontology/partial_ontology_content.html",
+                dict(
+                    ontology=ontology_data["ontology"],
+                    version=ontology_data["version"],
+                    submodules=relevant_modules.items(),
+                    imports=imports.items(),
+                    ontology_description=ontology_data["oeo_context_data"][
+                        "ontology_description"
+                    ],
+                ),
+            ).content.decode("utf-8")
 
-                return HttpResponse(partial)
+            return HttpResponse(partial)
+        else:
+            # TODO: why do we only return response for HTMX?
+            return HttpResponse(b"")
 
 
-class PartialOntologyAboutSidebarContent(View):
+class PartialOntologyAboutSidebarContentView(View):
     def get(self, request):
         version = OEO_VERSION
         main_module = OEO_MODULES_MAIN
@@ -136,13 +130,7 @@ class PartialOntologyAboutSidebarContent(View):
         return HttpResponse(partial)
 
 
-def initial_for_pageload(request):
-    if request.headers.get("HTTP_HX_REQUEST") == "true":
-        if request.method == "GET":
-            return render(request, "ontology/initial_response_htmx.html")
-
-
-class OntologyViewClasses(View):
+class OntologyViewClassesView(View):
     def get(
         self,
         request,
@@ -160,7 +148,6 @@ class OntologyViewClasses(View):
         if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
             ontology_data = OEO_COMMON_DATA
         elif ontology in [OEO_EXT_NAME]:
-            # ontology_data = OEOX_COMMON_DATA
             ontology_data = get_common_data(
                 OEO_EXT_NAME, file=OEO_EXT_OWL_NAME, path=OEO_EXT_PATH
             )
@@ -279,7 +266,7 @@ class OntologyViewClasses(View):
         )
 
 
-class OntologyStatics(View):
+class OntologyStaticsView(View):
     def get(
         self,
         request,
@@ -400,7 +387,7 @@ class OntologyStatics(View):
                 return response
 
 
-class OeoExtendedFileServe(View):
+class OeoExtendedFileServeView(View):
     def __init__(self) -> None:
         self.oeo_ext_static = self.read_owl_file()
         self.file_extension = "owl"

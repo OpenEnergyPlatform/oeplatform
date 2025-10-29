@@ -1,5 +1,6 @@
 {% extends "base/base-full.html" %}
 {% load base_tags %}
+{% load static %}
 
 {% block main-content-body %}
   <!-- Alert out of main block, e.g. for successful log out info -->
@@ -12,7 +13,7 @@
     <div class="login__wrap">
       <!-- Logo -->
       <div class="login__logo">
-        <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo" />
+        <img src="{% static 'OEP_logo_2_no_text.svg' %}" alt="OEP Logo" />
       </div>
 
       <!-- Be sure to use h1 for the heading -->

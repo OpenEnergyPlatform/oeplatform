@@ -31,7 +31,10 @@
       {{ displaySheetType }} Factsheet
     </h1>
     <div class="main-header__wizard">
-      <a href="/factsheets/{{ displaySheetType | lower }}s">Overview</a> /
+      <a href="{% url 'modelview:modellist' displaySheetType|lower %}"
+        >Overview</a
+      >
+      /
       {% if model.model_name %}
         {{ model.model_name }}
         {% if  model.acronym %}({{ model.acronym }}){% endif %}

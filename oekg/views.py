@@ -27,7 +27,7 @@ def main_view(request):
 
 
 @require_POST
-def sparql_endpoint(request):
+def sparql_endpoint_view(request):
     """
     Internal SPARQL endpoint. Must only allow read queries. Intended to be use
     with a djago app frontend as it requires an CSRF token.
@@ -53,7 +53,7 @@ def sparql_endpoint(request):
 
 
 @require_GET
-def sparql_metadata(request):
+def sparql_metadata_view(request):
     supported_formats = {
         "json": "application/sparql-results+json",
         "json-ld": "application/ld+json",
@@ -70,7 +70,8 @@ def sparql_metadata(request):
 
 
 # @login_required
-def filter_oekg_by_scenario_bundles_attributes(request):
+@require_POST
+def filter_oekg_by_scenario_bundles_attributes_view(request):
     """
     This function takes filter objects provided by the user and utilises
     them to construct a SPARQL query.
@@ -94,19 +95,3 @@ def filter_oekg_by_scenario_bundles_attributes(request):
         content_type="application/json",
     )
     return response
-
-
-# # TODO: check if API TOKEN safety required
-# def send_oekg_rdf(requests):
-#     """
-#     This function sends the entire OEKG as RDF data in Turtle format.
-
-#     Args:
-#         request (HttpRequest): The incoming HTTP GET request.
-
-#     Returns:
-#         HttpResponse: A response containing the OEKG RDF data in Turtle format.
-#     """
-#     oekg = get_oekg()
-#     rdf_data = oekg.serialize(format="turtle")
-#     return HttpResponse(rdf_data, content_type="text/turtle")

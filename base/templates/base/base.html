@@ -73,7 +73,7 @@
                       Energy Platform, you are welcome to add your comments to
                       the existing issues on
                       <a
-                        href="https://github.com/OpenEnergyPlatform/oeplatform"
+                        href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}"
                         target="_blank"
                         >GitHub</a
                       >. <br />
@@ -104,6 +104,7 @@
 
     {% block body-bottom-js %}
       {% block before-body-bottom-js %}
+        {% include 'base/reverseUrl.html' %}
       {% endblock before-body-bottom-js %}
       {% compress js %}
         <script src="{% static 'js/jquery.min.js' %}"></script>

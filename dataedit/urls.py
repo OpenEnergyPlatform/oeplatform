@@ -43,8 +43,9 @@ from dataedit.views import (
     topic_view,
 )
 
-pgsql_qualifier = r"[\w\d_]+"
 app_name = "dataedit"
+pgsql_qualifier = r"[\w\d_]+"
+
 
 urlpatterns_view_schema = [
     re_path(
@@ -60,7 +61,7 @@ urlpatterns_view_schema = [
     re_path(
         r"^(?P<schema>{qual})/(?P<table>{qual})/download$".format(qual=pgsql_qualifier),
         TableRevisionView.as_view(),
-        # name="table-revision-TODO",  # do we actually need this?
+        name="table-revision-download",  # TODO: do we actually need this?
     ),
     re_path(
         r"^(?P<schema>{qual})/(?P<table>{qual})/permissions$".format(
@@ -102,6 +103,7 @@ urlpatterns_view_schema = [
             qual=pgsql_qualifier
         ),
         table_show_revision_view,
+        name="table-revision",
         # TODO: do we need it??, also: rev_id (int) in args, but view wants a date?
     ),
     re_path(
@@ -142,7 +144,7 @@ urlpatterns_view_schema = [
 urlpatterns_tag = [
     re_path(r"^$", tag_overview_view, name="tags"),
     re_path(r"^new/?$", tag_editor_view, name="tags-new"),
-    re_path(r"^edit/(?P<tag_pk>[a-z0-9]+)/?$", tag_editor_view, name="tags-edit"),
+    re_path(r"^edit/(?P<tag_pk>[a-z0-9_]+)/?$", tag_editor_view, name="tags-edit"),
     re_path(r"^add/?$", tage_table_add_view, name="tags-add"),
     re_path(r"^set/?$", tag_update_view, name="tags-set"),
 ]
@@ -156,12 +158,12 @@ urlpatterns = [
     re_path(
         r"^admin/columns/",
         admin_column_view,
-        # name="admin-columns" # TODO: do we need this
+        name="admin-columns",  # TODO: do we need this
     ),
     re_path(
         r"^admin/constraints/",
         admin_constraints_view,
-        # name="admin-contraints" # TODO: do we need this
+        name="admin-contraints",  # TODO: do we need this
     ),
     re_path(
         r"^wizard/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),

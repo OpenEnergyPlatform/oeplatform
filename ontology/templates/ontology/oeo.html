@@ -8,7 +8,7 @@
   <div class="main-header">
     <h1 class="main-header__title">
       <img
-        src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg"
+        src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
         width="16"
         height="16"
         alt="OEO"
@@ -16,14 +16,14 @@
       Ontology
     </h1>
     <div class="main-header__wizard">
-      <a href="/ontology/">Overview</a> / Open Energy Ontology
+      <a href="{% url 'ontology:index' %}">Overview</a> / Open Energy Ontology
     </div>
   </div>
 {% endblock site-header %}
 
 {% block main-right-sidebar-content %}
   <div
-    hx-get="{% url 'partial-page-sidebar-content' %}"
+    hx-get="{% url 'ontology:partial-page-sidebar-content' %}"
     hx-swap="outerHTML"
     hx-target="#content-sidebar"
     hx-trigger="load"
@@ -48,7 +48,7 @@
 
 {% block main-content-body %}
   <div
-    hx-get="{% url 'partial-page-content' %}"
+    hx-get="{% url 'ontology:partial-page-content' %}"
     hx-swap="outerHTML"
     hx-target="#content"
     hx-trigger="load"

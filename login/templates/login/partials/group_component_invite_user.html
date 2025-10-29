@@ -53,7 +53,7 @@
       var dfd = new $.Deferred();
       var request = $.ajax({
         type: "GET",
-        url: "/api/usrprop/",
+        url: "{% url 'api:usrprop' %}",
         dataType: "json",
         data: {
           name: $(this).val(),

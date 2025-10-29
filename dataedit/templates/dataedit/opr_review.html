@@ -4,7 +4,6 @@
 {% load django_bootstrap5 %}
 {% load compress %}
 {% block after-head %}
-  <!-- <link href="/static/peer_review/peer_review.css" rel="stylesheet"> -->
   {#{% vite_asset "dataedit/static/peer_review/peer_review.js" %}#}
   {#    {% vite_asset "dataedit/static/peer_review/peer_review.js" %}#}
   {#{% vite_asset "dataedit/static/peer_review/opr_reviewer.js" %}#}
@@ -37,8 +36,8 @@
       <div class="main-header__wizard">
         <span class="main-header__wizard-process">Review :</span>
         <span class="main-header__wizard-path"
-          ><a href="/dataedit/schemas">Topics</a> /
-          <a href="/dataedit/view/{{ topic }}">{{ topic }}</a> /
+          ><a href="{% url 'dataedit:topic-list' %}">Topics</a> /
+          <a href="{% url 'dataedit:tables' topic %}">{{ topic }}</a> /
           {{ table }}</span
         >
       </div>
@@ -72,7 +71,7 @@
           still expected to occur. In general, the feature is much more stable
           now. Please share your experience in this
           <a
-            href="https://github.com/OpenEnergyPlatform/oeplatform/discussions/1268"
+            href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform_discussions_1268 }}"
             >discussion on GitHub</a
           >
           (login required).

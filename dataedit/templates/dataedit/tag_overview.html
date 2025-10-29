@@ -36,7 +36,7 @@
     <ul>
       {% for t in all_tags %}
         <a
-          href="/dataedit/tags/edit/{{ t.pk }}"
+          href="{% url 'dataedit:tags-edit' t.pk %}"
           class="btn tag"
           style="margin:0 5px 5px 0; color:{% readable_text_color t.color_hex %}; display:inline; float: left; background:{{ t.color_hex }}"
         >
@@ -48,12 +48,14 @@
   <br />
 
   <div style="float:left; padding-right:15px">
-    <a href="/dataedit/tags/new/" class="btn btn-info">Create new Tag</a>
+    <a href="{% url 'dataedit:tags-new' %}" class="btn btn-info"
+      >Create new Tag</a
+    >
   </div>
   <div style="clear:right">
     <a
       style="padding-left:15px; clear:right"
-      href="/dataedit/"
+      href="{% url 'dataedit:index' %}"
       class="btn btn-primary"
       >Back to Database</a
     >

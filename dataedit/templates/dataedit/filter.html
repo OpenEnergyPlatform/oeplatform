@@ -101,7 +101,7 @@
         </button>
         <a
           class="btn btn-link controls-container__create-tags"
-          href="/dataedit/tags"
+          href="{% url 'dataedit:tags' %}"
         >
           <span class="btn__icon">
             <svg
@@ -140,7 +140,7 @@
           <button
             type="button"
             class="btn btn-outline-primary"
-            onclick="redirectToLink('/user/profile/{{ user.pk }}/tables')"
+            onclick="redirectToLink('{% url 'login:tables' user.pk %}')"
           >
             <span class="btn__icon">
               <svg

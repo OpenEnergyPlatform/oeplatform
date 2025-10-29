@@ -7,10 +7,8 @@
   <h2>Factsheets Overview</h2>
   <p>
     The Open Energy Platform hosts a series of factsheets – currently we offer
-    <a href="https://openenergy-platform.org/factsheets/models/"
-      >Model Factsheets</a
-    >,
-    <a href="https://openenergy-platform.org/factsheets/frameworks/"
+    <a href="{% url 'modelview:modellist' 'model' %}">Model Factsheets</a>,
+    <a href="{% url 'modelview:modellist' 'framework' %}"
       >Framework Factsheets</a
     >
     and <a href="">Scenario Factsheets</a> that help to learn more about the
@@ -31,7 +29,7 @@
     factsheets will also be succeeded by
     <a href="">Study Factsheets (alpha)</a> that will hold more functionality.
     These improved factsheets will be based on RDF and the
-    <a href="https://github.com/OpenEnergyPlatform/oekg"
+    <a href="{{ EXTERNAL_URLS.github_openenergyplatform_oekg }}"
       >Open Energy Knowledge Graph (OEKG)</a
     >
     which is currently under heavy development. Please note that this is just a
@@ -51,12 +49,12 @@
     Anyone is invited to contribute to development as this is a community-driven
     process. Most of the development takes place on GitHub. We have some
     <a
-      href="https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md"
+      href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform_develop_contributing }}"
       >helpful guidelines</a
     >
     on the workflow providing detailed information.
     <a
-      href="https://github.com/OpenEnergyPlatform/ontology/wiki/Welcome!-How-to-participate"
+      href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology_wiki_welcome__how_to_participate }}"
       >Welcome! We invite you to participate</a
     >.
   </p>

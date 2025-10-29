@@ -4,7 +4,7 @@
 {% load django_bootstrap5 %}
 
 {% block after-head %}
-  <link href="/static/metaedit/metaedit.css" rel="stylesheet" />
+  <link href="{% static 'metaedit/metaedit.css' %}" rel="stylesheet" />
 {% endblock after-head %}
 
 {% block site-header %}
@@ -23,11 +23,13 @@
         {{ schema }}
         /
         {% if table_label %}
-          <a href="/dataedit/view/{{ schema }}/{{ table }}"
+          <a href="{% url 'dataedit:view' schema=schema table=table %}"
             >{{ table_label }}</a
           >
         {% else %}
-          <a href="/dataedit/view/{{ schema }}/{{ table }}">{{ table }}</a>
+          <a href="{% url 'dataedit:view' schema=schema table=table %}"
+            >{{ table }}</a
+          >
         {% endif %}
         /
       {% else %}
@@ -151,16 +153,16 @@
     }
   </style>
   {% compress js %}
-    <script src="/static/metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js"></script>
-    <script src="/static/metaedit/metaedit.js"></script>
+    <script src="{% static 'metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js' %}"></script>
+    <script src="{% static 'metaedit/metaedit.js' %}"></script>
     <script src="{% static 'modelview/htmx.min.js' %}"></script>
   {% endcompress %}
   <!-- fix imports below - we dont use cdn anymore -->
-  <script src="https://unpkg.com/@trevoreyre/autocomplete-js"></script>
+  <script src="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js }}"></script>
 
   <link
     rel="stylesheet"
-    href="https://unpkg.com/@trevoreyre/autocomplete-js/dist/style.css"
+    href="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js_dist_style_css }}"
   />
 
   <script>

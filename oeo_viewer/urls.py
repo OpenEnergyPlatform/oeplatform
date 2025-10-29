@@ -6,6 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from django.urls import path
 
-from .views import viewer_index
+from oeo_viewer.views import viewer_index_view
 
-urlpatterns = [path(r"", viewer_index)]
+app_name = "oeo_viewer"
+urlpatterns = [path(r"", viewer_index_view, name="index")]

@@ -6,7 +6,9 @@
 {% load compress %}
 
 {% block main-right-sidebar-content-actions %}
-  <a class="btn btn-info" href="edit">Edit</a>
+  <a class="btn btn-info" href="{% url 'modelview:edit' 'model' model.pk %}"
+    >Edit</a
+  >
   <a
     class="btn btn-danger"
     hx-delete="{% url 'modelview:delete-factsheet' sheettype='model' pk=model.pk %}"
@@ -130,18 +132,10 @@
                   data-github="{{ gh_org }}/{{ gh_repo }}"
                   class="github-card"
                 ></div>
-                <script src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script>
+                <script src="{{ EXTERNAL_URLS.cdn_github_cards_widget }}"></script>
               </td>
 
               <td></td>
-            </tr>
-            <tr>
-              <td class="sheetlabel">GitHub Contributions Graph</td>
-              <td>
-                <img
-                  src="/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png"
-                />
-              </td>
             </tr>
           </table>
         {% endif %}
@@ -413,6 +407,6 @@
     });
   </script>
   {% compress js %}
-    <script src="/static/modelview/htmx.min.js"></script>
+    <script src="{% static 'modelview/htmx.min.js' %}"></script>
   {% endcompress %}
 {% endblock after-body-bottom-js %}

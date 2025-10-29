@@ -25,8 +25,8 @@
     <div class="main-header__wizard">
       <span class="main-header__wizard-process">Permissions :</span>
       <span class="main-header__wizard-path"
-        ><a href="/dataedit/schemas">Topics</a> /
-        <a href="/dataedit/view/{{ schema }}">{{ schema }}</a> /
+        ><a href="{% url 'dataedit:topic-list' %}">Topics</a> /
+        <a href="{% url 'dataedit:tables' schema=schema %}">{{ schema }}</a> /
         <a href="{% url 'dataedit:view' schema table %}">{{ table }}</a></span
       >
     </div>
@@ -55,7 +55,7 @@
           <form
             id="addGroupForm"
             style="position:absolute; right: 0%;"
-            action="permissions"
+            action="{% url 'dataedit:table-permission' schema=schema table=table %}"
             method="post"
           >
             {% csrf_token %}
@@ -86,7 +86,7 @@
 
             <form
               class="form-inline"
-              action="permissions"
+              action="{% url 'dataedit:table-permission' schema=schema table=table %}"
               method="post"
               style="display:inline-block;"
             >
@@ -114,7 +114,7 @@
               </select>
             </form>
             <form
-              action="permissions"
+              action="{% url 'dataedit:table-permission' schema=schema table=table %}"
               method="post"
               style="display:inline-block;float:right"
               onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ schema.table }}.{{ table }} and retract all permissions?')"
@@ -148,7 +148,7 @@
           <form
             id="addUserForm"
             style="position:absolute; right: 0%;"
-            action="permissions"
+            action="{% url 'dataedit:table-permission' schema=schema table=table %}"
             method="post"
           >
             {% csrf_token %}
@@ -177,7 +177,7 @@
             <label class="form-label" for="level">{{ perm.holder.name }}</label>
             <form
               class="form-inline"
-              action="permissions"
+              action="{% url 'dataedit:table-permission' schema=schema table=table %}"
               method="post"
               style="display:inline-block;"
             >
@@ -207,7 +207,7 @@
               </select>
             </form>
             <form
-              action="permissions"
+              action="{% url 'dataedit:table-permission' schema=schema table=table %}"
               method="post"
               style="display:inline-block;float:right"
               onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ schema.table }}.{{ table }} and retract all permissions?')"
@@ -245,7 +245,7 @@
         $("#group_field").autocomplete({
           source: function (request, response) {
             $.ajax({
-              url: "/api/grpprop/",
+              url: "{% url 'api:usrprop' %}",
               dataType: "json",
               data: { name: request.term },
               success: function (data) {
@@ -277,31 +277,10 @@
         let validSelection = false;
         let autocompleteSource = []; // This will be filled with your autocomplete data
 
-        // $('#user_field').bind('input', function() {
-        //     var dfd = new $.Deferred();
-        //     var request = $.ajax({type: 'GET',
-        //         url:'/api/usrprop/', dataType:'json',
-        //         data: {
-        //             name: $(this).val()
-        //         },
-        //         success: function(data) {
-        //             autocompleteSource = data; // Assuming 'data' is an array of strings
-        //         }
-        //     });
-        //     request.done(function(users)
-        //     {
-        //         console.log(users);
-        //         $('#user_field').autocomplete({
-        //             source: users
-        //         });
-        //         dfd.resolve({})
-        //     });
-        // });
-
         $("#user_field").autocomplete({
           source: function (request, response) {
             $.ajax({
-              url: "/api/usrprop/",
+              url: "{% url 'api:usrprop' %}",
               dataType: "json",
               data: { name: request.term },
               success: function (data) {

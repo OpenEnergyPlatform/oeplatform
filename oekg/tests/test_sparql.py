@@ -17,7 +17,7 @@ from oeplatform.settings import OEKG_SPARQL_ENDPOINT_URL
 class SparqlEndpointTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.endpoint_url = reverse("sparql_endpoint")
+        self.endpoint_url = reverse("oekg:sparql_endpoint")
 
     @patch("oekg.utils.execute_sparql_query")
     @unittest.skipIf(
@@ -44,7 +44,3 @@ class SparqlEndpointTest(TestCase):
         json_response = response.json()
         self.assertIn("head", json_response)
         self.assertIn("results", json_response)
-
-
-if __name__ == "__main__":
-    unittest.main()
