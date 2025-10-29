@@ -207,6 +207,85 @@ EXTERNAL_URLS = {
     "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
     "open_plan": "https://open-plan-tool.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
+    "tutorials_index": "https://openenergyplatform.github.io/academy/",
+    "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
+    "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
+    "tutorials_api_upload": "https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/",  # noqa E501
+    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
+    "tutorials_wizard": "https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/",  # noqa E501
+    "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
+    "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
+    "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
+    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
+    "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
+    "compendium": "https://openenergyplatform.github.io/organisation/",
+    "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
+    "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
+    "spdx_licenses": "https://spdx.github.io/license-list-data/",
+    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
+    "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
+    "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
+    "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
+    "open_plan": "https://open-plan-tool.org/",
+    "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
+    "creativecommons_licenses_by_3_0_de": "http://creativecommons.org/licenses/by/3.0/de/",  # noqa:E501
+    "iks_cs_ovgu_iks": "http://iks.cs.ovgu.de/IKS.html",
+    "reiner_lemoine_institut_en": "http://reiner-lemoine-institut.de/en/",
+    "dgs_berlin": "http://www.dgs-berlin.de/",
+    "znes_flensburg": "http://www.znes-flensburg.de/",
+    "creativecommons_licenses_by_3_0_de_deed_en": "https://creativecommons.org/licenses/by/3.0/de/deed.en",  # noqa:E501
+    "doi_10_1016_j_egyai_2021_100074": "https://doi.org/10.1016/j.egyai.2021.100074",
+    "en_wikipedia_wiki_open_science": "https://en.wikipedia.org/wiki/Open_science",
+    "forum_openmod_initiative": "https://forum.openmod-initiative.org/",
+    "github_openenergyplatform_oekg": "https://github.com/OpenEnergyPlatform/oekg",
+    "github_openenergyplatform_oemetadata": "https://github.com/OpenEnergyPlatform/oemetadata",  # noqa:E501
+    "github_openenergyplatform_oemetadata_production_oemetadata": "https://github.com/OpenEnergyPlatform/oemetadata/blob/production/oemetadata/latest/metadata_key_description.md",  # noqa:E501
+    "github_openenergyplatform_oeplatform": "https://github.com/OpenEnergyPlatform/oeplatform",  # noqa:E501
+    "github_openenergyplatform_oeplatform_develop_contributing": "https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md",  # noqa:E501
+    "github_openenergyplatform_oeplatform_discussions_1268": "https://github.com/OpenEnergyPlatform/oeplatform/discussions/1268",  # noqa:E501
+    "github_openenergyplatform_oeplatform_issues": "https://github.com/OpenEnergyPlatform/oeplatform/issues",  # noqa:E501
+    "github_openenergyplatform_oeplatform_issues_568": "https://github.com/OpenEnergyPlatform/oeplatform/issues/568",  # noqa:E501
+    "github_openenergyplatform_ontology": "https://github.com/OpenEnergyPlatform/ontology",  # noqa:E501
+    "github_openenergyplatform_ontology_dev_contributing": "https://github.com/OpenEnergyPlatform/ontology/blob/dev/CONTRIBUTING.md",  # noqa:E501
+    "github_openenergyplatform_ontology_releases": "https://github.com/OpenEnergyPlatform/ontology/releases",  # noqa:E501
+    "github_openenergyplatform_ontology_wiki_welcome__how_to_participate": "https://github.com/OpenEnergyPlatform/ontology/wiki/Welcome!-How-to-participate",  # noqa:E501
+    "github_openenergyplatform_tutorial_open_data_licenses_ipynb": "https://github.com/OpenEnergyPlatform/tutorial/blob/master/other/tutorial_open-data-licenses.ipynb",  # noqa:E501
+    "i_creativecommons_l_by_3_0_de_88x31_png": "https://i.creativecommons.org/l/by/3.0/de/88x31.png",  # noqa:E501
+    "infai": "https://infai.org/",
+    "nfdi4energy": "https://nfdi4energy.uol.de/",
+    "openenergyplatform_github_academy_courses_05_ontology": "https://openenergyplatform.github.io/academy/courses/05_ontology/",  # noqa:E501
+    "openenergyplatform_github_organisation_family_members": "https://openenergyplatform.github.io/organisation/family_members/",  # noqa:E501
+    "openenergyplatform_github_organisation_family_members_templates_metadata": "https://openenergyplatform.github.io/organisation/family_members/templates-and-specification/open-energy-metadata/",  # noqa:E501
+    "openmod_initiative": "https://openmod-initiative.org/",
+    "reiner_lemoine_institut": "https://reiner-lemoine-institut.de/",
+    "unpkg__trevoreyre_autocomplete_js": "https://unpkg.com/@trevoreyre/autocomplete-js",  # noqa:E501
+    "unpkg__trevoreyre_autocomplete_js_dist_style_css": "https://unpkg.com/@trevoreyre/autocomplete-js/dist/style.css",  # noqa:E501
+    "unpkg_htmx_org_1_7_0_dist_htmx_js": "https://unpkg.com/htmx.org@1.7.0/dist/htmx.js",  # noqa:E501
+    "wiki_openmod_initiative_wiki_category_glossary": "https://wiki.openmod-initiative.org/wiki/Category:Glossary",  # noqa:E501
+    "dlr": "https://www.dlr.de/",
+    "dlr_tt": "https://www.dlr.de/tt/",
+    "enargus_pub_bscw_cgi__op_enargus_eps2_q__2201180818_1_22": "https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201180818/1%22",  # noqa:E501
+    "enargus_pub_bscw_cgi__op_enargus_eps2_q__2201186899_1_22": "https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201186899/1%22",  # noqa:E501
+    "enargus_pub_bscw_cgi__op_enargus_eps2_q__2201227101_1_22": "https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201227101/1%22",  # noqa:E501
+    "enargus_pub_bscw_cgi_26_op_enargus_eps2_m_0_v_10_p_0_s_0_q_03ei1051c": "https://www.enargus.de/pub/bscw.cgi/26?op=enargus.eps2&m=0&v=10&p=0&s=0&q=03EI1051C",  # noqa:E501
+    "enargus_pub_bscw_cgi_26_op_enargus_eps2_m_0_v_10_p_0_s_0_q_sedos": "https://www.enargus.de/pub/bscw.cgi/26?op=enargus.eps2&m=0&v=10&p=0&s=0&q=SEDOS",  # noqa:E501
+    "fin_ovgu": "https://www.fin.ovgu.de/",
+    "fkie_fraunhofer": "https://www.fkie.fraunhofer.de/",
+    "fortiss": "https://www.fortiss.org/",
+    "fz_juelich_de": "https://www.fz-juelich.de",
+    "fz_juelich_iek_iek_3": "https://www.fz-juelich.de/iek/iek-3/",
+    "go_fair_fair_principles": "https://www.go-fair.org/fair-principles/",
+    "hereon": "https://www.hereon.de/",
+    "iee_fraunhofer_en": "https://www.iee.fraunhofer.de/en.html",
+    "ier_uni_stuttgart": "https://www.ier.uni-stuttgart.de/",
+    "informatik_uni_osnabrueck_institut_fuer_informatik": "https://www.informatik.uni-osnabrueck.de/institut_fuer_informatik.html",  # noqa:E501
+    "oeko": "https://www.oeko.de/",
+    "oeko_en": "https://www.oeko.de/en/",
+    "offis": "https://www.offis.de/",
+    "pik_potsdam": "https://www.pik-potsdam.de/",
+    "ptj_energiesystemanalyse": "https://www.ptj.de/energiesystemanalyse",
+    "tib_eu_de": "https://www.tib.eu/de/",
+    "uni_flensburg_en": "https://www.uni-flensburg.de/en/",
     "cdn_github_cards_widget": "//cdn.jsdelivr.net/github-cards/latest/widget.js",
 }
 
