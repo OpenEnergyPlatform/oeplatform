@@ -66,6 +66,7 @@ from api.views import (
     SequenceAPIView,
     TableAPIView,
     TableSizeAPIView,
+    TableUnpublishAPIView,
     groups_api_view,
     oeo_search_api_view,
     users_api_view,
@@ -100,6 +101,11 @@ urlpatterns_v0_schema_table = [
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move_publish/(?P<to_schema>[\w\d_\s]+)/",  # noqa
         MovePublishAPIView.as_view(),
         name="move_publish",
+    ),
+    re_path(
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/unpublish$",
+        TableUnpublishAPIView.as_view(),
+        name="table-unpublish",
     ),
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa

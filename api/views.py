@@ -38,6 +38,7 @@ from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
+    HttpRequest,
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseServerError,
@@ -666,7 +667,18 @@ class MovePublishAPIView(APIView):
         ) or json_data.get("embargo", {}).get("duration", None)
         actions.move_publish(schema, table, to_schema, embargo_period)
 
-        return HttpResponse(status=status.HTTP_200_OK)
+        return JsonResponse({}, status=status.HTTP_200_OK)
+
+
+class TableUnpublishAPIView(APIView):
+    @require_admin_permission
+    @api_exception
+    def post(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
+        """Set table to `not published`"""
+        table_obj = DBTable.objects.get(name=table)
+        table_obj.is_publish = False
+        table_obj.save()
+        return JsonResponse({}, status=status.HTTP_200_OK)
 
 
 class MoveAPIView(APIView):

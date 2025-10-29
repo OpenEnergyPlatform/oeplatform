@@ -25,6 +25,7 @@ import json
 import logging
 import re
 from decimal import Decimal
+from typing import Callable
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
@@ -183,7 +184,7 @@ def cors(allow):
     return doublewrapper
 
 
-def api_exception(f):
+def api_exception(f: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
@@ -197,7 +198,7 @@ def api_exception(f):
     return wrapper
 
 
-def permission_wrapper(permission, f):
+def permission_wrapper(permission: int, f: Callable):
     def wrapper(caller, request, *args, **kwargs):
         table = kwargs.get("table") or kwargs.get("sequence")
         actions.assert_permission(user=request.user, table=table, permission=permission)
@@ -206,15 +207,15 @@ def permission_wrapper(permission, f):
     return wrapper
 
 
-def require_write_permission(f):
+def require_write_permission(f: Callable) -> Callable:
     return permission_wrapper(login_models.WRITE_PERM, f)
 
 
-def require_delete_permission(f):
+def require_delete_permission(f: Callable) -> Callable:
     return permission_wrapper(login_models.DELETE_PERM, f)
 
 
-def require_admin_permission(f):
+def require_admin_permission(f: Callable) -> Callable:
     return permission_wrapper(login_models.ADMIN_PERM, f)
 
 
