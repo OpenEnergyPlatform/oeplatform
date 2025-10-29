@@ -7,6 +7,7 @@ SPDX-License-Identifier: CC0-1.0
 # Developer documentation of the Open Peer Review Process
 
 !!! Danger "🚧 Feature currently deactivated"
+
     The Open Peer Review on the OEP is currently under development as we migrated all metadata documents to version 2.
 
 ### What is this feature about?

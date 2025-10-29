@@ -19,6 +19,7 @@ First make sure to install django allauth package and install it into the existi
 Now edit your securitysettings.py and update it with the content form the securitysettings.py.default template file to setup the social provider used for 3rd Party Login flow. We use openIDConnect that is implemented by django allauth:
 
 !!! Note
+
     Filling out the values in the dictionary depends on your Provider. They should provide documentation or provide you with the relevant credentials. In some cases the provider_id must be in line with the specification of the provider in others you can choose your own name here. The client_id & secret should also be provided as well as the server_url.
 
 ```python

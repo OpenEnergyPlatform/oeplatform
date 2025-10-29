@@ -75,6 +75,7 @@ This way you can insert your changes without worrying about breaking anything in
 ### Deploy react app´s locally
 
 !!! Note
+
     This solution is not the best developer experience and needs optimization
 
 As some Apps of the Oeplatform integrate React apps they need to be build using npm locally. We offer build scripts that can be triggered using django management commands. For example to build the scenario bundles react app and deploy it in the django app factsheet you can run the command `python manage.py build_factsheet_app`. Once done you can access the scenario bundles app via your locally deployed django instance (see above).

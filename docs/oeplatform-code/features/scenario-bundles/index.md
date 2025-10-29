@@ -32,7 +32,8 @@ Database
 ### Django view for the scenario bundles
 
 !!! note
-Some of the information on this page may be changed in the future. To review the most recent information, please revisit.
+
+    Some of the information on this page may be changed in the future. To review the most recent information, please revisit.
 
 #### ::: factsheet.views
 
@@ -45,6 +46,7 @@ You can read the following sections as: This is how django processes the data, a
 The technology that drives this implementation is HTTP. The JSON objects and key:value information is send in packaged as a payload that is send along with each requests. A requests can be triggered by multiple actions for example a button that is pressed by the user. Based on the URL and the payload the backend can determine what functionality must be triggered. This can be for example creating a scenario bundle or retrieving a specific bundle by its ID.
 
 !!! note
+
     Some of the information on this page may be changed in the future. To review the most recent information, please revisit.
 
 #### Create a new bundle in OEKG

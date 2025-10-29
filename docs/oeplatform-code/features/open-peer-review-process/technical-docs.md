@@ -47,8 +47,9 @@ Django models.
 The model of the Open Peer Review defines what data is stored in the django database about each existing review. Next to the review itself it stores additional data about the the reviewer and contributor user and more. It is used in the PeerReviewManger.
 
 !!! note
-This model also provides functionality that is directly related to the model.
-It is up to discussion if we want to keep the functionality inside the model.
+
+    This model also provides functionality that is directly related to the model.
+    It is up to discussion if we want to keep the functionality inside the model.
 
 #### ::: dataedit.models.PeerReview
 
@@ -57,7 +58,8 @@ It is up to discussion if we want to keep the functionality inside the model.
 The Manager is introduced to be able to store additional information about the peer review process and separate it from the PeerReview model. The process is started by submitting a review and the manager maintains the order of which user has to take the next action to be able to hold and activate the process.
 
 !!! note
-This model also provides functionality that is directly related to the model.
-It is up to discussion if we want to keep the functionality inside the model.
+
+    This model also provides functionality that is directly related to the model.
+    It is up to discussion if we want to keep the functionality inside the model.
 
 #### ::: dataedit.models.PeerReviewManager

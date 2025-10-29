@@ -7,8 +7,9 @@ SPDX-License-Identifier: CC0-1.0
 # Rest (http) API
 
 !!! Info "We are still in the process of migrating this document!"
-If you are looking for our former ReadTheDocs based documentation: We do not support it anymore and added a redirect to this page here.
-Migrating the outdated documentation and updating the content will take some time. Please revisit this page later again.
+
+    If you are looking for our former ReadTheDocs based documentation: We do not support it anymore and added a redirect to this page here.
+    Migrating the outdated documentation and updating the content will take some time. Please revisit this page later again.
 
 In the meantime we suggest you to have a look at our Courses & Tutorials available in the [Academy](https://openenergyplatform.github.io/academy/tutorials/).
 

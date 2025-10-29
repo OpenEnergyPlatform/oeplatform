@@ -7,6 +7,7 @@ SPDX-License-Identifier: CC0-1.0
 # Datasets
 
 !!! danger "🚧 Feature not yet available"
+
     Datasets are still in development and not yet fully implemented as described below. Currently, tabular data resources are handled individually.
 
 This section explains how we plan to implement **Datasets** in the OEP (Open Energy Platform).
@@ -24,6 +25,7 @@ The OEP integrates the **OpenEnergyDatabus**, which assigns persistent identifie
 ## About OEP Datasets
 
 ??? info "🧩 Dataset Specifications We Build On"
+
     Datasets are a general concept used to group one or more data resources. Each dataset represents a unique set of data resources, meaning resources are not duplicated within a dataset.
 
     Rather than being stored as a physical set in a database, datasets are often described using **metadata**. In most professional and governmental domains, datasets follow the **DCAT vocabulary** (W3C), particularly the **DCAT-AP** specification promoted by the EU.
@@ -141,4 +143,5 @@ Since we already have a production implementation up and running since years and
 The OEP interface will visualize datasets within a navigable catalog structure and provide editing capabilities for metadata and resources.
 
 !!! tip "🌱 Coming Soon"
+
     The dataset interface is currently under active development. Feedback and suggestions are welcome as we evolve the feature!

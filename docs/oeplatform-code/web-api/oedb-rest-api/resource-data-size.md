@@ -20,6 +20,7 @@ Authorization: Token <YOUR_API_TOKEN>
 ```
 
 !!! warning "Security"
+
     Never use real tokens in documentation. Always use placeholders like `<YOUR_API_TOKEN>`.
 
 ## Endpoint
@@ -77,6 +78,7 @@ Authorization: Token <YOUR_API_TOKEN>
 ```
 
 !!! note "Note on empty tables"
+
     `8192` bytes is typically the default overhead for an empty table (one memory page). Therefore, `total_bytes` can be > 0 even if `table_bytes` and `index_bytes` are zero.
 
 ## Response Fields

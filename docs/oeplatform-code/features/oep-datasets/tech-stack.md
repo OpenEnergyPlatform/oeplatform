@@ -7,6 +7,7 @@ SPDX-License-Identifier: CC0-1.0
 # Technology & Architecture
 
 !!! danger "🚧 Feature not yet available"
+
     Datasets are still in development and not yet fully implemented as described below.
     Currently, tabular data resources are handled individually.
 
@@ -81,4 +82,5 @@ The transition to a dataset-centric model requires several substantial changes:
 The **MOSS microservice** plays a key role in powering metadata search by indexing OEMetadata documents. This greatly improves **findability** and supports FAIR data practices.
 
 !!! tip "💡 Looking Ahead"
+
     Once fully implemented, the new architecture will streamline data handling, reduce redundancy, and make working with large datasets on the OEP much more efficient.

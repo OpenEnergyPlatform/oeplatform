@@ -1,9 +1,11 @@
 # Docker based installation
 
 !!! Warning "🚧"
+
     This section is still new and might change. The information presented here is tested by the developer and is currently rolled out within our team and close collaborators. Any suggestions are welcome and can be added in this GitHub discussion.
 
 !!! Info "Manual installation"
+
     If you prefer not to use docker or want to get insights into each step of the installation and setup process for the oeplatform please have a look at the [manual installation guide](./installation.md) which also links the [detailed database setup](./manual-db-setup.md).
 
 ## Introduction
@@ -13,6 +15,7 @@ Installing the oeplatform and its infrastructure is a tedious when one wants to 
 This concept is not exclusive to docker as many parties offer specific container solutions. As docker is rather disseminated and adapted we want to start our route to containerization by providing a docker compose development setup which will enable developers even with low technical literacy to install the oeplatform and apply changes to this local instance of the software infrastructure. We hope that this will enable more contributors to get started with development quickly and learn the details along side the development road.
 
 !!! Note
+
     We already maintain an docker image of the oeplatform and the OEDB (postgresql database) which is mainly used for CI especially unit and integration testing. These images stays valid for now. The new setup aims for developers and is a more complete version as it introduces services to our docker compose setup which have been missing in the previous version.
 
 ## Relevant docker components
@@ -42,6 +45,7 @@ The ontop service requires a special database driver which must be [downloaded m
 #### Docker compose command
 
 !!! Info
+
     We assume that you already installed these software pieces.
 
     - [Git](https://git-scm.com/downloads)

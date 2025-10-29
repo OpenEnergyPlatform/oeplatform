@@ -3,6 +3,7 @@
 Below we describe the manual installation of the oeplatform code and infrastructure.
 
 !!! tip
+
     We also support [docker](https://www.docker.com/) users by providing basic oeplatform-webapp and database images . This brings an easy setup which provides an installed and ready to use locally oeplatform and additional databases.
     To support developers with getting started with the initial setup which provides a pre configured complete oeplatform software infrastructure with a docker compose setup that installs all components of the infrastructure using containers run locally in a shared virtual network. By adding convince functionality to the setup we enhance the developer experience to support the development.
 
@@ -11,6 +12,7 @@ Below we describe the manual installation of the oeplatform code and infrastruct
     [Find the (old) instructions related to our docker image mainly used for testing as part of the CI](docker.md)
 
 !!! danger
+
     Currently the docker based installation does not cover the installation of the additional database `jenna-fuseki` a triple store that stores graph data used in some of our features.
     It is not mandatory to run the core functionality of the oeplatform. You need to install it manually as described in the installation guide.
 
@@ -42,6 +44,7 @@ Below we describe the manual installation of the oeplatform code and infrastruct
         - Chose 2 to install everything on your directly on your system.
 
         ??? info "Option 1: Use docker"
+
             - [Install docker](https://docs.docker.com/get-docker/)
             - while in oeplatform directory `cd docker`
             - `docker compose -f docker-compose.yaml`
@@ -49,6 +52,7 @@ Below we describe the manual installation of the oeplatform code and infrastruct
             - Additionally install and start jenna-fuseki db as docker or install it locally.
 
         ??? info "Option 2: Manual database setup"
+
             - [install manually](./manual-db-setup.md)
 
         Summary:
@@ -66,6 +70,7 @@ Below we describe the manual installation of the oeplatform code and infrastruct
         - `python manage.py alembic upgrade head`
 
         ??? Info "Sept 3.1: Management commands:"
+
             These commands are most likely not relevant if you are setting up oeplatform for the first time. Use the following command to show a list of all available management commands.
 
             - `python manage.py -h`
@@ -183,6 +188,7 @@ To be able to run the commands below we first need to Setup the security setting
 - copy the file `securitysettings.py.default` and rename it to `securitysettings.py`
 
 ??? note "How to configure securitysettings.py"
+
     The security settings provide information to django to connect to your databases, relevant for step 5, below. You can provide the access credentials directly in the script or import them using environment variables. For detailed instructions see section [3. of the manual database setup guide](./manual-db-setup.md#3-connect-database-to-the-django-project).
 
 After the above setup is done make sure the python environment is activated and then run:
@@ -239,6 +245,7 @@ We use `alembic` to keep track of changes to the general structure of the primar
     python manage.py alembic upgrade head
 
 !!! Note
+
     If you encounter errors in this step verify that your database service is available, the databases `oep_django` and `oedb` exist and your `securitysettings.py` provide the correct access credentials.
 
 ## 6 Install the OpenEnergyOntology tools
@@ -248,6 +255,7 @@ Only start the following steps if you have completed step 3 above.
 ### 6.1 Setup the OEO-viewer app
 
 !!! note "Optional Step"
+
     This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website including most ontology pages except for the oeo-viewer.
 
 The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see and use the oeo-viewer as part of the oep-website, follow the steps below:
@@ -279,6 +287,7 @@ The use case described above requires to setup the oeo extended template file in
 ## 7 Setup the Scenario-Bundles app
 
 !!! note "Optional Step"
+
     This step is not mandatory to run the oeplatform-core as it is a plug able React-App. If you don't include this step you can access the oeplatform website except scenario-bundle pages including the scenario-comparison React modules.
 
 In the django app directory `oeplatform/factsheet` we provide a Web-API to access the OEKG and the Scenario-Bundle feature. Similar to the oeo-viewer we need to use npm to install & build the Scenario-Bundle app and integrate the build in the django app.
