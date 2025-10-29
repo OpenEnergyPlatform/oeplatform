@@ -8,26 +8,33 @@ SPDX-License-Identifier: CC0-1.0
 
 # Bootstrap 5 Theme Generation
 
-We use a custom bootstrap theme to style the platform. If I did everything correctly, you never need to touch this, but this is very unlikely, so this is how to generate a new bootstrap.min.css, which contains the theme.
+We use a custom bootstrap theme to style the platform. If I did everything
+correctly, you never need to touch this, but this is very unlikely, so this is
+how to generate a new bootstrap.min.css, which contains the theme.
 
-You need to do this steps, if you change values within the `_variables.scss`.
-I used [Bootstrap Build](https://bootstrap.build/) to create `_variables.scss`. If you need to change anything, you can import this theme into this tool.
+You need to do this steps, if you change values within the `_variables.scss`. I
+used [Bootstrap Build](https://bootstrap.build/) to create `_variables.scss`. If
+you need to change anything, you can import this theme into this tool.
 
 ## Preparation
 
-Since we do not have any `npm`-based environment within this platform, which is required by Bootstrap, this is packed into a Docker container. First, we need to build this container.
+Since we do not have any `npm`-based environment within this platform, which is
+required by Bootstrap, this is packed into a Docker container. First, we need to
+build this container.
 
 ```sh
 docker build -t bootstrap-build .
 ```
 
-Afterwards, we have a ready build container, which can be used to build our `bootstrap.min.css` file.
+Afterwards, we have a ready build container, which can be used to build our
+`bootstrap.min.css` file.
 
 ```shell
 docker run -v $(pwd)/_variables.scss:/_variables.scss -v $(pwd)/scss:/scss bootstrap-build > bootstrap.min.css
 ```
 
-To check what changes are in the updated bootstrap.min.css, you can use the script `build_an_diff.sh` (here of #1856):
+To check what changes are in the updated bootstrap.min.css, you can use the
+script `build_an_diff.sh` (here of #1856):
 
 ```shell
 me@local:/app/theming/$ sh build_and_diff.sh
@@ -47,10 +54,13 @@ If this diff is fine for you, copy the bootstrap.min.css to ../base/static/css/b
 mv bootstrap.min.css ../base/static/css/bootstrap.min.css
 ```
 
-If you're fine with the changed, copy the file `bootstrap.min.css` manually into `base/static/css/`, as indicated.
+If you're fine with the changed, copy the file `bootstrap.min.css` manually into
+`base/static/css/`, as indicated.
 
 ## Build css without docker
 
 1. navigate into the `theming` directory
-1. locally clone bootstrap: `git clone --depth=1 --branch v5.2.0 https://github.com/twbs/bootstrap.git`
-1. build css: `sass --no-source-map --style=compressed oepstrap.scss ../base/static/css/bootstrap.min.css`
+1. locally clone bootstrap:
+   `git clone --depth=1 --branch v5.2.0 https://github.com/twbs/bootstrap.git`
+1. build css:
+   `sass --no-source-map --style=compressed oepstrap.scss ../base/static/css/bootstrap.min.css`

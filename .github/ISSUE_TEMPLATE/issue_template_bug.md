@@ -1,16 +1,16 @@
 ---
 name: Bug Issue
 about: For bugs and errors
-title: Your title should make sense if said after "The issue is <your issue title>"
+title:
+  Your title should make sense if said after "The issue is <your issue title>"
 labels: "bug"
 assignees: ""
 ---
 
 ## Description of the issue
 
-Describe the problem in as much detail as possible.
-Focus on the expected and current behavior.
-If necessary, create a screenshot and insert below.
+Describe the problem in as much detail as possible. Focus on the expected and
+current behavior. If necessary, create a screenshot and insert below.
 
 ## Steps to Reproduce
 
@@ -30,4 +30,5 @@ Describe possible ideas for solution and evaluate advantages and disadvantages.
 
 ## Workflow checklist
 
-- [ ] I am aware of the workflow in [CONTRIBUTING.md](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md)
+- [ ] I am aware of the workflow in
+      [CONTRIBUTING.md](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md)

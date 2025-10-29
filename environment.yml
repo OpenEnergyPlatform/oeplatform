@@ -2,8 +2,8 @@ name: oep-website
 channels:
   - conda-forge
 dependencies:
-    - python=3.9
-    - shapely
-    - pip
-    - pip:
-          - -r requirements.txt
+  - python=3.9
+  - shapely
+  - pip
+  - pip:
+      - -r requirements.txt
