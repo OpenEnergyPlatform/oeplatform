@@ -37,7 +37,7 @@ from rest_framework.authtoken.models import Token
 
 import login.models as models
 from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
-from login.forms import CreateUserForm, DetachForm, EditUserForm, GroupForm
+from login.forms import EditUserForm, GroupForm
 from login.models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
 from login.models import myuser as OepUser
 from login.utils import (
@@ -839,21 +839,6 @@ class EditUserView(View):
             return render(request, "login/oepuser_edit_form.html", {"form": form})
 
 
-class CreateUserView(View):
-    # TODO: duplicate user create form, and not working?
-    def get(self, request):
-        form = CreateUserForm()
-        return render(request, "login/oepuser_create_form.html", {"form": form})
-
-    def post(self, request):
-        form = CreateUserForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("activate")
-        else:
-            return render(request, "login/oepuser_create_form.html", {"form": form})
-
-
 class UserRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
 
@@ -862,25 +847,6 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 
 user_redirect_view = UserRedirectView.as_view()
-
-
-class DetachView(LoginRequiredMixin, View):
-    def get(self, request):
-        if request.user.is_native:
-            raise PermissionDenied
-        form = DetachForm(request.user)
-        return render(request, "login/detach.html", {"form": form})
-
-    def post(self, request):
-        if request.user.is_native:
-            raise PermissionDenied
-        form = DetachForm(request.user, request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("base:home")
-        else:
-            print(form.errors)
-            return render(request, "login/detach.html", {"form": form})
 
 
 class AccountDeleteView_TODO_UNUSED(LoginRequiredMixin, DeleteView):

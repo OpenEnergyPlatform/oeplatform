@@ -16,7 +16,6 @@ class TestViewsLogin(TestViewsTestCase):
 
         # "login:password_reset_confirm",
         # "login:account-delete",
-        # "login:detach",
         # "login:group-partial-edit-form",
         # "login:delete_peer_review_simple",
         # "login:group-leave",  # cannot leave beacuase only member
@@ -43,7 +42,6 @@ class TestViewsLogin(TestViewsTestCase):
         self.get("login:password_reset_done")
         self.get("login:profile", kwargs={"user_id": user_id})
         self.get("login:redirect")
-        self.get("login:register")
         self.get("login:reset-token", logged_in=True)
         self.get("login:reviews", kwargs={"user_id": user_id})
         self.get("login:settings", kwargs={"user_id": user_id})
