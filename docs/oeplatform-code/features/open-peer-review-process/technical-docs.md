@@ -22,13 +22,15 @@ View for the contributor role of the Open Peer Review process.
 
 ## Helper Functions
 
-Separated functionality that can be imported in other modules. It contains several functions that help with recurring tasks in the peer review system.
+Separated functionality that can be imported in other modules. It contains
+several functions that help with recurring tasks in the peer review system.
 
 ### ::: dataedit.helper
 
 ## Metadata Functions
 
-Provide functionality that is related to retrieving and updating the oemetadata resource from the database. The oemetadata is the object of a review.
+Provide functionality that is related to retrieving and updating the oemetadata
+resource from the database. The oemetadata is the object of a review.
 
 ### Save Metadata to Database
 
@@ -44,7 +46,10 @@ Django models.
 
 ### PeerReview
 
-The model of the Open Peer Review defines what data is stored in the django database about each existing review. Next to the review itself it stores additional data about the the reviewer and contributor user and more. It is used in the PeerReviewManger.
+The model of the Open Peer Review defines what data is stored in the django
+database about each existing review. Next to the review itself it stores
+additional data about the the reviewer and contributor user and more. It is used
+in the PeerReviewManger.
 
 !!! note
 
@@ -55,7 +60,10 @@ The model of the Open Peer Review defines what data is stored in the django data
 
 ### PeerReviewManager
 
-The Manager is introduced to be able to store additional information about the peer review process and separate it from the PeerReview model. The process is started by submitting a review and the manager maintains the order of which user has to take the next action to be able to hold and activate the process.
+The Manager is introduced to be able to store additional information about the
+peer review process and separate it from the PeerReview model. The process is
+started by submitting a review and the manager maintains the order of which user
+has to take the next action to be able to hold and activate the process.
 
 !!! note
 

@@ -4,10 +4,11 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: CC0-1.0
 -->
 
-
 # Database Table Sizes
 
-Short guide for the **Table Sizes** API endpoint. This endpoint returns the storage size of individual tables (including indexes) or all tables across all schemas.
+Short guide for the **Table Sizes** API endpoint. This endpoint returns the
+storage size of individual tables (including indexes) or all tables across all
+schemas.
 
 > Base URL: `https://openenergyplatform.org`
 
@@ -96,8 +97,9 @@ Authorization: Token <YOUR_API_TOKEN>
 
 ## Error Cases
 
-* `401 Unauthorized`: Token missing or invalid.
-* `400 Bad Request`: Invalid parameter combination (e.g., `table` without `schema`).
+- `401 Unauthorized`: Token missing or invalid.
+- `400 Bad Request`: Invalid parameter combination (e.g., `table` without
+  `schema`).
 
 ## Quickstart in Python (requests)
 
@@ -121,4 +123,4 @@ print(r.json())
 
 ---
 
-*Last updated: 17.08.2025*
+_Last updated: 17.08.2025_
