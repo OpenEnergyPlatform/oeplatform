@@ -237,7 +237,9 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
         tag_ids=searched_tag_ids,
     )
 
-    tables = tables.order_by("human_readable_name")
+    # descending (-): null/missing should be at end, so
+    # "-date_updated" should be newest first
+    tables = tables.order_by("-date_updated", "human_readable_name")
 
     # paginate tables
     paginator = Paginator(tables, ITEMS_PER_PAGE)
