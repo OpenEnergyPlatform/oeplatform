@@ -209,7 +209,7 @@ def parse_select(d):
                 elif isinstance(grouping, list):
                     partials = map(parse_select, grouping)
                 else:
-                    APIError(
+                    raise APIError(
                         "Cannot handle grouping type. Dictionary or list expected."
                     )
             elif t == "select":

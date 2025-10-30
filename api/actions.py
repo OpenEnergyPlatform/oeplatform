@@ -117,7 +117,7 @@ def assert_permission(user: User, table: str, permission: int):
         raise APIError("User is anonymous", 401)
 
     if user.get_table_permission_level(DBTable.load(name=table)) < permission:
-        raise PermissionDenied
+        raise APIError("Permission denied", 403)
 
 
 def assert_add_tag_permission(user, table, permission, schema):
@@ -895,15 +895,11 @@ def table_create(schema, table, column_definitions, constraints_definitions):
 
         # check for duplicate column names
         if col.name in columns_by_name:
-            error = APIError("Duplicate column name: %s" % col.name)
-            logger.error(error)
-            raise error
+            raise APIError("Duplicate column name: %s" % col.name)
         columns_by_name[col.name] = col
         if col.primary_key:
             if primary_key_col_names:
-                error = APIError("Multiple definitions of primary key")
-                logger.error(error)
-                raise error
+                raise APIError("Multiple definitions of primary key")
             primary_key_col_names = [col.name]
 
     constraints = []
@@ -2401,11 +2397,6 @@ def set_table_metadata(table: str, metadata):
     metadata_obj, err = try_validate_metadata(metadata_oep)
     if err:
         raise APIError(err)
-    # dump the metadata dict into json string
-    # try:
-    #     metadata_str = json.dumps(metadata_obj, ensure_ascii=False)
-    # except Exception:
-    #     raise APIError("Cannot serialize metadata")
 
     # ---------------------------------------
     # update the oemetadata field (JSONB) in django db

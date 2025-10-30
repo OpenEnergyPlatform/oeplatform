@@ -62,6 +62,7 @@ from api.encode import Echo
 from api.error import APIError
 from api.helper import (
     WHERE_EXPRESSION,
+    JsonLikeResponse,
     OEPStream,
     check_embargo,
     conjunction,
@@ -109,9 +110,6 @@ if USE_ONTOP:
     from oeplatform.settings import ONTOP_SPARQL_ENDPOINT_URL
 
 from api.helper import api_exception
-
-# Response is from rest framework, OEPStream has content_type json
-JsonLikeResponse = JsonResponse | Response | OEPStream
 
 
 class SequenceAPIView(APIView):
@@ -662,8 +660,8 @@ class FieldsAPIView(APIView):
 
 
 class MovePublishAPIView(APIView):
-    @require_admin_permission
     @api_exception
+    @require_admin_permission
     def post(
         self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonLikeResponse:
@@ -678,8 +676,8 @@ class MovePublishAPIView(APIView):
 
 
 class TableUnpublishAPIView(APIView):
-    @require_admin_permission
     @api_exception
+    @require_admin_permission
     def post(self, request: HttpRequest, schema: str, table: str) -> JsonLikeResponse:
         """Set table to `not published`"""
         table_obj = DBTable.objects.get(name=table)
@@ -689,8 +687,8 @@ class TableUnpublishAPIView(APIView):
 
 
 class MoveAPIView(APIView):
-    @require_admin_permission
     @api_exception
+    @require_admin_permission
     def post(
         self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonLikeResponse:
@@ -926,7 +924,7 @@ class RowsAPIView(APIView):
         column_data = request.data["query"]
 
         if row_id and column_data.get("id", int(row_id)) != int(row_id):
-            raise actions.APIError(
+            raise APIError(
                 "Id in URL and query do not match. Ids may not change.",
                 status=status.HTTP_409_CONFLICT,
             )

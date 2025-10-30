@@ -188,20 +188,24 @@ def cors(allow):
     return doublewrapper
 
 
-def api_exception(f: Callable[..., JsonResponse]) -> Callable[..., JsonResponse]:
+def api_exception(
+    f: Callable[..., JsonLikeResponse],
+) -> Callable[..., JsonLikeResponse]:
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except actions.APIError as e:
-            return JsonResponse({"error": e.message}, status=e.status)
+            return JsonResponse({"reason": e.message}, status=e.status)
         except DBTable.DoesNotExist:
-            return JsonResponse({"error": "Table does not exist"}, status=404)
-        except Exception as exc:
-            # for any other error:
-            # log to error log and return generic error
-            # (we dont want to accidently send sensitive data to user)
-            logger.error(str(exc))
-            return JsonResponse({"error": "Table does not exist"}, status=404)
+            return JsonResponse({"reason": "table does not exist"}, status=404)
+
+        # TODO: why cant' we handle all other errors here? (tests failing)
+
+        # except Exception as exc:
+        #    # All other Errors: dont accidently return sensitive data from error
+        #    # but return generic error message
+        #    logger.error(str(exc))
+        #    return JsonResponse({"reason": "Invalid request."}, status=400)
 
     return wrapper
 
