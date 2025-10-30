@@ -46,11 +46,11 @@ def update_date_from_metadata(apps, schema_editor):
     for table in Table.objects.all():
         try:
             table.date_updated = get_metadata_date(table.oemetadata or {})
-        except Exception:
-            pass
-        if table.date_updated:
             print(f"{table.name}: {table.date_updated}")
-            table.save()
+        except Exception:
+            # no date in metadata found
+            table.date_updated = None
+        table.save()
 
 
 def update_date_from_metadata_rev(apps, schema_editor):
