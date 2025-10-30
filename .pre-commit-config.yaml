@@ -50,4 +50,5 @@ repos:
         name: prettier
         entry: npx prettier --check .
         language: node
-        types: [javascript, typescript, css, scss, html, json, markdown]
+        # files: \.(js|ts|jsx|tsx|css|scss|html|json|md)$
+        files: \.(js|ts|jsx|tsx|css|scss|html|json|md)$
