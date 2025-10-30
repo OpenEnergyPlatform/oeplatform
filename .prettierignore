@@ -1,3 +1,20 @@
 # prettier: could not determine a constructor for the tag 'tag:yaml.org,2002:python/name:material.extensions.emoji.twemoji' in "mkdocs.yml"
-
 mkdocs.yml
+
+**/*.min.js
+**/*.min.css
+
+# ignore these for now
+**/*.js
+**/*.tsx
+**/*.jsx
+**/*.css
+**/*.scss
+**/*.jsonc
+
+modelview/templates/modelview/modellist.html
+modelview/templates/modelview/array_snippet.html
+modelview/templates/modelview/editmodel_snippet_depend.html
+
+#xclude: ^.*(.min.js|.min.css|.js.map|js|jsx|tsx|jsonc|scss|mkdocs.yml|/dist/.*)$
+
