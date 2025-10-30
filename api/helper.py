@@ -30,7 +30,7 @@ from typing import Callable
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
@@ -271,7 +271,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
 
         @cors(allow_cors)
         @api_exception
-        def post(self, request):
+        def post(self, request: HttpRequest):
             result = self.execute(request)
             session = (
                 sessions.load_session_from_context(result.pop("context"))
@@ -284,7 +284,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
                 session=session,
             )
 
-        def execute(self, request):
+        def execute(self, request: HttpRequest):
             if requires_cursor:
                 return load_cursor()(self._internal_execute)(self, request)
             else:
