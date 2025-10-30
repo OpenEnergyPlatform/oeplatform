@@ -135,8 +135,6 @@ def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig):
     }}
     """  # noqa
 
-    print(sparql_query)
-    # response = send_sparql_update(sparql_query)
     sparql_wrapper_update.setQuery(sparql_query)
     sparql_wrapper_update.setMethod(POST)
     sparql_wrapper_update.setReturnFormat(JSON)

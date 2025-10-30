@@ -19,11 +19,6 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 
-@register.simple_tag
-def prnt(x):
-    print(x)
-
-
 @register.filter
 def isArray(field):
     return isinstance(field.field, SimpleArrayField)

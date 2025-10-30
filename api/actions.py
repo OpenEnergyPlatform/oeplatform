@@ -442,7 +442,7 @@ def perform_sql(sql_statement, parameter=None):
     try:
         result = session.execute(sql_statement, parameter)
     except Exception as e:
-        print("SQL Action failed. \n Error:\n" + str(e))
+        logging.error("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
         raise APIError(str(e))
     else:
@@ -2180,7 +2180,7 @@ def getValue(schema, table, column, id):
 
         return returnValue
     except Exception as e:
-        print("SQL Action failed. \n Error:\n" + str(e))
+        logging.error("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
     finally:
         session.close()
