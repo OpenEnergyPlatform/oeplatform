@@ -30,6 +30,7 @@ from datetime import datetime, timedelta
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 import sqlalchemy as sa
+from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404
@@ -112,8 +113,8 @@ class ResponsiveException(Exception):
     pass
 
 
-def assert_permission(user: User, table: str, permission: int):
-    if user.is_anonymous:
+def assert_permission(user: AbstractUser, table: str, permission: int):
+    if user.is_anonymous or not isinstance(user, User):
         raise APIError("User is anonymous", 401)
 
     if user.get_table_permission_level(DBTable.load(name=table)) < permission:

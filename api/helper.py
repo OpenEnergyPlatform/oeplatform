@@ -210,9 +210,9 @@ def api_exception(
     return wrapper
 
 
-def permission_wrapper(permission: int, f: Callable):
+def permission_wrapper(permission: int, f: Callable) -> Callable:
     def wrapper(caller, request: HttpRequest, *args, **kwargs):
-        table = kwargs.get("table") or kwargs.get("sequence")
+        table = kwargs.get("table") or kwargs.get("sequence") or ""
         actions.assert_permission(user=request.user, table=table, permission=permission)
         return f(caller, request, *args, **kwargs)
 
@@ -235,11 +235,11 @@ def conjunction(clauses):
     return {"type": "operator", "operator": "AND", "operands": clauses}
 
 
-def check_embargo(schema, table):
+def check_embargo(schema: str, table: str) -> bool:
     try:
         table_obj = DBTable.objects.get(name=table)
         embargo = Embargo.objects.filter(table=table_obj).first()
-        if embargo and embargo.date_ended > timezone.now():
+        if embargo and embargo.date_ended and embargo.date_ended > timezone.now():
             return True
         return False
     except ObjectDoesNotExist:
@@ -273,12 +273,12 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     class AJAX_View(APIView):
         @cors(allow_cors)
         @api_exception
-        def options(self, request: HttpRequest, *args, **kwargs) -> JsonResponse:
+        def options(self, request: HttpRequest, *args, **kwargs) -> JsonLikeResponse:
             return JsonResponse({})
 
         @cors(allow_cors)
         @api_exception
-        def post(self, request: HttpRequest) -> OEPStream:
+        def post(self, request: HttpRequest) -> JsonLikeResponse:
             result = self.execute(request)
             session = (
                 sessions.load_session_from_context(result.pop("context"))
