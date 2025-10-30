@@ -25,7 +25,7 @@ import json
 import logging
 import re
 from decimal import Decimal
-from typing import Callable
+from typing import Callable, Union
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
@@ -33,6 +33,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest, JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import login.models as login_models
@@ -45,7 +46,7 @@ from dataedit.models import Tag
 from oeplatform.settings import SCHEMA_DEFAULT
 
 # Response is from rest framework, OEPStream has content_type json
-JsonLikeResponse = JsonResponse | Response | OEPStream
+JsonLikeResponse = Union[JsonResponse, Response, "OEPStream"]
 
 logger = logging.getLogger("oeplatform")
 
@@ -130,7 +131,7 @@ def load_cursor(named=False):
                             if not e.args or e.args[0] != "no results to fetch":
                                 raise e
                         except psycopg2.errors.InvalidCursorName as e:
-                            logging.error(str(e))
+                            logger.error(str(e))
                     if first:
                         first = map(actions._translate_fetched_cell, first)
                         if cursor.description:
@@ -199,7 +200,7 @@ def api_exception(f: Callable[..., JsonResponse]) -> Callable[..., JsonResponse]
             # for any other error:
             # log to error log and return generic error
             # (we dont want to accidently send sensitive data to user)
-            logging.error(str(exc))
+            logger.error(str(exc))
             return JsonResponse({"error": "Table does not exist"}, status=404)
 
     return wrapper

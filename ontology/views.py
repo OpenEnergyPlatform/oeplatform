@@ -30,9 +30,9 @@ from oeplatform.settings import (
 )
 from ontology.utils import collect_modules, get_common_data, get_ontology_version
 
-LOGGER = logging.getLogger("oeplatform")
+logger = logging.getLogger("oeplatform")
 
-LOGGER.info("Start loading the oeo from local static files.")
+logger.info("Start loading the oeo from local static files.")
 OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
 OEO_PATH = OEO_BASE_PATH / OEO_VERSION
@@ -40,7 +40,7 @@ OEO_MODULES_MAIN = collect_modules(OEO_PATH)
 OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
 OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
 OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
-LOGGER.info(
+logger.info(
     "Loading completed! The content form the oeo files is parse into python data types."
 )
 
@@ -52,7 +52,7 @@ class OntologyAboutView(View):
         if not onto_base_path.exists():
             raise Http404
         versions = os.listdir(onto_base_path)
-        LOGGER.info(f"Loaded oeo version {version}")
+        logger.info(f"Loaded oeo version {version}")
         if not version:
             version = max(
                 (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
