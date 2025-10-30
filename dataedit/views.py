@@ -423,7 +423,7 @@ def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpR
                     value=filter["value"],
                 )
                 curr_filter.save()
-    print("REDIRECTING")
+
     return redirect(
         reverse("dataedit:view", kwargs={"schema": schema, "table": table})
         + f"?view={update_view.pk}"
