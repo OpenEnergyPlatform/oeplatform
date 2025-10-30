@@ -93,8 +93,8 @@ class OEPStream(StreamingHttpResponse):
 
 
 def load_cursor(named=False):
-    def inner(f):
-        def wrapper(*args, **kwargs):
+    def inner(f: Callable):
+        def wrapper(*args, **kwargs) -> dict:
             artificial_connection = "connection_id" not in args[1].data
             fetch_all = "cursor_id" not in args[1].data
             triggered_close = False

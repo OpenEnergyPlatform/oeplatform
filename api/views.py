@@ -115,7 +115,7 @@ class SequenceAPIView(APIView):
             raise APIError("User is anonymous", 401)
         if actions.has_table(dict(schema=schema, sequence_name=sequence), {}):
             raise APIError("Sequence already exists", 409)
-        return self.__create_sequence(request, schema, sequence)
+        return JsonResponse(self.__create_sequence(request, schema, sequence))
 
     @api_exception
     @require_delete_permission
@@ -125,7 +125,7 @@ class SequenceAPIView(APIView):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
-        return self.__delete_sequence(request, schema, sequence)
+        return JsonResponse(self.__delete_sequence(request, schema, sequence))
 
     @load_cursor()
     def __delete_sequence(
@@ -777,8 +777,7 @@ class RowsAPIView(APIView):
             "offset": offset,
         }
 
-        # FIXME: how can return_obj be dict if self.__get_rows returns None
-        return_obj: dict = self.__get_rows(request, data)
+        return_obj = self.__get_rows(request, data)
         session = (
             sessions.load_session_from_context(return_obj.pop("context"))
             if "context" in return_obj
@@ -1112,7 +1111,7 @@ class RowsAPIView(APIView):
         return actions.data_update(query, context)
 
     @load_cursor(named=True)
-    def __get_rows(self, request: Request, data) -> None:
+    def __get_rows(self, request: Request, data):
         table = actions._get_table(data["schema"], table=data["table"])
         # params = {}
         # params_count = 0
