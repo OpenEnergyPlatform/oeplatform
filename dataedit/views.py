@@ -43,7 +43,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, F
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
@@ -239,7 +239,9 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
 
     # descending (-): null/missing should be at end, so
     # "-date_updated" should be newest first
-    tables = tables.order_by("-date_updated", "human_readable_name")
+    tables = tables.order_by(
+        F("date_updated").desc(nulls_last=True), "human_readable_name"
+    )
 
     # paginate tables
     paginator = Paginator(tables, ITEMS_PER_PAGE)
@@ -421,7 +423,7 @@ def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpR
                     value=filter["value"],
                 )
                 curr_filter.save()
-    print("REDIRECTING")
+
     return redirect(
         reverse("dataedit:view", kwargs={"schema": schema, "table": table})
         + f"?view={update_view.pk}"

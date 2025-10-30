@@ -127,7 +127,7 @@ def load_cursor(named=False):
                             if not e.args or e.args[0] != "no results to fetch":
                                 raise e
                         except psycopg2.errors.InvalidCursorName as e:
-                            print(e)
+                            logging.error(str(e))
                     if first:
                         first = map(actions._translate_fetched_cell, first)
                         if cursor.description:

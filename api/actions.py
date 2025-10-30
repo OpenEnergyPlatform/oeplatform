@@ -442,7 +442,7 @@ def perform_sql(sql_statement, parameter=None):
     try:
         result = session.execute(sql_statement, parameter)
     except Exception as e:
-        print("SQL Action failed. \n Error:\n" + str(e))
+        logging.error("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
         raise APIError(str(e))
     else:
@@ -1818,22 +1818,20 @@ def get_view_definition(request, context=None):
     return result
 
 
-def get_columns(request, context=None):
+def get_columns(query: dict, context=None) -> dict:
     engine = _get_engine()
     connection = engine.connect()
 
-    print(request.GET)
-
-    table_name = get_or_403(request, "table")
-    schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
+    table_name = get_or_403(query, "table")
+    schema = query.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
 
     # We need to translate the info_cache from a json-friendly format to the
     # conventional one
     info_cache = None
-    if request.get("info_cache"):
+    if query.get("info_cache"):
         info_cache = {
             ("get_columns", tuple(k.split("+")), tuple()): v
-            for k, v in request.get("info_cache", {}).items()
+            for k, v in query.get("info_cache", {}).items()
         }
 
     try:
@@ -2182,7 +2180,7 @@ def getValue(schema, table, column, id):
 
         return returnValue
     except Exception as e:
-        print("SQL Action failed. \n Error:\n" + str(e))
+        logging.error("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
     finally:
         session.close()

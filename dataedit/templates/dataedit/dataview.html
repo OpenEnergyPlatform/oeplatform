@@ -712,7 +712,7 @@
       </a>
     </div>
 
-    {% if schema == "model_draft" %}
+    {% if not table_obj.is_publish %}
       <div class="table-sidebar__section">
         <h2 class="table-sidebar__heading">Uploads</h2>
         <span
