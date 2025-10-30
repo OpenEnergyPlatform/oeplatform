@@ -233,10 +233,10 @@
               <li class="page-item">
                 <a
                   class="page-link"
-                  href="?published_page={{ published_tables_page.previous_page_number }}"
+                  href="?published_page={{ published_tables_page.previous_page_number }}&draft_page={{ draft_page }}"
                   tabindex="-1"
                   aria-disabled="true"
-                  >&laquo;Previous</a
+                  >Previous</a
                 >
               </li>
             {% endif %}
@@ -244,7 +244,7 @@
             <li class="page-item active">
               <a
                 class="page-link"
-                href="?published_page={{ published_tables_page.number }}"
+                href="?published_page={{ published_tables_page.number }}&draft_page={{ draft_page }}"
               >
                 {{ published_tables_page.number }}
               </a>
@@ -254,7 +254,7 @@
               <li class="page-item">
                 <a
                   class="page-link"
-                  href="?published_page={{ published_tables_page.next_page_number }}"
+                  href="?published_page={{ published_tables_page.next_page_number }}&draft_page={{ draft_page }}"
                   >Next</a
                 >
               </li>
@@ -473,10 +473,10 @@
               <li class="page-item">
                 <a
                   class="page-link"
-                  href="?draft_page={{ draft_tables_page.previous_page_number }}"
+                  href="?draft_page={{ draft_tables_page.previous_page_number }}&published_page={{ published_page }}"
                   tabindex="-1"
                   aria-disabled="true"
-                  >&laquo;Previous</a
+                  >Previous</a
                 >
               </li>
             {% endif %}
@@ -484,7 +484,7 @@
             <li class="page-item active">
               <a
                 class="page-link"
-                href="?draft_page={{ draft_tables_page.number }}"
+                href="?draft_page={{ draft_tables_page.number }}&published_page={{ published_page }}"
               >
                 {{ draft_tables_page.number }}
               </a>
@@ -494,7 +494,7 @@
               <li class="page-item">
                 <a
                   class="page-link"
-                  href="?draft_page={{ draft_tables_page.next_page_number }}"
+                  href="?draft_page={{ draft_tables_page.next_page_number }}&published_page={{ published_page }}"
                   >Next</a
                 >
               </li>

@@ -52,6 +52,7 @@ from oeplatform.settings import SCHEMA_DATA
 # Pagination
 ITEMS_PER_PAGE = 8
 
+
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
 
 ###########################################################################
@@ -113,24 +114,19 @@ class TablesView(View):
         draft_paginator = Paginator(draft_tables, ITEMS_PER_PAGE)
 
         # Check if the request contains a page
-        if request.GET.get("published_page"):
-            page_number = request.GET.get("published_page")
-            published_page_obj = published_paginator.get_page(page_number)
-        # Always return page 1 if not requested otherwise
-        else:
-            published_page_obj = published_paginator.get_page(1)
+        published_page = request.GET.get("published_page", 1)
+        published_page_obj = published_paginator.get_page(published_page)
 
-        if request.GET.get("draft_page"):
-            page_number = request.GET.get("draft_page")
-            draft_page_obj = draft_paginator.get_page(page_number)
-        else:
-            draft_page_obj = draft_paginator.get_page(1)
+        draft_page = request.GET.get("draft_page", 1)
+        draft_page_obj = draft_paginator.get_page(draft_page)
 
         context = {
             "profile_user": user,
             "draft_tables_page": draft_page_obj,
             "published_tables_page": published_page_obj,
             "topics": [t.name for t in Topic.objects.all()],
+            "draft_page": draft_page,
+            "published_page": published_page,
         }
 
         # TODO: Fix this is_ajax as it is outdated according to django documentation ...
