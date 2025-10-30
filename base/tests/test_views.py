@@ -103,7 +103,7 @@ class TestViewsBase(TestViewsTestCase):
                         line,
                     ):
                         error = find_url_problem(
-                            url=match[1], location=f"{path}:{idx+1}"
+                            url=match[1], location=f"{path}:{idx + 1}"
                         )
                         if error:
                             errors.append(error)
