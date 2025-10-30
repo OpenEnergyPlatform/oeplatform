@@ -43,7 +43,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, F
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
@@ -82,9 +82,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import (
-    Embargo,
-)
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -239,7 +237,9 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
 
     # descending (-): null/missing should be at end, so
     # "-date_updated" should be newest first
-    tables = tables.order_by("-date_updated", "human_readable_name")
+    tables = tables.order_by(
+        F("date_updated").desc(nulls_last=True), "human_readable_name"
+    )
 
     # paginate tables
     paginator = Paginator(tables, ITEMS_PER_PAGE)
