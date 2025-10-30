@@ -62,6 +62,7 @@ from api.helper import (
     conjunction,
     create_ajax_handler,
     date_handler,
+    get_request_data_dict,
     load_cursor,
     require_admin_permission,
     require_delete_permission,
@@ -229,31 +230,31 @@ class TableAPIView(APIView):
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
-        json_data = request.data
+        request_data_dict = get_request_data_dict(request)
 
-        if "column" in json_data["type"]:
+        if "column" in request_data_dict["type"]:
             column_definition = api.parser.parse_scolumnd_from_columnd(
-                schema, table, json_data["name"], json_data
+                schema, table, request_data_dict["name"], request_data_dict
             )
             result = actions.queue_column_change(schema, table, column_definition)
             return ModJsonResponse(result)
 
-        elif "constraint" in json_data["type"]:
+        elif "constraint" in request_data_dict["type"]:
             # Input has nothing to do with DDL from Postgres.
             # Input is completely different.
             # dict.get() returns None, if key does not exist
             constraint_definition = {
-                "action": json_data["action"],  # {ADD, DROP}
-                "constraint_type": json_data.get(
+                "action": request_data_dict["action"],  # {ADD, DROP}
+                "constraint_type": request_data_dict.get(
                     "constraint_type"
                 ),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
-                "constraint_name": json_data.get(
+                "constraint_name": request_data_dict.get(
                     "constraint_name"
                 ),  # {myForeignKey, myUniqueConstraint}
-                "constraint_parameter": json_data.get("constraint_parameter"),
+                "constraint_parameter": request_data_dict.get("constraint_parameter"),
                 # Things in Brackets, e.g. name of column
-                "reference_table": json_data.get("reference_table"),
-                "reference_column": json_data.get("reference_column"),
+                "reference_table": request_data_dict.get("reference_table"),
+                "reference_column": request_data_dict.get("reference_column"),
             }
 
             result = actions.queue_constraint_change(
@@ -302,19 +303,22 @@ class TableAPIView(APIView):
         assert_valid_identifier_name(table)
 
         # 3) Parse and validate payload
-        payload = request.data.get("query", {})
-        columns = payload.get("columns")
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict.get("query", {})
+        columns = payload_query.get("columns")
         if not columns:
             raise APIError("Table contains no columns")
         for col in columns:
             col.update({"c_schema": schema, "c_table": table})
         validate_column_names(columns)
 
-        constraints = payload.get("constraints", [])
+        constraints = payload_query.get("constraints", [])
         for cons in constraints:
             cons.update({"action": "ADD", "c_schema": schema, "c_table": table})
 
-        embargo_data = request.data.get("embargo") or payload.get("embargo", {})
+        embargo_data = request_data_dict.get("embargo") or payload_query.get(
+            "embargo", {}
+        )
         try:
             embargo_required = parse_embargo_payload(embargo_data)
         except EmbargoValidationError as e:
@@ -335,7 +339,7 @@ class TableAPIView(APIView):
 
         assign_table_holder(request.user, schema, table)
 
-        metadata = payload.get("metadata")
+        metadata = payload_query.get("metadata")
         if metadata:
 
             actions.set_table_metadata(table=table, metadata=metadata)
@@ -607,8 +611,10 @@ class ColumnAPIView(APIView):
         self, request: Request, schema: str, table: str, column: str
     ) -> JsonLikeResponse:
         schema, table = actions.get_table_name(schema, table)
+
+        request_data_dict = get_request_data_dict(request)
         response = actions.column_alter(
-            request.data["query"], {}, schema, table, column
+            request_data_dict["query"], {}, schema, table, column
         )
         return JsonResponse(response)
 
@@ -618,7 +624,8 @@ class ColumnAPIView(APIView):
         self, request: Request, schema: str, table: str, column: str
     ) -> JsonLikeResponse:
         schema, table = actions.get_table_name(schema, table)
-        actions.column_add(schema, table, column, request.data["query"])
+        request_data_dict = get_request_data_dict(request)
+        actions.column_add(schema, table, column, request_data_dict["query"])
         return JsonResponse({}, status=201)
 
 
@@ -656,10 +663,11 @@ class MovePublishAPIView(APIView):
         self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonLikeResponse:
         # Make payload more friendly as users tend to use the query wrapper in payload
-        json_data = request.data.get("query", {})
-        embargo_period = request.data.get("embargo", {}).get(
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict.get("query", {})
+        embargo_period = request_data_dict.get("embargo", {}).get(
             "duration", None
-        ) or json_data.get("embargo", {}).get("duration", None)
+        ) or payload_query.get("embargo", {}).get("duration", None)
         actions.move_publish(schema, table, to_schema, embargo_period)
 
         return JsonResponse({}, status=status.HTTP_200_OK)
@@ -683,7 +691,7 @@ class MoveAPIView(APIView):
         self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonLikeResponse:
         actions.move(schema, table, to_schema)
-        return HttpResponse(status=status.HTTP_200_OK)
+        return JsonResponse({}, status=status.HTTP_200_OK)
 
 
 class RowsAPIView(APIView):
@@ -868,18 +876,21 @@ class RowsAPIView(APIView):
             )
 
         schema, table = actions.get_table_name(schema, table)
-        column_data = request.data["query"]
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict["query"]
         status_code = status.HTTP_200_OK
         if row_id:
-            response = self.__update_rows(request, schema, table, column_data, row_id)
+            response = self.__update_rows(request, schema, table, payload_query, row_id)
         else:
             if action == "new":
                 response = self.__insert_row(
-                    request, schema, table, column_data, row_id
+                    request, schema, table, payload_query, row_id
                 )
                 status_code = status.HTTP_201_CREATED
             else:
-                response = self.__update_rows(request, schema, table, column_data, None)
+                response = self.__update_rows(
+                    request, schema, table, payload_query, None
+                )
         actions.apply_changes(schema, table)
         return stream(response, status_code=status_code)
 
@@ -911,9 +922,10 @@ class RowsAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        column_data = request.data["query"]
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict["query"]
 
-        if row_id and column_data.get("id", int(row_id)) != int(row_id):
+        if row_id and payload_query.get("id", int(row_id)) != int(row_id):
             raise APIError(
                 "Id in URL and query do not match. Ids may not change.",
                 status=status.HTTP_409_CONFLICT,
@@ -932,11 +944,11 @@ class RowsAPIView(APIView):
             else False
         )
         if exists:
-            response = self.__update_rows(request, schema, table, column_data, row_id)
+            response = self.__update_rows(request, schema, table, payload_query, row_id)
             actions.apply_changes(schema, table)
             return JsonResponse(response)
         else:
-            result = self.__insert_row(request, schema, table, column_data, row_id)
+            result = self.__insert_row(request, schema, table, payload_query, row_id)
             actions.apply_changes(schema, table)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
@@ -969,9 +981,11 @@ class RowsAPIView(APIView):
         query = {"schema": schema, "table": table}
         if where:
             query["where"] = self.__read_where_clause(where)
+
+        request_data_dict = get_request_data_dict(request)
         context = {
-            "connection_id": request.data["connection_id"],
-            "cursor_id": request.data["cursor_id"],
+            "connection_id": request_data_dict["connection_id"],
+            "cursor_id": request_data_dict["cursor_id"],
             "user": request.user,
         }
 
@@ -1030,9 +1044,10 @@ class RowsAPIView(APIView):
         if row_id:
             row["id"] = row_id
 
+        request_data_dict = get_request_data_dict(request)
         context = {
-            "connection_id": request.data["connection_id"],
-            "cursor_id": request.data["cursor_id"],
+            "connection_id": request_data_dict["connection_id"],
+            "cursor_id": request_data_dict["cursor_id"],
             "user": request.user,
         }
 
@@ -1063,9 +1078,10 @@ class RowsAPIView(APIView):
                 status=403,
             )
 
+        request_data_dict = get_request_data_dict(request)
         context = {
-            "connection_id": request.data["connection_id"],
-            "cursor_id": request.data["cursor_id"],
+            "connection_id": request_data_dict["connection_id"],
+            "cursor_id": request_data_dict["cursor_id"],
             "user": request.user,
         }
 
@@ -1250,16 +1266,17 @@ class OekgSparqlAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request: Request) -> JsonLikeResponse:
-        sparql_query = request.data.get("query", "")
-        response_format = request.data.get("format", "json")  # Default format
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict.get("query", "")
+        response_format = request_data_dict.get("format", "json")  # Default format
 
-        if not validate_public_sparql_query(sparql_query):
+        if not validate_public_sparql_query(payload_query):
             raise ValidationError(
                 "Invalid SPARQL query. Update/delete queries are not allowed."
             )
 
         try:
-            content, content_type = execute_sparql_query(sparql_query, response_format)
+            content, content_type = execute_sparql_query(payload_query, response_format)
         except ValueError as e:
             raise ValidationError(str(e))
 

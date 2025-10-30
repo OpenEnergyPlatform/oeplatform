@@ -33,6 +33,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest, JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -384,3 +385,9 @@ def get_json_columns(table: str, schema: str | None = None, **_kwargs) -> set[st
         for name, spec in column_descriptions.items()
         if "json" in spec["data_type"]
     }
+
+
+def get_request_data_dict(request: Request) -> dict:
+    if isinstance(request.data, dict):
+        return request.data
+    raise TypeError(type(request.data))
