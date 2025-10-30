@@ -762,8 +762,7 @@ class RowsAPIView(APIView):
                 "type": "operator",
             }
             if where_clauses:
-                # FIXME: how can conjunction be called (only single argument allowed)
-                where_clauses = conjunction(clause, where_clauses)
+                where_clauses = conjunction([clause, where_clauses])
             else:
                 where_clauses = clause
 
