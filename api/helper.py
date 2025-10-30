@@ -45,10 +45,10 @@ from dataedit.models import Table as DBTable
 from dataedit.models import Tag
 from oeplatform.settings import SCHEMA_DEFAULT
 
-# Response is from rest framework, OEPStream has content_type json
-JsonLikeResponse = Union[JsonResponse, Response, "OEPStream"]
-
 logger = logging.getLogger("oeplatform")
+
+# Response is from rest framework, OEPStream has content_type json
+JsonLikeResponse = Union[JsonResponse, Response, "OEPStream", "ModJsonResponse"]
 
 
 WHERE_EXPRESSION = re.compile(
@@ -56,6 +56,20 @@ WHERE_EXPRESSION = re.compile(
     + r"|".join(parser.sql_operators)
     + r")\s*(?P<second>(?![>=]).+)$"
 )
+
+
+class ModJsonResponse(JsonResponse):
+    def __init__(self, dictionary):
+        if dictionary is None:
+            super().__init__({}, tatus=500)
+        elif dictionary["success"]:
+            super().__init__({}, status=200)
+        elif dictionary["error"] is not None:
+            super().__init__(
+                {}, status=dictionary["http_status"], reason=dictionary["error"]
+            )
+        else:
+            super().__init__({}, status=dictionary["http_status"])
 
 
 def transform_results(cursor, triggers, trigger_args):

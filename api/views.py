@@ -25,7 +25,6 @@ import itertools
 import json
 import re
 from datetime import datetime, timedelta
-from typing import cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import requests
@@ -36,14 +35,7 @@ from django.contrib.postgres.search import TrigramSimilarity
 from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.db.utils import IntegrityError
-from django.http import (
-    Http404,
-    HttpRequest,
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseServerError,
-    JsonResponse,
-)
+from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
@@ -63,7 +55,9 @@ from api.error import APIError
 from api.helper import (
     WHERE_EXPRESSION,
     JsonLikeResponse,
+    ModJsonResponse,
     OEPStream,
+    api_exception,
     check_embargo,
     conjunction,
     create_ajax_handler,
@@ -75,7 +69,6 @@ from api.helper import (
     stream,
     update_tags_from_keywords,
 )
-from api.helpers.http import ModHttpResponse
 from api.serializers import (
     EnergyframeworkSerializer,
     EnergymodelSerializer,
@@ -101,15 +94,12 @@ from oekg.utils import (
     process_datasets_sparql_query,
     validate_public_sparql_query,
 )
-from oeplatform.settings import USE_LOEP, USE_ONTOP
-
-if USE_LOEP:
-    from oeplatform.settings import DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
-
-if USE_ONTOP:
-    from oeplatform.settings import ONTOP_SPARQL_ENDPOINT_URL
-
-from api.helper import api_exception
+from oeplatform.settings import (
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL,
+    ONTOP_SPARQL_ENDPOINT_URL,
+    USE_LOEP,
+    USE_ONTOP,
+)
 
 
 class SequenceAPIView(APIView):
@@ -239,14 +229,14 @@ class TableAPIView(APIView):
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
-        json_data = cast(dict, request.data)
+        json_data = request.data
 
         if "column" in json_data["type"]:
             column_definition = api.parser.parse_scolumnd_from_columnd(
                 schema, table, json_data["name"], json_data
             )
             result = actions.queue_column_change(schema, table, column_definition)
-            return ModHttpResponse(result)
+            return ModJsonResponse(result)
 
         elif "constraint" in json_data["type"]:
             # Input has nothing to do with DDL from Postgres.
@@ -269,9 +259,9 @@ class TableAPIView(APIView):
             result = actions.queue_constraint_change(
                 schema, table, constraint_definition
             )
-            return ModHttpResponse(result)
+            return ModJsonResponse(result)
         else:
-            return ModHttpResponse(
+            return ModJsonResponse(
                 actions.get_response_dict(False, 400, "type not recognised")
             )
 
@@ -633,6 +623,7 @@ class ColumnAPIView(APIView):
 
 
 class FieldsAPIView(APIView):
+    # TODO: is this really used?
     @method_decorator(never_cache)
     def get(
         self,
@@ -649,14 +640,13 @@ class FieldsAPIView(APIView):
             or not parser.is_pg_qual(column_id)
             or not parser.is_pg_qual(column)
         ):
-            return ModHttpResponse({"error": "Bad Request", "http_status": 400})
+            return ModJsonResponse({"error": "Bad Request", "http_status": 400})
 
         returnValue = actions.getValue(schema, table, column, column_id)
-
-        return HttpResponse(
-            returnValue if returnValue is not None else "",
-            status=(404 if returnValue is None else 200),
-        )
+        if returnValue is None:
+            return JsonResponse({}, status=404)
+        else:
+            return JsonResponse(returnValue, status=200)
 
 
 class MovePublishAPIView(APIView):
@@ -1237,6 +1227,7 @@ def groups_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(group_names, safe=False)
 
 
+@api_exception
 def oeo_search_api_view(request: Request) -> JsonLikeResponse:
     if USE_LOEP:
         # get query from user request # TODO validate input to prevent sneaky stuff
@@ -1248,7 +1239,7 @@ def oeo_search_api_view(request: Request) -> JsonLikeResponse:
         # res: something like [{"label": "testlabel", "resource": "testresource"}]
         # send back to client
     else:
-        return HttpResponseServerError(
+        raise APIError(
             "The endpoint for LOEP is not setup. Please contact a server admin."
         )
     return JsonResponse(res, safe=False)
@@ -1278,15 +1269,14 @@ class OekgSparqlAPIView(APIView):
             return Response(content, content_type=content_type)
 
 
-def OevkgSearchAPIView(request: Request) -> JsonLikeResponse:
+@api_exception
+def oevkg_search_api_view(request: Request) -> JsonLikeResponse:
     if USE_ONTOP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         try:
             query = request.body.decode("utf-8")
         except UnicodeDecodeError:
-            return HttpResponseBadRequest(
-                "Invalid request body encoding. Please use 'utf-8'."
-            )
+            raise APIError("Invalid request body encoding. Please use 'utf-8'.")
         headers = {
             "Accept": "application/sparql-results+json",
             "Content-Type": "application/sparql-query",
@@ -1298,18 +1288,16 @@ def OevkgSearchAPIView(request: Request) -> JsonLikeResponse:
             )
             response.raise_for_status()
         except requests.RequestException as e:
-            return HttpResponseServerError(
-                f"Error contacting SPARQL endpoint: {str(e)}"
-            )
+            raise APIError(f"Error contacting SPARQL endpoint: {str(e)}")
 
         # res: something like [{"label": "testlabel", "resource": "testresource"}]
         # Maybe validate using shacl or other data model descriptor file
         try:
             res = response.json()
         except json.JSONDecodeError:
-            return HttpResponseServerError("Error decoding SPARQL endpoint response.")
+            raise APIError("Error decoding SPARQL endpoint response.")
     else:
-        return HttpResponseServerError(
+        raise APIError(
             "The SPARQL endpoint for OEVKG is not setup. Please contact your server admin."  # noqa
         )
     # send back to client

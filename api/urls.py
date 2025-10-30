@@ -60,7 +60,6 @@ from api.views import (
     MoveAPIView,
     MovePublishAPIView,
     OekgSparqlAPIView,
-    OevkgSearchAPIView,
     RowsAPIView,
     ScenarioDataTablesListAPIView,
     SequenceAPIView,
@@ -69,6 +68,7 @@ from api.views import (
     TableUnpublishAPIView,
     groups_api_view,
     oeo_search_api_view,
+    oevkg_search_api_view,
     users_api_view,
 )
 
@@ -312,5 +312,5 @@ urlpatterns = [
     path("usrprop/", users_api_view, name="usrprop"),
     path("grpprop/", groups_api_view, name="grpprop"),
     path("oeo-search", oeo_search_api_view, name="oeo-search"),
-    path("oevkg-query", OevkgSearchAPIView, name="oevkg-query"),
+    path("oevkg-query", oevkg_search_api_view, name="oevkg-query"),
 ]
