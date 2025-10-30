@@ -44,6 +44,9 @@ from dataedit.models import Table as DBTable
 from dataedit.models import Tag
 from oeplatform.settings import SCHEMA_DEFAULT
 
+# Response is from rest framework, OEPStream has content_type json
+JsonLikeResponse = JsonResponse | Response | OEPStream
+
 logger = logging.getLogger("oeplatform")
 
 
@@ -184,16 +187,20 @@ def cors(allow):
     return doublewrapper
 
 
-def api_exception(f: Callable) -> Callable:
+def api_exception(f: Callable[..., JsonResponse]) -> Callable[..., JsonResponse]:
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except actions.APIError as e:
-            return JsonResponse({"reason": e.message}, status=e.status)
-        except KeyError as e:
-            return JsonResponse({"reason": e}, status=400)
+            return JsonResponse({"error": e.message}, status=e.status)
         except DBTable.DoesNotExist:
-            return JsonResponse({"reason": "table does not exist"}, status=404)
+            return JsonResponse({"error": "Table does not exist"}, status=404)
+        except Exception as exc:
+            # for any other error:
+            # log to error log and return generic error
+            # (we dont want to accidently send sensitive data to user)
+            logging.error(str(exc))
+            return JsonResponse({"error": "Table does not exist"}, status=404)
 
     return wrapper
 
