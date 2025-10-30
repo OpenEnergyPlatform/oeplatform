@@ -1,4 +1,5 @@
-"""
+"""Api actions.
+
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
@@ -1177,7 +1178,7 @@ def __internal_select(query, context):
     return rows
 
 
-def __change_rows(request, context, target_table, setter, fields=None):
+def __change_rows(request, context, target_table, setter, fields=None) -> dict:
     orig_table = read_pgid(request["table"])
     query = {
         "from": {
@@ -1302,11 +1303,11 @@ def data_delete(request, context=None):
     return result
 
 
-def data_update(request, context=None):
-    orig_table = read_pgid(get_or_403(request, "table"))
+def data_update(query: dict, context=None):
+    orig_table = read_pgid(get_or_403(query, "table"))
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX))
+    orig_schema = read_pgid(query.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX))
     schema, table = get_table_name(orig_schema, orig_table)
 
     if schema is None:
@@ -1317,14 +1318,14 @@ def data_update(request, context=None):
     )
 
     target_table = get_edit_table_name(orig_schema, orig_table)
-    setter = get_or_403(request, "values")
+    setter = get_or_403(query, "values")
     if isinstance(setter, list):
-        if "fields" not in request:
+        if "fields" not in query:
             raise APIError("values passed in list format without field info")
-        field_names = [read_pgid(d["column"]) for d in request["fields"]]
+        field_names = [read_pgid(d["column"]) for d in query["fields"]]
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)  # TODO:
-    result = __change_rows(request, context, target_table, setter)
+    result = __change_rows(query, context, target_table, setter)
     apply_changes(schema, table, cursor)
     return result
 

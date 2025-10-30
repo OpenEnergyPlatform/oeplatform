@@ -25,6 +25,7 @@ import itertools
 import json
 import re
 from datetime import datetime, timedelta
+from typing import cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import requests
@@ -35,7 +36,7 @@ from django.contrib.postgres.search import TrigramSimilarity
 from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.db.utils import IntegrityError
-from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
+from django.http import Http404, HttpRequest, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
@@ -46,6 +47,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from sqlalchemy.sql.expression import Select
 
 import api.parser
 import login.models as login_models
@@ -760,6 +762,7 @@ class RowsAPIView(APIView):
                 "type": "operator",
             }
             if where_clauses:
+                # FIXME: how can conjunction be called (only single argument allowed)
                 where_clauses = conjunction(clause, where_clauses)
             else:
                 where_clauses = clause
@@ -775,7 +778,8 @@ class RowsAPIView(APIView):
             "offset": offset,
         }
 
-        return_obj = self.__get_rows(request, data)
+        # FIXME: how can return_obj be dict if self.__get_rows returns None
+        return_obj: dict = self.__get_rows(request, data)
         session = (
             sessions.load_session_from_context(return_obj.pop("context"))
             if "context" in return_obj
@@ -978,7 +982,7 @@ class RowsAPIView(APIView):
             )
 
         where = request.GET.getlist("where")
-        query = {"schema": schema, "table": table}
+        query: dict[str, str | list | dict] = {"schema": schema, "table": table}
         if where:
             query["where"] = self.__read_where_clause(where)
 
@@ -1005,7 +1009,7 @@ class RowsAPIView(APIView):
 
         return actions.data_delete(query, context)
 
-    def __read_where_clause(self, wheres):
+    def __read_where_clause(self, wheres) -> list:
         where_clauses = []
         if wheres:
             for where in wheres:
@@ -1071,10 +1075,10 @@ class RowsAPIView(APIView):
         table: str,
         row,
         row_id: int | None = None,
-    ) -> JsonLikeResponse:
+    ) -> dict:
         if check_embargo(schema, table):
-            return JsonResponse(
-                {"error": "Access to this table is restricted due to embargo."},
+            raise APIError(
+                "Access to this table is restricted due to embargo.",
                 status=403,
             )
 
@@ -1125,6 +1129,7 @@ class RowsAPIView(APIView):
 
         if where_clauses:
             query = query.where(parser.parse_condition(where_clauses))
+            query = cast(Select, query)  # TODO: fix type hints in a better way
 
         orderby = data.get("orderby")
         if orderby:
@@ -1134,14 +1139,17 @@ class RowsAPIView(APIView):
                 query = query.order_by(orderby)
             else:
                 raise APIError("Unknown order_by clause: " + orderby)
+            query = cast(Select, query)  # TODO: fix type hints in a better way
 
         limit = data.get("limit")
         if limit and limit.isdigit():
             query = query.limit(int(limit))
+            query = cast(Select, query)  # TODO: fix type hints in a better way
 
         offset = data.get("offset")
         if offset and offset.isdigit():
             query = query.offset(int(offset))
+            query = cast(Select, query)  # TODO: fix type hints in a better way
 
         cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)
@@ -1182,7 +1190,7 @@ class AdvancedFetchAPIView(APIView):
 class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
     def get(self, request: Request) -> JsonLikeResponse:
         sessions.close_all_for_user(request.user)
-        return HttpResponse("All connections closed")
+        return JsonResponse({"message": "All connections closed"})
 
 
 def users_api_view(request: Request) -> JsonLikeResponse:
@@ -1223,7 +1231,9 @@ def groups_api_view(request: Request) -> JsonLikeResponse:
     if not query:
         return JsonResponse([], safe=False)
 
-    user_groups = user.memberships.all().prefetch_related("group")
+    user_groups = user.memberships.all().prefetch_related(  # type:ignore related
+        "group"
+    )
     groups = [g.group for g in user_groups]
 
     # Assuming 'name' is the field you want to search against
@@ -1288,7 +1298,7 @@ class OekgSparqlAPIView(APIView):
 
 @api_exception
 def oevkg_search_api_view(request: Request) -> JsonLikeResponse:
-    if USE_ONTOP:
+    if USE_ONTOP and ONTOP_SPARQL_ENDPOINT_URL:
         # get query from user request # TODO validate input to prevent sneaky stuff
         try:
             query = request.body.decode("utf-8")

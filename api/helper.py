@@ -246,7 +246,7 @@ def require_admin_permission(f: Callable) -> Callable:
     return permission_wrapper(login_models.ADMIN_PERM, f)
 
 
-def conjunction(clauses):
+def conjunction(clauses) -> dict:
     return {"type": "operator", "operator": "AND", "operands": clauses}
 
 
