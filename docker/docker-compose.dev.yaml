@@ -5,7 +5,6 @@ volumes:
   vite_cache:
   vite_temp:
 
-
 services:
   postgres:
     image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
@@ -89,7 +88,6 @@ services:
     ports:
       - "${OEP_DEV_PORT_VITE:-5173}:5173"
     volumes:
-
       # 1) keep dependencies in a named volume *inside* /app
       - type: volume
         source: vite_node_modules

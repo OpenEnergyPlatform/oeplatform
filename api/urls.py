@@ -55,20 +55,21 @@ from api.views import (
     EnergyframeworkFactsheetListAPIView,
     EnergymodelFactsheetListAPIView,
     FieldsAPIView,
-    GroupsAPIView,
     ManageOekgScenarioDatasetsAPIView,
     MetadataAPIView,
     MoveAPIView,
     MovePublishAPIView,
     OekgSparqlAPIView,
-    OeoSsearchAPIView,
     OevkgSearchAPIView,
     RowsAPIView,
     ScenarioDataTablesListAPIView,
     SequenceAPIView,
     TableAPIView,
     TableSizeAPIView,
-    UsersAPIView,
+    TableUnpublishAPIView,
+    groups_api_view,
+    oeo_search_api_view,
+    users_api_view,
 )
 
 app_name = "api"
@@ -102,12 +103,19 @@ urlpatterns_v0_schema_table = [
         name="move_publish",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa
-        ColumnAPIView.as_view(),
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/unpublish$",
+        TableUnpublishAPIView.as_view(),
+        name="table-unpublish",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/id/(?P<id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa
+        ColumnAPIView.as_view(),
+        name="table-columns",
+    ),
+    re_path(
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/id/(?P<column_id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
         FieldsAPIView.as_view(),
+        name="table-fields",
     ),
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",  # noqa
@@ -126,141 +134,144 @@ urlpatterns_v0_schema = urlpatterns_v0_schema_table + [
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/sequences/(?P<sequence>[\w\d_\s]+)/$",
         SequenceAPIView.as_view(),
+        # TODO: do we actually use this?
     ),
 ]
 
 
 urlpatterns_v0_advanced = [
-    re_path(r"^search", AdvancedSearchAPIView, name="advenced-search"),
+    re_path(r"^search", AdvancedSearchAPIView, name="advanced-search"),
     re_path(
         r"^insert",
         AdvancedInsertAPIView,
-        name="api_insert",
+        name="advanced-insert",
     ),
-    re_path(
-        r"^delete",
-        AdvancedDeleteAPIView,
-    ),
-    re_path(
-        r"^update",
-        AdvancedUpdateAPIView,
-    ),
-    re_path(r"^info", AdvancedInfoAPIView),
-    re_path(
-        r"^has_schema",
-        AdvancedHasSchemaAPIView,
-    ),
-    re_path(r"^has_table", AdvancedHasTableAPIView),
-    re_path(
-        r"^has_sequence",
-        AdvancedHasSequenceAPIView,
-    ),
-    re_path(r"^has_type", AdvancedHasTypeAPIView),
+    re_path(r"^delete", AdvancedDeleteAPIView, name="advanced-delete"),
+    re_path(r"^update", AdvancedUpdateAPIView, name="advanced-update"),
+    re_path(r"^info", AdvancedInfoAPIView, name="advanced-info"),
+    re_path(r"^has_schema", AdvancedHasSchemaAPIView, name="advanced-has-schema"),
+    re_path(r"^has_table", AdvancedHasTableAPIView, name="advanced-has-table"),
+    re_path(r"^has_sequence", AdvancedHasSequenceAPIView, name="advanced-has-sequence"),
+    re_path(r"^has_type", AdvancedHasTypeAPIView, name="advanced-has-type"),
     re_path(
         r"^get_schema_names",
         AdvancedGetSchemaNamesAPIView,
+        name="advanced-schema-names",
     ),
     re_path(
-        r"^get_table_names",
-        AdvancedGetTableNamesAPIView,
+        r"^get_table_names", AdvancedGetTableNamesAPIView, name="advanced-table-names"
     ),
     re_path(
-        r"^get_view_names",
-        AdvancedGetViewNamesAPIView,
+        r"^get_view_names", AdvancedGetViewNamesAPIView, name="advanced-view-names"
     ),
     re_path(
         r"^get_view_definition",
         AdvancedGetViewDefinitionAPIView,
+        name="advanced-view-definitions",
     ),
     re_path(
         r"^get_columns",
         AdvancedGetColumnsAPIView,
+        name="advanced-columns",
     ),
     re_path(
         r"^get_pk_constraint",
         AdvancedGetPkConstraintAPIView,
+        name="advanced-pk-constraint",
     ),
     re_path(
         r"^get_foreign_keys",
         AdvancedGetForeignKeysAPIView,
+        name="advanced-foreign-keys",
     ),
     re_path(
         r"^get_indexes",
         AdvancedGetIndexesAPIView,
+        name="advanced-indexes",
     ),
     re_path(
         r"^get_unique_constraints",
         AdvancedGetUniqueConstraintsAPIView,
+        name="advanced-unique-constraints",
     ),
     re_path(
         r"^connection/open",
         AdvancedConnectionOpenAPIView,
-        name="api_con_open",
+        name="advanced-connection-open",
     ),
     re_path(
         r"^connection/close$",
         AdvancedConnectionCloseAPIView,
-        name="api_con_close",
+        name="advanced-connection-close",
     ),
     re_path(
         r"^connection/commit",
         AdvancedConnectionCommitAPIView,
-        name="api_con_commit",
+        name="advanced-connection-commit",
     ),
     re_path(
         r"^connection/rollback",
         AdvancedConnectionRollbackAPIView,
+        name="advanced-connection-rollback",
     ),
-    re_path(
-        r"^cursor/open",
-        AdvancedCursorOpenAPIView,
-    ),
-    re_path(
-        r"^cursor/close",
-        AdvancedCursorCloseAPIView,
-    ),
+    re_path(r"^cursor/open", AdvancedCursorOpenAPIView, name="advanced-cursor-open"),
+    re_path(r"^cursor/close", AdvancedCursorCloseAPIView, name="advanced-cursor-close"),
     re_path(
         r"^cursor/fetch_one",
         AdvancedCursorFetchOneAPIView,
+        name="advanced-cursor-fetch-one",
     ),
     re_path(
         r"^set_isolation_level",
         AdvancedSetIsolationLevelAPIView,
+        name="advanced-set-isolation-level",
     ),
     re_path(
         r"^get_isolation_level",
         AdvancedGetIsolationLevelAPIView,
+        name="advanced-get-isolation-level",
     ),
     re_path(
         r"^do_begin_twophase",
         AdvancedDoBeginTwophaseAPIView,
+        name="advanced-do-begin-twophase",
     ),
     re_path(
         r"^do_prepare_twophase",
         AdvancedDoPrepareTwophaseAPIView,
+        name="advanced-doprepare-twophase",
     ),
     re_path(
         r"^do_rollback_twophase",
         AdvancedDoRollbackTwophaseAPIView,
+        name="advanced-do-rollback-twophase",
     ),
     re_path(
         r"^do_commit_twophase",
         AdvancedDoCommitTwophaseAPIView,
+        name="advanced-do-commit-twophase",
     ),
     re_path(
         r"^do_recover_twophase",
         AdvancedDoRecoverTwophaseAPIView,
+        name="advanced-do-recover-twophase",
     ),
-    re_path(r"^connection/close_all", AdvancedCloseAllAPIView.as_view()),
+    re_path(
+        r"^connection/close_all",
+        AdvancedCloseAllAPIView.as_view(),
+        name="advanced-connection-close-all",
+    ),
     re_path(
         r"^cursor/fetch_many",
         AdvancedFetchAPIView.as_view(),
         dict(fetchtype="all"),
+        name="advanced-cursor-fetch-many",
     ),
     re_path(
         r"^cursor/fetch_all",
         AdvancedFetchAPIView.as_view(),
         dict(fetchtype="all"),
+        name="advanced-cursor-fetch-all",
     ),
 ]
 
@@ -298,8 +309,8 @@ urlpatterns_v0 = [
 
 urlpatterns = [
     path("v0/", include(urlpatterns_v0)),
-    path("usrprop/", UsersAPIView),
-    path("grpprop/", GroupsAPIView),
-    path("oeo-search", OeoSsearchAPIView),
-    path("oevkg-query", OevkgSearchAPIView),
+    path("usrprop/", users_api_view, name="usrprop"),
+    path("grpprop/", groups_api_view, name="grpprop"),
+    path("oeo-search", oeo_search_api_view, name="oeo-search"),
+    path("oevkg-query", OevkgSearchAPIView, name="oevkg-query"),
 ]

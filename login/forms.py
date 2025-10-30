@@ -14,15 +14,10 @@ from allauth.socialaccount.forms import SignupForm as SocialSignupForm
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.contrib.auth.forms import (
-    PasswordChangeForm,
-    SetPasswordForm,
-    UserChangeForm,
-)
-from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import PasswordChangeForm, UserChangeForm
 
-from .models import UserGroup
-from .models import myuser as OepUser
+from login.models import UserGroup
+from login.models import myuser as OepUser
 
 
 class UserSocialSignupForm(SocialSignupForm):
@@ -39,8 +34,6 @@ class CreateUserForm(SignupForm):
     def save(self, request):
         user = super(CreateUserForm, self).save(request)
         return user
-
-    # def signup(self, request, user):
 
 
 class EditUserForm(UserChangeForm):
@@ -80,28 +73,6 @@ class EditUserForm(UserChangeForm):
         return None
 
 
-class DetachForm(SetPasswordForm):
-    email = forms.EmailField(label="Mail")
-    email2 = forms.EmailField(label="Mail confirmation")
-
-    def clean_email(self):
-        if not self.data["email"] == self.data["email2"]:
-            raise ValidationError("The two email fields didn't match.")
-        mail_user = OepUser.objects.filter(email=self.data["email"]).first()
-        if mail_user and mail_user != self.user:
-            raise ValidationError("This mail address is already in use.")
-
-    def save(self, commit=True):
-        super(DetachForm, self).save(commit=commit)
-        self.user.email = self.data["email"]
-        self.user.is_native = True
-        self.user.is_mail_verified = False
-
-        if commit:
-            self.user.save()
-            self.user.send_activation_mail()
-
-
 class OEPPasswordChangeForm(PasswordChangeForm):
     captcha = CaptchaField()
 
@@ -137,9 +108,8 @@ class GroupUserForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-        group_id = kwargs.pop(
-            "group_id"
-        )  # group_id is the parameter passed from views.py
+        # group_id is the parameter passed from views.py
+        group_id = kwargs.pop("group_id")
         super(GroupUserForm, self).__init__(*args, **kwargs)
         if group_id != "":
             self.fields["groupmembers"].initial = OepUser.objects.filter(

@@ -5,105 +5,121 @@
 {% load compress %}
 
 {% block site-header %}
-    <div class="main-header">
-        <h1 class="main-header__title">
-            <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg" width="16" height="16" alt="OEO">
-            Ontology
-        </h1>
-        <div class="main-header__wizard">
-            <a href="/ontology/">Overview</a> / Open Energy Ontology
-        </div>
+  <div class="main-header">
+    <h1 class="main-header__title">
+      <img
+        src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
+        width="16"
+        height="16"
+        alt="OEO"
+      />
+      Ontology
+    </h1>
+    <div class="main-header__wizard">
+      <a href="{% url 'ontology:index' %}">Overview</a> / Open Energy Ontology
     </div>
-
+  </div>
 {% endblock site-header %}
 
 {% block main-right-sidebar-content %}
-<div hx-get="{% url 'partial-page-sidebar-content' %}" hx-swap="outerHTML" hx-target="#content-sidebar" hx-trigger="load" id="content-sidebar">
-
-
-</div>
-<div id="loading-spinner-sidebar" class=" btn btn-primary disabled placeholder" role="status" style="display: none;">
+  <div
+    hx-get="{% url 'ontology:partial-page-sidebar-content' %}"
+    hx-swap="outerHTML"
+    hx-target="#content-sidebar"
+    hx-trigger="load"
+    id="content-sidebar"
+  ></div>
+  <div
+    id="loading-spinner-sidebar"
+    class=" btn btn-primary disabled placeholder"
+    role="status"
+    style="display: none;"
+  >
     <p class="card-text placeholder-glow">
-        <span class="placeholder col-7"></span>
-        <span class="placeholder col-4"></span>
-        <span class="placeholder col-4"></span>
-        <span class="placeholder col-6"></span>
-        <span class="placeholder col-8"></span>
-      </p>
+      <span class="placeholder col-7"></span>
+      <span class="placeholder col-4"></span>
+      <span class="placeholder col-4"></span>
+      <span class="placeholder col-6"></span>
+      <span class="placeholder col-8"></span>
+    </p>
     <span class="visually-hidden">Loading...</span>
-</div>
-
+  </div>
 {% endblock main-right-sidebar-content %}
 
 {% block main-content-body %}
+  <div
+    hx-get="{% url 'ontology:partial-page-content' %}"
+    hx-swap="outerHTML"
+    hx-target="#content"
+    hx-trigger="load"
+    id="content"
+  ></div>
 
-<div hx-get="{% url 'partial-page-content' %}" hx-swap="outerHTML" hx-target="#content" hx-trigger="load" id="content">
-
-
-</div>
-
-
-<div id="loading-spinner" class="text-primary" role="status" style="display: none;" aria-hidden="true">
+  <div
+    id="loading-spinner"
+    class="text-primary"
+    role="status"
+    style="display: none;"
+    aria-hidden="true"
+  >
     <p class="card-text placeholder-glow">
-        <span class="placeholder col-7"></span>
-        <span class="placeholder col-4"></span>
-        <span class="placeholder col-4"></span>
-        <span class="placeholder col-6"></span>
-        <span class="placeholder col-8"></span>
+      <span class="placeholder col-7"></span>
+      <span class="placeholder col-4"></span>
+      <span class="placeholder col-4"></span>
+      <span class="placeholder col-6"></span>
+      <span class="placeholder col-8"></span>
     </p>
 
     <div class="card" aria-hidden="true">
-        <div class="card-body">
-            <h5 class="card-title placeholder-glow">
-            <span class="placeholder col-6"></span>
-            </h5>
-            <p class="card-text placeholder-glow">
-            <span class="placeholder col-7"></span>
-            <span class="placeholder col-4"></span>
-            <span class="placeholder col-4"></span>
-            <span class="placeholder col-6"></span>
-            <span class="placeholder col-8"></span>
-            <span class="placeholder col-7"></span>
-            <span class="placeholder col-4"></span>
-            <span class="placeholder col-4"></span>
-            <span class="placeholder col-6"></span>
-            <span class="placeholder col-8"></span>
-            <span class="placeholder col-7"></span>
-            <span class="placeholder col-4"></span>
-            <span class="placeholder col-4"></span>
-            <span class="placeholder col-6"></span>
-            <span class="placeholder col-8"></span>
+      <div class="card-body">
+        <h5 class="card-title placeholder-glow">
+          <span class="placeholder col-6"></span>
+        </h5>
+        <p class="card-text placeholder-glow">
+          <span class="placeholder col-7"></span>
+          <span class="placeholder col-4"></span>
+          <span class="placeholder col-4"></span>
+          <span class="placeholder col-6"></span>
+          <span class="placeholder col-8"></span>
+          <span class="placeholder col-7"></span>
+          <span class="placeholder col-4"></span>
+          <span class="placeholder col-4"></span>
+          <span class="placeholder col-6"></span>
+          <span class="placeholder col-8"></span>
+          <span class="placeholder col-7"></span>
+          <span class="placeholder col-4"></span>
+          <span class="placeholder col-4"></span>
+          <span class="placeholder col-6"></span>
+          <span class="placeholder col-8"></span>
         </p>
+      </div>
     </div>
-</div>
-
-
+  </div>
 {% endblock %}
-
 
 {% block after-body-bottom-js %}
 
-{% compress js %}
-<script src="{% static 'ontology/htmx.js' %}"></script>
-{% endcompress %}
+  {% compress js %}
+    <script src="{% static 'ontology/htmx.js' %}"></script>
+  {% endcompress %}
 
-<script>
-    document.addEventListener('htmx:beforeRequest', function (event) {
-        document.getElementById('loading-spinner').style.display = 'block';
-        document.getElementById('loading-spinner-sidebar').style.display = 'block';
+  <script>
+    document.addEventListener("htmx:beforeRequest", function (event) {
+      document.getElementById("loading-spinner").style.display = "block";
+      document.getElementById("loading-spinner-sidebar").style.display =
+        "block";
     });
 
-    document.addEventListener('htmx:afterSwap', function (event) {
-        document.getElementById('loading-spinner').style.display = 'none';
-        document.getElementById('loading-spinner-sidebar').style.display = 'none';
+    document.addEventListener("htmx:afterSwap", function (event) {
+      document.getElementById("loading-spinner").style.display = "none";
+      document.getElementById("loading-spinner-sidebar").style.display = "none";
     });
 
     // Optionally, you can use this event to handle errors
-    document.addEventListener('htmx:afterRequest', function (event) {
-        if (event.detail.xhr.status >= 400) {
-            console.error('Request failed:', event.detail.xhr);
-        }
+    document.addEventListener("htmx:afterRequest", function (event) {
+      if (event.detail.xhr.status >= 400) {
+        console.error("Request failed:", event.detail.xhr);
+      }
     });
-</script>
-
+  </script>
 {% endblock after-body-bottom-js %}

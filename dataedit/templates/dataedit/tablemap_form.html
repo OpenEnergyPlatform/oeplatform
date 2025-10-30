@@ -5,14 +5,11 @@
   <h2 class="site-header">Create Map View</h2>
 {% endblock %}
 
-
 {% block data_content %}
-{% load static %}
-<form method="post">
+  {% load static %}
+  <form method="post">
     {% csrf_token %}
     {% bootstrap_form form %}
-    <input class="btn btn-success" type="submit" value="Submit Form"/>
-</form>
-
-
+    <input class="btn btn-success" type="submit" value="Submit Form" />
+  </form>
 {% endblock %}

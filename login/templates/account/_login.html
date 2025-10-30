@@ -1,173 +1,169 @@
 {% extends "base/base-full.html" %}
 {% load base_tags %}
+{% load static %}
 
 {% block main-content-body %}
-    <!-- Alert out of main block, e.g. for successful log out info -->
-    <div class="login__alert login__alert--success login__alert--100">
-        <p>You have been successfully logged out.</p>
-    </div>
+  <!-- Add .login as as main block and then elements & modifiers -->
+  <div class="login">
+    <div class="login__wrap">
+      <!-- Logo -->
+      <div class="login__logo">
+        <img src="{% static 'OEP_logo_2_no_text.svg' %}" alt="OEP Logo" />
+      </div>
 
-    <!-- Add .login as as main block and then elements & modifiers -->
-    <div class="login">
-        <div class="login__wrap">
+      <!-- Be sure to use h1 for the heading -->
+      <h1 class="login__heading">Log in to the Open Energy Platform</h1>
 
-            <!-- Logo -->
-            <div class="login__logo">
-                <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo">
-            </div>
+      <!-- Text field -->
+      <div class="login__field">
+        <label for="exampleInputUserName">User name</label>
+        <input type="text" id="exampleInputUserName" />
+      </div>
 
-            <!-- Be sure to use h1 for the heading -->
-            <h1 class="login__heading">Log in to the Open Energy Platform</h1>
-
-            <!-- Text field -->
-            <div class="login__field">
-                <label for="exampleInputUserName">User name</label>
-                <input type="text" id="exampleInputUserName">
-            </div>
-
-            <!-- Password field -->
-            <div class="login__field">
-                <label for="exampleInputPassword1">Password</label>
-                <input type="password" id="exampleInputPassword1">
-                <div class="login__hint login__hint--password">
-                    <a href="#">Forgot your password?</a>
-                </div>
-            </div>
-
-            <!-- Blue button (main CTA) -->
-            <button type="submit" class="login__button">
-                Log in
-            </button>
-
-            <!-- Separator -->
-            <div class="login__separation">
-                <div class="login__separation-line"></div>
-                <div class="login__separation-word">OR</div>
-                <div class="login__separation-line"></div>
-            </div>
-
-            <!-- Secondary button (gray) -->
-            <button type="submit" class="login__button login__button--outline-secondary">
-                <span>
-                    <svg width="24" height="24" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <path d="m73.543 39.375h4.7969l-0.003906-3.543-3.543-1.7734-24.797-12.395-24.793 12.395-3.543 1.7734v3.543zm-10.625-5.3125-12.914-6.457-12.914 6.457zm-27.973 33.438-0.003906-23.027h-5.3164v23.027zm17.707-23.027v23.023h-5.3125l-0.003906-23.023zm17.711 0v23.023h-5.3125l-0.003906-23.023zm7.9766 31.207c0 1.4648-1.1836 2.6562-2.6484 2.6562h-51.367c-1.4648 0-2.6562-1.1875-2.6562-2.6562 0-1.4648 1.1914-2.6562 2.6562-2.6562h51.363c1.4648 0.003906 2.6523 1.1914 2.6523 2.6562z"/>
-                    </svg>
-                </span>
-                <span>
-                    Sign in through your institution
-                </span>
-            </button>
-
-            <!-- Use for less important text -->
-            <div class="login__alternative">
-                <p>New to the Open Energy Platform?</p>
-                <a href="#">Sign up</a>
-            </div>
-
-            <!-- Components & Variants -->
-             <!-- Info alert -->
-            <div class="login__alert login__alert--info">
-                <p class="login__alert-heading">You are nearly done! Just one step...</p>
-                <p>You are about to use your NFDI-RegApp AAI account to login to Example.</p>
-                <p>Please complete the following form, as we did not get this information from your provider.</p>
-            </div>
-
-            <!-- Warning alert -->
-            <div class="login__alert login__alert--warning">
-                <p>Disconnecting your [Provider] account will stop you from logging in using [Provider]. Ensure you set a password for your account to log in next time.</p>
-                <p>Make sure you have an email and password set up before disconnecting your [Provider] account.</p>
-            </div>
-
-            <!-- Danger alert -->
-            <div class="login__alert login__alert--danger">
-                <p>Disconnecting your [Provider] account will stop you from logging in using [Provider]. Ensure you set a password for your account to log in next time.</p>
-                <p>Make sure you have an email and password set up before disconnecting your [Provider] account.</p>
-            </div>
-
-            <!-- Warning button -->
-            <button type="submit" class="login__button login__button--warning">
-                Disconnect
-            </button>
-
-            <div class="mb-2"></div>
-
-            <!-- Danger button -->
-            <button type="submit" class="login__button login__button--danger">
-                Disconnect
-            </button>
-
-            <div class="mb-2"></div>
-
-            <!-- Cancel button -->
-            <button type="submit" class="login__button login__button--outline-primary">
-                Cancel
-            </button>
-
-            <!-- General text that is relatively important -->
-            <div class="login__text">
-                <p>Please check your new email <b>test_2@mail.com</b> for a verification link to complete the update.</p>
-            </div>
-
-            <!-- Password field with hint below -->
-            <div class="login__field">
-                <label for="exampleInputPassword2">New password</label>
-                <input type="password" id="exampleInputPassword2">
-                <div class="login__hint">
-                    Make sure it's at least 15 characters OR at least 8 characters including a number and a lowercase letter.
-                </div>
-            </div>
-
-            <!-- Verification successful -->
-             <div class="login__verification login__verification--successful">
-                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M32 2C15.4571 2 2 15.4571 2 32C2 48.5429 15.4571 62 32 62C48.5429 62 62 48.5429 62 32C62 15.4571 48.5429 2 32 2ZM47.4149 23.4149L29.4149 41.4149C29.0249 41.8049 28.5124 41.9999 27.9999 41.9999C27.4875 41.9999 26.9749 41.805 26.585 41.4149L18.585 33.4149C17.8025 32.6324 17.8025 31.3699 18.585 30.5874C19.3675 29.8049 20.63 29.8049 21.4125 30.5874L27.9975 37.1725L44.5826 20.5874C45.3651 19.8049 46.6276 19.8049 47.4101 20.5874C48.1926 21.3699 48.1926 22.6324 47.4101 23.4149H47.4149Z" fill="#21A179"/>
-                </svg>
-                <h2>Verification successful!</h2>
-                <p>Your email has been confirmed.</p>
-             </div>
-            
-
-            <!-- Original code -->
-            <!-- 
-            {% if form.errors %}
-                <p>Your username and password didn't match. Please try again.</p>
-            {% endif %}
-            
-            {% if next %}
-                {% if user.is_authenticated %}
-                <p>Your account doesn't have access to this page. To proceed,
-                please login with an account that has access.</p>
-                {% else %}
-                <p>Please login to see this page.</p>
-                {% endif %}
-            {% endif %}
-        
-            <form method="post" action="{% url 'login' %}">
-                {% csrf_token %}
-                <div class="mb-3">
-                    {{ form.username.errors }}
-                    {{ form.username.label_tag }} {{ form.username | addclass:"form-control" }}
-                </div>
-                <div class="mb-3">
-                    {{ form.password.errors }}
-                    {{ form.password.label_tag }} {{ form.password | addclass:"form-control" }}
-                <input type="hidden" name="next" value="{{ next }}">
-                </div>
-                <div class="mb-3">
-                    <div>
-                        <a href="/user/register">Create a new account</a>
-                    </div>
-                    {% url 'password_reset' as password_reset_url %}
-                    {% if password_reset_url %}
-                        <div class="password-reset-link">
-                            <a href="{{ password_reset_url }}">Forgotten your password or username?</a>
-                        </div>
-                    {% endif %}
-                </div>
-                <div class="submit-row">
-                <label class="form-label d-none">&nbsp;</label><input class="btn btn-success" type="submit" value="Log in">
-                </div>
-            </form> -->
+      <!-- Password field -->
+      <div class="login__field">
+        <label for="exampleInputPassword1">Password</label>
+        <input type="password" id="exampleInputPassword1" />
+        <div class="login__hint login__hint--password">
+          <a href="#">Forgot your password?</a>
         </div>
+      </div>
+
+      <!-- Blue button (main CTA) -->
+      <button type="submit" class="login__button">Log in</button>
+
+      <!-- Separator -->
+      <div class="login__separation">
+        <div class="login__separation-line"></div>
+        <div class="login__separation-word">OR</div>
+        <div class="login__separation-line"></div>
+      </div>
+
+      <!-- Secondary button (gray) -->
+      <button
+        type="submit"
+        class="login__button login__button--outline-secondary"
+      >
+        <span>
+          <svg
+            width="24"
+            height="24"
+            version="1.1"
+            viewBox="0 0 100 100"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m73.543 39.375h4.7969l-0.003906-3.543-3.543-1.7734-24.797-12.395-24.793 12.395-3.543 1.7734v3.543zm-10.625-5.3125-12.914-6.457-12.914 6.457zm-27.973 33.438-0.003906-23.027h-5.3164v23.027zm17.707-23.027v23.023h-5.3125l-0.003906-23.023zm17.711 0v23.023h-5.3125l-0.003906-23.023zm7.9766 31.207c0 1.4648-1.1836 2.6562-2.6484 2.6562h-51.367c-1.4648 0-2.6562-1.1875-2.6562-2.6562 0-1.4648 1.1914-2.6562 2.6562-2.6562h51.363c1.4648 0.003906 2.6523 1.1914 2.6523 2.6562z"
+            />
+          </svg>
+        </span>
+        <span> Sign in through your institution </span>
+      </button>
+
+      <!-- Use for less important text -->
+      <div class="login__alternative">
+        <p>New to the Open Energy Platform?</p>
+        <a href="#">Sign up</a>
+      </div>
+
+      <!-- Components & Variants -->
+      <!-- Info alert -->
+      <div class="login__alert login__alert--info">
+        <p class="login__alert-heading">
+          You are nearly done! Just one step...
+        </p>
+        <p>
+          You are about to use your NFDI-RegApp AAI account to login to Example.
+        </p>
+        <p>
+          Please complete the following form, as we did not get this information
+          from your provider.
+        </p>
+      </div>
+
+      <!-- Warning alert -->
+      <div class="login__alert login__alert--warning">
+        <p>
+          Disconnecting your [Provider] account will stop you from logging in
+          using [Provider]. Ensure you set a password for your account to log in
+          next time.
+        </p>
+        <p>
+          Make sure you have an email and password set up before disconnecting
+          your [Provider] account.
+        </p>
+      </div>
+
+      <!-- Danger alert -->
+      <div class="login__alert login__alert--danger">
+        <p>
+          Disconnecting your [Provider] account will stop you from logging in
+          using [Provider]. Ensure you set a password for your account to log in
+          next time.
+        </p>
+        <p>
+          Make sure you have an email and password set up before disconnecting
+          your [Provider] account.
+        </p>
+      </div>
+
+      <!-- Warning button -->
+      <button type="submit" class="login__button login__button--warning">
+        Disconnect
+      </button>
+
+      <div class="mb-2"></div>
+
+      <!-- Danger button -->
+      <button type="submit" class="login__button login__button--danger">
+        Disconnect
+      </button>
+
+      <div class="mb-2"></div>
+
+      <!-- Cancel button -->
+      <button
+        type="submit"
+        class="login__button login__button--outline-primary"
+      >
+        Cancel
+      </button>
+
+      <!-- General text that is relatively important -->
+      <div class="login__text">
+        <p>
+          Please check your new email <b>test_2@mail.com</b> for a verification
+          link to complete the update.
+        </p>
+      </div>
+
+      <!-- Password field with hint below -->
+      <div class="login__field">
+        <label for="exampleInputPassword2">New password</label>
+        <input type="password" id="exampleInputPassword2" />
+        <div class="login__hint">
+          Make sure it's at least 15 characters OR at least 8 characters
+          including a number and a lowercase letter.
+        </div>
+      </div>
+
+      <!-- Verification successful -->
+      <div class="login__verification login__verification--successful">
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 64 64"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M32 2C15.4571 2 2 15.4571 2 32C2 48.5429 15.4571 62 32 62C48.5429 62 62 48.5429 62 32C62 15.4571 48.5429 2 32 2ZM47.4149 23.4149L29.4149 41.4149C29.0249 41.8049 28.5124 41.9999 27.9999 41.9999C27.4875 41.9999 26.9749 41.805 26.585 41.4149L18.585 33.4149C17.8025 32.6324 17.8025 31.3699 18.585 30.5874C19.3675 29.8049 20.63 29.8049 21.4125 30.5874L27.9975 37.1725L44.5826 20.5874C45.3651 19.8049 46.6276 19.8049 47.4101 20.5874C48.1926 21.3699 48.1926 22.6324 47.4101 23.4149H47.4149Z"
+            fill="#21A179"
+          />
+        </svg>
+        <h2>Verification successful!</h2>
+        <p>Your email has been confirmed.</p>
+      </div>
     </div>
+  </div>
 {% endblock %}

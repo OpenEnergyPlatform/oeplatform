@@ -1,5 +1,3 @@
-# Ignore all HTML files, because they contain
-# django markup that will not be broken by prettier
-**/*.html
+# prettier: could not determine a constructor for the tag 'tag:yaml.org,2002:python/name:material.extensions.emoji.twemoji' in "mkdocs.yml"
 
-docs/*
+mkdocs.yml

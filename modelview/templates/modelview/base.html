@@ -2,25 +2,21 @@
 {% load static %}
 {% block main-right-sidebar-content %}
 
-{% block main-right-sidebar-content-before %}
-{% endblock main-right-sidebar-content-before %}
-
+  {% block main-right-sidebar-content-before %}
+  {% endblock main-right-sidebar-content-before %}
 {% endblock %}
 
 {% block main-content-body %}
-{% block factsheets_content %}
-
-{% endblock %}
+  {% block factsheets_content %}
+  {% endblock %}
 {% endblock %}
 
 {% block after-body-bottom-js %}
-    <script>
-        $(function () {
-            $('[data-bs-toggle="tooltip"]').tooltip()
-        })
-    </script>
-    {% block factsheets-after-body-bottom-js %}
-
-    {% endblock %}
-
+  <script>
+    $(function () {
+      $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+  </script>
+  {% block factsheets-after-body-bottom-js %}
+  {% endblock %}
 {% endblock %}

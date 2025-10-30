@@ -1,0 +1,14 @@
+{
+  "proseWrap": "always",
+  "printWidth": 80,
+  "trailingComma": "es5",
+  "plugins": ["prettier-plugin-jinja-template"],
+  "overrides": [
+    {
+      "files": ["**/templates/**/*.html"],
+      "options": {
+        "parser": "jinja-template"
+      }
+    }
+  ]
+}

@@ -1,43 +1,52 @@
 {% extends "account/base.html" %}
 {% load i18n %}
 {% load account socialaccount %}
-
+{% load static %}
 {% block head_title %}
   {% translate "" %}
 {% endblock head_title %}
 
 {% block inner %}
-  {% include 'account/messages/messages.html' %}
   <div class="login">
     <div class="login__wrap">
-
       <!-- Logo -->
       <div class="login__logo">
-        <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo">
+        <img src="{% static 'OEP_logo_2_no_text.svg' %}" alt="OEP Logo" />
       </div>
 
       <!-- Heading -->
-      <h1 class="login__heading">{% translate "Create your Open Energy Platform account" %}</h1>
+      <h1 class="login__heading">
+        {% translate "Create your Open Energy Platform account" %}
+      </h1>
 
       {% get_providers as socialaccount_providers %}
 
-      <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+      <form
+        class="signup"
+        id="signup_form"
+        method="post"
+        action="{% url 'account_signup' %}"
+      >
         {% csrf_token %}
 
         <!-- Username field -->
         <div class="login__field">
-          <label for="{{ form.email.id_for_label }}">{{ form.username.label }}</label>
+          <label for="{{ form.email.id_for_label }}"
+            >{{ form.username.label }}</label
+          >
           {{ form.username }}
           {% if form.username.errors %}
-           <div class="login__alert login__alert--success login__alert--100">
-            {{ form.username.errors }}
-          </div>
+            <div class="login__alert login__alert--success login__alert--100">
+              {{ form.username.errors }}
+            </div>
           {% endif %}
         </div>
 
         <!-- Email field -->
         <div class="login__field">
-          <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+          <label for="{{ form.email.id_for_label }}"
+            >{{ form.email.label }}</label
+          >
           {{ form.email }}
           {% if form.email.errors %}
             <div class="login__alert login__alert--success login__alert--100">
@@ -48,7 +57,9 @@
 
         <!-- Password field -->
         <div class="login__field">
-          <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+          <label for="{{ form.password1.id_for_label }}"
+            >{{ form.password1.label }}</label
+          >
           {{ form.password1 }}
           {% if form.password1.errors %}
             <div class="login__alert login__alert--success login__alert--100">
@@ -59,7 +70,9 @@
 
         <!-- Confirm password field -->
         <div class="login__field">
-          <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+          <label for="{{ form.password2.id_for_label }}"
+            >{{ form.password2.label }}</label
+          >
           {{ form.password2 }}
           {% if form.password2.errors %}
             <div class="login__alert login__alert--success login__alert--100">
@@ -68,19 +81,25 @@
           {% endif %}
         </div>
 
-      <!-- Captcha field -->
-      <div class="login__field">
-        <label for="{{ form.captcha.id_for_label }}">{{ form.captcha.label }}</label>
-        {{ form.captcha }}
-        {% if form.captcha.errors %}
-          <div class="login__alert login__alert--success login__alert--100">
-            {{ form.captcha.errors }}
-          </div>
-        {% endif %}
-      </div>
+        <!-- Captcha field -->
+        <div class="login__field">
+          <label for="{{ form.captcha.id_for_label }}"
+            >{{ form.captcha.label }}</label
+          >
+          {{ form.captcha }}
+          {% if form.captcha.errors %}
+            <div class="login__alert login__alert--success login__alert--100">
+              {{ form.captcha.errors }}
+            </div>
+          {% endif %}
+        </div>
 
         {% if redirect_field_value %}
-          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+          <input
+            type="hidden"
+            name="{{ redirect_field_name }}"
+            value="{{ redirect_field_value }}"
+          />
         {% endif %}
 
         <!-- Submit -->
@@ -98,7 +117,6 @@
         <p>Already have an account?</p>
         <a href="{{ login_url }}">Log in</a>
       </div>
-
     </div>
   </div>
 {% endblock inner %}

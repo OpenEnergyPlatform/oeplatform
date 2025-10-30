@@ -3432,3 +3432,28 @@ SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
   "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
+
+
+[[annotations]]
+path = "eslint.config.mjs"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = ".prettierrc"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = ".markdownlint.json"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]

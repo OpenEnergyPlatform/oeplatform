@@ -4,86 +4,144 @@
 {% load django_bootstrap5 %}
 
 {% block after-head %}
-<link href="/static/metaedit/metaedit.css" rel="stylesheet">
+  <link href="{% static 'metaedit/metaedit.css' %}" rel="stylesheet" />
 {% endblock after-head %}
 
 {% block site-header %}
-<h2 class="site-header">
+  <h2 class="site-header">
     <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i>
-</h2>
+  </h2>
 {% endblock site-header %}
 
 {% block main %}
-<div class="main-header">
-  <h1 class="main-header__title">
+  <div class="main-header">
+    <h1 class="main-header__title">
       <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i> Edit Metadata
-  </h1>
-  <div class="main-header__wizard">
-    {% if table %}{{ schema }} / {% if table_label %}  <a href="/dataedit/view/{{ schema }}/{{ table }}">{{ table_label }}</a> {% else %} <a href="/dataedit/view/{{ schema }}/{{ table }}">{{ table }}</a> {% endif %} / {% else %} <a href="{% url 'dataedit:topic-list' %}">Topics</a> / Standalone (no data table attached) {% endif %} OEMetaBuilder
-    <!-- Indicate weather the user got permissions fot this table -->
-    {% if can_add %}
-      <span class="success-badge">
-        You can edit the metadata.
-      </span>
-    {% endif %}
-  </div>
-  <br>
-  <div>
-    Find a detailed description for all fields of the OEMetaData visible on <a href="{{oem_key_desc}}" target="_blank">GitHub</a>.
-    For a brief introduction on how to work with the oemetadata and the <a href="{{oemetabuilder_tutorial}}" target="_blank">OEMetaBuilder</a> tool find our <a href="{{oemetadata_tutorial}}" target="_blank">tutorial</a> in the academy.
-  </div>
-</div>
-<div class=" d-flex justify-content-center">
-    <div class="spinner-border text-primary m-5 d-none" role="status" id="metaedit-loading">
-        <span class="visually-hidden">Loading...</span>
+    </h1>
+    <div class="main-header__wizard">
+      {% if table %}
+        {{ schema }}
+        /
+        {% if table_label %}
+          <a href="{% url 'dataedit:view' schema=schema table=table %}"
+            >{{ table_label }}</a
+          >
+        {% else %}
+          <a href="{% url 'dataedit:view' schema=schema table=table %}"
+            >{{ table }}</a
+          >
+        {% endif %}
+        /
+      {% else %}
+        <a href="{% url 'dataedit:topic-list' %}">Topics</a> / Standalone (no
+        data table attached)
+      {% endif %}
+      OEMetaBuilder
+      <!-- Indicate weather the user got permissions fot this table -->
+      {% if can_add %}
+        <span class="success-badge"> You can edit the metadata. </span>
+      {% endif %}
     </div>
-</div>
-<div class="row d-none fixed-controls" id="metaedit-controls">
-  <div class="col">
-      <span class="" {% if not can_add %} data-bs-toggle="popover" title="You need write permissions on this table to upload meta data" {% endif %}>
-          <a href="#metaedit-submit" class="btn btn-sm btn-success mr-2 {% if not can_add %} disabled {% endif %}" id="metaedit-submit"><span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="metaedit-submitting"></span>Submit</a>
+    <br />
+    <div>
+      Find a detailed description for all fields of the OEMetaData visible on
+      <a href="{{ oem_key_desc }}" target="_blank">GitHub</a>. For a brief
+      introduction on how to work with the oemetadata and the
+      <a href="{{ oemetabuilder_tutorial }}" target="_blank">OEMetaBuilder</a>
+      tool find our
+      <a href="{{ oemetadata_tutorial }}" target="_blank">tutorial</a> in the
+      academy.
+    </div>
+  </div>
+  <div class=" d-flex justify-content-center">
+    <div
+      class="spinner-border text-primary m-5 d-none"
+      role="status"
+      id="metaedit-loading"
+    >
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  <div class="row d-none fixed-controls" id="metaedit-controls">
+    <div class="col">
+      <span
+        class=""
+        {% if not can_add %}
+          data-bs-toggle="popover" title="You need write permissions on this
+          table to upload meta data"
+        {% endif %}
+      >
+        <a
+          href="#metaedit-submit"
+          class="btn btn-sm btn-success mr-2 {% if not can_add %}disabled{% endif %}"
+          id="metaedit-submit"
+          ><span
+            class="spinner-border text-light d-none mr-2 spinner-border-sm"
+            id="metaedit-submitting"
+          ></span
+          >Submit</a
+        >
       </span>
-      <button class="btn btn-sm btn-primary mr-2" id="metaedit-cancel">Cancel</button>
-      <button class="btn btn-sm btn-primary mr-2" id="metaedit-download">Download</button>
+      <button class="btn btn-sm btn-primary mr-2" id="metaedit-cancel">
+        Cancel
+      </button>
+      <button class="btn btn-sm btn-primary mr-2" id="metaedit-download">
+        Download
+      </button>
+    </div>
   </div>
-</div>
 
-<div class="row">
-  <div class="col">
+  <div class="row">
+    <div class="col">
       <form iv id="metaedit-form">
-          <!-- placeholder -->
+        <!-- placeholder -->
       </form>
+    </div>
   </div>
-</div>
 
-<div>
-  <!-- Modal for oeo extended -->
-  <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalLabel">Add your custom units as extension to the oeo:</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Insert the form here -->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          
+  <div>
+    <!-- Modal for oeo extended -->
+    <div
+      class="modal fade"
+      id="formModal"
+      tabindex="-1"
+      aria-labelledby="modalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">
+              Add your custom units as extension to the oeo:
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <!-- Insert the form here -->
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-
 {% endblock main %}
 
 {% block after-body-bottom-js %}
-
   <style>
-
-  .fixed-controls {
+    .fixed-controls {
       position: fixed;
       bottom: 20px;
       right: 20px;
@@ -91,57 +149,60 @@
       background-color: white; /* Optional: Background color to make it stand out */
       padding: 10px; /* Optional: Padding for better spacing */
       border-radius: 5px; /* Optional: Rounded corners for better aesthetics */
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Optional: Add a slight shadow for better visibility */
-  }
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Optional: Add a slight shadow for better visibility */
+    }
   </style>
-    {% compress js %}
-    <script src="/static/metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js"></script>
-    <script src="/static/metaedit/metaedit.js"></script>
+  {% compress js %}
+    <script src="{% static 'metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js' %}"></script>
+    <script src="{% static 'metaedit/metaedit.js' %}"></script>
     <script src="{% static 'modelview/htmx.min.js' %}"></script>
-    {% endcompress %}
-    <!-- fix imports below - we dont use cdn anymore -->
-    <script src="https://unpkg.com/@trevoreyre/autocomplete-js"></script>
+  {% endcompress %}
+  <!-- fix imports below - we dont use cdn anymore -->
+  <script src="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js }}"></script>
 
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/@trevoreyre/autocomplete-js/dist/style.css"
-    />
+  <link
+    rel="stylesheet"
+    href="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js_dist_style_css }}"
+  />
 
-    <script>
-        var createUrl = '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}';
-        var config = JSON.parse("{{ config|escapejs }}");
-        MetaEdit(config);
-        $(function () {
-            $('[data-bs-toggle="popover"]').popover()
+  <script>
+    var createUrl = '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}';
+    var config = JSON.parse("{{ config|escapejs }}");
+    MetaEdit(config);
+    $(function () {
+      $('[data-bs-toggle="popover"]').popover();
 
-            $('.popover-dismiss').popover({
-            trigger: 'focus'
-            })
-        })
-        function hideTabsFilter(tabIdsToRemove) {
-          const observer = new MutationObserver(() => {
-            document.querySelectorAll('.nav-item a.nav-link').forEach(link => {
-              const href = link.getAttribute('href');
-              const label = link.querySelector('span')?.textContent.trim();
+      $(".popover-dismiss").popover({
+        trigger: "focus",
+      });
+    });
+    function hideTabsFilter(tabIdsToRemove) {
+      const observer = new MutationObserver(() => {
+        document.querySelectorAll(".nav-item a.nav-link").forEach((link) => {
+          const href = link.getAttribute("href");
+          const label = link.querySelector("span")?.textContent.trim();
 
-              if (tabIdsToRemove.includes(href?.replace('#', '')) || tabIdsToRemove.includes(label)) {
-                const item = link.closest('.nav-item');
-                if (item) item.remove();
-              }
-            });
-          });
-
-          // Observe the form for any new child elements
-          const target = document.querySelector('#metaedit-form');
-          if (target) {
-            observer.observe(target, {
-              childList: true,
-              subtree: true,
-            });
+          if (
+            tabIdsToRemove.includes(href?.replace("#", "")) ||
+            tabIdsToRemove.includes(label)
+          ) {
+            const item = link.closest(".nav-item");
+            if (item) item.remove();
           }
-        }
+        });
+      });
 
-        // Set up tab filtering
-        hideTabsFilter(['Meta Metadata', 'Embargo Period', 'Dialect', 'Review']);
-    </script>
+      // Observe the form for any new child elements
+      const target = document.querySelector("#metaedit-form");
+      if (target) {
+        observer.observe(target, {
+          childList: true,
+          subtree: true,
+        });
+      }
+    }
+
+    // Set up tab filtering
+    hideTabsFilter(["Meta Metadata", "Embargo Period", "Dialect", "Review"]);
+  </script>
 {% endblock after-body-bottom-js %}

@@ -694,8 +694,12 @@ function renderSchemaTab(metadata) {
                       "resources.schema.fields.nullable",
                       "Nullable"
                     )}:</strong> ${
-          field.nullable !== undefined ? (field.nullable ? "Yes" : "No") : "-"
-        }
+                      field.nullable !== undefined
+                        ? field.nullable
+                          ? "Yes"
+                          : "No"
+                        : "-"
+                    }
                   </div>
                   <div class="col-md-4">
                     <strong>Unit ${createInfoIcon(
@@ -961,9 +965,9 @@ function renderSubjectContent(subjects) {
     html += `
       <div class="list-group-item">
         <div class="fw-bold">${subject.name || "-"} ${createInfoIcon(
-      "resources.subject.name",
-      "Subject Name"
-    )}</div>
+          "resources.subject.name",
+          "Subject Name"
+        )}</div>
         ${
           subject["@id"]
             ? `<a href="${subject["@id"]}" target="_blank" rel="noopener noreferrer" class="small">
@@ -1170,9 +1174,9 @@ function renderSourcesContent(sources) {
     html += `
       <div class="list-group-item">
         <h6 class="mb-2">${source.title || "-"} ${createInfoIcon(
-      "resources.sources.title",
-      "Source Title"
-    )}</h6>
+          "resources.sources.title",
+          "Source Title"
+        )}</h6>
         <p class="small text-muted mb-3">${source.description || "-"}</p>
         
         <div class="row mb-3">
@@ -1236,9 +1240,9 @@ function renderSourcesContent(sources) {
         html += `
           <div class="list-group-item">
             <div class="fw-bold">${license.title || "-"} ${createInfoIcon(
-          "resources.sources.sourceLicenses.title",
-          "License Title"
-        )}</div>
+              "resources.sources.sourceLicenses.title",
+              "License Title"
+            )}</div>
             <a href="${
               license.path
             }" target="_blank" rel="noopener noreferrer" class="small">
@@ -1282,9 +1286,9 @@ function renderLicensesContent(licenses) {
     html += `
       <div class="list-group-item">
         <h6 class="mb-2">${license.title || "-"} ${createInfoIcon(
-      "resources.licenses.title",
-      "License Title"
-    )}</h6>
+          "resources.licenses.title",
+          "License Title"
+        )}</h6>
         <a href="${
           license.path
         }" target="_blank" rel="noopener noreferrer" class="small">
@@ -1334,9 +1338,9 @@ function renderContributorsContent(contributors) {
       <div class="list-group-item">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="mb-0">${contributor.title || "-"} ${createInfoIcon(
-      "resources.contributors.title",
-      "Contributor Title"
-    )}</h6>
+            "resources.contributors.title",
+            "Contributor Title"
+          )}</h6>
           <span class="metadata-badge metadata-badge-blue">${
             contributor.organization || "-"
           }</span>
@@ -1603,9 +1607,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const metadataId = metadataViewer.dataset.metadataId;
 
   // Fetch the metadata
-  fetch(
-    `/api/v0/schema/${window.meta_widget_config.schema}/tables/${window.meta_widget_config.table}/meta`
-  )
+  window
+    .reverseUrl("api:api_table_meta", {
+      schema: "data",
+      table: window.meta_widget_config.table,
+    })
+    .then((url) => {
+      return fetch(url);
+    })
     .then((response) => {
       if (!response.ok) {
         throw new Error(

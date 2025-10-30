@@ -1,50 +1,71 @@
 <div class="htmxComponentGroupMembership">
-        <div class="profile-category__member-invite">
-            <form id="invite-form" hx-post="{% url 'login:partial-group-invite' group_id=group.id %}" hx-target="#error-message" hx-encType="multipart/form-data" data-error-display="error-message">
-                {% csrf_token %}
-                <input type="hidden" name="mode" value="add_user">
-                <input class="form-control" id="username-input" name="name" type="text" placeholder="Add a user" >
-                {% if error %}
-                    <div style="color:#ff0000">{{ error.value }}</div>
-                {% endif %}
-
-            </form>
-            <div id="error-message"></div>
-            <button form="invite-form" type="submit" value="Submit">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                </svg>
-                Invite member
-            </button>
-            <b>Note:</b> Users have to log in on the OEP at least once in order to be registered.<br>
-        </div>
-    </div>
+  <div class="profile-category__member-invite">
+    <form
+      id="invite-form"
+      hx-post="{% url 'login:partial-group-invite' group_id=group.id %}"
+      hx-target="#error-message"
+      hx-encType="multipart/form-data"
+      data-error-display="error-message"
+    >
+      {% csrf_token %}
+      <input type="hidden" name="mode" value="add_user" />
+      <input
+        class="form-control"
+        id="username-input"
+        name="name"
+        type="text"
+        placeholder="Add a user"
+      />
+      {% if error %}
+        <div style="color:#ff0000">{{ error.value }}</div>
+      {% endif %}
+    </form>
+    <div id="error-message"></div>
+    <button form="invite-form" type="submit" value="Submit">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        fill="currentColor"
+        class="bi bi-plus"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"
+        />
+      </svg>
+      Invite member
+    </button>
+    <b>Note:</b> Users have to log in on the OEP at least once in order to be
+    registered.<br />
+  </div>
 </div>
 
 <script>
-    /*
-    * Handle user autocomplete and add client side form validation.
-    */
-    $(function() {
-        let validSelection = false;
-        let autocompleteSource = []; // This will be filled with your autocomplete data
+  /*
+   * Handle user autocomplete and add client side form validation.
+   */
+  $(function () {
+    let validSelection = false;
+    let autocompleteSource = []; // This will be filled with your autocomplete data
 
-        $('#username-input').bind('input', function() {
-            var dfd = new $.Deferred();
-            var request = $.ajax({type: 'GET',
-                url:'/api/usrprop/', dataType:'json',
-                data: {
-                    name: $(this).val()
-                }
-            });
-            request.done(function(users)
-            {
-                console.log(users);
-                $('#username-input').autocomplete({
-                    source: users
-                });
-                dfd.resolve({})
-            });
+    $("#username-input").bind("input", function () {
+      var dfd = new $.Deferred();
+      var request = $.ajax({
+        type: "GET",
+        url: "{% url 'api:usrprop' %}",
+        dataType: "json",
+        data: {
+          name: $(this).val(),
+        },
+      });
+      request.done(function (users) {
+        console.log(users);
+        $("#username-input").autocomplete({
+          source: users,
         });
+        dfd.resolve({});
+      });
     });
+  });
 </script>

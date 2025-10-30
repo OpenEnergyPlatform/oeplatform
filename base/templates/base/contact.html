@@ -1,34 +1,30 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% block main-content-body %}
-{% load static %}
-<h3>OEP - Contact</h3> <br>
-<div style="padding:10px">
+  {% load static %}
+  <h3>OEP - Contact</h3>
+  <br />
+  <div style="padding:10px">
     <form class="form form-horizontal" action="" method="post">
-        {% csrf_token %}
-        {% if success %}
+      {% csrf_token %}
+      {% if success %}
         <div class="alert alert-success">
           <strong>Success!</strong> Your message has been sent.
         </div>
-        {% endif %}
-        <table>
-            {% bootstrap_form form %}
-        </table>
-        <button type="submit">Submit</button>
+      {% endif %}
+      <table>
+        {% bootstrap_form form %}
+      </table>
+      <button type="submit">Submit</button>
     </form>
-</div>
-<br>
+  </div>
+  <br />
 
-Or use the issue tracking system on <a href="https://github.com/OpenEnergyPlatform/oeplatform">GitHub</a>.
+  Or use the issue tracking system on
+  <a href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}">GitHub</a>.
 
-<br>
-<br>
+  <br />
+  <br />
 
-<div class="well">
-
-</div>
-
-
-
-
+  <div class="well"></div>
 {% endblock %}

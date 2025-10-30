@@ -18,7 +18,7 @@ class EnergyframeworkSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
     def get_url(self, obj):
-        kwargs = {"sheettype": "framework", "model_name": obj.id}
+        kwargs = {"sheettype": "framework", "pk": obj.id}
         detail_url = reverse(
             "modelview:show-factsheet",
             kwargs=kwargs,
@@ -34,7 +34,7 @@ class EnergymodelSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
     def get_url(self, obj):
-        kwargs = {"sheettype": "model", "model_name": obj.id}
+        kwargs = {"sheettype": "model", "pk": obj.id}
         detail_url = reverse(
             "modelview:show-factsheet",
             kwargs=kwargs,
@@ -43,7 +43,6 @@ class EnergymodelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Energymodel
-        # fields = ["id", "model_name", "acronym", "url"]
         fields = ["id", "model_name", "acronym", "url", "license", "institutions"]
 
 

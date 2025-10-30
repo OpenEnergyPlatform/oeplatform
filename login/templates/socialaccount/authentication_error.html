@@ -1,26 +1,27 @@
 {% extends "account/base.html" %}
 {% load i18n %}
 {% load allauth %}
+{% load static %}
 {% load account socialaccount %}
 
 {% block head_title %}
-    {% trans "" %}
+  {% trans "" %}
 {% endblock head_title %}
 {% block content %}
-    {% block inner %}
+  {% block inner %}
     <div class="login">
-        <div class="login__wrap">
-            <!-- Logo -->
-            <div class="login__logo">
-                <img src="/static/OEP_logo_2_no_text.svg" alt="OEP Logo">
-            </div>
-            <!-- Be sure to use h1 for the heading -->
-            <h1 class="login__heading">{% trans "Third-Party Login Failure" %}</h1>
-
-            {% element p %}
-                {% trans "An error occurred while attempting to login via your third-party account." %}
-            {% endelement %}
+      <div class="login__wrap">
+        <!-- Logo -->
+        <div class="login__logo">
+          <img src="{% static 'OEP_logo_2_no_text.svg' %}" alt="OEP Logo" />
         </div>
+        <!-- Be sure to use h1 for the heading -->
+        <h1 class="login__heading">{% trans "Third-Party Login Failure" %}</h1>
+
+        {% element p %}
+          {% trans "An error occurred while attempting to login via your third-party account." %}
+        {% endelement %}
+      </div>
     </div>
-    {% endblock inner %}
+  {% endblock inner %}
 {% endblock content %}

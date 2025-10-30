@@ -1,11 +1,10 @@
-Hello<br>
-<br>
+Hello<br />
+<br />
 {% block message %}
-
 {% endblock %}
-<br>
-If you have any questions, please do not hesitate to get in touch with us via the contact form <br>
-<a href="https://{{ site_name }}/contact">https://{{ site_name }}/contact</a><br>
-<br>
-Best regards,<br>
-the {{ site_name }} Team<br>
+<br />
+If you have any questions, please do not hesitate to get in touch with us via
+the<a href="{% url 'base:contact' %}">contact form</a><br />
+<br />
+Best regards,<br />
+the {{ site_name }} Team<br />

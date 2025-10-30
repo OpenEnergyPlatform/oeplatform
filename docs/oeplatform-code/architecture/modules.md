@@ -6,11 +6,16 @@ SPDX-License-Identifier: CC0-1.0
 
 # Modules of the oeplatform software
 
-This section describes the modules of the oeplatoform website software. As we use django modules are also called apps. Each modules describes a django app that provides all the backend functionality as well as the user interface for a specific area of the website.
+This section describes the modules of the oeplatoform website software. As we
+use django modules are also called apps. Each modules describes a django app
+that provides all the backend functionality as well as the user interface for a
+specific area of the website.
 
 ## Overview
 
-Each module represents a [Django App](https://docs.djangoproject.com/en/4.2/ref/applications/) and includes a specific functionality or area of the Open Energy Platform Website.
+Each module represents a
+[Django App](https://docs.djangoproject.com/en/4.2/ref/applications/) and
+includes a specific functionality or area of the Open Energy Platform Website.
 
 | Module     | Function                                                                                                                                                                                                                                           |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -23,7 +28,8 @@ Each module represents a [Django App](https://docs.djangoproject.com/en/4.2/ref/
 | ontology   | - Integration of the Open Energy Ontology<br>- Presentation of the contents of OEO<br>- Descriptive contents about OEO and the development process                                                                                                 |
 | oeo_viewer | - Open Energy Ontology visualization<br>- Open Energy Ontology search functionality<br>- Special feature: Integrated React application                                                                                                             |
 
-In addition to Django apps, there are other components that serve specific functionalities within the system:
+In addition to Django apps, there are other components that serve specific
+functionalities within the system:
 
 | Module          | Explanation                                                                                                                                                                                                                                |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

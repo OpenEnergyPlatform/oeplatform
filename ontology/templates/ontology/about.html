@@ -3,182 +3,287 @@
 {% load compress %}
 
 {% block site-header %}
-    <div class="main-header">
-        <h1 class="main-header__title">
-            <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg" width="16" height="16" alt="OEO">
-            Ontology
-        </h1>
-        <div class="main-header__wizard">
-            Overview
-        </div>
-    </div>
-
+  <div class="main-header">
+    <h1 class="main-header__title">
+      <img
+        src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
+        width="16"
+        height="16"
+        alt="OEO"
+      />
+      Ontology
+    </h1>
+    <div class="main-header__wizard">Overview</div>
+  </div>
 {% endblock site-header %}
 
 {% block main-right-sidebar-content %}
-
-
-<div class="container">
-
+  <div class="container">
     <div class="row">
-        <div hx-get="{% url 'partial-page-sidebar-content' %}" hx-swap="outerHTML" hx-target="#content-sidebar" hx-trigger="load" id="content-sidebar">
+      <div
+        hx-get="{% url 'ontology:partial-page-sidebar-content' %}"
+        hx-swap="outerHTML"
+        hx-target="#content-sidebar"
+        hx-trigger="load"
+        id="content-sidebar"
+      ></div>
     </div>
-</div>   
-
-</div>
-<div id="loading-spinner-sidebar" class=" btn btn-primary disabled placeholder" role="status" style="display: none;">
+  </div>
+  <div
+    id="loading-spinner-sidebar"
+    class=" btn btn-primary disabled placeholder"
+    role="status"
+    style="display: none;"
+  >
     <p class="card-text placeholder-glow">
+      <span class="placeholder col-7"></span>
+      <span class="placeholder col-4"></span>
+      <span class="placeholder col-4"></span>
+      <span class="placeholder col-6"></span>
+      <span class="placeholder col-8"></span>
+    </p>
+    <span class="visually-hidden">Loading...</span>
+  </div>
+{% endblock main-right-sidebar-content %}
+
+{% block main-content-body %}
+  <div class="ontology">
+    <h2 class="ontology__heading">Open Energy Ontology</h2>
+    <p class="ontology__intro">
+      The Open Energy Ontology (OEO) is a dynamic domain ontology for energy
+      system modeling, updated regularly following a release cycle.
+    </p>
+    <p class="ontology__intro--secondary">
+      Access the latest version {{ version }}
+      <a href="{% url 'oeo_viewer:index' %}">here</a>.
+    </p>
+
+    <h3 id="domain-ontology-what-is-that" class="ontology__subheading">
+      Domain ontology: What is that?
+    </h3>
+    <p class="ontology__paragraph">
+      An ontology is a structured collection of terms and their relationships,
+      providing clear definitions and logical interpretation. The OEO aims to
+      create a common language for energy system modeling, bridging various
+      disciplines.
+    </p>
+    <div class="ontology__features">
+      <div class="ontology__features-row">
+        <div class="ontology__feature">
+          <h4 class="ontology__feature-title">Standardising Terminology</h4>
+          <span
+            >Provides a controlled vocabulary with clear definitions,
+            disambiguating terms</span
+          >
+        </div>
+        <div class="ontology__feature">
+          <h4 class="ontology__feature-title">
+            Data Annotation and Integration
+          </h4>
+          <span
+            >Enhances data integration, aggregation, and search functions</span
+          >
+        </div>
+        <div class="ontology__feature">
+          <h4 class="ontology__feature-title">Templates for Data Capture</h4>
+          <span>Ensures uniform and detailed reporting structures</span>
+        </div>
+      </div>
+      <div class="ontology__features-row">
+        <div class="ontology__feature">
+          <h4 class="ontology__feature-title">Visualisation</h4>
+          <span
+            >Makes complex knowledge comprehensible through various visual
+            formats</span
+          >
+        </div>
+        <div class="ontology__feature">
+          <h4 class="ontology__feature-title">Text and Data Mining</h4>
+          <span
+            >Automates searches across resources, aiding discovery, data
+            synthesis, and meta-analysis</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <h3 id="oeo-modules" class="ontology__subheading">Modules</h3>
+
+    <div
+      class="ontology__content"
+      hx-get="{% url 'ontology:partial-page-content' %}"
+      hx-swap="outerHTML"
+      hx-target="#content"
+      hx-trigger="load"
+      id="content"
+    ></div>
+
+    <div
+      id="loading-spinner"
+      class="text-primary"
+      role="status"
+      style="display: none;"
+      aria-hidden="true"
+    >
+      <p class="card-text placeholder-glow">
         <span class="placeholder col-7"></span>
         <span class="placeholder col-4"></span>
         <span class="placeholder col-4"></span>
         <span class="placeholder col-6"></span>
         <span class="placeholder col-8"></span>
       </p>
-    <span class="visually-hidden">Loading...</span>
-</div>
 
-{% endblock main-right-sidebar-content %}
-
-
-{% block main-content-body %}
-<div class="ontology">
-    <h2 class="ontology__heading">Open Energy Ontology</h2>
-    <p class="ontology__intro">The Open Energy Ontology (OEO) is a dynamic domain ontology for energy system modeling, 
-        updated regularly following a release cycle.</p>
-    <p class="ontology__intro--secondary">Access the latest version {{version}} <a href="/viewer/oeo/">here</a>.</p>
-    
-    <h3 id="domain-ontology-what-is-that" class="ontology__subheading">Domain ontology: What is that?</h3>
-    <p class="ontology__paragraph">An ontology is a structured collection of terms and their relationships, providing clear definitions and logical interpretation. 
-        The OEO aims to create a common language for energy system modeling, bridging various disciplines.</p>
-    <div class="ontology__features">
-        <div class="ontology__features-row">
-            <div class="ontology__feature">
-                <h4 class="ontology__feature-title">Standardising Terminology</h4>
-                <span>Provides a controlled vocabulary with clear definitions, disambiguating terms</span>
-            </div>
-            <div class="ontology__feature">
-                <h4 class="ontology__feature-title">Data Annotation and Integration</h4>
-                <span>Enhances data integration, aggregation, and search functions</span>
-            </div>
-            <div class="ontology__feature">
-                <h4 class="ontology__feature-title">Templates for Data Capture</h4>
-                <span>Ensures uniform and detailed reporting structures</span>
-            </div>
-        </div>
-        <div class="ontology__features-row">
-            <div class="ontology__feature">
-                <h4 class="ontology__feature-title">Visualisation</h4>
-                <span>Makes complex knowledge comprehensible through various visual formats</span>
-            </div>
-            <div class="ontology__feature">
-                <h4 class="ontology__feature-title">Text and Data Mining</h4>
-                <span>Automates searches across resources, aiding discovery, data synthesis, and meta-analysis</span>
-            </div>
-        </div>
-    </div>
-  
-    <h3 id="oeo-modules" class="ontology__subheading">Modules</h3>
-    
-    <div class="ontology__content" hx-get="{% url 'partial-page-content' %}" hx-swap="outerHTML" hx-target="#content" hx-trigger="load" id="content">
-    
-    
-    </div>
-    
-    
-    <div id="loading-spinner" class="text-primary" role="status" style="display: none;" aria-hidden="true">
-        <p class="card-text placeholder-glow">
+      <div class="card" aria-hidden="true">
+        <div class="card-body">
+          <h5 class="card-title placeholder-glow">
+            <span class="placeholder col-6"></span>
+          </h5>
+          <p class="card-text placeholder-glow">
             <span class="placeholder col-7"></span>
             <span class="placeholder col-4"></span>
             <span class="placeholder col-4"></span>
             <span class="placeholder col-6"></span>
             <span class="placeholder col-8"></span>
-        </p>
-    
-        <div class="card" aria-hidden="true">
-            <div class="card-body">
-                <h5 class="card-title placeholder-glow">
-                <span class="placeholder col-6"></span>
-                </h5>
-                <p class="card-text placeholder-glow">
-                <span class="placeholder col-7"></span>
-                <span class="placeholder col-4"></span>
-                <span class="placeholder col-4"></span>
-                <span class="placeholder col-6"></span>
-                <span class="placeholder col-8"></span>
-                <span class="placeholder col-7"></span>
-                <span class="placeholder col-4"></span>
-                <span class="placeholder col-4"></span>
-                <span class="placeholder col-6"></span>
-                <span class="placeholder col-8"></span>
-                <span class="placeholder col-7"></span>
-                <span class="placeholder col-4"></span>
-                <span class="placeholder col-4"></span>
-                <span class="placeholder col-6"></span>
-                <span class="placeholder col-8"></span>
-                </p>
-            </div>
+            <span class="placeholder col-7"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-6"></span>
+            <span class="placeholder col-8"></span>
+            <span class="placeholder col-7"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-4"></span>
+            <span class="placeholder col-6"></span>
+            <span class="placeholder col-8"></span>
+          </p>
         </div>
+      </div>
     </div>
-    
+
     <h3 class="ontology__subheading">OEO Extended (OEOX)</h3>
-    <p class="ontology__paragraph">To increase the usability of OEO and react to user requirements, we introduced a post-coordination extension to
-        OEO, the Open Energy Ontology Extended (OEOX). We created OEOX as an ontology for specific energy-
-        related terms with a high complexity that go beyond the level of detail of the standard OEO class hierarchy.
-        For further information you can have a look at the <a href="https://github.com/OpenEnergyPlatform/oeo-extended">GitHub page</a>.</p>
-    
-    <h3 id="usage-beyond-the-open-energy-family-tools" class="ontology__subheading">Usage beyond the Open Energy Family tools</h3>
-    <p>The OEO is developed within the scope of the Open Energy Family but aims to serve the entire energy system modeling community. 
-        We encourage its use in various contexts and use cases beyond its initial scope.</p>
-    
-    <h3 id="where-and-how-can-i-contribute" class="ontology__subheading">Where and how can I contribute?</h3>
-    <p class="ontology__paragraph">We welcome everyone to contribute to OEO development, a community-driven project hosted on 
-        GitHub. Explore our ontology course and have a look at our contribution guidelines.
-        If you have questions, reach out via the OEP contact form, and we'll connect you with the right person.</p>
+    <p class="ontology__paragraph">
+      To increase the usability of OEO and react to user requirements, we
+      introduced a post-coordination extension to OEO, the Open Energy Ontology
+      Extended (OEOX). We created OEOX as an ontology for specific energy-
+      related terms with a high complexity that go beyond the level of detail of
+      the standard OEO class hierarchy. For further information you can have a
+      look at the
+      <a href="{{ EXTERNAL_URLS.oeo_extended_github }}">GitHub page</a>.
+    </p>
+
+    <h3
+      id="usage-beyond-the-open-energy-family-tools"
+      class="ontology__subheading"
+    >
+      Usage beyond the Open Energy Family tools
+    </h3>
+    <p>
+      The OEO is developed within the scope of the Open Energy Family but aims
+      to serve the entire energy system modeling community. We encourage its use
+      in various contexts and use cases beyond its initial scope.
+    </p>
+
+    <h3 id="where-and-how-can-i-contribute" class="ontology__subheading">
+      Where and how can I contribute?
+    </h3>
+    <p class="ontology__paragraph">
+      We welcome everyone to contribute to OEO development, a community-driven
+      project hosted on GitHub. Explore our ontology course and have a look at
+      our contribution guidelines. If you have questions, reach out via the OEP
+      contact form, and we'll connect you with the right person.
+    </p>
 
     <div class="ontology__links">
-        <a href="https://github.com/OpenEnergyPlatform/ontology" target="_blank"><i class="fas fa-external-link-alt"></i>GitHub</a>
-        <a href="https://openenergyplatform.github.io/academy/courses/05_ontology/">Ontology course</a>
-        <a href="https://github.com/OpenEnergyPlatform/ontology/blob/dev/CONTRIBUTING.md" target="_blank"><i class="fas fa-external-link-alt"></i>Contribution guidelines</a>
-        <a href="https://openenergyplatform.org/contact/">Contact form</a>
+      <a
+        href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology }}"
+        target="_blank"
+        ><i class="fas fa-external-link-alt"></i>GitHub</a
+      >
+      <a
+        href="{{ EXTERNAL_URLS.openenergyplatform_github_academy_courses_05_ontology }}"
+        >Ontology course</a
+      >
+      <a
+        href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology_dev_contributing }}"
+        target="_blank"
+        ><i class="fas fa-external-link-alt"></i>Contribution guidelines</a
+      >
+      <a href="{% url 'base:contact' %}">Contact form</a>
     </div>
-    
+
     <div class="ontology__box">
-        <h3 id="further-information" class="ontology__subheading ontology__subheading--secondary">Further information</h3>
-        <p class="ontology__paragraph ontology__paragraph--secondary">OEO development began with the <a href="https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201180818/1%22" target="_blank"><i class="fas fa-external-link-alt"></i>"SzenarienDB"</a> 
-            project and is enhanced by <a href="https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201186899/1%22" target="_blank"><i class="fas fa-external-link-alt"></i>"LOD_GEOSS"</a>, 
-            <a href="https://www.enargus.de/pub/bscw.cgi/26?op=enargus.eps2&m=0&v=10&p=0&s=0&q=SEDOS" target="_blank"><i class="fas fa-external-link-alt"></i>"SEDOS"</a>,
-            <a href="https://www.enargus.de/pub/bscw.cgi/26?op=enargus.eps2&m=0&v=10&p=0&s=0&q=03EI1051C" target="_blank"><i class="fas fa-external-link-alt"></i>"Stadt-Land-Energie"</a> and 
-            <a href="https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201227101/1%22" target="_blank"><i class="fas fa-external-link-alt"></i>"SIROP"</a>. 
-            The OEO was introduced in an open-access peer-reviewed paper: <a href="https://doi.org/10.1016/j.egyai.2021.100074" target="_blank"><i class="fas fa-external-link-alt"></i>Introducing the 
-            Open Energy Ontology: Enhancing data interpretation and interfacing in energy systems analysis</a>.</p>
-        
-        <p>The <a href="{% url 'oeo-s-c' %}">OEO steering committee</a> was established in autumn 2019.</p>
+      <h3
+        id="further-information"
+        class="ontology__subheading ontology__subheading--secondary"
+      >
+        Further information
+      </h3>
+      <p class="ontology__paragraph ontology__paragraph--secondary">
+        OEO development began with the
+        <a
+          href="{{ EXTERNAL_URLS.enargus_pub_bscw_cgi__op_enargus_eps2_q__2201180818_1_22 }}"
+          target="_blank"
+          ><i class="fas fa-external-link-alt"></i>"SzenarienDB"</a
+        >
+        project and is enhanced by
+        <a
+          href="{{ EXTERNAL_URLS.enargus_pub_bscw_cgi__op_enargus_eps2_q__2201186899_1_22 }}"
+          target="_blank"
+          ><i class="fas fa-external-link-alt"></i>"LOD_GEOSS"</a
+        >,
+        <a
+          href="{{ EXTERNAL_URLS.enargus_pub_bscw_cgi_26_op_enargus_eps2_m_0_v_10_p_0_s_0_q_sedos }}"
+          target="_blank"
+          ><i class="fas fa-external-link-alt"></i>"SEDOS"</a
+        >,
+        <a
+          href="{{ EXTERNAL_URLS.enargus_pub_bscw_cgi_26_op_enargus_eps2_m_0_v_10_p_0_s_0_q_03ei1051c }}"
+          target="_blank"
+          ><i class="fas fa-external-link-alt"></i>"Stadt-Land-Energie"</a
+        >
+        and
+        <a
+          href="{{ EXTERNAL_URLS.enargus_pub_bscw_cgi__op_enargus_eps2_q__2201227101_1_22 }}"
+          target="_blank"
+          ><i class="fas fa-external-link-alt"></i>"SIROP"</a
+        >. The OEO was introduced in an open-access peer-reviewed paper:
+        <a
+          href="{{ EXTERNAL_URLS.doi_10_1016_j_egyai_2021_100074 }}"
+          target="_blank"
+          ><i class="fas fa-external-link-alt"></i>Introducing the Open Energy
+          Ontology: Enhancing data interpretation and interfacing in energy
+          systems analysis</a
+        >.
+      </p>
+
+      <p>
+        The
+        <a href="{% url 'ontology:oeo-s-c' %}">OEO steering committee</a> was
+        established in autumn 2019.
+      </p>
     </div>
-</div>
+  </div>
 
-{% compress js %}
-<script src="{% static 'ontology/htmx.js' %}"></script>
-{% endcompress %}
+  {% compress js %}
+    <script src="{% static 'ontology/htmx.js' %}"></script>
+  {% endcompress %}
 
-<script>
-    document.addEventListener('htmx:beforeRequest', function (event) {
-        document.getElementById('loading-spinner').style.display = 'block';
-        document.getElementById('loading-spinner-sidebar').style.display = 'block';
+  <script>
+    document.addEventListener("htmx:beforeRequest", function (event) {
+      document.getElementById("loading-spinner").style.display = "block";
+      document.getElementById("loading-spinner-sidebar").style.display =
+        "block";
     });
 
-    document.addEventListener('htmx:afterSwap', function (event) {
-        document.getElementById('loading-spinner').style.display = 'none';
-        document.getElementById('loading-spinner-sidebar').style.display = 'none';
+    document.addEventListener("htmx:afterSwap", function (event) {
+      document.getElementById("loading-spinner").style.display = "none";
+      document.getElementById("loading-spinner-sidebar").style.display = "none";
     });
 
     // Optionally, you can use this event to handle errors
-    document.addEventListener('htmx:afterRequest', function (event) {
-        if (event.detail.xhr.status >= 400) {
-            console.error('Request failed:', event.detail.xhr);
-        }
+    document.addEventListener("htmx:afterRequest", function (event) {
+      if (event.detail.xhr.status >= 400) {
+        console.error("Request failed:", event.detail.xhr);
+      }
     });
-</script>
-
-
+  </script>
 {% endblock %}
-

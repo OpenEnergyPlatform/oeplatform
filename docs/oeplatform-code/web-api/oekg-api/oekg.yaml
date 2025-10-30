@@ -1,7 +1,11 @@
 openapi: 3.0.2
 info:
   title: SPARQL Query API
-  description: An API to execute SPARQL queries on a Jena Fuseki endpoint and retrieve results in various formats. The formats are currently experimental as only json or XML is returned properly. You might experience escaped stings in the return format.
+  description:
+    An API to execute SPARQL queries on a Jena Fuseki endpoint and retrieve
+    results in various formats. The formats are currently experimental as only
+    json or XML is returned properly. You might experience escaped stings in the
+    return format.
   version: 1.0.0
 servers:
   - url: https://openenergyplatform.org/
@@ -14,7 +18,10 @@ components:
       type: apiKey
       in: header
       name: Authorization
-      description: "Token-based authentication using Django REST Framework's token authentication. Include 'Token <your_token>' in the Authorization header."
+      description:
+        "Token-based authentication using Django REST Framework's token
+        authentication. Include 'Token <your_token>' in the Authorization
+        header."
 paths:
   /api/v0/oekg/sparql:
     post:
@@ -50,7 +57,7 @@ paths:
                     - xml
                     - turtle
       responses:
-        '200':
+        "200":
           description: Successful response with query results.
           content:
             application/json:
@@ -69,7 +76,7 @@ paths:
               schema:
                 type: string
                 description: The SPARQL query results in Turtle format.
-        '400':
+        "400":
           description: Bad request due to invalid query or unsupported format.
           content:
             application/json:
@@ -91,9 +98,11 @@ paths:
   /sparql_metadata:
     get:
       summary: Retrieve metadata about the SPARQL API
-      description: Provides information about the SPARQL API, including supported response formats.
+      description:
+        Provides information about the SPARQL API, including supported response
+        formats.
       responses:
-        '200':
+        "200":
           description: Successful response with API metadata.
           content:
             application/json:

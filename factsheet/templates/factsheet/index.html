@@ -3,20 +3,14 @@
 {% load django_vite %}
 
 {% block after-head %}
-<!-- The following must stay before the vite_asset tag -->
-{% vite_react_refresh nonce="{{ request.csp_nonce }}" %}
-{% vite_asset "factsheet/frontend/src/index.jsx" %}
-
-<!-- <script src="factsheet/frontend/src/index.jsx"></script> -->
+  <!-- The following must stay before the vite_asset tag -->
+  {% vite_react_refresh nonce="{{ request.csp_nonce }}" %}
+  {% vite_asset "factsheet/frontend/src/index.jsx" %}
 {% endblock after-head %}
 
 {% block main-content-body %}
-<div id="root" style="width:100%">
-</div>
-
+  <div id="root" style="width:100%"></div>
 {% endblock main-content-body %}
 
 {% block after-body-bottom-js %}
-
-
 {% endblock after-body-bottom-js %}

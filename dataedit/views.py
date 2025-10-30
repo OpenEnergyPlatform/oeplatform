@@ -42,7 +42,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.db.models import Count
+from django.core.paginator import Paginator
+from django.db.models import Count, F
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
@@ -56,6 +57,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
 from django.views.generic import View
 from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 
@@ -71,6 +73,7 @@ from dataedit.helper import (
     find_tables,
     get_cancle_state,
     get_column_description,
+    get_page,
     merge_field_reviews,
     process_review_data,
     recursive_update,
@@ -96,34 +99,11 @@ from dataedit.models import View as DataViewModel
 from login import models as login_models
 from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SCHEMA_DATA
 
-__all__ = [
-    "AdminColumnView",
-    "AdminConstraintsView",
-    "TagUpdateView",
-    "TableDataView",
-    "TableGraphView",
-    "TableMapView",
-    "MetadataWidgetView",
-    "TableMetaEditView",
-    "TablePeerReviewView",
-    "TablePeerRreviewContributorView",
-    "TablePermissionView",
-    "TageTableAddView",
-    "TableRevisionView",
-    "TableShowRevisionView",
-    "StandaloneMetaEditView",
-    "TablesView",
-    "TagEditorView",
-    "TagOverviewView",
-    "TopicView",
-    "TableViewDeleteView",
-    "TableViewSaveView",
-    "TableViewSetDefaultView",
-    "TableWizardView",
-]  # mark views as used (by urls.py)
+ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
 
 
-def AdminConstraintsView(request: HttpRequest) -> HttpResponse:
+@require_POST
+def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     """
     Way to apply changes
     :param request:
@@ -139,12 +119,11 @@ def AdminConstraintsView(request: HttpRequest) -> HttpResponse:
     elif "apply" in action:
         actions.apply_queued_constraint(id)
 
-    return redirect(
-        "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-    )
+    return redirect("dataedit:view", schema=schema, table=table)
 
 
-def AdminColumnView(request: HttpRequest) -> HttpResponse:
+@require_POST
+def admin_column_view(request: HttpRequest) -> HttpResponse:
     """
     Way to apply changes
     :param request:
@@ -161,12 +140,10 @@ def AdminColumnView(request: HttpRequest) -> HttpResponse:
     elif "apply" in action:
         actions.apply_queued_column(id)
 
-    return redirect(
-        "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-    )
+    return redirect("dataedit:view", schema=schema, table=table)
 
 
-def TopicView(request: HttpRequest) -> HttpResponse:
+def topic_view(request: HttpRequest) -> HttpResponse:
     """
     Loads all schemas that are present in the external database specified in
     oeplatform/securitysettings.py. Only schemas that are present in the
@@ -241,7 +218,7 @@ def TopicView(request: HttpRequest) -> HttpResponse:
     )
 
 
-def TablesView(request: HttpRequest, schema: str) -> HttpResponse:
+def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
     """
     :param request: A HTTP-request object sent by the Django framework
     :param schema_name: Name of a schema
@@ -260,23 +237,22 @@ def TablesView(request: HttpRequest, schema: str) -> HttpResponse:
         tag_ids=searched_tag_ids,
     )
 
-    tables = tables.order_by("human_readable_name")
+    # descending (-): null/missing should be at end, so
+    # "-date_updated" should be newest first
+    tables = tables.order_by(
+        F("date_updated").desc(nulls_last=True), "human_readable_name"
+    )
 
-    table_label_tags = [
-        (
-            table.name,
-            table.human_readable_name,
-            table.tags.all(),
-        )
-        for table in tables
-    ]
+    # paginate tables
+    paginator = Paginator(tables, ITEMS_PER_PAGE)
+    tables_paginated = paginator.get_page(get_page(request))
 
     return render(
         request,
         "dataedit/dataedit_tablelist.html",
         {
             "schema": schema,
-            "table_label_tags": table_label_tags,
+            "tables_paginated": tables_paginated,
             "query": searched_query_string,
             "tags": searched_tag_ids,
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
@@ -286,10 +262,11 @@ def TablesView(request: HttpRequest, schema: str) -> HttpResponse:
 
 class TableRevisionView(View):
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
-        return redirect(f"/api/v0/schema/{schema}/tables/{table}/rows")
+        # TODO: why is this a redirect to API? do we still need it?
+        return redirect("api:api_rows", schema=schema, table=table)
 
 
-def TableShowRevisionView(
+def table_show_revision_view(
     request: HttpRequest, schema: str, table: str, date: str
 ) -> HttpResponse:
     rev = TableRevision.objects.get(schema=schema, table=table, date=date)
@@ -299,7 +276,7 @@ def TableShowRevisionView(
 
 
 @login_required
-def TagOverviewView(request: HttpRequest) -> HttpResponse:
+def tag_overview_view(request: HttpRequest) -> HttpResponse:
     # if rename or adding of tag fails: display error message
     context = {
         "errorMsg": (
@@ -313,8 +290,8 @@ def TagOverviewView(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-def TagEditorView(request: HttpRequest, id: str = "") -> HttpResponse:
-    tag = Tag.get_or_none(id)
+def tag_editor_view(request: HttpRequest, tag_pk: str | None = None) -> HttpResponse:
+    tag = Tag.get_or_none(tag_pk or "")
     if tag:
         assigned = tag.tables.count() > 0  # type: ignore (related name)
         return render(
@@ -335,8 +312,9 @@ def TagEditorView(request: HttpRequest, id: str = "") -> HttpResponse:
         )
 
 
+@require_POST
 @login_required
-def TagUpdateView(request: HttpRequest) -> HttpResponse:
+def tag_update_view(request: HttpRequest) -> HttpResponse:
     status = ""  # error status if operation fails
 
     if "submit_save" in request.POST:
@@ -358,10 +336,11 @@ def TagUpdateView(request: HttpRequest) -> HttpResponse:
         id = request.POST["tag_id"]
         delete_tag(id)
 
-    return redirect("/dataedit/tags/?status=" + status)
+    return redirect(reverse("dataedit:tags") + f"?status={status}")
 
 
-def TableViewSaveView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
+@require_POST
+def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpResponse:
     post_name = request.POST.get("name")
     post_type = request.POST.get("type")
     post_id = request.POST.get("id")
@@ -445,12 +424,16 @@ def TableViewSaveView(request: HttpRequest, schema: str, table: str) -> HttpResp
                 )
                 curr_filter.save()
 
-    return redirect("../../" + table + "?view=" + str(update_view.id))
+    return redirect(
+        reverse("dataedit:view", kwargs={"schema": schema, "table": table})
+        + f"?view={update_view.pk}"
+    )
 
 
-def TableViewSetDefaultView(
+def table_view_set_default_view(
     request: HttpRequest, schema: str, table: str
 ) -> HttpResponse:
+    # TODO: shouldnt this be POST only?
     post_id = request.GET.get("id")
 
     for view in DBView.objects.filter(schema=schema, table=table):
@@ -459,16 +442,19 @@ def TableViewSetDefaultView(
         else:
             view.is_default = False
         view.save()
-    return redirect("/dataedit/view/" + schema + "/" + table)
+    return redirect("dataedit:view", schema=schema, table=table)
 
 
-def TableViewDeleteView(request: HttpRequest, schema: str, table: str) -> HttpResponse:
+def table_view_delete_view(
+    request: HttpRequest, schema: str, table: str
+) -> HttpResponse:
+    # TODO: shouldnt this be POST only?
     post_id = request.GET.get("id")
 
     view = DBView.objects.get(id=post_id, schema=schema, table=table)
     view.delete()
 
-    return redirect("/dataedit/view/" + schema + "/" + table)
+    return redirect("dataedit:view", schema=schema, table=table)
 
 
 class TableGraphView(View):
@@ -486,7 +472,6 @@ class TableGraphView(View):
         gview = DataViewModel.objects.create(
             name=request.POST.get("name"),
             table=table,
-            schema=schema,
             type="graph",
             options=opt,
             is_default=request.POST.get("is_default", False),
@@ -494,9 +479,8 @@ class TableGraphView(View):
         gview.save()
 
         return redirect(
-            "/dataedit/view/{schema}/{table}?view={view_id}".format(
-                schema=schema, table=table, view_id=gview.id
-            )
+            reverse("dataedit:view", kwargs={"schema": schema, "table": table})
+            + f"?view={gview.pk}"
         )
 
 
@@ -533,9 +517,8 @@ class TableMapView(View):
         if form.is_valid():
             view_id = form.save(commit=True)
             return redirect(
-                "/dataedit/view/{schema}/{table}?view={view_id}".format(
-                    schema=schema, table=table, view_id=view_id
-                )
+                reverse("dataedit:view", kwargs={"schema": schema, "table": table})
+                + f"?view={view_id}"
             )
         else:
             return self.get(
@@ -686,6 +669,7 @@ class TableDataView(View):
             "revisions": revisions,
             "kinds": ["table", "map", "graph"],
             "table": table,
+            "table_obj": table_obj,
             "schema": schema,
             "table_label": table_label,
             # "tags": tags,
@@ -731,9 +715,7 @@ class TableDataView(View):
                 },
                 {"user": request.user},
             )
-        return redirect(
-            "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-        )
+        return redirect("dataedit:view", schema=schema, table=table)
 
 
 class TablePermissionView(View):
@@ -881,8 +863,9 @@ class TablePermissionView(View):
         return self.get(request, schema, table)
 
 
+@require_POST
 @login_required
-def TageTableAddView(request: HttpRequest) -> HttpResponse:
+def tage_table_add_view(request: HttpRequest) -> HttpResponse:
     """
     Updates the tags on a table according to the tag values in request.
     The update will delete all tags that are not present
@@ -929,7 +912,8 @@ def TageTableAddView(request: HttpRequest) -> HttpResponse:
         ),
     )
 
-    return redirect(request.META["HTTP_REFERER"])
+    redirect_url = request.META.get("HTTP_REFERER") or reverse("dataedit:index")
+    return redirect(redirect_url)
 
 
 class TableWizardView(LoginRequiredMixin, View):
@@ -1568,7 +1552,7 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         return render(request, "dataedit/opr_contributor.html", context=context)
 
 
-def MetadataWidgetView(request: HttpRequest) -> HttpResponse:
+def metadata_widget_view(request: HttpRequest) -> HttpResponse:
     """
     A view to render the metadata widget for the dataedit app.
     The metadata widget is a small widget that can be embedded in other
@@ -1580,6 +1564,7 @@ def MetadataWidgetView(request: HttpRequest) -> HttpResponse:
     Returns:
         HttpResponse: Rendered HTML response for the metadata widget.
     """
+    # TODO: schema and table should be in path?
     schema = request.GET.get("schema")
     table = request.GET.get("table")
 

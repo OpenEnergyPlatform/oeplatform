@@ -1,262 +1,313 @@
 {% load django_bootstrap5 %}
 
 <div class="htmxComponent">
-    <div>
-        With the extended OEO functionality, you can expand the terms found in the OEO.     
-        Currently we only offer the possibility to create additional units. As it is possible 
-        to create any combination of existing terms using the form below, the OEO extended module 
-        will be stored on the OEP but also made available on <a href="{{oeox_github_link}}" target="_blank">GitHub</a>. 
-        Before each release, we will review the content of the OEO extended with all newly composed entities 
-        contributed by the Open Energy Family community.<br>
-        We are about to publish an paper describing the approach used here and will provide the link shortly.
+  <div>
+    With the extended OEO functionality, you can expand the terms found in the
+    OEO. Currently we only offer the possibility to create additional units. As
+    it is possible to create any combination of existing terms using the form
+    below, the OEO extended module will be stored on the OEP but also made
+    available on <a href="{{ oeox_github_link }}" target="_blank">GitHub</a>.
+    Before each release, we will review the content of the OEO extended with all
+    newly composed entities contributed by the Open Energy Family community.<br />
+    We are about to publish an paper describing the approach used here and will
+    provide the link shortly.
+  </div>
+  <br />
+  <span class="early-access"> Early Access </span>
+  <div>
+    This feature is still a research prototype and offers only a minimal user
+    experience. After you successfully create a new composed unit, you need to
+    copy the URL, which then becomes visible. You can access the URL in your
+    browser and copy the name and URL into the oemetadata fields for "Name" and
+    "Path" as soon as you close this overlay.
+  </div>
+  <div class="result-section mt-4">
+    <h3>Result</h3>
+    <div id="result-expression">
+      <!-- Result expression will be displayed here -->
     </div>
-    <br>
-    <span class="early-access">
-        Early Access
-    </span>
-    <div>
-        This feature is still a research prototype and offers only a minimal user experience. 
-        After you successfully create a new composed unit, you need to copy the URL, which then becomes
-        visible. You can access the URL in your browser and copy the name and URL into the oemetadata fields 
-        for "Name" and "Path" as soon as you close this overlay. 
+  </div>
+  <hr />
+  <form
+    class="htmxFormComponent"
+    id="oeo-ext-form"
+    hx-post="{% url 'oeo_ext:oeo-ext-plugin-ui-create' %}"
+    hx-target=".htmxFormComponent"
+    hx-swap="outerHTML"
+    class="needs-validation"
+    novalidate
+  >
+    {% csrf_token %}
+
+    <div class="nominator-section mb-4">
+      <h3>Numerator</h3>
+      <div id="nominator-elements" class="mb-3">
+        <!-- Elements will be added here -->
+      </div>
+      <button
+        type="button"
+        class="btn btn-primary"
+        hx-get="{% url 'oeo_ext:add_unit_element' %}"
+        hx-target="#nominator-elements"
+        hx-swap="beforeend"
+      >
+        Add Numerator oeo-Unit
+      </button>
     </div>
-    <div class="result-section mt-4">
-        <h3>Result</h3>
-        <div id="result-expression">
-            <!-- Result expression will be displayed here -->
-        </div>
+
+    <div class="denominator-section mb-4">
+      <h3>Denominator</h3>
+      <div id="denominator-elements" class="mb-3">
+        <!-- Elements will be added here -->
+      </div>
+      <button
+        type="button"
+        class="btn btn-primary"
+        hx-get="{% url 'oeo_ext:add_unit_element' %}"
+        hx-target="#denominator-elements"
+        hx-swap="beforeend"
+      >
+        Add Denominator oeo-Unit
+      </button>
     </div>
-    <hr>
-    <form class="htmxFormComponent" id="oeo-ext-form" hx-post="{% url 'oeo_ext:oeo-ext-plugin-ui-create' %}" hx-target=".htmxFormComponent" hx-swap="outerHTML" class="needs-validation" novalidate>
-        {% csrf_token %}
 
-        <div class="nominator-section mb-4">
-            <h3>Numerator</h3>
-            <div id="nominator-elements" class="mb-3">
-                <!-- Elements will be added here -->
-            </div>
-            <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#nominator-elements" hx-swap="beforeend">Add Numerator oeo-Unit</button>
-        </div>
+    {% if form.unitLabel.value %}
+      <div class="mb-2">
+        <label for="unitLabel" class="form-label">Optional - Unit Label:</label>
+        {{ form.unitLabel }}
+        <div class="invalid-feedback">{{ form.unitLabel.errors }}</div>
+      </div>
+    {% endif %}
 
-        <div class="denominator-section mb-4">
-            <h3>Denominator</h3>
-            <div id="denominator-elements" class="mb-3">
-                <!-- Elements will be added here -->
+    {% if form.definition.value %}
+      <div class="mb-2">
+        <label for="definition" class="form-label"
+          >Optional - Definition:</label
+        >
+        {{ form.definition }}
+        <div class="invalid-feedback">{{ form.definition.errors }}</div>
+      </div>
+    {% endif %}
 
-            </div>
-            <button type="button" class="btn btn-primary" hx-get="{% url 'oeo_ext:add_unit_element' %}" hx-target="#denominator-elements" hx-swap="beforeend">Add Denominator oeo-Unit</button>
-        </div>
-
-        {% if form.unitLabel.value %}
-            <div class="mb-2">
-                <label for="unitLabel" class="form-label">Optional - Unit Label:</label>
-                {{ form.unitLabel }}
-                <div class="invalid-feedback">{{ form.unitLabel.errors }}</div>
-            </div>
-        {% endif %}
-
-        {% if form.definition.value %}
-            <div class="mb-2">
-                <label for="definition" class="form-label">Optional - Definition:</label>
-                {{ form.definition }}
-                <div class="invalid-feedback">{{ form.definition.errors }}</div>
-            </div>
-        {% endif %}
-        
-        <button type="submit" class="btn btn-success">Save</button>
-    </form>
-
+    <button type="submit" class="btn btn-success">Save</button>
+  </form>
 </div>
 
 <script>
-    document.addEventListener('htmx:configRequest', (event) => {
-        if (event.detail.elt.id === 'oeo-ext-form') {
-            handleFormData(event.detail);
-        }
-    });
-
-    function handleFormData(detail) {
-        const form = detail.elt;
-        const formData = new FormData(form);
-        const data = {
-            nominator: [],
-            denominator: [],
-            definition: formData.get('description'),
-            unitLabel: formData.get('new_label')
-        };
-
-        document.querySelectorAll('#nominator-elements .unit-element').forEach((element, index) => {
-            data.nominator.push({
-                position: index + 1,
-                unitName: element.querySelector('.unitName').value,
-                unitType: element.querySelector('.unitType').value,
-                unitPrefix: element.querySelector('.unitPrefix').value
-            });
-        });
-
-        document.querySelectorAll('#denominator-elements .unit-element').forEach((element, index) => {
-            data.denominator.push({
-                position: index + 1,
-                unitName: element.querySelector('.unitName').value,
-                unitType: element.querySelector('.unitType').value,
-                unitPrefix: element.querySelector('.unitPrefix').value
-            });
-        });
-
-        // Update request detail with the structured data
-        detail.parameters = {
-            csrfmiddlewaretoken: formData.get('csrfmiddlewaretoken'),
-            data: JSON.stringify(data)
-        };
+  document.addEventListener("htmx:configRequest", (event) => {
+    if (event.detail.elt.id === "oeo-ext-form") {
+      handleFormData(event.detail);
     }
+  });
 
-    function updateResultExpression() {
-        let nominatorElements = document.querySelectorAll('#nominator-elements .unit-element');
-        let denominatorElements = document.querySelectorAll('#denominator-elements .unit-element');
+  function handleFormData(detail) {
+    const form = detail.elt;
+    const formData = new FormData(form);
+    const data = {
+      nominator: [],
+      denominator: [],
+      definition: formData.get("description"),
+      unitLabel: formData.get("new_label"),
+    };
 
-        let nominatorText = Array.from(nominatorElements).map(element => {
-            let name = element.querySelector('.unitName').value;
-            let type = element.querySelector('.unitType').value;
-            let prefix = element.querySelector('.unitPrefix').value;
-            return `${prefix} ${name} (${type})`;
-        }).join(' * ');
+    document
+      .querySelectorAll("#nominator-elements .unit-element")
+      .forEach((element, index) => {
+        data.nominator.push({
+          position: index + 1,
+          unitName: element.querySelector(".unitName").value,
+          unitType: element.querySelector(".unitType").value,
+          unitPrefix: element.querySelector(".unitPrefix").value,
+        });
+      });
 
-        let denominatorText = Array.from(denominatorElements).map(element => {
-            let name = element.querySelector('.unitName').value;
-            let type = element.querySelector('.unitType').value;
-            let prefix = element.querySelector('.unitPrefix').value;
-            return `${prefix} ${name} (${type})`;
-        }).join(' * ');
+    document
+      .querySelectorAll("#denominator-elements .unit-element")
+      .forEach((element, index) => {
+        data.denominator.push({
+          position: index + 1,
+          unitName: element.querySelector(".unitName").value,
+          unitType: element.querySelector(".unitType").value,
+          unitPrefix: element.querySelector(".unitPrefix").value,
+        });
+      });
 
-        let resultExpression = `
+    // Update request detail with the structured data
+    detail.parameters = {
+      csrfmiddlewaretoken: formData.get("csrfmiddlewaretoken"),
+      data: JSON.stringify(data),
+    };
+  }
+
+  function updateResultExpression() {
+    let nominatorElements = document.querySelectorAll(
+      "#nominator-elements .unit-element"
+    );
+    let denominatorElements = document.querySelectorAll(
+      "#denominator-elements .unit-element"
+    );
+
+    let nominatorText = Array.from(nominatorElements)
+      .map((element) => {
+        let name = element.querySelector(".unitName").value;
+        let type = element.querySelector(".unitType").value;
+        let prefix = element.querySelector(".unitPrefix").value;
+        return `${prefix} ${name} (${type})`;
+      })
+      .join(" * ");
+
+    let denominatorText = Array.from(denominatorElements)
+      .map((element) => {
+        let name = element.querySelector(".unitName").value;
+        let type = element.querySelector(".unitType").value;
+        let prefix = element.querySelector(".unitPrefix").value;
+        return `${prefix} ${name} (${type})`;
+      })
+      .join(" * ");
+
+    let resultExpression = `
             <div class="fraction">
                 <div class="nominator">${nominatorText}</div>
                 <div class="denominator">${denominatorText}</div>
             </div>
         `;
 
-        document.getElementById('result-expression').innerHTML = resultExpression;
-    }
+    document.getElementById("result-expression").innerHTML = resultExpression;
+  }
 
-    document.addEventListener('htmx:afterSwap', (e) => {
-        if (e.detail.target.id === 'nominator-elements' || e.detail.target.id === 'denominator-elements') {
-            initializeUnitElement(e.detail.target);
-        }
+  document.addEventListener("htmx:afterSwap", (e) => {
+    if (
+      e.detail.target.id === "nominator-elements" ||
+      e.detail.target.id === "denominator-elements"
+    ) {
+      initializeUnitElement(e.detail.target);
+    }
+  });
+
+  function initializeUnitElement(parent) {
+    parent.querySelectorAll(".remove-element").forEach((button) => {
+      button.addEventListener("click", function () {
+        this.closest(".unit-element").remove();
+        updateResultExpression();
+      });
     });
 
-    function initializeUnitElement(parent) {
-        parent.querySelectorAll('.remove-element').forEach(button => {
-            button.addEventListener('click', function () {
-                this.closest('.unit-element').remove();
-                updateResultExpression();
+    parent.querySelectorAll(".unitName, .unitType").forEach((input) => {
+      input.addEventListener("input", updateResultExpression);
+    });
+  }
+
+  // document.addEventListener('DOMContentLoaded', () => {
+  //     let nominatorIndex = 0;
+  //     let denominatorIndex = 0;
+  //     document.querySelector('#oeo-ext-form').addEventListener('submit', (event) => {
+  //         event.preventDefault();
+  //         handleSubmit(event.target);
+  //     });
+  // });
+
+  document.addEventListener("htmx:afterRequest", function (event) {
+    if (event.detail.xhr.status === 400) {
+      let response = JSON.parse(event.detail.xhr.responseText);
+
+      if (!response.success) {
+        // Clear previous errors
+        document.querySelectorAll(".invalid-feedback").forEach((errorDiv) => {
+          errorDiv.innerText = "";
+          errorDiv.style.display = "none";
+        });
+        document.querySelectorAll(".form-control").forEach((inputField) => {
+          inputField.classList.remove("is-invalid");
+        });
+
+        // Handle nominator errors
+        response.errors.nominator_errors.forEach((nominatorError, index) => {
+          const nominatorElement = document.querySelectorAll(
+            `#nominator-elements .unit-element`
+          )[index];
+
+          if (nominatorElement && Object.keys(nominatorError).length > 0) {
+            Object.entries(nominatorError).forEach(([field, messages]) => {
+              let inputField = nominatorElement.querySelector(`.${field}`);
+              let errorDiv = inputField
+                ? inputField.closest(".mb-2").querySelector(".invalid-feedback")
+                : null;
+
+              if (errorDiv && messages.length > 0) {
+                errorDiv.innerText = messages.join(", ");
+                errorDiv.style.display = "block";
+              }
+
+              if (inputField) {
+                inputField.classList.add("is-invalid");
+              }
             });
+          }
         });
 
-        parent.querySelectorAll('.unitName, .unitType').forEach(input => {
-            input.addEventListener('input', updateResultExpression);
-        });
-    }
+        // Handle denominator errors
+        response.errors.denominator_errors.forEach(
+          (denominatorError, index) => {
+            const denominatorElement = document.querySelectorAll(
+              `#denominator-elements .unit-element`
+            )[index];
 
-    // document.addEventListener('DOMContentLoaded', () => {
-    //     let nominatorIndex = 0;
-    //     let denominatorIndex = 0;
-    //     document.querySelector('#oeo-ext-form').addEventListener('submit', (event) => {
-    //         event.preventDefault();
-    //         handleSubmit(event.target);
-    //     });
-    // });
+            if (
+              denominatorElement &&
+              Object.keys(denominatorError).length > 0
+            ) {
+              Object.entries(denominatorError).forEach(([field, messages]) => {
+                let inputField = denominatorElement.querySelector(`.${field}`);
+                let errorDiv = inputField
+                  ? inputField
+                      .closest(".mb-2")
+                      .querySelector(".invalid-feedback")
+                  : null;
 
-    document.addEventListener('htmx:afterRequest', function (event) {
-        if (event.detail.xhr.status === 400) {
-            let response = JSON.parse(event.detail.xhr.responseText);
+                if (errorDiv && messages.length > 0) {
+                  errorDiv.innerText = messages.join(", ");
+                  errorDiv.style.display = "block";
+                }
 
-            if (!response.success) {
-                // Clear previous errors
-                document.querySelectorAll('.invalid-feedback').forEach(errorDiv => {
-                    errorDiv.innerText = '';
-                    errorDiv.style.display = 'none';
-                });
-                document.querySelectorAll('.form-control').forEach(inputField => {
-                    inputField.classList.remove('is-invalid');
-                });
-
-                // Handle nominator errors
-                response.errors.nominator_errors.forEach((nominatorError, index) => {
-                    const nominatorElement = document.querySelectorAll(`#nominator-elements .unit-element`)[index];
-
-                    if (nominatorElement && Object.keys(nominatorError).length > 0) {
-                        Object.entries(nominatorError).forEach(([field, messages]) => {
-                            let inputField = nominatorElement.querySelector(`.${field}`);
-                            let errorDiv = inputField ? inputField.closest('.mb-2').querySelector('.invalid-feedback') : null;
-
-                            if (errorDiv && messages.length > 0) {
-                                errorDiv.innerText = messages.join(', ');
-                                errorDiv.style.display = 'block';
-                            }
-
-                            if (inputField) {
-                                inputField.classList.add('is-invalid');
-                            }
-                        });
-                    }
-                });
-
-                // Handle denominator errors
-                response.errors.denominator_errors.forEach((denominatorError, index) => {
-                    const denominatorElement = document.querySelectorAll(`#denominator-elements .unit-element`)[index];
-
-                    if (denominatorElement && Object.keys(denominatorError).length > 0) {
-                        Object.entries(denominatorError).forEach(([field, messages]) => {
-                            let inputField = denominatorElement.querySelector(`.${field}`);
-                            let errorDiv = inputField ? inputField.closest('.mb-2').querySelector('.invalid-feedback') : null;
-
-                            if (errorDiv && messages.length > 0) {
-                                errorDiv.innerText = messages.join(', ');
-                                errorDiv.style.display = 'block';
-                            }
-
-                            if (inputField) {
-                                inputField.classList.add('is-invalid');
-                            }
-                        });
-                    }
-                });
+                if (inputField) {
+                  inputField.classList.add("is-invalid");
+                }
+              });
             }
-        } else {
-            // Clear previous errors if any
-            let errorFields = document.querySelectorAll('.invalid-feedback');
-            errorFields.forEach(function (field) {
-                field.style.display = 'none';
-                field.innerText = '';
-            });
-            let inputFields = document.querySelectorAll('.form-control');
-            inputFields.forEach(function (field) {
-                field.classList.remove('is-invalid');
-            });
-        }
-    });
+          }
+        );
+      }
+    } else {
+      // Clear previous errors if any
+      let errorFields = document.querySelectorAll(".invalid-feedback");
+      errorFields.forEach(function (field) {
+        field.style.display = "none";
+        field.innerText = "";
+      });
+      let inputFields = document.querySelectorAll(".form-control");
+      inputFields.forEach(function (field) {
+        field.classList.remove("is-invalid");
+      });
+    }
+  });
 
-
-
-
-
-    initializeUnitElement(document); // Initialize existing elements
+  initializeUnitElement(document); // Initialize existing elements
 </script>
 
 <style>
-.fraction {
+  .fraction {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
+  }
 
-.fraction .nominator,
-.fraction .denominator {
+  .fraction .nominator,
+  .fraction .denominator {
     text-align: center;
-}
+  }
 
-.fraction .denominator {
+  .fraction .denominator {
     border-top: 1px solid black;
     width: 100%;
-}
+  }
 </style>

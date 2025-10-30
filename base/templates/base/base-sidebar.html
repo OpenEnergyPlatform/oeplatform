@@ -18,121 +18,142 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software. -->
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
+  <head>
     {% block before-head %}{% endblock before-head %}
 
     <!-- Meta Tags, which should be implemented -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-    <title> OEP{% block title %}{% endblock %} </title>
+    <title>OEP{% block title %}{% endblock %}</title>
 
-    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon"/>
+    <link
+      rel="shortcut icon"
+      href="{% static 'favicon.ico' %}"
+      type="image/x-icon"
+    />
 
     {% fontawesome_5_static %}
     {% compress css %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"><!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}?md5=d4e024ac45daad057d0191a8f6266156">^
-
-    {% vite_hmr_client %}
+      <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'css/bootstrap.min.css' %}"
+      />
+      <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'css/jquery-ui.min.css' %}"
+      /><!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
+      <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'css/base-style.css' %}?md5=d4e024ac45daad057d0191a8f6266156"
+      />^ {% vite_hmr_client %}
     {% endcompress %}
-    {% block after-head %}{% endblock after-head %}
-</head>
+    {% block after-head %}
+    {% endblock after-head %}
+  </head>
 
-<body class="d-flex flex-column h-100">
-{% block header %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-        <div class="container-fluid">
-            {% include 'base/_header.html' %}
-        </div>
-    </nav>
-{% endblock header %}
-{% block main %}
-<main class="main">
-    {% block site-header %}
-        {% include 'account/messages/messages.html' %}                
-    {% endblock site-header %}    
+  <body class="d-flex flex-column h-100">
+    {% block header %}
+      <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+        <div class="container-fluid">{% include 'base/_header.html' %}</div>
+      </nav>
+    {% endblock header %}
+    {% block main %}
+      <main class="main">
+        {% block site-header %}
+        {% endblock site-header %}
         <div class="content">
-            <div class="content__container">
-                {% block main-left-sidebar %}{% endblock main-left-sidebar %}
-                {% block main-content %}
-                    <section class="content__main" id="contentMain">
-                        {% include 'messages.html' %}
-                        {% block main-content-body %}{% endblock %}
-                    </section>
-                {% endblock main-content %}
-                {% block main-right-sidebar %}
-                    <section class="content__side" id="contentSide">                        
-                        <div>                            
-                            {% block main-right-sidebar-content %}
-                            {% endblock main-right-sidebar-content %}
-                        </div>
-                    </section>
-                {% endblock main-right-sidebar %}
-            </div>
+          <div class="content__container">
+            {% block main-left-sidebar %}{% endblock main-left-sidebar %}
+            {% block main-content %}
+              <section class="content__main" id="contentMain">
+                {% include 'base/messages.html' %}
+                {% block main-content-body %}
+                {% endblock %}
+              </section>
+            {% endblock main-content %}
+            {% block main-right-sidebar %}
+              <section class="content__side" id="contentSide">
+                <div>
+                  {% block main-right-sidebar-content %}
+                  {% endblock main-right-sidebar-content %}
+                </div>
+              </section>
+            {% endblock main-right-sidebar %}
+          </div>
         </div>
-    </main>
-{% endblock main %}
-{% block footer %}
-    {% include 'base/_footer.html' %}
-{% endblock footer %}
+      </main>
+    {% endblock main %}
+    {% block footer %}
+      {% include 'base/_footer.html' %}
+    {% endblock footer %}
 
-
-{% block body-bottom-js %}
-    {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
-    {% compress js %}
-    <script src="{% static 'js/jquery.min.js' %}"></script>
-    <script src="{% static 'js/popper.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/jquery-ui.min.js' %}"></script><!-- https://code.jquery.com/ui/1.12.1/jquery-ui.js -->
-    <script src="{% static 'js/jsi18n.js' %}"></script>
-    <script src="{% static 'js/oep-tags.js' %}"></script>
-    {% endcompress %}
-    <script>
-        const eyeHideIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"/><path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"/></svg>';
-        const eyeShowIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/></svg>';
+    {% block body-bottom-js %}
+      {% block before-body-bottom-js %}
+      {% endblock before-body-bottom-js %}
+      {% compress js %}
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        <script src="{% static 'js/popper.min.js' %}"></script>
+        <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+        <!-- https://code.jquery.com/ui/1.12.1/jquery-ui.js -->
+        <script src="{% static 'js/jsi18n.js' %}"></script>
+        <script src="{% static 'js/oep-tags.js' %}"></script>
+      {% endcompress %}
+      <script>
+        const eyeHideIcon =
+          '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"/><path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"/></svg>';
+        const eyeShowIcon =
+          '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/></svg>';
 
         toggleContentSideBtn.innerHTML = eyeHideIcon + "Hide options";
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const tableTabsContainer = document.getElementById("tableTabsContainer");
-            const contentMain = document.getElementById("contentMain");
-            const tableTabsContent = document.getElementById("tableTabsContent");
-            const contentSide = document.getElementById("contentSide");
-            const toggleContentSideBtn = document.getElementById("toggleContentSideBtn");
+        document.addEventListener("DOMContentLoaded", function () {
+          const tableTabsContainer =
+            document.getElementById("tableTabsContainer");
+          const contentMain = document.getElementById("contentMain");
+          const tableTabsContent = document.getElementById("tableTabsContent");
+          const contentSide = document.getElementById("contentSide");
+          const toggleContentSideBtn = document.getElementById(
+            "toggleContentSideBtn"
+          );
 
-            toggleContentSideBtn.addEventListener("click", function() {
-                if (contentMain.contains(tableTabsContent)) {
-                    if (contentSide.style.display === "none") {
-                        contentSide.style.display = "block";
-                        setTimeout(function() {
-                            contentSide.style.opacity = "1";
-                            tableTabsContainer.classList.remove("table-tabs__container--100w");
-                            contentMain.classList.remove("content__main--100w");
-                            tableTabsContent.classList.remove("tab-content--100w");
-                            toggleContentSideBtn.innerHTML = eyeHideIcon + "Hide options";
-                        }, 10);
-                    } else {
-                        contentSide.style.opacity = "0";
-                        setTimeout(function() {
-                            contentSide.style.display = "none";
-                            tableTabsContainer.classList.add("table-tabs__container--100w");
-                            contentMain.classList.add("content__main--100w");
-                            tableTabsContent.classList.add("tab-content--100w");
-                            toggleContentSideBtn.innerHTML = eyeShowIcon + "Show options";
-                        }, 500);
-                    }
-                }
-            });
+          toggleContentSideBtn.addEventListener("click", function () {
+            if (contentMain.contains(tableTabsContent)) {
+              if (contentSide.style.display === "none") {
+                contentSide.style.display = "block";
+                setTimeout(function () {
+                  contentSide.style.opacity = "1";
+                  tableTabsContainer.classList.remove(
+                    "table-tabs__container--100w"
+                  );
+                  contentMain.classList.remove("content__main--100w");
+                  tableTabsContent.classList.remove("tab-content--100w");
+                  toggleContentSideBtn.innerHTML = eyeHideIcon + "Hide options";
+                }, 10);
+              } else {
+                contentSide.style.opacity = "0";
+                setTimeout(function () {
+                  contentSide.style.display = "none";
+                  tableTabsContainer.classList.add(
+                    "table-tabs__container--100w"
+                  );
+                  contentMain.classList.add("content__main--100w");
+                  tableTabsContent.classList.add("tab-content--100w");
+                  toggleContentSideBtn.innerHTML = eyeShowIcon + "Show options";
+                }, 500);
+              }
+            }
+          });
         });
-    </script>
-    {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
-{% endblock body-bottom-js %}
-
-</body>
-
+      </script>
+      {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
+    {% endblock body-bottom-js %}
+  </body>
 </html>

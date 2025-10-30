@@ -6,11 +6,23 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Project directory
 
-The tree structure you see below describes the structure of the oeplatform code project. In general it is a django (using version 3.2) project that maintains multiple django apps that either serve for the frontend UI of the oeplatform website or host our WEB-API´s like the REST-API or our OEKG-API which provide a interface to specific functionality that accesses the the different databases we maintain.
+The tree structure you see below describes the structure of the oeplatform code
+project. In general it is a django (using version 3.2) project that maintains
+multiple django apps that either serve for the frontend UI of the oeplatform
+website or host our WEB-API´s like the REST-API or our OEKG-API which provide a
+interface to specific functionality that accesses the the different databases we
+maintain.
 
-The tree also shows several configurations and text files for the django application itself and also the project tooling and management we use to operate, test, maintain and document the system as well as the software code. Some files are also used to provide specific information about the development and deployment process and some other files are used for the project presentation on GitHub.
+The tree also shows several configurations and text files for the django
+application itself and also the project tooling and management we use to
+operate, test, maintain and document the system as well as the software code.
+Some files are also used to provide specific information about the development
+and deployment process and some other files are used for the project
+presentation on GitHub.
 
-In the following we will dive a bit deeper into the structure of the project. We aim to provide a general understanding of the different modules so that developers become enabled to get started with the development.
+In the following we will dive a bit deeper into the structure of the project. We
+aim to provide a general understanding of the different modules so that
+developers become enabled to get started with the development.
 
 ```plaintext
 .oeplatform
@@ -119,7 +131,8 @@ REST API and Advanced API
 
 Features
 
-Data publication(upload tabular data & metadata), view, search, peer-review, download
+Data publication(upload tabular data & metadata), view, search, peer-review,
+download
 
 - dataedit
 
@@ -131,7 +144,8 @@ Scenario Bundles & Scenario Comparison
 
 - factsheet
 
-Integration of the OpenEnergyOntology (view, search download full .owl file that includes the latest release of the oeo)
+Integration of the OpenEnergyOntology (view, search download full .owl file that
+includes the latest release of the oeo)
 
 - ontology
 

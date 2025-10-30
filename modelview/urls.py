@@ -9,30 +9,37 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from django.urls import path
 
-from modelview import views
+from modelview.views import (
+    FSAddView,
+    edit_model_view,
+    fs_delete_view,
+    list_sheets_view,
+    model_to_csv_view,
+    show_view,
+)
 
 app_name = "modelview"
 
 urlpatterns = [
-    path("<str:sheettype>s/", views.listsheets, name="modellist"),
+    path("<str:sheettype>s/", list_sheets_view, name="modellist"),
     path(
         "<str:sheettype>s/add/",
-        views.FSAdd.as_view(),
+        FSAddView.as_view(),
         {"method": "add"},
         name="modeladd",
     ),
     path(
         "<str:sheettype>s/delete/<int:pk>/",
-        views.fs_delete,
+        fs_delete_view,
         name="delete-factsheet",
     ),
-    path("<str:sheettype>s/download/", views.model_to_csv, name="index"),
-    path("<str:sheettype>s/<int:model_name>/", views.show, name="show-factsheet"),
-    path("<str:sheettype>s/<int:model_name>/edit/", views.editModel, name="index"),
+    path("<str:sheettype>s/download/", model_to_csv_view, name="download"),
+    path("<str:sheettype>s/<int:pk>/", show_view, name="show-factsheet"),
+    path("<str:sheettype>s/<int:pk>/edit/", edit_model_view, name="edit"),
     path(
         "<str:sheettype>s/<int:pk>/update/",
-        views.FSAdd.as_view(),
+        FSAddView.as_view(),
         {"method": "update"},
-        name="index",
+        name="update",
     ),
 ]

@@ -38,6 +38,7 @@ from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
+    HttpRequest,
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseServerError,
@@ -108,61 +109,6 @@ if USE_ONTOP:
     from oeplatform.settings import ONTOP_SPARQL_ENDPOINT_URL
 
 from api.helper import api_exception
-
-__all__ = [
-    "AdvancedCloseAllAPIView",
-    "ColumnAPIView",
-    "EnergyframeworkFactsheetListAPIView",
-    "EnergymodelFactsheetListAPIView",
-    "AdvancedFetchAPIView",
-    "FieldsAPIView",
-    "GroupsAPIView",
-    "ManageOekgScenarioDatasetsAPIView",
-    "MetadataAPIView",
-    "MoveAPIView",
-    "MovePublishAPIView",
-    "OekgSparqlAPIView",
-    "OeoSsearchAPIView",
-    "OevkgSearchAPIView",
-    "RowsAPIView",
-    "ScenarioDataTablesListAPIView",
-    "SequenceAPIView",
-    "TableAPIView",
-    "TableSizeAPIView",
-    "UsersAPIView",
-    "AdvancedSearchAPIView",
-    "AdvancedInsertAPIView",
-    "AdvancedDeleteAPIView",
-    "AdvancedUpdateAPIView",
-    "AdvancedInfoAPIView",
-    "AdvancedHasSchemaAPIView",
-    "AdvancedHasTableAPIView",
-    "AdvancedHasSequenceAPIView",
-    "AdvancedHasTypeAPIView",
-    "AdvancedGetSchemaNamesAPIView",
-    "AdvancedGetTableNamesAPIView",
-    "AdvancedGetViewNamesAPIView",
-    "AdvancedGetViewDefinitionAPIView",
-    "AdvancedGetColumnsAPIView",
-    "AdvancedGetPkConstraintAPIView",
-    "AdvancedGetForeignKeysAPIView",
-    "AdvancedGetIndexesAPIView",
-    "AdvancedGetUniqueConstraintsAPIView",
-    "AdvancedConnectionOpenAPIView",
-    "AdvancedConnectionCloseAPIView",
-    "AdvancedConnectionCommitAPIView",
-    "AdvancedConnectionRollbackAPIView",
-    "AdvancedCursorOpenAPIView",
-    "AdvancedCursorCloseAPIView",
-    "AdvancedCursorFetchOneAPIView",
-    "AdvancedSetIsolationLevelAPIView",
-    "AdvancedGetIsolationLevelAPIView",
-    "AdvancedDoBeginTwophaseAPIView",
-    "AdvancedDoPrepareTwophaseAPIView",
-    "AdvancedDoRollbackTwophaseAPIView",
-    "AdvancedDoCommitTwophaseAPIView",
-    "AdvancedDoRecoverTwophaseAPIView",
-]
 
 
 class SequenceAPIView(APIView):
@@ -688,19 +634,19 @@ class FieldsAPIView(APIView):
         request: Request,
         schema: str,
         table: str,
-        id,
+        column_id: int,
         column: str | None = None,
     ) -> JsonResponse:
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         if (
             not parser.is_pg_qual(table)
             or not parser.is_pg_qual(schema)
-            or not parser.is_pg_qual(id)
+            or not parser.is_pg_qual(column_id)
             or not parser.is_pg_qual(column)
         ):
             return ModHttpResponse({"error": "Bad Request", "http_status": 400})
 
-        returnValue = actions.getValue(schema, table, column, id)
+        returnValue = actions.getValue(schema, table, column, column_id)
 
         return HttpResponse(
             returnValue if returnValue is not None else "",
@@ -721,7 +667,18 @@ class MovePublishAPIView(APIView):
         ) or json_data.get("embargo", {}).get("duration", None)
         actions.move_publish(schema, table, to_schema, embargo_period)
 
-        return HttpResponse(status=status.HTTP_200_OK)
+        return JsonResponse({}, status=status.HTTP_200_OK)
+
+
+class TableUnpublishAPIView(APIView):
+    @require_admin_permission
+    @api_exception
+    def post(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
+        """Set table to `not published`"""
+        table_obj = DBTable.objects.get(name=table)
+        table_obj.is_publish = False
+        table_obj.save()
+        return JsonResponse({}, status=status.HTTP_200_OK)
 
 
 class MoveAPIView(APIView):
@@ -1217,7 +1174,7 @@ class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
         return HttpResponse("All connections closed")
 
 
-def UsersAPIView(request: Request) -> JsonResponse:
+def users_api_view(request: Request) -> JsonResponse:
     query = request.GET.get("name", "")
 
     # Ensure query is not empty to proceed with filtering
@@ -1241,7 +1198,7 @@ def UsersAPIView(request: Request) -> JsonResponse:
     return JsonResponse(user_names, safe=False)
 
 
-def GroupsAPIView(request: Request) -> JsonResponse:
+def groups_api_view(request: Request) -> JsonResponse:
     """
     Return all Groups where this user is a member that match
     the current query. The query is input by the User.
@@ -1275,7 +1232,7 @@ def GroupsAPIView(request: Request) -> JsonResponse:
     return JsonResponse(group_names, safe=False)
 
 
-def OeoSsearchAPIView(request: Request) -> JsonResponse:
+def oeo_search_api_view(request: Request) -> JsonResponse:
     if USE_LOEP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         query = request.GET["query"]

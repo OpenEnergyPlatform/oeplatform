@@ -166,6 +166,11 @@ class Table(Tagable):
     topics = models.ManyToManyField(Topic, related_name="tables")
     tags = models.ManyToManyField(Tag, related_name="tables")
 
+    # Datetime when table was created (auto_now_add=True)
+    # Maybe we want to update it when table is changed, or published?
+    # For now, we only set it on creation
+    date_updated = DateTimeField(auto_now_add=True, null=True)
+
     class Meta:
         unique_together = (("name",),)
 

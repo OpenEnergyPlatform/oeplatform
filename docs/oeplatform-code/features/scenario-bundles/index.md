@@ -32,39 +32,10 @@ Database
 ### Django view for the scenario bundles
 
 !!! note
-Some of the information on this page may be changed in the future. To review the most recent information, please revisit.
 
-`def create_factsheet(request, *args, **kwargs):`
+    Some of the information on this page may be changed in the future. To review the most recent information, please revisit.
 
-#### ::: factsheet.views.create_factsheet
-
-`def update_factsheet(request, *args, **kwargs):`
-
-#### ::: factsheet.views.update_factsheet
-
-`def factsheet_by_id(request, *args, **kwargs):`
-
-#### ::: factsheet.views.factsheet_by_id
-
-`def delete_factsheet_by_id(request, *args, **kwargs):`
-
-#### ::: factsheet.views.delete_factsheet_by_id
-
-`def add_entities(request, *args, **kwargs):`
-
-#### ::: factsheet.views.add_entities
-
-`def delete_entities(request, *args, **kwargs):`
-
-#### ::: factsheet.views.delete_entities
-
-`def update_an_entity(request, *args, **kwargs):`
-
-#### ::: factsheet.views.update_an_entity
-
-`def get_entities_by_type(request, *args, **kwargs):`
-
-#### ::: factsheet.views.get_entities_by_type
+#### ::: factsheet.views
 
 ### The scenario bundle object construction and API in django
 
@@ -75,6 +46,7 @@ You can read the following sections as: This is how django processes the data, a
 The technology that drives this implementation is HTTP. The JSON objects and key:value information is send in packaged as a payload that is send along with each requests. A requests can be triggered by multiple actions for example a button that is pressed by the user. Based on the URL and the payload the backend can determine what functionality must be triggered. This can be for example creating a scenario bundle or retrieving a specific bundle by its ID.
 
 !!! note
+
     Some of the information on this page may be changed in the future. To review the most recent information, please revisit.
 
 #### Create a new bundle in OEKG

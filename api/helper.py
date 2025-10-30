@@ -25,11 +25,12 @@ import json
 import logging
 import re
 from decimal import Decimal
+from typing import Callable
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
@@ -126,7 +127,7 @@ def load_cursor(named=False):
                             if not e.args or e.args[0] != "no results to fetch":
                                 raise e
                         except psycopg2.errors.InvalidCursorName as e:
-                            print(e)
+                            logging.error(str(e))
                     if first:
                         first = map(actions._translate_fetched_cell, first)
                         if cursor.description:
@@ -183,7 +184,7 @@ def cors(allow):
     return doublewrapper
 
 
-def api_exception(f):
+def api_exception(f: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
@@ -197,7 +198,7 @@ def api_exception(f):
     return wrapper
 
 
-def permission_wrapper(permission, f):
+def permission_wrapper(permission: int, f: Callable):
     def wrapper(caller, request, *args, **kwargs):
         table = kwargs.get("table") or kwargs.get("sequence")
         actions.assert_permission(user=request.user, table=table, permission=permission)
@@ -206,15 +207,15 @@ def permission_wrapper(permission, f):
     return wrapper
 
 
-def require_write_permission(f):
+def require_write_permission(f: Callable) -> Callable:
     return permission_wrapper(login_models.WRITE_PERM, f)
 
 
-def require_delete_permission(f):
+def require_delete_permission(f: Callable) -> Callable:
     return permission_wrapper(login_models.DELETE_PERM, f)
 
 
-def require_admin_permission(f):
+def require_admin_permission(f: Callable) -> Callable:
     return permission_wrapper(login_models.ADMIN_PERM, f)
 
 
@@ -270,7 +271,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
 
         @cors(allow_cors)
         @api_exception
-        def post(self, request):
+        def post(self, request: HttpRequest):
             result = self.execute(request)
             session = (
                 sessions.load_session_from_context(result.pop("context"))
@@ -283,7 +284,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
                 session=session,
             )
 
-        def execute(self, request):
+        def execute(self, request: HttpRequest):
             if requires_cursor:
                 return load_cursor()(self._internal_execute)(self, request)
             else:

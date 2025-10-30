@@ -25,7 +25,7 @@ class TestIssue2041SortJson(APITestCaseWithTable):
     test_data = [{column_json: {"x": 1}}, {column_json: {"x": "xyz"}}]
 
     def test_issue_2041_sort_json(self):
-        url = reverse("api:advenced-search")
+        url = reverse("api:advanced-search")
 
         # {'reason': 'could not identify an ordering operator for type json'}
         self.api_req(

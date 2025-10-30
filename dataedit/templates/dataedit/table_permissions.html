@@ -1,231 +1,310 @@
 {% extends "dataedit/base.html" %}
 {% load static %}
 {% load compress %}
-{% block title %} - {{schema}}{% endblock %}
+{% block title %}- {{ schema }}{% endblock %}
 
 {% block site-header %}
-<div class="main-header">
+  <div class="main-header">
     <h1 class="main-header__title">
-        <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M4.31781 2.68742C3.35608 3.12457 3 3.62628 3 4C3 4.37372 3.35608 4.87543 4.31781 5.31258C5.23441 5.72922 6.53579 6 8 6C9.46421 6 10.7656 5.72922 11.6822 5.31258C12.6439 4.87543 13 4.37372 13 4C13 3.62628 12.6439 3.12457 11.6822 2.68742C10.7656 2.27078 9.46421 2 8 2C6.53579 2 5.23441 2.27078 4.31781 2.68742ZM13 5.69813C12.729 5.90046 12.4201 6.07563 12.096 6.22295C11.022 6.71114 9.57336 7 8 7C6.42664 7 4.97802 6.71114 3.90401 6.22295C3.5799 6.07563 3.27105 5.90046 3 5.69813V7C3 7.37372 3.35608 7.87543 4.31781 8.31258C5.23441 8.72922 6.53579 9 8 9C9.46421 9 10.7656 8.72922 11.6822 8.31258C12.6439 7.87543 13 7.37372 13 7V5.69813ZM14 4C14 2.993 13.1249 2.24472 12.096 1.77705C11.022 1.28886 9.57336 1 8 1C6.42664 1 4.97802 1.28886 3.90401 1.77705C2.87513 2.24472 2 2.993 2 4V13C2 14.007 2.87513 14.7553 3.90401 15.2229C4.97802 15.7111 6.42664 16 8 16C9.57336 16 11.022 15.7111 12.096 15.2229C13.1249 14.7553 14 14.007 14 13V4ZM13 8.69813C12.729 8.90046 12.4201 9.07563 12.096 9.22295C11.022 9.71114 9.57336 10 8 10C6.42664 10 4.97802 9.71114 3.90401 9.22295C3.5799 9.07563 3.27105 8.90046 3 8.69813V10C3 10.3737 3.35608 10.8754 4.31781 11.3126C5.23441 11.7292 6.53579 12 8 12C9.46421 12 10.7656 11.7292 11.6822 11.3126C12.6439 10.8754 13 10.3737 13 10V8.69813ZM13 11.6981C12.729 11.9005 12.4201 12.0756 12.096 12.2229C11.022 12.7111 9.57336 13 8 13C6.42664 13 4.97802 12.7111 3.90401 12.2229C3.5799 12.0756 3.27105 11.9005 3 11.6981V13C3 13.3737 3.35608 13.8754 4.31781 14.3126C5.23441 14.7292 6.53579 15 8 15C9.46421 15 10.7656 14.7292 11.6822 14.3126C12.6439 13.8754 13 13.3737 13 13V11.6981Z" fill="#293B46"/>
-        </svg>
-        Database
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 16 16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M4.31781 2.68742C3.35608 3.12457 3 3.62628 3 4C3 4.37372 3.35608 4.87543 4.31781 5.31258C5.23441 5.72922 6.53579 6 8 6C9.46421 6 10.7656 5.72922 11.6822 5.31258C12.6439 4.87543 13 4.37372 13 4C13 3.62628 12.6439 3.12457 11.6822 2.68742C10.7656 2.27078 9.46421 2 8 2C6.53579 2 5.23441 2.27078 4.31781 2.68742ZM13 5.69813C12.729 5.90046 12.4201 6.07563 12.096 6.22295C11.022 6.71114 9.57336 7 8 7C6.42664 7 4.97802 6.71114 3.90401 6.22295C3.5799 6.07563 3.27105 5.90046 3 5.69813V7C3 7.37372 3.35608 7.87543 4.31781 8.31258C5.23441 8.72922 6.53579 9 8 9C9.46421 9 10.7656 8.72922 11.6822 8.31258C12.6439 7.87543 13 7.37372 13 7V5.69813ZM14 4C14 2.993 13.1249 2.24472 12.096 1.77705C11.022 1.28886 9.57336 1 8 1C6.42664 1 4.97802 1.28886 3.90401 1.77705C2.87513 2.24472 2 2.993 2 4V13C2 14.007 2.87513 14.7553 3.90401 15.2229C4.97802 15.7111 6.42664 16 8 16C9.57336 16 11.022 15.7111 12.096 15.2229C13.1249 14.7553 14 14.007 14 13V4ZM13 8.69813C12.729 8.90046 12.4201 9.07563 12.096 9.22295C11.022 9.71114 9.57336 10 8 10C6.42664 10 4.97802 9.71114 3.90401 9.22295C3.5799 9.07563 3.27105 8.90046 3 8.69813V10C3 10.3737 3.35608 10.8754 4.31781 11.3126C5.23441 11.7292 6.53579 12 8 12C9.46421 12 10.7656 11.7292 11.6822 11.3126C12.6439 10.8754 13 10.3737 13 10V8.69813ZM13 11.6981C12.729 11.9005 12.4201 12.0756 12.096 12.2229C11.022 12.7111 9.57336 13 8 13C6.42664 13 4.97802 12.7111 3.90401 12.2229C3.5799 12.0756 3.27105 11.9005 3 11.6981V13C3 13.3737 3.35608 13.8754 4.31781 14.3126C5.23441 14.7292 6.53579 15 8 15C9.46421 15 10.7656 14.7292 11.6822 14.3126C12.6439 13.8754 13 13.3737 13 13V11.6981Z"
+          fill="#293B46"
+        />
+      </svg>
+      Database
     </h1>
     <div class="main-header__wizard">
-        <span class="main-header__wizard-process">Permissions :</span>
-        <span class="main-header__wizard-path"><a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/{{schema}}">{{schema}}</a> / <a href="{% url 'dataedit:view' schema table %}">{{table}}</a>
+      <span class="main-header__wizard-process">Permissions :</span>
+      <span class="main-header__wizard-path"
+        ><a href="{% url 'dataedit:topic-list' %}">Topics</a> /
+        <a href="{% url 'dataedit:tables' schema=schema %}">{{ schema }}</a> /
+        <a href="{% url 'dataedit:view' schema table %}">{{ table }}</a></span
+      >
     </div>
   </div>
 {% endblock site-header %}
 {% block main-right-sidebar-content-additional %}
-    <h3>Permissions</h3>
-    This page shows the users and user groups that have permissions to alter the contents of this table. Only
-    admins of this dataset can alter these settings.<br><br>
-{% if is_admin %}
+  <h3>Permissions</h3>
+  This page shows the users and user groups that have permissions to alter the
+  contents of this table. Only admins of this dataset can alter these
+  settings.<br /><br />
+  {% if is_admin %}
     <b> You are allowed to administrate this table </b>
-{% else %}
+  {% else %}
     <div class="alert alert-danger" role="alert">
-        You do not have permissions to alter these settings
+      You do not have permissions to alter these settings
     </div>
-{% endif %}
+  {% endif %}
 {% endblock %}
 {% block data_content %}
-{% load dataedit.taghandler %}
-<h3>Manage permissions on {{schema}}.{{table}}</h3>
-    <div class="card ">
-        <div class="card-header">
-
-            {% if is_admin %}
-                <div style="position:relative;">
-                    <form id="addGroupForm" style="position:absolute; right: 0%;" action="permissions" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="mode" value="add_group">
-                        <input name="name" type="text" placeholder="Add a group" id="group_field"><input type="submit" value="Add">
-                    </form>
-                </div>
-            {% endif %}
-            <div>
-                <h4>Group Permissions</h4>
-            </div>
+  {% load dataedit.taghandler %}
+  <h3>Manage permissions on {{ schema }}.{{ table }}</h3>
+  <div class="card ">
+    <div class="card-header">
+      {% if is_admin %}
+        <div style="position:relative;">
+          <form
+            id="addGroupForm"
+            style="position:absolute; right: 0%;"
+            action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+            method="post"
+          >
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="add_group" />
+            <input
+              name="name"
+              type="text"
+              placeholder="Add a group"
+              id="group_field"
+            /><input type="submit" value="Add" />
+          </form>
         </div>
-        {% if not group_perms %}
-            No permissions for groups set, yet.
-        {% endif %}
-        {% for perm in group_perms %}
-            <div class="card-body">
-                <div>
-                    {% if is_admin %}
-                        <label class="form-label" for="group_level">{{ perm.holder.name }}</label>
-
-                        <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
-                            {% csrf_token %}
-                            <input type="hidden" name="mode" value="alter_group">
-                            <input type="hidden" name="group_id" value="{{perm.holder.id}}">
-                                <select class="form-control" id="group_level" name="level" onchange="this.form.submit()">
-                                    {% for value, choice in choices %}
-                                        <option value="{{value}}" {% if perm.level == value %} selected="selected" {% endif %}>{{choice}}</option>
-                                    {% endfor %}
-                                </select>
-                        </form>
-                        <form action="permissions" method="post" style="display:inline-block;float:right"  onsubmit="return confirm('Are you sure you want to remove {{perm.holder.name}} from {{schema.table}}.{{table}} and retract all permissions?')">
-                            {% csrf_token %}
-                            <input type="hidden" name="mode" value="remove_group">
-                            <input type="hidden" name="group_id" value="{{perm.holder.id}}">
-                            <input type="submit" class="btn btn-danger" value="Remove group">
-                        </form>
-                    {% else %}
-                        {{ perm.holder.name }}: {% for value, choice in choices %}{% if perm.level == value %}{{choice}}{% endif %}{% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
+      {% endif %}
+      <div>
+        <h4>Group Permissions</h4>
+      </div>
     </div>
-    <br>
-    <div class="card ">
-        <div class="card-header">
+    {% if not group_perms %}
+      No permissions for groups set, yet.
+    {% endif %}
+    {% for perm in group_perms %}
+      <div class="card-body">
+        <div>
+          {% if is_admin %}
+            <label class="form-label" for="group_level"
+              >{{ perm.holder.name }}</label
+            >
 
-            {% if is_admin %}
-                <div style="position:relative;">
-                    <form id="addUserForm" style="position:absolute; right: 0%;" action="permissions" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="mode" value="add_user">
-                        <input name="name" type="text" placeholder="Add an user" id="user_field">
-                        <input type="submit" value="Add">
-                    </form>
-                </div>
-            {% endif %}
-            <div>
-                <h4>User Permissions</h4>
-            </div>
+            <form
+              class="form-inline"
+              action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+              method="post"
+              style="display:inline-block;"
+            >
+              {% csrf_token %}
+              <input type="hidden" name="mode" value="alter_group" />
+              <input
+                type="hidden"
+                name="group_id"
+                value="{{ perm.holder.id }}"
+              />
+              <select
+                class="form-control"
+                id="group_level"
+                name="level"
+                onchange="this.form.submit()"
+              >
+                {% for value, choice in choices %}
+                  <option
+                    value="{{ value }}"
+                    {% if perm.level == value %}selected="selected"{% endif %}
+                  >
+                    {{ choice }}
+                  </option>
+                {% endfor %}
+              </select>
+            </form>
+            <form
+              action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+              method="post"
+              style="display:inline-block;float:right"
+              onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ schema.table }}.{{ table }} and retract all permissions?')"
+            >
+              {% csrf_token %}
+              <input type="hidden" name="mode" value="remove_group" />
+              <input
+                type="hidden"
+                name="group_id"
+                value="{{ perm.holder.id }}"
+              />
+              <input
+                type="submit"
+                class="btn btn-danger"
+                value="Remove group"
+              />
+            </form>
+          {% else %}
+            {{ perm.holder.name }}:
+            {% for value, choice in choices %}{% if perm.level == value %}{{ choice }}{% endif %}{% endfor %}
+          {% endif %}
         </div>
-        {% if not user_perms %}
-            No permissions for users set, yet.
-        {% endif %}
-        {% for perm in user_perms %}
-            <div class="card-body">
-                <div>
-                    {% if is_admin %}
-                        <label class="form-label" for="level">{{ perm.holder.name }}</label>
-                        <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
-                            {% csrf_token %}
-                            <input type="hidden" name="mode" value="alter_user">
-                            <input type="hidden" name="user_id" value="{{perm.holder.id}}">
-                            <select class="form-control" id="level" name="level" onchange="this.form.submit()">
-                                {% for value, choice in choices %}
-                                    {% if own_level >= value %}
-                                        <option value="{{value}}" {% if perm.level == value %} selected="selected" {% endif %}>{{choice}}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                        </form>
-                        <form action="permissions" method="post" style="display:inline-block;float:right"  onsubmit="return confirm('Are you sure you want to remove {{perm.holder.name}} from {{schema.table}}.{{table}} and retract all permissions?')">
-                            {% csrf_token %}
-                            <input type="hidden" name="mode" value="remove_user">
-                            <input type="hidden" name="user_id" value="{{perm.holder.id}}">
-                            <input type="submit" class="btn btn-danger" value="Remove user">
-                        </form>
-                    {% else %}
-                        {{ perm.holder.name }}: {% for value, choice in choices %}{% if perm.level == value %}{{choice}}{% endif %}{% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+  <br />
+  <div class="card ">
+    <div class="card-header">
+      {% if is_admin %}
+        <div style="position:relative;">
+          <form
+            id="addUserForm"
+            style="position:absolute; right: 0%;"
+            action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+            method="post"
+          >
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="add_user" />
+            <input
+              name="name"
+              type="text"
+              placeholder="Add an user"
+              id="user_field"
+            />
+            <input type="submit" value="Add" />
+          </form>
+        </div>
+      {% endif %}
+      <div>
+        <h4>User Permissions</h4>
+      </div>
     </div>
-
+    {% if not user_perms %}
+      No permissions for users set, yet.
+    {% endif %}
+    {% for perm in user_perms %}
+      <div class="card-body">
+        <div>
+          {% if is_admin %}
+            <label class="form-label" for="level">{{ perm.holder.name }}</label>
+            <form
+              class="form-inline"
+              action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+              method="post"
+              style="display:inline-block;"
+            >
+              {% csrf_token %}
+              <input type="hidden" name="mode" value="alter_user" />
+              <input
+                type="hidden"
+                name="user_id"
+                value="{{ perm.holder.id }}"
+              />
+              <select
+                class="form-control"
+                id="level"
+                name="level"
+                onchange="this.form.submit()"
+              >
+                {% for value, choice in choices %}
+                  {% if own_level >= value %}
+                    <option
+                      value="{{ value }}"
+                      {% if perm.level == value %}selected="selected"{% endif %}
+                    >
+                      {{ choice }}
+                    </option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </form>
+            <form
+              action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+              method="post"
+              style="display:inline-block;float:right"
+              onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ schema.table }}.{{ table }} and retract all permissions?')"
+            >
+              {% csrf_token %}
+              <input type="hidden" name="mode" value="remove_user" />
+              <input
+                type="hidden"
+                name="user_id"
+                value="{{ perm.holder.id }}"
+              />
+              <input type="submit" class="btn btn-danger" value="Remove user" />
+            </form>
+          {% else %}
+            {{ perm.holder.name }}:
+            {% for value, choice in choices %}{% if perm.level == value %}{{ choice }}{% endif %}{% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 {% endblock %}
 
 {% block after-body-bottom-js %}
 
-{% if is_admin %}
-<script>
-    /*
-    * Handle group autocomplete and add client side form validation.
-    */
-    $(function() {
+  {% if is_admin %}
+    <script>
+      /*
+       * Handle group autocomplete and add client side form validation.
+       */
+      $(function () {
         let validSelection = false;
         let autocompleteSource = []; // This will be filled with your autocomplete data
 
-        $('#group_field').autocomplete({
-            source: function(request, response) {
-                $.ajax({
-                    url: '/api/grpprop/',
-                    dataType: 'json',
-                    data: { name: request.term },
-                    success: function(data) {
-                        autocompleteSource = data; // Assuming 'data' is an array of strings
-                        response(data);
-                    }
-                });
-            },
-            select: function(event, ui) {
-                validSelection = true;
-            }
+        $("#group_field").autocomplete({
+          source: function (request, response) {
+            $.ajax({
+              url: "{% url 'api:usrprop' %}",
+              dataType: "json",
+              data: { name: request.term },
+              success: function (data) {
+                autocompleteSource = data; // Assuming 'data' is an array of strings
+                response(data);
+              },
+            });
+          },
+          select: function (event, ui) {
+            validSelection = true;
+          },
         });
 
-        $('#addGroupForm').on('submit', function(e) {
-            var inputValue = $('#group_field').val();
-            if (!validSelection || !autocompleteSource.includes(inputValue)) {
-                e.preventDefault(); // Prevent form submission
-                alert('Please select a valid group name from the list that appears after you start typing.');
-            }
+        $("#addGroupForm").on("submit", function (e) {
+          var inputValue = $("#group_field").val();
+          if (!validSelection || !autocompleteSource.includes(inputValue)) {
+            e.preventDefault(); // Prevent form submission
+            alert(
+              "Please select a valid group name from the list that appears after you start typing."
+            );
+          }
         });
-    });
+      });
 
-    /*
-    * Handle user autocomplete and add client side form validation.
-    */
-    $(function() {
+      /*
+       * Handle user autocomplete and add client side form validation.
+       */
+      $(function () {
         let validSelection = false;
         let autocompleteSource = []; // This will be filled with your autocomplete data
 
-        // $('#user_field').bind('input', function() {
-        //     var dfd = new $.Deferred();
-        //     var request = $.ajax({type: 'GET',
-        //         url:'/api/usrprop/', dataType:'json',
-        //         data: {
-        //             name: $(this).val()
-        //         },
-        //         success: function(data) {
-        //             autocompleteSource = data; // Assuming 'data' is an array of strings
-        //         }
-        //     });
-        //     request.done(function(users)
-        //     {
-        //         console.log(users);
-        //         $('#user_field').autocomplete({
-        //             source: users
-        //         });
-        //         dfd.resolve({})
-        //     });
-        // });
-
-        $('#user_field').autocomplete({
-            source: function(request, response) {
-                $.ajax({
-                    url: '/api/usrprop/',
-                    dataType: 'json',
-                    data: { name: request.term },
-                    success: function(data) {
-                        autocompleteSource = data; // Assuming 'data' is an array of strings
-                        response(data);
-                    }
-                });
-            },
-            select: function(event, ui) {
-                validSelection = true;
-            }
+        $("#user_field").autocomplete({
+          source: function (request, response) {
+            $.ajax({
+              url: "{% url 'api:usrprop' %}",
+              dataType: "json",
+              data: { name: request.term },
+              success: function (data) {
+                autocompleteSource = data; // Assuming 'data' is an array of strings
+                response(data);
+              },
+            });
+          },
+          select: function (event, ui) {
+            validSelection = true;
+          },
         });
 
-        $('#addUserForm').on('submit', function(e) {
-            var inputValue = $('#user_field').val();
-            console.log(autocompleteSource, inputValue);
-            if (!validSelection || !autocompleteSource.includes(inputValue)) {
-                e.preventDefault(); // Prevent form submission
-                alert('Please select a valid user name from the list that appears after you start typing.');
-            }
+        $("#addUserForm").on("submit", function (e) {
+          var inputValue = $("#user_field").val();
+          console.log(autocompleteSource, inputValue);
+          if (!validSelection || !autocompleteSource.includes(inputValue)) {
+            e.preventDefault(); // Prevent form submission
+            alert(
+              "Please select a valid user name from the list that appears after you start typing."
+            );
+          }
         });
-    });
-</script>
-{% endif %}
-
+      });
+    </script>
+  {% endif %}
 {% endblock after-body-bottom-js %}

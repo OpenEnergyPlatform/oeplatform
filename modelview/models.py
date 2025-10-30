@@ -24,7 +24,6 @@ from django.db.models import (
     DateField,
     EmailField,
     ImageField,
-    IntegerField,
     TextField,
 )
 
@@ -231,7 +230,7 @@ class BasicFactsheet(models.Model):
         verbose_name="Collaborative programming",
         help_text="Is it possible to join the coding group?",
     )
-    number_of_devolopers = CharField(
+    number_of_developers = CharField(
         max_length=1000,
         verbose_name="Number of developers",
         help_text="How many people are involved in the model development?",
@@ -324,14 +323,11 @@ class BasicFactsheet(models.Model):
         null=True,
     )
 
-    tags_TODO_deprecated = ArrayField(IntegerField(), default=list, null=True)
     tags = models.ManyToManyField(Tag, related_name="factsheets")
 
 
 class Energymodel(BasicFactsheet):
-    energy_sectors_electricity = BooleanField(
-        default=False, verbose_name="electricity"
-    )  # noqa
+    energy_sectors_electricity = BooleanField(default=False, verbose_name="electricity")
     energy_sectors_heat = BooleanField(default=False, verbose_name="heat")
     energy_sectors_liquid_fuels = BooleanField(
         default=False, verbose_name="liquid fuels"
