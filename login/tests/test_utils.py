@@ -1,3 +1,8 @@
+"""
+SPDX-FileCopyrightText: Christian Winger
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 from django.test import TestCase
 
 from dataedit.models import Table
