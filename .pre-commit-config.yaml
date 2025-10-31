@@ -1,4 +1,4 @@
-exclude: ^.*(.min.js|.min.css|.js.map|js|jsx|tsx|jsonc|scss|mkdocs.yml|/dist/.*)$
+exclude: ^.*(.min.js|.min.css|.js.map|js|mkdocs.yml|/dist/.*)$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -25,10 +25,14 @@ repos:
     hooks:
       - id: eslint
         additional_dependencies:
-          - eslint@8.14.0
+          - eslint@9.25
           - eslint-config-google@0.14.0
           - eslint-plugin-jsdoc@39.2.9
+          - eslint-plugin-react@7.37.3
+          - eslint-plugin-react-hooks@5.1.0
         args: ["--fix"]
+        files: .*\.(js|jsx|tsx|jsonc|scss|css)$
+
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
