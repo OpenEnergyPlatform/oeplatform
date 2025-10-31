@@ -1437,8 +1437,6 @@ class TablePeerReviewView(LoginRequiredMixin, View):
                 active_peer_review.save()
 
             # TODO: also update reviewFinished in review datamodel json
-            # logging.INFO(f"Table {table.name} is now reviewed and can be moved
-            # to the destination schema.")
 
         return render(request, "dataedit/opr_review.html", context=context)
 

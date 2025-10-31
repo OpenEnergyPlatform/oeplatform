@@ -1,4 +1,4 @@
-exclude: ^.*(.min.js|.min.css|.js.map|js|jsx|tsx|jsonc|scss|mkdocs.yml|/dist/.*)$
+exclude: ^.*(.min.js|.min.css|.js.map|js|mkdocs.yml|/dist/.*)$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -25,14 +25,21 @@ repos:
     hooks:
       - id: eslint
         additional_dependencies:
-          - eslint@8.14.0
+          - eslint@9.25
           - eslint-config-google@0.14.0
           - eslint-plugin-jsdoc@39.2.9
+          - eslint-plugin-react@7.37.3
+          - eslint-plugin-react-hooks@5.1.0
         args: ["--fix"]
+
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
+    rev: v3.1.0
     hooks:
       - id: prettier
-        additional_dependencies:
-          - prettier-plugin-jinja-template
-          - prettier-plugin-sql
+        files: .*\.(json|md|yaml|yml)$
+  - repo: https://github.com/djlint/djLint
+    # see https://djlint.com/docs/integrations/
+    rev: v1.36.4
+    hooks:
+      - id: djlint-reformat-django
+        files: .*templates/.*\.html$

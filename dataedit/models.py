@@ -40,6 +40,8 @@ from django.utils import timezone
 
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
+logger = logging.getLogger("oeplatform")
+
 
 class TableRevision(models.Model):
     table = CharField(max_length=1000, null=False)
@@ -447,9 +449,9 @@ class PeerReview(models.Model):
             elif review_type == "submit":
                 result = self.set_version_of_metadata_for_review(table=self.table)
                 if result[0]:
-                    logging.info(result[1])
+                    logger.info(result[1])
                 elif result[0] is False:
-                    logging.info(result[1])
+                    logger.info(result[1])
 
                 pm_new = PeerReviewManager(
                     opr=self, status=ReviewDataStatus.SUBMITTED.value
@@ -459,9 +461,9 @@ class PeerReview(models.Model):
             elif review_type == "finished":
                 result = self.set_version_of_metadata_for_review(table=self.table)
                 if result[0]:
-                    logging.info(result[1])
+                    logger.info(result[1])
                 elif result[0] is False:
-                    logging.info(result[1])
+                    logger.info(result[1])
 
                 pm_new = PeerReviewManager(
                     opr=self, status=ReviewDataStatus.FINISHED.value

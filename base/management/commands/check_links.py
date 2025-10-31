@@ -29,6 +29,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 
+logger = logging.getLogger("oeplatform")
 cache = {}
 
 
@@ -47,9 +48,9 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
     )
 
     if not res.ok:
-        logging.error("%s %s (SOURCE: %s)", res.status_code, url, parent_url)
+        logger.error("%s %s (SOURCE: %s)", res.status_code, url, parent_url)
     else:
-        logging.info("%s %s (parse=%s)", res.status_code, url, parse)
+        logger.info("%s %s (parse=%s)", res.status_code, url, parse)
 
     if not parse:
         res.close()  # close stream
@@ -68,7 +69,7 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
             if match:
                 ref = match.groups()[0]
             else:
-                logging.debug("skipping %s", ref)
+                logger.debug("skipping %s", ref)
                 continue
         else:
             ref = t.get("src") or t.get("href")

@@ -1,7 +1,6 @@
 {% load compress %}
 {% load django_bootstrap5 %}
 {% load static %}
-
 {% if profile_user == request.user %}
   <div class="container">
     <div class="row">
@@ -13,21 +12,15 @@
               <div class="col-md-4 mb-3">
                 <div class="card">
                   <div class="card-body">
-                    <h5 class="card-title">
-                      {{ table.name }} - {{ table.schema }}
-                    </h5>
-                    <a
-                      href="{% url 'dataedit:view' schema=table.schema table=table.name %}"
-                      class="card-link"
-                      >View Table</a
-                    >
+                    <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
+                    <a href="{% url 'dataedit:view' schema=table.schema table=table.name %}"
+                       class="card-link">View Table</a>
                   </div>
                 </div>
               </div>
             {% endfor %}
           </div>
         </div>
-
         <h2>Draft</h2>
         <div class="container">
           <div class="row">
@@ -35,26 +28,16 @@
               <div class="col-md-4 mb-3">
                 <div class="card">
                   <div class="card-body">
-                    <h5 class="card-title">
-                      {{ table.name }} - {{ table.schema }}
-                    </h5>
-                    <a
-                      href="{% url 'dataedit:view' schema=table.schema table=table.name %}"
-                      class="card-link"
-                      >View Table</a
-                    >
+                    <h5 class="card-title">{{ table.name }} - {{ table.schema }}</h5>
+                    <a href="{% url 'dataedit:view' schema=table.schema table=table.name %}"
+                       class="card-link">View Table</a>
                     {% if table.is_reviewed and not table.is_publish %}
-                      <button
-                        class="btn btn-primary publish-button"
-                        data-schema="{{ table.schema }}"
-                        data-tableName="{{ table.name }}"
-                      >
+                      <button class="btn btn-primary publish-button"
+                              data-schema="{{ table.schema }}"
+                              data-tableName="{{ table.name }}">
                         Publish
                       </button>
-                      <div
-                        class="publish-options-{{ table.name }}"
-                        style="display: none;"
-                      >
+                      <div class="publish-options-{{ table.name }}" style="display: none;">
                         <label>
                           <select class="schema-dropdown"></select>
                         </label>
@@ -65,13 +48,11 @@
                             <option value="1_year">1 Year</option>
                           </select>
                         </label>
-                        <button
-                          class="btn btn-secondary confirm-publish"
-                          hx-post="{% url 'api:move_publish' schema=table.schema table=table.name to_schema=toSchema %}"
-                          hx-target="#tableContainer"
-                          hx-swap="outerHTML"
-                          hx-include="#publish-options-{{ table.name }}"
-                        >
+                        <button class="btn btn-secondary confirm-publish"
+                                hx-post="{% url 'api:move_publish' schema=table.schema table=table.name to_schema=toSchema %}"
+                                hx-target="#tableContainer"
+                                hx-swap="outerHTML"
+                                hx-include="#publish-options-{{ table.name }}">
                           Confirm
                         </button>
                       </div>
@@ -82,7 +63,6 @@
             {% endfor %}
           </div>
         </div>
-
         <!-- </div> -->
       </div>
     </div>

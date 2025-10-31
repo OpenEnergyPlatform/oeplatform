@@ -1,38 +1,24 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
-
 {% block after-head %}
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="{% static 'css/index-style.css' %}?v=latest"
-  />
+  <link rel="stylesheet"
+        type="text/css"
+        href="{% static 'css/index-style.css' %}?v=latest" />
 {% endblock %}
-
 {% block main %}
   <div class="index-home">
     <div class="index-group">
       <div class="index-padding">
         {% include 'base/messages.html' %}
         <h3>Open Energy Platform</h3>
-        <span class="subheader"
-          >Make your energy system modelling process transparent!</span
-        >
-
+        <span class="subheader">Make your energy system modelling process transparent!</span>
         <div class="index-tile-container">
           <div class="index-tile index-tile-colored index-tile-color-1">
-            <img
-              src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg' %}"
-              alt="OEDB"
-            />
+            <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg' %}"
+                 alt="OEDB" />
             {% comment %}
-              <a
-                role="button"
-                class="btn btn-primary"
-                href="{% url 'dataedit:topic-list' %}"
-                >Database</a
-              >
+              <a role="button" class="btn btn-primary" href="{% url 'dataedit:topic-list' %}">Database</a>
             {% endcomment %}
             <div class="inner-index-tile">
               <div class="panel-description">
@@ -45,13 +31,10 @@
                   upload it.
                 </p>
               </div>
-              <a
-                role="button"
-                class="btn btn-primary pull-right"
-                style="font-size: 16px;"
-                href="{% url 'dataedit:topic-list' %}"
-                >Database</a
-              >
+              <a role="button"
+                 class="btn btn-primary pull-right"
+                 style="font-size: 16px"
+                 href="{% url 'dataedit:topic-list' %}">Database</a>
             </div>
             {% comment %}
               <div class="hovertext">
@@ -60,11 +43,9 @@
             {% endcomment %}
           </div>
           <div class="index-tile index-tile-colored index-tile-color-2">
-            <!-- <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg' %}" alt="Factsheets"> -->
-            <img
-              src="{% static 'img/welcome/bundles.png' %}"
-              alt="Scenario Bundle"
-            />
+            <!-- <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg' %}"
+      alt="Factsheets"> -->
+            <img src="{% static 'img/welcome/bundles.png' %}" alt="Scenario Bundle" />
             <div class="inner-index-tile">
               <div class="panel-description">
                 <h2>Scenario Bundles</h2>
@@ -77,30 +58,20 @@
                 </p>
               </div>
             </div>
-            <a
-              role="button"
-              class="btn btn-primary"
-              style="font-size: 16px;"
-              href="{% url 'factsheet:index' %}"
-              >Scenario Bundles</a
-            >
+            <a role="button"
+               class="btn btn-primary"
+               style="font-size: 16px"
+               href="{% url 'factsheet:index' %}">Scenario Bundles</a>
           </div>
           {#    <div class="index-tile index-tile-colored index-tile-color-3">#}
           {#    <img src="{% static 'img/welcome/bundles.png' %}" alt="">#}
           {#    <a role="button" class="btn btn-primary" href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform_issues_568 }}">Bundles</a>#}
           {#    </div>#}
           <div class="index-tile index-tile-colored index-tile-color-3">
-            <img
-              src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
-              alt="OEO"
-            />
+            <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
+                 alt="OEO" />
             {% comment %}
-              <a
-                role="button"
-                class="btn btn-primary"
-                href="{% url 'ontology:index' %}"
-                >Ontology</a
-              >
+              <a role="button" class="btn btn-primary" href="{% url 'ontology:index' %}">Ontology</a>
             {% endcomment %}
             <div class="inner-index-tile">
               <div class="panel-description">
@@ -113,20 +84,14 @@
                 </p>
               </div>
             </div>
-            <a
-              role="button"
-              class="btn btn-primary"
-              style="font-size: 16px;"
-              href="{% url 'ontology:index' %}"
-            >
-              Ontology
-            </a>
+            <a role="button"
+               class="btn btn-primary"
+               style="font-size: 16px"
+               href="{% url 'ontology:index' %}">Ontology</a>
           </div>
           <div class="index-tile index-tile-colored index-tile-color-4">
-            <img
-              src="{% static 'img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg' %}"
-              alt="Academy"
-            />
+            <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg' %}"
+                 alt="Academy" />
             <div class="inner-index-tile">
               <div class="panel-description">
                 <h2>Academy</h2>
@@ -138,36 +103,26 @@
                 </p>
               </div>
             </div>
-            <a
-              role="button"
-              class="btn btn-primary"
-              style="font-size: 16px;"
-              href="{{ EXTERNAL_URLS.tutorials_index }}"
-              >Academy</a
-            >
+            <a role="button"
+               class="btn btn-primary"
+               style="font-size: 16px"
+               href="{{ EXTERNAL_URLS.tutorials_index }}">Academy</a>
           </div>
         </div>
       </div>
     </div>
-
     <div class="index-about-container-background">
       <div class="index-about-container">
         <div class="index-about-column">
-          <img
-            src="{% static 'img/welcome/about-process-modelling.svg' %}"
-            alt=""
-          />
+          <img src="{% static 'img/welcome/about-process-modelling.svg' %}" alt="" />
           <b>API</b>
           <span class="alternative">
             Learn how to download and publish open data on the OEP using the
             API.
           </span>
-          <a
-            role="button"
-            class="btn btn-primary btn-sm"
-            href="{{ EXTERNAL_URLS.tutorials_api1 }}"
-            >Learn more</a
-          >
+          <a role="button"
+             class="btn btn-primary btn-sm"
+             href="{{ EXTERNAL_URLS.tutorials_api1 }}">Learn more</a>
         </div>
         <div class="index-about-column">
           <img src="{% static 'img/welcome/about-openscience.svg' %}" alt="" />
@@ -176,12 +131,9 @@
             Good scientific practice needs open licenses for software, data and
             content.
           </span>
-          <a
-            role="button"
-            class="btn btn-primary btn-sm"
-            href="{{ EXTERNAL_URLS.tutorials_licenses }}"
-            >Learn more</a
-          >
+          <a role="button"
+             class="btn btn-primary btn-sm"
+             href="{{ EXTERNAL_URLS.tutorials_licenses }}">Learn more</a>
         </div>
         <div class="index-about-column">
           <img src="{% static 'img/welcome/about-community.svg' %}" alt="" />
@@ -189,12 +141,9 @@
           <span class="alternative">
             Collaborate and contribute to the development on GitHub.
           </span>
-          <a
-            role="button"
-            class="btn btn-primary btn-sm"
-            href="{{ EXTERNAL_URLSgithub_openenergyplatform }}"
-            >Learn more</a
-          >
+          <a role="button"
+             class="btn btn-primary btn-sm"
+             href="{{ EXTERNAL_URLSgithub_openenergyplatform }}">Learn more</a>
         </div>
       </div>
     </div>

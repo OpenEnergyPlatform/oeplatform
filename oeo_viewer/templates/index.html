@@ -1,22 +1,18 @@
 {% extends "base/base-wide-react.html" %}
 {% load static %}
 {% load django_vite %}
-
 {% block after-head %}
   <!-- The following must stay before the vite_asset tag -->
   {% vite_react_refresh nonce="{{ request.csp_nonce }}" %}
   {% vite_asset "oeo_viewer/frontend/src/index.jsx" %}
 {% endblock after-head %}
-
 {% block main %}
   <div class="main-header">
     <h1 class="main-header__title">
-      <img
-        src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
-        width="16"
-        height="16"
-        alt="OEO"
-      />
+      <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
+           width="16"
+           height="16"
+           alt="OEO" />
       Open Energy Ontology Viewer
     </h1>
     <div class="main-header__wizard">
@@ -27,7 +23,7 @@
       The OEO Viewer is a research prototype tool to visually browse the Open
       Energy Ontology. External tools like TIB's terminology service are more
       sophisticated for browsing and searching ontologies; you can also find the
-      <a href="{{ tib_ts_oeo_link }}" target="_blank"> OEO there </a>.
+      <a href="{{ tib_ts_oeo_link }}" target="_blank">OEO there</a>.
     </div>
   </div>
   {% block main-content-body %}
@@ -36,6 +32,5 @@
     </div>
   {% endblock main-content-body %}
 {% endblock main %}
-
 {% block after-body-bottom-js %}
 {% endblock after-body-bottom-js %}

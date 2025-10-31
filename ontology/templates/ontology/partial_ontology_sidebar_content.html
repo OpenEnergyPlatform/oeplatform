@@ -7,34 +7,22 @@
         <span>Version</span>
       </div>
       <div class="ontology-side__versions-row">
-        <span
-          ><a href="{% url 'oeo_viewer:index' %}"
-            >Open Energy Ontology (OEO)</a
-          ></span
-        >
+        <span><a href="{% url 'oeo_viewer:index' %}">Open Energy Ontology (OEO)</a></span>
         <span>{{ version }}</span>
       </div>
       <div class="ontology-side__versions-row">
-        <span
-          ><a href="{{ EXTERNAL_URLS.oeo_extended_github }}"
-            >Open Energy Ontology Extended (OEOX)</a
-          ></span
-        >
+        <span><a href="{{ EXTERNAL_URLS.oeo_extended_github }}">Open Energy Ontology Extended (OEOX)</a></span>
         <span>1.0.0</span>
       </div>
     </div>
   </div>
-
   {% comment %}
     <div class="ontology-side__section">
       <h3 class="container ontology-side__title">
         View the oeo version {{ version }}
       </h3>
       <div class="btn-group float-end" role="group" aria-label="Basic example">
-        <a
-          class="btn btn-light"
-          href="{% url 'ontology:oeo-classes' ontology 'BFO_0000001' %}"
-        >
+        <a class="btn btn-light" href="{% url 'ontology:oeo-classes' ontology 'BFO_0000001' %}">
           Browse oeo classes
         </a>
       </div>
@@ -43,104 +31,74 @@
       </a>
     </div>
   {% endcomment %}
-
   <div class="ontology-side__section">
     <h3 class="ontology-side__title">Get the latest OEO release</h3>
     <p>
       Get the
-      <a
-        class=" "
-        href="{% url 'ontology:oeo-latest-glossary' ontology='oeo' %}"
-        >Glossary</a
-      >
+      <a class=" "
+         href="{% url 'ontology:oeo-latest-glossary' ontology='oeo' %}">Glossary</a>
       to get an overview of the OEO contents.
     </p>
-
-    <a
-      class="ontology-side__btn-main"
-      id="popoverTrigger"
-      href="{% url 'ontology:oeo-latest-full-zip' ontology='oeo' %}"
-      data-bs-toggle="popover"
-      data-bs-trigger="hover"
-      title="oeo release"
-      data-bs-content="Download the latest release oeo-{{ version }} as zip archive."
-    >
+    <a class="ontology-side__btn-main"
+       id="popoverTrigger"
+       href="{% url 'ontology:oeo-latest-full-zip' ontology='oeo' %}"
+       data-bs-toggle="popover"
+       data-bs-trigger="hover"
+       title="oeo release"
+       data-bs-content="Download the latest release oeo-{{ version }} as zip archive.">
       Download latest release {{ version }}
     </a>
     <p>Download the latest oeo version {{ version }} in OWL format:</p>
-    <a
-      id="popoverTrigger"
-      class="ontology-side__btn-link"
-      href="{% url 'ontology:oeo-static' ontology 'oeo-full.owl' %}"
-      data-bs-toggle="popover"
-      data-bs-trigger="hover"
-      title="full-oeo-owl"
-      data-bs-content="This file contains the complete version of the Open Energy Ontology (OEO) as an OWL file in XML/RDF format. It encompasses all classes, properties, and relationships defined within the OEO framework."
-    >
+    <a id="popoverTrigger"
+       class="ontology-side__btn-link"
+       href="{% url 'ontology:oeo-static' ontology 'oeo-full.owl' %}"
+       data-bs-toggle="popover"
+       data-bs-trigger="hover"
+       title="full-oeo-owl"
+       data-bs-content="This file contains the complete version of the Open Energy Ontology (OEO) as an OWL file in XML/RDF format. It encompasses all classes, properties, and relationships defined within the OEO framework.">
       Download full-oeo
     </a>
     <!-- Info button to trigger the modal -->
-    <button
-      type="button"
-      class="ontology-side__btn-popover"
-      data-bs-toggle="modal"
-      data-bs-target="#oeoFullInfoModal"
-    >
+    <button type="button"
+            class="ontology-side__btn-popover"
+            data-bs-toggle="modal"
+            data-bs-target="#oeoFullInfoModal">
       <i class="fas fa-info-circle"></i>
     </button>
     <div class="row">
       <!-- Modal for oeo-full-info -->
-      <div
-        class="modal fade"
-        id="oeoFullInfoModal"
-        tabindex="-1"
-        aria-labelledby="oeoFullInfoModalLabel"
-        aria-hidden="true"
-      >
+      <div class="modal fade"
+           id="oeoFullInfoModal"
+           tabindex="-1"
+           aria-labelledby="oeoFullInfoModalLabel"
+           aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="oeoFullInfoModalLabel">
-                Full OEO Information
-              </h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
+              <h5 class="modal-title" id="oeoFullInfoModalLabel">Full OEO Information</h5>
+              <button type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"></button>
             </div>
             <div class="modal-body" id="oeo-full-info">
               <p>
                 The open energy platform currently only provides the latest
                 version for download. Please find previous versions on GitHub.
               </p>
-              <p>
-                You can download the full ontology using the following URLs:
-              </p>
+              <p>You can download the full ontology using the following URLs:</p>
               <ul>
                 <li>
-                  <a
-                    href="{% url 'ontology:oeo-initializer' 'oeo' %}"
-                    target="_blank"
-                    >{% url 'ontology:oeo-initializer' 'oeo' %}</a
-                  >
+                  <a href="{% url 'ontology:oeo-initializer' 'oeo' %}" target="_blank">{% url 'ontology:oeo-initializer' 'oeo' %}</a>
                 </li>
                 <li>
-                  <a
-                    href="{% url 'ontology:oeo-static' 'oeo' 'oeo-full.owl' %}"
-                    target="_blank"
-                    >{% url 'ontology:oeo-static' 'oeo' 'oeo-full.owl' %}</a
-                  >
+                  <a href="{% url 'ontology:oeo-static' 'oeo' 'oeo-full.owl' %}"
+                     target="_blank">{% url 'ontology:oeo-static' 'oeo' 'oeo-full.owl' %}</a>
                 </li>
               </ul>
             </div>
             <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                 Close
               </button>
             </div>
@@ -151,49 +109,39 @@
     <div class="row">
       <div class="col">
         <div class="btn-group" role="group" aria-label="Basic example">
-          <a
-            id="popoverTrigger"
-            class="ontology-side__btn-link"
-            href="{% url 'ontology:oeo-static' ontology 'oeo-closure.owl' %}"
-            data-bs-toggle="popover"
-            data-bs-trigger="hover focus"
-            title="closure"
-            data-bs-content="This file represents the Open Energy Ontology (OEO) with the logical closure of all axioms included. It is provided as an OWL file in XML/RDF format, ensuring that all inferred relationships and properties are fully realized."
-          >
+          <a id="popoverTrigger"
+             class="ontology-side__btn-link"
+             href="{% url 'ontology:oeo-static' ontology 'oeo-closure.owl' %}"
+             data-bs-toggle="popover"
+             data-bs-trigger="hover focus"
+             title="closure"
+             data-bs-content="This file represents the Open Energy Ontology (OEO) with the logical closure of all axioms included. It is provided as an OWL file in XML/RDF format, ensuring that all inferred relationships and properties are fully realized.">
             Download closure
           </a>
         </div>
-        <button
-          type="button"
-          class="ontology-side__btn-popover"
-          data-bs-toggle="modal"
-          data-bs-target="#closureInfoModal"
-        >
+        <button type="button"
+                class="ontology-side__btn-popover"
+                data-bs-toggle="modal"
+                data-bs-target="#closureInfoModal">
           <i class="fas fa-info-circle"></i>
         </button>
       </div>
     </div>
     <div class="row">
       <!-- Modal for closure-info -->
-      <div
-        class="modal fade"
-        id="closureInfoModal"
-        tabindex="-1"
-        aria-labelledby="closureInfoModalLabel"
-        aria-hidden="true"
-      >
+      <div class="modal fade"
+           id="closureInfoModal"
+           tabindex="-1"
+           aria-labelledby="closureInfoModalLabel"
+           aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="closureInfoModalLabel">
-                Closure OEO Information
-              </h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
+              <h5 class="modal-title" id="closureInfoModalLabel">Closure OEO Information</h5>
+              <button type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"></button>
             </div>
             <div class="modal-body" id="closure-info">
               The open energy platform currently only provides the latest
@@ -201,20 +149,13 @@
               <p>You can download the closure file using the following URL:</p>
               <ul>
                 <li>
-                  <a
-                    href="{% url 'ontology:oeo-static' 'oeo' 'oeo-closure.owl' %}"
-                    target="_blank"
-                    >{% url 'ontology:oeo-static' 'oeo' 'oeo-closure.owl' %}</a
-                  >
+                  <a href="{% url 'ontology:oeo-static' 'oeo' 'oeo-closure.owl' %}"
+                     target="_blank">{% url 'ontology:oeo-static' 'oeo' 'oeo-closure.owl' %}</a>
                 </li>
               </ul>
             </div>
             <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                 Close
               </button>
             </div>
@@ -223,28 +164,23 @@
       </div>
     </div>
   </div>
-
   <div class="ontology-side__section">
     <h3 class="ontology-side__title">The OEO on GitHub</h3>
     <span>
       On GitHub you can find previous releases. If you are interested in the
       latest developments then have a look at the develop branch.
     </span>
-    <a
-      class="ontology-side__btn-link"
-      href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology_releases }}"
-      target="_blank"
-    >
+    <a class="ontology-side__btn-link"
+       href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology_releases }}"
+       target="_blank">
       <i class="fas fa-external-link-alt"></i>
       Download release from GitHub.
     </a>
     <div class="content-sidebar">
-      <div
-        id="loading-spinner"
-        class="spinner-border text-primary"
-        role="status"
-        style="display: none;"
-      >
+      <div id="loading-spinner"
+           class="spinner-border text-primary"
+           role="status"
+           style="display: none">
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>

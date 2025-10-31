@@ -11,6 +11,7 @@ from api.actions import _get_engine, get_schema_names, get_table_names
 from dataedit.models import Table
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
+logger = logging.getLogger("oeplatform")
 # copied from dataedit.views, because it may be removed later
 schemas_whitelist = {
     "boundaries",
@@ -47,7 +48,7 @@ def get_schema_tables_oedb() -> set[tuple[str, str]]:
     result = set()
     for schema in get_schema_names({}):
         if schema not in schemas_all:
-            logging.warning(f"Unexpected schema: {schema}")
+            logger.warning(f"Unexpected schema: {schema}")
             continue
         elif schema.lstrip("_") not in schemas_whitelist:
             continue
@@ -81,12 +82,12 @@ def get_schema_tables_oep() -> set[tuple[str, str]]:
             _meta_table_name = f"_{table_name}_{action}"
             meta_table_name = _meta_table_name[:63]
             if meta_table_name != _meta_table_name:
-                logging.warning(
+                logger.warning(
                     f"table name too long {_meta_table_name} => {meta_table_name}"
                 )
             if meta_table_name in table_names:
                 # we warn, but will ignore it
-                logging.error("duplicate meta table name: %s", meta_table_name)
+                logger.error("duplicate meta table name: %s", meta_table_name)
                 continue
             table_names.add(meta_table_name)
             result.add((meta_schema, meta_table_name))
@@ -122,7 +123,7 @@ def get_migration_sql() -> str:
 
     schema_tables = get_schema_tables_migration()
     if not schema_tables:
-        logging.info("No tables to migrate")
+        logger.info("No tables to migrate")
     else:
         for schema, table in sorted(schema_tables):
             schema_new = (
@@ -145,14 +146,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         sql = get_migration_sql()
-        logging.info("Here is the proposed migration sql code")
+        logger.info("Here is the proposed migration sql code")
         print(sql)  # print so we could pipe it into psql or file
 
         inp = input("Run the migration script now? [Y|n]:")
         if inp != "Y":
-            logging.info("No changes applied")
+            logger.info("No changes applied")
             return
         else:
             with _get_engine().connect() as con:
                 con.execute(sql)
-            logging.info("Changes applied successfully!")
+            logger.info("Changes applied successfully!")

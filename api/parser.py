@@ -209,7 +209,7 @@ def parse_select(d):
                 elif isinstance(grouping, list):
                     partials = map(parse_select, grouping)
                 else:
-                    APIError(
+                    raise APIError(
                         "Cannot handle grouping type. Dictionary or list expected."
                     )
             elif t == "select":
@@ -704,7 +704,7 @@ def parse_scolumnd_from_columnd(schema, table, name, column_description):
     }
 
 
-def replace_None_with_NULL(dictonary):
+def replace_None_with_NULL(dictonary: dict) -> dict:
     # Replacing None with null for Database
     for key, value in dictonary.items():
         if value is None:

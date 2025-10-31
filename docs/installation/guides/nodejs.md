@@ -57,5 +57,4 @@ The following apps integrate:
   - factsheet (scenario bundles react client)
 
 - None so far
-
   - MetaBuilder (dataedit js client)

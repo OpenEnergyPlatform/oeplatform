@@ -4,7 +4,6 @@
 {% block main-content-body %}
   {% load static %}
   <h4>My Memberships</h4>
-
   <ul class="list-group">
     {% for membership in request.user.memberships.all %}
       <li class="list-group-item">
@@ -13,8 +12,6 @@
     {% endfor %}
   </ul>
   <div>
-    <a href="{% url 'login:group-create' %}" class="btn btn-info"
-      >Create new Group</a
-    >
+    <a href="{% url 'login:group-create' %}" class="btn btn-info">Create new Group</a>
   </div>
 {% endblock %}

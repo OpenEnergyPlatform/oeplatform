@@ -68,6 +68,8 @@ from oekg.sparqlQuery import (
     normalize_factsheets_rows,
 )
 
+logger = logging.getLogger("oeplatform")
+
 
 def factsheets_index_view(request, *args, **kwargs):
     return render(request, "factsheet/index.html")
@@ -557,7 +559,7 @@ def create_factsheet_view(request, *args, **kwargs):
             "Factsheet saved", safe=False, content_type="application/json"
         )
         result = set_ownership(bundle_uid=uid, user=request.user)
-        logging.info(result)
+        logger.info(result)
         patch_response_headers(response, cache_timeout=1)
 
         return response

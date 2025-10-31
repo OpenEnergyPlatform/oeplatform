@@ -36,14 +36,7 @@ from django.contrib.postgres.search import TrigramSimilarity
 from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.db.utils import IntegrityError
-from django.http import (
-    Http404,
-    HttpRequest,
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseServerError,
-    JsonResponse,
-)
+from django.http import Http404, HttpRequest, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
@@ -54,6 +47,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from sqlalchemy.sql.expression import Select
 
 import api.parser
 import login.models as login_models
@@ -62,11 +56,15 @@ from api.encode import Echo
 from api.error import APIError
 from api.helper import (
     WHERE_EXPRESSION,
+    JsonLikeResponse,
+    ModJsonResponse,
     OEPStream,
+    api_exception,
     check_embargo,
     conjunction,
     create_ajax_handler,
     date_handler,
+    get_request_data_dict,
     load_cursor,
     require_admin_permission,
     require_delete_permission,
@@ -74,7 +72,6 @@ from api.helper import (
     stream,
     update_tags_from_keywords,
 )
-from api.helpers.http import ModHttpResponse
 from api.serializers import (
     EnergyframeworkSerializer,
     EnergymodelSerializer,
@@ -100,20 +97,17 @@ from oekg.utils import (
     process_datasets_sparql_query,
     validate_public_sparql_query,
 )
-from oeplatform.settings import USE_LOEP, USE_ONTOP
-
-if USE_LOEP:
-    from oeplatform.settings import DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
-
-if USE_ONTOP:
-    from oeplatform.settings import ONTOP_SPARQL_ENDPOINT_URL
-
-from api.helper import api_exception
+from oeplatform.settings import (
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL,
+    ONTOP_SPARQL_ENDPOINT_URL,
+    USE_LOEP,
+    USE_ONTOP,
+)
 
 
 class SequenceAPIView(APIView):
     @api_exception
-    def put(self, request: Request, schema: str, sequence: str) -> JsonResponse:
+    def put(self, request: Request, schema: str, sequence: str) -> JsonLikeResponse:
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
@@ -121,26 +115,30 @@ class SequenceAPIView(APIView):
             raise APIError("User is anonymous", 401)
         if actions.has_table(dict(schema=schema, sequence_name=sequence), {}):
             raise APIError("Sequence already exists", 409)
-        return self.__create_sequence(request, schema, sequence)
+        return JsonResponse(self.__create_sequence(request, schema, sequence))
 
     @api_exception
     @require_delete_permission
-    def delete(self, request: Request, schema: str, sequence: str) -> JsonResponse:
+    def delete(self, request: Request, schema: str, sequence: str) -> JsonLikeResponse:
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
-        return self.__delete_sequence(request, schema, sequence)
+        return JsonResponse(self.__delete_sequence(request, schema, sequence))
 
     @load_cursor()
-    def __delete_sequence(self, request: Request, schema: str, sequence: str):
+    def __delete_sequence(
+        self, request: Request, schema: str, sequence: str
+    ) -> JsonLikeResponse:
         seq = sqla.schema.Sequence(sequence, schema=schema)
         seq.drop(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_200_OK)
 
     @load_cursor()
-    def __create_sequence(self, request: Request, schema: str, sequence: str):
+    def __create_sequence(
+        self, request: Request, schema: str, sequence: str
+    ) -> JsonLikeResponse:
         seq = sqla.schema.Sequence(sequence, schema=schema)
         seq.create(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_201_CREATED)
@@ -149,14 +147,14 @@ class SequenceAPIView(APIView):
 class MetadataAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request: Request, schema: str, table: str) -> JsonResponse:
+    def get(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
         metadata = actions.get_table_metadata(schema, table)
         return JsonResponse(metadata)
 
     @api_exception
     @require_write_permission
     @load_cursor()
-    def post(self, request: Request, schema: str, table: str) -> JsonResponse:
+    def post(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
 
@@ -194,7 +192,7 @@ class TableAPIView(APIView):
 
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request: Request, schema: str, table: str) -> JsonResponse:
+    def get(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
         """
         Returns a dictionary that describes the DDL-make-up of this table.
         Fields are:
@@ -223,7 +221,7 @@ class TableAPIView(APIView):
         )
 
     @api_exception
-    def post(self, request: Request, schema: str, table: str) -> JsonResponse:
+    def post(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
         """
         Changes properties of tables and table columns
         :param request:
@@ -234,44 +232,44 @@ class TableAPIView(APIView):
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
-        json_data = cast(dict, request.data)
+        request_data_dict = get_request_data_dict(request)
 
-        if "column" in json_data["type"]:
+        if "column" in request_data_dict["type"]:
             column_definition = api.parser.parse_scolumnd_from_columnd(
-                schema, table, json_data["name"], json_data
+                schema, table, request_data_dict["name"], request_data_dict
             )
             result = actions.queue_column_change(schema, table, column_definition)
-            return ModHttpResponse(result)
+            return ModJsonResponse(result)
 
-        elif "constraint" in json_data["type"]:
+        elif "constraint" in request_data_dict["type"]:
             # Input has nothing to do with DDL from Postgres.
             # Input is completely different.
             # dict.get() returns None, if key does not exist
             constraint_definition = {
-                "action": json_data["action"],  # {ADD, DROP}
-                "constraint_type": json_data.get(
+                "action": request_data_dict["action"],  # {ADD, DROP}
+                "constraint_type": request_data_dict.get(
                     "constraint_type"
                 ),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
-                "constraint_name": json_data.get(
+                "constraint_name": request_data_dict.get(
                     "constraint_name"
                 ),  # {myForeignKey, myUniqueConstraint}
-                "constraint_parameter": json_data.get("constraint_parameter"),
+                "constraint_parameter": request_data_dict.get("constraint_parameter"),
                 # Things in Brackets, e.g. name of column
-                "reference_table": json_data.get("reference_table"),
-                "reference_column": json_data.get("reference_column"),
+                "reference_table": request_data_dict.get("reference_table"),
+                "reference_column": request_data_dict.get("reference_column"),
             }
 
             result = actions.queue_constraint_change(
                 schema, table, constraint_definition
             )
-            return ModHttpResponse(result)
+            return ModJsonResponse(result)
         else:
-            return ModHttpResponse(
+            return ModJsonResponse(
                 actions.get_response_dict(False, 400, "type not recognised")
             )
 
     @api_exception
-    def put(self, request: Request, schema: str, table: str) -> JsonResponse:
+    def put(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
         """
         Creates a new table: physical table first, then metadata row.
         Applies embargo and permissions, and sets metadata if provided.
@@ -307,19 +305,22 @@ class TableAPIView(APIView):
         assert_valid_identifier_name(table)
 
         # 3) Parse and validate payload
-        payload = request.data.get("query", {})
-        columns = payload.get("columns")
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict.get("query", {})
+        columns = payload_query.get("columns")
         if not columns:
             raise APIError("Table contains no columns")
         for col in columns:
             col.update({"c_schema": schema, "c_table": table})
         validate_column_names(columns)
 
-        constraints = payload.get("constraints", [])
+        constraints = payload_query.get("constraints", [])
         for cons in constraints:
             cons.update({"action": "ADD", "c_schema": schema, "c_table": table})
 
-        embargo_data = request.data.get("embargo") or payload.get("embargo", {})
+        embargo_data = request_data_dict.get("embargo") or payload_query.get(
+            "embargo", {}
+        )
         try:
             embargo_required = parse_embargo_payload(embargo_data)
         except EmbargoValidationError as e:
@@ -340,7 +341,7 @@ class TableAPIView(APIView):
 
         assign_table_holder(request.user, schema, table)
 
-        metadata = payload.get("metadata")
+        metadata = payload_query.get("metadata")
         if metadata:
 
             actions.set_table_metadata(table=table, metadata=metadata)
@@ -580,7 +581,7 @@ class TableAPIView(APIView):
 
     @api_exception
     @require_delete_permission
-    def delete(self, request: Request, schema: str, table: str) -> JsonResponse:
+    def delete(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
         orchestrator = TableCreationOrchestrator()
 
         schema, table = actions.get_table_name(schema, table)
@@ -594,7 +595,7 @@ class ColumnAPIView(APIView):
     @method_decorator(never_cache)
     def get(
         self, request: Request, schema: str, table: str, column: str | None = None
-    ) -> JsonResponse:
+    ) -> JsonLikeResponse:
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         response = actions.describe_columns(schema, table)
         if column:
@@ -610,10 +611,12 @@ class ColumnAPIView(APIView):
     @require_write_permission
     def post(
         self, request: Request, schema: str, table: str, column: str
-    ) -> JsonResponse:
+    ) -> JsonLikeResponse:
         schema, table = actions.get_table_name(schema, table)
+
+        request_data_dict = get_request_data_dict(request)
         response = actions.column_alter(
-            request.data["query"], {}, schema, table, column
+            request_data_dict["query"], {}, schema, table, column
         )
         return JsonResponse(response)
 
@@ -621,13 +624,15 @@ class ColumnAPIView(APIView):
     @require_write_permission
     def put(
         self, request: Request, schema: str, table: str, column: str
-    ) -> JsonResponse:
+    ) -> JsonLikeResponse:
         schema, table = actions.get_table_name(schema, table)
-        actions.column_add(schema, table, column, request.data["query"])
+        request_data_dict = get_request_data_dict(request)
+        actions.column_add(schema, table, column, request_data_dict["query"])
         return JsonResponse({}, status=201)
 
 
 class FieldsAPIView(APIView):
+    # TODO: is this really used?
     @method_decorator(never_cache)
     def get(
         self,
@@ -636,7 +641,7 @@ class FieldsAPIView(APIView):
         table: str,
         column_id: int,
         column: str | None = None,
-    ) -> JsonResponse:
+    ) -> JsonLikeResponse:
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         if (
             not parser.is_pg_qual(table)
@@ -644,36 +649,36 @@ class FieldsAPIView(APIView):
             or not parser.is_pg_qual(column_id)
             or not parser.is_pg_qual(column)
         ):
-            return ModHttpResponse({"error": "Bad Request", "http_status": 400})
+            return ModJsonResponse({"error": "Bad Request", "http_status": 400})
 
         returnValue = actions.getValue(schema, table, column, column_id)
-
-        return HttpResponse(
-            returnValue if returnValue is not None else "",
-            status=(404 if returnValue is None else 200),
-        )
+        if returnValue is None:
+            return JsonResponse({}, status=404)
+        else:
+            return JsonResponse(returnValue, status=200)
 
 
 class MovePublishAPIView(APIView):
-    @require_admin_permission
     @api_exception
+    @require_admin_permission
     def post(
         self, request: Request, schema: str, table: str, to_schema: str
-    ) -> JsonResponse:
+    ) -> JsonLikeResponse:
         # Make payload more friendly as users tend to use the query wrapper in payload
-        json_data = request.data.get("query", {})
-        embargo_period = request.data.get("embargo", {}).get(
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict.get("query", {})
+        embargo_period = request_data_dict.get("embargo", {}).get(
             "duration", None
-        ) or json_data.get("embargo", {}).get("duration", None)
+        ) or payload_query.get("embargo", {}).get("duration", None)
         actions.move_publish(schema, table, to_schema, embargo_period)
 
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
 class TableUnpublishAPIView(APIView):
-    @require_admin_permission
     @api_exception
-    def post(self, request: HttpRequest, schema: str, table: str) -> JsonResponse:
+    @require_admin_permission
+    def post(self, request: HttpRequest, schema: str, table: str) -> JsonLikeResponse:
         """Set table to `not published`"""
         table_obj = DBTable.objects.get(name=table)
         table_obj.is_publish = False
@@ -682,13 +687,13 @@ class TableUnpublishAPIView(APIView):
 
 
 class MoveAPIView(APIView):
-    @require_admin_permission
     @api_exception
+    @require_admin_permission
     def post(
         self, request: Request, schema: str, table: str, to_schema: str
-    ) -> JsonResponse:
+    ) -> JsonLikeResponse:
         actions.move(schema, table, to_schema)
-        return HttpResponse(status=status.HTTP_200_OK)
+        return JsonResponse({}, status=status.HTTP_200_OK)
 
 
 class RowsAPIView(APIView):
@@ -696,7 +701,7 @@ class RowsAPIView(APIView):
     @method_decorator(never_cache)
     def get(
         self, request: Request, schema: str, table: str, row_id: int | None = None
-    ) -> JsonResponse:
+    ) -> JsonLikeResponse:
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -757,7 +762,7 @@ class RowsAPIView(APIView):
                 "type": "operator",
             }
             if where_clauses:
-                where_clauses = conjunction(clause, where_clauses)
+                where_clauses = conjunction([clause, where_clauses])
             else:
                 where_clauses = clause
 
@@ -865,7 +870,7 @@ class RowsAPIView(APIView):
         table: str,
         row_id: int | None = None,
         action: str | None = None,
-    ) -> JsonResponse:
+    ) -> JsonLikeResponse:
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -873,18 +878,21 @@ class RowsAPIView(APIView):
             )
 
         schema, table = actions.get_table_name(schema, table)
-        column_data = request.data["query"]
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict["query"]
         status_code = status.HTTP_200_OK
         if row_id:
-            response = self.__update_rows(request, schema, table, column_data, row_id)
+            response = self.__update_rows(request, schema, table, payload_query, row_id)
         else:
             if action == "new":
                 response = self.__insert_row(
-                    request, schema, table, column_data, row_id
+                    request, schema, table, payload_query, row_id
                 )
                 status_code = status.HTTP_201_CREATED
             else:
-                response = self.__update_rows(request, schema, table, column_data, None)
+                response = self.__update_rows(
+                    request, schema, table, payload_query, None
+                )
         actions.apply_changes(schema, table)
         return stream(response, status_code=status_code)
 
@@ -897,7 +905,7 @@ class RowsAPIView(APIView):
         table: str,
         row_id: int | None = None,
         action: str | None = None,
-    ) -> JsonResponse:
+    ) -> JsonLikeResponse:
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -916,10 +924,11 @@ class RowsAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        column_data = request.data["query"]
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict["query"]
 
-        if row_id and column_data.get("id", int(row_id)) != int(row_id):
-            raise actions.APIError(
+        if row_id and payload_query.get("id", int(row_id)) != int(row_id):
+            raise APIError(
                 "Id in URL and query do not match. Ids may not change.",
                 status=status.HTTP_409_CONFLICT,
             )
@@ -937,18 +946,19 @@ class RowsAPIView(APIView):
             else False
         )
         if exists:
-            response = self.__update_rows(request, schema, table, column_data, row_id)
+            response = self.__update_rows(request, schema, table, payload_query, row_id)
             actions.apply_changes(schema, table)
             return JsonResponse(response)
         else:
-            result = self.__insert_row(request, schema, table, column_data, row_id)
+            result = self.__insert_row(request, schema, table, payload_query, row_id)
             actions.apply_changes(schema, table)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
+    @api_exception
     @require_delete_permission
     def delete(
         self, request: Request, table: str, schema: str, row_id: int | None = None
-    ) -> JsonResponse:
+    ) -> JsonLikeResponse:
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -971,12 +981,14 @@ class RowsAPIView(APIView):
             )
 
         where = request.GET.getlist("where")
-        query = {"schema": schema, "table": table}
+        query: dict[str, str | list | dict] = {"schema": schema, "table": table}
         if where:
             query["where"] = self.__read_where_clause(where)
+
+        request_data_dict = get_request_data_dict(request)
         context = {
-            "connection_id": request.data["connection_id"],
-            "cursor_id": request.data["cursor_id"],
+            "connection_id": request_data_dict["connection_id"],
+            "cursor_id": request_data_dict["cursor_id"],
             "user": request.user,
         }
 
@@ -996,7 +1008,7 @@ class RowsAPIView(APIView):
 
         return actions.data_delete(query, context)
 
-    def __read_where_clause(self, wheres):
+    def __read_where_clause(self, wheres) -> list:
         where_clauses = []
         if wheres:
             for where in wheres:
@@ -1035,9 +1047,10 @@ class RowsAPIView(APIView):
         if row_id:
             row["id"] = row_id
 
+        request_data_dict = get_request_data_dict(request)
         context = {
-            "connection_id": request.data["connection_id"],
-            "cursor_id": request.data["cursor_id"],
+            "connection_id": request_data_dict["connection_id"],
+            "cursor_id": request_data_dict["cursor_id"],
             "user": request.user,
         }
 
@@ -1061,16 +1074,17 @@ class RowsAPIView(APIView):
         table: str,
         row,
         row_id: int | None = None,
-    ) -> JsonResponse:
+    ) -> dict:
         if check_embargo(schema, table):
-            return JsonResponse(
-                {"error": "Access to this table is restricted due to embargo."},
+            raise APIError(
+                "Access to this table is restricted due to embargo.",
                 status=403,
             )
 
+        request_data_dict = get_request_data_dict(request)
         context = {
-            "connection_id": request.data["connection_id"],
-            "cursor_id": request.data["cursor_id"],
+            "connection_id": request_data_dict["connection_id"],
+            "cursor_id": request_data_dict["cursor_id"],
             "user": request.user,
         }
 
@@ -1114,6 +1128,7 @@ class RowsAPIView(APIView):
 
         if where_clauses:
             query = query.where(parser.parse_condition(where_clauses))
+            query = cast(Select, query)  # TODO: fix type hints in a better way
 
         orderby = data.get("orderby")
         if orderby:
@@ -1123,14 +1138,17 @@ class RowsAPIView(APIView):
                 query = query.order_by(orderby)
             else:
                 raise APIError("Unknown order_by clause: " + orderby)
+            query = cast(Select, query)  # TODO: fix type hints in a better way
 
         limit = data.get("limit")
         if limit and limit.isdigit():
             query = query.limit(int(limit))
+            query = cast(Select, query)  # TODO: fix type hints in a better way
 
         offset = data.get("offset")
         if offset and offset.isdigit():
             query = query.offset(int(offset))
+            query = cast(Select, query)  # TODO: fix type hints in a better way
 
         cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)
@@ -1138,7 +1156,7 @@ class RowsAPIView(APIView):
 
 class AdvancedFetchAPIView(APIView):
     @api_exception
-    def post(self, request: Request, fetchtype) -> JsonResponse:
+    def post(self, request: Request, fetchtype) -> JsonLikeResponse:
         if fetchtype == "all":
             return self.do_fetch(request, actions.fetchall)
         elif fetchtype == "many":
@@ -1169,12 +1187,14 @@ class AdvancedFetchAPIView(APIView):
 
 
 class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
-    def get(self, request: Request) -> JsonResponse:
+    @api_exception
+    def get(self, request: Request) -> JsonLikeResponse:
         sessions.close_all_for_user(request.user)
-        return HttpResponse("All connections closed")
+        return JsonResponse({"message": "All connections closed"})
 
 
-def users_api_view(request: Request) -> JsonResponse:
+@api_exception
+def users_api_view(request: Request) -> JsonLikeResponse:
     query = request.GET.get("name", "")
 
     # Ensure query is not empty to proceed with filtering
@@ -1198,7 +1218,8 @@ def users_api_view(request: Request) -> JsonResponse:
     return JsonResponse(user_names, safe=False)
 
 
-def groups_api_view(request: Request) -> JsonResponse:
+@api_exception
+def groups_api_view(request: Request) -> JsonLikeResponse:
     """
     Return all Groups where this user is a member that match
     the current query. The query is input by the User.
@@ -1212,7 +1233,9 @@ def groups_api_view(request: Request) -> JsonResponse:
     if not query:
         return JsonResponse([], safe=False)
 
-    user_groups = user.memberships.all().prefetch_related("group")
+    user_groups = user.memberships.all().prefetch_related(  # type:ignore related
+        "group"
+    )
     groups = [g.group for g in user_groups]
 
     # Assuming 'name' is the field you want to search against
@@ -1232,7 +1255,8 @@ def groups_api_view(request: Request) -> JsonResponse:
     return JsonResponse(group_names, safe=False)
 
 
-def oeo_search_api_view(request: Request) -> JsonResponse:
+@api_exception
+def oeo_search_api_view(request: Request) -> JsonLikeResponse:
     if USE_LOEP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         query = request.GET["query"]
@@ -1243,7 +1267,7 @@ def oeo_search_api_view(request: Request) -> JsonResponse:
         # res: something like [{"label": "testlabel", "resource": "testresource"}]
         # send back to client
     else:
-        return HttpResponseServerError(
+        raise APIError(
             "The endpoint for LOEP is not setup. Please contact a server admin."
         )
     return JsonResponse(res, safe=False)
@@ -1253,17 +1277,18 @@ class OekgSparqlAPIView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def post(self, request: Request) -> JsonResponse:
-        sparql_query = request.data.get("query", "")
-        response_format = request.data.get("format", "json")  # Default format
+    def post(self, request: Request) -> JsonLikeResponse:
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict.get("query", "")
+        response_format = request_data_dict.get("format", "json")  # Default format
 
-        if not validate_public_sparql_query(sparql_query):
+        if not validate_public_sparql_query(payload_query):
             raise ValidationError(
                 "Invalid SPARQL query. Update/delete queries are not allowed."
             )
 
         try:
-            content, content_type = execute_sparql_query(sparql_query, response_format)
+            content, content_type = execute_sparql_query(payload_query, response_format)
         except ValueError as e:
             raise ValidationError(str(e))
 
@@ -1273,15 +1298,14 @@ class OekgSparqlAPIView(APIView):
             return Response(content, content_type=content_type)
 
 
-def OevkgSearchAPIView(request: Request) -> JsonResponse:
-    if USE_ONTOP:
+@api_exception
+def oevkg_search_api_view(request: Request) -> JsonLikeResponse:
+    if USE_ONTOP and ONTOP_SPARQL_ENDPOINT_URL:
         # get query from user request # TODO validate input to prevent sneaky stuff
         try:
             query = request.body.decode("utf-8")
         except UnicodeDecodeError:
-            return HttpResponseBadRequest(
-                "Invalid request body encoding. Please use 'utf-8'."
-            )
+            raise APIError("Invalid request body encoding. Please use 'utf-8'.")
         headers = {
             "Accept": "application/sparql-results+json",
             "Content-Type": "application/sparql-query",
@@ -1293,18 +1317,16 @@ def OevkgSearchAPIView(request: Request) -> JsonResponse:
             )
             response.raise_for_status()
         except requests.RequestException as e:
-            return HttpResponseServerError(
-                f"Error contacting SPARQL endpoint: {str(e)}"
-            )
+            raise APIError(f"Error contacting SPARQL endpoint: {str(e)}")
 
         # res: something like [{"label": "testlabel", "resource": "testresource"}]
         # Maybe validate using shacl or other data model descriptor file
         try:
             res = response.json()
         except json.JSONDecodeError:
-            return HttpResponseServerError("Error decoding SPARQL endpoint response.")
+            raise APIError("Error decoding SPARQL endpoint response.")
     else:
-        return HttpResponseServerError(
+        raise APIError(
             "The SPARQL endpoint for OEVKG is not setup. Please contact your server admin."  # noqa
         )
     # send back to client
@@ -1348,8 +1370,9 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
 class ManageOekgScenarioDatasetsAPIView(APIView):
     permission_classes = [IsAuthenticated]  # Require authentication
 
+    @api_exception
     @post_only_if_user_is_owner_of_scenario_bundle
-    def post(self, request: Request) -> JsonResponse:
+    def post(self, request: Request) -> JsonLikeResponse:
         serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1377,7 +1400,7 @@ class TableSizeAPIView(APIView):
     """
 
     @api_exception
-    def get(self, request: Request) -> JsonResponse:
+    def get(self, request: Request) -> JsonLikeResponse:
         table = request.query_params.get("table")
 
         if table:

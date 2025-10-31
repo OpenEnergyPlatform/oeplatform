@@ -1,4 +1,5 @@
-"""
+"""Api actions.
+
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
@@ -42,12 +43,22 @@ from sqlalchemy import types as sqltypes
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
-import api
 import dataedit.metadata
 import login.models as login_models
 from api.connection import _get_engine, create_oedb_session
 from api.error import APIError
-from api.parser import get_or_403, parse_type, read_bool, read_pgid
+from api.parser import (
+    get_or_403,
+    is_pg_qual,
+    parse_insert,
+    parse_select,
+    parse_type,
+    read_bool,
+    read_pgid,
+    read_pgvalue,
+    replace_None_with_NULL,
+    set_meta_info,
+)
 from api.sessions import (
     SessionContext,
     close_all_for_user,
@@ -61,10 +72,11 @@ from login.models import myuser as User
 from login.utils import validate_open_data_license
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
+logger = logging.getLogger("oeplatform")
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 
-logger = logging.getLogger("oeplatform")
+Base = declarative_base()
 
 __INSERT = 0
 __UPDATE = 1
@@ -77,7 +89,7 @@ MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
 IDENTIFIER_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_IDENTIFIER_LENGTH - 1))
 
 
-def get_column_obj(table, column):
+def get_column_obj(table: Table, column: str):
     """
 
     :param talbe: A sqla-table object
@@ -92,7 +104,9 @@ def get_column_obj(table, column):
         raise APIError("Column '%s' does not exist." % column)
 
 
-def get_table_name(schema: str | None, table: str, restrict_schemas: bool = True):
+def get_table_name(
+    schema: str | None, table: str, restrict_schemas: bool = True
+) -> tuple[str, str]:
     schema = validate_schema(schema)
 
     if not has_schema(dict(schema=schema)):
@@ -105,22 +119,19 @@ def get_table_name(schema: str | None, table: str, restrict_schemas: bool = True
     return schema, table
 
 
-Base = declarative_base()
-
-
 class ResponsiveException(Exception):
     pass
 
 
-def assert_permission(user: User, table: str, permission: int):
-    if user.is_anonymous:
+def assert_permission(user, table: str, permission: int) -> None:
+    if user.is_anonymous or not isinstance(user, User):
         raise APIError("User is anonymous", 401)
 
     if user.get_table_permission_level(DBTable.load(name=table)) < permission:
-        raise PermissionDenied
+        raise APIError("Permission denied", 403)
 
 
-def assert_add_tag_permission(user, table, permission, schema):
+def assert_add_tag_permission(user, table: str, permission: int, schema) -> None:
     """
     Tags can be added to tables that are in any schema. However,
     it is necessary to check whether the user has write permission
@@ -144,7 +155,7 @@ def assert_add_tag_permission(user, table, permission, schema):
         raise PermissionDenied
 
 
-def assert_has_metadata(table: str, schema: str):
+def assert_has_metadata(table: str, schema: str) -> bool:
     table_obj = DBTable.load(name=table)
     if table_obj.oemetadata is None:
         result = False
@@ -422,7 +433,7 @@ def describe_constraints(schema, table):
     }
 
 
-def perform_sql(sql_statement, parameter=None):
+def perform_sql(sql_statement, parameter: dict | None = None) -> dict:
     """
     Performs a sql command on standard database.
     :param sql_statement: SQL-Command
@@ -442,7 +453,7 @@ def perform_sql(sql_statement, parameter=None):
     try:
         result = session.execute(sql_statement, parameter)
     except Exception as e:
-        logging.error("SQL Action failed. \n Error:\n" + str(e))
+        logger.error("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
         raise APIError(str(e))
     else:
@@ -528,8 +539,12 @@ def remove_queued_constraint(id):
 
 
 def get_response_dict(
-    success, http_status_code=200, reason=None, exception=None, result=None
-):
+    success: bool,
+    http_status_code: int = 200,
+    reason: str | None = None,
+    exception=None,
+    result=None,
+) -> dict:
     """
     Unified error description
     :param success: Task was successful or unsuccessful
@@ -552,7 +567,7 @@ def get_response_dict(
     return dict
 
 
-def queue_constraint_change(schema, table, constraint_def):
+def queue_constraint_change(schema: str, table: str, constraint_def: dict):
     """
     Queue a change to a constraint
     :param schema: Schema
@@ -561,7 +576,7 @@ def queue_constraint_change(schema, table, constraint_def):
     :return: Result of database command
     """
 
-    cd = api.parser.replace_None_with_NULL(constraint_def)
+    cd = replace_None_with_NULL(constraint_def)
 
     sql_string = (
         "INSERT INTO public.api_constraints (action, constraint_type"
@@ -582,7 +597,7 @@ def queue_constraint_change(schema, table, constraint_def):
     return perform_sql(sql_string)
 
 
-def queue_column_change(schema, table, column_definition):
+def queue_column_change(schema: str, table: str, column_definition: dict) -> dict:
     """
     Quere a change to a column
     :param schema: Schema
@@ -591,7 +606,7 @@ def queue_column_change(schema, table, column_definition):
     :return: Result of database command
     """
 
-    column_definition = api.parser.replace_None_with_NULL(column_definition)
+    column_definition = replace_None_with_NULL(column_definition)
 
     sql_string = "INSERT INTO public.api_columns (column_name, not_null, data_type, new_name, c_schema, c_table) " "VALUES ('{name}','{not_null}','{data_type}','{new_name}','{c_schema}','{c_table}');".format(  # noqa
         name=get_or_403(column_definition, "column_name"),
@@ -797,7 +812,7 @@ def get_column_definition_query(d):
         kwargs["primary_key"] = True
 
     if "column_default" in d:
-        kwargs["default"] = api.parser.read_pgvalue(d["column_default"])
+        kwargs["default"] = read_pgvalue(d["column_default"])
 
     if d.get("character_maximum_length", False):
         dt = dt(int(d["character_maximum_length"]))
@@ -819,9 +834,7 @@ def column_alter(query, context, schema, table, column):
     if "data_type" in query:
         sql = alter_preamble + "SET DATA TYPE " + read_pgid(query["data_type"])
         if "character_maximum_length" in query:
-            sql += (
-                "(" + api.parser.read_pgvalue(query["character_maximum_length"]) + ")"
-            )
+            sql += "(" + read_pgvalue(query["character_maximum_length"]) + ")"
         perform_sql(sql)
     if "is_nullable" in query:
         if read_bool(query["is_nullable"]):
@@ -830,7 +843,7 @@ def column_alter(query, context, schema, table, column):
             sql = alter_preamble + " SET NOT NULL"
         perform_sql(sql)
     if "column_default" in query:
-        value = api.parser.read_pgvalue(query["column_default"])
+        value = read_pgvalue(query["column_default"])
         sql = alter_preamble + "SET DEFAULT " + value
         perform_sql(sql)
     if "name" in query:
@@ -895,15 +908,11 @@ def table_create(schema, table, column_definitions, constraints_definitions):
 
         # check for duplicate column names
         if col.name in columns_by_name:
-            error = APIError("Duplicate column name: %s" % col.name)
-            logger.error(error)
-            raise error
+            raise APIError("Duplicate column name: %s" % col.name)
         columns_by_name[col.name] = col
         if col.primary_key:
             if primary_key_col_names:
-                error = APIError("Multiple definitions of primary key")
-                logger.error(error)
-                raise error
+                raise APIError("Multiple definitions of primary key")
             primary_key_col_names = [col.name]
 
     constraints = []
@@ -1181,7 +1190,7 @@ def __internal_select(query, context):
     return rows
 
 
-def __change_rows(request, context, target_table, setter, fields=None):
+def __change_rows(request, context, target_table, setter, fields=None) -> dict:
     orig_table = read_pgid(request["table"])
     query = {
         "from": {
@@ -1202,7 +1211,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
     rows = __internal_select(query, dict(context))
 
     message = request.get("message", None)
-    meta_fields = list(api.parser.set_meta_info("update", user, message).items())
+    meta_fields = list(set_meta_info("update", user, message).items())
     if fields is None:
         fields = [field[0] for field in rows["description"]]
     fields += [f[0] for f in meta_fields]
@@ -1223,7 +1232,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
         for row in rows["data"]:
             insert = []
             for key, value in list(zip(fields, row)) + meta_fields:
-                if not api.parser.is_pg_qual(key):
+                if not is_pg_qual(key):
                     raise APIError("%s is not a PostgreSQL identifier" % key)
                 if key in setter:
                     if not (key in pks and value != setter[key]):
@@ -1306,11 +1315,11 @@ def data_delete(request, context=None):
     return result
 
 
-def data_update(request, context=None):
-    orig_table = read_pgid(get_or_403(request, "table"))
+def data_update(query: dict, context=None):
+    orig_table = read_pgid(get_or_403(query, "table"))
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX))
+    orig_schema = read_pgid(query.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX))
     schema, table = get_table_name(orig_schema, orig_table)
 
     if schema is None:
@@ -1321,14 +1330,14 @@ def data_update(request, context=None):
     )
 
     target_table = get_edit_table_name(orig_schema, orig_table)
-    setter = get_or_403(request, "values")
+    setter = get_or_403(query, "values")
     if isinstance(setter, list):
-        if "fields" not in request:
+        if "fields" not in query:
             raise APIError("values passed in list format without field info")
-        field_names = [read_pgid(d["column"]) for d in request["fields"]]
+        field_names = [read_pgid(d["column"]) for d in query["fields"]]
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)  # TODO:
-    result = __change_rows(request, context, target_table, setter)
+    result = __change_rows(query, context, target_table, setter)
     apply_changes(schema, table, cursor)
     return result
 
@@ -1451,7 +1460,7 @@ def data_insert(request, context=None):
     request["table"] = get_insert_table_name(schema_name, table_name)
     request["schema"] = "_" + schema_name
 
-    query, values = api.parser.parse_insert(request, context)
+    query, values = parse_insert(request, context)
     data_insert_check(schema_name, table_name, values, context)
     _execute_sqla(query, cursor)
     description = cursor.description
@@ -1531,7 +1540,7 @@ def process_value(val):
 
 
 def data_search(request, context=None):
-    query = api.parser.parse_select(request)
+    query = parse_select(request)
     cursor = load_cursor_from_context(context)
     _execute_sqla(query, cursor)
     description = [
@@ -2180,7 +2189,7 @@ def getValue(schema, table, column, id):
 
         return returnValue
     except Exception as e:
-        logging.error("SQL Action failed. \n Error:\n" + str(e))
+        logger.error("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
     finally:
         session.close()
@@ -2401,11 +2410,6 @@ def set_table_metadata(table: str, metadata):
     metadata_obj, err = try_validate_metadata(metadata_oep)
     if err:
         raise APIError(err)
-    # dump the metadata dict into json string
-    # try:
-    #     metadata_str = json.dumps(metadata_obj, ensure_ascii=False)
-    # except Exception:
-    #     raise APIError("Cannot serialize metadata")
 
     # ---------------------------------------
     # update the oemetadata field (JSONB) in django db

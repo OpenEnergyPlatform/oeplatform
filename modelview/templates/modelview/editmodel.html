@@ -3,7 +3,6 @@
 {% block factsheets_content %}
   {% load django_bootstrap5 %}
   {% load static %}
-
   <style>
     .btn-add {
       background: transparent;
@@ -14,21 +13,16 @@
       border: 3px solid;
     }
   </style>
-
   <link rel="stylesheet" href="{% static 'css/form-style.css' %}" />
   <h1>Model</h1>
   <sup color="light grey">* required field</sup>
-
-  <form
-    action="{% if method == 'update' %}/factsheets/models/{{ name }}/update/{% else %}/factsheets/models/add/{% endif %}"
-    method="post"
-    novalidate="novalidate"
-    role="form"
-    enctype="multipart/form-data"
-  >
+  <form action="{% if method == 'update' %}/factsheets/models/{{ name }}/update/{% else %}/factsheets/models/add/{% endif %}"
+        method="post"
+        novalidate="novalidate"
+        role="form"
+        enctype="multipart/form-data">
     {% csrf_token %}
     {% include 'modelview/error_snipet.html' with errors=errors %}
-
     <div style="width:100%">
       <ul class="nav nav-tabs" style="width:100%">
         <!-- <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Basic">General Information</a></li>
@@ -40,123 +34,90 @@
   <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#References">References</a></li>
   <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Tags">Tags</a></li> -->
         <li class="nav-item" role="presentation">
-          <button
-            class="nav-link active"
-            id="basic-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#Basic"
-            type="button"
-            role="tab"
-            aria-controls="Basic"
-            aria-selected="true"
-          >
-            General
-          </button>
+          <button class="nav-link active"
+                  id="basic-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#Basic"
+                  type="button"
+                  role="tab"
+                  aria-controls="Basic"
+                  aria-selected="true">General</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="openness-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#Openness"
-            type="button"
-            role="tab"
-            aria-controls="Openness"
-            aria-selected="false"
-          >
-            Openness
-          </button>
+          <button class="nav-link"
+                  id="openness-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#Openness"
+                  type="button"
+                  role="tab"
+                  aria-controls="Openness"
+                  aria-selected="false">Openness</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="software-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#Software"
-            type="button"
-            role="tab"
-            aria-controls="Software"
-            aria-selected="false"
-          >
-            Software
-          </button>
+          <button class="nav-link"
+                  id="software-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#Software"
+                  type="button"
+                  role="tab"
+                  aria-controls="Software"
+                  aria-selected="false">Software</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="coverage-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#Coverage"
-            type="button"
-            role="tab"
-            aria-controls="Coverage"
-            aria-selected="false"
-          >
-            Coverage
-          </button>
+          <button class="nav-link"
+                  id="coverage-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#Coverage"
+                  type="button"
+                  role="tab"
+                  aria-controls="Coverage"
+                  aria-selected="false">Coverage</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="math-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#Math"
-            type="button"
-            role="tab"
-            aria-controls="Math"
-            aria-selected="false"
-          >
-            Mathematical Properties
-          </button>
+          <button class="nav-link"
+                  id="math-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#Math"
+                  type="button"
+                  role="tab"
+                  aria-controls="Math"
+                  aria-selected="false">Mathematical Properties</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="integration-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#Integration"
-            type="button"
-            role="tab"
-            aria-controls="Integration"
-            aria-selected="false"
-          >
-            Model Integration
-          </button>
+          <button class="nav-link"
+                  id="integration-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#Integration"
+                  type="button"
+                  role="tab"
+                  aria-controls="Integration"
+                  aria-selected="false">Model Integration</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="references-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#References"
-            type="button"
-            role="tab"
-            aria-controls="Overview"
-            aria-selected="false"
-          >
-            References
-          </button>
+          <button class="nav-link"
+                  id="references-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#References"
+                  type="button"
+                  role="tab"
+                  aria-controls="Overview"
+                  aria-selected="false">References</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="tags-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#Tags"
-            type="button"
-            role="tab"
-            aria-controls="Overview"
-            aria-selected="false"
-          >
-            Tags
-          </button>
+          <button class="nav-link"
+                  id="tags-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#Tags"
+                  type="button"
+                  role="tab"
+                  aria-controls="Overview"
+                  aria-selected="false">Tags</button>
         </li>
         <span onclick="window.onbeforeunload = function (e) {};">
           <input class="btn btn-info right" type="submit" value="Submit all" />
         </span>
       </ul>
     </div>
-
     <div class="tab-content">
       <div id="Basic" class="tab-pane fade show active">
         <table class="formtable">
@@ -166,10 +127,8 @@
             <th class="formlabel">
               {% bootstrap_label form.methodical_focus_1.label %}*
               {% if form.methodical_focus_1.help_text != "" %}
-                <i
-                  data-bs-toggle="tooltip"
-                  title="{{ form.methodical_focus_1.help_text }}"
-                >
+                <i data-bs-toggle="tooltip"
+                   title="{{ form.methodical_focus_1.help_text }}">
                   <span class="fas fa-question"></span>
                 </i>
               {% endif %}
@@ -256,7 +215,6 @@
           }
         }
       </script>
-
       <div id="Openness" class="tab-pane fade">
         <table class="formtable">
           {% include 'modelview/editmodel_snippet.html' with field=form.open_source event='onclick' %}
@@ -295,7 +253,6 @@
               </table>
             </td>
           </tr>
-
           <tr>
             <th>Modeled demand sectors</th>
             <td>
@@ -510,9 +467,7 @@
               </table>
             </td>
           </tr>
-
           {% include 'modelview/editmodel_snippet.html' with field=form.short_description_of_mathematical_model_class %}
-
           <tr>
             <th>Mathematical objective</th>
             <td>
@@ -546,7 +501,6 @@
           {% include 'modelview/editmodel_snippet.html' with field=form.citation_DOI %}
           {% include 'modelview/editmodel_snippet.html' with field=form.references_to_reports_produced_using_the_model %}
           {% include 'modelview/editmodel_snippet.html' with field=form.larger_scale_usage %}
-
           <tr>
             <th>Model Validation</th>
             <td>
@@ -576,7 +530,6 @@
     </div>
   </form>
 {% endblock %}
-
 {% block after-body-bottom-js %}
   <script type="text/javascript">
     var confirmOnLeave = function (msg) {

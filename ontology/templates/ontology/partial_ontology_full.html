@@ -1,16 +1,13 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
-
 {% block site-header %}
   <div class="main-header">
     <h1 class="main-header__title">
-      <img
-        src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
-        width="16"
-        height="16"
-        alt="OEO"
-      />
+      <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
+           width="16"
+           height="16"
+           alt="OEO" />
       Ontology
     </h1>
     <div class="main-header__wizard">
@@ -18,12 +15,10 @@
     </div>
   </div>
 {% endblock site-header %}
-
 {% block main-content-body %}
   <!-- Trigger an htmx request to load actual content -->
   <!-- Include htmx library -->
   <script src="{{ EXTERNAL_URLS.unpkg_htmx_org_1_7_0_dist_htmx_js }}"></script>
-
   <!-- This div will be replaced with the content from the OEOWithData view -->
   <div>Loading...</div>
 {% endblock main-content-body %}

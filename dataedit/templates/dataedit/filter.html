@@ -1,18 +1,12 @@
 {% extends "dataedit/base_fullwidth.html" %}
 {% load static %}
-
 {% block after-head %}
   <!-- Latest compiled and minified CSS -->
-  <link
-    href="{% static 'css/bootstrap-select.min.css' %}"
-    rel="stylesheet"
-  /><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
-  <link
-    href="{% static 'database/css/database-enhancements.css' %}"
-    rel="stylesheet"
-  />
+  <link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet" />
+  <!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+  <link href="{% static 'database/css/database-enhancements.css' %}"
+        rel="stylesheet" />
 {% endblock after-head %}
-
 {% block main-top-bar-filter %}
   <!-- TODO looks out of place -->
   <div class="controls-container controls-container--horizontal">
@@ -23,95 +17,66 @@
         <div class="controls-container__input">
           <label for="filterInputText" class="form-label">Filters</label>
           <!-- TODO down this displayed as a button and looks bad .. but popup is nice -->
-          <button
-            type="button"
-            class="btn btn-outline-light"
-            data-bs-toggle="popover"
-            data-trigger="focus"
-            title="How to use search and filter"
-            {% if not tables %}
-              data-bs-content="Use the dropdown and search on Tags or try
-              searching for text that may occur in table names and metadata. If
-              you filter for multiple Tags, only topics containing tables with
-              all selected Tags will be displayed. To see all schemas and tables
-              again use the reset filter button."
-            {% else %}
-              data-bs-content="Use the dropdown and search on Tags or try
-              searching for text that may occur in table names and metadata."
-            {% endif %}
-            style="margin-left: 10px;"
-          >
+          <button type="button"
+                  class="btn btn-outline-light"
+                  data-bs-toggle="popover"
+                  data-trigger="focus"
+                  title="How to use search and filter"
+                  {% if not tables %} data-bs-content="Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata. If you filter for multiple Tags, only topics containing tables with all selected Tags will be displayed. To see all schemas and tables again use the reset filter button." {% else %} data-bs-content="Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata." {% endif %}
+                  style="margin-left: 10px">
             <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
           </button>
           <!-- TODO up this displayed as a button and looks bad .. but popup is nice -->
-          <input
-            id="search-filter"
-            type="text"
-            name="query"
-            placeholder="Search text..."
-            value="{% firstof query '' %}"
-            class="form-control"
-          />
+          <input id="search-filter"
+                 type="text"
+                 name="query"
+                 placeholder="Search text..."
+                 value="{% firstof query '' %}"
+                 class="form-control" />
         </div>
         <div id="tags">
-          <select
-            id="tag-select"
-            name="tags"
-            class="form-control controls-container__tags selectpicker"
-            multiple
-            data-live-search="true"
-            title="Click and search all Tags..."
-            data-style="btn-outline-primary"
-            data-width="auto"
-            data-selected-text-format="values"
-            data-actions-box="true"
-            iconBase="fa"
-          >
+          <select id="tag-select"
+                  name="tags"
+                  class="form-control controls-container__tags selectpicker"
+                  multiple
+                  data-live-search="true"
+                  title="Click and search all Tags..."
+                  data-style="btn-outline-primary"
+                  data-width="auto"
+                  data-selected-text-format="values"
+                  data-actions-box="true"
+                  iconBase="fa">
             {% for t in all_tags %}
-              <option
-                data-content='<i class="fa fa-circle" style="color: {{ t.color_hex }};"></i> {{ t.name }}'
-                value="{{ t.pk }}"
+              <option data-content='<i class="fa fa-circle" style="color: {{ t.color_hex }};"></i> {{ t.name }}' value="{{ t.pk }}"
                 {% if t.pk in tags %}selected{% endif %}
-              >
-                {{ t.name }}
-              </option>
+                >{{ t.name }}</option>
             {% endfor %}
           </select>
         </div>
-        <button
-          type="button"
-          class="btn btn-link controls-container__reset"
-          onclick="reset_filter()"
-        >
+        <button type="button"
+                class="btn btn-link controls-container__reset"
+                onclick="reset_filter()">
           <span class="btn__icon">
-            <svg
-              width="16"
-              height="16"
-              version="1.1"
-              fill="currentColor"
-              viewBox="0 0 16 16"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="m14,9c0,3.31-2.69,6-6,6s-6-2.69-6-6h1c0,2.76,2.24,5,5,5s5-2.24,5-5-2.24-5-5-5h-3.6l1.48,2.22-.83.55-2.19-3.28L5.12.22l.82.57-1.53,2.22h3.58c3.31,0,6,2.69,6,6Z"
-              />
+            <svg width="16"
+                 height="16"
+                 version="1.1"
+                 fill="currentColor"
+                 viewBox="0 0 16 16"
+                 xmlns="http://www.w3.org/2000/svg">
+              <path d="m14,9c0,3.31-2.69,6-6,6s-6-2.69-6-6h1c0,2.76,2.24,5,5,5s5-2.24,5-5-2.24-5-5-5h-3.6l1.48,2.22-.83.55-2.19-3.28L5.12.22l.82.57-1.53,2.22h3.58c3.31,0,6,2.69,6,6Z" />
             </svg>
           </span>
           <span class="btn__text">Reset</span>
         </button>
-        <a
-          class="btn btn-link controls-container__create-tags"
-          href="{% url 'dataedit:tags' %}"
-        >
+        <a class="btn btn-link controls-container__create-tags"
+           href="{% url 'dataedit:tags' %}">
           <span class="btn__icon">
-            <svg
-              width="16"
-              height="16"
-              version="1.1"
-              fill="currentColor"
-              viewBox="0 0 16 16"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg width="16"
+                 height="16"
+                 version="1.1"
+                 fill="currentColor"
+                 viewBox="0 0 16 16"
+                 xmlns="http://www.w3.org/2000/svg">
               <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z" />
             </svg>
           </span>
@@ -121,36 +86,28 @@
     </div>
     <div class="controls-container__btns">
       <div>
-        <a class="btn btn-primary" href="{% url 'dataedit:oemetabuilder' %}"
-          >OEMetaBuilder</a
-        >
-        <a
-          href="{{ doc_oem_builder_link }}"
-          target="_blank"
-          data-bs-toggle="popover"
-          data-bs-trigger="hover"
-          title="OEMetaBuilder"
-          data-bs-content="Click to open the documentation for the OEMetaBuilder."
-        >
+        <a class="btn btn-primary" href="{% url 'dataedit:oemetabuilder' %}">OEMetaBuilder</a>
+        <a href="{{ doc_oem_builder_link }}"
+           target="_blank"
+           data-bs-toggle="popover"
+           data-bs-trigger="hover"
+           title="OEMetaBuilder"
+           data-bs-content="Click to open the documentation for the OEMetaBuilder.">
           <i class="fas fa-info-circle"></i>
         </a>
       </div>
       {% if user.is_authenticated %}
         <div>
-          <button
-            type="button"
-            class="btn btn-outline-primary"
-            onclick="redirectToLink('{% url 'login:tables' user.pk %}')"
-          >
+          <button type="button"
+                  class="btn btn-outline-primary"
+                  onclick="redirectToLink('{% url 'login:tables' user.pk %}')">
             <span class="btn__icon">
-              <svg
-                width="16"
-                height="16"
-                version="1.1"
-                fill="currentColor"
-                viewBox="0 0 16 16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg width="16"
+                   height="16"
+                   version="1.1"
+                   fill="currentColor"
+                   viewBox="0 0 16 16"
+                   xmlns="http://www.w3.org/2000/svg">
                 <path d="m16,1v1H0v-1h16ZM0,8h16v-1H0v1Zm0,6h16v-1H0v1Z" />
               </svg>
             </span>
@@ -160,54 +117,38 @@
       {% endif %}
     </div>
   </div>
-
   <!-- Enhanced Info Section -->
   <div class="database-info-section mb-4">
     <div class="info-banner" id="infoBanner">
       <div class="info-banner__content">
         <div class="info-banner__header">
           <div class="info-banner__title">
-            <svg
-              width="18"
-              height="18"
-              fill="currentColor"
-              viewBox="0 0 16 16"
-              class="me-2"
-            >
-              <path
-                d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"
-              />
-              <path
-                d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"
-              />
+            <svg width="18"
+                 height="18"
+                 fill="currentColor"
+                 viewBox="0 0 16 16"
+                 class="me-2">
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+              <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
             </svg>
             Database Introduction
           </div>
-          <button
-            class="info-banner__toggle"
-            onclick="toggleInfoSection()"
-            id="infoToggle"
-          >
-            <svg
-              width="16"
-              height="16"
-              fill="currentColor"
-              viewBox="0 0 16 16"
-              id="toggleIcon"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-              />
+          <button class="info-banner__toggle"
+                  onclick="toggleInfoSection()"
+                  id="infoToggle">
+            <svg width="16"
+                 height="16"
+                 fill="currentColor"
+                 viewBox="0 0 16 16"
+                 id="toggleIcon">
+              <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
             </svg>
           </button>
         </div>
         <div class="info-banner__body" id="infoContent" style="display: none;">
           <div class="row">
             <div class="col-md-8">
-              <h5 class="info-section__subtitle">
-                About the Open Energy Platform Database
-              </h5>
+              <h5 class="info-section__subtitle">About the Open Energy Platform Database</h5>
               <p class="info-section__text">
                 The Open Energy Platform offers a rich collection of
                 energy-related datasets, organized by topic to support modeling,
@@ -221,9 +162,7 @@
                 to make the platform more user-friendly—especially for tasks
                 like comparing scenario input/output datasets. Learn more about
                 using the database in our
-                <a href="{{ EXTERNAL_URLS.tutorials_index }}" target="_blank"
-                  >Academy</a
-                >.
+                <a href="{{ EXTERNAL_URLS.tutorials_index }}" target="_blank">Academy</a>.
               </p>
               <h6 class="info-section__subtitle">How to Navigate:</h6>
               <ul class="info-section__list">
@@ -266,9 +205,7 @@
                     <span class="stat-label">Topics Available</span>
                   </div>
                   <div class="stat-item">
-                    <span class="stat-number"
-                      >{{ total_table_count|default:"None" }}</span
-                    >
+                    <span class="stat-number">{{ total_table_count|default:"None" }}</span>
                     <span class="stat-label">Total Tables</span>
                   </div>
                 </div>
@@ -276,40 +213,26 @@
             {% endif %}
           </div>
           <div class="info-section__actions mt-3">
-            <a
-              href="{% url 'dataedit:wizard_create' %}"
-              class="btn btn-success btn-sm"
-            >
-              <svg
-                width="14"
-                height="14"
-                fill="currentColor"
-                viewBox="0 0 16 16"
-                class="me-1"
-              >
-                <path
-                  d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"
-                />
-                <path
-                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
-                />
+            <a href="{% url 'dataedit:wizard_create' %}"
+               class="btn btn-success btn-sm">
+              <svg width="14"
+                   height="14"
+                   fill="currentColor"
+                   viewBox="0 0 16 16"
+                   class="me-1">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
               </svg>
               Contribute Data
             </a>
-            <a
-              href="{{ EXTERNAL_URLS.tutorials_api_upload }}"
-              class="btn btn-outline-secondary btn-sm me-2"
-            >
-              <svg
-                width="14"
-                height="14"
-                fill="currentColor"
-                viewBox="0 0 16 16"
-                class="me-1"
-              >
-                <path
-                  d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z"
-                />
+            <a href="{{ EXTERNAL_URLS.tutorials_api_upload }}"
+               class="btn btn-outline-secondary btn-sm me-2">
+              <svg width="14"
+                   height="14"
+                   fill="currentColor"
+                   viewBox="0 0 16 16"
+                   class="me-1">
+                <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z" />
               </svg>
               API Access
             </a>
@@ -319,7 +242,6 @@
     </div>
   </div>
 {% endblock main-top-bar-filter %}
-
 {% block after-body-bottom-js %}
   <!-- Latest compiled and minified JavaScript -->
   <script src="{% static 'js/bootstrap-select.min.js' %}"></script>
@@ -369,12 +291,12 @@
         content.style.display = "block";
         toggle.classList.add("info-banner__toggle--active");
         icon.innerHTML =
-          '<path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>';
+          '<path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" />';
       } else {
         content.style.display = "none";
         toggle.classList.remove("info-banner__toggle--active");
         icon.innerHTML =
-          '<path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>';
+          '<path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />';
       }
     }
   </script>
