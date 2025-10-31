@@ -72,10 +72,11 @@ from login.models import myuser as User
 from login.utils import validate_open_data_license
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
+logger = logging.getLogger("oeplatform")
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 
-logger = logging.getLogger("oeplatform")
+Base = declarative_base()
 
 __INSERT = 0
 __UPDATE = 1
@@ -88,7 +89,7 @@ MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
 IDENTIFIER_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_IDENTIFIER_LENGTH - 1))
 
 
-def get_column_obj(table, column):
+def get_column_obj(table: Table, column: str):
     """
 
     :param talbe: A sqla-table object
@@ -103,7 +104,9 @@ def get_column_obj(table, column):
         raise APIError("Column '%s' does not exist." % column)
 
 
-def get_table_name(schema: str | None, table: str, restrict_schemas: bool = True):
+def get_table_name(
+    schema: str | None, table: str, restrict_schemas: bool = True
+) -> tuple[str, str]:
     schema = validate_schema(schema)
 
     if not has_schema(dict(schema=schema)):
@@ -116,14 +119,11 @@ def get_table_name(schema: str | None, table: str, restrict_schemas: bool = True
     return schema, table
 
 
-Base = declarative_base()
-
-
 class ResponsiveException(Exception):
     pass
 
 
-def assert_permission(user, table: str, permission: int):
+def assert_permission(user, table: str, permission: int) -> None:
     if user.is_anonymous or not isinstance(user, User):
         raise APIError("User is anonymous", 401)
 
@@ -131,7 +131,7 @@ def assert_permission(user, table: str, permission: int):
         raise APIError("Permission denied", 403)
 
 
-def assert_add_tag_permission(user, table, permission, schema):
+def assert_add_tag_permission(user, table: str, permission: int, schema) -> None:
     """
     Tags can be added to tables that are in any schema. However,
     it is necessary to check whether the user has write permission
@@ -155,7 +155,7 @@ def assert_add_tag_permission(user, table, permission, schema):
         raise PermissionDenied
 
 
-def assert_has_metadata(table: str, schema: str):
+def assert_has_metadata(table: str, schema: str) -> bool:
     table_obj = DBTable.load(name=table)
     if table_obj.oemetadata is None:
         result = False
