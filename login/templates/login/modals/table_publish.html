@@ -1,34 +1,27 @@
 <!-- Modal for publishing functionality (after pressing publish button) -->
-
-<div
-  class="modal fade"
-  id="publishModal"
-  tabindex="-1"
-  aria-labelledby="publishModalLabel"
-  aria-hidden="true"
-  data-bs-backdrop="static"
->
+<div class="modal fade"
+     id="publishModal"
+     tabindex="-1"
+     aria-labelledby="publishModalLabel"
+     aria-hidden="true"
+     data-bs-backdrop="static">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="publishModalLabel">Publish Table</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="m-1 publishEmbargoOptions">
           <label for="embargo">
             Apply Embargo
-            <i
-              class="fas fa-info-circle"
-              data-bs-toggle="tooltip"
-              title="Set an embargo period to hide your data and restrict data access for a specific time period of 6 or 12 months. Other users will be able to find the data resource and its metadata but not the data values."
-            ></i
-          ></label>
+            <i class="fas fa-info-circle"
+               data-bs-toggle="tooltip"
+               title="Set an embargo period to hide your data and restrict data access for a specific time period of 6 or 12 months. Other users will be able to find the data resource and its metadata but not the data values."></i>
+          </label>
           <select id="embargo" class="form-select embargo-dropdown">
             <!-- The value fields are coupled with the backend implementation -->
             <option value="none">None</option>
@@ -36,21 +29,15 @@
             <option value="1_year">1 Year</option>
           </select>
         </div>
-
         <div class="m-1 publish-options">
-          <label for="embargo"
-            >Select data topic
-            <i
-              class="fas fa-info-circle"
-              data-bs-toggle="tooltip"
-              title="Select a topic the data is related to. The table will be moved to this topic."
-            ></i
-          ></label>
+          <label for="embargo">
+            Select data topic
+            <i class="fas fa-info-circle"
+               data-bs-toggle="tooltip"
+               title="Select a topic the data is related to. The table will be moved to this topic."></i>
+          </label>
           <select id="publish" class="form-select schema-dropdown"></select>
-          <button
-            class=" m-1 btn btn-primary confirm-publish"
-            data-bs-dismiss="modal"
-          >
+          <button class=" m-1 btn btn-primary confirm-publish" data-bs-dismiss="modal">
             Confirm
           </button>
         </div>

@@ -4,107 +4,111 @@
 {% load modelview_extras %}
 {% load dataedit.taghandler %}
 {% block after-head %}
-<link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
-<link href="{% static 'dataedit/jquery.dataTables.min.css' %}" rel="stylesheet"><!-- src: https://cdn.datatables.net/1.10.20/css/jimages/query.dataTables.min.css -->
-
-
-<style>
-</style>
+  <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
+  <link href="{% static 'dataedit/jquery.dataTables.min.css' %}"
+        rel="stylesheet">
+  <!-- src: https://cdn.datatables.net/1.10.20/css/jimages/query.dataTables.min.css -->
+  <style></style>
 {% endblock %}
-
-
 {% block site-header %}
-    <div class="main-header">
-        <h1 class="main-header__title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-                <path d="m22.06,4.25L17.83,0H7.45h0v1.23h-2.42v2.07h-2.39v20.7h15.53v-2.07h2.39v-2.24h1.49V4.25Zm-3.91-2.36l2.04,2.04h-2.04V1.89Zm-1.07,21.01H3.73V4.4h1.29v17.53h12.05v.97Zm2.39-2.07H6.12V2.33h1.33v17.36h12.02v1.14Zm-10.92-2.24V1.11h8.51v3.92h3.9v13.56h-12.41Z" fill="#293B46"></path>
-                <rect x="10.77" y="10.41" width="7.57" height="1.1" fill="#293B46"/>
-                <rect x="10.77" y="12.78" width="7.57" height="1.1" fill="#293B46"/>
-                <rect x="10.77" y="15.17" width="7.57" height="1.1" fill="#293B46"/>
-                <rect x="10.68" y="4.18" width="1.09" height="4.19" fill="#293B46"/>
-                <rect x="12.58" y="3.16" width="1.09" height="5.2" fill="#293B46"/>
-                <rect x="14.48" y="6.14" width="1.09" height="2.23" fill="#293B46"/>
-              </svg>
-            {{ label }} Factsheets
-        </h1>
-        <div class="main-header__wizard">
-            Overview
-        </div>
-    </div>
-
+  <div class="main-header">
+    <h1 class="main-header__title">
+      <svg xmlns="http://www.w3.org/2000/svg"
+           width="16"
+           height="16"
+           viewBox="0 0 24 24">
+        <path d="m22.06,4.25L17.83,0H7.45h0v1.23h-2.42v2.07h-2.39v20.7h15.53v-2.07h2.39v-2.24h1.49V4.25Zm-3.91-2.36l2.04,2.04h-2.04V1.89Zm-1.07,21.01H3.73V4.4h1.29v17.53h12.05v.97Zm2.39-2.07H6.12V2.33h1.33v17.36h12.02v1.14Zm-10.92-2.24V1.11h8.51v3.92h3.9v13.56h-12.41Z" fill="#293B46">
+        </path>
+        <rect x="10.77" y="10.41" width="7.57" height="1.1" fill="#293B46" />
+        <rect x="10.77" y="12.78" width="7.57" height="1.1" fill="#293B46" />
+        <rect x="10.77" y="15.17" width="7.57" height="1.1" fill="#293B46" />
+        <rect x="10.68" y="4.18" width="1.09" height="4.19" fill="#293B46" />
+        <rect x="12.58" y="3.16" width="1.09" height="5.2" fill="#293B46" />
+        <rect x="14.48" y="6.14" width="1.09" height="2.23" fill="#293B46" />
+      </svg>
+      {{ label }} Factsheets
+    </h1>
+    <div class="main-header__wizard">Overview</div>
+  </div>
 {% endblock site-header %}
-
 {% block main-right-sidebar-content %}
   <hr>
   <h3>Actions</h3>
-    <a role="button" class="btn btn-success" href="{% url 'modelview:modeladd' sheettype %}">
-      <span class="fas fa-plus"></span> Add {{ label }}
-    </a>
-    <a id="dlcsv" role="button"  class="btn btn-info" href="{% url 'modelview:download' sheettype %}">
-      <span class="fas fa-download"></span> Download CSV
-    </a>
+  <a role="button"
+     class="btn btn-success"
+     href="{% url 'modelview:modeladd' sheettype %}">
+    <span class="fas fa-plus"></span> Add {{ label }}
+  </a>
+  <a id="dlcsv"
+     role="button"
+     class="btn btn-info"
+     href="{% url 'modelview:download' sheettype %}">
+    <span class="fas fa-download"></span> Download CSV
+  </a>
   <hr>
-
   <h3>Tags</h3>
   <div style="display: flex; flex-flow: wrap">
-      {% for t in tags %}
-          <label class="tag-checkbox-container form-label {% if t.pk in tags %} tag-checkbox-checked {% endif %}" style="background:{{ t.color_hex }};color:{% readable_text_color t.color_hex %}">
-              <input {% if t.pk in tags %} checked="checked" {% endif %} type="checkbox" class="tag-checkbox" name="tags" id="select_{{ t.pk }}" value="{{ t.pk }}" onchange="apply_tag_filter(event.target)">
-              <span>{{ t.name }}</span>
-              <span class="tag-checkbox-icon fas fa-check"></span>
-          </label>
-      {% endfor %}
+    {% for t in tags %}
+      <label class="tag-checkbox-container form-label {% if t.pk in tags %}tag-checkbox-checked{% endif %}"
+             style="background:{{ t.color_hex }};
+                    color:{% readable_text_color t.color_hex %}">
+        <input {% if t.pk in tags %}checked="checked"{% endif %}
+               type="checkbox"
+               class="tag-checkbox"
+               name="tags"
+               id="select_{{ t.pk }}"
+               value="{{ t.pk }}"
+               onchange="apply_tag_filter(event.target)">
+        <span>{{ t.name }}</span>
+        <span class="tag-checkbox-icon fas fa-check"></span>
+      </label>
+    {% endfor %}
   </div>
   <hr>
-
   <h3>Fields</h3>
   <div class="checkbox-container">
-  {% for heading,d in fields.items %}
+    {% for heading,d in fields.items %}
       <div class="checkbox-item">
-          <a class="fill-div" data-bs-toggle="collapse" href="#{{heading.split|join:'_'}}">{{heading}}</a>
-
-          <div id="{{heading.split|join:'_'}}" class="collapse">
-              {% for key,value in d.items %}
-                  <div style="display: flex;flex-flow: nowrap;align-items: center">
-                      <input type="checkbox" onchange="apply_filter(event.target)" id="{{key}}" {% if key.split|join:'_' in default %} checked="checked" {%endif %}>
-                      <label class="form-label" style="margin: 0" for="{{key}}">{{key}}</label>
-                  </div>
-              {% endfor %}
-          </div>
+        <a class="fill-div"
+           data-bs-toggle="collapse"
+           href="#{{ heading.split|join:'_' }}">{{ heading }}</a>
+        <div id="{{ heading.split|join:'_' }}" class="collapse">
+          {% for key,value in d.items %}
+            <div style="display: flex;flex-flow: nowrap;align-items: center">
+              <input type="checkbox"
+                     onchange="apply_filter(event.target)"
+                     id="{{ key }}"
+                     {% if key.split|join:'_' in default %}checked="checked"{% endif %}>
+              <label class="form-label" style="margin: 0" for="{{ key }}">{{ key }}</label>
+            </div>
+          {% endfor %}
+        </div>
       </div>
-  {% endfor %}
+    {% endfor %}
   </div>
   <hr>
-
 {% endblock main-right-sidebar-content %}
-
 {% block factsheets_content %}
-
-    {% if label == "Model" %}
-        <div>
-            The <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00000277' %}">model factsheet</a> characterise models used in energy system analysis in a
-            structured way regarding important characteristics, such as their scope and <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00020015' %}">licence</a>
-            and their developing <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00030022' %}">institutions</a>. You are developing a model? Then you can inform
-            about its characteristics here. The models available as a factsheet can be integrated as an element into a <a href="{% url 'factsheet:factsheets_index' %}">scenario bundle</a>
-            which weave together important information about <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00000364' %}">scenarios</a>, such as the model used for conducting a
-            <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00010262' %}">scenario projection</a>, <a href="{% url 'ontology:oeo-classes' 'oeo' 'IAO_0000027' %}">data</a>
-            provided on the OEP, and <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00020012' %}">publications</a>.
-        </div>
-        <br>
-    {% endif %}
-
-    <div style="width:100%; overflow-y: auto; padding-bottom: 1em">
-        <table id="overview" class="display" style="width:100%;">
-        </table>
+  {% if label == "Model" %}
+    <div>
+      The <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00000277' %}">model factsheet</a> characterise models used in energy system analysis in a
+      structured way regarding important characteristics, such as their scope and <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00020015' %}">licence</a>
+      and their developing <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00030022' %}">institutions</a>. You are developing a model? Then you can inform
+      about its characteristics here. The models available as a factsheet can be integrated as an element into a <a href="{% url 'factsheet:factsheets_index' %}">scenario bundle</a>
+      which weave together important information about <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00000364' %}">scenarios</a>, such as the model used for conducting a
+      <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00010262' %}">scenario projection</a>, <a href="{% url 'ontology:oeo-classes' 'oeo' 'IAO_0000027' %}">data</a>
+      provided on the OEP, and <a href="{% url 'ontology:oeo-classes' 'oeo' 'OEO_00020012' %}">publications</a>.
     </div>
-
-
+    <br>
+  {% endif %}
+  <div style="width:100%; overflow-y: auto; padding-bottom: 1em">
+    <table id="overview" class="display" style="width:100%;">
+    </table>
+  </div>
 {% endblock %}
-
 {% block after-body-bottom-js %}
-    <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
-
-    <script>
+  <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
+  <script>
     var dt;
 
     var full_data = [
@@ -223,6 +227,5 @@
     } );
 
 
-    </script>
-
+  </script>
 {% endblock %}

@@ -3,7 +3,6 @@
 {% load allauth %}
 {% load account socialaccount %}
 {% load static %}
-
 {% block head_title %}
   {% trans "" %}
 {% endblock head_title %}
@@ -20,34 +19,32 @@
           {% blocktrans with provider.name as provider %}Connect {{ provider }}{% endblocktrans %}
         </h1>
         {% element p %}
-          {% blocktrans with provider.name as provider %}
+        {% blocktrans with provider.name as provider %}
             You are about to connect a new third-party account from
             {{ provider }}.
           {% endblocktrans %}
-        {% endelement %}
-      {% else %}
-        <!-- Heading -->
-        <h1 class="login__heading">
-          {% blocktrans with provider.name as provider %}
+      {% endelement %}
+    {% else %}
+      <!-- Heading -->
+      <h1 class="login__heading">
+        {% blocktrans with provider.name as provider %}
             Sign In Via {{ provider }}
           {% endblocktrans %}
-        </h1>
-        {% element p %}
-          {% blocktrans with provider.name as provider %}
+      </h1>
+      {% element p %}
+      {% blocktrans with provider.name as provider %}
             You are about to sign in using a third-party account from
             {{ provider }}.
           {% endblocktrans %}
-        {% endelement %}
-      {% endif %}
-      {% element form method="post" no_visible_fields=True %}
-        {% slot actions %}
-          {% csrf_token %}
-          <!-- Submit -->
-          <button type="submit" class="login__button">
-            {% trans "Continue" %}
-          </button>
-        {% endslot %}
-      {% endelement %}
-    </div>
-  </div>
+    {% endelement %}
+  {% endif %}
+  {% element form method="post" no_visible_fields=True %}
+  {% slot actions %}
+  {% csrf_token %}
+  <!-- Submit -->
+  <button type="submit" class="login__button">{% trans "Continue" %}</button>
+{% endslot %}
+{% endelement %}
+</div>
+</div>
 {% endblock content %}

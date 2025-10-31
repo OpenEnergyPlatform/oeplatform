@@ -16,13 +16,14 @@ function delInput_{{ field.name }}(c){
 }
 </script>
 <div>
-<div id="{{ field.name }}_container">
+  <div id="{{ field.name }}_container">
     <script>
     {% for entry in field|splitarray %}
             addInput_{{ field.name }}("{{ entry }}")
     {% endfor %}
     </script>
-</div> <a href="javascript:addInput_{{ field.name }}('');" style="color:green">
-        <span class='fas fa-plus'></span>
-    </a>
+  </div>
+  <a href="javascript:addInput_{{ field.name }}('');" style="color:green">
+    <span class='fas fa-plus'></span>
+  </a>
 </div>

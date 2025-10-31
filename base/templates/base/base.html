@@ -2,47 +2,37 @@
 {% load django_bootstrap5 %}
 {% load fontawesome_5 %}
 {% load compress %}
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    {% block before-head %}{% endblock before-head %}
-
+    {% block before-head %}
+    {% endblock before-head %}
     <!-- Meta Tags, which should be implemented -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-
-    <title>OEP{% block title %}{% endblock %}</title>
-
-    <link
-      rel="shortcut icon"
-      href="{% static 'favicon.ico' %}"
-      type="image/x-icon"
-    />
-
+    <title>OEP
+      {% block title %}{% endblock %}
+    </title>
+    <link rel="shortcut icon"
+          href="{% static 'favicon.ico' %}"
+          type="image/x-icon" />
     {% fontawesome_5_static %}
     {% compress css %}
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href="{% static 'css/bootstrap.min.css' %}"
-      />
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href="{% static 'css/jquery-ui.min.css' %}"
-      /><!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href="{% static 'css/base-style.css' %}?md5=d4e024ac45daad057d0191a8f6266156"
-      />
+      <link rel="stylesheet"
+            type="text/css"
+            href="{% static 'css/bootstrap.min.css' %}" />
+      <link rel="stylesheet"
+            type="text/css"
+            href="{% static 'css/jquery-ui.min.css' %}" />
+      <!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
+      <link rel="stylesheet"
+            type="text/css"
+            href="{% static 'css/base-style.css' %}?md5=d4e024ac45daad057d0191a8f6266156" />
     {% endcompress %}
     {% block after-head %}
     {% endblock after-head %}
   </head>
-
   <body class="d-flex flex-column h-100">
     {% block header %}
       <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
@@ -55,12 +45,12 @@
         {% endblock site-header %}
         <div class="content">
           <div class="content__container">
-            {% block main-left-sidebar %}{% endblock main-left-sidebar %}
+            {% block main-left-sidebar %}
+            {% endblock main-left-sidebar %}
             {% block main-content %}
               <section class="content__main">
                 {% include 'base/messages.html' %}
-                {% block main-content-body %}
-                {% endblock %}
+                {% block main-content-body %}{% endblock %}
               </section>
             {% endblock main-content %}
             {% block main-right-sidebar %}
@@ -71,19 +61,14 @@
                       If you find bugs or if you have ideas to improve the Open
                       Energy Platform, you are welcome to add your comments to
                       the existing issues on
-                      <a
-                        href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}"
-                        target="_blank"
-                        >GitHub</a
-                      >. <br />
+                      <a href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}" target="_blank">GitHub</a>. <br />
                       You can also fork the project and get involved.
                     </p>
                     <p>
                       <b>
                         Please note that the platform is still under
                         construction and therefore the design of this page is
-                        still highly volatile!</b
-                      >
+                        still highly volatile!</b>
                     </p>
                   </div>
                 {% endblock main-right-sidebar-disclaimer %} -->
@@ -100,7 +85,6 @@
     {% block footer %}
       {% include 'base/_footer.html' %}
     {% endblock footer %}
-
     {% block body-bottom-js %}
       {% block before-body-bottom-js %}
         {% include 'base/reverseUrl.html' %}

@@ -5,21 +5,16 @@
   <div class="mb-2">
     <label for="unitName" class="form-label">Unit Name:</label>
     <div class="dropdown">
-      <input
-        type="text"
-        name="unitName-{{ unit_id }}"
-        id="autocomplete-{{ unit_id }}"
-        class="form-control unitName"
-        autocomplete="off"
-      />
+      <input type="text"
+             name="unitName-{{ unit_id }}"
+             id="autocomplete-{{ unit_id }}"
+             class="form-control unitName"
+             autocomplete="off" />
       <div id="dropdown-content" class="dropdown-content"></div>
     </div>
-    <div
-      class="invalid-feedback"
-      id="unitName-{{ type }}-{{ unit_id }}_error"
-    ></div>
+    <div class="invalid-feedback" id="unitName-{{ type }}-{{ unit_id }}_error">
+    </div>
   </div>
-
   <div class="mb-2">
     <label for="unitType" class="form-label">Unit Type:</label>
     <select name="unitType" class="form-select unitType">
@@ -27,34 +22,24 @@
       <option value="squared">Squared</option>
       <option value="cubed">Cubed</option>
     </select>
-
-    <div
-      class="invalid-feedback"
-      id="unitType-{{ type }}-{{ unit_id }}_error"
-    ></div>
+    <div class="invalid-feedback" id="unitType-{{ type }}-{{ unit_id }}_error">
+    </div>
   </div>
-
   <div class="mb-2">
     <label for="unitPrefix" class="form-label">Unit Prefix:</label>
-    <input
-      type="text"
-      name="unitPrefix-{{ unit_id }}"
-      id="autocomplete-{{ unit_id }}"
-      class="form-control unitPrefix"
-      autocomplete="off"
-    />
+    <input type="text"
+           name="unitPrefix-{{ unit_id }}"
+           id="autocomplete-{{ unit_id }}"
+           class="form-control unitPrefix"
+           autocomplete="off" />
     <div id="dropdown-content" class="dropdown-content"></div>
-    <div
-      class="invalid-feedback"
-      id="unitPrefix-{{ type }}-{{ unit_id }}_error"
-    ></div>
+    <div class="invalid-feedback"
+         id="unitPrefix-{{ type }}-{{ unit_id }}_error"></div>
   </div>
-
   <button type="button" class="btn btn-danger remove-element mt-2">
     Remove
   </button>
 </div>
-
 <script>
   // Function to handle the fetching and dropdown population
   function handleInput(input) {
@@ -76,8 +61,8 @@
                 const link = document.createElement("a");
                 link.href = "#";
                 link.textContent = String(item.label[0])
-                  .replaceAll("<B>", "")
-                  .replaceAll("</B>", "");
+                  .replaceAll("<b>", "")
+                  .replaceAll("</b>", "");
                 link.addEventListener("click", function (event) {
                   event.preventDefault(); // Prevent the default action of the anchor tag
                   input.value = this.textContent;
@@ -145,7 +130,6 @@
     initializeDynamicElements();
   });
 </script>
-
 <style>
   .dropdown {
     position: relative;

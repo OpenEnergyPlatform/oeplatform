@@ -3,7 +3,6 @@
 {% block factsheets_content %}
   {% load django_bootstrap5 %}
   {% load static %}
-
   <style>
     .btn-add {
       background: transparent;
@@ -15,119 +14,86 @@
       border: 3px solid;
     }
   </style>
-
   <link rel="stylesheet" href="{% static 'css/form-style.css' %}" />
   <h1>Framework</h1>
   <sup color="light grey">* required field</sup>
-
-  <form
-    action="{% if method == 'update' %}/factsheets/frameworks/{{ name }}/update/{% else %}/factsheets/frameworks/add/{% endif %}"
-    novalidate="novalidate"
-    method="post"
-    role="form"
-    enctype="multipart/form-data"
-  >
+  <form action="{% if method == 'update' %}/factsheets/frameworks/{{ name }}/update/{% else %}/factsheets/frameworks/add/{% endif %}"
+        novalidate="novalidate"
+        method="post"
+        role="form"
+        enctype="multipart/form-data">
     {% csrf_token %}
     {% include 'modelview/error_snipet.html' with errors=errors %}
-
     <ul class="nav nav-tabs">
       <li class="nav-item" role="presentation">
-        <button
-          class="nav-link active"
-          id="overview-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#Overview"
-          type="button"
-          role="tab"
-          aria-controls="Overview"
-          aria-selected="true"
-        >
-          Overview
-        </button>
+        <button class="nav-link active"
+                id="overview-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#Overview"
+                type="button"
+                role="tab"
+                aria-controls="Overview"
+                aria-selected="true">Overview</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="general-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#General"
-          type="button"
-          role="tab"
-          aria-controls="General"
-          aria-selected="false"
-        >
-          General
-        </button>
+        <button class="nav-link"
+                id="general-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#General"
+                type="button"
+                role="tab"
+                aria-controls="General"
+                aria-selected="false">General</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="openness-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#Openness"
-          type="button"
-          role="tab"
-          aria-controls="Openness"
-          aria-selected="false"
-        >
-          Openness
-        </button>
+        <button class="nav-link"
+                id="openness-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#Openness"
+                type="button"
+                role="tab"
+                aria-controls="Openness"
+                aria-selected="false">Openness</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="mathematical-description-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#MathematicalDescription"
-          type="button"
-          role="tab"
-          aria-controls="MathematicalDescription"
-          aria-selected="false"
-        >
-          MathematicalDescription
-        </button>
+        <button class="nav-link"
+                id="mathematical-description-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#MathematicalDescription"
+                type="button"
+                role="tab"
+                aria-controls="MathematicalDescription"
+                aria-selected="false">MathematicalDescription</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="model-building-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#ModelBuilding"
-          type="button"
-          role="tab"
-          aria-controls="Overview"
-          aria-selected="false"
-        >
-          ModelBuilding
-        </button>
+        <button class="nav-link"
+                id="model-building-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#ModelBuilding"
+                type="button"
+                role="tab"
+                aria-controls="Overview"
+                aria-selected="false">ModelBuilding</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="references-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#References"
-          type="button"
-          role="tab"
-          aria-controls="Overview"
-          aria-selected="false"
-        >
-          References
-        </button>
+        <button class="nav-link"
+                id="references-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#References"
+                type="button"
+                role="tab"
+                aria-controls="Overview"
+                aria-selected="false">References</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="tags-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#Tags"
-          type="button"
-          role="tab"
-          aria-controls="Overview"
-          aria-selected="false"
-        >
-          Tags
-        </button>
+        <button class="nav-link"
+                id="tags-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#Tags"
+                type="button"
+                role="tab"
+                aria-controls="Overview"
+                aria-selected="false">Tags</button>
       </li>
       <span onclick="window.onbeforeunload = function (e) {};">
         <input class="btn btn-info right" type="submit" value="Submit all" />
@@ -156,10 +122,8 @@
         <table class="formtable">
           <th>
             Geographical Scope
-            <a
-              data-bs-toggle="tooltip"
-              title="What geographical scope was modelled with the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="What geographical scope was modelled with the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -177,10 +141,8 @@
         <table class="formtable">
           <th>
             Sectoral Scope
-            <a
-              data-bs-toggle="tooltip"
-              title="What sectoral scope was modelled with the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="What sectoral scope was modelled with the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -198,10 +160,8 @@
         <table class="formtable">
           <th>
             General Problem Scope
-            <a
-              data-bs-toggle="tooltip"
-              title="What is the primary purpose of the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="What is the primary purpose of the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -217,10 +177,8 @@
         <table class="formtable">
           <th>
             Specific Problem Scope
-            <a
-              data-bs-toggle="tooltip"
-              title="What is/are the specific purpose(s) of the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="What is/are the specific purpose(s) of the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -276,10 +234,8 @@
           <table class="formtable">
             <th>
               Programming Framework
-              <a
-                data-bs-toggle="tooltip"
-                title="Which programming framework/language is used to develop the framework?"
-              >
+              <a data-bs-toggle="tooltip"
+                 title="Which programming framework/language is used to develop the framework?">
                 <span class="fas fa-question "></span>
               </a>
             </th>
@@ -304,10 +260,8 @@
           <table class="formtable">
             <th>
               External Solver
-              <a
-                data-bs-toggle="tooltip"
-                title="Which external solver(s) can the framework apply? Please list!"
-              >
+              <a data-bs-toggle="tooltip"
+                 title="Which external solver(s) can the framework apply? Please list!">
                 <span class="fas fa-question "></span>
               </a>
             </th>
@@ -325,10 +279,8 @@
           <table class="formtable">
             <th>
               Input Data Format
-              <a
-                data-bs-toggle="tooltip"
-                title="Which input format(s) can the framework apply? Please list!"
-              >
+              <a data-bs-toggle="tooltip"
+                 title="Which input format(s) can the framework apply? Please list!">
                 <span class="fas fa-question "></span>
               </a>
             </th>
@@ -354,10 +306,8 @@
           <table class="formtable">
             <th>
               Output Data Format
-              <a
-                data-bs-toggle="tooltip"
-                title="Which output format(s) can the framework apply? Please list!"
-              >
+              <a data-bs-toggle="tooltip"
+                 title="Which output format(s) can the framework apply? Please list!">
                 <span class="fas fa-question "></span>
               </a>
             </th>
@@ -383,10 +333,8 @@
           <table class="formtable">
             <th>
               The analytical approach
-              <a
-                data-bs-toggle="tooltip"
-                title="What is the analytical approach that the framework applies?"
-              >
+              <a data-bs-toggle="tooltip"
+                 title="What is the analytical approach that the framework applies?">
                 <span class="fas fa-question "></span>
               </a>
             </th>
@@ -405,10 +353,8 @@
             <table class="formtable">
               <th>
                 The mathematical approach
-                <a
-                  data-bs-toggle="tooltip"
-                  title="What is the mathematical approach that the framework applies?"
-                >
+                <a data-bs-toggle="tooltip"
+                   title="What is the mathematical approach that the framework applies?">
                   <span class="fas fa-question "></span>
                 </a>
               </th>
@@ -423,14 +369,11 @@
                 </table>
               </td>
             </table>
-
             <table class="formtable">
               <th>
                 The underlying methodology
-                <a
-                  data-bs-toggle="tooltip"
-                  title="What underlying methodology(-y/-ies) is the framework based on?"
-                >
+                <a data-bs-toggle="tooltip"
+                   title="What underlying methodology(-y/-ies) is the framework based on?">
                   <span class="fas fa-question "></span>
                 </a>
               </th>
@@ -454,10 +397,8 @@
             <table class="formtable">
               <th>
                 Objective function type
-                <a
-                  data-bs-toggle="tooltip"
-                  title="If the framework is applying optimization, what objectives are commonly formulated?"
-                >
+                <a data-bs-toggle="tooltip"
+                   title="If the framework is applying optimization, what objectives are commonly formulated?">
                   <span class="fas fa-question "></span>
                 </a>
               </th>
@@ -498,10 +439,8 @@
         <table class="formtable">
           <th>
             Support
-            <a
-              data-bs-toggle="tooltip"
-              title="Click the check box if there is a support or Q and A Forum for the Model"
-            >
+            <a data-bs-toggle="tooltip"
+               title="Click the check box if there is a support or Q and A Forum for the Model">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -525,7 +464,6 @@
           {% include 'modelview/editmodel_snippet.html' with field=form.skills_advanced %}
         </table>
       </div>
-
       <div id="Software" class="tab-pane fade">
         <table class="formtable">
           {% include 'modelview/editmodel_snippet.html' with field=form.modelling_software %}
@@ -542,10 +480,8 @@
         <table class="formtable">
           <th>
             Renewable Technology Inclusion
-            <a
-              data-bs-toggle="tooltip"
-              title="Which renewable energy technologies are already modelled with the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="Which renewable energy technologies are already modelled with the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -564,10 +500,8 @@
         <table class="formtable">
           <th>
             Storage Technology Inclusion
-            <a
-              data-bs-toggle="tooltip"
-              title="Which storage technologies are already modelled with the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="Which storage technologies are already modelled with the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -583,10 +517,8 @@
         <table class="formtable">
           <th>
             Transport Demand
-            <a
-              data-bs-toggle="tooltip"
-              title="Which transportation demands were already modelled with the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="Which transportation demands were already modelled with the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -604,10 +536,8 @@
         <table class="formtable">
           <th>
             Residential Demand
-            <a
-              data-bs-toggle="tooltip"
-              title="Which residential demands are already modelled with the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="Which residential demands are already modelled with the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -624,10 +554,8 @@
         <table class="formtable">
           <th>
             Commercial Demand
-            <a
-              data-bs-toggle="tooltip"
-              title="Which commercial demands are already modelled with the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="Which commercial demands are already modelled with the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -645,10 +573,7 @@
         <table class="formtable">
           <th>
             Grid model
-            <a
-              data-bs-toggle="tooltip"
-              title="How is the (power) grid modelled?"
-            >
+            <a data-bs-toggle="tooltip" title="How is the (power) grid modelled?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -663,10 +588,8 @@
         <table class="formtable">
           <th>
             Cost Inclusion
-            <a
-              data-bs-toggle="tooltip"
-              title="Which cost types are already modelled are the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="Which cost types are already modelled are the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -689,10 +612,8 @@
         <table class="formtable">
           <th>
             Commonly used time step
-            <a
-              data-bs-toggle="tooltip"
-              title="What is/are commonly used time step(s) that are already modelled with the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="What is/are commonly used time step(s) that are already modelled with the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -710,10 +631,8 @@
         <table class="formtable">
           <th>
             Commonly modelled time horizon
-            <a
-              data-bs-toggle="tooltip"
-              title="What is/are commonly used time horizon(S) that are already modelled with the framework?"
-            >
+            <a data-bs-toggle="tooltip"
+               title="What is/are commonly used time horizon(S) that are already modelled with the framework?">
               <span class="fas fa-question "></span>
             </a>
           </th>
@@ -740,7 +659,6 @@
     </div>
   </form>
 {% endblock %}
-
 {% block after-body-bottom-js %}
   <script type="text/javascript">
     $(document).ready(function () {

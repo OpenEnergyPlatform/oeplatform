@@ -3,13 +3,10 @@
 {% load i18n %}
 {% load static %}
 {% load account socialaccount %}
-
 {% block head_title %}
   {% translate "" %}
 {% endblock head_title %}
-
 {% block content %}
-
   {% block inner %}
     <div class="login">
       <div class="login__wrap">
@@ -21,7 +18,6 @@
         <h1 class="login__heading">
           {% translate "Log in to the Open Energy Platform" %}
         </h1>
-
         {% get_providers as socialaccount_providers %}
         {% if socialaccount_providers %}
           {% comment %}
@@ -32,83 +28,69 @@
                   Or, <a href="{{ signup_url }}">sign up</a>
                   for a {{ site_name }} account and sign in below:
                 {% endblocktranslate %}
-              {% endif %}
-            </p>
-          {% endcomment %}
-          {% include "socialaccount/snippets/login_extra.html" %}
-        {% else %}
-          {% if ACCOUNT_ALLOW_REGISTRATION %}
-            <p>
-              {% blocktranslate trimmed %}
-                If you have not created an account yet, then please
-                <a href="{{ signup_url }}">sign up</a> first.
-              {% endblocktranslate %}
-            </p>
-          {% endif %}
+                        {% endif %}
+                    </p>
+        {% endcomment %}
+        {% include "socialaccount/snippets/login_extra.html" %}
+      {% else %}
+        {% if ACCOUNT_ALLOW_REGISTRATION %}
+          <p>
+            {% blocktranslate trimmed %}
+              If you have not created an account yet, then please
+              <a href="{{ signup_url }}">sign up</a> first.
+            {% endblocktranslate %}
+          </p>
         {% endif %}
-
-        <form
-          class="signup"
-          id="signup_form"
-          method="post"
-          action="{% url 'account_login' %}"
-        >
-          {% csrf_token %}
-
-          <!-- Text field -->
-          <div class="login__field">
-            <label for="{{ form.login.id_for_label }}">User name</label>
-            {{ form.login }}
+      {% endif %}
+      <form class="signup"
+            id="signup_form"
+            method="post"
+            action="{% url 'account_login' %}">
+        {% csrf_token %}
+        <!-- Text field -->
+        <div class="login__field">
+          <label for="{{ form.login.id_for_label }}">User name</label>
+          {{ form.login }}
+        </div>
+        <!-- Password field -->
+        <div class="login__field">
+          <label for="{{ form.password.id_for_label }}">Password</label>
+          {{ form.password }}
+          <div class="login__hint login__hint--password">
+            <a href="{% url 'account_reset_password' %}">Forgot your password?</a>
           </div>
-
-          <!-- Password field -->
-          <div class="login__field">
-            <label for="{{ form.password.id_for_label }}">Password</label>
-            {{ form.password }}
-
-            <div class="login__hint login__hint--password">
-              <a href="{% url 'account_reset_password' %}"
-                >Forgot your password?</a
-              >
-            </div>
-          </div>
-
-          {% if form.errors %}
-            {% for field in form %}
-              {% for error in field.errors %}
-                <div class="login__alert login__alert--danger">
-                  <strong>{{ error|escape }}</strong>
-                </div>
-              {% endfor %}
-            {% endfor %}
-            {% for error in form.non_field_errors %}
+        </div>
+        {% if form.errors %}
+          {% for field in form %}
+            {% for error in field.errors %}
               <div class="login__alert login__alert--danger">
                 <strong>{{ error|escape }}</strong>
               </div>
             {% endfor %}
-          {% endif %}
-
-          {% if redirect_field_value %}
-            <input
-              type="hidden"
-              name="{{ redirect_field_name }}"
-              value="{{ redirect_field_value }}"
-            />
-          {% endif %}
-
-          <!-- Blue button (main CTA) -->
-          <button type="submit" class="login__button">Log in</button>
-        </form>
-        {% if SOCIALACCOUNT_ENABLED %}
-          {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <div class="login__alert login__alert--danger">
+              <strong>{{ error|escape }}</strong>
+            </div>
+          {% endfor %}
         {% endif %}
-
-        <!-- Use for less important text -->
-        <div class="login__alternative">
-          <p>New to the Open Energy Platform?</p>
-          <a href="{{ signup_url }}">Sign up</a>
-        </div>
+        {% if redirect_field_value %}
+          <input type="hidden"
+                 name="{{ redirect_field_name }}"
+                 value="{{ redirect_field_value }}" />
+        {% endif %}
+        <!-- Blue button (main CTA) -->
+        <button type="submit" class="login__button">Log in</button>
+      </form>
+      {% if SOCIALACCOUNT_ENABLED %}
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+      {% endif %}
+      <!-- Use for less important text -->
+      <div class="login__alternative">
+        <p>New to the Open Energy Platform?</p>
+        <a href="{{ signup_url }}">Sign up</a>
       </div>
     </div>
-  {% endblock inner %}
+  </div>
+{% endblock inner %}
 {% endblock %}
