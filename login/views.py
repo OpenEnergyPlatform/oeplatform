@@ -22,6 +22,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db.models import F
 from django.http import (
     HttpResponse,
     HttpResponseForbidden,
@@ -40,14 +41,7 @@ from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
 from login.forms import EditUserForm, GroupForm
 from login.models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
 from login.models import myuser as OepUser
-from login.utils import (
-    get_badge_icon_path,
-    get_review_badge_from_table_metadata,
-    get_tables_if_group_assigned,
-    get_user_tables,
-    validate_open_data_license,
-)
-from oeplatform.settings import SCHEMA_DATA
+from login.utils import get_tables_if_group_assigned
 
 # Pagination
 ITEMS_PER_PAGE = 8
@@ -63,51 +57,13 @@ ITEMS_PER_PAGE = 8
 class TablesView(View):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-        tables = get_user_tables(user_id)
-        draft_tables = []
-        published_tables = []
-
-        for table in tables:
-            permission_level = user.get_table_permission_level(table)
-            license_status = validate_open_data_license(django_table_obj=table)
-
-            review_badge = None
-            badge_icon = None
-            badge_msg = None
-            # oemetadata is None by default
-            if table.oemetadata:
-                review_badge = get_review_badge_from_table_metadata(table)
-
-            if review_badge and review_badge[0]:
-                badge_icon = get_badge_icon_path(review_badge[1])
-
-            if review_badge and review_badge[0]:
-                badge_msg = review_badge[1]
-
-            # Use attributes in the templates
-            table_data = {
-                "name": table.name,
-                "schema": SCHEMA_DATA,
-                "table_label": table.human_readable_name,
-                "is_publish": table.is_publish,
-                "is_reviewed": table.is_reviewed,
-                "review_badge_context": {
-                    "error_msg": badge_msg,
-                    "badge": review_badge,
-                    "icon": badge_icon,
-                },
-                "icon_path": badge_icon,
-                "license_status": {
-                    "status": license_status[0],
-                    "error": license_status[1],
-                },
-            }
-
-            if permission_level >= models.WRITE_PERM:
-                if table.is_publish:
-                    published_tables.append(table_data)
-                else:
-                    draft_tables.append(table_data)
+        tables_set = user.get_tables_queryset(min_permission_level=WRITE_PERM)
+        draft_tables = tables_set.filter(is_publish=False).order_by(
+            F("date_updated").desc(nulls_last=True), "human_readable_name"
+        )
+        published_tables = tables_set.filter(is_publish=True).order_by(
+            F("date_updated").desc(nulls_last=True), "human_readable_name"
+        )
 
         # Paginate tables
         published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)
@@ -877,22 +833,6 @@ def token_reset_view(request):
 def metadata_review_badge_indicator_icon_file_view(request, user_id, table_name):
     # is_badge : bool , msg : string -> either error msg or badge name
     table = get_object_or_404(Table, name=table_name)
-    is_badge, msg = get_review_badge_from_table_metadata(table)
+    context = table.get_review_badge_from_table_metadata()
 
-    icon_path = None
-    err_msg = None
-    if is_badge:
-        icon_path = get_badge_icon_path(msg)
-        badge_name = msg
-    else:
-        badge_name = None
-        err_msg = msg
-
-    context = {
-        "is_badge": is_badge,
-        "err_msg": err_msg,
-        "badge_name": badge_name,
-        "icon_path": icon_path,
-    }
-
-    return render(request, "login/partials/badge_icon.html", context)
+    return render(request, "login/partials/badge_icon.html", context=context)

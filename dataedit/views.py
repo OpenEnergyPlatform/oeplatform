@@ -237,8 +237,6 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
         tag_ids=searched_tag_ids,
     )
 
-    # descending (-): null/missing should be at end, so
-    # "-date_updated" should be newest first
     tables = tables.order_by(
         F("date_updated").desc(nulls_last=True), "human_readable_name"
     )

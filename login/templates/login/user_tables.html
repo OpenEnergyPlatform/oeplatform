@@ -12,63 +12,66 @@
         <div class="profile-tables">
           <div class="profile-tables__row">
             {% for table in published_tables_page %}
-              <div class="profile-tables__col">
-                <div class="profile-table-card">
-                  <div class="profile-table-card__content">
-                    <div class="profile-table-card__content--left">
-                      <div class="profile-table-card__tag">
-                        <svg width="12"
-                             height="12"
-                             version="1.1"
-                             fill="currentColor"
-                             viewBox="0 0 16 16"
-                             xmlns="http://www.w3.org/2000/svg">
-                          <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z">
-                          </path>
-                        </svg>
-                        {{ table.schema }}
+              {% with license_status=table.validate_open_data_license %}
+                <div class="profile-tables__col">
+                  <div class="profile-table-card">
+                    <div class="profile-table-card__content">
+                      <div class="profile-table-card__content--left">
+                        {% for topic in table.topics.all %}
+                          <div class="profile-table-card__tag">
+                            <svg width="12"
+                                 height="12"
+                                 version="1.1"
+                                 fill="currentColor"
+                                 viewBox="0 0 16 16"
+                                 xmlns="http://www.w3.org/2000/svg">
+                              <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z">
+                              </path>
+                            </svg>
+                            {{ topic.name }}
+                          </div>
+                        {% endfor %}
+                        {% if license_status.status %}
+                          <div class="profile-table-card__tag profile-table-card__tag--info"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               title="Open License check successful">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 width="14"
+                                 height="14"
+                                 fill="currentColor"
+                                 class="bi bi-check-lg"
+                                 viewBox="0 0 16 16">
+                              <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z" />
+                            </svg>
+                            License
+                          </div>
+                        {% else %}
+                          <div class="profile-table-card__tag profile-table-card__tag--danger"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               title="Open License check failed">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 width="12"
+                                 height="12"
+                                 fill="currentColor"
+                                 class="bi bi-x-lg"
+                                 viewBox="0 0 16 16">
+                              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                            </svg>
+                            License check failed
+                          </div>
+                        {% endif %}
                       </div>
-                      {% if table.license_status.status %}
-                        <div class="profile-table-card__tag profile-table-card__tag--info"
-                             data-bs-toggle="tooltip"
-                             data-bs-placement="top"
-                             title="Open License check successful">
-                          <svg xmlns="http://www.w3.org/2000/svg"
-                               width="14"
-                               height="14"
-                               fill="currentColor"
-                               class="bi bi-check-lg"
-                               viewBox="0 0 16 16">
-                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z" />
-                          </svg>
-                          License
-                        </div>
-                      {% else %}
-                        <div class="profile-table-card__tag profile-table-card__tag--danger"
-                             data-bs-toggle="tooltip"
-                             data-bs-placement="top"
-                             title="Open License check failed">
-                          <svg xmlns="http://www.w3.org/2000/svg"
-                               width="12"
-                               height="12"
-                               fill="currentColor"
-                               class="bi bi-x-lg"
-                               viewBox="0 0 16 16">
-                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                          </svg>
-                          License check failed
-                        </div>
-                      {% endif %}
-                    </div>
-                    <div class="profile-table-card__content--right">
-                      <button class="profile-table-card__btn profile-table-card__btn--sm publish-button"
-                              hx-post="{% url 'api:table-unpublish' schema=table.schema table=table.name %}"
-                              hx-confirm="Are you sure you want to mark the table as draft?"
-                              hx-target="">Unpublish</button>
-                    </div>
-                    <div class="profile-table-card__content--title">
-                      <!-- Add as soon as the open peer review is finalized -->
-                      {% comment %}
+                      <div class="profile-table-card__content--right">
+                        <button class="profile-table-card__btn profile-table-card__btn--sm publish-button"
+                                hx-post="{% url 'api:table-unpublish' schema='data' table=table.name %}"
+                                hx-confirm="Are you sure you want to mark the table as draft?"
+                                hx-target="">Unpublish</button>
+                      </div>
+                      <div class="profile-table-card__content--title">
+                        <!-- Add as soon as the open peer review is finalized -->
+                        {% comment %}
                         {% if table.is_reviewed %}
                           <div class="profile-table-card__tag profile-table-card__tag--success" data-bs-toggle="tooltip" data-bs-placement="top" title="The table has been successfully reviewed">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
@@ -86,19 +89,19 @@
                             Not reviewed
                           </div>
                         {% endif %}
-                      {% endcomment %}
-                      <div class="profile-table-card__link">
-                        <a href="{% url 'dataedit:view' schema=table.schema table=table.name %}">
-                          {% if table.table_label %}
-                            {{ table.table_label }}
-                          {% else %}
-                            {{ table.name }}
-                          {% endif %}
-                        </a>
+                        {% endcomment %}
+                        <div class="profile-table-card__link">
+                          <a href="{% url 'dataedit:view' schema='data' table=table.name %}">
+                            {% if table.human_readable_name %}
+                              {{ table.human_readable_name }}
+                            {% else %}
+                              {{ table.name }}
+                            {% endif %}
+                          </a>
+                        </div>
                       </div>
-                    </div>
-                    <!-- Add once embargo branch is merged PR {{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}/pull/1534 -->
-                    <!-- <div class="profile-table-card__content-secondary">
+                      <!-- Add once embargo branch is merged PR {{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}/pull/1534 -->
+                      <!-- <div class="profile-table-card__content-secondary">
                             <span class="profile-table-card__embargo">
                                 Embargo until 06/05/2024
                                 <button type="button" class="btn btn-outline-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Test text">
@@ -109,58 +112,59 @@
                                 </button>
                             </span>
                         </div> -->
-                  </div>
-                  {% if table.license_status.error %}
-                    <div class="profile-table-card__content-danger">
-                      <div class="profile-table-card__content-danger-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             width="14"
-                             height="14"
-                             fill="currentColor"
-                             class="bi bi-exclamation-circle"
-                             viewBox="0 0 16 16">
-                          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                          <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z" />
-                        </svg>
-                      </div>
-                      <div class="profile-table-card__content-danger-message">
-                        Potential publishing without an open license.
-                      </div>
-                      <div class="profile-table-card__content-danger-details">
-                        <p>
-                          <button type="button"
-                                  data-bs-toggle="collapse"
-                                  data-bs-target="#collapseWarningDetails{{ table.name }}"
-                                  aria-expanded="false"
-                                  aria-controls="collapseWarningDetails{{ table.name }}">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 width="14"
-                                 height="14"
-                                 fill="currentColor"
-                                 class="bi bi-caret-right-fill"
-                                 viewBox="0 0 16 16">
-                              <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z" />
-                            </svg>
-                            Details
-                          </button>
-                        </p>
-                        <div class="collapse" id="collapseWarningDetails{{ table.name }}">
-                          License check failed because of:
-                          {{ table.license_status.error }}
-                          <br />
-                          <br />
-                          <a href="{{ EXTERNAL_URLS.spdx_licenses }}" class="card-link">Please use a SPDX license identifier.</a>
-                          <br />
-                          <br />
-                          Please revisit your metadata and check the license
-                          information. Do not publish data that does not hold an
-                          open license.
+                    </div>
+                    {% if not license_status.status %}
+                      <div class="profile-table-card__content-danger">
+                        <div class="profile-table-card__content-danger-icon">
+                          <svg xmlns="http://www.w3.org/2000/svg"
+                               width="14"
+                               height="14"
+                               fill="currentColor"
+                               class="bi bi-exclamation-circle"
+                               viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                            <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z" />
+                          </svg>
+                        </div>
+                        <div class="profile-table-card__content-danger-message">
+                          Potential publishing without an open license.
+                        </div>
+                        <div class="profile-table-card__content-danger-details">
+                          <p>
+                            <button type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapseWarningDetails{{ table.name }}"
+                                    aria-expanded="false"
+                                    aria-controls="collapseWarningDetails{{ table.name }}">
+                              <svg xmlns="http://www.w3.org/2000/svg"
+                                   width="14"
+                                   height="14"
+                                   fill="currentColor"
+                                   class="bi bi-caret-right-fill"
+                                   viewBox="0 0 16 16">
+                                <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z" />
+                              </svg>
+                              Details
+                            </button>
+                          </p>
+                          <div class="collapse" id="collapseWarningDetails{{ table.name }}">
+                            License check failed because of:
+                            {{ license_status.error }}
+                            <br />
+                            <br />
+                            <a href="{{ EXTERNAL_URLS.spdx_licenses }}" class="card-link">Please use a SPDX license identifier.</a>
+                            <br />
+                            <br />
+                            Please revisit your metadata and check the license
+                            information. Do not publish data that does not hold an
+                            open license.
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  {% endif %}
+                    {% endif %}
+                  </div>
                 </div>
-              </div>
+              {% endwith %}
             {% endfor %}
           </div>
         </div>
@@ -203,76 +207,78 @@
         <div class="profile-tables">
           <div class="profile-tables__row">
             {% for table in draft_tables_page %}
-              <div class="profile-tables__col">
-                <div class="profile-table-card">
-                  <div class="profile-table-card__content">
-                    <div class="profile-table-card__content--left">
-                      <div class="profile-table-card__tag">
-                        <svg width="12"
-                             height="12"
-                             version="1.1"
-                             fill="currentColor"
-                             viewBox="0 0 16 16"
-                             xmlns="http://www.w3.org/2000/svg">
-                          <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z">
-                          </path>
-                        </svg>
-                        {{ table.schema }}
+              {% with license_status=table.validate_open_data_license %}
+                <div class="profile-tables__col">
+                  <div class="profile-table-card">
+                    <div class="profile-table-card__content">
+                      <div class="profile-table-card__content--left">
+                        {% for topic in table.topics.all %}
+                          <div class="profile-table-card__tag">
+                            <svg width="12"
+                                 height="12"
+                                 version="1.1"
+                                 fill="currentColor"
+                                 viewBox="0 0 16 16"
+                                 xmlns="http://www.w3.org/2000/svg">
+                              <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z">
+                              </path>
+                            </svg>
+                            {{ topic.name }}
+                          </div>
+                        {% endfor %}
+                        {% if license_status.status %}
+                          <div class="profile-table-card__tag profile-table-card__tag--info"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               title="Open License check successful">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 width="14"
+                                 height="14"
+                                 fill="currentColor"
+                                 class="bi bi-check-lg"
+                                 viewBox="0 0 16 16">
+                              <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z" />
+                            </svg>
+                            License
+                          </div>
+                        {% else %}
+                          <div class="profile-table-card__tag profile-table-card__tag--danger"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               title="Open License check failed">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 width="12"
+                                 height="12"
+                                 fill="currentColor"
+                                 class="bi bi-x-lg"
+                                 viewBox="0 0 16 16">
+                              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                            </svg>
+                            License check failed
+                          </div>
+                        {% endif %}
                       </div>
-                      {% if table.license_status.status %}
-                        <div class="profile-table-card__tag profile-table-card__tag--info"
-                             data-bs-toggle="tooltip"
-                             data-bs-placement="top"
-                             title="Open License check successful">
-                          <svg xmlns="http://www.w3.org/2000/svg"
-                               width="14"
-                               height="14"
-                               fill="currentColor"
-                               class="bi bi-check-lg"
-                               viewBox="0 0 16 16">
-                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z" />
-                          </svg>
-                          License
-                        </div>
-                      {% else %}
-                        <div class="profile-table-card__tag profile-table-card__tag--danger"
-                             data-bs-toggle="tooltip"
-                             data-bs-placement="top"
-                             title="Open License check failed">
-                          <svg xmlns="http://www.w3.org/2000/svg"
-                               width="12"
-                               height="12"
-                               fill="currentColor"
-                               class="bi bi-x-lg"
-                               viewBox="0 0 16 16">
-                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                          </svg>
-                          License check failed
-                        </div>
-                      {% endif %}
-                    </div>
-                    <div class="profile-table-card__content--right">
-                      {% if table.license_status.status %}
-                        <button class="profile-table-card__btn profile-table-card__btn--sm publish-button"
-                                data-bs-toggle="modal"
-                                data-bs-target="#publishModal"
-                                data-schema="{{ table.schema }}"
-                                data-tableName="{{ table.name }}">
-                          Publish
-                        </button>
-                      {% else %}
-                        <button class="profile-table-card__btn profile-table-card__btn--sm disabled">
-                          Publish
-                        </button>
-                      {% endif %}
-                      <button class="profile-table-card__btn profile-table-card__btn--sm"
-                              hx-delete="{% url 'api:api_table' schema=table.schema table=table.name %}"
-                              hx-confirm="Are you sure you want to delete the table?"
-                              hx-target="">Delete</button>
-                    </div>
-                    <div class="profile-table-card__content--title">
-                      <!-- Add as soon as the open peer review is finalized -->
-                      {% comment %}
+                      <div class="profile-table-card__content--right">
+                        {% if license_status.status %}
+                          <button class="profile-table-card__btn profile-table-card__btn--sm publish-button"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#publishModal"
+                                  data-tableName="{{ table.name }}">
+                            Publish
+                          </button>
+                        {% else %}
+                          <button class="profile-table-card__btn profile-table-card__btn--sm disabled">
+                            Publish
+                          </button>
+                        {% endif %}
+                        <button class="profile-table-card__btn profile-table-card__btn--sm"
+                                hx-delete="{% url 'api:api_table' schema='data' table=table.name %}"
+                                hx-confirm="Are you sure you want to delete the table?"
+                                hx-target="">Delete</button>
+                      </div>
+                      <div class="profile-table-card__content--title">
+                        <!-- Add as soon as the open peer review is finalized -->
+                        {% comment %}
                         {% if table.is_reviewed %}
                           <div class="profile-table-card__tag profile-table-card__tag--success" data-bs-toggle="tooltip" data-bs-placement="top" title="The table has been successfully reviewed">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
@@ -290,19 +296,19 @@
                             Not reviewed
                           </div>
                         {% endif %}
-                      {% endcomment %}
-                      <div class="profile-table-card__link">
-                        <a href="{% url 'dataedit:view' schema=table.schema table=table.name %}">
-                          {% if table.table_label %}
-                            {{ table.table_label }}
-                          {% else %}
-                            {{ table.name }}
-                          {% endif %}
-                        </a>
+                        {% endcomment %}
+                        <div class="profile-table-card__link">
+                          <a href="{% url 'dataedit:view' schema='data' table=table.name %}">
+                            {% if table.table_label %}
+                              {{ table.table_label }}
+                            {% else %}
+                              {{ table.name }}
+                            {% endif %}
+                          </a>
+                        </div>
                       </div>
-                    </div>
-                    <!-- Add once embargo branch is merged PR {{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}/pull/1534 -->
-                    <!-- <div class="profile-table-card__content-secondary">
+                      <!-- Add once embargo branch is merged PR {{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}/pull/1534 -->
+                      <!-- <div class="profile-table-card__content-secondary">
                         <span class="profile-table-card__embargo">
                                 Embargo until 06/05/2024
                                 <button type="button" class="btn btn-outline-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Test text">
@@ -313,30 +319,31 @@
                                 </button>
                             </span>
                         </div>  -->
-                  </div>
-                  {% if table.license_status.error %}
-                    <div class="profile-table-card__content-danger">
-                      <div class="profile-table-card__content-danger-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             width="14"
-                             height="14"
-                             fill="currentColor"
-                             class="bi bi-exclamation-circle"
-                             viewBox="0 0 16 16">
-                          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                          <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z" />
-                        </svg>
-                      </div>
-                      <div class="profile-table-card__content-danger-message">
-                        {{ table.license_status.error }}
-                      </div>
-                      <div class="profile-table-card__content-danger-details">
-                        <a href="{{ EXTERNAL_URLS.spdx_licenses }}">Please use a SPDX license identifier</a>
-                      </div>
                     </div>
-                  {% endif %}
+                    {% if not license_status.status %}
+                      <div class="profile-table-card__content-danger">
+                        <div class="profile-table-card__content-danger-icon">
+                          <svg xmlns="http://www.w3.org/2000/svg"
+                               width="14"
+                               height="14"
+                               fill="currentColor"
+                               class="bi bi-exclamation-circle"
+                               viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                            <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z" />
+                          </svg>
+                        </div>
+                        <div class="profile-table-card__content-danger-message">
+                          {{ table.license_status.error }}
+                        </div>
+                        <div class="profile-table-card__content-danger-details">
+                          <a href="{{ EXTERNAL_URLS.spdx_licenses }}">Please use a SPDX license identifier</a>
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
                 </div>
-              </div>
+              {% endwith %}
             {% endfor %}
           </div>
         </div>
@@ -508,12 +515,12 @@
           const schema_dropdown = document.querySelector(".schema-dropdown");
           const embargo_dropdown = document.querySelector(".embargo-dropdown");
           if (relatedButton) {
-            const schema = relatedButton.getAttribute("data-schema");
+            const schema = 'data';
             const tableName = relatedButton.getAttribute("data-tableName");
-            const toSchema = schema_dropdown.value;
+            const toTopic = schema_dropdown.value;
             const embargoPeriod = embargo_dropdown.value;
 
-            publishTable(schema, tableName, toSchema, embargoPeriod);
+            publishTable(schema, tableName, toTopic, embargoPeriod);
           } else {
             console.error("relatedButton is not defined.");
           }
