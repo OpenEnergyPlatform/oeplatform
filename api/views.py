@@ -954,6 +954,7 @@ class RowsAPIView(APIView):
             actions.apply_changes(schema, table)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
+    @api_exception
     @require_delete_permission
     def delete(
         self, request: Request, table: str, schema: str, row_id: int | None = None
@@ -1186,11 +1187,13 @@ class AdvancedFetchAPIView(APIView):
 
 
 class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
+    @api_exception
     def get(self, request: Request) -> JsonLikeResponse:
         sessions.close_all_for_user(request.user)
         return JsonResponse({"message": "All connections closed"})
 
 
+@api_exception
 def users_api_view(request: Request) -> JsonLikeResponse:
     query = request.GET.get("name", "")
 
@@ -1215,6 +1218,7 @@ def users_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(user_names, safe=False)
 
 
+@api_exception
 def groups_api_view(request: Request) -> JsonLikeResponse:
     """
     Return all Groups where this user is a member that match
@@ -1366,6 +1370,7 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
 class ManageOekgScenarioDatasetsAPIView(APIView):
     permission_classes = [IsAuthenticated]  # Require authentication
 
+    @api_exception
     @post_only_if_user_is_owner_of_scenario_bundle
     def post(self, request: Request) -> JsonLikeResponse:
         serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
