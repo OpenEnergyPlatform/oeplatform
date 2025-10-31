@@ -704,7 +704,7 @@ def parse_scolumnd_from_columnd(schema, table, name, column_description):
     }
 
 
-def replace_None_with_NULL(dictonary):
+def replace_None_with_NULL(dictonary: dict) -> dict:
     # Replacing None with null for Database
     for key, value in dictonary.items():
         if value is None:

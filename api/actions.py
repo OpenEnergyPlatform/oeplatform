@@ -43,12 +43,22 @@ from sqlalchemy import types as sqltypes
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
-import api
 import dataedit.metadata
 import login.models as login_models
 from api.connection import _get_engine, create_oedb_session
 from api.error import APIError
-from api.parser import get_or_403, parse_type, read_bool, read_pgid
+from api.parser import (
+    get_or_403,
+    is_pg_qual,
+    parse_insert,
+    parse_select,
+    parse_type,
+    read_bool,
+    read_pgid,
+    read_pgvalue,
+    replace_None_with_NULL,
+    set_meta_info,
+)
 from api.sessions import (
     SessionContext,
     close_all_for_user,
@@ -423,7 +433,7 @@ def describe_constraints(schema, table):
     }
 
 
-def perform_sql(sql_statement, parameter=None):
+def perform_sql(sql_statement, parameter: dict | None = None) -> dict:
     """
     Performs a sql command on standard database.
     :param sql_statement: SQL-Command
@@ -529,8 +539,12 @@ def remove_queued_constraint(id):
 
 
 def get_response_dict(
-    success, http_status_code=200, reason=None, exception=None, result=None
-):
+    success: bool,
+    http_status_code: int = 200,
+    reason: str | None = None,
+    exception=None,
+    result=None,
+) -> dict:
     """
     Unified error description
     :param success: Task was successful or unsuccessful
@@ -553,7 +567,7 @@ def get_response_dict(
     return dict
 
 
-def queue_constraint_change(schema, table, constraint_def):
+def queue_constraint_change(schema: str, table: str, constraint_def: dict):
     """
     Queue a change to a constraint
     :param schema: Schema
@@ -562,7 +576,7 @@ def queue_constraint_change(schema, table, constraint_def):
     :return: Result of database command
     """
 
-    cd = api.parser.replace_None_with_NULL(constraint_def)
+    cd = replace_None_with_NULL(constraint_def)
 
     sql_string = (
         "INSERT INTO public.api_constraints (action, constraint_type"
@@ -583,7 +597,7 @@ def queue_constraint_change(schema, table, constraint_def):
     return perform_sql(sql_string)
 
 
-def queue_column_change(schema, table, column_definition):
+def queue_column_change(schema: str, table: str, column_definition: dict) -> dict:
     """
     Quere a change to a column
     :param schema: Schema
@@ -592,7 +606,7 @@ def queue_column_change(schema, table, column_definition):
     :return: Result of database command
     """
 
-    column_definition = api.parser.replace_None_with_NULL(column_definition)
+    column_definition = replace_None_with_NULL(column_definition)
 
     sql_string = "INSERT INTO public.api_columns (column_name, not_null, data_type, new_name, c_schema, c_table) " "VALUES ('{name}','{not_null}','{data_type}','{new_name}','{c_schema}','{c_table}');".format(  # noqa
         name=get_or_403(column_definition, "column_name"),
@@ -798,7 +812,7 @@ def get_column_definition_query(d):
         kwargs["primary_key"] = True
 
     if "column_default" in d:
-        kwargs["default"] = api.parser.read_pgvalue(d["column_default"])
+        kwargs["default"] = read_pgvalue(d["column_default"])
 
     if d.get("character_maximum_length", False):
         dt = dt(int(d["character_maximum_length"]))
@@ -820,9 +834,7 @@ def column_alter(query, context, schema, table, column):
     if "data_type" in query:
         sql = alter_preamble + "SET DATA TYPE " + read_pgid(query["data_type"])
         if "character_maximum_length" in query:
-            sql += (
-                "(" + api.parser.read_pgvalue(query["character_maximum_length"]) + ")"
-            )
+            sql += "(" + read_pgvalue(query["character_maximum_length"]) + ")"
         perform_sql(sql)
     if "is_nullable" in query:
         if read_bool(query["is_nullable"]):
@@ -831,7 +843,7 @@ def column_alter(query, context, schema, table, column):
             sql = alter_preamble + " SET NOT NULL"
         perform_sql(sql)
     if "column_default" in query:
-        value = api.parser.read_pgvalue(query["column_default"])
+        value = read_pgvalue(query["column_default"])
         sql = alter_preamble + "SET DEFAULT " + value
         perform_sql(sql)
     if "name" in query:
@@ -1199,7 +1211,7 @@ def __change_rows(request, context, target_table, setter, fields=None) -> dict:
     rows = __internal_select(query, dict(context))
 
     message = request.get("message", None)
-    meta_fields = list(api.parser.set_meta_info("update", user, message).items())
+    meta_fields = list(set_meta_info("update", user, message).items())
     if fields is None:
         fields = [field[0] for field in rows["description"]]
     fields += [f[0] for f in meta_fields]
@@ -1220,7 +1232,7 @@ def __change_rows(request, context, target_table, setter, fields=None) -> dict:
         for row in rows["data"]:
             insert = []
             for key, value in list(zip(fields, row)) + meta_fields:
-                if not api.parser.is_pg_qual(key):
+                if not is_pg_qual(key):
                     raise APIError("%s is not a PostgreSQL identifier" % key)
                 if key in setter:
                     if not (key in pks and value != setter[key]):
@@ -1448,7 +1460,7 @@ def data_insert(request, context=None):
     request["table"] = get_insert_table_name(schema_name, table_name)
     request["schema"] = "_" + schema_name
 
-    query, values = api.parser.parse_insert(request, context)
+    query, values = parse_insert(request, context)
     data_insert_check(schema_name, table_name, values, context)
     _execute_sqla(query, cursor)
     description = cursor.description
@@ -1528,7 +1540,7 @@ def process_value(val):
 
 
 def data_search(request, context=None):
-    query = api.parser.parse_select(request)
+    query = parse_select(request)
     cursor = load_cursor_from_context(context)
     _execute_sqla(query, cursor)
     description = [

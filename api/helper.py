@@ -60,10 +60,8 @@ WHERE_EXPRESSION = re.compile(
 
 
 class ModJsonResponse(JsonResponse):
-    def __init__(self, dictionary):
-        if dictionary is None:
-            super().__init__({}, tatus=500)
-        elif dictionary["success"]:
+    def __init__(self, dictionary: dict):
+        if dictionary["success"]:
             super().__init__({}, status=200)
         elif dictionary["error"] is not None:
             super().__init__(
