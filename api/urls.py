@@ -69,6 +69,7 @@ from api.views import (
     groups_api_view,
     oeo_search_api_view,
     oevkg_search_api_view,
+    table_approx_row_count_view,
     users_api_view,
 )
 
@@ -127,6 +128,11 @@ urlpatterns_v0_schema_table = [
         RowsAPIView.as_view(),
         {"action": "new"},
         name="api_rows_new",
+    ),
+    re_path(
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rowcount$",
+        table_approx_row_count_view,
+        name="approx-row-count",
     ),
 ]
 

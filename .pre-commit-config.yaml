@@ -30,6 +30,7 @@ repos:
           - eslint-plugin-jsdoc@39.2.9
           - eslint-plugin-react@7.37.3
           - eslint-plugin-react-hooks@5.1.0
+          - eslint-plugin-prettier@5.1.3
         args: ["--fix"]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
