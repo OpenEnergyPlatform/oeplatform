@@ -69,7 +69,6 @@ from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
 from login.models import myuser as User
-from login.utils import validate_open_data_license
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
@@ -1630,7 +1629,10 @@ def move_publish(from_schema, table, to_schema, embargo_period):
     """
 
     t = DBTable.objects.get(name=table)
-    license_check, license_error = validate_open_data_license(t)
+    validate_open_data_license = t.validate_open_data_license()
+
+    license_check = validate_open_data_license["status"]
+    license_error = validate_open_data_license["error"]
 
     if not license_check:
         raise APIError(

@@ -125,7 +125,7 @@ def recursive_update(metadata, review_data):
     not 'rejected'.
     """
 
-    def delete_nested_field(data, keys):
+    def delete_nested_field(data: list | dict | None, keys: list[str]):
         """
         Removes a nested field from a dictionary based on a list of keys.
 
@@ -134,10 +134,15 @@ def recursive_update(metadata, review_data):
             to remove the field.
             keys (list): A list of keys pointing to the field to remove.
         """
+
         for key in keys[:-1]:
             if isinstance(data, list):
                 key = int(key)
-            data = data.get(key) if isinstance(data, dict) else data[key]
+                data = data[key]
+            elif isinstance(data, dict):
+                data = data.get(key)
+            else:
+                raise NotImplementedError()
 
         last_key = keys[-1]
         if isinstance(data, list) and last_key.isdigit():
