@@ -134,16 +134,16 @@ function renderOverviewTab(metadata) {
           <dl>
             <dt>Name ${createInfoIcon("name", "Dataset Name")}</dt>
             <dd>${metadata.name || "-"}</dd>
-            
+
             <dt>Title ${createInfoIcon("title", "Dataset Title")}</dt>
             <dd>${metadata.title || "-"}</dd>
-            
+
             <dt>Description ${createInfoIcon(
               "description",
               "Dataset Description"
             )}</dt>
             <dd>${metadata.description || "-"}</dd>
-            
+
             <dt>Identifier ${createInfoIcon("@id", "Dataset Identifier")}</dt>
             <dd>
               ${
@@ -254,7 +254,7 @@ function renderResourcesTab(metadata) {
                   "Resource Name"
                 )}</dt>
                 <dd>${resource.name || "-"}</dd>
-                
+
                 <dt>Path ${createInfoIcon(
                   "resources.path",
                   "Resource Path"
@@ -272,19 +272,19 @@ function renderResourcesTab(metadata) {
                       : "-"
                   }
                 </dd>
-                
+
                 <dt>Type ${createInfoIcon(
                   "resources.type",
                   "Resource Type"
                 )}</dt>
                 <dd>${resource.type || "-"}</dd>
-                
+
                 <dt>Format ${createInfoIcon(
                   "resources.format",
                   "Resource Format"
                 )}</dt>
                 <dd>${resource.format || "-"}</dd>
-                
+
                 <dt>Publication Date ${createInfoIcon(
                   "resources.publicationDate",
                   "Publication Date"
@@ -310,7 +310,7 @@ function renderResourcesTab(metadata) {
                 </dd>
               </dl>
             </div>
-            
+
             <div class="col-md-6">
               <h6 class="metadata-section-title">Topics & Languages</h6>
     `;
@@ -505,11 +505,11 @@ function renderSchemaTab(metadata) {
           "resources.schema.fields",
           "Fields"
         )}</h6>
-        
+
         <div class="mb-3">
           <input type="text" id="field-search-${resourceIndex}" class="form-control" placeholder="Search fields...">
         </div>
-        
+
         <div class="metadata-table-container">
           <table class="table table-striped metadata-table" id="fields-table-${resourceIndex}">
             <thead>
@@ -681,7 +681,7 @@ function renderSchemaTab(metadata) {
             <div id="fieldCollapse-${resourceIndex}-${fieldIndex}" class="accordion-collapse collapse" aria-labelledby="fieldHeading-${resourceIndex}-${fieldIndex}" data-bs-parent="#fieldAccordion-${resourceIndex}">
               <div class="accordion-body">
                 <p>${field.description || "No description"}</p>
-                
+
                 <div class="row mb-3">
                   <div class="col-md-4">
                     <strong>Type ${createInfoIcon(
@@ -848,7 +848,7 @@ function renderMetadataTab(metadata) {
             }</strong></p>
           </div>
         </div>
-        
+
         <dl class="row">
   `;
 
@@ -1178,7 +1178,7 @@ function renderSourcesContent(sources) {
           "Source Title"
         )}</h6>
         <p class="small text-muted mb-3">${source.description || "-"}</p>
-        
+
         <div class="row mb-3">
           <div class="col-md-6">
             <strong>Publication Year ${createInfoIcon(
@@ -1190,7 +1190,7 @@ function renderSourcesContent(sources) {
             <strong>Path ${createInfoIcon(
               "resources.sources.path",
               "Path"
-            )}:</strong> 
+            )}:</strong>
             ${
               source.path
                 ? `<a href="${source.path}" target="_blank" rel="noopener noreferrer">
@@ -1311,7 +1311,7 @@ function renderLicensesContent(licenses) {
         ${
           license.copyrightStatement
             ? `<p class="small text-muted">
-            Copyright: 
+            Copyright:
             <a href="${license.copyrightStatement}" target="_blank" rel="noopener noreferrer">
               ${license.copyrightStatement}
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16">
@@ -1345,7 +1345,7 @@ function renderContributorsContent(contributors) {
             contributor.organization || "-"
           }</span>
         </div>
-        
+
         <div class="row mb-3">
           ${
             contributor.path
@@ -1354,7 +1354,7 @@ function renderContributorsContent(contributors) {
               <strong>Path ${createInfoIcon(
                 "resources.contributors.path",
                 "Path"
-              )}:</strong> 
+              )}:</strong>
               <a href="${
                 contributor.path
               }" target="_blank" rel="noopener noreferrer" class="small">
@@ -1368,7 +1368,7 @@ function renderContributorsContent(contributors) {
           `
               : ""
           }
-          
+
           ${
             contributor.date
               ? `
@@ -1381,7 +1381,7 @@ function renderContributorsContent(contributors) {
           `
               : ""
           }
-          
+
           ${
             contributor.object
               ? `
@@ -1466,17 +1466,17 @@ function renderMetadataViewer(metadata, container) {
         <h1>Dataset: ${
           metadata.title || metadata.name || "Metadata Specification"
         }</h1>
-        <!-- 
+        <!--
         <button id="download-json" class="btn btn-primary">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
             <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
             <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
           </svg>
           Download JSON
-        </button> 
+        </button>
         -->
       </div>
-      
+
       <!-- Tabs -->
       <ul class="nav nav-tabs mb-4" id="metadataTabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -1492,24 +1492,24 @@ function renderMetadataViewer(metadata, container) {
           <button class="nav-link" id="metameta-tab" data-bs-toggle="tab" data-bs-target="#metameta" type="button" role="tab" aria-controls="metameta" aria-selected="false">Metadata Version</button>
         </li>
       </ul>
-      
+
       <!-- Tab content -->
       <div class="tab-content" id="metadataTabsContent">
         <!-- Overview tab -->
         <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
           ${renderOverviewTab(metadata)}
         </div>
-        
+
         <!-- Resources tab -->
         <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab">
           ${renderResourcesTab(metadata)}
         </div>
-        
+
         <!-- Data Model tab (formerly Schema) -->
         <div class="tab-pane fade" id="schema" role="tabpanel" aria-labelledby="schema-tab">
           ${renderSchemaTab(metadata)}
         </div>
-        
+
         <!-- Metadata Version tab (formerly Meta Metadata) -->
         <div class="tab-pane fade" id="metameta" role="tabpanel" aria-labelledby="metameta-tab">
           ${renderMetadataTab(metadata)}
