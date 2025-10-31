@@ -4,6 +4,9 @@ mkdocs.yml
 **/*.min.js
 **/*.min.css
 
+# django templates will be handled by djlint
+*/templates/**/*.html
+
 # ignore these for now
 **/*.js
 **/*.tsx
@@ -11,6 +14,3 @@ mkdocs.yml
 **/*.css
 **/*.scss
 **/*.jsonc
-modelview/templates/modelview/modellist.html
-modelview/templates/modelview/array_snippet.html
-modelview/templates/modelview/editmodel_snippet_depend.html
