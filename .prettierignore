@@ -8,7 +8,6 @@ mkdocs.yml
 */templates/**/*.html
 
 # ignore these for now
-**/*.js
 **/*.tsx
 **/*.jsx
 **/*.css
