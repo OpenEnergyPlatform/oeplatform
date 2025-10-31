@@ -106,7 +106,7 @@ var MetaEdit = function(config) {
     json.properties.metaMetadata.options = {hidden: true};
 
     // add formats
-    // json.properties.context.properties.homepage.format = 'url'; // uri or url???
+    // json.properties.context.properties.homepage.format = 'url'; // uri or url??? 
 
     json["options"] = {
       "disable_edit_json": false, // show only for entire form
@@ -380,7 +380,7 @@ var MetaEdit = function(config) {
           "button": {
             "openModalAction": function openOeoExtPlugin(jseditor, e) {
               // Perform the HTMX request or any other desired action
-
+             
               htmx.ajax('GET', createUrl, {
                 target: '.modal-body',
                 swap: 'innerHTML',

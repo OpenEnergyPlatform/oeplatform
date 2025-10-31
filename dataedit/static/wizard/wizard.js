@@ -331,8 +331,8 @@ window.Wizard = function (config) {
         }
       });
 
-    /* row mapper for preview:
-    converts input row from csv into preview table row,
+    /* row mapper for preview: 
+    converts input row from csv into preview table row, 
     applies column mapping and conversions
 
     returns array
@@ -351,8 +351,8 @@ window.Wizard = function (config) {
       });
     };
 
-    /* row mapper for preview:
-    converts input row from csv into upload table row (object),
+    /* row mapper for preview: 
+    converts input row from csv into upload table row (object), 
     applies column mapping and conversions, drops null / unmapped columns
 
     returns object
@@ -606,9 +606,9 @@ window.Wizard = function (config) {
    *   on each chunk we pause and and post the data. on success we resume the csv parser
    *
    ,
-
-
-   *
+   
+   
+   * 
    */
   function csvUpload() {
     Promise.all([

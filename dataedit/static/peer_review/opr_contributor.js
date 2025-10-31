@@ -477,3 +477,4 @@ function saveEntrancesForContributor() {
 }
 initializeEventBindings(saveEntrancesForContributor);
 }}}
+
