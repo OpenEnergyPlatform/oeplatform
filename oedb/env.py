@@ -17,13 +17,13 @@ from logging.config import fileConfig  # noqa: E402
 from alembic import context  # noqa: E402
 from alembic.config import Config  # noqa: E402
 
-from oedb.connection import _get_connection_string, _get_engine  # noqa: E402
+from oedb.connection import __get_connection_string, _get_engine  # noqa: E402
 from oedb.structures import Base  # noqa: E402
 
 target_metadata = Base.metadata  # type:ignore
 
 alembic_cfg = Config()
-db_url = _get_connection_string()
+db_url = __get_connection_string()
 db_url = db_url.replace("%", "%%")
 alembic_cfg.set_main_option("url", db_url)
 
@@ -33,7 +33,7 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name)
+fileConfig(config.config_file_name)  # type:ignore
 
 # add your model's MetaData object here
 # for 'autogenerate' support

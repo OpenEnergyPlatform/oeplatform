@@ -26,17 +26,19 @@ import re
 from urllib.parse import urljoin, urlparse, urlunparse
 
 import requests
-from bs4 import BeautifulSoup
+import urllib3
+from bs4 import BeautifulSoup, Tag
 from django.core.management.base import BaseCommand
 
-logger = logging.getLogger("oeplatform")
 cache = {}
 
 
 def iter_links(url, parent_url=None, root_url=None, no_external=False):
     res = requests.get(
-        url, stream=True
-    )  # stream because sometimes we dont actually load all the content
+        url,
+        stream=True,  # stream because sometimes we dont actually load all the content
+        verify=False,  # sometimes ssl certs fail
+    )
     cache[url] = res.status_code
 
     # check if page should be parsed
@@ -48,9 +50,9 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
     )
 
     if not res.ok:
-        logger.error("%s %s (SOURCE: %s)", res.status_code, url, parent_url)
+        logging.error("%s %s (SOURCE: %s)", res.status_code, url, parent_url)
     else:
-        logger.info("%s %s (parse=%s)", res.status_code, url, parse)
+        logging.info("%s %s (parse=%s)", res.status_code, url, parse)
 
     if not parse:
         res.close()  # close stream
@@ -59,20 +61,25 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
     # load and parse page
 
     html = BeautifulSoup(res.content, "html.parser")
+
+    def filter_tag(t: Tag) -> bool:
+        return bool(t.get("src") or t.get("href") or t.get("onclick"))
+
     # find all tags with href or src attribute
-    for t in html.find_all(lambda t: t.get("src") or t.get("href") or t.get("onclick")):
-        if t.get("onclick"):
-            ref = t.get("onclick")
+    tag: Tag
+    for tag in html.find_all(filter_tag):
+        if tag.get("onclick"):
+            ref = str(tag.get("onclick", ""))
             match = re.match(
                 r'.*window.location[ ]*=[ ]*["\']([^"\']+)', ref
             ) or re.match(r'.*window.open[ ]*\([ ]*["\']([^"\']+)', ref)
             if match:
                 ref = match.groups()[0]
             else:
-                logger.debug("skipping %s", ref)
+                logging.debug("skipping %s", ref)
                 continue
         else:
-            ref = t.get("src") or t.get("href")
+            ref = str(tag.get("src") or tag.get("href") or "")
 
         if not ref:
             continue
@@ -91,7 +98,7 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
         if ref in cache:  # already processed
             continue
         # only parse local links that come from an <a> tag
-        parse = ref.startswith(root_url) and t.name == "a"
+        parse = ref.startswith(root_url) and tag.name == "a"
         iter_links(ref, root_url=root_url, parent_url=url, no_external=no_external)
 
 
@@ -117,5 +124,7 @@ class Command(BaseCommand):
             datefmt="%Y-%m-%d %H:%M:%S",
             level=loglevel,
         )
+        # Suppress only the insecure request warning
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         iter_links(options["instance"], no_external=options["no_external"])
