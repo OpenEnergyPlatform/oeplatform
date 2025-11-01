@@ -11,7 +11,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
-from dataedit.models import Table
 from oeplatform.settings import (
     SCHEMA_DEFAULT_TEST_SANDBOX,
     dbhost,
@@ -22,14 +21,14 @@ from oeplatform.settings import (
 )
 
 
-def get_connection_string():
+def _get_connection_string():
     return "postgresql://{0}:{1}@{2}:{3}/{4}".format(
         dbuser, dbpasswd, dbhost, dbport, dbname
     )
 
 
 __ENGINE = sqla.create_engine(
-    get_connection_string(), pool_size=0, pool_recycle=600, max_overflow=200
+    _get_connection_string(), pool_size=0, pool_recycle=600, max_overflow=200
 )
 
 
@@ -37,7 +36,7 @@ def _get_engine():
     return __ENGINE
 
 
-def table_exists_in_oedb(table, schema=None):
+def _table_exists_in_oedb(table, schema=None):
     """check if table exists in oedb
 
     Args:
@@ -57,24 +56,7 @@ def table_exists_in_oedb(table, schema=None):
     return result
 
 
-def table_exists_in_django(table: str):
-    """check if table exists in django
-
-    Args:
-        table (str): table name
-        schema (str, optional): table schema name
-
-    Returns:
-        bool
-    """
-    try:
-        Table.objects.get(name=table)
-        return True
-    except Table.DoesNotExist:
-        return False
-
-
-def create_oedb_session():
+def _create_oedb_session():
     """Return a sqlalchemy session to the oedb
 
     Should only be created once per user request.

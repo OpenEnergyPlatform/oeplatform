@@ -25,11 +25,9 @@ import itertools
 import json
 import re
 from datetime import datetime, timedelta
-from typing import cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import requests
-import sqlalchemy as sqla
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
@@ -47,7 +45,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from sqlalchemy.sql.expression import Select
 
 import api.parser
 import login.models as login_models
@@ -72,6 +69,7 @@ from api.helper import (
     stream,
     update_tags_from_keywords,
 )
+from api.parser import query_typecast_select
 from api.serializers import (
     EnergyframeworkSerializer,
     EnergymodelSerializer,
@@ -92,6 +90,7 @@ from dataedit.models import Embargo
 from dataedit.models import Table as DBTable
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
+from oedb.connection import _get_engine
 from oekg.utils import (
     execute_sparql_query,
     process_datasets_sparql_query,
@@ -131,16 +130,14 @@ class SequenceAPIView(APIView):
     def __delete_sequence(
         self, request: Request, schema: str, sequence: str
     ) -> JsonLikeResponse:
-        seq = sqla.schema.Sequence(sequence, schema=schema)
-        seq.drop(bind=actions._get_engine())
+        actions.delete_sequence(sequence=sequence, schema=schema)
         return JsonResponse({}, status=status.HTTP_200_OK)
 
     @load_cursor()
     def __create_sequence(
         self, request: Request, schema: str, sequence: str
     ) -> JsonLikeResponse:
-        seq = sqla.schema.Sequence(sequence, schema=schema)
-        seq.create(bind=actions._get_engine())
+        actions.create_sequence(sequence=sequence, schema=schema)
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
 
@@ -452,13 +449,13 @@ class TableAPIView(APIView):
 
             # drop the revision table with edit_ prefix
             edit_table = actions.get_edit_table_name(schema, table)
-            actions._get_engine().execute(
+            _get_engine().execute(
                 'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
                     schema=meta_schema, table=edit_table
                 )
             )
             # drop the data table
-            actions._get_engine().execute(
+            _get_engine().execute(
                 'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
                     schema=schema, table=table
                 )
@@ -933,7 +930,7 @@ class RowsAPIView(APIView):
                 status=status.HTTP_409_CONFLICT,
             )
 
-        engine = actions._get_engine()
+        engine = _get_engine()
         # check whether id is already in use
         exists = (
             engine.execute(
@@ -1114,21 +1111,19 @@ class RowsAPIView(APIView):
     @load_cursor(named=True)
     def __get_rows(self, request: Request, data):
         table = actions._get_table(data["schema"], table=data["table"])
-        # params = {}
-        # params_count = 0
         columns = data.get("columns")
 
         if not columns:
             query = table.select()
         else:
             columns = [actions.get_column_obj(table, c) for c in columns]
-            query = sqla.select(columns=columns)
+            query = actions.get_columns_select_query(columns=columns)
 
         where_clauses = data.get("where")
 
         if where_clauses:
             query = query.where(parser.parse_condition(where_clauses))
-            query = cast(Select, query)  # TODO: fix type hints in a better way
+            query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
         orderby = data.get("orderby")
         if orderby:
@@ -1138,17 +1133,17 @@ class RowsAPIView(APIView):
                 query = query.order_by(orderby)
             else:
                 raise APIError("Unknown order_by clause: " + orderby)
-            query = cast(Select, query)  # TODO: fix type hints in a better way
+            query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
         limit = data.get("limit")
         if limit and limit.isdigit():
             query = query.limit(int(limit))
-            query = cast(Select, query)  # TODO: fix type hints in a better way
+            query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
         offset = data.get("offset")
         if offset and offset.isdigit():
             query = query.offset(int(offset))
-            query = cast(Select, query)  # TODO: fix type hints in a better way
+            query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
         cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)

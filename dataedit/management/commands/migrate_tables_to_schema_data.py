@@ -7,8 +7,9 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from api.actions import _get_engine, get_schema_names, get_table_names
+from api.actions import get_schema_names, get_table_names
 from dataedit.models import Table
+from oedb.connection import _get_engine
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")

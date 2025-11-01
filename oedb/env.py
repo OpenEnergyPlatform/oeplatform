@@ -4,27 +4,26 @@ SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from __future__ import with_statement
-
 import os
 
-# sys.path.append(".")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "oeplatform.settings")
 
-import django  # noqa
+import django  # noqa: E402
 
 django.setup()
 
-from logging.config import fileConfig  # noqa
+from logging.config import fileConfig  # noqa: E402
 
-from alembic import context  # noqa
-from alembic.config import Config  # noqa
+from alembic import context  # noqa: E402
+from alembic.config import Config  # noqa: E402
 
-from api.connection import _get_engine, get_connection_string  # noqa
-from base.structures import metadata as target_metadata  # noqa
+from oedb.connection import _get_connection_string, _get_engine  # noqa: E402
+from oedb.structures import Base  # noqa: E402
+
+target_metadata = Base.metadata  # type:ignore
 
 alembic_cfg = Config()
-db_url = get_connection_string()
+db_url = _get_connection_string()
 db_url = db_url.replace("%", "%%")
 alembic_cfg.set_main_option("url", db_url)
 
@@ -34,7 +33,7 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name)  # noqa
+fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support

@@ -3,6 +3,7 @@ from django.db import transaction
 from api import actions
 from api.error import APIError
 from dataedit.models import Table as DBTable
+from oedb.connection import _get_engine
 from oeplatform.settings import IS_SANDBOX, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
@@ -32,7 +33,7 @@ class OEDBTableService:
         insert_table = actions.get_insert_table_name(real_schema, real_table)
         delete_table = actions.get_delete_table_name(real_schema, real_table)
 
-        engine = actions._get_engine()
+        engine = _get_engine()
 
         # drop the revision tables
         engine.execute(f'DROP TABLE IF EXISTS "{meta_schema}"."{edit_table}" CASCADE;')

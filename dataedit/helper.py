@@ -493,8 +493,6 @@ def edit_tag(id: str, name: str, color: str) -> None:
         id(int): tag id
         name(str): max 40 character tag text
         color(str): hexadecimal color code, eg #aaf0f0
-    Raises:
-        sqlalchemy.exc.IntegrityError if name is not ok
 
     """
     tag = Tag.objects.get(pk=id)
