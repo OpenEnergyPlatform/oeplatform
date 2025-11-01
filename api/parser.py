@@ -48,9 +48,8 @@ from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun
 from sqlalchemy.sql.elements import Slice
 from sqlalchemy.sql.expression import ClauseElement, CompoundSelect, Select
-from sqlalchemy.sql.sqltypes import Interval, Text
+from sqlalchemy.sql.sqltypes import Interval
 
-import api  # TODO: we need functions from api.helper but get circular imports
 from api.error import APIError, APIKeyError
 from api.utils import validate_schema
 from oedb.connection import _get_engine
@@ -267,19 +266,8 @@ def parse_select(d):
                 query.except_(subquery)
     if "order_by" in d:
 
-        # issue #2041: order by on json columns fails,
-        # so we try to find json columns and cast them as text for ordering
-        if "from" in d:
-            json_columns = api.helper.get_json_columns(**d["from"])
-        else:
-            json_columns = set()
-
         for ob in d["order_by"]:
             expr = parse_expression(ob)
-
-            # cannot order json fields, so we cast them to string
-            if expr.name in json_columns:
-                expr = cast(expr, Text)
 
             if isinstance(ob, dict):
                 desc = ob.get("ordering", "asc").lower() == "desc"
