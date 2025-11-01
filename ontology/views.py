@@ -33,7 +33,7 @@ from ontology.utils import collect_modules, get_common_data, get_ontology_versio
 
 logger = logging.getLogger("oeplatform")
 
-logger.info("Start loading the oeo from local static files.")
+
 OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
 OEO_PATH = OEO_BASE_PATH / OEO_VERSION
@@ -57,11 +57,6 @@ def get_OEO_MODULES_IMPORTS() -> dict:
 @cache
 def get_OEO_COMMON_DATA() -> dict:
     return get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
-
-
-logger.info(
-    "Loading completed! The content form the oeo files is parse into python data types."
-)
 
 
 class OntologyAboutView(View):
