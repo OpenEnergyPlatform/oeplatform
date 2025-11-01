@@ -56,6 +56,29 @@ from oedb.connection import _get_engine
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
+sql_operators = {
+    "EQUALS": "=",
+    "GREATER": ">",
+    "LOWER": "<",
+    "NOTEQUAL": "!=",
+    "NOTGREATER": "<=",
+    "NOTLOWER": ">=",
+    "=": "=",
+    ">": ">",
+    "<": "<",
+    "!=": "!=",
+    "<>": "!=",
+    "<=": "<=",
+    ">=": ">=",
+}
+_POSTGIS_MAP = {
+    "compositeelement": geoalchemy2.types.CompositeElement,
+    "geography": geoalchemy2.types.Geography,
+    "geometry": geoalchemy2.types.Geometry,
+    "raster": geoalchemy2.types.Raster,
+    "rasterelement": geoalchemy2.types.RasterElement,
+}
+__PARSER_META = MetaData(bind=_get_engine())
 
 
 def query_typecast_select(select) -> Select:
@@ -353,9 +376,6 @@ def parse_from_item(d):
     return item
 
 
-__PARSER_META = MetaData(bind=_get_engine())
-
-
 def load_table_from_metadata(table, schema=None):
     ext_name = table
     schema = validate_schema(schema)
@@ -485,15 +505,6 @@ def parse_type(dt_string, **kwargs):
         else:
             raise APIError("Unknown type (%s)." % dt_string)
         return dt, autoincrement
-
-
-_POSTGIS_MAP = {
-    "compositeelement": geoalchemy2.types.CompositeElement,
-    "geography": geoalchemy2.types.Geography,
-    "geometry": geoalchemy2.types.Geometry,
-    "raster": geoalchemy2.types.Raster,
-    "rasterelement": geoalchemy2.types.RasterElement,
-}
 
 
 def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=True):
@@ -729,23 +740,6 @@ def alchemyencoder(obj):
         return obj.isoformat()
     elif isinstance(obj, decimal.Decimal):
         return float(obj)
-
-
-sql_operators = {
-    "EQUALS": "=",
-    "GREATER": ">",
-    "LOWER": "<",
-    "NOTEQUAL": "!=",
-    "NOTGREATER": "<=",
-    "NOTLOWER": ">=",
-    "=": "=",
-    ">": ">",
-    "<": "<",
-    "!=": "!=",
-    "<>": "!=",
-    "<=": "<=",
-    ">=": ">=",
-}
 
 
 def parse_sql_operator(key: str) -> str:

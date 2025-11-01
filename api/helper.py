@@ -41,9 +41,7 @@ import login.models as login_models
 from api import actions, parser, sessions
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
-from dataedit.models import Embargo
-from dataedit.models import Table as DBTable
-from dataedit.models import Tag
+from dataedit.models import Embargo, Table, Tag
 
 logger = logging.getLogger("oeplatform")
 
@@ -208,7 +206,7 @@ def api_exception(
             return f(*args, **kwargs)
         except actions.APIError as e:
             return JsonResponse({"reason": e.message}, status=e.status)
-        except DBTable.DoesNotExist:
+        except Table.DoesNotExist:
             return JsonResponse({"reason": "table does not exist"}, status=404)
 
         # TODO: why cant' we handle all other errors here? (tests failing)
@@ -249,7 +247,7 @@ def conjunction(clauses) -> dict:
 
 def check_embargo(schema: str, table: str) -> bool:
     try:
-        table_obj = DBTable.objects.get(name=table)
+        table_obj = Table.objects.get(name=table)
         embargo = Embargo.objects.filter(table=table_obj).first()
         if embargo and embargo.date_ended and embargo.date_ended > timezone.now():
             return True
@@ -362,7 +360,7 @@ def stream(
 
 
 def update_tags_from_keywords(table: str, keywords: list[str]) -> list[str]:
-    table_obj = DBTable.objects.get(name=table)
+    table_obj = Table.objects.get(name=table)
     table_obj.tags.clear()
     keywords_new = set()
     for keyword in keywords:

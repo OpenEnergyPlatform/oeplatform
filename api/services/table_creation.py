@@ -2,17 +2,17 @@ from django.db import transaction
 
 from api import actions
 from api.error import APIError
-from dataedit.models import Table as DBTable
+from dataedit.models import Table
 from oedb.connection import _get_engine
 from oeplatform.settings import IS_SANDBOX, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class DjangoTableService:
     def create(self, table: str, is_sandbox: bool = IS_SANDBOX):
-        return DBTable.objects.create(name=table, is_sandbox=is_sandbox)
+        return Table.objects.create(name=table, is_sandbox=is_sandbox)
 
     def delete(self, table: str):
-        DBTable.objects.filter(name=table).delete()
+        Table.objects.filter(name=table).delete()
 
 
 class OEDBTableService:

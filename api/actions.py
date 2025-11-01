@@ -61,7 +61,6 @@ from sqlalchemy.schema import Sequence
 from sqlalchemy.sql.expression import Select
 
 import dataedit.metadata
-import login.models as login_models
 from api.error import APIError
 from api.parser import (
     get_or_403,
@@ -84,6 +83,7 @@ from api.sessions import (
 from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
+from login.models import DELETE_PERM, WRITE_PERM
 from login.models import myuser as User
 from login.utils import validate_open_data_license
 from oedb.connection import _create_oedb_session, _get_engine
@@ -1329,9 +1329,7 @@ def data_delete(request, context=None):
     if schema is None:
         schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
-    assert_permission(
-        user=context["user"], table=table, permission=login_models.DELETE_PERM
-    )
+    assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
 
     target_table = get_delete_table_name(orig_schema, orig_table)
     setter = []
@@ -1355,9 +1353,7 @@ def data_update(query: dict, context=None):
     if schema is None:
         schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
-    assert_permission(
-        user=context["user"], table=table, permission=login_models.WRITE_PERM
-    )
+    assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
 
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(query, "values")
@@ -1481,9 +1477,7 @@ def data_insert(request, context=None):
 
     schema_name, table_name = get_table_name(schema_name, table_name)
 
-    assert_permission(
-        user=context["user"], table=table_name, permission=login_models.WRITE_PERM
-    )
+    assert_permission(user=context["user"], table=table_name, permission=WRITE_PERM)
 
     # mapper = {orig_schema: schema, orig_table: table}
 

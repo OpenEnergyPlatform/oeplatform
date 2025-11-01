@@ -86,8 +86,7 @@ from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs, validate_schema
 from api.validators.column import MAX_COL_NAME_LENGTH, validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
-from dataedit.models import Embargo
-from dataedit.models import Table as DBTable
+from dataedit.models import Embargo, Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oedb.connection import _get_engine
@@ -416,7 +415,7 @@ class TableAPIView(APIView):
 
             # also remove any django table object
             # find the created django table object
-            object_to_delete = DBTable.objects.filter(name=table)
+            object_to_delete = Table.objects.filter(name=table)
             # delete it if it exists
             if object_to_delete.exists():
                 object_to_delete.delete()
@@ -518,7 +517,7 @@ class TableAPIView(APIView):
 
     def _create_table_object(self, table: str):
         try:
-            table_object = DBTable.objects.create(name=table)
+            table_object = Table.objects.create(name=table)
         except IntegrityError:
             raise APIError("Table already exists")
         return table_object
@@ -568,7 +567,7 @@ class TableAPIView(APIView):
             embargo.save()
 
     def _assign_table_holder(self, user, table: str):
-        table_object = DBTable.load(name=table)
+        table_object = Table.load(name=table)
         perm, _ = login_models.UserPermission.objects.get_or_create(
             table=table_object, holder=user
         )
@@ -677,7 +676,7 @@ class TableUnpublishAPIView(APIView):
     @require_admin_permission
     def post(self, request: HttpRequest, schema: str, table: str) -> JsonLikeResponse:
         """Set table to `not published`"""
-        table_obj = DBTable.objects.get(name=table)
+        table_obj = Table.objects.get(name=table)
         table_obj.is_publish = False
         table_obj.save()
         return JsonResponse({}, status=status.HTTP_200_OK)
@@ -822,7 +821,7 @@ class RowsAPIView(APIView):
                     for x in itertools.chain([cols], return_obj["data"])
                 ),
             )
-            django_table = DBTable.load(name=table)
+            django_table = Table.load(name=table)
             if django_table and django_table.oemetadata:
                 zf.writestr(
                     "datapackage.json",
@@ -1358,7 +1357,7 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     form select options with existing datasets from scenario topic.
     """
 
-    queryset = DBTable.objects.filter(topics__name="scenario")
+    queryset = Table.objects.filter(topics__name="scenario")
     serializer_class = ScenarioDataTablesSerializer
 
 
