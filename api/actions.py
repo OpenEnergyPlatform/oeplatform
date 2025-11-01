@@ -86,7 +86,7 @@ from dataedit.models import Table as DBTable
 from login.models import DELETE_PERM, WRITE_PERM
 from login.models import myuser as User
 from login.utils import validate_open_data_license
-from oedb.connection import _create_oedb_session, _get_engine
+from oedb.connection import _get_engine
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
@@ -104,6 +104,14 @@ ID_COLUMN_NAME = "id"
 
 MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
 IDENTIFIER_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_IDENTIFIER_LENGTH - 1))
+
+
+def _create_oedb_session():
+    """Return a sqlalchemy session to the oedb
+
+    Should only be created once per user request.
+    """
+    return sessionmaker(bind=_get_engine())()
 
 
 def delete_sequence(sequence: str, schema: str) -> None:
