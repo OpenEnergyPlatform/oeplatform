@@ -13,6 +13,7 @@ import logging
 import os
 import tempfile
 import zipfile
+from functools import cache
 from pathlib import Path
 
 from django.http import Http404, HttpRequest
@@ -32,17 +33,30 @@ from ontology.utils import collect_modules, get_common_data, get_ontology_versio
 
 logger = logging.getLogger("oeplatform")
 
-logger.info("Start loading the oeo from local static files.")
+
 OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
 OEO_PATH = OEO_BASE_PATH / OEO_VERSION
-OEO_MODULES_MAIN = collect_modules(OEO_PATH)
-OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
-OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
-OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
-logger.info(
-    "Loading completed! The content form the oeo files is parse into python data types."
-)
+
+
+@cache
+def get_OEO_MODULES_MAIN() -> dict:
+    return collect_modules(OEO_PATH)
+
+
+@cache
+def get_OEO_MODULES_SUBMODULES() -> dict:
+    return collect_modules(OEO_PATH / "modules")
+
+
+@cache
+def get_OEO_MODULES_IMPORTS() -> dict:
+    return collect_modules(OEO_PATH / "imports")
+
+
+@cache
+def get_OEO_COMMON_DATA() -> dict:
+    return get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
 
 
 class OntologyAboutView(View):
@@ -69,9 +83,9 @@ class OntologyAboutView(View):
 class PartialOntologyAboutContentView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         if request.headers.get("HX-Request") == "true":
-            ontology_data = OEO_COMMON_DATA
+            ontology_data = get_OEO_COMMON_DATA()
 
-            submodules = OEO_MODULES_SUBMODULES
+            submodules = get_OEO_MODULES_SUBMODULES()
 
             desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
 
@@ -80,7 +94,7 @@ class PartialOntologyAboutContentView(View):
             }
 
             # Collect all file names
-            imports = OEO_MODULES_IMPORTS
+            imports = get_OEO_MODULES_IMPORTS()
 
             partial = render(
                 request,
@@ -105,7 +119,7 @@ class PartialOntologyAboutContentView(View):
 class PartialOntologyAboutSidebarContentView(View):
     def get(self, request):
         version = OEO_VERSION
-        main_module = OEO_MODULES_MAIN
+        main_module = get_OEO_MODULES_MAIN()
 
         if OPEN_ENERGY_ONTOLOGY_NAME in main_module.keys():
             main_module_name = OPEN_ENERGY_ONTOLOGY_NAME
@@ -146,7 +160,7 @@ class OntologyViewClassesView(View):
             raise Http404
 
         if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
-            ontology_data = OEO_COMMON_DATA
+            ontology_data = get_OEO_COMMON_DATA()
         elif ontology in [OEO_EXT_NAME]:
             ontology_data = get_common_data(
                 OEO_EXT_NAME, file=OEO_EXT_OWL_NAME, path=OEO_EXT_PATH

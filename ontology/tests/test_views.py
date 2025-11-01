@@ -4,7 +4,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from base.tests import TestViewsTestCase
-from ontology.views import OEO_MODULES_MAIN
+from ontology.views import get_OEO_MODULES_MAIN
 
 TEST_ONTOLOGY = "oeo"
 
@@ -31,7 +31,7 @@ class TestViewsOntology(TestViewsTestCase):
         self.get("ontology:releases")
 
         # these tests only work if local ontology exists
-        if TEST_ONTOLOGY in OEO_MODULES_MAIN:
+        if TEST_ONTOLOGY in get_OEO_MODULES_MAIN():
             self.get("ontology:oeo-latest-glossary", kwargs={"ontology": TEST_ONTOLOGY})
             self.get("ontology:oeo-initializer", kwargs={"ontology": TEST_ONTOLOGY})
             self.get("ontology:oeo-latest-full-zip", kwargs={"ontology": TEST_ONTOLOGY})
