@@ -1116,7 +1116,7 @@ class RowsAPIView(APIView):
             query = table.select()
         else:
             columns = [actions.get_column_obj(table, c) for c in columns]
-            query = actions.get_columns_select_query(columns=columns)
+            query = actions.get_columns_select(columns=columns)
 
         where_clauses = data.get("where")
 
