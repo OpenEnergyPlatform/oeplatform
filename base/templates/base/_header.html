@@ -147,20 +147,22 @@
     </li>
   </ul>
 </div>
-{% if request.user.is_authenticated %}
-  <!-- Profile Link -->
-  <a class="btn btn-link text-white p-0"
-     href="{% url 'login:settings' user.pk %} ">
-    {% fa5_icon 'user' 'fas' %} {{ user }}
-  </a>
-  {# URL provided by django-allauth/account/urls.py #}
-  <a href="{% url 'account_logout' %}" class="btn btn-danger btn-sm m-1">
-  {% fa5_icon 'arrow-right' 'fas' %} {% translate "Sign Out" %}</a>
-{% else %}
-  {% if ACCOUNT_ALLOW_REGISTRATION %}
+<div class="ms-auto">
+  {% if request.user.is_authenticated %}
+    <!-- Profile Link -->
+    <a class="btn btn-link text-white p-0"
+       href="{% url 'login:settings' user.pk %} ">
+      {% fa5_icon 'user' 'fas' %} {{ user }}
+    </a>
     {# URL provided by django-allauth/account/urls.py #}
-    <a href="{% url 'account_signup' %}" class="btn btn-info btn-sm m-1">{% translate "Sign Up" %}</a>
+    <a href="{% url 'account_logout' %}" class="btn btn-danger btn-sm m-1">
+    {% fa5_icon 'arrow-right' 'fas' %} {% translate "Sign Out" %}</a>
+  {% else %}
+    {% if ACCOUNT_ALLOW_REGISTRATION %}
+      {# URL provided by django-allauth/account/urls.py #}
+      <a href="{% url 'account_signup' %}" class="btn btn-info btn-sm m-1">{% translate "Sign Up" %}</a>
+    {% endif %}
+    {# URL provided by django-allauth/account/urls.py #}
+    <a class="btn btn-info btn-sm m-1" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
   {% endif %}
-  {# URL provided by django-allauth/account/urls.py #}
-  <a class="btn btn-info btn-sm m-1" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
-{% endif %}
+</div>

@@ -1,10 +1,13 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
+{% load compress %}
 {% block after-head %}
-  <link rel="stylesheet"
-        type="text/css"
-        href="{% static 'css/index-style.css' %}?v=latest" />
+  {% compress css %}
+    <link rel="stylesheet"
+          type="text/css"
+          href="{% static 'css/index-style.css' %}" />
+  {% endcompress %}
 {% endblock %}
 {% block main %}
   <div class="index-home">
@@ -31,16 +34,11 @@
                   upload it.
                 </p>
               </div>
-              <a role="button"
-                 class="btn btn-primary pull-right"
-                 style="font-size: 16px"
-                 href="{% url 'dataedit:topic-list' %}">Database</a>
             </div>
-            {% comment %}
-              <div class="hovertext">
-                This text will be trimmed down to what is visible in the div
-              </div>
-            {% endcomment %}
+            <a role="button"
+               class="btn btn-primary pull-right"
+               style="font-size: 16px"
+               href="{% url 'dataedit:topic-list' %}">Database</a>
           </div>
           <div class="index-tile index-tile-colored index-tile-color-2">
             <!-- <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg' %}"
