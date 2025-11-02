@@ -45,7 +45,7 @@ def automated_label_generator(new_unit_class: type):
                             prefix_label = None
                             for sub_class in target_class.Classes:
                                 if isinstance(sub_class, ThingClass):  # The unit part
-                                    unit_label = sub_class.label[0]
+                                    unit_label = sub_class.label[0]  # type:ignore ?
                                 elif (
                                     isinstance(sub_class, Restriction)
                                     and sub_class.property == has_unit_prefix

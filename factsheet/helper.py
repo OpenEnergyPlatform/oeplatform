@@ -182,7 +182,7 @@ def build_sector_dropdowns_from_oeo(g: Graph):
 
         # sector individuals: ?sector oeo:is_defined_by ?sd
         for sector in g.subjects(PROP_DEFINED_BY, sd):
-            sec_label = _label(g, sector)
+            sec_label = _label(g, sector)  # type:ignore
             definition = g.value(sector, PROP_DEFINITION)
 
             sectors_list.append(
