@@ -2506,3 +2506,51 @@ def list_table_sizes() -> list[dict]:
         return out
     finally:
         sess.close()
+
+
+def table_get_approx_row_count(table: DBTable, precise_below: int = 0) -> int:
+    """Get approximate number of rows quickly.
+
+    Especially for huge tables, count(*) is slow,
+    so we use reltuples.
+    See https://www.postgresql.org/docs/current/catalog-pg-class.html
+    This is useful for data preview in frontend, where its not a problem that actual
+    number of rows is different because its paginated anywayss.
+    See issue #1531
+    """
+
+    engine = _get_engine()
+    # NOTE: cannot use :parameter, because we insert
+    # table / schema name. but its validated by constraints
+    # on django table.name field
+
+    query = sa.text(
+        f"""
+        SELECT reltuples::bigint AS approx_row_count
+        FROM pg_class
+        WHERE oid = '"{table.oedb_schema}"."{table.name}"'::regclass
+        ;
+    """
+    )
+
+    with engine.connect() as conn:
+        resp = conn.execute(query)
+        row_count = resp.fetchone()[0]
+
+    print(row_count, precise_below)
+    if row_count >= precise_below:
+        return row_count
+
+    query = sa.text(
+        f"""
+        SELECT count(*)
+        FROM "{table.oedb_schema}"."{table.name}"
+        ;
+    """
+    )
+
+    with engine.connect() as conn:
+        resp = conn.execute(query)
+        row_count = resp.fetchone()[0]
+
+    return row_count
