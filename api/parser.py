@@ -82,7 +82,8 @@ def query_typecast_select(select) -> Select:
     return cast_type(Select, select)
 
 
-def get_or_403(dictionary, key):
+def get_or_403(dictionary: dict | None, key):
+    dictionary = dictionary or {}
     try:
         return dictionary[key]
     except KeyError:

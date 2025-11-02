@@ -55,10 +55,9 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy import types as sqltypes
-from sqlalchemy.engine import ResultProxy
 from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm.session import Session, sessionmaker
+from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql.expression import Select
 
@@ -87,7 +86,15 @@ from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
 from login.models import DELETE_PERM, WRITE_PERM
 from login.models import myuser as User
-from oedb.connection import _get_engine
+from oedb.connection import (
+    Connection,
+    Cursor,
+    Engine,
+    ResultProxy,
+    Session,
+    _get_engine,
+)
+from oedb.utils import ID_COLUMN_NAME, MAX_NAME_LENGTH, NAME_PATTERN
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
@@ -99,12 +106,6 @@ Base = declarative_base()
 __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
-
-ID_COLUMN_NAME = "id"
-
-
-MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
-IDENTIFIER_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_IDENTIFIER_LENGTH - 1))
 
 
 def _create_oedb_session():
@@ -207,7 +208,7 @@ def assert_has_metadata(table: str, schema: str) -> bool:
 
 def _translate_fetched_cell(cell):
     if isinstance(cell, geoalchemy2.WKBElement):
-        return _get_engine().execute(cell.ST_AsText()).scalar()
+        return engine_execute(_get_engine(), cell.ST_AsText()).scalar()
     elif isinstance(cell, memoryview):
         return wkb.dumps(wkb.loads(cell.tobytes()), hex=True)
     else:
@@ -922,12 +923,12 @@ def column_add(schema, table, column, description):
 
 
 def assert_valid_identifier_name(identifier):
-    if not IDENTIFIER_PATTERN.match(identifier):
+    if not NAME_PATTERN.match(identifier):
         raise APIError(
             f"Unsupported table name: {identifier}\n"
             "Table names must consist of lowercase alpha-numeric words or underscores "
             "and start with a letter "
-            f"and must not exceed {MAX_IDENTIFIER_LENGTH} characters "
+            f"and must not exceed {MAX_NAME_LENGTH} characters "
             f"(current table name length: {len(identifier)})."
         )
 
@@ -1322,7 +1323,8 @@ def drop_not_null_constraints_from_delete_meta_table(
     AND table_schema = '{meta_schema}'
     AND is_nullable = 'NO'
     """
-    column_names = [x[0] for x in engine.execute(query).fetchall()]
+    resp = engine_execute(engine, query).fetchall()
+    column_names = [x[0] for x in resp] if resp else []
     # filter meta columns and id
     column_names = [
         c for c in column_names if c != ID_COLUMN_NAME and not c.startswith("_")
@@ -1335,7 +1337,7 @@ def drop_not_null_constraints_from_delete_meta_table(
     # drop not null from these columns
     col_drop = ", ".join(f'ALTER "{c}" DROP NOT NULL' for c in column_names)
     query = f'ALTER TABLE "{meta_schema}"."{meta_table_delete}" {col_drop};'
-    engine.execute(query)
+    engine_execute(engine, query)
 
 
 def data_delete(request: dict, context: dict):
@@ -1417,7 +1419,7 @@ def data_insert_check(schema, table, values, context):
             #       Use joins instead to avoid piping your results through
             #       python.
             if isinstance(values, Select):
-                values = engine.execute(values)
+                values = engine_execute(engine, values)
             for row in values:
                 # TODO: This is horribly inefficient!
                 query = {
@@ -1530,7 +1532,7 @@ def data_insert(request, context: dict):
     return response
 
 
-def _execute_sqla(query, cursor):
+def _execute_sqla(query, cursor: Cursor):
     dialect = _get_engine().dialect
     try:
         compiled = query.compile(dialect=dialect)
@@ -1584,10 +1586,11 @@ def process_value(val):
         return str(val)
 
 
-def data_search(request, context=None):
+def data_search(request, context: dict | None = None):
     query = parse_select(request)
-    cursor = load_cursor_from_context(context)
+    cursor = load_cursor_from_context(context or {})
     _execute_sqla(query, cursor)
+
     description = [
         [
             col.name,
@@ -1621,10 +1624,11 @@ def count_all(request, context=None):
 
 def analyze_columns(schema, table):
     engine = _get_engine()
-    result = engine.execute(
+    result = engine_execute(
+        engine,
         "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(  # noqa
             schema=schema, table=table
-        )
+        ),
     )
     return [{"id": get_or_403(r, "id"), "type": get_or_403(r, "type")} for r in result]
 
@@ -1733,9 +1737,10 @@ def get_comment_table(schema, table):
     sql_string = "select obj_description('\"{schema}\".\"{table}\"'::regclass::oid, 'pg_class');".format(  # noqa
         schema=schema, table=table
     )
-    res = engine.execute(sql_string)
+    res = engine_execute(engine, sql_string)
+    row = res.first()
     if res:
-        jsn = res.first().obj_description
+        jsn = row.obj_description if row else None
         if jsn:
             jsn = jsn.replace("\n", "")
         else:
@@ -1877,7 +1882,7 @@ def get_view_definition(request, context=None):
 
 def get_columns(query: dict, context=None) -> dict:
     engine = _get_engine()
-    connection = engine.connect()
+    connection: Connection = engine.connect()
 
     table_name = get_or_403(query, "table")
     schema = query.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
@@ -1916,7 +1921,7 @@ def get_columns(query: dict, context=None) -> dict:
         bindparams=[sql.bindparam("table_oid", type_=sqltypes.Integer)],
         typemap={"attname": sqltypes.Unicode, "default": sqltypes.Unicode},
     )
-    c = connection.execute(s, table_oid=table_oid)
+    c = connection_execute(connection, s, table_oid=table_oid)
     rows = c.fetchall()
 
     domains = engine.dialect._load_domains(connection)
@@ -2188,7 +2193,7 @@ def create_meta_table(
             meta_schema=meta_schema, edit_table=meta_table, schema=schema, table=table
         )
         engine = _get_engine()
-        engine.execute(query)
+        engine_execute(engine, query)
 
 
 def create_delete_table(schema, table, meta_schema=None):
@@ -2230,7 +2235,7 @@ def getValue(schema, table, column, id):
     return None
 
 
-def apply_changes(schema, table, cursor=None):
+def apply_changes(schema, table, cursor: Cursor | None = None):
     """Apply changes from the meta tables to the actual table.
 
     Meta tables are :
@@ -2250,8 +2255,8 @@ def apply_changes(schema, table, cursor=None):
 
     if cursor is None:
         artificial_connection = True
-        connection = engine.raw_connection()
-        cursor = connection.cursor()
+        connection: Connection = engine.raw_connection()  # type:ignore TODO
+        cursor: Cursor = connection.cursor()  # type:ignore TODO
 
     try:
         meta_schema = get_meta_schema_name(schema)
@@ -2571,8 +2576,9 @@ def table_get_approx_row_count(table: DBTable, precise_below: int = 0) -> int:
     )
 
     with engine.connect() as conn:
-        resp = conn.execute(query)
-        row_count = resp.fetchone()[0]
+        resp = connection_execute(conn, query)
+        row = resp.fetchone()
+        row_count = row[0] if row else 0
 
     print(row_count, precise_below)
     if row_count >= precise_below:
@@ -2587,14 +2593,31 @@ def table_get_approx_row_count(table: DBTable, precise_below: int = 0) -> int:
     )
 
     with engine.connect() as conn:
-        resp = conn.execute(query)
-        row_count = resp.fetchone()[0]
+        resp = connection_execute(conn, query)
+        row = resp.fetchone()
+        row_count = row[0] if row else 0
 
     return row_count
 
 
 def session_execute(session: Session, sql: str, parameter=None) -> ResultProxy:
     response = session.execute(sql, parameter)
+    # Note: cast is only for type checking,
+    # should disappear once we migrate to sqlalchemy >= 1.4
+    response = cast(ResultProxy, response)
+    return response
+
+
+def engine_execute(engine: Engine, sql: str, parameter=None) -> ResultProxy:
+    response = engine.execute(sql, parameter)
+    # Note: cast is only for type checking,
+    # should disappear once we migrate to sqlalchemy >= 1.4
+    response = cast(ResultProxy, response)
+    return response
+
+
+def connection_execute(connection: Connection, sql: str, **kwargs) -> ResultProxy:
+    response = connection.execute(sql, **kwargs)
     # Note: cast is only for type checking,
     # should disappear once we migrate to sqlalchemy >= 1.4
     response = cast(ResultProxy, response)

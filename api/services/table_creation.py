@@ -3,7 +3,7 @@ from django.db import transaction
 from api import actions
 from api.error import APIError
 from dataedit.models import Table
-from oedb.connection import _get_engine
+from oedb.utils import OedbTableGroup
 from oeplatform.settings import IS_SANDBOX, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
@@ -27,25 +27,10 @@ class OEDBTableService:
         except Exception:
             # does not exist
             return
-        meta_schema = actions.get_meta_schema_name(real_schema)
 
-        edit_table = actions.get_edit_table_name(real_schema, real_table)
-        insert_table = actions.get_insert_table_name(real_schema, real_table)
-        delete_table = actions.get_delete_table_name(real_schema, real_table)
-
-        engine = _get_engine()
-
-        # drop the revision tables
-        engine.execute(f'DROP TABLE IF EXISTS "{meta_schema}"."{edit_table}" CASCADE;')
-        engine.execute(
-            f'DROP TABLE IF EXISTS "{meta_schema}"."{insert_table}" CASCADE;'
-        )
-        engine.execute(
-            f'DROP TABLE IF EXISTS "{meta_schema}"."{delete_table}" CASCADE;'
-        )
-
-        # drop the actual data table
-        engine.execute(f'DROP TABLE IF EXISTS "{real_schema}"."{real_table}" CASCADE;')
+        OedbTableGroup(
+            validated_table_name=real_table, schema_name=real_schema
+        ).drop_if_exists()
 
 
 class TableCreationOrchestrator:

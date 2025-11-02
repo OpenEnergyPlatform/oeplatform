@@ -49,7 +49,7 @@ from rest_framework.views import APIView
 import api.parser
 import login.models as login_models
 from api import actions, parser, sessions
-from api.actions import table_get_approx_row_count
+from api.actions import engine_execute, table_get_approx_row_count
 from api.encode import Echo
 from api.error import APIError
 from api.helper import (
@@ -85,12 +85,13 @@ from api.services.embargo import (
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs, validate_schema
-from api.validators.column import MAX_COL_NAME_LENGTH, validate_column_names
+from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo, Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oedb.connection import _get_engine
+from oedb.utils import MAX_COL_NAME_LENGTH, OedbTableGroup
 from oekg.utils import (
     execute_sparql_query,
     process_datasets_sparql_query,
@@ -447,21 +448,10 @@ class TableAPIView(APIView):
         if actions.has_table({"table": table, "schema": schema}):
             # get table and schema names, also for meta(revision) tables
             schema, table = actions.get_table_name(schema, table)
-            meta_schema = actions.get_meta_schema_name(schema)
 
-            # drop the revision table with edit_ prefix
-            edit_table = actions.get_edit_table_name(schema, table)
-            _get_engine().execute(
-                'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                    schema=meta_schema, table=edit_table
-                )
-            )
-            # drop the data table
-            _get_engine().execute(
-                'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                    schema=schema, table=table
-                )
-            )
+            OedbTableGroup(
+                validated_table_name=table, schema_name=schema
+            ).drop_if_exists()
 
     @load_cursor()
     def __create_table(
@@ -923,27 +913,28 @@ class RowsAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        row_id = int(row_id)
+
         request_data_dict = get_request_data_dict(request)
         payload_query = request_data_dict["query"]
 
-        if row_id and payload_query.get("id", int(row_id)) != int(row_id):
+        if payload_query.get("id", row_id) != row_id:
             raise APIError(
                 "Id in URL and query do not match. Ids may not change.",
                 status=status.HTTP_409_CONFLICT,
             )
 
         engine = _get_engine()
+
         # check whether id is already in use
-        exists = (
-            engine.execute(
-                "select count(*) "
-                "from {schema}.{table} "
-                "where id = {id};".format(schema=schema, table=table, id=row_id)
-            ).first()[0]
-            > 0
-            if row_id
-            else False
-        )
+        resp = engine_execute(
+            engine,
+            'select count(*) from "{schema}"."{table}" where id = {id};'.format(
+                schema=schema, table=table, id=row_id
+            ),
+        ).first()
+        count = resp[0] if resp else 0
+        exists = count > 0 if row_id else False
         if exists:
             response = self.__update_rows(request, schema, table, payload_query, row_id)
             actions.apply_changes(schema, table)

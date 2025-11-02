@@ -116,6 +116,8 @@ def load_cursor(named=False):
                 if fetch_all:
                     cursor = actions.load_cursor_from_context(context)
                     session = actions.load_session_from_context(context)
+                    connection = session.connection
+
                     if not result:
                         result = {}
                     # Initial server-side cursors do not contain any description before
@@ -130,7 +132,7 @@ def load_cursor(named=False):
                     triggers = [
                         actions.close_cursor,
                         actions.close_raw_connection,
-                        session.connection.commit,
+                        connection.commit,
                     ]
                     trigger_args = [({}, context), ({}, context), tuple()]
                     first = None
@@ -169,7 +171,7 @@ def load_cursor(named=False):
                             result["rowcount"] = cursor.rowcount
                             triggered_close = True
                     if not triggered_close and artificial_connection:
-                        session.connection.commit()
+                        connection.commit()
             finally:
                 if not triggered_close:
                     if fetch_all and not artificial_connection:

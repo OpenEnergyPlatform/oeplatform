@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand
 from api.actions import get_schema_names, get_table_names
 from dataedit.models import Table
 from oedb.connection import _get_engine
+from oedb.utils import MAX_TABLE_NAME_LENGTH
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
@@ -81,7 +82,7 @@ def get_schema_tables_oep() -> set[tuple[str, str]]:
         result.add((schema, table_name))
         for action in ["delete", "edit", "insert"]:
             _meta_table_name = f"_{table_name}_{action}"
-            meta_table_name = _meta_table_name[:63]
+            meta_table_name = _meta_table_name[:MAX_TABLE_NAME_LENGTH]
             if meta_table_name != _meta_table_name:
                 logger.warning(
                     f"table name too long {_meta_table_name} => {meta_table_name}"

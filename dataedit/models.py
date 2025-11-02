@@ -40,6 +40,7 @@ from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
 
 from dataedit.utils import get_badge_icon_path, validate_badge_name_match
+from oedb.utils import OedbTableGroup
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 if TYPE_CHECKING:
@@ -194,6 +195,12 @@ class Table(Tagable):
 
     class Meta:
         unique_together = (("name",),)
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        OedbTableGroup(
+            validated_table_name=self.name, schema_name=self.oedb_schema
+        ).drop_if_exists()
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})

@@ -1,8 +1,7 @@
 import re
 
 from api.error import APIError
-
-MAX_COL_NAME_LENGTH = 63
+from oedb.utils import MAX_COL_NAME_LENGTH
 
 
 def validate_column_names(column_definitions):

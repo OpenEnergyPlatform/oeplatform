@@ -9,8 +9,24 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import sqlalchemy as sqla
+from psycopg2.extensions import cursor as Cursor
+from sqlalchemy import inspect
+from sqlalchemy.engine import ResultProxy
+from sqlalchemy.engine.base import (
+    Connection,  # from engine.connect() or engine.raw_connection()
+)
+from sqlalchemy.engine.base import (
+    Engine,
+)
+from sqlalchemy.engine.reflection import Inspector
+from sqlalchemy.orm.session import Session, sessionmaker
+from sqlalchemy.pool.base import (
+    _ConnectionFairy as DBAPIConnection,  # from engine.connect().connection
+)
 
 from oeplatform.settings import dbhost, dbname, dbpasswd, dbport, dbuser
+
+__all__ = ["Connection", "Cursor", "ResultProxy", "DBAPIConnection"]
 
 
 def __get_connection_string():
@@ -24,5 +40,17 @@ __ENGINE = sqla.create_engine(
 )
 
 
-def _get_engine():
+def _get_engine() -> Engine:
     return __ENGINE
+
+
+def _get_inspector() -> Inspector:
+    return inspect(_get_engine())  # type: ignore
+
+
+def _create_oedb_session() -> Session:
+    """Return a sqlalchemy session to the oedb
+
+    Should only be created once per user request.
+    """
+    return sessionmaker(bind=_get_engine())()
