@@ -114,10 +114,12 @@ def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     schema = request.POST.get("schema")
     table = request.POST.get("table")
 
-    if "deny" in action:
+    if action == "deny":
         actions.remove_queued_constraint(id)
-    elif "apply" in action:
+    elif action == "apply":
         actions.apply_queued_constraint(id)
+    else:
+        raise NotImplementedError(action)
 
     return redirect("dataedit:view", schema=schema, table=table)
 
@@ -135,10 +137,12 @@ def admin_column_view(request: HttpRequest) -> HttpResponse:
     schema = request.POST.get("schema")
     table = request.POST.get("table")
 
-    if "deny" in action:
+    if action == "deny":
         actions.remove_queued_column(id)
-    elif "apply" in action:
+    elif action == "apply":
         actions.apply_queued_column(id)
+    else:
+        raise NotImplementedError(action)
 
     return redirect("dataedit:view", schema=schema, table=table)
 

@@ -283,7 +283,7 @@ EXTERNAL_URLS = {
     "oeko_en": "https://www.oeko.de/en/",
     "offis": "https://www.offis.de/",
     "pik_potsdam": "https://www.pik-potsdam.de/",
-    "ptj_energiesystemanalyse": "https://www.ptj.de/energiesystemanalyse",
+    "ptj": "https://www.ptj.de",
     "tib_eu_de": "https://www.tib.eu/de/",
     "uni_flensburg_en": "https://www.uni-flensburg.de/en/",
     "cdn_github_cards_widget": "//cdn.jsdelivr.net/github-cards/latest/widget.js",
