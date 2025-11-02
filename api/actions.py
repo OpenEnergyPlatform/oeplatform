@@ -2556,7 +2556,7 @@ def table_get_approx_row_count(table: DBTable, precise_below: int = 0) -> int:
     # table / schema name. but its validated by constraints
     # on django table.name field
 
-    query = sa.text(
+    query = text(
         f"""
         SELECT reltuples::bigint AS approx_row_count
         FROM pg_class
@@ -2573,7 +2573,7 @@ def table_get_approx_row_count(table: DBTable, precise_below: int = 0) -> int:
     if row_count >= precise_below:
         return row_count
 
-    query = sa.text(
+    query = text(
         f"""
         SELECT count(*)
         FROM "{table.oedb_schema}"."{table.name}"

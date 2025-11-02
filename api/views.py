@@ -1394,7 +1394,7 @@ class ManageOekgScenarioDatasetsAPIView(APIView):
 def table_approx_row_count_view(
     request: HttpRequest, table: str, schema: str | None = None
 ) -> JsonResponse:
-    table_obj = DBTable.objects.get(name=table)
+    table_obj = Table.objects.get(name=table)
     precise_below = int(
         request.GET.get("precise-below", APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW)
     )
