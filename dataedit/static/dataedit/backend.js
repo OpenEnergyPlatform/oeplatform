@@ -1,12 +1,18 @@
-// SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-// SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
-// SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-// SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
+/* eslint-disable max-len */
+/*
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-License-Identifier: AGPL-3.0-or-later
+*/
+/* eslint-enable max-len */
 
 "use strict";
+
+const MAX_ROWCOUNT_ORDER_BY = 100000;
+/* table with more than that: disable filter and sort */
 
 var map;
 var tile_layer;
@@ -116,6 +122,7 @@ function request_data(data, callback, settings) {
   ];
   count_query.where = where;
   var select_query = JSON.parse(JSON.stringify(base_query));
+
   select_query["order_by"] = data.order.map(function (c) {
     return {
       type: "column",
@@ -123,6 +130,7 @@ function request_data(data, callback, settings) {
       ordering: c.dir,
     };
   });
+
   select_query["fields"] = [];
   for (var i in table_info.columns) {
     var col = table_info.columns[i];
@@ -148,18 +156,32 @@ function request_data(data, callback, settings) {
   if (where !== null) {
     select_query.where = where;
   }
+
+  const tableTooLarge = table_info.rows > MAX_ROWCOUNT_ORDER_BY;
+
+  if (tableTooLarge) {
+    showMessage(
+      "Sorting and filtering in preview is disabled for very large tables",
+      "warning"
+    );
+    select_query.where = undefined;
+    select_query.order_by = undefined;
+  }
+
   var draw = Number(data.draw);
   window.reverseUrl("api:advanced-search").then((urlSearch) => {
     $.when(
-      $.ajax({
-        type: "POST",
-        url: urlSearch,
-        dataType: "json",
-        data: {
-          csrfmiddlewaretoken: csrftoken,
-          query: JSON.stringify(count_query),
-        },
-      }),
+      tableTooLarge
+        ? undefined
+        : $.ajax({
+            type: "POST",
+            url: urlSearch,
+            dataType: "json",
+            data: {
+              csrfmiddlewaretoken: csrftoken,
+              query: JSON.stringify(count_query),
+            },
+          }),
       $.ajax({
         type: "POST",
         url: urlSearch,
@@ -189,10 +211,16 @@ function request_data(data, callback, settings) {
         } else if (view.type === "graph") {
           build_graph(select_response[0].data);
         }
+
+        const recordsFiltered = tableTooLarge
+          ? table_info.rows /* total row count */
+          : count_response[0]
+              .data[0][0]; /* correct row count of filtered data */
+
         callback({
           data: select_response[0].data,
           draw: draw,
-          recordsFiltered: count_response[0].data[0][0],
+          recordsFiltered: recordsFiltered,
           recordsTotal: table_info.rows,
         });
       })
@@ -298,40 +326,33 @@ function flash_handler(i) {
   };
 }
 
+/**
+ *
+ * @param {string} schema
+ * @param {string} table
+ * @param {string} csrftoken
+ * @param {object} current_view
+ */
 function load_view(schema, table, csrftoken, current_view) {
   view = current_view;
   table_info.name = table;
   table_info.schema = schema;
-  var count_query = {
-    from: {
-      type: "table",
-      schema: schema,
-      table: table,
-    },
-    fields: [
-      {
-        type: "function",
-        function: "count",
-        operands: ["*"],
-      },
-    ],
-  };
 
   Promise.all([
     window.reverseUrl("api:advanced-search"),
     window.reverseUrl("api:table-columns", { schema: schema, table: table }),
-  ]).then(([urlSearch, urlColumns]) => {
+    window.reverseUrl("api:approx-row-count", { schema: "data", table: table }),
+  ]).then(([urlSearch, urlColumns, urlApproxRowCount]) => {
     $.when(
       $.ajax({
         url: urlColumns,
       }),
       $.ajax({
-        type: "POST",
-        url: urlSearch,
+        type: "GET",
+        url: urlApproxRowCount,
         dataType: "json",
         data: {
           csrfmiddlewaretoken: csrftoken,
-          query: JSON.stringify(count_query),
         },
       })
     )
@@ -359,7 +380,9 @@ function load_view(schema, table, csrftoken, current_view) {
             "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             {
               attribution:
-                'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende',
+                "Kartendaten &copy; " +
+                '<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' +
+                "Mitwirkende",
               useCache: true,
             }
           );

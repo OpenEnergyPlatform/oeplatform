@@ -49,6 +49,7 @@ from rest_framework.views import APIView
 import api.parser
 import login.models as login_models
 from api import actions, parser, sessions
+from api.actions import table_get_approx_row_count
 from api.encode import Echo
 from api.error import APIError
 from api.helper import (
@@ -101,6 +102,10 @@ from oeplatform.settings import (
     USE_LOEP,
     USE_ONTOP,
 )
+
+# when running approximate (fast) row count: if number is below this
+# we get the precise row count (slow)
+APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW = 0
 
 
 class SequenceAPIView(APIView):
@@ -1383,6 +1388,21 @@ class ManageOekgScenarioDatasetsAPIView(APIView):
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+@api_exception
+def table_approx_row_count_view(
+    request: HttpRequest, table: str, schema: str | None = None
+) -> JsonResponse:
+    table_obj = Table.objects.get(name=table)
+    precise_below = int(
+        request.GET.get("precise-below", APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW)
+    )
+    approx_row_count = table_get_approx_row_count(
+        table=table_obj, precise_below=precise_below
+    )
+    response = {"data": [[approx_row_count]]}
+    return JsonResponse(response)
 
 
 class TableSizeAPIView(APIView):

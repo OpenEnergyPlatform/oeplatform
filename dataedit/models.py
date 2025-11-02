@@ -21,7 +21,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Union
+from typing import Literal, Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
@@ -37,7 +37,9 @@ from django.db.models import (
 )
 from django.urls import reverse
 from django.utils import timezone
+from omi.license import LicenseError, validate_oemetadata_licenses
 
+from dataedit.utils import get_badge_icon_path, validate_badge_name_match
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
@@ -299,6 +301,63 @@ class Table(Tagable):
         except Exception as e:
             raise e
         return label
+
+    def validate_open_data_license(
+        self,
+    ) -> dict[Literal["status", "error"], bool | str]:
+        metadata = self.oemetadata or {}
+
+        try:
+            validate_oemetadata_licenses(metadata)
+        except LicenseError as e:
+            return {"status": False, "error": str(e)}
+        except Exception as e:
+            return {"status": False, "error": str(e)}
+
+        return {"status": True, "error": ""}
+
+    def get_review_badge_from_table_metadata(
+        self,
+    ) -> dict[Literal["is_badge", "err_msg", "badge_name", "icon_path"], bool | str]:
+        metadata = self.oemetadata or {}
+
+        if metadata is None:
+            return {"is_badge": False, "err_msg": "Metadata is empty!"}
+
+        review = metadata.get("review")
+
+        if not review:
+            return {
+                "is_badge": False,
+                "err_msg": "No review information available in the metadata.",
+            }
+
+        badge = review.get("badge")
+
+        if badge is None and badge != "":
+            return {
+                "is_badge": False,
+                "err_msg": (
+                    "No badge information available in the metadata.Please start "
+                    "a community-based open peer review for this table first."
+                ),
+            }
+
+        badge_name_normalized = badge.upper()
+        check_is_badge = validate_badge_name_match(badge_name_normalized)
+
+        if check_is_badge:
+            icon = get_badge_icon_path(check_is_badge.name)
+            return {
+                "is_badge": True,
+                "badge_name": check_is_badge.name,
+                "icon_path": icon,
+            }
+        else:
+            return {
+                "is_badge": False,
+                "err_msg": f"No match found for badge name: {badge}",
+            }
 
 
 class Embargo(models.Model):
