@@ -24,6 +24,28 @@ var query_builder;
 var where;
 var view;
 
+var type_maps = {
+  "double precision": "double",
+};
+
+var valid_types = [
+  "string",
+  "integer",
+  "double",
+  "date",
+  "time",
+  "datetime",
+  "boolean",
+];
+
+var table_info = {
+  columns: [],
+  columnTypes: {},
+  rows: null,
+  name: null,
+  schema: null,
+};
+
 function getCookie(name) {
   var cookieValue = null;
   if (document.cookie && document.cookie !== "") {
@@ -38,6 +60,65 @@ function getCookie(name) {
     }
   }
   return cookieValue;
+}
+
+/**
+ *
+ * @param {str} colType
+ * @returns {boolean}
+ */
+function columnTypeIsGeometry(colType) {
+  var colTypeLower = colType.toLowerCase();
+  if (colTypeLower.includes("geo")) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ *
+ * @param {str} colType
+ * @returns {boolean}
+ */
+function columnTypeIsJson(colType) {
+  var colTypeLower = colType.toLowerCase();
+  if (colTypeLower.includes("json")) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ *
+ * @param {str} colType
+ * @returns {boolean}
+ */
+function columnTypeIsSortable(colType) {
+  if (columnTypeIsJson(colType) || columnTypeIsGeometry(colType)) {
+    return false; /* cannot sort json/jsonb */
+  }
+  return true;
+}
+
+/**
+ *
+ * @param {*} query
+ * @param {string} label
+ * @returns {object}
+ */
+function queryCastToText(query, label) {
+  var result = {
+    type: "label",
+    element: {
+      type: "cast",
+      source: query,
+      as: "text",
+    },
+  };
+  if (label) {
+    result.label = label;
+  }
+  return result;
 }
 
 function fail_handler(jqXHR, exception) {
@@ -72,21 +153,6 @@ function fail_handler(jqXHR, exception) {
   showMessage(msg, "warning");
 }
 
-var table_info = {
-  columns: [],
-  rows: null,
-  name: null,
-  schema: null,
-};
-
-var geo_datatypes = [
-  "point",
-  "polygon",
-  "polygonwithhole",
-  "collection",
-  "linestring",
-];
-
 /**
  *
  * @param {string} textData
@@ -102,9 +168,15 @@ function customParseJSON(textData) {
   return jsonData;
 }
 
+/**
+ * this function is called by the table widget to update displayed data,
+ * like filtering, sorting, pagination, ...
+ * @param {object} data
+ * @param {function} callback
+ * @param {object} settings
+ */
 function request_data(data, callback, settings) {
   $("#loading-indicator").show();
-
   var base_query = {
     from: {
       type: "table",
@@ -123,25 +195,52 @@ function request_data(data, callback, settings) {
   count_query.where = where;
   var select_query = JSON.parse(JSON.stringify(base_query));
 
-  select_query["order_by"] = data.order.map(function (c) {
-    return {
-      type: "column",
-      column: table_info.columns[c.column],
-      ordering: c.dir,
-    };
-  });
+  select_query["order_by"] = data.order
+    .map(function (c) {
+      /* some types cannot be sorted by */
+      const colName = table_info.columns[c.column];
+      const colType = table_info.columnTypes[colName];
+
+      if (!columnTypeIsSortable(colType)) {
+        const castCol = queryCastToText(
+          {
+            type: "column",
+            column: colName,
+          },
+          (colName.ordering = c.dir)
+        );
+
+        return castCol;
+        /*
+        showMessage(`Cannot order by column ${colName}(${colType})`, "warning");
+        return undefined;
+        */
+      }
+
+      return {
+        type: "column",
+        column: colName,
+        ordering: c.dir,
+      };
+    })
+    .filter((item) => item !== undefined);
 
   select_query["fields"] = [];
   for (var i in table_info.columns) {
-    var col = table_info.columns[i];
+    var colName = table_info.columns[i];
+    const colType = table_info.columnTypes[colName];
+
     var query = {
       type: "column",
-      column: col,
+      column: colName,
     };
-    if (col == "geom") {
+
+    if (columnTypeIsJson(colType)) {
+      query = queryCastToText(query, colName);
+    } else if (columnTypeIsGeometry(colType)) {
       query = {
         type: "label",
-        label: "geom",
+        label: colName,
         element: {
           type: "function",
           function: "ST_Transform",
@@ -149,6 +248,7 @@ function request_data(data, callback, settings) {
         },
       };
     }
+
     select_query["fields"].push(query);
   }
   select_query.offset = data.start;
@@ -269,7 +369,7 @@ function get_selected_geo_columns() {
   ) {
     return [view.options.lat, view.options.lon];
   } else {
-    console.log("Unrecognised map type");
+    showMessage("Unrecognised map type", "warning");
   }
 }
 
@@ -362,6 +462,7 @@ function load_view(schema, table, csrftoken, current_view) {
           $(str).appendTo("#datatable" + ">thead>tr");
           table_info.columns.push(colname);
           var dt = column_response[0][colname]["data_type"];
+          table_info.columnTypes[colname] = dt;
           var mapped_dt;
           if (dt in type_maps) {
             mapped_dt = type_maps[dt];
@@ -626,20 +727,6 @@ function parse_rule(r) {
   }
 }
 
-var type_maps = {
-  "double precision": "double",
-};
-
-var valid_types = [
-  "string",
-  "integer",
-  "double",
-  "date",
-  "time",
-  "datetime",
-  "boolean",
-];
-
 /**
  * create a message div in the django message container
  * @param {string} message
@@ -647,7 +734,7 @@ var valid_types = [
  */
 function showMessage(message, level) {
   level = level || "info";
-  console.log(level, message);
+  console.log(level, ":", message); /* also keep message in console */
   const container = document.getElementById("uiMessages");
   const div = document.createElement("div");
   div.innerHTML = `

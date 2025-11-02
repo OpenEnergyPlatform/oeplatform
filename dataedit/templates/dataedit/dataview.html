@@ -693,11 +693,9 @@ for row in result.json():
 
     var downloadMetadata = function () {
       var metaUrl = "{% url 'api:api_table_meta' schema=schema table=table %}";
-      $.get(metaUrl).then(function (json) {
-        console.log(json);
+      $.get(metaUrl).then(function (json) {        
         // create data url
-        var json = JSON.stringify(json, null, 1);
-        console.log(json);
+        var json = JSON.stringify(json, null, 1);        
         ((blob = new Blob([json], { type: "application/json" })),
           (dataUrl = URL.createObjectURL(blob)));
         // create link
