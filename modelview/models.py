@@ -15,7 +15,6 @@ SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Rei
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from django import forms
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (

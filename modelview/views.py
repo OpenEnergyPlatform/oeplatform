@@ -39,6 +39,7 @@ from modelview.helper import (
     printable,
     processPost,
 )
+from modelview.models import BasicFactsheet
 
 
 def list_sheets_view(request, sheettype):
@@ -105,7 +106,7 @@ def show_view(request, sheettype, pk):
             "We dropped the scenario factsheets in favor of scenario bundles."
         )
 
-    model = get_object_or_404(c, pk=pk)
+    model: BasicFactsheet = get_object_or_404(c, pk=pk)
 
     user_agent = {"user-agent": "oeplatform"}
     urllib3.PoolManager(headers=user_agent)
@@ -113,15 +114,14 @@ def show_view(request, sheettype, pk):
     repo = None
 
     if model.gitHub and model.link_to_source_code:
-        try:
-            match = re.match(
-                r".*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*",
-                model.link_to_source_code,
-            )
+        match = re.match(
+            r".*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*",
+            model.link_to_source_code,
+        )
+        if match:
             org = match.group("org")
             repo = match.group("repo")
-            # _handle_github_contributions(org, repo)
-        except Exception:
+        else:
             org = None
             repo = None
 
@@ -149,7 +149,9 @@ def model_to_csv_view(request, sheettype):
         tag_ids = tag_ids.split(",")
 
     header = list(
-        field.attname for field in c._meta.get_fields() if hasattr(field, "attname")
+        field.attname  # type:ignore because hasattr(field, "attname")
+        for field in c._meta.get_fields()
+        if hasattr(field, "attname")
     )
 
     response = HttpResponse(content_type="text/csv")
@@ -180,8 +182,12 @@ def edit_model_view(request, pk, sheettype):
     Constructs a form accoring to existing model
     """
     c, f = getClasses(sheettype)
+    if not c or not f:
+        raise Http404(
+            "We dropped the scenario factsheets in favor of scenario bundles."
+        )
 
-    model = get_object_or_404(c, pk=pk)
+    model: BasicFactsheet = get_object_or_404(c, pk=pk)
 
     form = f(instance=model)
 
@@ -204,7 +210,8 @@ class FSAddView(LoginRequiredMixin, View):
         # TODO: pk not used, but defined in urls.py
         # this should be POST,not GET?
         c, f = getClasses(sheettype)
-        if method == "add":
+
+        if method == "add" and f:
             form = f()
 
             return render(
@@ -270,6 +277,11 @@ class FSAddView(LoginRequiredMixin, View):
 @login_required
 def fs_delete_view(request, sheettype, pk):
     c, _ = getClasses(sheettype)
+    if not c:
+        raise Http404(
+            "We dropped the scenario factsheets in favor of scenario bundles."
+        )
+
     model = get_object_or_404(c, pk=pk)
     model.delete()
 
