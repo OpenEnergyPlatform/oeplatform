@@ -17,7 +17,12 @@ from typing import cast as cast_type  # cast already used from sqlalchemy
 
 import dateutil
 import geoalchemy2  # Although this import seems unused is has to be here
-from sqlalchemy import ARRAY, MetaData, Table, and_
+from sqlalchemy import (
+    ARRAY,
+    MetaData,
+    Table,
+    and_,
+)
 from sqlalchemy import case as sa_case
 from sqlalchemy import (
     cast,
@@ -31,7 +36,9 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy import types as sqltypes
-from sqlalchemy import util
+from sqlalchemy import (
+    util,
+)
 from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.exc import ArgumentError, NoSuchTableError
 from sqlalchemy.schema import Sequence
