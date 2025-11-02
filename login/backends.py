@@ -4,10 +4,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.contrib.auth.backends import ModelBackend
-from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
-from .models import myuser
+from login.models import myuser
 
 
 class ModelBackendWithEmail(ModelBackend):
@@ -22,7 +22,10 @@ class ModelBackendWithEmail(ModelBackend):
         try:
             # find user object based on name OR email
             user = myuser.objects.get(Q(name=username) | Q(email=username))
-        except models.ObjectDoesNotExist:
+        except ObjectDoesNotExist:
+            return None
+
+        if not password:
             return None
 
         if user.check_password(password):

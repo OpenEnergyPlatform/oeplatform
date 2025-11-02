@@ -21,7 +21,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Literal, Union
+from typing import TYPE_CHECKING, Literal, Mapping, Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
@@ -41,6 +41,12 @@ from omi.license import LicenseError, validate_oemetadata_licenses
 
 from dataedit.utils import get_badge_icon_path, validate_badge_name_match
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
+
+if TYPE_CHECKING:
+    # only import for static typechecking
+    # TODO: is there a betetr way of doing this?
+    from login.models import GroupPermission, UserPermission
+    from modelview.models import BasicFactsheet
 
 logger = logging.getLogger("oeplatform")
 
@@ -63,6 +69,7 @@ class Tagable(models.Model):
 
 class Topic(models.Model):
     name = CharField(max_length=128, primary_key=True)
+    tables: QuerySet["Table"]  # related_name, for static type checking
 
 
 class Tag(models.Model):
@@ -72,6 +79,8 @@ class Tag(models.Model):
     color = IntegerField(default=int("2E3638", 16), null=False)
     usage_tracked_since = DateTimeField(null=False, default=timezone.now)
     category = CharField(max_length=40, null=True)
+    tables: QuerySet["Table"]  # related_name, for static type checking
+    factsheets: QuerySet["BasicFactsheet"]  # related_name, for static type checking
 
     def __str__(self) -> str:
         return str(self.name)
@@ -175,6 +184,14 @@ class Table(Tagable):
     # For now, we only set it on creation
     date_updated = DateTimeField(auto_now_add=True, null=True)
 
+    embargos: QuerySet["Embargo"]  # related_name, for static type checking
+    userpermission_set: QuerySet[
+        "UserPermission"  # TODO: import
+    ]  # related_name, for static type checking
+    grouppermission_set: QuerySet[
+        "GroupPermission"  # TODO: import
+    ]  # related_name, for static type checking
+
     class Meta:
         unique_together = (("name",),)
 
@@ -264,43 +281,19 @@ class Table(Tagable):
             str
         """
 
-        def read_label_only_for_first_resource_element(
-            table_name: str, oemetadata: dict
-        ) -> str:
-            """
-            Extracts the readable name from oemetadata and appends the real name
-            in parenthesis.
-            If oemetadata is not a JSON-dictionary or does not contain a field 'Name'
-            None is returned.
-
-            :param table: Name to append
-
-            :param comment: String containing a JSON-dictionary according to @Metadata
-
-            :return: Readable name appended by the true table name as string or None
-            """
-            try:
-                if oemetadata.get("resources")[0]:
-                    return (
-                        oemetadata.get("resources", [])[0]["title"].strip()
-                        + " ("
-                        + table_name
-                        + ")"
-                    )
-
-                else:
-                    return None
-
-            except Exception:
-                return None
-
+        # Extracts the readable name from oemetadata and appends the real name
+        # in parenthesis.
         try:
-            label = read_label_only_for_first_resource_element(
-                self.name, self.oemetadata
+            return (
+                (self.oemetadata or {})["resources"][0]["title"].strip()
+                + " ("
+                + self.name
+                + ")"
             )
-        except Exception as e:
-            raise e
-        return label
+
+        except Exception:
+
+            return self.name
 
     def validate_open_data_license(
         self,
@@ -318,7 +311,7 @@ class Table(Tagable):
 
     def get_review_badge_from_table_metadata(
         self,
-    ) -> dict[Literal["is_badge", "err_msg", "badge_name", "icon_path"], bool | str]:
+    ) -> Mapping[Literal["is_badge", "err_msg", "badge_name", "icon_path"], bool | str]:
         metadata = self.oemetadata or {}
 
         if metadata is None:
@@ -365,20 +358,29 @@ class Embargo(models.Model):
         ("6_months", "6 Months"),
         ("1_year", "1 Year"),
     ]
-
-    table = models.ForeignKey(Table, on_delete=models.CASCADE, related_name="embargoes")
+    table = models.ForeignKey(Table, on_delete=models.CASCADE, related_name="embargos")
     date_started = models.DateTimeField(auto_now_add=True)
     date_ended = models.DateTimeField()
     duration = models.CharField(max_length=10, choices=DURATION_CHOICES)
 
     def is_active(self):
+        if not self.date_ended:
+            return False
         return datetime.now() < self.date_ended
 
     def remaining_days(self):
+        if not self.date_ended:
+            return 0
         return (self.date_ended - datetime.now()).days if self.is_active() else 0
 
     def __str__(self):
-        return f"Table {self.table} in embargo until {self.date_ended.strftime('%Y-%m-%d')}"  # noqa: E501
+        if self.date_ended:
+            return (
+                f"Table {self.table} in embargo until "
+                f"{self.date_ended.strftime('%Y-%m-%d')}"
+            )
+        else:
+            return f"Table {self.table} has no embargo"
 
     def save(self, *args, **kwargs):
         if not self.date_started:
@@ -400,6 +402,8 @@ class View(models.Model):
     type = CharField(max_length=10, null=False, choices=VIEW_TYPES)
     options = JSONField(null=False, default=dict)
     is_default = BooleanField(default=False)
+
+    filter: QuerySet["Filter"]  # related_name, for static type checking
 
     def __str__(self):
         return '{}--"{}"({})'.format(self.table, self.name, self.type.upper())
@@ -446,6 +450,10 @@ class PeerReview(models.Model):
     # TODO: Maybe oemetadata should be stored in a separate table and imported
     # via FK here / change also for Tables model
     oemetadata = JSONField(null=False, default=dict)
+
+    review_id: QuerySet["PeerReviewManager"]  # related_name, for static type checking
+    prev_review: QuerySet["PeerReviewManager"]  # related_name, for static type checking
+    next_review: QuerySet["PeerReviewManager"]  # related_name, for static type checking
 
     # laden
     @classmethod
@@ -610,7 +618,7 @@ class PeerReview(models.Model):
         if isinstance(self.review, str):
             review_data = json.loads(self.review)
         else:
-            review_data = self.review
+            review_data = self.review or {}
 
         review_data["topic"] = topic
 
@@ -622,7 +630,7 @@ class PeerReview(models.Model):
     def days_open(self):
         if self.date_started is None:
             return None  # Review has not started yet
-        elif self.is_finished:
+        elif self.date_finished:
             return (self.date_finished - self.date_started).days  # Review has finished
         else:
             return (timezone.now() - self.date_started).days  # Review is still open
@@ -719,7 +727,7 @@ class PeerReviewManager(models.Model):
         super().save(*args, **kwargs)
 
     @classmethod
-    def update_open_since(cls, opr=None, *args, **kwargs):
+    def update_open_since(cls, opr: PeerReview | None = None, *args, **kwargs):
         """
         Update the "is_open_since" field of the peer review manager.
 
@@ -729,15 +737,15 @@ class PeerReviewManager(models.Model):
 
         """
         if opr is not None:
-            peer_review = PeerReviewManager.objects.get(opr=opr)
+            peer_review_manager = PeerReviewManager.objects.get(opr=opr)
         else:
-            peer_review = cls.opr
+            peer_review_manager = cls()
 
-        days_open = peer_review.opr.days_open
-        peer_review.is_open_since = str(days_open)
+        days_open = peer_review_manager.opr.days_open
+        peer_review_manager.is_open_since = str(days_open)
 
         # Call the parent class's save method to save the PeerReviewManager instance
-        peer_review.save(*args, **kwargs)
+        peer_review_manager.save(*args, **kwargs)
 
     def set_next_reviewer(self):
         """
@@ -781,14 +789,10 @@ class PeerReviewManager(models.Model):
             User: The contributor user.
         """
         current_table = Table.load(name=table)
-        try:
-            table_holder = (
-                current_table.userpermission_set.filter(table=current_table.pk)
-                .first()
-                .holder
-            )
-        except AttributeError:
-            table_holder = None
+        userpermission = current_table.userpermission_set.filter(
+            table=current_table.pk
+        ).first()
+        table_holder = userpermission.holder if userpermission else None
         return table_holder
 
     @staticmethod

@@ -10,13 +10,10 @@ SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> Â
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-###########
-# Parsers #
-###########
 import decimal
 import re
-from datetime import datetime
-from typing import cast as cast_type
+from typing import Mapping
+from typing import cast as cast_type  # cast already used from sqlalchemy
 
 import dateutil
 import geoalchemy2  # Although this import seems unused is has to be here
@@ -150,6 +147,7 @@ def parse_insert(d, context, message=None, mapper=None):
         autoload=True,
         schema=read_pgid(get_or_403(d, "schema")),
     )
+
     field_strings = []
     for field in d.get("fields", []):
         if not (
@@ -158,6 +156,9 @@ def parse_insert(d, context, message=None, mapper=None):
         ):
             raise APIError("Only pure column expressions are allowed in insert")
         field_strings.append(parse_expression(field))
+
+    # NOTE: type casting probably no longer needed in later sqlalchemay
+    table = cast_type(Table, table)
 
     query = table.insert()
 
@@ -237,7 +238,7 @@ def parse_select(d):
                 if isinstance(grouping, dict):
                     partials.append(parse_select(grouping))
                 elif isinstance(grouping, list):
-                    partials = map(parse_select, grouping)
+                    partials = list(map(parse_select, grouping))
                 else:
                     raise APIError(
                         "Cannot handle grouping type. Dictionary or list expected."
@@ -273,9 +274,11 @@ def parse_select(d):
 
     if "group_by" in d:
         query = query.group_by(*[parse_expression(f) for f in d["group_by"]])
+        query = query_typecast_select(query)
 
     if "having" in d:
         query.having([parse_condition(f) for f in d["having"]])
+        query = query_typecast_select(query)
 
     if "select" in d:
         for constraint in d["select"]:
@@ -297,16 +300,19 @@ def parse_select(d):
                 if desc:
                     expr = expr.desc()
             query = query.order_by(expr)
+            query = query_typecast_select(query)
 
     if "limit" in d:
         if isinstance(d["limit"], int) or d["limit"].isdigit():
             query = query.limit(int(d["limit"]))
+            query = query_typecast_select(query)
         else:
             raise APIError("Invalid LIMIT: Expected a digit")
 
     if "offset" in d:
         if isinstance(d["offset"], int) or d["offset"].isdigit():
             query = query.offset(int(d["offset"]))
+            query = query_typecast_select(query)
         else:
             raise APIError("Invalid LIMIT: Expected a digit")
     return query
@@ -339,15 +345,20 @@ def parse_from_item(d):
     if dtype == "table":
         # only = d.get("only", False)
         ext_name = read_pgid(get_or_403(d, "table"))
-        tkwargs = dict(autoload=True)
+        tkwargs: dict = dict(autoload=True)
         if schema_name:
             ext_name = schema_name + "." + ext_name
             tkwargs["schema"] = schema_name
-        if ext_name in __PARSER_META.tables:
-            item = __PARSER_META.tables[ext_name]
+
+        tables: Mapping[str, Table] = __PARSER_META.tables  # type: ignore
+
+        if ext_name in tables:
+            item = tables[ext_name]
         else:
             try:
                 item = Table(d["table"], __PARSER_META, **tkwargs)
+                # NOTE: type casting probably no longer needed in later sqlalchemay
+                item = cast_type(Table, item)
             except NoSuchTableError:
                 raise APIError("Table {table} not found".format(table=ext_name))
 
@@ -381,8 +392,11 @@ def load_table_from_metadata(table, schema=None):
     schema = validate_schema(schema)
     if schema:
         ext_name = schema + "." + ext_name
-    if ext_name and ext_name in __PARSER_META.tables:
-        return __PARSER_META.tables[ext_name]
+
+    tables: Mapping[str, Table] = __PARSER_META.tables  # type: ignore
+
+    if ext_name and ext_name in tables:
+        return tables[ext_name]
     else:
         if _get_engine().dialect.has_table(
             _get_engine().connect(), table, schema=schema
@@ -734,18 +748,6 @@ def replace(string, occuring_symb, replace_symb):
         return str(string).replace(occuring_symb, replace_symb)
 
 
-def alchemyencoder(obj):
-    """JSON encoder function for SQLAlchemy special classes."""
-    if isinstance(obj, datetime.date):
-        return obj.isoformat()
-    elif isinstance(obj, decimal.Decimal):
-        return float(obj)
-
-
-def parse_sql_operator(key: str) -> str:
-    return sql_operators.get(key)
-
-
 def parse_sqla_operator(raw_key, *operands):
     try:
         key = raw_key.lower().strip()
@@ -802,7 +804,10 @@ def parse_sqla_operator(raw_key, *operands):
                 return x.distance_centroid(y)
             if key in ["getitem"]:
                 if isinstance(y, Slice):
-                    return x[parse_single(y.start, int) : parse_single(y.stop, int)]
+                    ystart, ystop = parse_single(y.start, int), parse_single(
+                        y.stop, int
+                    )
+                    return x[ystart:ystop]
                 else:
                     return x[read_pgid(y)]
             if key in ["in"]:

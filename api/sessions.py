@@ -117,7 +117,7 @@ def load_cursor_from_context(context):
     return session.get_cursor(cursor_id)
 
 
-def load_session_from_context(context):
+def load_session_from_context(context: dict):
     connection_id = get_or_403(context, "connection_id")
     user = context.get("user")
     try:

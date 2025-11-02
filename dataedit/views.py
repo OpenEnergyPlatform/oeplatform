@@ -295,7 +295,7 @@ def tag_overview_view(request: HttpRequest) -> HttpResponse:
 def tag_editor_view(request: HttpRequest, tag_pk: str | None = None) -> HttpResponse:
     tag = Tag.get_or_none(tag_pk or "")
     if tag:
-        assigned = tag.tables.count() > 0  # type: ignore (related name)
+        assigned = tag.tables.count() > 0
         return render(
             request=request,
             template_name="dataedit/tag_editor.html",
@@ -354,8 +354,10 @@ def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpR
         y_axis_list = []
         for item in request.POST.items():
             item_name, item_value = item
-            if item_name.startswith("y-axis-") and item_value == "on":
-                y_axis_list.append(item_name["y-axis-".__len__() :])
+            y_ax_prefix = "y-axis-"
+            y_ax_prefix_len = len(y_ax_prefix)
+            if item_name.startswith(y_ax_prefix) and item_value == "on":
+                y_axis_list.append(item_name[y_ax_prefix_len:])
         post_options = {"x_axis": post_x_axis, "y_axis": y_axis_list}
     elif post_type == "map":
         # add location column info to options
@@ -395,12 +397,12 @@ def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpR
         post_filter = json.loads(post_filter_json)
 
         db_filter: DBFilter
-        for db_filter in update_view.filter.all():  # type: ignore (related name )
+        for db_filter in update_view.filter.all():
             # look for filters in the database, that aren't used anymore and delete them
             db_filter_is_used = False
             for defined_filter in post_filter:
                 if "id" in defined_filter:
-                    if db_filter.id == defined_filter["id"]:
+                    if db_filter.pk == defined_filter["id"]:
                         db_filter_is_used = True
                         break
             if not db_filter_is_used:
@@ -513,7 +515,6 @@ class TableMapView(View):
         else:
             raise Http404
 
-        form.schema = schema
         form.table = table
         form.options = options
         if form.is_valid():
@@ -777,6 +778,8 @@ class TablePermissionView(View):
             return self.__change_group(request, schema, table)
         if request.POST["mode"] == "remove_group":
             return self.__remove_group(request, schema, table)
+        else:
+            raise NotImplementedError()
 
     def __add_user(self, request: HttpRequest, schema: str, table: str):
         user_name = request.POST.get("name")
@@ -803,7 +806,7 @@ class TablePermissionView(View):
         user = login_models.myuser.objects.filter(id=user_id).first()
         table_obj = Table.load(name=table)
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
-        p.level = request.POST["level"]
+        p.level = int(request.POST["level"])
         p.save()
         return self.get(request, schema, table)
 
@@ -846,7 +849,7 @@ class TablePermissionView(View):
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
         )
-        p.level = request.POST["level"]
+        p.level = int(request.POST["level"])
         p.save()
         return self.get(request, schema, table)
 
@@ -890,9 +893,10 @@ def tage_table_add_view(request: HttpRequest) -> HttpResponse:
     actions.assert_add_tag_permission(
         request.user, table, login_models.WRITE_PERM, schema=schema_name
     )
-
+    tag_prefix = "tag_"
+    tag_prefix_len = len(tag_prefix)
     tag_ids = {
-        field[len("tag_") :] for field in request.POST if field.startswith("tag_")
+        field[tag_prefix_len:] for field in request.POST if field.startswith(tag_prefix)
     }
     tags = Tag.objects.filter(pk__in=tag_ids)
     table_obj = Table.objects.get(name=table)
@@ -1275,7 +1279,8 @@ class TablePeerReviewView(LoginRequiredMixin, View):
                 kwargs={"schema": schema, "table": table, "review_id": review_id},
             )
             opr_review = PeerReviewManager.get_opr_by_id(opr_id=review_id)
-            existing_review = opr_review.review.get("reviews", [])
+
+            existing_review = (opr_review.review or {}).get("reviews", [])
             review_finished = opr_review.is_finished
             categories = [
                 "general",
@@ -1372,7 +1377,9 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         if review_id:
             contributor_review = PeerReview.objects.filter(id=review_id).first()
             if contributor_review:
-                contributor_review_data = contributor_review.review.get("reviews", [])
+                contributor_review_data = (contributor_review.review or {}).get(
+                    "reviews", []
+                )
                 review_data["reviewData"]["reviews"].extend(contributor_review_data)
 
         # The type can be "save" or "submit" as this triggers different behavior
@@ -1411,8 +1418,8 @@ class TablePeerReviewView(LoginRequiredMixin, View):
 
                 # Set new review values and update existing review
                 active_peer_review.review = merged_review_data
-                active_peer_review.reviewer = user  # type: ignore
-                active_peer_review.contributor = contributor
+                active_peer_review.reviewer = user  # type:ignore TODO why type warning?
+                active_peer_review.contributor = contributor  # type:ignore TODO
                 active_peer_review.update(review_type=review_post_type)
         else:
             error_msg = (

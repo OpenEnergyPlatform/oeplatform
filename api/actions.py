@@ -27,6 +27,7 @@ import logging
 import re
 from copy import deepcopy
 from datetime import datetime, timedelta
+from typing import cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
@@ -54,9 +55,10 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy import types as sqltypes
+from sqlalchemy.engine import ResultProxy
 from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm.session import sessionmaker
+from sqlalchemy.orm.session import Session, sessionmaker
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql.expression import Select
 
@@ -216,7 +218,7 @@ def __response_success():
     return {"success": True}
 
 
-def _response_error(message):
+def _response_error(message: str):
     return {"success": False, "message": message}
 
 
@@ -289,7 +291,7 @@ def try_parse_metadata(inp) -> tuple[dict | None, str | None]:
     raise APIError(f"Metadata could not be parsed: {last_err}")
 
 
-def try_validate_metadata(inp):
+def try_validate_metadata(inp: dict) -> tuple[dict | None, str | None]:
     """
 
     Args:
@@ -317,7 +319,7 @@ def try_validate_metadata(inp):
     raise APIError(f"Metadata validation failed: {last_err}")
 
 
-def try_convert_metadata_to_v2(metadata: dict):
+def try_convert_metadata_to_v2(metadata: dict) -> dict:
     valid_oemetadata_versions = ["OEP-1.5.2", "OEP-1.6.0", "OEMetadata-2.0"]
     valid_conversable_oemetadata_versions = ["OEP-1.5.2", "OEP-1.6.0"]
     version = get_metadata_version(metadata)
@@ -378,7 +380,12 @@ def describe_columns(schema, table):
         "= (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier)) where table_name = "  # noqa
         "'{table}' and table_schema='{schema}';".format(table=table, schema=schema)
     )
-    response = session.execute(query)
+    response = session_execute(session, query)
+
+    # Note: cast is only for type checking,
+    # should disappear once we migrate to sqlalchemy >= 1.4
+    response = cast(ResultProxy, response)
+
     session.close()
     return {
         column.column_name: {
@@ -424,7 +431,7 @@ def describe_indexes(schema, table):
         "select indexname, indexdef from pg_indexes where tablename = "
         "'{table}' and schemaname='{schema}';".format(table=table, schema=schema)
     )
-    response = session.execute(query)
+    response = session_execute(session, query)
     session.close()
 
     # Use a single-value dictionary to allow future extension with downward
@@ -458,7 +465,7 @@ def describe_constraints(schema, table):
     query = "select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name='{table}' AND constraint_schema='{schema}';".format(  # noqa
         table=table, schema=schema
     )
-    response = session.execute(query)
+    response = session_execute(session, query)
     session.close()
     return {
         column.constraint_name: {
@@ -489,7 +496,7 @@ def perform_sql(sql_statement, parameter: dict | None = None) -> dict:
         return get_response_dict(success=True)
 
     try:
-        result = session.execute(sql_statement, parameter)
+        result = session_execute(session, sql_statement, parameter)
     except Exception as e:
         logger.error("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
@@ -668,7 +675,7 @@ def get_column_change(i_id):
     """
     all_changes = get_column_changes()
     for change in all_changes:
-        if int(change.get("id")) == int(i_id):
+        if int(change["id"]) == int(i_id):
             return change
 
     return None
@@ -683,7 +690,7 @@ def get_constraint_change(i_id):
     all_changes = get_constraints_changes()
 
     for change in all_changes:
-        if int(change.get("id")) == int(i_id):
+        if int(change["id"]) == int(i_id):
             return change
 
     return None
@@ -729,7 +736,7 @@ def get_column_changes(reviewed=None, changed=None, schema=None, table=None):
 
     sql = "".join(query)
 
-    response = session.execute(sql)
+    response = session_execute(session, sql)
     session.close()
 
     return [
@@ -788,7 +795,7 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
 
     sql = "".join(query)
 
-    response = session.execute(sql)
+    response = session_execute(session, sql)
     session.close()
 
     return [
@@ -852,8 +859,9 @@ def get_column_definition_query(d):
     if "column_default" in d:
         kwargs["default"] = read_pgvalue(d["column_default"])
 
-    if d.get("character_maximum_length", False):
-        dt = dt(int(d["character_maximum_length"]))
+    if d.get("character_maximum_length"):
+        max_len = int(d["character_maximum_length"])
+        dt = dt(max_len)  # type:ignore
 
     assert_valid_identifier_name(name)
     c = Column(name, dt, *args, **kwargs)
@@ -1014,6 +1022,10 @@ def table_create(schema, table, column_definitions, constraints_definitions):
         raise APIError("Primary key must be column id")
 
     t = Table(table, metadata, *(columns + constraints), schema=schema)
+
+    # NOTE: type casting probably no longer needed in later sqlalchemay
+    t = cast(Table, t)
+
     t.create(_get_engine())
 
     # Create Metatables
@@ -1229,7 +1241,7 @@ def __internal_select(query, context):
 
 def __change_rows(request, context, target_table, setter, fields=None) -> dict:
     orig_table = read_pgid(request["table"])
-    query = {
+    query: dict = {
         "from": {
             "type": "table",
             "schema": read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)),
@@ -1261,7 +1273,8 @@ def __change_rows(request, context, target_table, setter, fields=None) -> dict:
         autoload=True,
         schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
     )
-    pks = [c for c in table.columns if c.primary_key]
+
+    pks = [c for c in table.columns if c.primary_key]  # type:ignore
 
     inserts = []
     cursor = load_cursor_from_context(context)
@@ -1325,7 +1338,7 @@ def drop_not_null_constraints_from_delete_meta_table(
     engine.execute(query)
 
 
-def data_delete(request, context=None):
+def data_delete(request: dict, context: dict):
     orig_table = get_or_403(request, "table")
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
@@ -1350,7 +1363,7 @@ def data_delete(request, context=None):
     return result
 
 
-def data_update(query: dict, context=None):
+def data_update(query: dict, context: dict):
     orig_table = read_pgid(get_or_403(query, "table"))
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
@@ -1389,7 +1402,7 @@ def data_insert_check(schema, table, values, context):
         "   AND conrelid='{schema}.{table}'::regclass::oid "
         "GROUP BY conname, contype;".format(table=table, schema=schema)
     )
-    response = session.execute(query)
+    response = session_execute(session, query)
     session.close()
 
     for constraint in response:
@@ -1474,7 +1487,8 @@ def data_insert_check(schema, table, values, context):
                         )
 
 
-def data_insert(request, context=None):
+def data_insert(request, context: dict):
+
     cursor = load_cursor_from_context(context)
     # If the insert request is not for a meta table, change the request to do so
     table_name = get_or_403(request, "table")
@@ -2010,7 +2024,7 @@ def set_isolation_level(request, context):
     try:
         engine.dialect.set_isolation_level(cursor, level)
     except exc.ArgumentError as ae:
-        return _response_error(ae.message)
+        return _response_error(str(ae))
     return __response_success()
 
 
@@ -2086,7 +2100,7 @@ def close_raw_connection(request, context):
 
 
 def close_all_connections(request, context):
-    close_all_for_user(request, context)
+    close_all_for_user(request)
     return __response_success()
 
 
@@ -2192,20 +2206,6 @@ def create_insert_table(schema, table, meta_schema=None):
     create_meta_table(schema, table, meta_table, meta_schema)
 
 
-def create_comment_table(schema: str, table, meta_schema=None):
-    schema = validate_schema(schema)
-    meta_schema = get_meta_schema_name(schema)
-
-    engine = _get_engine()
-    query = (
-        "CREATE TABLE {schema}.{table} (PRIMARY KEY (_id)) "
-        "INHERITS (_comment_base); ".format(
-            schema=meta_schema, table=get_comment_table_name(table)
-        )
-    )
-    engine.execute(query)
-
-
 def getValue(schema, table, column, id):
     sql = "SELECT {column} FROM {schema}.{table} WHERE id={id}".format(
         column=column, schema=schema, table=table, id=id
@@ -2215,7 +2215,7 @@ def getValue(schema, table, column, id):
     session = sessionmaker(bind=engine)()
 
     try:
-        result = session.execute(sql)
+        result = session_execute(session, sql)
 
         returnValue = None
         for row in result:
@@ -2366,6 +2366,10 @@ def set_applied(session, table, rids, mode):
         autoload=True,
         schema=get_meta_schema_name(table.schema),
     )
+
+    # NOTE: type casting probably no longer needed in later sqlalchemay
+    meta_table = cast(Table, meta_table)
+
     update_query = (
         meta_table.update()
         .where(sql.or_(*(meta_table.c._id == i for i in rids)))
@@ -2439,6 +2443,7 @@ def set_table_metadata(table: str, metadata):
     metadata_oep, err = try_parse_metadata(metadata)
     if err:
         raise APIError(err)
+    metadata_oep = metadata_oep or {}
     # compile OEPMetadata instance back into native python object (dict)
     # TODO: we should try to convert to the latest standard in this step?
     metadata_obj, err = try_validate_metadata(metadata_oep)
@@ -2449,8 +2454,8 @@ def set_table_metadata(table: str, metadata):
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.load(name=table)
-    django_table_obj.oemetadata = metadata_obj
+    django_table_obj = DBTable.objects.get(name=table)
+    django_table_obj.oemetadata = metadata_obj  # type:ignore
     django_table_obj.save()
 
     # ---------------------------------------
@@ -2492,7 +2497,7 @@ def get_single_table_size(table: str) -> dict | None:
     schema = DBTable.load(name=table).oedb_schema
     sess = _create_oedb_session()
     try:
-        res = sess.execute(sql, {"schema": schema, "table": table})
+        res = session_execute(sess, sql, {"schema": schema, "table": table})
         row = res.fetchone()
         if not row:
             return None
@@ -2527,8 +2532,8 @@ def list_table_sizes() -> list[dict]:
 
     sess = _create_oedb_session()
     try:
-        res = sess.execute(sql)
-        rows = res.fetchall()
+        res = session_execute(sess, sql)
+        rows = res.fetchall() or []
         out = []
         for r in rows:
             m = dict(r.items())  # RowProxy -> dict
@@ -2586,3 +2591,11 @@ def table_get_approx_row_count(table: DBTable, precise_below: int = 0) -> int:
         row_count = resp.fetchone()[0]
 
     return row_count
+
+
+def session_execute(session: Session, sql: str, parameter=None) -> ResultProxy:
+    response = session.execute(sql, parameter)
+    # Note: cast is only for type checking,
+    # should disappear once we migrate to sqlalchemy >= 1.4
+    response = cast(ResultProxy, response)
+    return response

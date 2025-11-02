@@ -49,5 +49,5 @@ class OntologyConfig(AppConfig):
                 f"{DOCUMENTATION_LINKS.get(documentation_key)}"
             )
 
-            self.logger.error(msg)
+            logger.error(msg)
             raise ImportError(msg)

@@ -20,7 +20,7 @@ def get_tables_if_group_assigned(group: UserGroup) -> List[Table]:
     """
 
     group_table_relation = GroupPermission.objects.filter(
-        holder_id=group.id
+        holder_id=group.pk
     ).prefetch_related("table")
 
     group_tables = []

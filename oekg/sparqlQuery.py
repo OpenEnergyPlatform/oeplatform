@@ -6,6 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import logging
+from http.client import HTTPResponse
 from typing import Union
 from uuid import UUID
 
@@ -51,7 +52,7 @@ def bundle_scenarios_filter(bundle_uri: Union[str, URIRef], return_format=JSON) 
 
     sparql.setReturnFormat(return_format)
     sparql.setQuery(sparql_query)
-    return sparql.query().convert()
+    return sparql.query().convert()  # type:ignore (if json, convert() -> dict)
 
 
 def scenario_in_bundle(bundle_uuid: UUID, scenario_uuid: UUID) -> bool:
@@ -69,7 +70,9 @@ def scenario_in_bundle(bundle_uuid: UUID, scenario_uuid: UUID) -> bool:
     sparql.setQuery(sparql_query)
     sparql.setMethod(POST)
     sparql.setReturnFormat(JSON)
-    response = sparql.query().convert()
+    response: dict = (
+        sparql.query().convert()
+    )  # type:ignore (if json, convert() -> dict)
 
     return response.get(
         "boolean", False
@@ -95,12 +98,14 @@ def dataset_exists(scenario_uuid: UUID, dataset_url: str) -> bool:
     sparql.setQuery(sparql_query)
     sparql.setMethod(POST)
     sparql.setReturnFormat(JSON)
-    response = sparql.query().convert()
+    response: dict = (
+        sparql.query().convert()
+    )  # type:ignore (if json, convert() -> dict)
 
     return response.get("boolean", False)  # Returns True if dataset exists
 
 
-def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig):
+def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig) -> bool:
     """
     Function to add datasets to a scenario bundle in Jena Fuseki.
     """
@@ -140,7 +145,9 @@ def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig):
     sparql_wrapper_update.setReturnFormat(JSON)
     try:
         response = sparql_wrapper_update.query()
-        http_response = response.response
+        http_response: HTTPResponse = (
+            response.response
+        )  # type:ignore (according to documentation)
         if not http_response.status == 200:
             return False  # Return False if any query fails
     except Exception as e:
@@ -300,7 +307,7 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
     # Run query
     sparql.setReturnFormat(return_format)
     sparql.setQuery(query_structure)
-    return sparql.query().convert()
+    return sparql.query().convert()  # type:ignore (if json, convert() -> dict)
 
 
 # --- filter helpers (reusable) -------------------------------------
@@ -371,7 +378,7 @@ def publication_year_filter_block(start_year, end_year):
 # Use in SB react app instead of slow rdflib loops
 
 
-def list_factsheets_oekg(criteria: dict, return_format=JSON):
+def list_factsheets_oekg(criteria: dict, return_format=JSON) -> dict:
     """
     Aggregated list for bundles, replacing slow rdflib loops in the view.
     Returns SPARQL JSON that your view can map to the same structure as before.
@@ -473,7 +480,7 @@ def list_factsheets_oekg(criteria: dict, return_format=JSON):
 
     sparql.setReturnFormat(return_format)
     sparql.setQuery(sparql_query)
-    return sparql.query().convert()
+    return sparql.query().convert()  # type:ignore (if json, convert() -> dict)
 
 
 def normalize_factsheets_rows(res_json: dict) -> list[dict]:

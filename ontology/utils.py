@@ -7,9 +7,11 @@ import os
 import re
 from collections import defaultdict
 from pathlib import Path
+from typing import Iterable
 
 from django.http import Http404
 from rdflib import Graph
+from rdflib.query import ResultRow
 
 from oeplatform.settings import OEO_EXT_NAME, ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME
 
@@ -33,6 +35,8 @@ def collect_modules(path):
     for file in os.listdir(path):
         if not os.path.isdir(os.path.join(path, file)):
             match = re.match(r"^(?P<filename>.*)\.(?P<extension>\w+)$", file)
+            if not match:
+                raise ValueError(file)
             filename, extension = match.groups()
             if filename not in modules:
                 modules[filename] = dict(extensions=[], comment="No description found")
@@ -53,7 +57,9 @@ def collect_modules(path):
                     }}
                 """  # noqa
                 # Execute the SPARQL query for comment
-                comment_results = g.query(comment_query)
+                comment_results: Iterable[ResultRow] = g.query(
+                    comment_query
+                )  # type:ignore
 
                 # Update the comment in the modules dictionary if found
                 for row in comment_results:
@@ -70,7 +76,9 @@ def collect_modules(path):
                         }}
                     """  # noqa
                     # Execute the SPARQL query for description
-                    description_results = g.query(description_query)
+                    description_results: Iterable[ResultRow] = g.query(
+                        description_query
+                    )  # type:ignore
 
                     # Update the comment in the modules dictionary if found
                     for row in description_results:
@@ -94,19 +102,19 @@ def read_oeo_context_information(path, file, ontology=None):
         """
     )
 
-    q_label = g.query(
+    q_label: Iterable[ResultRow] = g.query(
         """
         SELECT DISTINCT ?s ?o
         WHERE { ?s rdfs:label ?o }
         """
-    )
+    )  # type:ignore
 
-    q_main_description = g.query(
+    q_main_description: Iterable[ResultRow] = g.query(
         """
         SELECT ?s ?o
         WHERE { ?s dc:description ?o }
         """
-    )
+    )  # type:ignore
 
     classes_name = {}
     for row in q_label:
@@ -119,19 +127,19 @@ def read_oeo_context_information(path, file, ontology=None):
             ontology_description = row.o
 
     if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
-        q_definition = g.query(
+        q_definition: Iterable[ResultRow] = g.query(
             """
             SELECT DISTINCT ?s ?o
             WHERE { ?s obo:IAO_0000115 ?o }
             """
-        )
+        )  # type:ignore
 
-        q_note = g.query(
+        q_note: Iterable[ResultRow] = g.query(
             """
             SELECT DISTINCT ?s ?o
             WHERE { ?s obo:IAO_0000116 ?o }
             """
-        )
+        )  # type:ignore
 
         classes_definitions = defaultdict(list)
         for row in q_definition:
