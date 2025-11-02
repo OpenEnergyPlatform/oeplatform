@@ -44,7 +44,10 @@ def read_version_changes() -> dict:
         with open(
             os.path.join(SITE_ROOT, "..", "VERSION"), encoding="utf-8"
         ) as version_file:
-            match = re.match(version_expr, version_file.read())
+            text = version_file.read()
+            match = re.match(version_expr, text)
+            if not match:
+                raise ValueError(text)
             major, minor, patch = match.groups()
         with open(
             os.path.join(

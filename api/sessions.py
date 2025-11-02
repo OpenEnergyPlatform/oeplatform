@@ -9,16 +9,18 @@ import sys
 import time
 from random import randrange
 
-from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION_LIMIT
+from django.contrib.auth.models import AbstractUser
 
-from .actions import _get_engine, get_or_403
-from .error import APIError
+from api.actions import get_or_403
+from api.error import APIError
+from oedb.connection import _get_engine
+from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION_LIMIT
 
 _SESSION_CONTEXTS = {}
 
 
 class SessionContext:
-    def __init__(self, connection_id=None, owner=None):
+    def __init__(self, connection_id=None, owner: AbstractUser | None = None):
         user_connections = 0
         current_time = time.time()
 
@@ -34,7 +36,7 @@ class SessionContext:
             except KeyError:
                 pass
 
-        if owner.is_anonymous:
+        if not owner or owner.is_anonymous:
             if user_connections >= ANON_CONNECTION_LIMIT:
                 raise APIError(
                     "Connection limit for anonymous users is exceeded"

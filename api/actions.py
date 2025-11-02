@@ -30,7 +30,6 @@ from datetime import datetime, timedelta
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
-import sqlalchemy as sa
 from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404
@@ -38,14 +37,30 @@ from omi.base import get_metadata_version
 from omi.conversion import convert_metadata
 from omi.validation import ValidationError, parse_metadata, validate_metadata
 from shapely import wkb
-from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
+from sqlalchemy import (
+    BigInteger,
+    Column,
+    ForeignKey,
+    ForeignKeyConstraint,
+    MetaData,
+    PrimaryKeyConstraint,
+    Table,
+    UniqueConstraint,
+    exc,
+    func,
+    inspect,
+    select,
+    sql,
+    text,
+)
 from sqlalchemy import types as sqltypes
+from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
+from sqlalchemy.schema import Sequence
+from sqlalchemy.sql.expression import Select
 
 import dataedit.metadata
-import login.models as login_models
-from api.connection import _get_engine, create_oedb_session
 from api.error import APIError
 from api.parser import (
     get_or_403,
@@ -68,7 +83,9 @@ from api.sessions import (
 from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
+from login.models import DELETE_PERM, WRITE_PERM
 from login.models import myuser as User
+from oedb.connection import _get_engine
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
@@ -86,6 +103,28 @@ ID_COLUMN_NAME = "id"
 
 MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
 IDENTIFIER_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_IDENTIFIER_LENGTH - 1))
+
+
+def _create_oedb_session():
+    """Return a sqlalchemy session to the oedb
+
+    Should only be created once per user request.
+    """
+    return sessionmaker(bind=_get_engine())()
+
+
+def delete_sequence(sequence: str, schema: str) -> None:
+    seq = Sequence(sequence, schema=schema)
+    seq.drop(bind=_get_engine())
+
+
+def create_sequence(sequence: str, schema: str) -> None:
+    seq = Sequence(sequence, schema=schema)
+    seq.create(bind=_get_engine())
+
+
+def get_columns_select(columns: list[str]) -> Select:
+    return select(columns=columns)
 
 
 def get_column_obj(table: Table, column: str):
@@ -940,7 +979,7 @@ def table_create(schema, table, column_definitions, constraints_definitions):
                 raise APIError("Multiple definitions of primary key.")
             primary_key_col_names = ccolumns
 
-            const = sa.schema.PrimaryKeyConstraint(*ccolumns, **kwargs)
+            const = PrimaryKeyConstraint(*ccolumns, **kwargs)
             constraints.append(const)
         elif constraint_type == "unique":
             kwargs = {}
@@ -951,13 +990,13 @@ def table_create(schema, table, column_definitions, constraints_definitions):
                 ccolumns = constraint["columns"]
             else:
                 ccolumns = [constraint["constraint_parameter"]]
-            constraints.append(sa.schema.UniqueConstraint(*ccolumns, **kwargs))
+            constraints.append(UniqueConstraint(*ccolumns, **kwargs))
 
     assert_valid_identifier_name(table)
 
     # autogenerate id column if missing
     if "id" not in columns_by_name:
-        columns_by_name["id"] = sa.Column("id", sa.BigInteger, autoincrement=True)
+        columns_by_name["id"] = Column("id", BigInteger, autoincrement=True)
         columns.insert(0, columns_by_name["id"])
 
     # check id column type
@@ -967,7 +1006,7 @@ def table_create(schema, table, column_definitions, constraints_definitions):
 
     # autogenerate primary key
     if not primary_key_col_names:
-        constraints.append(sa.schema.PrimaryKeyConstraint("id"))
+        constraints.append(PrimaryKeyConstraint("id"))
         primary_key_col_names = ["id"]
 
     # check pk == id
@@ -1110,23 +1149,22 @@ def table_change_constraint(constraint_definition):
                 get_column(c) for c in get_or_403(constraint_definition, "refcolumns")
             ]
 
-            constraint = sa.ForeignKeyConstraint(columns, refcolumns)
+            constraint = ForeignKeyConstraint(columns, refcolumns)
             constraint.create(_get_engine())
         elif ctype == "primary key":
             columns = [
                 get_column(c) for c in get_or_403(constraint_definition, "columns")
             ]
-            constraint = sa.PrimaryKeyConstraint(columns)
+            constraint = PrimaryKeyConstraint(columns)
             constraint.create(_get_engine())
         elif ctype == "unique":
             columns = [
                 get_column(c) for c in get_or_403(constraint_definition, "columns")
             ]
-            constraint = sa.UniqueConstraint(*columns)
+            constraint = UniqueConstraint(*columns)
             constraint.create(_get_engine())
         elif ctype == "check":
             raise APIError("Not supported")
-            # constraint_class = sa.CheckConstraint
     elif "DROP" in constraint_definition["action"]:
         sql.append(
             "ALTER TABLE {schema}.{table} DROP CONSTRAINT {constraint_name}".format(
@@ -1298,9 +1336,7 @@ def data_delete(request, context=None):
     if schema is None:
         schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
-    assert_permission(
-        user=context["user"], table=table, permission=login_models.DELETE_PERM
-    )
+    assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
 
     target_table = get_delete_table_name(orig_schema, orig_table)
     setter = []
@@ -1324,9 +1360,7 @@ def data_update(query: dict, context=None):
     if schema is None:
         schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
-    assert_permission(
-        user=context["user"], table=table, permission=login_models.WRITE_PERM
-    )
+    assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
 
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(query, "values")
@@ -1369,7 +1403,7 @@ def data_insert_check(schema, table, values, context):
             # TODO: I guess this should not be done this way.
             #       Use joins instead to avoid piping your results through
             #       python.
-            if isinstance(values, sa.sql.expression.Select):
+            if isinstance(values, Select):
                 values = engine.execute(values)
             for row in values:
                 # TODO: This is horribly inefficient!
@@ -1450,9 +1484,7 @@ def data_insert(request, context=None):
 
     schema_name, table_name = get_table_name(schema_name, table_name)
 
-    assert_permission(
-        user=context["user"], table=table_name, permission=login_models.WRITE_PERM
-    )
+    assert_permission(user=context["user"], table=table_name, permission=WRITE_PERM)
 
     # mapper = {orig_schema: schema, orig_table: table}
 
@@ -1708,7 +1740,7 @@ def data_info(request, context=None):
 
 def connect():
     engine = _get_engine()
-    insp = sa.inspect(engine)
+    insp = inspect(engine)
     return insp
 
 
@@ -1773,7 +1805,7 @@ def get_table_oid(request, context=None):
             schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
             **request,
         )
-    except sa.exc.NoSuchTableError as e:
+    except NoSuchTableError as e:
         raise ConnectionError(str(e))
     finally:
         conn.close()
@@ -1849,7 +1881,7 @@ def get_columns(query: dict, context=None) -> dict:
         table_oid = engine.dialect.get_table_oid(
             connection, table_name, schema, info_cache=info_cache
         )
-    except sa.exc.NoSuchTableError as e:
+    except NoSuchTableError as e:
         raise ConnectionError(str(e))
     SQL_COLS = """
                 SELECT a.attname,
@@ -2443,7 +2475,7 @@ def get_single_table_size(table: str) -> dict | None:
     Return size details for one schema.table or None if not found.
     """
 
-    sql = sa.text(
+    sql = text(
         """
         SELECT
             :schema AS table_schema,
@@ -2458,7 +2490,7 @@ def get_single_table_size(table: str) -> dict | None:
     )
 
     schema = DBTable.load(name=table).oedb_schema
-    sess = create_oedb_session()
+    sess = _create_oedb_session()
     try:
         res = sess.execute(sql, {"schema": schema, "table": table})
         row = res.fetchone()
@@ -2477,7 +2509,7 @@ def list_table_sizes() -> list[dict]:
     List table sizes
     """
     oedb_schema = SCHEMA_DATA
-    sql = sa.text(
+    sql = text(
         f"""
         SELECT
             table_schema,
@@ -2493,7 +2525,7 @@ def list_table_sizes() -> list[dict]:
     """  # noqa: E501
     )
 
-    sess = create_oedb_session()
+    sess = _create_oedb_session()
     try:
         res = sess.execute(sql)
         rows = res.fetchall()
@@ -2524,7 +2556,7 @@ def table_get_approx_row_count(table: DBTable, precise_below: int = 0) -> int:
     # table / schema name. but its validated by constraints
     # on django table.name field
 
-    query = sa.text(
+    query = text(
         f"""
         SELECT reltuples::bigint AS approx_row_count
         FROM pg_class
@@ -2541,7 +2573,7 @@ def table_get_approx_row_count(table: DBTable, precise_below: int = 0) -> int:
     if row_count >= precise_below:
         return row_count
 
-    query = sa.text(
+    query = text(
         f"""
         SELECT count(*)
         FROM "{table.oedb_schema}"."{table.name}"

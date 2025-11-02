@@ -6,11 +6,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from typing import List
 
-import sqlalchemy as sqla
 from django.core.management.base import BaseCommand
+from sqlalchemy import inspect
 
-from api.connection import _get_engine
 from dataedit.models import Table
+from oedb.connection import _get_engine
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
@@ -28,7 +28,7 @@ def get_sandbox_table_names_oedb() -> List[str]:
         List[str]: list of table names in oedb in sandbox schema
     """
     engine = _get_engine()
-    return sqla.inspect(engine).get_table_names(schema=SCHEMA_DEFAULT_TEST_SANDBOX)
+    return inspect(engine).get_table_names(schema=SCHEMA_DEFAULT_TEST_SANDBOX)
 
 
 def get_sandbox_meta_table_names_oedb() -> List[str]:
@@ -37,9 +37,7 @@ def get_sandbox_meta_table_names_oedb() -> List[str]:
         List[str]: list of table names in oedb in sandbox meta schema
     """
     engine = _get_engine()
-    return sqla.inspect(engine).get_table_names(
-        schema="_" + SCHEMA_DEFAULT_TEST_SANDBOX
-    )
+    return inspect(engine).get_table_names(schema="_" + SCHEMA_DEFAULT_TEST_SANDBOX)
 
 
 def clear_sandbox(output: bool = False) -> None:

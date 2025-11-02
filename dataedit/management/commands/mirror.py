@@ -6,18 +6,18 @@ SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import sqlalchemy as sqla
 from django.core.management.base import BaseCommand
+from sqlalchemy import inspect
 
-from api.connection import _get_engine
 from dataedit.models import Table
+from oedb.connection import _get_engine
 from oeplatform.settings import SCHEMA_DATA
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         engine = _get_engine()
-        inspector = sqla.inspect(engine)
+        inspector = inspect(engine)
         real_tables = set(inspector.get_table_names(schema=SCHEMA_DATA))
         table_objects = {t.name for t in Table.objects.filter(is_sandbox=False)}
 

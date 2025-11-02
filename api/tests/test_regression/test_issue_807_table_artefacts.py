@@ -1,5 +1,5 @@
 """Some api actions run `assert_permission`, which calls
-DBTable.load(table), which used get_or_create().
+Table.load(table), which used get_or_create().
 
 This caused the creation of an artefact entry in django tables.
 
@@ -9,9 +9,30 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from api.actions import assert_permission
-from api.connection import table_exists_in_django, table_exists_in_oedb
 from api.tests import APITestCase
+from dataedit.models import Table
+from oedb.connection import _get_engine
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
+
+
+def _table_exists_in_oedb(table, schema=None):
+    """check if table exists in oedb
+
+    Args:
+        table (str): table name
+        schema (str, optional): table schema name
+
+    Returns:
+        bool
+    """
+    schema = schema or SCHEMA_DEFAULT_TEST_SANDBOX
+    engine = _get_engine()
+    conn = engine.connect()
+    try:
+        result = engine.dialect.has_table(conn, table, schema=schema)
+    finally:
+        conn.close()
+    return result
 
 
 class Test_issue_807_table_artefacts(APITestCase):
@@ -28,6 +49,6 @@ class Test_issue_807_table_artefacts(APITestCase):
         except Exception:
             pass
 
-        self.assertFalse(table_exists_in_oedb(self.table, self.schema))
+        self.assertFalse(_table_exists_in_oedb(self.table, self.schema))
         # this failed before the bugfix
-        self.assertFalse(table_exists_in_django(self.table))
+        self.assertFalse(Table.objects.filter(name=self.table).first())

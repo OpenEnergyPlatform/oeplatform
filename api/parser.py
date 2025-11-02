@@ -16,14 +16,18 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import decimal
 import re
 from datetime import datetime
+from typing import cast as cast_type
 
 import dateutil
 import geoalchemy2  # Although this import seems unused is has to be here
-import sqlalchemy as sa
 from sqlalchemy import (
+    ARRAY,
     MetaData,
     Table,
     and_,
+)
+from sqlalchemy import case as sa_case
+from sqlalchemy import (
     cast,
     column,
     func,
@@ -39,20 +43,46 @@ from sqlalchemy import (
     util,
 )
 from sqlalchemy.dialects.postgresql.base import INTERVAL
-from sqlalchemy.exc import ArgumentError
+from sqlalchemy.exc import ArgumentError, NoSuchTableError
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun
 from sqlalchemy.sql.elements import Slice
-from sqlalchemy.sql.expression import CompoundSelect
-from sqlalchemy.sql.sqltypes import Interval, Text
+from sqlalchemy.sql.expression import ClauseElement, CompoundSelect, Select
+from sqlalchemy.sql.sqltypes import Interval
 
-import api  # TODO: we need functions from api.helper but get circular imports
-from api.connection import _get_engine
 from api.error import APIError, APIKeyError
 from api.utils import validate_schema
+from oedb.connection import _get_engine
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
+sql_operators = {
+    "EQUALS": "=",
+    "GREATER": ">",
+    "LOWER": "<",
+    "NOTEQUAL": "!=",
+    "NOTGREATER": "<=",
+    "NOTLOWER": ">=",
+    "=": "=",
+    ">": ">",
+    "<": "<",
+    "!=": "!=",
+    "<>": "!=",
+    "<=": "<=",
+    ">=": ">=",
+}
+_POSTGIS_MAP = {
+    "compositeelement": geoalchemy2.types.CompositeElement,
+    "geography": geoalchemy2.types.Geography,
+    "geometry": geoalchemy2.types.Geometry,
+    "raster": geoalchemy2.types.Raster,
+    "rasterelement": geoalchemy2.types.RasterElement,
+}
+__PARSER_META = MetaData(bind=_get_engine())
+
+
+def query_typecast_select(select) -> Select:
+    return cast_type(Select, select)
 
 
 def get_or_403(dictionary, key):
@@ -259,19 +289,8 @@ def parse_select(d):
                 query.except_(subquery)
     if "order_by" in d:
 
-        # issue #2041: order by on json columns fails,
-        # so we try to find json columns and cast them as text for ordering
-        if "from" in d:
-            json_columns = api.helper.get_json_columns(**d["from"])
-        else:
-            json_columns = set()
-
         for ob in d["order_by"]:
             expr = parse_expression(ob)
-
-            # cannot order json fields, so we cast them to string
-            if expr.name in json_columns:
-                expr = cast(expr, Text)
 
             if isinstance(ob, dict):
                 desc = ob.get("ordering", "asc").lower() == "desc"
@@ -329,7 +348,7 @@ def parse_from_item(d):
         else:
             try:
                 item = Table(d["table"], __PARSER_META, **tkwargs)
-            except sa.exc.NoSuchTableError:
+            except NoSuchTableError:
                 raise APIError("Table {table} not found".format(table=ext_name))
 
         engine = _get_engine()
@@ -355,9 +374,6 @@ def parse_from_item(d):
     if "alias" in d:
         item = item.alias(read_pgid(d["alias"]))
     return item
-
-
-__PARSER_META = MetaData(bind=_get_engine())
 
 
 def load_table_from_metadata(table, schema=None):
@@ -420,7 +436,7 @@ def parse_type(dt_string, **kwargs):
             # is_array = True
             dt_string = arr_match.groups()[0]
             dt, autoincrement = parse_type(dt_string)
-            return sa.ARRAY(dt), autoincrement
+            return ARRAY(dt), autoincrement
 
         # Is the datatypestring of form NAME(NUMBER)?
         dt_expression = r"(?P<dtname>[A-z_]+)\s*\((?P<cardinality>.*(,.*)?)\)"
@@ -440,13 +456,13 @@ def parse_type(dt_string, **kwargs):
         dt_string = dt_string.lower()
 
         if dt_string in ("int", "integer"):
-            dt = sa.types.INTEGER
+            dt = sqltypes.INTEGER
         elif dt_string in ("bigint", "biginteger"):
-            dt = sa.types.BigInteger
+            dt = sqltypes.BigInteger
         elif dt_string in ("bit",):
-            dt = sa.types.LargeBinary
+            dt = sqltypes.LargeBinary
         elif dt_string in ("boolean", "bool"):
-            dt = sa.types.Boolean
+            dt = sqltypes.Boolean
         elif dt_string in ("char",):
             dt = sqltypes.CHAR
         elif dt_string in ("date",):
@@ -468,7 +484,7 @@ def parse_type(dt_string, **kwargs):
         elif dt_string in ("nchar",):
             dt = sqltypes.NCHAR
         elif dt_string in ("numerical", "numeric"):
-            dt = sa.types.Numeric
+            dt = sqltypes.Numeric
         elif dt_string in ["varchar", "character varying"]:
             dt = sqltypes.VARCHAR
         elif dt_string in ("real",):
@@ -484,20 +500,11 @@ def parse_type(dt_string, **kwargs):
         elif hasattr(sqltypes, dt_string.upper()):
             dt = getattr(sqltypes, dt_string.upper())
         elif dt_string == "bigserial":
-            dt = sa.types.BigInteger
+            dt = sqltypes.BigInteger
             autoincrement = True
         else:
             raise APIError("Unknown type (%s)." % dt_string)
         return dt, autoincrement
-
-
-_POSTGIS_MAP = {
-    "compositeelement": geoalchemy2.types.CompositeElement,
-    "geography": geoalchemy2.types.Geography,
-    "geometry": geoalchemy2.types.Geometry,
-    "raster": geoalchemy2.types.Raster,
-    "rasterelement": geoalchemy2.types.RasterElement,
-}
 
 
 def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=True):
@@ -581,8 +588,8 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
 
 def parse_label(d):
     element = parse_expression(get_or_403(d, "element"))
-    if not isinstance(element, sa.sql.expression.ClauseElement):
-        element = sa.literal(element)
+    if not isinstance(element, ClauseElement):
+        element = literal(element)
     return element.label(get_or_403(d, "label"))
 
 
@@ -619,7 +626,7 @@ def parse_condition(dl):
 def parse_case(dl):
     else_clause = parse_expression(dl["else"])
     if "expression" in dl:
-        return sa.case(
+        return sa_case(
             {
                 parse_expression(case["when"]): parse_expression(case["then"])
                 for case in dl.get("cases", [])
@@ -628,7 +635,7 @@ def parse_case(dl):
             else_=else_clause,
         )
     else:
-        return sa.case(
+        return sa_case(
             [
                 (parse_expression(case["when"]), parse_expression(case["then"]))
                 for case in dl.get("cases", [])
@@ -733,23 +740,6 @@ def alchemyencoder(obj):
         return obj.isoformat()
     elif isinstance(obj, decimal.Decimal):
         return float(obj)
-
-
-sql_operators = {
-    "EQUALS": "=",
-    "GREATER": ">",
-    "LOWER": "<",
-    "NOTEQUAL": "!=",
-    "NOTGREATER": "<=",
-    "NOTLOWER": ">=",
-    "=": "=",
-    ">": ">",
-    "<": "<",
-    "!=": "!=",
-    "<>": "!=",
-    "<=": "<=",
-    ">=": ">=",
-}
 
 
 def parse_sql_operator(key: str) -> str:
