@@ -17,24 +17,20 @@
       "logo": "partner_logo_fortiss.png"
     },
     {
-      "name": "RWTH Aachen",
-      "logo": ""
+      "name": "RWTH Aachen"
     },
     {
-      "name": "Technical University of Denmark",
-      "logo": ""
+      "name": "Technical University of Denmark"
     },
     {
-      "name": "TU Berlin",
-      "logo": ""
+      "name": "TU Berlin"
     },
     {
       "name": "Europa-Universität Flensburg",
       "logo": "EUF.png"
     },
     {
-      "name": "TU München",
-      "logo": ""
+      "name": "TU München"
     }
   ],
   "funding": "03ET4076",
