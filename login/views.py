@@ -262,7 +262,7 @@ class ReviewsView(View):
         grouped_contributions = {
             k: list(v) for k, v in groupby(sorted_contributions, key=lambda x: x.table)
         }
-        latest_review_id = latest_review.id if latest_review is not None else None
+        latest_review_id = latest_review.pk if latest_review is not None else None
 
         return render(
             request,
@@ -594,7 +594,7 @@ class PartialGroupMemberManagementView(View, LoginRequiredMixin):
                 group=group, user=user_to_remove
             )
 
-            if request.user.id == user_to_remove.id:
+            if request.user.id == user_to_remove.pk:
                 errors["name"] = "Please leave the group to remove your own membership."
                 return JsonResponse(errors, status=400)
 
@@ -754,7 +754,7 @@ class PartialGroupInviteView(View, LoginRequiredMixin):
                     group=group, user=user
                 )
                 membership.save()
-                context["added_user"] = user.id
+                context["added_user"] = user.pk
                 return JsonResponse(context, status=201)
             except OepUser.DoesNotExist:
                 context["error"] = "User does not exist"
@@ -795,7 +795,7 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
 
     def get_redirect_url(self):
-        return reverse("login:settings", kwargs={"user_id": self.request.user.id})
+        return reverse("login:settings", kwargs={"user_id": self.request.user.pk})
 
 
 user_redirect_view = UserRedirectView.as_view()
@@ -835,4 +835,8 @@ def metadata_review_badge_indicator_icon_file_view(request, user_id, table_name)
     table = get_object_or_404(Table, name=table_name)
     context = table.get_review_badge_from_table_metadata()
 
-    return render(request, "login/partials/badge_icon.html", context=context)
+    return render(
+        request,
+        "login/partials/badge_icon.html",
+        context=context,  # type:ignore (we have Literals in type signature)
+    )
