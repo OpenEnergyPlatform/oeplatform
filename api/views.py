@@ -1231,9 +1231,7 @@ def groups_api_view(request: Request) -> JsonLikeResponse:
     if not query:
         return JsonResponse([], safe=False)
 
-    user_groups = user.memberships.all().prefetch_related(  # type:ignore related
-        "group"
-    )
+    user_groups = user.memberships.all().prefetch_related("group")
     groups = [g.group for g in user_groups]
 
     # Assuming 'name' is the field you want to search against
@@ -1243,7 +1241,7 @@ def groups_api_view(request: Request) -> JsonLikeResponse:
         )
         .filter(
             similarity__gt=0.2,  # Adjust the threshold as needed
-            id__in=[group.id for group in groups],
+            id__in=[group.pk for group in groups],
         )
         .order_by("-similarity")[:5]
     )
