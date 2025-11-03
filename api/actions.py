@@ -907,8 +907,9 @@ def column_add(schema, table, column, description):
     description["name"] = column
     settings = get_column_definition_query(description)
     name = settings.name
-    s = 'ALTER TABLE "{schema}"."{table}" ADD COLUMN "{name}" "{type}"'.format(
-        schema=schema, table=table, name=name, type=str(settings.type)
+    # NOTE: we format schema/table with placeholders and format again later
+    s = 'ALTER TABLE "{schema}"."{table}" ADD COLUMN "{name}" {type}'.format(
+        schema="{schema}", table="{table}", name=name, type=str(settings.type)
     )
     edit_table = get_edit_table_name(schema, table)
     insert_table = get_insert_table_name(schema, table)
@@ -1087,7 +1088,7 @@ def table_change_column(column_definition):
             != existing_column_description[column_definition["name"]]["data_type"]
         ):
             sql.append(
-                'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" TYPE "{c_datatype}";'.format(  # noqa
+                'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" TYPE {c_datatype};'.format(  # noqa
                     schema=schema,
                     table=table,
                     c_name=current_name,
@@ -1116,7 +1117,7 @@ def table_change_column(column_definition):
         # Column does not exist and should be created
         # Request will end in 500, if an argument is missing.
         sql.append(
-            'ALTER TABLE "{schema}"."{table}" ADD "{c_name}" "{c_datatype}" {c_notnull};'.format(  # noqa
+            'ALTER TABLE "{schema}"."{table}" ADD "{c_name}" {c_datatype} {c_notnull};'.format(  # noqa
                 schema=schema,
                 table=table,
                 c_name=current_name,
