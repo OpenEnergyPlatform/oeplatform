@@ -6,12 +6,13 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import logging
 import re
-from typing import Iterable
+from typing import Iterable, Literal, get_args
 
 from sqlalchemy import MetaData, Table
 
-from login.permissions import DELETE_PERM, NO_PERM
+from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM
 from oedb.connection import _get_engine, _get_inspector
+from oedb.structures import EditBase
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT, SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
@@ -26,8 +27,7 @@ MAX_SCHEMA_NAME_LENGTH = MAX_IDENTIFIER_LENGTH
 MAX_NAME_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
 NAME_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_NAME_LENGTH - 1))
 
-
-META_TABLE_TYPES = ["edit", "insert", "delete"]
+MetaActionType = Literal["edit", "insert", "delete"]
 
 
 class PermissionError(Exception):
@@ -91,6 +91,10 @@ class _OedbTable:
         return self._validated_table_name
 
     @property
+    def schema_name(self) -> str:
+        return self._validated_schema_name
+
+    @property
     def _quoted_name(self) -> str:
         return f'"{self._schema}"."{self._validated_table_name}"'
 
@@ -99,15 +103,12 @@ class _OedbTable:
         return self._schema._validated_schema_name
 
     def drop_if_exists(self) -> None:
-        if self._permission_level < DELETE_PERM:
-            raise PermissionError(f"Not allowed to drop table: {self}")
-
         # IMPORTANT: this should be the only place where we delete
         # tables in oedb
         # we coud also do self._sa_table.drop(checkfirst=True),
         # but i don't think it does CASCADE
         sql = f"DROP TABLE IF EXISTS {self._quoted_name} CASCADE;"
-        self._engine.execute(sql)
+        return self._execute(sql, requires_permission=DELETE_PERM)
 
     def exists(self) -> bool:
         return bool(
@@ -128,12 +129,54 @@ class _OedbTable:
             schema=self._validated_schema_name,
         )
 
+    def _execute(self, query, requires_permission: int = ADMIN_PERM):
+        if self._permission_level < requires_permission:
+            raise PermissionError()
+        return self._engine.execute(query)
+
     def __str__(self) -> str:
         return self._quoted_name
 
 
-class _OedbMetaTable(_OedbTable):
+class _OedbMainTable(_OedbTable):
     pass
+
+
+class _OedbMetaTable(_OedbTable):
+    def __init__(
+        self,
+        action: MetaActionType,
+        validated_main_table_name: str,
+        validated_main_schema_name: str,
+        permission_level: int = NO_PERM,
+    ):
+        assert action in set(get_args(MetaActionType))
+        self._action = action
+        self._main_table = _OedbMainTable(
+            validated_table_name=validated_main_table_name,
+            validated_schema_name=validated_main_schema_name,
+            permission_level=permission_level,
+        )
+
+        super().__init__(
+            validated_table_name=f"_{validated_main_table_name}_{action}",
+            validated_schema_name=f"_{validated_main_schema_name}",
+            permission_level=permission_level,
+        )
+
+    def _create(self, include_indexes: bool = True) -> None:
+        query = (
+            f'CREATE TABLE "{self.schema_name}"."{self.name}" (LIKE '
+            f'"{self._main_table.schema_name}"."{self._main_table.name}"'
+        )
+        if include_indexes:
+            query += "INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id) "
+        query += f") INHERITS ({EditBase.__tablename__});"
+        return self._execute(query, requires_permission=ADMIN_PERM)
+
+    def create_if_missing(self, include_indexes: bool = True) -> None:
+        if not self.exists():
+            self._create(include_indexes=include_indexes)
 
 
 class OedbTableGroup:
@@ -165,19 +208,20 @@ class OedbTableGroup:
             raise ValueError(f"Invalid schema: {schema_name}")
 
         # readonly properties
-        self._table = _OedbTable(
+        self._table = _OedbMainTable(
             validated_table_name=validated_table_name,
             validated_schema_name=schema_name,
             permission_level=self._permission_level,
         )
 
         self._meta_tables = {
-            t: _OedbMetaTable(
-                validated_table_name=f"_{validated_table_name}_{t}",
-                validated_schema_name=f"_{schema_name}",
+            a: _OedbMetaTable(
+                action=a,
+                validated_main_schema_name=schema_name,
+                validated_main_table_name=validated_table_name,
                 permission_level=self._permission_level,
             )
-            for t in META_TABLE_TYPES
+            for a in get_args(_OedbMetaTable)
         }
 
     @property

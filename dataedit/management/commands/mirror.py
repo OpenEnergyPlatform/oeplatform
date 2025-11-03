@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand
 
 from dataedit.models import Table
 from login.permissions import DELETE_PERM
-from oedb.utils import OedbTableGroup, _OedbMetaTable, _OedbSchema
+from oedb.utils import OedbTableGroup, _OedbSchema, _OedbTable
 from oeplatform.settings import SCHEMA_DATA
 
 data_schema = _OedbSchema(validated_schema_name=SCHEMA_DATA)
@@ -102,8 +102,8 @@ def delete_artefact_oedb_meta_table() -> bool:
         )
         if inp == "Y":
             for name in delete_oedb_meta_tables_names:
-                print(f"Deleteing {name}")
-                _OedbMetaTable(
+                print(f"Deleting {name}")
+                _OedbTable(
                     validated_table_name=name,
                     validated_schema_name=data_meta_schema._validated_schema_name,
                     permission_level=DELETE_PERM,
@@ -125,4 +125,4 @@ class Command(BaseCommand):
         if not delete_artefact_oedb_meta_table():
             return
 
-        print("finished")
+        print("Finished")

@@ -48,6 +48,61 @@ def get_sandbox_meta_tables_oedb() -> List[_OedbTable]:
     return list(meta_schema.get_oedb_tables(permission_level=DELETE_PERM))
 
 
+def delete_sandbox_django_tables(interactive: bool = True) -> bool:
+    tables = get_sandbox_tables_django()
+
+    if not tables:
+        # nohing to do
+        return True
+
+    if interactive:
+        for table in tables:
+            print(table)
+
+        if input(f"Delete {len(tables)} tables from {schema} [Y|n]: ") != "Y":
+            print("Abort")
+            return False
+    # actually deleting
+    for table in tables:
+        if interactive:
+            print(f"Deleting {table}")
+        table.delete()
+
+    return True
+
+
+def delete_sandbox_artefact_tables(interactive: bool = True) -> bool:
+    # now schema should be empty:
+    oedb_meta_tables = get_sandbox_meta_tables_oedb()
+    oedb_tables = get_sandbox_tables_oedb()
+    leftover_oedb_tables = oedb_meta_tables + oedb_tables
+
+    if not leftover_oedb_tables:
+        # nohing to do
+        return True
+
+    if interactive:
+        for oedb_table in leftover_oedb_tables:
+            print(oedb_table)
+
+        if (
+            input(
+                f"Delete {len(leftover_oedb_tables)} tables from {meta_schema} [Y|n]: "
+            )
+            != "Y"
+        ):
+            print("Abort")
+            return False
+
+    # actually deleting
+    for oedb_table in leftover_oedb_tables:
+        if interactive:
+            print(f"Deleting {oedb_table}")
+        oedb_table.drop_if_exists()
+
+    return True
+
+
 def clear_sandbox(interactive: bool = True) -> None:
     """delete all tables from the sandbox schema.
 
@@ -65,48 +120,12 @@ def clear_sandbox(interactive: bool = True) -> None:
 
     """
 
-    # 1. Step: collect and display all django table objects
-    tables = get_sandbox_tables_django()
-    table_count = len(tables)
+    if not delete_sandbox_django_tables(interactive=interactive):
+        return
+    if not delete_sandbox_artefact_tables(interactive=interactive):
+        return
 
-    if interactive:
-        for table in tables:
-            print(table)
-
-        if not table_count:
-            print("Nothing to do")
-        elif input(f"Delete {table_count} tables from {schema} [Y|n]: ") != "Y":
-            print("Abort")
-            return
-    # actually deleting
-    for table in tables:
-        if interactive:
-            print(f"Deleting {table}")
-        table.delete()
-
-    # now schema should be empty:
-    oedb_meta_tables = get_sandbox_meta_tables_oedb()
-    oedb_tables = get_sandbox_tables_oedb()
-    leftover_oedb_tables = oedb_meta_tables + oedb_tables
-    table_count = len(leftover_oedb_tables)
-    if not table_count:
-        return  # all good
-
-    if interactive:
-        for oedb_table in leftover_oedb_tables:
-            print(oedb_table)
-        if (
-            input(f"Delete {table_count} artefact tables from {meta_schema} [Y|n]: ")
-            != "Y"
-        ):
-            print("Abort")
-            return
-
-    # actually deleting
-    for oedb_table in leftover_oedb_tables:
-        if interactive:
-            print(f"Deleting {oedb_table}")
-        oedb_table.drop_if_exists()
+    print("Finished")
 
 
 class Command(BaseCommand):
