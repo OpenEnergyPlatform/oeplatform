@@ -943,7 +943,7 @@ class TableWizardView(LoginRequiredMixin, View):
             can_add = level >= login_models.WRITE_PERM
             columns = get_column_description(schema, table)
             # get number of rows
-            sql = "SELECT COUNT(*) FROM {schema}.{table}".format(
+            sql = 'SELECT COUNT(*) FROM "{schema}"."{table}"'.format(
                 schema=schema, table=table
             )
             res = actions.perform_sql(sql)

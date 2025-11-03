@@ -48,7 +48,6 @@ from sqlalchemy import (
     Table,
     UniqueConstraint,
     exc,
-    func,
     inspect,
     select,
     sql,
@@ -497,7 +496,7 @@ def perform_sql(sql_statement, parameter: dict | None = None) -> dict:
         return get_response_dict(success=True)
 
     try:
-        result = session_execute(session, sql_statement, parameter)
+        result = session_execute_parameter(session, sql_statement, parameter)
     except Exception as e:
         logger.error("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
@@ -875,7 +874,7 @@ def column_alter(query, context, schema, table, column):
 
     if column == "id":
         raise APIError("You cannot alter the id column")
-    alter_preamble = "ALTER TABLE {schema}.{table} ALTER COLUMN {column} ".format(
+    alter_preamble = 'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{column}" '.format(
         schema=schema, table=table, column=column
     )
     if "data_type" in query:
@@ -895,7 +894,7 @@ def column_alter(query, context, schema, table, column):
         perform_sql(sql)
     if "name" in query:
         sql = (
-            "ALTER TABLE {schema}.{table} RENAME COLUMN {column} TO "
+            'ALTER TABLE "{schema}"."{table}" RENAME COLUMN "{column}" TO '
             + read_pgid(query["name"])
         ).format(schema=schema, table=table, column=column)
         perform_sql(sql)
@@ -907,8 +906,8 @@ def column_add(schema, table, column, description):
     description["name"] = column
     settings = get_column_definition_query(description)
     name = settings.name
-    s = "ALTER TABLE {schema}.{table} ADD COLUMN {name} {type}".format(
-        schema="{schema}", table="{table}", name=name, type=str(settings.type)
+    s = 'ALTER TABLE "{schema}"."{table}" ADD COLUMN "{name}" "{type}"'.format(
+        schema=schema, table=table, name=name, type=str(settings.type)
     )
     edit_table = get_edit_table_name(schema, table)
     insert_table = get_insert_table_name(schema, table)
@@ -1069,7 +1068,7 @@ def table_change_column(column_definition):
         if get_or_403(column_definition, "new_name") is not None:
             # Rename table
             sql.append(
-                "ALTER TABLE {schema}.{table} RENAME COLUMN {name} TO {new_name};".format(  # noqa
+                'ALTER TABLE "{schema}"."{table}" RENAME COLUMN "{name}" TO "{new_name}";'.format(  # noqa
                     schema=schema,
                     table=table,
                     name=current_name,
@@ -1087,7 +1086,7 @@ def table_change_column(column_definition):
             != existing_column_description[column_definition["name"]]["data_type"]
         ):
             sql.append(
-                "ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} TYPE {c_datatype};".format(  # noqa
+                'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" TYPE "{c_datatype}";'.format(  # noqa
                     schema=schema,
                     table=table,
                     c_name=current_name,
@@ -1101,14 +1100,14 @@ def table_change_column(column_definition):
             if c_null:
                 # Change to nullable
                 sql.append(
-                    "ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} DROP NOT NULL;".format(  # noqa
+                    '"ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" DROP NOT NULL;'.format(  # noqa
                         schema=schema, table=table, c_name=current_name
                     )
                 )
             else:
                 # Change to not null
                 sql.append(
-                    "ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} SET NOT NULL;".format(  # noqa
+                    'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" SET NOT NULL;'.format(  # noqa
                         schema=schema, table=table, c_name=current_name
                     )
                 )
@@ -1116,7 +1115,7 @@ def table_change_column(column_definition):
         # Column does not exist and should be created
         # Request will end in 500, if an argument is missing.
         sql.append(
-            "ALTER TABLE {schema}.{table} ADD {c_name} {c_datatype} {c_notnull};".format(  # noqa
+            'ALTER TABLE "{schema}"."{table}" ADD "{c_name}" "{c_datatype}" {c_notnull};'.format(  # noqa
                 schema=schema,
                 table=table,
                 c_name=current_name,
@@ -1180,7 +1179,7 @@ def table_change_constraint(constraint_definition):
             raise APIError("Not supported")
     elif "DROP" in constraint_definition["action"]:
         sql.append(
-            "ALTER TABLE {schema}.{table} DROP CONSTRAINT {constraint_name}".format(
+            'ALTER TABLE "{schema}"."{table}" DROP CONSTRAINT "{constraint_name}"'.format(  # noqa
                 schema=schema,
                 table=table,
                 constraint_name=constraint_definition["constraint_name"],
@@ -1196,9 +1195,10 @@ def put_rows(schema, table, column_data):
     keys = list(column_data.keys())
     values = list(column_data.values())
 
+    keys = ['"{0}"'.format(key) for key in keys]
     values = ["'{0}'".format(value) for value in values]
 
-    sql = "INSERT INTO {schema}.{table} ({keys}) VALUES({values})".format(
+    sql = 'INSERT INTO "{schema}"."{table}" ({keys}) VALUES({values})'.format(
         schema=schema, table=table, keys=",".join(keys), values=",".join(values)
     )
 
@@ -1546,7 +1546,7 @@ def _execute_sqla(query, cursor: Cursor):
                     params[key] = json.dumps(value)
                 else:
                     params[key] = dialect._json_serializer(value)
-        cursor.execute(str(compiled), params)
+        cursor_execute_parameter(cursor, str(compiled), params)
     except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
         raise APIError(repr(e))
     except psycopg2.InternalError as e:
@@ -1605,12 +1605,6 @@ def data_search(request, context: dict | None = None):
     ]
     result = {"description": description, "rowcount": cursor.rowcount}
     return result
-
-
-def _get_count(q):
-    count_q = q.statement.with_only_columns([func.count()]).order_by(None)
-    count = q.session.execute(count_q).scalar()
-    return count
 
 
 def count_all(request, context=None):
@@ -2212,7 +2206,7 @@ def create_insert_table(schema, table, meta_schema=None):
 
 
 def getValue(schema, table, column, id):
-    sql = "SELECT {column} FROM {schema}.{table} WHERE id={id}".format(
+    sql = 'SELECT {column} FROM "{schema}"."{table}" WHERE id={id}'.format(
         column=column, schema=schema, table=table, id=id
     )
 
@@ -2265,10 +2259,11 @@ def apply_changes(schema, table, cursor: Cursor | None = None):
         extended_columns = columns + ["_submitted", "_id"]
 
         insert_table = get_insert_table_name(schema, table)
-        cursor.execute(
+        cursor_execute(
+            cursor,
             "select * "
-            "from {schema}.{table} "
-            "where _applied = FALSE;".format(schema=meta_schema, table=insert_table)
+            'from "{schema}"."{table}" '
+            "where _applied = FALSE;".format(schema=meta_schema, table=insert_table),
         )
         changes = [
             add_type(
@@ -2283,10 +2278,11 @@ def apply_changes(schema, table, cursor: Cursor | None = None):
         ]
 
         update_table = get_edit_table_name(schema, table)
-        cursor.execute(
+        cursor_execute(
+            cursor,
             "select * "
-            "from {schema}.{table} "
-            "where _applied = FALSE;".format(schema=meta_schema, table=update_table)
+            'from "{schema}"."{table}" '
+            "where _applied = FALSE;".format(schema=meta_schema, table=update_table),
         )
         changes += [
             add_type(
@@ -2301,10 +2297,11 @@ def apply_changes(schema, table, cursor: Cursor | None = None):
         ]
 
         delete_table = get_delete_table_name(schema, table)
-        cursor.execute(
+        cursor_execute(
+            cursor,
             "select * "
-            "from {schema}.{table} "
-            "where _applied = FALSE;".format(schema=meta_schema, table=delete_table)
+            'from "{schema}"."{table}" '
+            "where _applied = FALSE;".format(schema=meta_schema, table=delete_table),
         )
         changes += [
             add_type(
@@ -2381,7 +2378,7 @@ def set_applied(session, table, rids, mode):
         .values(_applied=True)
         .compile()
     )
-    session.execute(str(update_query), update_query.params)
+    session_execute_parameter(session, str(update_query), update_query.params)
 
 
 def apply_insert(session, table, rows, rids):
@@ -2502,7 +2499,7 @@ def get_single_table_size(table: str) -> dict | None:
     schema = DBTable.load(name=table).oedb_schema
     sess = _create_oedb_session()
     try:
-        res = session_execute(sess, sql, {"schema": schema, "table": table})
+        res = session_execute_parameter(sess, sql, {"schema": schema, "table": table})
         row = res.fetchone()
         if not row:
             return None
@@ -2600,7 +2597,15 @@ def table_get_approx_row_count(table: DBTable, precise_below: int = 0) -> int:
     return row_count
 
 
-def session_execute(session: Session, sql: str, parameter=None) -> ResultProxy:
+def session_execute(session: Session, sql) -> ResultProxy:
+    response = session.execute(sql)
+    # Note: cast is only for type checking,
+    # should disappear once we migrate to sqlalchemy >= 1.4
+    response = cast(ResultProxy, response)
+    return response
+
+
+def session_execute_parameter(session: Session, sql, parameter) -> ResultProxy:
     response = session.execute(sql, parameter)
     # Note: cast is only for type checking,
     # should disappear once we migrate to sqlalchemy >= 1.4
@@ -2608,17 +2613,25 @@ def session_execute(session: Session, sql: str, parameter=None) -> ResultProxy:
     return response
 
 
-def engine_execute(engine: Engine, sql: str, parameter=None) -> ResultProxy:
-    response = engine.execute(sql, parameter)
+def engine_execute(engine: Engine, sql) -> ResultProxy:
+    response = engine.execute(sql)
     # Note: cast is only for type checking,
     # should disappear once we migrate to sqlalchemy >= 1.4
     response = cast(ResultProxy, response)
     return response
 
 
-def connection_execute(connection: Connection, sql: str, **kwargs) -> ResultProxy:
+def connection_execute(connection: Connection, sql, **kwargs) -> ResultProxy:
     response = connection.execute(sql, **kwargs)
     # Note: cast is only for type checking,
     # should disappear once we migrate to sqlalchemy >= 1.4
     response = cast(ResultProxy, response)
     return response
+
+
+def cursor_execute(cursor: Cursor, sql) -> None:
+    cursor.execute(sql)
+
+
+def cursor_execute_parameter(cursor: Cursor, sql, parameter) -> None:
+    cursor.execute(sql, parameter)
