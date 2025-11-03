@@ -40,7 +40,7 @@ from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
 
 from dataedit.utils import get_badge_icon_path, validate_badge_name_match
-from oedb.utils import OedbTableGroup
+from oedb.utils import OedbTableGroup, is_valid_name
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 if TYPE_CHECKING:
@@ -198,9 +198,21 @@ class Table(Tagable):
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
+        # ensure oedb tables are deleted
         OedbTableGroup(
             validated_table_name=self.name, schema_name=self.oedb_schema
         ).drop_if_exists()
+
+    def save(self, *args, **kwargs):
+        # validate name on first save, never change name again
+        if self.pk:  # object already exists
+            old_name = Table.objects.get(pk=self.pk).name
+            if old_name != self.name:
+                raise ValidationError("name cannot be changed")
+        else:  # first time creation
+            if not is_valid_name(self.name):
+                raise ValidationError(f"Invalid name: {self.name}")
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})

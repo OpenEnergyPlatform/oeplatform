@@ -25,7 +25,7 @@ NAME_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_NAME_LENGTH - 1))
 META_TABLE_TYPES = ["edit", "insert", "delete"]
 
 
-def is_valid_identifier(name: str) -> bool:
+def is_valid_name(name: str) -> bool:
     return len(name) <= MAX_NAME_LENGTH and bool(NAME_PATTERN.match(name))
 
 
@@ -51,7 +51,13 @@ class _OedbSchema:
 class _OedbTable:
     """represents data table and meta tables in postgres oedb."""
 
-    def __init__(self, validated_table_name: str, validated_schema_name: str):
+    def __init__(
+        self,
+        validated_table_name: str,
+        validated_schema_name: str,
+        permission_level: int = 0,
+    ):
+        self._permission_level = permission_level
         self._schema = _OedbSchema(validated_schema_name=validated_schema_name)
         self._validated_table_name = clip_table_name(validated_table_name)
         self._engine = _get_engine()
@@ -68,10 +74,19 @@ class _OedbTable:
         self._engine.execute(sql)
 
 
+class _OedbMetaTable(_OedbTable):
+    pass
+
+
 class OedbTableGroup:
     """represents data table and meta tables in postgres oedb."""
 
-    def __init__(self, validated_table_name: str, schema_name: str | None = None):
+    def __init__(
+        self,
+        validated_table_name: str,
+        schema_name: str | None = None,
+        permission_level: int = 0,
+    ):
         """
         Parameters
         ----------
@@ -83,6 +98,8 @@ class OedbTableGroup:
             physical schema in oedb
 
         """
+
+        self._permission_level = permission_level
 
         # check schema
         schema_name = schema_name or SCHEMA_DEFAULT
@@ -96,7 +113,7 @@ class OedbTableGroup:
         )
 
         self._meta_tables = {
-            t: _OedbTable(
+            t: _OedbMetaTable(
                 validated_table_name=f"_{validated_table_name}_{t}",
                 validated_schema_name=f"_{schema_name}",
             )

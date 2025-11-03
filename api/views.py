@@ -86,7 +86,7 @@ from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs, request_data_dict, validate_schema
 from api.validators.column import validate_column_names
-from api.validators.identifier import assert_valid_identifier_name
+from api.validators.identifier import assert_valid_table_name
 from dataedit.models import Embargo, Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
@@ -302,7 +302,7 @@ class TableAPIView(APIView):
             raise APIError("Table already exists", 409)
 
         # 2) Validate identifiers
-        assert_valid_identifier_name(table)
+        assert_valid_table_name(table)
 
         # 3) Parse and validate payload
         request_data_dict = get_request_data_dict(request)
@@ -464,7 +464,7 @@ class TableAPIView(APIView):
         metadata=None,
         embargo_data=None,
     ):
-        assert_valid_identifier_name(table)
+        assert_valid_table_name(table)
         self.validate_column_names(column_definitions)
 
         embargo_error, embargo_payload_check = self._check_embargo_payload_valid(

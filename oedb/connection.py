@@ -54,6 +54,8 @@ def _create_oedb_session() -> Session:
 
 
 class AbstractColumn(Protocol):
+    """this is only for type checking"""
+
     name: str
     type_code: int
     display_size: int
