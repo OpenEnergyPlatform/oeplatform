@@ -2384,15 +2384,15 @@ def set_applied(session, table, rids, mode):
 
 
 def apply_insert(session, table, rows, rids):
-    logger.info("apply inserts " + str(rids))
+    logger.debug("apply inserts (%d)", len(rids))
     query = table.insert().values(rows)
     _execute_sqla(query, session)
     set_applied(session, table, rids, __INSERT)
 
 
 def apply_update(session, table, rows, rids):
+    logger.debug("apply updates (%d)", len(rids))
     for row, rid in zip(rows, rids):
-        logger.info("apply update " + str(row))
         pks = [c.name for c in table.columns if c.primary_key]
         query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(
             row
@@ -2402,8 +2402,8 @@ def apply_update(session, table, rows, rids):
 
 
 def apply_deletion(session, table, rows, rids):
+    logger.debug("apply deletion (%d)", len(rids))
     for row, rid in zip(rows, rids):
-        logger.info("apply deletion " + str(row))
         query = table.delete().where(
             *[getattr(table.c, col) == row[col] for col in row]
         )

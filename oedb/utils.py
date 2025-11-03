@@ -61,8 +61,10 @@ class _OedbTable:
         return f'"{self._schema}"."{self._validated_table_name}"'
 
     def drop_if_exists(self) -> None:
+        # IMPORTANT: this should be the only place where we delete
+        # tables in oedb
         sql = f"DROP TABLE IF EXISTS {self._quoted_name} CASCADE;"
-        logger.warning(sql)
+        logger.info(sql)
         self._engine.execute(sql)
 
 
