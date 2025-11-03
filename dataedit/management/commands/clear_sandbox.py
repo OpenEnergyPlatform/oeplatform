@@ -75,11 +75,13 @@ def clear_sandbox(interactive: bool = True) -> None:
 
         if not table_count:
             print("Nothing to do")
-        elif input(f"Delete {table_count} tables from {schema} [y|n]: ") != "y":
+        elif input(f"Delete {table_count} tables from {schema} [Y|n]: ") != "Y":
             print("Abort")
             return
     # actually deleting
     for table in tables:
+        if interactive:
+            print(f"Deleting {table}")
         table.delete()
 
     # now schema should be empty:
@@ -94,13 +96,16 @@ def clear_sandbox(interactive: bool = True) -> None:
         for oedb_table in leftover_oedb_tables:
             print(oedb_table)
         if (
-            input(f"Delete {table_count} artefact tables from {meta_schema} [y|n]: ")
-            != "y"
+            input(f"Delete {table_count} artefact tables from {meta_schema} [Y|n]: ")
+            != "Y"
         ):
             print("Abort")
             return
+
     # actually deleting
     for oedb_table in leftover_oedb_tables:
+        if interactive:
+            print(f"Deleting {oedb_table}")
         oedb_table.drop_if_exists()
 
 

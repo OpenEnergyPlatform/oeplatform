@@ -87,6 +87,10 @@ class _OedbTable:
         self._engine = _get_engine()
 
     @property
+    def name(self) -> str:
+        return self._validated_table_name
+
+    @property
     def _quoted_name(self) -> str:
         return f'"{self._schema}"."{self._validated_table_name}"'
 
@@ -174,6 +178,12 @@ class OedbTableGroup:
                 permission_level=self._permission_level,
             )
             for t in META_TABLE_TYPES
+        }
+
+    @property
+    def meta_table_names(self) -> dict[str, str]:
+        return {
+            action: t._validated_table_name for action, t in self._meta_tables.items()
         }
 
     def exists(self) -> bool:
