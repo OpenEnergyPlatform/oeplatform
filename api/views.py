@@ -84,7 +84,7 @@ from api.services.embargo import (
 )
 from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
-from api.utils import get_dataset_configs, validate_schema
+from api.utils import get_dataset_configs, request_data_dict, validate_schema
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_identifier_name
 from dataedit.models import Embargo, Table
@@ -1138,7 +1138,7 @@ class RowsAPIView(APIView):
             query = query.offset(int(offset))
             query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
-        cursor = sessions.load_cursor_from_context(request.data)
+        cursor = sessions.load_cursor_from_context(request_data_dict(request))
         actions._execute_sqla(query, cursor)
 
 
@@ -1153,10 +1153,10 @@ class AdvancedFetchAPIView(APIView):
             raise APIError("Unknown fetchtype: %s" % fetchtype)
 
     def do_fetch(self, request: Request, fetch):
-
+        data = request_data_dict(request)
         context = {
-            "connection_id": actions.get_or_403(request.data, "connection_id"),
-            "cursor_id": actions.get_or_403(request.data, "cursor_id"),
+            "connection_id": actions.get_or_403(data, "connection_id"),
+            "cursor_id": actions.get_or_403(data, "cursor_id"),
             "user": request.user,
         }
         return OEPStream(

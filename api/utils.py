@@ -7,6 +7,10 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from typing import cast
+
+from rest_framework.request import Request
+
 from oekg.sparqlModels import DatasetConfig
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
@@ -48,3 +52,10 @@ def validate_schema(schema: str | None) -> str:
 
     schema = prefix + schema
     return schema
+
+
+def request_data_dict(request: Request) -> dict:
+    if request.data:
+        return cast(dict, request.data)
+    else:
+        return {}

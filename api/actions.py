@@ -86,8 +86,9 @@ from dataedit.models import Table as DBTable
 from login.models import DELETE_PERM, WRITE_PERM
 from login.models import myuser as User
 from oedb.connection import (
+    AbstractCursor,
     Connection,
-    Cursor,
+    DBAPIConnection,
     Engine,
     ResultProxy,
     Session,
@@ -1532,7 +1533,7 @@ def data_insert(request, context: dict):
     return response
 
 
-def _execute_sqla(query, cursor: Cursor):
+def _execute_sqla(query, cursor: AbstractCursor):
     dialect = _get_engine().dialect
     try:
         compiled = query.compile(dialect=dialect)
@@ -1916,7 +1917,7 @@ def get_columns(query: dict, context=None) -> dict:
         typemap={"attname": sqltypes.Unicode, "default": sqltypes.Unicode},
     )
     c = connection_execute(connection, s, table_oid=table_oid)
-    rows = c.fetchall()
+    rows = c.fetchall() or []
 
     domains = engine.dialect._load_domains(connection)
 
@@ -2133,7 +2134,7 @@ def fetchall(context):
 
 def fetchmany(request, context):
     cursor = load_cursor_from_context(context)
-    return cursor.fetchmany(request["size"])
+    return cursor.fetchmany(int(request["size"]))
 
 
 def get_comment_table_name(schema, table, create=True):
@@ -2229,7 +2230,7 @@ def getValue(schema, table, column, id):
     return None
 
 
-def apply_changes(schema, table, cursor: Cursor | None = None):
+def apply_changes(schema, table, cursor: AbstractCursor | None = None):
     """Apply changes from the meta tables to the actual table.
 
     Meta tables are :
@@ -2246,11 +2247,11 @@ def apply_changes(schema, table, cursor: Cursor | None = None):
     engine = _get_engine()
 
     artificial_connection = False
+    connection: DBAPIConnection = engine.raw_connection()  # type:ignore TODO
 
     if cursor is None:
         artificial_connection = True
-        connection: Connection = engine.raw_connection()  # type:ignore TODO
-        cursor: Cursor = connection.cursor()  # type:ignore TODO
+        cursor = cast(AbstractCursor, connection.cursor())  # type:ignore TODO
 
     try:
         meta_schema = get_meta_schema_name(schema)
@@ -2629,9 +2630,9 @@ def connection_execute(connection: Connection, sql, **kwargs) -> ResultProxy:
     return response
 
 
-def cursor_execute(cursor: Cursor, sql) -> None:
+def cursor_execute(cursor: AbstractCursor, sql) -> None:
     cursor.execute(sql)
 
 
-def cursor_execute_parameter(cursor: Cursor, sql, parameter) -> None:
+def cursor_execute_parameter(cursor: AbstractCursor, sql, parameter) -> None:
     cursor.execute(sql, parameter)

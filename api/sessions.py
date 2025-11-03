@@ -13,7 +13,7 @@ from django.contrib.auth.models import AbstractUser
 
 from api.actions import get_or_403
 from api.error import APIError
-from oedb.connection import Cursor, DBAPIConnection, _get_engine
+from oedb.connection import AbstractCursor, DBAPIConnection, _get_engine
 from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION_LIMIT
 
 _SESSION_CONTEXTS = {}
@@ -63,12 +63,12 @@ class SessionContext:
         self.owner = owner
 
         # FIXME: is this a good idea, to add a custom attribute?
-        self.connection._id = connection_id  # noqa
+        setattr(self.connection, "_id", connection_id)
 
         self.session_context = self
         self.cursors = {}
 
-    def get_cursor(self, cursor_id) -> Cursor:
+    def get_cursor(self, cursor_id) -> AbstractCursor:
         try:
             return self.cursors[cursor_id]
         except KeyError:
@@ -114,7 +114,7 @@ def close_all_for_user(owner) -> None:
             pass
 
 
-def load_cursor_from_context(context: dict) -> Cursor:
+def load_cursor_from_context(context: dict) -> AbstractCursor:
     session = load_session_from_context(context)
     cursor_id = get_or_403(context, "cursor_id")
     return session.get_cursor(cursor_id)
