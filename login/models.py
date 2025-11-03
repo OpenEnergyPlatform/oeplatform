@@ -29,16 +29,12 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 import dataedit.models as datamodels
+from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM, WRITE_PERM
 
 if TYPE_CHECKING:
     # only import for static typechecking
     # TODO: is there a betetr way of doing this?
     from factsheet.models import ScenarioBundleAccessControl
-
-NO_PERM = 0
-WRITE_PERM = 4
-DELETE_PERM = 8
-ADMIN_PERM = 12
 
 
 class OEPUserManager(UserManager):

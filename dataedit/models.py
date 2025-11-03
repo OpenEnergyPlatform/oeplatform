@@ -40,6 +40,7 @@ from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
 
 from dataedit.utils import get_badge_icon_path, validate_badge_name_match
+from login.permissions import DELETE_PERM
 from oedb.utils import OedbTableGroup, is_valid_name
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
@@ -200,7 +201,9 @@ class Table(Tagable):
         super().delete(*args, **kwargs)
         # ensure oedb tables are deleted
         OedbTableGroup(
-            validated_table_name=self.name, schema_name=self.oedb_schema
+            validated_table_name=self.name,
+            schema_name=self.oedb_schema,
+            permission_level=DELETE_PERM,
         ).drop_if_exists()
 
     def save(self, *args, **kwargs):
@@ -370,6 +373,9 @@ class Table(Tagable):
                 "is_badge": False,
                 "err_msg": f"No match found for badge name: {badge}",
             }
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Embargo(models.Model):

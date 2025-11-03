@@ -48,8 +48,9 @@ from rest_framework.views import APIView
 
 import api.parser
 import login.models as login_models
+import login.permissions
 from api import actions, parser, sessions
-from api.actions import engine_execute, table_get_approx_row_count
+from api.actions import engine_execute, table_get_approx_row_count, table_or_404
 from api.encode import Echo
 from api.error import APIError
 from api.helper import (
@@ -564,18 +565,15 @@ class TableAPIView(APIView):
         perm, _ = login_models.UserPermission.objects.get_or_create(
             table=table_object, holder=user
         )
-        perm.level = login_models.ADMIN_PERM
+        perm.level = login.permissions.ADMIN_PERM
         perm.save()
         user.save()
 
     @api_exception
     @require_delete_permission
     def delete(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
-        orchestrator = TableCreationOrchestrator()
-
-        schema, table = actions.get_table_name(schema, table)
-        orchestrator.drop_table(schema=schema, table=table)
-
+        table_obj = table_or_404(table=table)
+        table_obj.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
@@ -1103,13 +1101,13 @@ class RowsAPIView(APIView):
 
     @load_cursor(named=True)
     def __get_rows(self, request: Request, data):
-        table = actions._get_table(data["schema"], table=data["table"])
+        sa_table = actions._get_table(data["schema"], table=data["table"])
         columns = data.get("columns")
 
         if not columns:
-            query = table.select()
+            query = sa_table.select()
         else:
-            columns = [actions.get_column_obj(table, c) for c in columns]
+            columns = [actions.get_column_obj(sa_table, c) for c in columns]
             query = actions.get_columns_select(columns=columns)
 
         where_clauses = data.get("where")

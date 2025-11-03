@@ -1,5 +1,6 @@
 from dataedit.models import Table
-from login.models import ADMIN_PERM, UserPermission
+from login.models import UserPermission
+from login.permissions import ADMIN_PERM
 
 
 def assign_table_holder(user, schema: str, table: str):

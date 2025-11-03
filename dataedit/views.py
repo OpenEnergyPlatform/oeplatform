@@ -61,6 +61,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import View
 from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 
+import login.permissions
 from api import actions, utils
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
@@ -582,7 +583,7 @@ class TableDataView(View):
         if request.user and not request.user.is_anonymous:
             is_admin = user.has_admin_permissions(table=table)
             level = user.get_table_permission_level(table_obj)
-            can_add = level >= login_models.WRITE_PERM
+            can_add = level >= login.permissions.WRITE_PERM
 
         table_label = table_obj.human_readable_name
 
@@ -735,13 +736,13 @@ class TablePermissionView(View):
         is_admin = False
         can_add = False
         can_remove = False
-        level = login_models.NO_PERM
+        level = login.permissions.NO_PERM
         user: login_models.myuser = request.user  # type: ignore
         if not user.is_anonymous:
             level = user.get_table_permission_level(table_obj)
-            is_admin = level >= login_models.ADMIN_PERM
-            can_add = level >= login_models.WRITE_PERM
-            can_remove = level >= login_models.DELETE_PERM
+            is_admin = level >= login.permissions.ADMIN_PERM
+            can_add = level >= login.permissions.WRITE_PERM
+            can_remove = level >= login.permissions.DELETE_PERM
         return render(
             request,
             "dataedit/table_permissions.html",
@@ -763,7 +764,7 @@ class TablePermissionView(View):
         user: login_models.myuser = request.user  # type: ignore
         if (
             user.is_anonymous
-            or user.get_table_permission_level(table_obj) < login_models.ADMIN_PERM
+            or user.get_table_permission_level(table_obj) < login.permissions.ADMIN_PERM
         ):
             raise PermissionDenied
         if request.POST["mode"] == "add_user":
@@ -891,7 +892,7 @@ def tage_table_add_view(request: HttpRequest) -> HttpResponse:
     )
     # check write permission
     actions.assert_add_tag_permission(
-        request.user, table, login_models.WRITE_PERM, schema=schema_name
+        request.user, table, login.permissions.WRITE_PERM, schema=schema_name
     )
     tag_prefix = "tag_"
     tag_prefix_len = len(tag_prefix)
@@ -940,7 +941,7 @@ class TableWizardView(LoginRequiredMixin, View):
             table_obj = Table.objects.get(name=table)
             user: login_models.myuser = request.user  # type: ignore
             level = user.get_table_permission_level(table_obj)
-            can_add = level >= login_models.WRITE_PERM
+            can_add = level >= login.permissions.WRITE_PERM
             columns = get_column_description(schema, table)
             # get number of rows
             sql = 'SELECT COUNT(*) FROM "{schema}"."{table}"'.format(
@@ -982,7 +983,7 @@ class TableMetaEditView(LoginRequiredMixin, View):
         user: login_models.myuser = request.user  # type: ignore
         if not user.is_anonymous:
             level = user.get_table_permission_level(table_obj)
-            can_add = level >= login_models.WRITE_PERM
+            can_add = level >= login.permissions.WRITE_PERM
 
         url_table_id = request.build_absolute_uri(
             reverse("dataedit:view", kwargs={"schema": schema, "table": table})
@@ -1267,7 +1268,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         user: login_models.myuser = request.user  # type: ignore
         if not user.is_anonymous:
             level = user.get_table_permission_level(table_obj)
-            can_add = level >= login_models.WRITE_PERM
+            can_add = level >= login.permissions.WRITE_PERM
 
         oemetadata = self.load_json(schema, table, review_id)
         metadata = self.sort_in_category(
@@ -1479,7 +1480,7 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         user: login_models.myuser = request.user  # type: ignore
         if not user.is_anonymous:
             level = user.get_table_permission_level(table_obj)
-            can_add = level >= login_models.WRITE_PERM
+            can_add = level >= login.permissions.WRITE_PERM
         oemetadata = self.load_json(schema, table, review_id)
         metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)
         json_schema = self.load_json_schema()

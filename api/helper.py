@@ -37,7 +37,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-import login.models as login_models
+import login.permissions
 from api import actions, parser, sessions
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
@@ -232,15 +232,15 @@ def permission_wrapper(permission: int, f: Callable) -> Callable:
 
 
 def require_write_permission(f: Callable) -> Callable:
-    return permission_wrapper(login_models.WRITE_PERM, f)
+    return permission_wrapper(login.permissions.WRITE_PERM, f)
 
 
 def require_delete_permission(f: Callable) -> Callable:
-    return permission_wrapper(login_models.DELETE_PERM, f)
+    return permission_wrapper(login.permissions.DELETE_PERM, f)
 
 
 def require_admin_permission(f: Callable) -> Callable:
-    return permission_wrapper(login_models.ADMIN_PERM, f)
+    return permission_wrapper(login.permissions.ADMIN_PERM, f)
 
 
 def conjunction(clauses) -> dict:

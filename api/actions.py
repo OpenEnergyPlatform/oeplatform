@@ -45,7 +45,9 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     MetaData,
     PrimaryKeyConstraint,
-    Table,
+)
+from sqlalchemy import Table as SATable
+from sqlalchemy import (
     UniqueConstraint,
     exc,
     inspect,
@@ -83,8 +85,8 @@ from api.sessions import (
 from api.utils import check_if_oem_license_exists, validate_schema
 from dataedit.models import Embargo, PeerReview
 from dataedit.models import Table as DBTable
-from login.models import DELETE_PERM, WRITE_PERM
 from login.models import myuser as User
+from login.permissions import DELETE_PERM, WRITE_PERM
 from oedb.connection import (
     AbstractCursor,
     Connection,
@@ -130,7 +132,7 @@ def get_columns_select(columns: list[str]) -> Select:
     return select(columns=columns)
 
 
-def get_column_obj(table: Table, column: str):
+def get_column_obj(sa_table: SATable, column: str):
     """
 
     :param talbe: A sqla-table object
@@ -138,7 +140,7 @@ def get_column_obj(table: Table, column: str):
     :return: Basically `getattr(table.c, column)` but throws an exception of the
         column does not exists
     """
-    tc = table.c
+    tc = sa_table.c
     try:
         return getattr(tc, column)
     except AttributeError:
@@ -162,6 +164,13 @@ def get_table_name(
 
 class ResponsiveException(Exception):
     pass
+
+
+def table_or_404(table: str) -> DBTable:
+    table_obj = DBTable.objects.filter(name=table).first()
+    if table_obj is None:
+        raise APIError("Table doesnot exist", 401)
+    return table_obj
 
 
 def assert_permission(user, table: str, permission: int) -> None:
@@ -840,11 +849,11 @@ def get_column_definition_query(d):
         if fkschema is None:
             fkschema = SCHEMA_DEFAULT_TEST_SANDBOX
 
-        fktable = Table(get_or_403(fk, "table"), MetaData(), schema=fkschema)
+        fk_sa_table = SATable(get_or_403(fk, "table"), MetaData(), schema=fkschema)
 
         fkcolumn = Column(get_or_403(fk, "column"))
 
-        fkcolumn.table = fktable
+        fkcolumn.table = fk_sa_table
 
         args.append(ForeignKey(fkcolumn))
 
@@ -934,7 +943,9 @@ def assert_valid_identifier_name(identifier):
         )
 
 
-def table_create(schema, table, column_definitions, constraints_definitions):
+def table_create(
+    schema: str, table: str, column_definitions: list, constraints_definitions: list
+):
     """
     Creates a new table.
     :param schema: schema
@@ -1023,12 +1034,12 @@ def table_create(schema, table, column_definitions, constraints_definitions):
     if tuple(primary_key_col_names) != ("id",):
         raise APIError("Primary key must be column id")
 
-    t = Table(table, metadata, *(columns + constraints), schema=schema)
+    sa_table = SATable(table, metadata, *(columns + constraints), schema=schema)
 
     # NOTE: type casting probably no longer needed in later sqlalchemay
-    t = cast(Table, t)
+    sa_table = cast(SATable, sa_table)
 
-    t.create(_get_engine())
+    sa_table.create(_get_engine())
 
     # Create Metatables
     get_edit_table_name(schema, table)
@@ -1212,11 +1223,11 @@ ACTIONS FROM OLD API
 """
 
 
-def _get_table(schema, table) -> Table:
+def _get_table(schema, table) -> SATable:
     engine = _get_engine()
     metadata = MetaData(bind=_get_engine())
 
-    return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
+    return SATable(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
 
 def get_table_metadata(schema: str, table: str) -> dict:
@@ -1270,14 +1281,14 @@ def __change_rows(request, context, target_table, setter, fields=None) -> dict:
 
     table_name = orig_table
     meta = MetaData(bind=_get_engine())
-    table = Table(
+    sa_table = SATable(
         table_name,
         meta,
         autoload=True,
         schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
     )
 
-    pks = [c for c in table.columns if c.primary_key]  # type:ignore
+    pks = [c for c in sa_table.columns if c.primary_key]  # type:ignore
 
     inserts = []
     cursor = load_cursor_from_context(context)
@@ -1301,8 +1312,8 @@ def __change_rows(request, context, target_table, setter, fields=None) -> dict:
             get_meta_schema_name(schema) if not schema.startswith("_") else schema
         )
 
-        insert_table = _get_table(meta_schema, target_table)
-        query = insert_table.insert(values=inserts)
+        insert_sa_table = _get_table(meta_schema, target_table)
+        query = insert_sa_table.insert(values=inserts)
         _execute_sqla(query, cursor)
     return {"rowcount": rows["rowcount"]}
 
@@ -1614,8 +1625,8 @@ def count_all(request, context=None):
     schema = get_or_403(request, "schema")
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
-    t = _get_table(schema, table)
-    return session.query(t).count()
+    sa_table = _get_table(schema, table)
+    return session.query(sa_table).count()
 
 
 def analyze_columns(schema, table):
@@ -2318,7 +2329,7 @@ def apply_changes(schema, table, cursor: AbstractCursor | None = None):
         ]
 
         changes = list(changes)
-        table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
+        sa_table = SATable(table, MetaData(bind=engine), autoload=True, schema=schema)
 
         # ToDo: This may require some kind of dependency tree resolution
         prev_type = None
@@ -2326,13 +2337,13 @@ def apply_changes(schema, table, cursor: AbstractCursor | None = None):
         for change in sorted(changes, key=lambda x: x["_submitted"]):
             distilled_change = {k: v for k, v in change.items() if k in columns}
             if prev_type and change["_type"] != prev_type:
-                _apply_stack(cursor, table_obj, change_batch, prev_type)
+                _apply_stack(cursor, sa_table, change_batch, prev_type)
                 change_batch = []
             else:
                 change_batch.append((distilled_change, change["_id"]))
             prev_type = change["_type"]
         if prev_type:
-            _apply_stack(cursor, table_obj, change_batch, prev_type)
+            _apply_stack(cursor, sa_table, change_batch, prev_type)
         if artificial_connection:
             connection.commit()
     except Exception:
@@ -2364,7 +2375,7 @@ def set_applied(session, table, rids, mode):
         name_map = get_edit_table_name
     else:
         raise NotImplementedError
-    meta_table = Table(
+    meta_sa_table = SATable(
         name_map(table.schema, table.name),
         MetaData(bind=_get_engine()),
         autoload=True,
@@ -2372,11 +2383,11 @@ def set_applied(session, table, rids, mode):
     )
 
     # NOTE: type casting probably no longer needed in later sqlalchemay
-    meta_table = cast(Table, meta_table)
+    meta_sa_table = cast(SATable, meta_sa_table)
 
     update_query = (
-        meta_table.update()
-        .where(sql.or_(*(meta_table.c._id == i for i in rids)))
+        meta_sa_table.update()
+        .where(sql.or_(*(meta_sa_table.c._id == i for i in rids)))
         .values(_applied=True)
         .compile()
     )

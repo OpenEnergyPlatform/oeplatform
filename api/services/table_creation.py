@@ -3,7 +3,6 @@ from django.db import transaction
 from api import actions
 from api.error import APIError
 from dataedit.models import Table
-from oedb.utils import OedbTableGroup
 from oeplatform.settings import IS_SANDBOX, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
@@ -20,17 +19,6 @@ class OEDBTableService:
         if actions.has_table({"schema": schema, "table": table}):
             return
         actions.table_create(schema, table, columns, constraints)
-
-    def drop(self, schema, table):
-        try:
-            real_schema, real_table = actions.get_table_name(schema, table)
-        except Exception:
-            # does not exist
-            return
-
-        OedbTableGroup(
-            validated_table_name=real_table, schema_name=real_schema
-        ).drop_if_exists()
 
 
 class TableCreationOrchestrator:
@@ -77,11 +65,8 @@ class TableCreationOrchestrator:
             raise APIError(f"Could not create table {schema}.{table}: {e}")
 
     def _cleanup(self, schema, table, physical_created, metadata_created):
-        if physical_created:
-            self.oedb_svc.drop(schema, table)
         if metadata_created:
             self.django_svc.delete(table=table)
 
     def drop_table(self, schema, table):
-        self.oedb_svc.drop(schema, table)
         self.django_svc.delete(table=table)

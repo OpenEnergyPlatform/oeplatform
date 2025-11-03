@@ -4,8 +4,6 @@ SPDX-FileCopyrightText: 2025 Christisn Winger
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import unittest
-
 from django.urls import reverse
 
 from api.tests import APITestCaseWithTable
@@ -26,33 +24,53 @@ class TestIssue2041SortJson(APITestCaseWithTable):
     # insert some json string data
     test_data = [{column_json: {"x": 1}}, {column_json: {"x": "xyz"}}]
 
-    @unittest.skip("we leave it unfixed for now and display error message in frontend")
     def test_issue_2041_sort_json(self):
         url = reverse("api:advanced-search")
         # {'reason': 'could not identify an ordering operator for type json'}
+        query = {
+            "from": {
+                "type": "table",
+                "table": self.test_table,
+            },
+            "order_by": [
+                {
+                    "type": "column",
+                    "column": self.column_json,
+                    "ordering": "asc",
+                }
+            ],
+            "fields": [
+                {"type": "column", "column": self.column_json},
+            ],
+            "offset": 0,
+            "limit": 10,
+        }
+
+        # this does not work
         self.api_req(
             "post",
             url=url,
-            data={
-                "query": {
-                    "from": {
-                        "type": "table",
-                        "table": self.test_table,
-                    },
-                    "order_by": [
-                        {
-                            "type": "column",
-                            "column": self.column_json,
-                            "ordering": "asc",
-                        }
-                    ],
-                    "fields": [
-                        {"type": "column", "column": self.column_json},
-                    ],
-                    "offset": 0,
-                    "limit": 10,
-                }
-            },
-            # NOTE: we leave it infixed for now
+            data={"query": query},
+            exp_code=400,
+        )
+
+        # with applied change in backend.js:queryCastToText
+        query["order_by"] = [
+            {
+                # "label": self.column_json,
+                "type": "cast",
+                "source": {
+                    "type": "column",
+                    "column": self.column_json,
+                },
+                "as": "text",
+                "ordering": "asc",
+            }
+        ]
+
+        self.api_req(
+            "post",
+            url=url,
+            data={"query": query},
             exp_code=200,
         )

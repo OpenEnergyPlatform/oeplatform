@@ -6,6 +6,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from rest_framework.permissions import BasePermission
 
+NO_PERM = 0
+WRITE_PERM = 4
+DELETE_PERM = 8
+ADMIN_PERM = 12
+
 
 class CanEditScenarioBundle(BasePermission):
     """

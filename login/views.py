@@ -36,11 +36,12 @@ from django.views.generic import RedirectView, View
 from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
-import login.models as models
+import login.permissions
 from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
 from login.forms import EditUserForm, GroupForm
-from login.models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
+from login.models import GroupMembership, UserGroup
 from login.models import myuser as OepUser
+from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
 from login.utils import get_tables_if_group_assigned
 
 # Pagination
@@ -586,7 +587,7 @@ class PartialGroupMemberManagementView(View, LoginRequiredMixin):
 
         errors = {}
         if mode == "remove_user":
-            if membership.level < models.DELETE_PERM:
+            if membership.level < login.permissions.DELETE_PERM:
                 raise PermissionDenied
 
             user_to_remove: OepUser = OepUser.objects.get(id=request.POST["user_id"])
@@ -618,7 +619,7 @@ class PartialGroupMemberManagementView(View, LoginRequiredMixin):
             return response
 
         elif mode == "alter_user":
-            if membership.level < models.ADMIN_PERM:
+            if membership.level < login.permissions.ADMIN_PERM:
                 raise PermissionDenied
             user = OepUser.objects.get(id=request.POST["user_id"])
             if user == request.user:
@@ -631,7 +632,7 @@ class PartialGroupMemberManagementView(View, LoginRequiredMixin):
                 membership.save()
 
         elif mode == "delete_group":
-            if membership.level < models.ADMIN_PERM:
+            if membership.level < login.permissions.ADMIN_PERM:
                 raise PermissionDenied
             group.delete()
             response = HttpResponse()
@@ -746,7 +747,7 @@ class PartialGroupInviteView(View, LoginRequiredMixin):
 
         context = {}
         if mode == "add_user":
-            if membership.level < models.WRITE_PERM:
+            if membership.level < login.permissions.WRITE_PERM:
                 raise PermissionDenied
             try:
                 user = OepUser.objects.get(name=request.POST["name"])

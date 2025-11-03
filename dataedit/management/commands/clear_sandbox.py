@@ -7,11 +7,20 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from typing import List
 
 from django.core.management.base import BaseCommand
-from sqlalchemy import inspect
 
 from dataedit.models import Table
-from oedb.connection import _get_engine
+from login.permissions import DELETE_PERM
+from oedb.utils import _OedbSchema, _OedbTable
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# IMPORTANT: change this code carefully, you dont want to delete
+# your entire productive database by accident
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+schema = _OedbSchema(validated_schema_name=SCHEMA_DEFAULT_TEST_SANDBOX)
+meta_schema = schema.get_meta_schema()
 
 
 def get_sandbox_tables_django() -> List[Table]:
@@ -19,28 +28,27 @@ def get_sandbox_tables_django() -> List[Table]:
     Returns:
         List[Table]: list of table objects in django db in sandbox schema
     """
-    return Table.objects.filter(is_sandbox=True).all()
+    return list(Table.objects.filter(is_sandbox=True).all())
 
 
-def get_sandbox_table_names_oedb() -> List[str]:
+def get_sandbox_tables_oedb() -> List[_OedbTable]:
     """
     Returns:
         List[str]: list of table names in oedb in sandbox schema
     """
-    engine = _get_engine()
-    return inspect(engine).get_table_names(schema=SCHEMA_DEFAULT_TEST_SANDBOX)
+    return list(schema.get_oedb_tables(permission_level=DELETE_PERM))
 
 
-def get_sandbox_meta_table_names_oedb() -> List[str]:
+def get_sandbox_meta_tables_oedb() -> List[_OedbTable]:
     """
     Returns:
         List[str]: list of table names in oedb in sandbox meta schema
     """
-    engine = _get_engine()
-    return inspect(engine).get_table_names(schema="_" + SCHEMA_DEFAULT_TEST_SANDBOX)
+
+    return list(meta_schema.get_oedb_tables(permission_level=DELETE_PERM))
 
 
-def clear_sandbox(output: bool = False) -> None:
+def clear_sandbox(interactive: bool = True) -> None:
     """delete all tables from the sandbox schema.
 
     Maybe we should use the API (not just django objects)
@@ -57,35 +65,45 @@ def clear_sandbox(output: bool = False) -> None:
 
     """
 
-    # delete all from oedb
-    engine = _get_engine()
-    for table_name in get_sandbox_table_names_oedb():
-        sql = f'DROP TABLE "{SCHEMA_DEFAULT_TEST_SANDBOX}"."{table_name}" CASCADE;'
-        if output:
-            print(f"oedb: {sql}")
-        engine.execute(sql)
+    # 1. Step: collect and display all django table objects
+    tables = get_sandbox_tables_django()
+    table_count = len(tables)
 
-    for table_name in get_sandbox_meta_table_names_oedb():
-        sql = f'DROP TABLE "_{SCHEMA_DEFAULT_TEST_SANDBOX}"."{table_name}" CASCADE;'
-        if output:
-            print(f"oedb: {sql}")
-        engine.execute(sql)
+    if interactive:
+        for table in tables:
+            print(table)
 
-    # delete all from django
-    for table in get_sandbox_tables_django():
-        if output:
-            print(f"django: delete {table.name}")
+        if not table_count:
+            print("Nothing to do")
+        elif input(f"Delete {table_count} tables from {schema} [y|n]: ") != "y":
+            print("Abort")
+            return
+    # actually deleting
+    for table in tables:
         table.delete()
+
+    # now schema should be empty:
+    oedb_meta_tables = get_sandbox_meta_tables_oedb()
+    oedb_tables = get_sandbox_tables_oedb()
+    leftover_oedb_tables = oedb_meta_tables + oedb_tables
+    table_count = len(leftover_oedb_tables)
+    if not table_count:
+        return  # all good
+
+    if interactive:
+        for oedb_table in leftover_oedb_tables:
+            print(oedb_table)
+        if (
+            input(f"Delete {table_count} artefact tables from {meta_schema} [y|n]: ")
+            != "y"
+        ):
+            print("Abort")
+            return
+    # actually deleting
+    for oedb_table in leftover_oedb_tables:
+        oedb_table.drop_if_exists()
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        # ask for confirmation
-        answ = input(f"Delete all tables from {SCHEMA_DEFAULT_TEST_SANDBOX} [y|n]: ")
-        if not answ == "y":
-            print("Abort")
-            return
-
-        clear_sandbox(output=True)
-
-        print("Done")
+        clear_sandbox(interactive=True)

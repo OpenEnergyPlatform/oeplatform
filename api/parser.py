@@ -20,7 +20,9 @@ import geoalchemy2  # Although this import seems unused is has to be here
 from sqlalchemy import (
     ARRAY,
     MetaData,
-    Table,
+)
+from sqlalchemy import Table as SATable
+from sqlalchemy import (
     and_,
 )
 from sqlalchemy import case as sa_case
@@ -142,7 +144,7 @@ def set_meta_info(method, user, message=None):
 
 
 def parse_insert(d, context, message=None, mapper=None):
-    table = Table(
+    sa_table = SATable(
         read_pgid(get_or_403(d, "table")),
         MetaData(bind=_get_engine()),
         autoload=True,
@@ -159,9 +161,9 @@ def parse_insert(d, context, message=None, mapper=None):
         field_strings.append(parse_expression(field))
 
     # NOTE: type casting probably no longer needed in later sqlalchemay
-    table = cast_type(Table, table)
+    sa_table = cast_type(SATable, sa_table)
 
-    query = table.insert()
+    query = sa_table.insert()
 
     if "method" not in d:
         d["method"] = "values"
@@ -351,26 +353,26 @@ def parse_from_item(d):
             ext_name = schema_name + "." + ext_name
             tkwargs["schema"] = schema_name
 
-        tables: Mapping[str, Table] = __PARSER_META.tables  # type: ignore
+        sa_tables: Mapping[str, SATable] = __PARSER_META.tables  # type: ignore
 
-        if ext_name in tables:
-            item = tables[ext_name]
+        if ext_name in sa_tables:
+            sa_table = sa_tables[ext_name]
         else:
             try:
-                item = Table(d["table"], __PARSER_META, **tkwargs)
+                sa_table = SATable(d["table"], __PARSER_META, **tkwargs)
                 # NOTE: type casting probably no longer needed in later sqlalchemay
-                item = cast_type(Table, item)
+                sa_table = cast_type(SATable, sa_table)
             except NoSuchTableError:
                 raise APIError("Table {table} not found".format(table=ext_name))
 
         engine = _get_engine()
         conn = engine.connect()
-        exists = engine.dialect.has_table(conn, item.name, schema_name)
+        exists = engine.dialect.has_table(conn, sa_table.name, schema_name)
         conn.close()
         if not exists:
-            raise APIError("Table not found: " + str(item), status=400)
+            raise APIError("Table not found: " + str(sa_table), status=400)
     elif dtype == "select":
-        item = parse_select(d)
+        sa_table = parse_select(d)
     elif dtype == "join":
         left = parse_from_item(get_or_403(d, "left"))
         right = parse_from_item(get_or_403(d, "right"))
@@ -379,37 +381,37 @@ def parse_from_item(d):
         on_clause = None
         if "on" in d:
             on_clause = parse_condition(d["on"])
-        item = left.join(right, onclause=on_clause, isouter=is_outer, full=full)
+        sa_table = left.join(right, onclause=on_clause, isouter=is_outer, full=full)
     else:
         raise APIError("Unknown from-item: " + dtype)
 
     if "alias" in d:
-        item = item.alias(read_pgid(d["alias"]))
-    return item
+        sa_table = sa_table.alias(read_pgid(d["alias"]))
+    return sa_table
 
 
-def load_table_from_metadata(table, schema=None):
+def load_table_from_metadata(table: str, schema: str | None = None) -> SATable | None:
     ext_name = table
     schema = validate_schema(schema)
     if schema:
         ext_name = schema + "." + ext_name
 
-    tables: Mapping[str, Table] = __PARSER_META.tables  # type: ignore
+    sa_tables: Mapping[str, SATable] = __PARSER_META.tables  # type: ignore
 
-    if ext_name and ext_name in tables:
-        return tables[ext_name]
+    if ext_name and ext_name in sa_tables:
+        return sa_tables[ext_name]
     else:
         if _get_engine().dialect.has_table(
             _get_engine().connect(), table, schema=schema
         ):
-            return Table(table, __PARSER_META, autoload=True, schema=schema)
+            return SATable(table, __PARSER_META, autoload=True, schema=schema)
 
 
 def parse_column(d, mapper):
     name = get_or_403(d, "column")
     is_literal = parse_single(d.get("is_literal", False), bool)
     table_name = d.get("table")
-    table = None
+    sa_table = None
     if table_name:
         table_name = read_pgid(table_name)
         if mapper is None:
@@ -421,9 +423,9 @@ def parse_column(d, mapper):
         schema_name = read_pgid(do_map(d["schema"])) if "schema" in d else None
         schema_name = validate_schema(schema_name)
 
-        table = load_table_from_metadata(table_name, schema=schema_name)
-    if table is not None and name in table.c:
-        col = table.c[name]
+        sa_table = load_table_from_metadata(table_name, schema=schema_name)
+    if sa_table is not None and name in sa_table.c:
+        col = sa_table.c[name]
         if isinstance(col.type, INTERVAL):
             col.type = Interval(col.type)
         return col
