@@ -61,10 +61,7 @@ class TestViewsDataedit(TestViewsTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.peerreview.delete()
-        cls.orchestrator.drop_table(
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
-        )
+        cls.table.delete()
         super(TestViewsDataedit, cls).tearDownClass()
 
     def test_views_wizard(self):
