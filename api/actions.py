@@ -888,7 +888,7 @@ def get_column_definition_query(d):
     return c
 
 
-def column_alter(query, context, schema, table, column):
+def column_alter(query, context, schema, table: str, column):
     schema = validate_schema(schema)
 
     if column == "id":
@@ -933,15 +933,14 @@ def column_add(schema, table: str, column, description):
     # FIXME: no permission check?
     oeb_table_group = DBTable.objects.get(name=table).get_oeb_table_group(None)
 
-    edit_table = oeb_table_group._edit_table.get_sa_table().name
-    insert_table = oeb_table_group._insert_table.get_sa_table().name
+    edit_sa_table = oeb_table_group._edit_table.get_sa_table()
+    insert_sa_table = oeb_table_group._insert_table.get_sa_table()
+
     perform_sql(s.format(schema=schema, table=table))
     # Do the same for update and insert tables.
-    meta_schema = get_meta_schema_name(schema)
-    perform_sql(s.format(schema=meta_schema, table=edit_table))
+    perform_sql(s.format(schema=edit_sa_table.schema, table=edit_sa_table.name))
+    perform_sql(s.format(schema=insert_sa_table.schema, table=insert_sa_table.name))
 
-    meta_schema = get_meta_schema_name(schema)
-    perform_sql(s.format(schema=meta_schema, table=insert_table))
     return get_response_dict(success=True)
 
 
@@ -1214,7 +1213,7 @@ def table_change_constraint(constraint_definition):
     return perform_sql(sql_string)
 
 
-def put_rows(schema, table, column_data):
+def put_rows(schema, table: str, column_data):
     keys = list(column_data.keys())
     values = list(column_data.values())
 
@@ -1263,7 +1262,9 @@ def __internal_select(query, context):
     return rows
 
 
-def __change_rows(request, context, target_table, setter, fields=None) -> dict:
+def __change_rows(
+    request, context, target_sa_table: SATable, setter, fields=None
+) -> dict:
     orig_table = read_pgid(request["table"])
     query: dict = {
         "from": {
@@ -1317,13 +1318,7 @@ def __change_rows(request, context, target_table, setter, fields=None) -> dict:
 
             inserts.append(dict(insert))
         # Add metadata for insertions
-        schema = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-        meta_schema = (
-            get_meta_schema_name(schema) if not schema.startswith("_") else schema
-        )
-
-        insert_sa_table = _get_table(meta_schema, target_table)
-        query = insert_sa_table.insert(values=inserts)
+        query = target_sa_table.insert(values=inserts)
         _execute_sqla(query, cursor)
     return {"rowcount": rows["rowcount"]}
 
@@ -1376,19 +1371,19 @@ def data_delete(request: dict, context: dict):
 
     assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
 
-    target_table = (
+    target_meta_sa_table = (
         DBTable.objects.get(name=orig_table)
         .get_oeb_table_group()
         ._delete_table.get_sa_table()
-        .name
     )
     setter = []
     cursor = load_cursor_from_context(context)
 
-    meta_schema = get_meta_schema_name(schema)
-    drop_not_null_constraints_from_delete_meta_table(target_table, meta_schema)
+    drop_not_null_constraints_from_delete_meta_table(
+        target_meta_sa_table.name, target_meta_sa_table.schema
+    )
 
-    result = __change_rows(request, context, target_table, setter, ["id"])
+    result = __change_rows(request, context, target_meta_sa_table, setter, ["id"])
     apply_changes(schema, table, cursor)
     return result
 
@@ -1405,11 +1400,10 @@ def data_update(query: dict, context: dict):
 
     assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
 
-    target_table = (
+    target_sa_table = (
         DBTable.objects.get(name=orig_table)
         .get_oeb_table_group()
         ._edit_table.get_sa_table()
-        .name
     )
     setter = get_or_403(query, "values")
     if isinstance(setter, list):
@@ -1418,12 +1412,12 @@ def data_update(query: dict, context: dict):
         field_names = [read_pgid(d["column"]) for d in query["fields"]]
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)  # TODO:
-    result = __change_rows(query, context, target_table, setter)
+    result = __change_rows(query, context, target_sa_table, setter)
     apply_changes(schema, table, cursor)
     return result
 
 
-def data_insert_check(schema, table, values, context):
+def data_insert_check(schema, table: str, values, context):
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
     query = (
@@ -1669,7 +1663,7 @@ def clear_dict(d):
     }
 
 
-def move(from_schema, table, to_schema):
+def move(from_schema, table: str, to_schema):
     """
     Implementation note:
         Currently we implemented two versions of the move functionality
@@ -1683,7 +1677,7 @@ def move(from_schema, table, to_schema):
     )
 
 
-def move_publish(from_schema, table, to_schema, embargo_period):
+def move_publish(from_schema, table: str, to_schema, embargo_period):
     """
     The issue about publishing datatables  in the context of the OEP
     is that tables must be moved physically in the postgreSQL database.
@@ -1707,8 +1701,8 @@ def move_publish(from_schema, table, to_schema, embargo_period):
 
     """
 
-    t = DBTable.objects.get(name=table)
-    validate_open_data_license = t.validate_open_data_license()
+    table_obj = DBTable.objects.get(name=table)
+    validate_open_data_license = table_obj.validate_open_data_license()
 
     license_check = validate_open_data_license["status"]
     license_error = validate_open_data_license["error"]
@@ -1721,7 +1715,7 @@ def move_publish(from_schema, table, to_schema, embargo_period):
     if embargo_period in ["6_months", "1_year"]:
         duration_in_weeks = 26 if embargo_period == "6_months" else 52
         embargo, created = Embargo.objects.get_or_create(
-            table=t,
+            table=table_obj,
             defaults={
                 "duration": embargo_period,
                 "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
@@ -1741,16 +1735,16 @@ def move_publish(from_schema, table, to_schema, embargo_period):
                 )
             embargo.save()
     elif embargo_period == "none":
-        if Embargo.objects.filter(table=t).exists():
-            reset_embargo = Embargo.objects.get(table=t)
+        if Embargo.objects.filter(table=table_obj).exists():
+            reset_embargo = Embargo.objects.get(table=table_obj)
             reset_embargo.delete()
 
-    all_peer_reviews = PeerReview.objects.filter(table=t)
+    all_peer_reviews = PeerReview.objects.filter(table=table_obj)
 
     for peer_review in all_peer_reviews:
         peer_review.update_all_table_peer_reviews_after_table_moved(topic=to_schema)
 
-    t.set_is_published(topic_name=to_schema)
+    table_obj.set_is_published(topic_name=to_schema)
 
 
 def data_info(request, context=None):
@@ -1774,20 +1768,8 @@ def has_schema(request: dict, context=None) -> bool:
 
 
 def has_table(request, context=None):
-
     table = get_or_403(request, "table")
     return DBTable.objects.filter(name=table).exists()
-
-    engine = _get_engine()
-    schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-    schema = validate_schema(schema)
-    table = get_or_403(request, "table")
-    conn = engine.connect()
-    try:
-        result = engine.dialect.has_table(conn, table, schema=schema)
-    finally:
-        conn.close()
-    return result
 
 
 def has_sequence(request, context=None):
@@ -2013,12 +1995,6 @@ def get_unique_constraints(request, context=None):
     return result
 
 
-def __get_connection(request):
-    # TODO: Implement session-based connection handler
-    engine = _get_engine()
-    return engine.connect()
-
-
 def get_isolation_level(request, context):
     engine = _get_engine()
     cursor = load_cursor_from_context(context)
@@ -2083,10 +2059,6 @@ def do_recover_twophase(request, context):
     return engine.dialect.do_commit_twophase(cursor)
 
 
-def _get_default_schema_name(self, connection):
-    return connection.scalar("select current_schema()")
-
-
 def open_raw_connection(request, context):
     session_context = SessionContext(owner=context.get("user"))
     return {"connection_id": session_context.connection._id}
@@ -2136,21 +2108,17 @@ def fetchone(request, context):
         return row
 
 
-def fetchall(context):
+def fetchall(context: dict):
     cursor = load_cursor_from_context(context)
     return cursor.fetchall()
 
 
-def fetchmany(request, context):
+def fetchmany(request: dict, context):
     cursor = load_cursor_from_context(context)
     return cursor.fetchmany(int(request["size"]))
 
 
-def get_meta_schema_name(schema):
-    return "_" + schema
-
-
-def getValue(schema, table, column, id):
+def getValue(schema, table: str, column, id):
     sql = 'SELECT {column} FROM "{schema}"."{table}" WHERE id={id}'.format(
         column=column, schema=schema, table=table, id=id
     )
@@ -2198,19 +2166,20 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
         cursor = cast(AbstractCursor, connection.cursor())  # type:ignore TODO
 
     try:
-        meta_schema = get_meta_schema_name(schema)
 
         columns = list(describe_columns(schema, table).keys())
         extended_columns = columns + ["_submitted", "_id"]
 
         otg = DBTable.objects.get(name=table).get_oeb_table_group()
 
-        insert_table = otg._insert_table.get_sa_table().name
+        insert_sa_table = otg._insert_table.get_sa_table()
         cursor_execute(
             cursor,
             "select * "
             'from "{schema}"."{table}" '
-            "where _applied = FALSE;".format(schema=meta_schema, table=insert_table),
+            "where _applied = FALSE;".format(
+                schema=insert_sa_table.schema, table=insert_sa_table.name
+            ),
         )
         changes = [
             add_type(
@@ -2224,12 +2193,14 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
             for row in cursor.fetchall()
         ]
 
-        update_table = otg._edit_table.get_sa_table().name
+        update_sa_table = otg._edit_table.get_sa_table()
         cursor_execute(
             cursor,
             "select * "
             'from "{schema}"."{table}" '
-            "where _applied = FALSE;".format(schema=meta_schema, table=update_table),
+            "where _applied = FALSE;".format(
+                schema=update_sa_table.schema, table=update_sa_table.name
+            ),
         )
         changes += [
             add_type(
@@ -2243,12 +2214,14 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
             for row in cursor.fetchall()
         ]
 
-        delete_table = otg._delete_table.get_sa_table().name
+        delete_sa_table = otg._delete_table.get_sa_table()
         cursor_execute(
             cursor,
             "select * "
             'from "{schema}"."{table}" '
-            "where _applied = FALSE;".format(schema=meta_schema, table=delete_table),
+            "where _applied = FALSE;".format(
+                schema=delete_sa_table.schema, table=delete_sa_table.name
+            ),
         )
         changes += [
             add_type(
@@ -2300,27 +2273,27 @@ def _apply_stack(cursor, table_obj, changes, change_type):
         apply_deletion(cursor, table_obj, distilled_change, rids)
 
 
-def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode):
+def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode: int):
 
     otg = DBTable.objects.get(name=sa_table.name).get_oeb_table_group()
 
     if mode == __INSERT:
-        meta_table_name = otg._insert_table.get_sa_table().name
+        meta_sa_table = otg._insert_table.get_sa_table()
     elif mode == __DELETE:
-        meta_table_name = otg._delete_table.get_sa_table().name
+        meta_sa_table = otg._delete_table.get_sa_table()
     elif mode == __UPDATE:
-        meta_table_name = otg._edit_table.get_sa_table().name
+        meta_sa_table = otg._edit_table.get_sa_table()
     else:
         raise NotImplementedError
-    meta_sa_table = SATable(
-        meta_table_name,
-        MetaData(bind=_get_engine()),
-        autoload=True,
-        schema=get_meta_schema_name(sa_table.schema),
-    )
 
+    # meta_sa_table = SATable(
+    #    meta_table_name,
+    #    MetaData(bind=_get_engine()),
+    #    autoload=True,
+    #    schema=get_meta_schema_name(sa_table.schema),
+    # )
     # NOTE: type casting probably no longer needed in later sqlalchemay
-    meta_sa_table = cast(SATable, meta_sa_table)
+    # meta_sa_table = cast(SATable, meta_sa_table)
 
     update_query = (
         meta_sa_table.update()
@@ -2331,32 +2304,32 @@ def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode
     session_execute_parameter(session, str(update_query), update_query.params)
 
 
-def apply_insert(session: AbstractCursor | Session, table: SATable, rows, rids):
+def apply_insert(session: AbstractCursor | Session, sa_table: SATable, rows, rids):
     logger.debug("apply inserts (%d)", len(rids))
-    query = table.insert().values(rows)
+    query = sa_table.insert().values(rows)
     _execute_sqla(query, session)
-    set_applied(session, table, rids, __INSERT)
+    set_applied(session, sa_table, rids, __INSERT)
 
 
-def apply_update(session: AbstractCursor | Session, table, rows, rids):
+def apply_update(session: AbstractCursor | Session, sa_table, rows, rids):
     logger.debug("apply updates (%d)", len(rids))
     for row, rid in zip(rows, rids):
-        pks = [c.name for c in table.columns if c.primary_key]
-        query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(
-            row
-        )
+        pks = [c.name for c in sa_table.columns if c.primary_key]
+        query = sa_table.update(
+            *[getattr(sa_table.c, pk) == row[pk] for pk in pks]
+        ).values(row)
         _execute_sqla(query, session)
-        set_applied(session, table, [rid], __UPDATE)
+        set_applied(session, sa_table, [rid], __UPDATE)
 
 
-def apply_deletion(session, table, rows, rids):
+def apply_deletion(session, sa_table: SATable, rows, rids):
     logger.debug("apply deletion (%d)", len(rids))
     for row, rid in zip(rows, rids):
-        query = table.delete().where(
-            *[getattr(table.c, col) == row[col] for col in row]
+        query = sa_table.delete().where(
+            *[getattr(sa_table.c, col) == row[col] for col in row]
         )
         _execute_sqla(query, session)
-        set_applied(session, table, [rid], __DELETE)
+        set_applied(session, sa_table, [rid], __DELETE)
 
 
 def update_meta_search(table: str) -> None:
