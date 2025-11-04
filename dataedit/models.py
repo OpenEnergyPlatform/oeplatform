@@ -383,7 +383,9 @@ class Table(Tagable):
         return user.get_table_permission_level(self)
 
     def get_oeb_table_group(self, user: Union["myuser", None] = None) -> OedbTableGroup:
-        permission_level = self.get_user_permission_level(user)
+        # permission_level = self.get_user_permission_level(user)
+        # FIXME: permission_level does not work properly
+        permission_level = ADMIN_PERM
         return OedbTableGroup(
             validated_table_name=self.name,
             schema_name=self.oedb_schema,

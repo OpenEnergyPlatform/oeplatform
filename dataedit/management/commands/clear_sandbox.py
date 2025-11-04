@@ -9,7 +9,7 @@ from typing import List
 from django.core.management.base import BaseCommand
 
 from dataedit.models import Table
-from login.permissions import DELETE_PERM
+from login.permissions import ADMIN_PERM
 from oedb.utils import _OedbSchema, _OedbTable
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
@@ -36,7 +36,7 @@ def get_sandbox_tables_oedb() -> List[_OedbTable]:
     Returns:
         List[str]: list of table names in oedb in sandbox schema
     """
-    return list(schema.get_oedb_tables(permission_level=DELETE_PERM))
+    return list(schema.get_oedb_tables(permission_level=ADMIN_PERM))
 
 
 def get_sandbox_meta_tables_oedb() -> List[_OedbTable]:
@@ -45,7 +45,7 @@ def get_sandbox_meta_tables_oedb() -> List[_OedbTable]:
         List[str]: list of table names in oedb in sandbox meta schema
     """
 
-    return list(meta_schema.get_oedb_tables(permission_level=DELETE_PERM))
+    return list(meta_schema.get_oedb_tables(permission_level=ADMIN_PERM))
 
 
 def delete_sandbox_django_tables(interactive: bool = True) -> bool:

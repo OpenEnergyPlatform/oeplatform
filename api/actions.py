@@ -39,23 +39,9 @@ from omi.conversion import convert_metadata
 from omi.validation import ValidationError, parse_metadata, validate_metadata
 from rest_framework.request import Request
 from shapely import wkb
-from sqlalchemy import (
-    BigInteger,
-    Column,
-    ForeignKey,
-    ForeignKeyConstraint,
-    MetaData,
-    PrimaryKeyConstraint,
-)
+from sqlalchemy import Column, ForeignKeyConstraint, MetaData, PrimaryKeyConstraint
 from sqlalchemy import Table as SATable
-from sqlalchemy import (
-    UniqueConstraint,
-    exc,
-    inspect,
-    select,
-    sql,
-    text,
-)
+from sqlalchemy import UniqueConstraint, exc, inspect, select, sql, text
 from sqlalchemy import types as sqltypes
 from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.ext.declarative import declarative_base
@@ -66,11 +52,11 @@ from sqlalchemy.sql.expression import Select
 import dataedit.metadata
 from api.error import APIError
 from api.parser import (
+    get_column_definition_query,
     get_or_403,
     is_pg_qual,
     parse_insert,
     parse_select,
-    parse_type,
     read_bool,
     read_pgid,
     read_pgvalue,
@@ -96,7 +82,7 @@ from oedb.connection import (
     Session,
     _get_engine,
 )
-from oedb.utils import ID_COLUMN_NAME, MAX_NAME_LENGTH, NAME_PATTERN
+from oedb.utils import ID_COLUMN_NAME
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 logger = logging.getLogger("oeplatform")
@@ -843,51 +829,6 @@ def get_column(d):
     return Column("%s.%s" % (table, name), schema=schema)
 
 
-def get_column_definition_query(d):
-    name = get_or_403(d, "name")
-    args = []
-    kwargs = {}
-    dt_string = get_or_403(d, "data_type")
-    dt, autoincrement = parse_type(dt_string)
-
-    if autoincrement:
-        d["autoincrement"] = True
-
-    for fk in d.get("foreign_key", []):
-        fkschema = fk.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-        if fkschema is None:
-            fkschema = SCHEMA_DEFAULT_TEST_SANDBOX
-
-        fk_sa_table = SATable(get_or_403(fk, "table"), MetaData(), schema=fkschema)
-
-        fkcolumn = Column(get_or_403(fk, "column"))
-
-        fkcolumn.table = fk_sa_table
-
-        args.append(ForeignKey(fkcolumn))
-
-    if "autoincrement" in d:
-        kwargs["autoincrement"] = d["autoincrement"]
-
-    if not d.get("is_nullable", True):
-        kwargs["nullable"] = d["is_nullable"]  # True
-
-    if d.get("primary_key", False):
-        kwargs["primary_key"] = True
-
-    if "column_default" in d:
-        kwargs["default"] = read_pgvalue(d["column_default"])
-
-    if d.get("character_maximum_length"):
-        max_len = int(d["character_maximum_length"])
-        dt = dt(max_len)  # type:ignore
-
-    assert_valid_identifier_name(name)
-    c = Column(name, dt, *args, **kwargs)
-
-    return c
-
-
 def column_alter(query, context, schema, table: str, column):
     schema = validate_schema(schema)
 
@@ -941,120 +882,6 @@ def column_add(schema, table: str, column, description):
     # Do the same for update and insert tables.
     perform_sql(s.format(schema=edit_sa_table.schema, table=edit_sa_table.name))
     perform_sql(s.format(schema=insert_sa_table.schema, table=insert_sa_table.name))
-
-    return get_response_dict(success=True)
-
-
-def assert_valid_identifier_name(identifier):
-    if not NAME_PATTERN.match(identifier):
-        raise APIError(
-            f"Unsupported table name: {identifier}\n"
-            "Table names must consist of lowercase alpha-numeric words or underscores "
-            "and start with a letter "
-            f"and must not exceed {MAX_NAME_LENGTH} characters "
-            f"(current table name length: {len(identifier)})."
-        )
-
-
-def _table_create(
-    table_obj: Table, column_definitions: list, constraints_definitions: list
-):
-    """
-    Creates a new table
-
-    IMPORTANT: permission checks have to be performed before
-
-    :param schema: schema
-    :param table: table
-    :param column_definitions: Description of columns
-    :param constraints_definitions: Description of constraints
-    :return: Dictionary with results
-    """
-
-    primary_key_col_names = None
-    columns_by_name = {}
-
-    columns = []
-    for cdef in column_definitions:
-        col = get_column_definition_query(cdef)
-        columns.append(col)
-
-        # check for duplicate column names
-        if col.name in columns_by_name:
-            raise APIError("Duplicate column name: %s" % col.name)
-        columns_by_name[col.name] = col
-        if col.primary_key:
-            if primary_key_col_names:
-                raise APIError("Multiple definitions of primary key")
-            primary_key_col_names = [col.name]
-
-    constraints = []
-
-    for constraint in constraints_definitions:
-        constraint_type = constraint.get("constraint_type") or constraint.get("type")
-        if constraint_type is None:
-            raise APIError("constraint_type required in %s" % str(constraint))
-
-        constraint_type = constraint_type.lower().replace(" ", "_")
-        if constraint_type == "primary_key":
-            kwargs = {}
-            cname = constraint.get("name")
-            if cname:
-                kwargs["name"] = cname
-            if "columns" in constraint:
-                ccolumns = constraint["columns"]
-            else:
-                ccolumns = [constraint["constraint_parameter"]]
-
-            if primary_key_col_names:
-                # if table level PK constraint is set in addition
-                # to column level PK, both must be the same (#1110)
-                if set(ccolumns) == set(primary_key_col_names):
-                    continue
-                raise APIError("Multiple definitions of primary key.")
-            primary_key_col_names = ccolumns
-
-            const = PrimaryKeyConstraint(*ccolumns, **kwargs)
-            constraints.append(const)
-        elif constraint_type == "unique":
-            kwargs = {}
-            cname = constraint.get("name")
-            if cname:
-                kwargs["name"] = cname
-            if "columns" in constraint:
-                ccolumns = constraint["columns"]
-            else:
-                ccolumns = [constraint["constraint_parameter"]]
-            constraints.append(UniqueConstraint(*ccolumns, **kwargs))
-
-    # autogenerate id column if missing
-    if "id" not in columns_by_name:
-        columns_by_name["id"] = Column("id", BigInteger, autoincrement=True)
-        columns.insert(0, columns_by_name["id"])
-
-    # check id column type
-    id_col_type = str(columns_by_name["id"].type).upper()
-    if "INT" not in id_col_type or "SERIAL" in id_col_type:
-        raise APIError("Id column must be of int type")
-
-    # autogenerate primary key
-    if not primary_key_col_names:
-        constraints.append(PrimaryKeyConstraint("id"))
-        primary_key_col_names = ["id"]
-
-    # check pk == id
-    if tuple(primary_key_col_names) != ("id",):
-        raise APIError("Primary key must be column id")
-
-    table = table_obj.name
-    schema = table_obj.oedb_schema
-    metadata = MetaData()
-    sa_table = SATable(table, metadata, *(columns + constraints), schema=schema)
-
-    # NOTE: type casting probably no longer needed in later sqlalchemay
-    sa_table = cast(SATable, sa_table)
-
-    sa_table.create(_get_engine())
 
     return get_response_dict(success=True)
 
@@ -1538,10 +1365,11 @@ def data_insert(request: dict, context: dict) -> dict:
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    otg = Table.objects.get(name=table_name).get_oeb_table_group(user=None)
+    table_obj = Table.objects.get(name=table_name)
+    insert_sa_table = table_obj.get_oeb_table_group()._insert_table.get_sa_table()
 
-    request["table"] = otg._insert_table.get_sa_table().name
-    request["schema"] = otg._insert_table.schema_name
+    request["table"] = insert_sa_table.name
+    request["schema"] = insert_sa_table.schema
 
     query, values = parse_insert(request, context)
     data_insert_check(schema_name, table_name, values, context)

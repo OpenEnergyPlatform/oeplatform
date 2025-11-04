@@ -121,6 +121,7 @@ class _OedbTable:
         )
 
     def get_sa_table(self) -> SATable:
+        # don't create the table, just get/reflect sqlalchemy table object
         metadata = MetaData(bind=self._engine)
         return SATable(
             self._validated_table_name,
@@ -139,7 +140,21 @@ class _OedbTable:
 
 
 class _OedbMainTable(_OedbTable):
-    pass
+    def _create(
+        self, column_definitions: list, constraints_definitions: list
+    ) -> SATable:
+        # don create the table, just get/reflect sqlalchemy table object
+
+        metadata = MetaData()
+        sa_table = SATable(
+            self._validated_table_name,
+            metadata,
+            *column_definitions,
+            *constraints_definitions,
+            schema=self._validated_schema_name,
+        )
+        sa_table.create(self._engine)  # type:ignore
+        return sa_table
 
 
 class _OedbMetaTable(_OedbTable):
@@ -175,6 +190,7 @@ class _OedbMetaTable(_OedbTable):
         return self._execute(query, requires_permission=ADMIN_PERM)
 
     def get_sa_table(self) -> SATable:
+        # create on demand
         self._create_if_missing()
         return super().get_sa_table()
 
