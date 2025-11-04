@@ -88,7 +88,6 @@ UI Elements
 
 - Guide the User: Steps & Progress
 - Detailed Interfaces dor each step:
-
   - Dataset information
   - Metadata Template (apply for all resources, add specifics later)
   - Add resource (setup table, upload form datapackage or csv, Setup data

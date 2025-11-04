@@ -4,7 +4,6 @@ Below we describe the complete manual installation of the OpenEnergyPlatform
 database infrastructure, which is currently composed by multiple databases:
 
 1. PostgreSQL
-
    - Internal django database (oep_django)
    - as well as the primay database OpenEnergyDatabase (oedb)
 
