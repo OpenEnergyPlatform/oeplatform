@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import logging
 import re
-from typing import Iterable, Literal, get_args
+from typing import Iterable
 
 from sqlalchemy import MetaData, Table
 
@@ -27,7 +27,7 @@ MAX_SCHEMA_NAME_LENGTH = MAX_IDENTIFIER_LENGTH
 MAX_NAME_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
 NAME_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_NAME_LENGTH - 1))
 
-MetaActionType = Literal["edit", "insert", "delete"]
+ACTIONS = ["edit", "insert", "delete"]
 
 
 class PermissionError(Exception):
@@ -145,12 +145,12 @@ class _OedbMainTable(_OedbTable):
 class _OedbMetaTable(_OedbTable):
     def __init__(
         self,
-        action: MetaActionType,
+        action: str,
         validated_main_table_name: str,
         validated_main_schema_name: str,
         permission_level: int = NO_PERM,
     ):
-        assert action in set(get_args(MetaActionType))
+        assert action in ACTIONS
         self._action = action
         self._main_table = _OedbMainTable(
             validated_table_name=validated_main_table_name,
@@ -221,7 +221,7 @@ class OedbTableGroup:
                 validated_main_table_name=validated_table_name,
                 permission_level=self._permission_level,
             )
-            for a in get_args(_OedbMetaTable)
+            for a in ACTIONS
         }
 
     @property
