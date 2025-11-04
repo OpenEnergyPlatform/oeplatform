@@ -48,14 +48,7 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
 )
 from sqlalchemy import Table as SATable
-from sqlalchemy import (
-    UniqueConstraint,
-    exc,
-    inspect,
-    select,
-    sql,
-    text,
-)
+from sqlalchemy import UniqueConstraint, exc, inspect, select, sql, text
 from sqlalchemy import types as sqltypes
 from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.ext.declarative import declarative_base
@@ -126,6 +119,7 @@ def delete_sequence(sequence: str, schema: str) -> None:
 
 def create_sequence(sequence: str, schema: str) -> None:
     seq = Sequence(sequence, schema=schema)
+    # FIXME: no permission control
     seq.create(bind=_get_engine())
 
 
@@ -1516,7 +1510,7 @@ def data_insert_check(schema, table: str, values, context):
                         )
 
 
-def data_insert(request, context: dict):
+def data_insert(request: dict, context: dict) -> dict:
 
     cursor = load_cursor_from_context(context)
     # If the insert request is not for a meta table, change the request to do so
@@ -1561,7 +1555,7 @@ def data_insert(request, context: dict):
     return response
 
 
-def _execute_sqla(query, cursor: AbstractCursor | Session):
+def _execute_sqla(query, cursor: AbstractCursor | Session) -> None:
     dialect = _get_engine().dialect
     try:
         compiled = query.compile(dialect=dialect)
@@ -1800,7 +1794,7 @@ def has_type(request, context=None):
     return result
 
 
-def get_table_oid(request, context=None):
+def get_table_oid(request: dict, context=None):
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -1817,7 +1811,7 @@ def get_table_oid(request, context=None):
     return result
 
 
-def get_schema_names(request, context=None):
+def get_schema_names(request: dict, context=None):
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -1827,7 +1821,7 @@ def get_schema_names(request, context=None):
     return result
 
 
-def get_table_names(request, context=None):
+def get_table_names(request: dict, context=None):
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -1839,7 +1833,7 @@ def get_table_names(request, context=None):
     return result
 
 
-def get_view_names(request, context=None):
+def get_view_names(request: dict, context=None):
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -1851,7 +1845,7 @@ def get_view_names(request, context=None):
     return result
 
 
-def get_view_definition(request, context=None):
+def get_view_definition(request: dict, context=None):
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -1933,7 +1927,7 @@ def get_columns(query: dict, context=None) -> dict:
     return {"columns": columns, "domains": domains, "enums": enums}
 
 
-def get_pk_constraint(request, context=None):
+def get_pk_constraint(request: dict, context=None):
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -1948,7 +1942,7 @@ def get_pk_constraint(request, context=None):
     return result
 
 
-def get_foreign_keys(request, context=None):
+def get_foreign_keys(request: dict, context=None):
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
@@ -1967,7 +1961,7 @@ def get_foreign_keys(request, context=None):
     return result
 
 
-def get_indexes(request, context=None):
+def get_indexes(request: dict, context=None):
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
@@ -1981,7 +1975,7 @@ def get_indexes(request, context=None):
     return result
 
 
-def get_unique_constraints(request, context=None):
+def get_unique_constraints(request: dict, context=None):
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
@@ -1995,14 +1989,14 @@ def get_unique_constraints(request, context=None):
     return result
 
 
-def get_isolation_level(request, context):
+def get_isolation_level(request: dict, context: dict):
     engine = _get_engine()
     cursor = load_cursor_from_context(context)
     result = engine.dialect.get_isolation_level(cursor)
     return result
 
 
-def set_isolation_level(request, context):
+def set_isolation_level(request: dict, context: dict):
     level = request.get("level", None)
     engine = _get_engine()
     cursor = load_cursor_from_context(context)
@@ -2013,7 +2007,7 @@ def set_isolation_level(request, context):
     return __response_success()
 
 
-def do_begin_twophase(request, context):
+def do_begin_twophase(request: dict, context: dict):
     xid = request.get("xid", None)
     engine = _get_engine()
     cursor = load_cursor_from_context(context)
@@ -2021,7 +2015,7 @@ def do_begin_twophase(request, context):
     return __response_success()
 
 
-def do_prepare_twophase(request, context):
+def do_prepare_twophase(request: dict, context: dict):
     xid = request.get("xid", None)
     engine = _get_engine()
     cursor = load_cursor_from_context(context)
@@ -2029,7 +2023,7 @@ def do_prepare_twophase(request, context):
     return __response_success()
 
 
-def do_rollback_twophase(request, context):
+def do_rollback_twophase(request: dict, context: dict):
     xid = request.get("xid", None)
     is_prepared = request.get("is_prepared", True)
     recover = request.get("recover", False)
@@ -2041,7 +2035,7 @@ def do_rollback_twophase(request, context):
     return __response_success()
 
 
-def do_commit_twophase(request, context):
+def do_commit_twophase(request: dict, context: dict):
     xid = request.get("xid", None)
     is_prepared = request.get("is_prepared", True)
     recover = request.get("recover", False)
@@ -2053,52 +2047,52 @@ def do_commit_twophase(request, context):
     return __response_success()
 
 
-def do_recover_twophase(request, context):
+def do_recover_twophase(request, context: dict):
     engine = _get_engine()
     cursor = load_cursor_from_context(context)
     return engine.dialect.do_commit_twophase(cursor)
 
 
-def open_raw_connection(request, context):
+def open_raw_connection(request, context: dict):
     session_context = SessionContext(owner=context.get("user"))
     return {"connection_id": session_context.connection._id}
 
 
-def commit_raw_connection(request, context):
+def commit_raw_connection(request, context: dict):
     connection = load_session_from_context(context).connection
     connection.commit()
     return __response_success()
 
 
-def rollback_raw_connection(request, context):
+def rollback_raw_connection(request, context: dict):
     load_session_from_context(context).rollback()
     return __response_success()
 
 
-def close_raw_connection(request, context):
+def close_raw_connection(request, context: dict):
     load_session_from_context(context).close()
     return __response_success()
 
 
-def close_all_connections(request, context):
+def close_all_connections(request: dict, context):
     close_all_for_user(request)
     return __response_success()
 
 
-def open_cursor(request, context, named=False):
+def open_cursor(request: dict, context: dict, named: bool = False):
     session_context = load_session_from_context(context)
     cursor_id = session_context.open_cursor(named=named)
     return {"cursor_id": cursor_id}
 
 
-def close_cursor(request, context):
+def close_cursor(request, context: dict):
     session_context = load_session_from_context(context)
     cursor_id = int(context["cursor_id"])
     session_context.close_cursor(cursor_id)
     return {"cursor_id": cursor_id}
 
 
-def fetchone(request, context):
+def fetchone(request, context: dict):
     cursor = load_cursor_from_context(context)
     row = cursor.fetchone()
     if row:
@@ -2263,14 +2257,14 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
             connection.close()
 
 
-def _apply_stack(cursor, table_obj, changes, change_type):
+def _apply_stack(cursor: AbstractCursor, sa_table: SATable, changes, change_type):
     distilled_change, rids = zip(*changes)
     if change_type == "insert":
-        apply_insert(cursor, table_obj, distilled_change, rids)
+        apply_insert(cursor, sa_table, distilled_change, rids)
     elif change_type == "update":
-        apply_update(cursor, table_obj, distilled_change, rids)
+        apply_update(cursor, sa_table, distilled_change, rids)
     elif change_type == "delete":
-        apply_deletion(cursor, table_obj, distilled_change, rids)
+        apply_deletion(cursor, sa_table, distilled_change, rids)
 
 
 def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode: int):
@@ -2285,15 +2279,6 @@ def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode
         meta_sa_table = otg._edit_table.get_sa_table()
     else:
         raise NotImplementedError
-
-    # meta_sa_table = SATable(
-    #    meta_table_name,
-    #    MetaData(bind=_get_engine()),
-    #    autoload=True,
-    #    schema=get_meta_schema_name(sa_table.schema),
-    # )
-    # NOTE: type casting probably no longer needed in later sqlalchemay
-    # meta_sa_table = cast(SATable, meta_sa_table)
 
     update_query = (
         meta_sa_table.update()
@@ -2322,7 +2307,7 @@ def apply_update(session: AbstractCursor | Session, sa_table, rows, rids):
         set_applied(session, sa_table, [rid], __UPDATE)
 
 
-def apply_deletion(session, sa_table: SATable, rows, rids):
+def apply_deletion(session: AbstractCursor | Session, sa_table: SATable, rows, rids):
     logger.debug("apply deletion (%d)", len(rids))
     for row, rid in zip(rows, rids):
         query = sa_table.delete().where(
