@@ -930,8 +930,9 @@ def column_add(schema, table: str, column, description):
         schema="{schema}", table="{table}", name=name, type=str(settings.type)
     )
 
-    # FIXME: no permission check?
-    oeb_table_group = Table.objects.get(name=table).get_oeb_table_group(None)
+    # TODO:permission check is still done outside of this function,
+    # so we pass user=None
+    oeb_table_group = Table.objects.get(name=table).get_oeb_table_group(user=None)
 
     edit_sa_table = oeb_table_group._edit_table.get_sa_table()
     insert_sa_table = oeb_table_group._insert_table.get_sa_table()
@@ -1373,9 +1374,11 @@ def data_delete(request: dict, context: dict):
 
     assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
 
+    # TODO:permission check is still done outside of this function,
+    # so we pass user=None
     target_meta_sa_table = (
         Table.objects.get(name=orig_table)
-        .get_oeb_table_group()
+        .get_oeb_table_group(user=None)
         ._delete_table.get_sa_table()
     )
     setter = []
@@ -1402,9 +1405,11 @@ def data_update(query: dict, context: dict):
 
     assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
 
+    # TODO:permission check is still done outside of this function,
+    # so we pass user=None
     target_sa_table = (
         Table.objects.get(name=orig_table)
-        .get_oeb_table_group()
+        .get_oeb_table_group(user=None)
         ._edit_table.get_sa_table()
     )
     setter = get_or_403(query, "values")
@@ -1531,9 +1536,9 @@ def data_insert(request: dict, context: dict) -> dict:
 
     assert_permission(user=context["user"], table=table_name, permission=WRITE_PERM)
 
-    # mapper = {orig_schema: schema, orig_table: table}
-
-    otg = Table.objects.get(name=table_name).get_oeb_table_group()
+    # TODO:permission check is still done outside of this function,
+    # so we pass user=None
+    otg = Table.objects.get(name=table_name).get_oeb_table_group(user=None)
 
     request["table"] = otg._insert_table.get_sa_table().name
     request["schema"] = otg._insert_table.schema_name
@@ -2172,7 +2177,9 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
         columns = list(describe_columns(schema, table).keys())
         extended_columns = columns + ["_submitted", "_id"]
 
-        otg = Table.objects.get(name=table).get_oeb_table_group()
+        # TODO:permission check is still done outside of this function,
+        # so we pass user=None
+        otg = Table.objects.get(name=table).get_oeb_table_group(user=None)
 
         insert_sa_table = otg._insert_table.get_sa_table()
         cursor_execute(
@@ -2277,7 +2284,9 @@ def _apply_stack(cursor: AbstractCursor, sa_table: SATable, changes, change_type
 
 def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode: int):
 
-    otg = Table.objects.get(name=sa_table.name).get_oeb_table_group()
+    # TODO:permission check is still done outside of this function,
+    # so we pass user=None
+    otg = Table.objects.get(name=sa_table.name).get_oeb_table_group(user=None)
 
     if mode == __INSERT:
         meta_sa_table = otg._insert_table.get_sa_table()
