@@ -116,8 +116,8 @@ class Command(BaseCommand):
             try:
                 # 4) Create physical table → Django metadata
                 orchestrator.create_table(
-                    schema=schema_name,
                     table=table_name,
+                    is_sandbox=True,  # tests ALWAYS in sandbox
                     column_defs=column_defs,
                     constraint_defs=constraint_defs,
                 )

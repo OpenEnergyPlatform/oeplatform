@@ -24,16 +24,13 @@ import csv
 import itertools
 import json
 import re
-from datetime import datetime, timedelta
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import requests
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
-from django.db import DatabaseError, transaction
 from django.db.models import Q
-from django.db.utils import IntegrityError
 from django.http import Http404, HttpRequest, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -48,7 +45,6 @@ from rest_framework.views import APIView
 
 import api.parser
 import login.models as login_models
-import login.permissions
 from api import actions, parser, sessions
 from api.actions import engine_execute, table_get_approx_row_count, table_or_404
 from api.encode import Echo
@@ -88,11 +84,11 @@ from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs, request_data_dict, validate_schema
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_table_name
-from dataedit.models import Embargo, Table
+from dataedit.models import Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oedb.connection import _get_engine
-from oedb.utils import MAX_COL_NAME_LENGTH, OedbTableGroup
+from oedb.utils import MAX_COL_NAME_LENGTH
 from oekg.utils import (
     execute_sparql_query,
     process_datasets_sparql_query,
@@ -100,7 +96,9 @@ from oekg.utils import (
 )
 from oeplatform.settings import (
     DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL,
+    IS_TEST,
     ONTOP_SPARQL_ENDPOINT_URL,
+    SCHEMA_DEFAULT_TEST_SANDBOX,
     USE_LOEP,
     USE_ONTOP,
 )
@@ -329,9 +327,23 @@ class TableAPIView(APIView):
 
         # 4) Create the table (physical → metadata) atomically
         orchestrator = TableCreationOrchestrator()
+
+        # during tests, is_sandbox must be true
+        # otherwise: can be set as ?is_sandbox=
+        if (
+            IS_TEST
+            or schema == SCHEMA_DEFAULT_TEST_SANDBOX
+            or request.GET.get("is_sandbox")
+        ):
+            is_sandbox = True
+        else:
+            is_sandbox = False
+
+        assert is_sandbox
+
         table_obj = orchestrator.create_table(
-            schema=schema,
             table=table,
+            is_sandbox=is_sandbox,
             column_defs=columns,
             constraint_defs=constraints,
         )

@@ -85,9 +85,11 @@ def delete_artefact_oedb_meta_table() -> bool:
     expected_meta_table_names: set[str] = set()
     for name in tables_oedb_names:
         otg = OedbTableGroup(validated_table_name=name, schema_name=SCHEMA_DATA)
-        expected_meta_table_names = expected_meta_table_names | set(
-            otg.meta_table_names.values()
-        )
+        expected_meta_table_names.add(otg.main_table.name)
+        expected_meta_table_names.add(otg._edit_table.name)
+        expected_meta_table_names.add(otg._insert_table.name)
+        expected_meta_table_names.add(otg._delete_table.name)
+
     meta_table_names = set(data_meta_schema.get_table_names())
 
     delete_oedb_meta_tables_names = meta_table_names - expected_meta_table_names

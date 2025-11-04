@@ -159,7 +159,7 @@ class UserGroup(Group, PermissionHolder):
         "GroupPermission"
     ]  # related_name, for static type checking
 
-    def get_table_permission_level(self, table):
+    def get_table_permission_level(self, table: datamodels.Table) -> int:
         if self.is_admin:
             return ADMIN_PERM
         return max(

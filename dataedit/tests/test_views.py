@@ -34,12 +34,8 @@ class TestViewsDataedit(TestViewsTestCase):
         # create a test table
         cls.orchestrator = TableCreationOrchestrator()
         # ensure test table doesnot exist
-        cls.orchestrator.drop_table(
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
-        )
         cls.table = cls.orchestrator.create_table(
-            schema=cls.kwargs_w_table["schema"],
+            is_sandbox=True,  # tests ALWAYS in sandbox
             table=cls.kwargs_w_table["table"],
             column_defs=[],
             constraint_defs=[],

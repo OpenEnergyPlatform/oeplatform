@@ -33,10 +33,11 @@ import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
-from django.http import Http404
+from django.http import Http404, HttpRequest
 from omi.base import get_metadata_version
 from omi.conversion import convert_metadata
 from omi.validation import ValidationError, parse_metadata, validate_metadata
+from rest_framework.request import Request
 from shapely import wkb
 from sqlalchemy import (
     BigInteger,
@@ -171,6 +172,14 @@ def table_or_404(table: str) -> DBTable:
     if table_obj is None:
         raise APIError("Table doesnot exist", 401)
     return table_obj
+
+
+def table_or_404_from_dict(dct: dict) -> DBTable:
+    return table_or_404(get_or_403(dct, "table"))
+
+
+def table_or_404_from_req(request: Request | HttpRequest) -> DBTable:
+    return table_or_404_from_req(request.GET)  # type:ignore TODO
 
 
 def assert_permission(user, table: str, permission: int) -> None:
@@ -911,7 +920,7 @@ def column_alter(query, context, schema, table, column):
     return get_response_dict(success=True)
 
 
-def column_add(schema, table, column, description):
+def column_add(schema, table: str, column, description):
     schema = validate_schema(schema)
     description["name"] = column
     settings = get_column_definition_query(description)
@@ -920,8 +929,12 @@ def column_add(schema, table, column, description):
     s = 'ALTER TABLE "{schema}"."{table}" ADD COLUMN "{name}" {type}'.format(
         schema="{schema}", table="{table}", name=name, type=str(settings.type)
     )
-    edit_table = get_edit_table_name(schema, table)
-    insert_table = get_insert_table_name(schema, table)
+
+    # FIXME: no permission check?
+    oeb_table_group = DBTable.objects.get(name=table).get_oeb_table_group(None)
+
+    edit_table = oeb_table_group._edit_table.get_sa_table().name
+    insert_table = oeb_table_group._insert_table.get_sa_table().name
     perform_sql(s.format(schema=schema, table=table))
     # Do the same for update and insert tables.
     meta_schema = get_meta_schema_name(schema)
@@ -1040,9 +1053,6 @@ def table_create(
     sa_table = cast(SATable, sa_table)
 
     sa_table.create(_get_engine())
-
-    # Create Metatables
-    get_edit_table_name(schema, table)
 
     return get_response_dict(success=True)
 
@@ -1366,7 +1376,12 @@ def data_delete(request: dict, context: dict):
 
     assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
 
-    target_table = get_delete_table_name(orig_schema, orig_table)
+    target_table = (
+        DBTable.objects.get(name=orig_table)
+        .get_oeb_table_group()
+        ._delete_table.get_sa_table()
+        .name
+    )
     setter = []
     cursor = load_cursor_from_context(context)
 
@@ -1390,7 +1405,12 @@ def data_update(query: dict, context: dict):
 
     assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
 
-    target_table = get_edit_table_name(orig_schema, orig_table)
+    target_table = (
+        DBTable.objects.get(name=orig_table)
+        .get_oeb_table_group()
+        ._edit_table.get_sa_table()
+        .name
+    )
     setter = get_or_403(query, "values")
     if isinstance(setter, list):
         if "fields" not in query:
@@ -1517,8 +1537,10 @@ def data_insert(request, context: dict):
 
     # mapper = {orig_schema: schema, orig_table: table}
 
-    request["table"] = get_insert_table_name(schema_name, table_name)
-    request["schema"] = "_" + schema_name
+    otg = DBTable.objects.get(name=table_name).get_oeb_table_group()
+
+    request["table"] = otg._insert_table.get_sa_table().name
+    request["schema"] = otg._insert_table.schema_name
 
     query, values = parse_insert(request, context)
     data_insert_check(schema_name, table_name, values, context)
@@ -1545,7 +1567,7 @@ def data_insert(request, context: dict):
     return response
 
 
-def _execute_sqla(query, cursor: AbstractCursor):
+def _execute_sqla(query, cursor: AbstractCursor | Session):
     dialect = _get_engine().dialect
     try:
         compiled = query.compile(dialect=dialect)
@@ -1731,35 +1753,6 @@ def move_publish(from_schema, table, to_schema, embargo_period):
     t.set_is_published(topic_name=to_schema)
 
 
-def create_meta(schema, table):
-    get_edit_table_name(schema, table)
-    # Table for inserts
-    get_insert_table_name(schema, table)
-
-
-def get_comment_table(schema, table):
-    engine = _get_engine()
-
-    # https://www.postgresql.org/docs/9.5/functions-info.html
-    sql_string = "select obj_description('\"{schema}\".\"{table}\"'::regclass::oid, 'pg_class');".format(  # noqa
-        schema=schema, table=table
-    )
-    res = engine_execute(engine, sql_string)
-    row = res.first()
-    if res:
-        jsn = row.obj_description if row else None
-        if jsn:
-            jsn = jsn.replace("\n", "")
-        else:
-            return {}
-        try:
-            return json.loads(jsn)
-        except ValueError:
-            return {"error": "No json format", "description": jsn}
-    else:
-        return {}
-
-
 def data_info(request, context=None):
     return request
 
@@ -1781,6 +1774,10 @@ def has_schema(request: dict, context=None) -> bool:
 
 
 def has_table(request, context=None):
+
+    table = get_or_403(request, "table")
+    return DBTable.objects.filter(name=table).exists()
+
     engine = _get_engine()
     schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
     schema = validate_schema(schema)
@@ -2149,73 +2146,8 @@ def fetchmany(request, context):
     return cursor.fetchmany(int(request["size"]))
 
 
-def get_comment_table_name(schema, table, create=True):
-    table_name = "_" + table + "_cor"
-    if create and not has_table(
-        {"schema": get_meta_schema_name(schema), "table": table_name}
-    ):
-        create_edit_table(schema, table)
-    return table_name
-
-
-def get_delete_table_name(schema, table, create=True):
-    table_name = "_" + table + "_delete"
-    if create:
-        create_delete_table(schema, table)
-    return table_name
-
-
-def get_edit_table_name(schema, table, create=True):
-    table_name = "_" + table + "_edit"
-    if create:
-        create_edit_table(schema, table)
-    return table_name
-
-
-def get_insert_table_name(schema, table, create=True):
-    table_name = "_" + table + "_insert"
-    if create:
-        create_insert_table(schema, table)
-    return table_name
-
-
 def get_meta_schema_name(schema):
     return "_" + schema
-
-
-def create_meta_table(
-    schema: str, table, meta_table, meta_schema=None, include_indexes=True
-):
-    schema = validate_schema(schema)
-    meta_schema = get_meta_schema_name(schema)
-
-    if not has_table(dict(schema=meta_schema, table=meta_table)):
-        query = (
-            'CREATE TABLE "{meta_schema}"."{edit_table}" ' '(LIKE "{schema}"."{table}"'
-        )
-        if include_indexes:
-            query += "INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id) "
-        query += ") INHERITS (_edit_base);"
-        query = query.format(
-            meta_schema=meta_schema, edit_table=meta_table, schema=schema, table=table
-        )
-        engine = _get_engine()
-        engine_execute(engine, query)
-
-
-def create_delete_table(schema, table, meta_schema=None):
-    meta_table = get_delete_table_name(schema, table, create=False)
-    create_meta_table(schema, table, meta_table, meta_schema, include_indexes=False)
-
-
-def create_edit_table(schema, table, meta_schema=None):
-    meta_table = get_edit_table_name(schema, table, create=False)
-    create_meta_table(schema, table, meta_table, meta_schema)
-
-
-def create_insert_table(schema, table, meta_schema=None):
-    meta_table = get_insert_table_name(schema, table, create=False)
-    create_meta_table(schema, table, meta_table, meta_schema)
 
 
 def getValue(schema, table, column, id):
@@ -2242,7 +2174,7 @@ def getValue(schema, table, column, id):
     return None
 
 
-def apply_changes(schema, table, cursor: AbstractCursor | None = None):
+def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None):
     """Apply changes from the meta tables to the actual table.
 
     Meta tables are :
@@ -2271,7 +2203,9 @@ def apply_changes(schema, table, cursor: AbstractCursor | None = None):
         columns = list(describe_columns(schema, table).keys())
         extended_columns = columns + ["_submitted", "_id"]
 
-        insert_table = get_insert_table_name(schema, table)
+        otg = DBTable.objects.get(name=table).get_oeb_table_group()
+
+        insert_table = otg._insert_table.get_sa_table().name
         cursor_execute(
             cursor,
             "select * "
@@ -2290,7 +2224,7 @@ def apply_changes(schema, table, cursor: AbstractCursor | None = None):
             for row in cursor.fetchall()
         ]
 
-        update_table = get_edit_table_name(schema, table)
+        update_table = otg._edit_table.get_sa_table().name
         cursor_execute(
             cursor,
             "select * "
@@ -2309,7 +2243,7 @@ def apply_changes(schema, table, cursor: AbstractCursor | None = None):
             for row in cursor.fetchall()
         ]
 
-        delete_table = get_delete_table_name(schema, table)
+        delete_table = otg._delete_table.get_sa_table().name
         cursor_execute(
             cursor,
             "select * "
@@ -2366,20 +2300,23 @@ def _apply_stack(cursor, table_obj, changes, change_type):
         apply_deletion(cursor, table_obj, distilled_change, rids)
 
 
-def set_applied(session, table, rids, mode):
+def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode):
+
+    otg = DBTable.objects.get(name=sa_table.name).get_oeb_table_group()
+
     if mode == __INSERT:
-        name_map = get_insert_table_name
+        meta_table_name = otg._insert_table.get_sa_table().name
     elif mode == __DELETE:
-        name_map = get_delete_table_name
+        meta_table_name = otg._delete_table.get_sa_table().name
     elif mode == __UPDATE:
-        name_map = get_edit_table_name
+        meta_table_name = otg._edit_table.get_sa_table().name
     else:
         raise NotImplementedError
     meta_sa_table = SATable(
-        name_map(table.schema, table.name),
+        meta_table_name,
         MetaData(bind=_get_engine()),
         autoload=True,
-        schema=get_meta_schema_name(table.schema),
+        schema=get_meta_schema_name(sa_table.schema),
     )
 
     # NOTE: type casting probably no longer needed in later sqlalchemay
@@ -2394,14 +2331,14 @@ def set_applied(session, table, rids, mode):
     session_execute_parameter(session, str(update_query), update_query.params)
 
 
-def apply_insert(session, table, rows, rids):
+def apply_insert(session: AbstractCursor | Session, table: SATable, rows, rids):
     logger.debug("apply inserts (%d)", len(rids))
     query = table.insert().values(rows)
     _execute_sqla(query, session)
     set_applied(session, table, rids, __INSERT)
 
 
-def apply_update(session, table, rows, rids):
+def apply_update(session: AbstractCursor | Session, table, rows, rids):
     logger.debug("apply updates (%d)", len(rids))
     for row, rid in zip(rows, rids):
         pks = [c.name for c in table.columns if c.primary_key]
@@ -2618,7 +2555,9 @@ def session_execute(session: Session, sql) -> ResultProxy:
     return response
 
 
-def session_execute_parameter(session: Session, sql, parameter) -> ResultProxy:
+def session_execute_parameter(
+    session: AbstractCursor | Session, sql, parameter
+) -> ResultProxy:
     response = session.execute(sql, parameter)
     # Note: cast is only for type checking,
     # should disappear once we migrate to sqlalchemy >= 1.4
@@ -2646,5 +2585,5 @@ def cursor_execute(cursor: AbstractCursor, sql) -> None:
     cursor.execute(sql)
 
 
-def cursor_execute_parameter(cursor: AbstractCursor, sql, parameter) -> None:
+def cursor_execute_parameter(cursor: AbstractCursor | Session, sql, parameter) -> None:
     cursor.execute(sql, parameter)

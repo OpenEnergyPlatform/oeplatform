@@ -40,14 +40,14 @@ from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
 
 from dataedit.utils import get_badge_icon_path, validate_badge_name_match
-from login.permissions import DELETE_PERM
+from login.permissions import ADMIN_PERM, NO_PERM
 from oedb.utils import OedbTableGroup, is_valid_name
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 if TYPE_CHECKING:
     # only import for static typechecking
     # TODO: is there a betetr way of doing this?
-    from login.models import GroupPermission, UserPermission
+    from login.models import GroupPermission, UserPermission, myuser
     from modelview.models import BasicFactsheet
 
 logger = logging.getLogger("oeplatform")
@@ -203,7 +203,7 @@ class Table(Tagable):
         OedbTableGroup(
             validated_table_name=self.name,
             schema_name=self.oedb_schema,
-            permission_level=DELETE_PERM,
+            permission_level=ADMIN_PERM,
         ).drop_if_exists()
 
     def save(self, *args, **kwargs):
@@ -376,6 +376,21 @@ class Table(Tagable):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_user_permission_level(self, user: Union["myuser", None] = None) -> int:
+        if not user:
+            return NO_PERM
+        return user.get_table_permission_level(self)
+
+    def get_oeb_table_group(self, user: Union["myuser", None] = None) -> OedbTableGroup:
+        # permission_level = self.get_user_permission_level(user)
+        # FIXME: permissions level dont work yet
+        permission_level = ADMIN_PERM
+        return OedbTableGroup(
+            validated_table_name=self.name,
+            schema_name=self.oedb_schema,
+            permission_level=permission_level,
+        )
 
 
 class Embargo(models.Model):

@@ -119,8 +119,7 @@ class _OedbTable:
             )
         )
 
-    @property
-    def _sa_table(self) -> Table:
+    def get_sa_table(self) -> Table:
         metadata = MetaData(bind=self._engine)
         return Table(
             self._validated_table_name,
@@ -152,7 +151,7 @@ class _OedbMetaTable(_OedbTable):
     ):
         assert action in ACTIONS
         self._action = action
-        self._main_table = _OedbMainTable(
+        self.main_table = _OedbMainTable(
             validated_table_name=validated_main_table_name,
             validated_schema_name=validated_main_schema_name,
             permission_level=permission_level,
@@ -164,19 +163,19 @@ class _OedbMetaTable(_OedbTable):
             permission_level=permission_level,
         )
 
-    def _create(self, include_indexes: bool = True) -> None:
+    def _create_if_missing(self, include_indexes: bool = True) -> None:
         query = (
-            f'CREATE TABLE "{self.schema_name}"."{self.name}" (LIKE '
-            f'"{self._main_table.schema_name}"."{self._main_table.name}"'
+            f'CREATE TABLE IF NOT EXISTS "{self.schema_name}"."{self.name}" (LIKE '
+            f'"{self.main_table.schema_name}"."{self.main_table.name}"'
         )
         if include_indexes:
             query += "INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id) "
         query += f") INHERITS ({EditBase.__tablename__});"
         return self._execute(query, requires_permission=ADMIN_PERM)
 
-    def create_if_missing(self, include_indexes: bool = True) -> None:
-        if not self.exists():
-            self._create(include_indexes=include_indexes)
+    def get_sa_table(self) -> Table:
+        self._create_if_missing()
+        return super().get_sa_table()
 
 
 class OedbTableGroup:
@@ -208,33 +207,37 @@ class OedbTableGroup:
             raise ValueError(f"Invalid schema: {schema_name}")
 
         # readonly properties
-        self._table = _OedbMainTable(
+        self.main_table = _OedbMainTable(
             validated_table_name=validated_table_name,
             validated_schema_name=schema_name,
             permission_level=self._permission_level,
         )
 
-        self._meta_tables = {
-            a: _OedbMetaTable(
-                action=a,
-                validated_main_schema_name=schema_name,
-                validated_main_table_name=validated_table_name,
-                permission_level=self._permission_level,
-            )
-            for a in ACTIONS
-        }
-
-    @property
-    def meta_table_names(self) -> dict[str, str]:
-        return {
-            action: t._validated_table_name for action, t in self._meta_tables.items()
-        }
+        self._edit_table = _OedbMetaTable(
+            action="edit",
+            validated_main_schema_name=schema_name,
+            validated_main_table_name=validated_table_name,
+            permission_level=self._permission_level,
+        )
+        self._delete_table = _OedbMetaTable(
+            action="delete",
+            validated_main_schema_name=schema_name,
+            validated_main_table_name=validated_table_name,
+            permission_level=self._permission_level,
+        )
+        self._insert_table = _OedbMetaTable(
+            action="insert",
+            validated_main_schema_name=schema_name,
+            validated_main_table_name=validated_table_name,
+            permission_level=self._permission_level,
+        )
 
     def exists(self) -> bool:
         # only check main table
-        return self._table.exists()
+        return self.main_table.exists()
 
     def drop_if_exists(self) -> None:
-        tables = list(self._meta_tables.values()) + [self._table]  # main table last
-        for table in tables:
-            table.drop_if_exists()
+        self.main_table.drop_if_exists()
+        self._edit_table.drop_if_exists()
+        self._insert_table.drop_if_exists()
+        self._delete_table.drop_if_exists()
