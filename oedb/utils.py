@@ -8,7 +8,8 @@ import logging
 import re
 from typing import Iterable
 
-from sqlalchemy import MetaData, Table
+from sqlalchemy import MetaData
+from sqlalchemy import Table as SATable
 
 from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM
 from oedb.connection import _get_engine, _get_inspector
@@ -119,9 +120,9 @@ class _OedbTable:
             )
         )
 
-    def get_sa_table(self) -> Table:
+    def get_sa_table(self) -> SATable:
         metadata = MetaData(bind=self._engine)
-        return Table(
+        return SATable(
             self._validated_table_name,
             metadata,
             autoload=True,
@@ -173,7 +174,7 @@ class _OedbMetaTable(_OedbTable):
         query += f") INHERITS ({EditBase.__tablename__});"
         return self._execute(query, requires_permission=ADMIN_PERM)
 
-    def get_sa_table(self) -> Table:
+    def get_sa_table(self) -> SATable:
         self._create_if_missing()
         return super().get_sa_table()
 

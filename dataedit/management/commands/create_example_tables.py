@@ -16,7 +16,6 @@ from api.actions import (
     try_parse_metadata,
     try_validate_metadata,
 )
-from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from oeplatform.settings import SCHEMA_DATA
 
@@ -118,12 +117,10 @@ class Command(BaseCommand):
                 orchestrator.create_table(
                     table=table_name,
                     is_sandbox=True,  # tests ALWAYS in sandbox
+                    user=user,
                     column_defs=column_defs,
                     constraint_defs=constraint_defs,
                 )
-
-                # 5) Grant ADMIN to your test user
-                assign_table_holder(user, schema_name, table_name)
 
                 self.stdout.write(
                     self.style.SUCCESS(f"✔ Created table {schema_name}.{table_name}")

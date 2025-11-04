@@ -14,7 +14,6 @@ from typing import cast
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 
-from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from base.tests import TestViewsTestCase
 from dataedit.models import PeerReview, PeerReviewManager, Tag
@@ -37,13 +36,9 @@ class TestViewsDataedit(TestViewsTestCase):
         cls.table = cls.orchestrator.create_table(
             is_sandbox=True,  # tests ALWAYS in sandbox
             table=cls.kwargs_w_table["table"],
-            column_defs=[],
-            constraint_defs=[],
-        )
-        assign_table_holder(
-            cls.user,
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
+            user=cls.user,
+            column_definitions=[],
+            constraints_definitions=[],
         )
 
         cls.tag = Tag.objects.create(name="tag1")

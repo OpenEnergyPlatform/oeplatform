@@ -48,7 +48,14 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
 )
 from sqlalchemy import Table as SATable
-from sqlalchemy import UniqueConstraint, exc, inspect, select, sql, text
+from sqlalchemy import (
+    UniqueConstraint,
+    exc,
+    inspect,
+    select,
+    sql,
+    text,
+)
 from sqlalchemy import types as sqltypes
 from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.ext.declarative import declarative_base
@@ -77,8 +84,7 @@ from api.sessions import (
     load_session_from_context,
 )
 from api.utils import check_if_oem_license_exists, validate_schema
-from dataedit.models import Embargo, PeerReview
-from dataedit.models import Table as DBTable
+from dataedit.models import Embargo, PeerReview, Table
 from login.models import myuser as User
 from login.permissions import DELETE_PERM, WRITE_PERM
 from oedb.connection import (
@@ -161,18 +167,18 @@ class ResponsiveException(Exception):
     pass
 
 
-def table_or_404(table: str) -> DBTable:
-    table_obj = DBTable.objects.filter(name=table).first()
+def table_or_404(table: str) -> Table:
+    table_obj = Table.objects.filter(name=table).first()
     if table_obj is None:
         raise APIError("Table doesnot exist", 401)
     return table_obj
 
 
-def table_or_404_from_dict(dct: dict) -> DBTable:
+def table_or_404_from_dict(dct: dict) -> Table:
     return table_or_404(get_or_403(dct, "table"))
 
 
-def table_or_404_from_req(request: Request | HttpRequest) -> DBTable:
+def table_or_404_from_req(request: Request | HttpRequest) -> Table:
     return table_or_404_from_req(request.GET)  # type:ignore TODO
 
 
@@ -180,7 +186,7 @@ def assert_permission(user, table: str, permission: int) -> None:
     if user.is_anonymous or not isinstance(user, User):
         raise APIError("User is anonymous", 401)
 
-    if user.get_table_permission_level(DBTable.load(name=table)) < permission:
+    if user.get_table_permission_level(Table.load(name=table)) < permission:
         raise APIError("Permission denied", 403)
 
 
@@ -204,12 +210,12 @@ def assert_add_tag_permission(user, table: str, permission: int, schema) -> None
     if user.is_anonymous:
         raise APIError("User is anonymous", 401)
 
-    if user.get_table_permission_level(DBTable.load(name=table)) < permission:
+    if user.get_table_permission_level(Table.load(name=table)) < permission:
         raise PermissionDenied
 
 
 def assert_has_metadata(table: str, schema: str) -> bool:
-    table_obj = DBTable.load(name=table)
+    table_obj = Table.load(name=table)
     if table_obj.oemetadata is None:
         result = False
     else:
@@ -925,7 +931,7 @@ def column_add(schema, table: str, column, description):
     )
 
     # FIXME: no permission check?
-    oeb_table_group = DBTable.objects.get(name=table).get_oeb_table_group(None)
+    oeb_table_group = Table.objects.get(name=table).get_oeb_table_group(None)
 
     edit_sa_table = oeb_table_group._edit_table.get_sa_table()
     insert_sa_table = oeb_table_group._insert_table.get_sa_table()
@@ -949,19 +955,20 @@ def assert_valid_identifier_name(identifier):
         )
 
 
-def table_create(
-    schema: str, table: str, column_definitions: list, constraints_definitions: list
+def _table_create(
+    table_obj: Table, column_definitions: list, constraints_definitions: list
 ):
     """
-    Creates a new table.
+    Creates a new table
+
+    IMPORTANT: permission checks have to be performed before
+
     :param schema: schema
     :param table: table
     :param column_definitions: Description of columns
     :param constraints_definitions: Description of constraints
     :return: Dictionary with results
     """
-
-    metadata = MetaData()
 
     primary_key_col_names = None
     columns_by_name = {}
@@ -1019,8 +1026,6 @@ def table_create(
                 ccolumns = [constraint["constraint_parameter"]]
             constraints.append(UniqueConstraint(*ccolumns, **kwargs))
 
-    assert_valid_identifier_name(table)
-
     # autogenerate id column if missing
     if "id" not in columns_by_name:
         columns_by_name["id"] = Column("id", BigInteger, autoincrement=True)
@@ -1040,6 +1045,9 @@ def table_create(
     if tuple(primary_key_col_names) != ("id",):
         raise APIError("Primary key must be column id")
 
+    table = table_obj.name
+    schema = table_obj.oedb_schema
+    metadata = MetaData()
     sa_table = SATable(table, metadata, *(columns + constraints), schema=schema)
 
     # NOTE: type casting probably no longer needed in later sqlalchemay
@@ -1234,7 +1242,7 @@ def _get_table(schema, table) -> SATable:
 
 
 def get_table_metadata(schema: str, table: str) -> dict:
-    django_obj = DBTable.load(name=table)
+    django_obj = Table.load(name=table)
     oemetadata = django_obj.oemetadata
     return oemetadata if oemetadata else {}
 
@@ -1366,7 +1374,7 @@ def data_delete(request: dict, context: dict):
     assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
 
     target_meta_sa_table = (
-        DBTable.objects.get(name=orig_table)
+        Table.objects.get(name=orig_table)
         .get_oeb_table_group()
         ._delete_table.get_sa_table()
     )
@@ -1395,7 +1403,7 @@ def data_update(query: dict, context: dict):
     assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
 
     target_sa_table = (
-        DBTable.objects.get(name=orig_table)
+        Table.objects.get(name=orig_table)
         .get_oeb_table_group()
         ._edit_table.get_sa_table()
     )
@@ -1525,7 +1533,7 @@ def data_insert(request: dict, context: dict) -> dict:
 
     # mapper = {orig_schema: schema, orig_table: table}
 
-    otg = DBTable.objects.get(name=table_name).get_oeb_table_group()
+    otg = Table.objects.get(name=table_name).get_oeb_table_group()
 
     request["table"] = otg._insert_table.get_sa_table().name
     request["schema"] = otg._insert_table.schema_name
@@ -1695,7 +1703,7 @@ def move_publish(from_schema, table: str, to_schema, embargo_period):
 
     """
 
-    table_obj = DBTable.objects.get(name=table)
+    table_obj = Table.objects.get(name=table)
     validate_open_data_license = table_obj.validate_open_data_license()
 
     license_check = validate_open_data_license["status"]
@@ -1763,7 +1771,7 @@ def has_schema(request: dict, context=None) -> bool:
 
 def has_table(request, context=None):
     table = get_or_403(request, "table")
-    return DBTable.objects.filter(name=table).exists()
+    return Table.objects.filter(name=table).exists()
 
 
 def has_sequence(request, context=None):
@@ -2164,7 +2172,7 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
         columns = list(describe_columns(schema, table).keys())
         extended_columns = columns + ["_submitted", "_id"]
 
-        otg = DBTable.objects.get(name=table).get_oeb_table_group()
+        otg = Table.objects.get(name=table).get_oeb_table_group()
 
         insert_sa_table = otg._insert_table.get_sa_table()
         cursor_execute(
@@ -2269,7 +2277,7 @@ def _apply_stack(cursor: AbstractCursor, sa_table: SATable, changes, change_type
 
 def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode: int):
 
-    otg = DBTable.objects.get(name=sa_table.name).get_oeb_table_group()
+    otg = Table.objects.get(name=sa_table.name).get_oeb_table_group()
 
     if mode == __INSERT:
         meta_sa_table = otg._insert_table.get_sa_table()
@@ -2321,7 +2329,7 @@ def update_meta_search(table: str) -> None:
     """
     TODO: also update JSONB index fields
     """
-    table_obj = DBTable.objects.get(name=table)
+    table_obj = Table.objects.get(name=table)
     comment = str(dataedit.metadata.load_metadata_from_db(table=table))
     tags = [t.name for t in table_obj.tags.all()]
     s = " ".join(
@@ -2364,7 +2372,7 @@ def set_table_metadata(table: str, metadata):
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.objects.get(name=table)
+    django_table_obj = Table.objects.get(name=table)
     django_table_obj.oemetadata = metadata_obj  # type:ignore
     django_table_obj.save()
 
@@ -2404,7 +2412,7 @@ def get_single_table_size(table: str) -> dict | None:
     """  # noqa: E501
     )
 
-    schema = DBTable.load(name=table).oedb_schema
+    schema = Table.load(name=table).oedb_schema
     sess = _create_oedb_session()
     try:
         res = session_execute_parameter(sess, sql, {"schema": schema, "table": table})
@@ -2455,7 +2463,7 @@ def list_table_sizes() -> list[dict]:
         sess.close()
 
 
-def table_get_approx_row_count(table: DBTable, precise_below: int = 0) -> int:
+def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
     """Get approximate number of rows quickly.
 
     Especially for huge tables, count(*) is slow,

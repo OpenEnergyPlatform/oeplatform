@@ -79,7 +79,6 @@ from api.services.embargo import (
     apply_embargo,
     parse_embargo_payload,
 )
-from api.services.permissions import assign_table_holder
 from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs, request_data_dict, validate_schema
 from api.validators.column import validate_column_names
@@ -343,16 +342,15 @@ class TableAPIView(APIView):
 
         table_obj = orchestrator.create_table(
             table=table,
+            user=request.user,
             is_sandbox=is_sandbox,
-            column_defs=columns,
-            constraint_defs=constraints,
+            column_definitions=columns,
+            constraints_definitions=constraints,
         )
 
         # 5) Post-creation hooks
         if embargo_required:
             apply_embargo(table_obj, embargo_data)
-
-        assign_table_holder(request.user, schema, table)
 
         metadata = payload_query.get("metadata")
         if metadata:

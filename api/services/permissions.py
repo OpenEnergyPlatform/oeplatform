@@ -1,16 +1,16 @@
 from dataedit.models import Table
 from login.models import UserPermission
+from login.models import myuser as User
 from login.permissions import ADMIN_PERM
 
 
-def assign_table_holder(user, schema: str, table: str):
+def assign_table_holder(user: User, table: Table) -> None:
     """
     Grant ADMIN permission level to user for the specified table.
     """
-    table_obj = Table.load(name=table)
 
     perm, created = UserPermission.objects.get_or_create(
-        table=table_obj,
+        table=table,
         holder=user,
         defaults={"level": ADMIN_PERM},
     )
