@@ -62,7 +62,18 @@ from django.views.generic import View
 from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 
 import login.permissions
-from api import actions, utils
+from api import utils
+from api.actions import (
+    apply_queued_column,
+    apply_queued_constraint,
+    assert_add_tag_permission,
+    data_insert,
+    describe_columns,
+    get_table_name,
+    perform_sql,
+    remove_queued_column,
+    remove_queued_constraint,
+)
 from api.error import APIError
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
@@ -117,9 +128,9 @@ def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     table = request.POST.get("table")
 
     if action == "deny":
-        actions.remove_queued_constraint(id)
+        remove_queued_constraint(id)
     elif action == "apply":
-        actions.apply_queued_constraint(id)
+        apply_queued_constraint(id)
     else:
         raise NotImplementedError(action)
 
@@ -140,9 +151,9 @@ def admin_column_view(request: HttpRequest) -> HttpResponse:
     table = request.POST.get("table")
 
     if action == "deny":
-        actions.remove_queued_column(id)
+        remove_queued_column(id)
     elif action == "apply":
-        actions.apply_queued_column(id)
+        apply_queued_column(id)
     else:
         raise NotImplementedError(action)
 
@@ -466,7 +477,7 @@ def table_view_delete_view(
 class TableGraphView(View):
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
         # get the columns id from the schema and the table
-        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in describe_columns(schema, table).keys()]
         formset = GraphViewForm(columns=columns)
 
         return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
@@ -494,7 +505,7 @@ class TableMapView(View):
     def get(
         self, request: HttpRequest, schema: str, table: str, maptype: str
     ) -> HttpResponse:
-        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(columns=columns)
         elif maptype == "geom":
@@ -507,7 +518,7 @@ class TableMapView(View):
     def post(
         self, request: HttpRequest, schema: str, table: str, maptype: str
     ) -> HttpResponse:
-        columns = [(c, c) for c in actions.describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(request.POST, columns=columns)
             options = dict(lat=request.POST.get("lat"), lon=request.POST.get("lon"))
@@ -711,7 +722,7 @@ class TableDataView(View):
 
             reader = csv.DictReader(csvfile, delimiter=",")
 
-            actions.data_insert(
+            data_insert(
                 {
                     "schema": schema,
                     "table": table,
@@ -887,13 +898,13 @@ def tage_table_add_view(request: HttpRequest) -> HttpResponse:
     """
     try:
         # check if valid table / schema
-        schema_name, table = actions.get_table_name(
+        schema_name, table = get_table_name(
             schema=request.POST["schema"],
             table=request.POST["table"],
             restrict_schemas=False,
         )
         # check write permission
-        actions.assert_add_tag_permission(
+        assert_add_tag_permission(
             request.user, table, login.permissions.WRITE_PERM, schema=schema_name
         )
         tag_prefix = "tag_"
@@ -956,7 +967,7 @@ class TableWizardView(LoginRequiredMixin, View):
             sql = 'SELECT COUNT(*) FROM "{schema}"."{table}"'.format(
                 schema=schema, table=table
             )
-            res = actions.perform_sql(sql)
+            res = perform_sql(sql)
             n_rows = res["result"].fetchone()[0]
 
         context = {

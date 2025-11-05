@@ -38,7 +38,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import login.permissions
-from api import actions, parser, sessions
+from api import parser, sessions
+from api.actions import (
+    _translate_fetched_cell,
+    assert_permission,
+    close_cursor,
+    close_raw_connection,
+    load_cursor_from_context,
+    load_session_from_context,
+    open_cursor,
+    open_raw_connection,
+)
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
 from dataedit.models import Embargo, Table, Tag
@@ -71,7 +81,7 @@ class ModJsonResponse(JsonResponse):
 def transform_results(cursor, triggers, trigger_args):
     row = cursor.fetchone() if not cursor.closed else None
     while row is not None:
-        yield list(map(actions._translate_fetched_cell, row))
+        yield list(map(_translate_fetched_cell, row))
         row = cursor.fetchone()
     for t, targs in zip(triggers, trigger_args):
         t(*targs)
@@ -104,18 +114,18 @@ def load_cursor(named=False):
                 if not artificial_connection:
                     context["connection_id"] = args[1].data["connection_id"]
                 else:
-                    context.update(actions.open_raw_connection({}, context))
+                    context.update(open_raw_connection({}, context))
                     args[1].data["connection_id"] = context["connection_id"]
                 if "cursor_id" in args[1].data:
                     context["cursor_id"] = args[1].data["cursor_id"]
                 else:
-                    context.update(actions.open_cursor({}, context, named=named))
+                    context.update(open_cursor({}, context, named=named))
                     args[1].data["cursor_id"] = context["cursor_id"]
             try:
                 result = f(*args, **kwargs)
                 if fetch_all:
-                    cursor = actions.load_cursor_from_context(context)
-                    session = actions.load_session_from_context(context)
+                    cursor = load_cursor_from_context(context)
+                    session = load_session_from_context(context)
                     connection = session.connection
 
                     if not result:
@@ -130,8 +140,8 @@ def load_cursor(named=False):
                     # Set of triggers after all the data was fetched.
                     # The cursor must not be closed earlier!
                     triggers = [
-                        actions.close_cursor,
-                        actions.close_raw_connection,
+                        close_cursor,
+                        close_raw_connection,
                         connection.commit,
                     ]
                     trigger_args = [({}, context), ({}, context), tuple()]
@@ -145,7 +155,7 @@ def load_cursor(named=False):
                         except psycopg2.errors.InvalidCursorName as e:
                             logger.error(str(e))
                     if first:
-                        first = map(actions._translate_fetched_cell, first)
+                        first = map(_translate_fetched_cell, first)
                         if cursor.description:
                             description = [
                                 [
@@ -175,9 +185,9 @@ def load_cursor(named=False):
             finally:
                 if not triggered_close:
                     if fetch_all and not artificial_connection:
-                        actions.close_cursor({}, context)
+                        close_cursor({}, context)
                     if artificial_connection:
-                        actions.close_raw_connection({}, context)
+                        close_raw_connection({}, context)
             return result
 
         return wrapper
@@ -213,7 +223,7 @@ def api_exception(
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
-        except actions.APIError as e:
+        except APIError as e:
             return JsonResponse({"reason": e.message}, status=e.status)
         except Table.DoesNotExist:
             return JsonResponse({"reason": "table does not exist"}, status=404)
@@ -231,7 +241,7 @@ def api_exception(
 def permission_wrapper(permission: int, f: Callable) -> Callable:
     def wrapper(caller, request: HttpRequest, *args, **kwargs):
         table = kwargs.get("table") or kwargs.get("sequence") or ""
-        actions.assert_permission(user=request.user, table=table, permission=permission)
+        assert_permission(user=request.user, table=table, permission=permission)
         return f(caller, request, *args, **kwargs)
 
     return wrapper

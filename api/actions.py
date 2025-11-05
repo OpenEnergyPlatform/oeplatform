@@ -65,7 +65,6 @@ from api.parser import (
 )
 from api.sessions import (
     SessionContext,
-    close_all_for_user,
     load_cursor_from_context,
     load_session_from_context,
 )
@@ -194,16 +193,6 @@ def assert_add_tag_permission(user, table: str, permission: int, schema) -> None
 
     if user.get_table_permission_level(Table.load(name=table)) < permission:
         raise APIError("Permission denied", status=403)
-
-
-def assert_has_metadata(table: str, schema: str) -> bool:
-    table_obj = Table.load(name=table)
-    if table_obj.oemetadata is None:
-        result = False
-    else:
-        result = True
-
-    return result
 
 
 def _translate_fetched_cell(cell):
@@ -1040,20 +1029,6 @@ def table_change_constraint(constraint_definition):
     return perform_sql(sql_string)
 
 
-def put_rows(schema, table: str, column_data):
-    keys = list(column_data.keys())
-    values = list(column_data.values())
-
-    keys = ['"{0}"'.format(key) for key in keys]
-    values = ["'{0}'".format(value) for value in values]
-
-    sql = 'INSERT INTO "{schema}"."{table}" ({keys}) VALUES({values})'.format(
-        schema=schema, table=table, keys=",".join(keys), values=",".join(values)
-    )
-
-    return perform_sql(sql)
-
-
 """
 ACTIONS FROM OLD API
 """
@@ -1327,26 +1302,6 @@ def _execute_sqla(query, cursor: AbstractCursor | Session) -> None:
         raise
 
 
-def process_value(val):
-    if isinstance(val, str):
-        return "'" + val.replace("'", "\\'") + "'"
-    if isinstance(val, datetime):
-        return "'" + str(val) + "'"
-    if val is None:
-        return "null"
-    else:
-        return str(val)
-
-
-def count_all(request, context=None):
-    table = get_or_403(request, "table")
-    schema = get_or_403(request, "schema")
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
-    sa_table = _get_table(schema, table)
-    return session.query(sa_table).count()
-
-
 def analyze_columns(schema, table):
     engine = _get_engine()
     result = engine_execute(
@@ -1470,11 +1425,6 @@ def get_table_oid(request: dict, context=None):
     finally:
         conn.close()
     return result
-
-
-def close_all_connections(request: dict, context):
-    close_all_for_user(request)
-    return __response_success()
 
 
 def fetchall(context: dict):

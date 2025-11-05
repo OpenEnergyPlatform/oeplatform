@@ -20,7 +20,13 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.utils.encoding import smart_str
 
 import api.parser
-from api import actions
+from api.actions import (
+    describe_columns,
+    describe_constraints,
+    get_column_changes,
+    get_constraints_changes,
+    set_table_metadata,
+)
 from dataedit.metadata import load_metadata_from_db
 from dataedit.models import PeerReview, Table, Tag
 from oeplatform.settings import MEDIA_ROOT
@@ -336,8 +342,8 @@ def change_requests(schema, table):
     # I want to display old and new data, if different.
 
     display_message = None
-    api_columns = actions.get_column_changes(reviewed=False, schema=schema, table=table)
-    api_constraints = actions.get_constraints_changes(
+    api_columns = get_column_changes(reviewed=False, schema=schema, table=table)
+    api_constraints = get_constraints_changes(
         reviewed=False, schema=schema, table=table
     )
 
@@ -355,7 +361,7 @@ def change_requests(schema, table):
         "id",
     ]
 
-    old_description = actions.describe_columns(schema, table)
+    old_description = describe_columns(schema, table)
 
     for change in api_columns:
         name = change["column_name"]
@@ -543,7 +549,7 @@ def update_keywords_from_tags(table: Table, schema: str) -> None:
     keywords = [tag.name_normalized for tag in table.tags.all()]
     metadata["resources"][0]["keywords"] = keywords
 
-    actions.set_table_metadata(table=table.name, metadata=metadata)
+    set_table_metadata(table=table.name, metadata=metadata)
 
 
 def get_column_description(schema, table):
@@ -610,8 +616,8 @@ def get_column_description(schema, table):
                     pk_fields = [x.strip() for x in m.groups()[0].split(",")]
         return pk_fields
 
-    _columns = actions.describe_columns(schema, table)
-    _constraints = actions.describe_constraints(schema, table)
+    _columns = describe_columns(schema, table)
+    _constraints = describe_constraints(schema, table)
     pk_fields = get_pk_fields(_constraints)
     # order by ordinal_position
     columns = []

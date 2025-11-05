@@ -58,8 +58,75 @@ from rest_framework.views import APIView
 
 import api.parser
 import login.models as login_models
-from api import actions, parser, sessions
-from api.actions import engine_execute, table_get_approx_row_count, table_or_404
+from api import parser, sessions
+from api.actions import (
+    _execute_sqla,
+    _get_table,
+    _response_error,
+    _translate_fetched_cell,
+    apply_changes,
+    close_cursor,
+    close_raw_connection,
+    column_add,
+    column_alter,
+    commit_raw_connection,
+    create_sequence,
+    data_delete,
+    data_info,
+    data_insert,
+    data_search,
+    data_update,
+    delete_sequence,
+    describe_columns,
+    describe_constraints,
+    describe_indexes,
+    do_begin_twophase,
+    do_commit_twophase,
+    do_prepare_twophase,
+    do_recover_twophase,
+    do_rollback_twophase,
+    engine_execute,
+    fetchall,
+    fetchmany,
+    fetchone,
+    get_column_obj,
+    get_columns,
+    get_columns_select,
+    get_foreign_keys,
+    get_indexes,
+    get_isolation_level,
+    get_or_403,
+    get_pk_constraint,
+    get_response_dict,
+    get_schema_names,
+    get_single_table_size,
+    get_table_metadata,
+    get_table_name,
+    get_table_names,
+    get_unique_constraints,
+    get_view_definition,
+    get_view_names,
+    getValue,
+    has_schema,
+    has_sequence,
+    has_table,
+    has_type,
+    list_table_sizes,
+    move,
+    move_publish,
+    open_cursor,
+    open_raw_connection,
+    queue_column_change,
+    queue_constraint_change,
+    rollback_raw_connection,
+    set_isolation_level,
+    set_table_metadata,
+    table_get_approx_row_count,
+    table_or_404,
+    try_convert_metadata_to_v2,
+    try_parse_metadata,
+    try_validate_metadata,
+)
 from api.encode import Echo
 from api.error import APIError
 from api.helper import (
@@ -124,7 +191,7 @@ class SequenceAPIView(APIView):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
-        if actions.has_table(dict(schema=schema, sequence_name=sequence), {}):
+        if has_table(dict(schema=schema, sequence_name=sequence), {}):
             raise APIError("Sequence already exists", 409)
         return JsonResponse(self.__create_sequence(request, schema, sequence))
 
@@ -142,14 +209,14 @@ class SequenceAPIView(APIView):
     def __delete_sequence(
         self, request: Request, schema: str, sequence: str
     ) -> JsonLikeResponse:
-        actions.delete_sequence(sequence=sequence, schema=schema)
+        delete_sequence(sequence=sequence, schema=schema)
         return JsonResponse({}, status=status.HTTP_200_OK)
 
     @load_cursor()
     def __create_sequence(
         self, request: Request, schema: str, sequence: str
     ) -> JsonLikeResponse:
-        actions.create_sequence(sequence=sequence, schema=schema)
+        create_sequence(sequence=sequence, schema=schema)
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
 
@@ -157,7 +224,7 @@ class MetadataAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
-        metadata = actions.get_table_metadata(schema, table)
+        metadata = get_table_metadata(schema, table)
         return JsonResponse(metadata)
 
     @api_exception
@@ -165,11 +232,11 @@ class MetadataAPIView(APIView):
     @load_cursor()
     def post(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
         raw_input = request.data
-        metadata, error = actions.try_parse_metadata(raw_input)
+        metadata, error = try_parse_metadata(raw_input)
 
         if not error and metadata is not None:
-            metadata = actions.try_convert_metadata_to_v2(metadata)
-            metadata, error = actions.try_validate_metadata(metadata)
+            metadata = try_convert_metadata_to_v2(metadata)
+            metadata, error = try_validate_metadata(metadata)
 
         if metadata is not None:
 
@@ -184,7 +251,7 @@ class MetadataAPIView(APIView):
             metadata.pop("connection_id", None)
             metadata.pop("cursor_id", None)
 
-            actions.set_table_metadata(table=table, metadata=metadata)
+            set_table_metadata(table=table, metadata=metadata)
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
@@ -215,15 +282,15 @@ class TableAPIView(APIView):
         :return:
         """
 
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = get_table_name(schema, table, restrict_schemas=False)
 
         return JsonResponse(
             {
                 "schema": schema,
                 "name": table,
-                "columns": actions.describe_columns(schema, table),
-                "indexed": actions.describe_indexes(schema, table),
-                "constraints": actions.describe_constraints(schema, table),
+                "columns": describe_columns(schema, table),
+                "indexed": describe_indexes(schema, table),
+                "constraints": describe_constraints(schema, table),
             }
         )
 
@@ -245,7 +312,7 @@ class TableAPIView(APIView):
             column_definition = api.parser.parse_scolumnd_from_columnd(
                 schema, table, request_data_dict["name"], request_data_dict
             )
-            result = actions.queue_column_change(schema, table, column_definition)
+            result = queue_column_change(schema, table, column_definition)
             return ModJsonResponse(result)
 
         elif "constraint" in request_data_dict["type"]:
@@ -266,14 +333,10 @@ class TableAPIView(APIView):
                 "reference_column": request_data_dict.get("reference_column"),
             }
 
-            result = actions.queue_constraint_change(
-                schema, table, constraint_definition
-            )
+            result = queue_constraint_change(schema, table, constraint_definition)
             return ModJsonResponse(result)
         else:
-            return ModJsonResponse(
-                actions.get_response_dict(False, 400, "type not recognised")
-            )
+            return ModJsonResponse(get_response_dict(False, 400, "type not recognised"))
 
     @api_exception
     def put(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
@@ -305,7 +368,7 @@ class TableAPIView(APIView):
             raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
-        if actions.has_table({"schema": schema, "table": table}, {}):
+        if has_table({"schema": schema, "table": table}, {}):
             raise APIError("Table already exists", 409)
 
         # 2) Validate identifiers
@@ -361,7 +424,7 @@ class TableAPIView(APIView):
         metadata = payload_query.get("metadata")
         if metadata:
 
-            actions.set_table_metadata(table=table, metadata=metadata)
+            set_table_metadata(table=table, metadata=metadata)
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
@@ -403,15 +466,13 @@ class ColumnAPIView(APIView):
     def get(
         self, request: Request, schema: str, table: str, column: str | None = None
     ) -> JsonLikeResponse:
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
-        response = actions.describe_columns(schema, table)
+        schema, table = get_table_name(schema, table, restrict_schemas=False)
+        response = describe_columns(schema, table)
         if column:
             try:
                 response = response[column]
             except KeyError:
-                raise actions.APIError(
-                    "The column specified is not part of " "this table."
-                )
+                raise APIError("The column specified is not part of " "this table.")
         return JsonResponse(response)
 
     @api_exception
@@ -419,12 +480,10 @@ class ColumnAPIView(APIView):
     def post(
         self, request: Request, schema: str, table: str, column: str
     ) -> JsonLikeResponse:
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = get_table_name(schema, table)
 
         request_data_dict = get_request_data_dict(request)
-        response = actions.column_alter(
-            request_data_dict["query"], {}, schema, table, column
-        )
+        response = column_alter(request_data_dict["query"], {}, schema, table, column)
         return JsonResponse(response)
 
     @api_exception
@@ -432,9 +491,9 @@ class ColumnAPIView(APIView):
     def put(
         self, request: Request, schema: str, table: str, column: str
     ) -> JsonLikeResponse:
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = get_table_name(schema, table)
         request_data_dict = get_request_data_dict(request)
-        actions.column_add(schema, table, column, request_data_dict["query"])
+        column_add(schema, table, column, request_data_dict["query"])
         return JsonResponse({}, status=201)
 
 
@@ -450,7 +509,7 @@ class FieldsAPIView(APIView):
         column_id: int,
         column: str | None = None,
     ) -> JsonLikeResponse:
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = get_table_name(schema, table, restrict_schemas=False)
         if (
             not parser.is_pg_qual(table)
             or not parser.is_pg_qual(schema)
@@ -459,7 +518,7 @@ class FieldsAPIView(APIView):
         ):
             return ModJsonResponse({"error": "Bad Request", "http_status": 400})
 
-        returnValue = actions.getValue(schema, table, column, column_id)
+        returnValue = getValue(schema, table, column, column_id)
         if returnValue is None:
             return JsonResponse({}, status=404)
         else:
@@ -478,7 +537,7 @@ class MovePublishAPIView(APIView):
         embargo_period = request_data_dict.get("embargo", {}).get(
             "duration", None
         ) or payload_query.get("embargo", {}).get("duration", None)
-        actions.move_publish(schema, table, to_schema, embargo_period)
+        move_publish(schema, table, to_schema, embargo_period)
 
         return JsonResponse({}, status=status.HTTP_200_OK)
 
@@ -500,7 +559,7 @@ class MoveAPIView(APIView):
     def post(
         self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonLikeResponse:
-        actions.move(schema, table, to_schema)
+        move(schema, table, to_schema)
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
@@ -516,45 +575,41 @@ class RowsAPIView(APIView):
                 status=403,
             )
 
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = get_table_name(schema, table, restrict_schemas=False)
         columns = request.GET.getlist("column")
 
         where = request.GET.getlist("where")
         if row_id and where:
-            raise actions.APIError(
-                "Where clauses and row id are not allowed in the same query"
-            )
+            raise APIError("Where clauses and row id are not allowed in the same query")
 
         orderby = request.GET.getlist("orderby")
         if row_id and orderby:
-            raise actions.APIError(
+            raise APIError(
                 "Order by clauses and row id are not allowed in the same query"
             )
 
         limit = request.GET.get("limit")
         if row_id and limit:
-            raise actions.APIError(
+            raise APIError(
                 "Limit by clauses and row id are not allowed in the same query"
             )
 
         offset = request.GET.get("offset")
         if row_id and offset:
-            raise actions.APIError(
+            raise APIError(
                 "Order by clauses and row id are not allowed in the same query"
             )
 
         format = request.GET.get("form")
 
         if offset is not None and not offset.isdigit():
-            raise actions.APIError("Offset must be integer")
+            raise APIError("Offset must be integer")
         if limit is not None and not limit.isdigit():
-            raise actions.APIError("Limit must be integer")
+            raise APIError("Limit must be integer")
         if not all(parser.is_pg_qual(c) for c in columns):
-            raise actions.APIError("Columns are no postgres qualifiers")
+            raise APIError("Columns are no postgres qualifiers")
         if not all(parser.is_pg_qual(c) for c in orderby):
-            raise actions.APIError(
-                "Columns in groupby-clause are no postgres qualifiers"
-            )
+            raise APIError("Columns in groupby-clause are no postgres qualifiers")
 
         # OPERATORS could be EQUALS, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
         # CONNECTORS could be AND, OR
@@ -685,7 +740,7 @@ class RowsAPIView(APIView):
                 status=403,
             )
 
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = get_table_name(schema, table)
         request_data_dict = get_request_data_dict(request)
         payload_query = request_data_dict["query"]
         status_code = status.HTTP_200_OK
@@ -701,7 +756,7 @@ class RowsAPIView(APIView):
                 response = self.__update_rows(
                     request, schema, table, payload_query, None
                 )
-        actions.apply_changes(schema, table)
+        apply_changes(schema, table)
         return stream(response, status_code=status_code)
 
     @api_exception
@@ -725,10 +780,10 @@ class RowsAPIView(APIView):
                 "This request type (PUT) is not supported. The "
                 "'new' statement is only possible in POST requests."
             )
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = get_table_name(schema, table)
         if not row_id:
             return JsonResponse(
-                actions._response_error("This methods requires an id"),
+                _response_error("This methods requires an id"),
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -756,11 +811,11 @@ class RowsAPIView(APIView):
         exists = count > 0 if row_id else False
         if exists:
             response = self.__update_rows(request, schema, table, payload_query, row_id)
-            actions.apply_changes(schema, table)
+            apply_changes(schema, table)
             return JsonResponse(response)
         else:
             result = self.__insert_row(request, schema, table, payload_query, row_id)
-            actions.apply_changes(schema, table)
+            apply_changes(schema, table)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
     @api_exception
@@ -774,9 +829,9 @@ class RowsAPIView(APIView):
                 status=403,
             )
 
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = get_table_name(schema, table)
         result = self.__delete_rows(request, schema, table, row_id)
-        actions.apply_changes(schema, table)
+        apply_changes(schema, table)
         return JsonResponse(result)
 
     @load_cursor()
@@ -815,7 +870,7 @@ class RowsAPIView(APIView):
                 clause = conjunction([clause, where])
             query["where"] = clause
 
-        return actions.data_delete(query, context)
+        return data_delete(query, context)
 
     def __read_where_clause(self, wheres) -> list:
         where_clauses = []
@@ -850,7 +905,7 @@ class RowsAPIView(APIView):
         row_id: int | None = None,
     ):
         if row_id and row.get("id", int(row_id)) != int(row_id):
-            return actions._response_error(
+            return _response_error(
                 "The id given in the query does not " "match the id given in the url"
             )
         if row_id:
@@ -871,7 +926,7 @@ class RowsAPIView(APIView):
 
         if not row_id:
             query["returning"] = [{"type": "column", "column": "id"}]
-        result = actions.data_insert(query, context)
+        result = data_insert(query, context)
 
         return result
 
@@ -918,18 +973,18 @@ class RowsAPIView(APIView):
                 clause = conjunction([clause, where])
             query["where"] = clause
 
-        return actions.data_update(query, context)
+        return data_update(query, context)
 
     @load_cursor(named=True)
     def __get_rows(self, request: Request, data):
-        sa_table = actions._get_table(data["schema"], table=data["table"])
+        sa_table = _get_table(data["schema"], table=data["table"])
         columns = data.get("columns")
 
         if not columns:
             query = sa_table.select()
         else:
-            columns = [actions.get_column_obj(sa_table, c) for c in columns]
-            query = actions.get_columns_select(columns=columns)
+            columns = [get_column_obj(sa_table, c) for c in columns]
+            query = get_columns_select(columns=columns)
 
         where_clauses = data.get("where")
 
@@ -958,24 +1013,24 @@ class RowsAPIView(APIView):
             query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
         cursor = sessions.load_cursor_from_context(request_data_dict(request))
-        actions._execute_sqla(query, cursor)
+        _execute_sqla(query, cursor)
 
 
 class AdvancedFetchAPIView(APIView):
     @api_exception
     def post(self, request: Request, fetchtype) -> JsonLikeResponse:
         if fetchtype == "all":
-            return self.do_fetch(request, actions.fetchall)
+            return self.do_fetch(request, fetchall)
         elif fetchtype == "many":
-            return self.do_fetch(request, actions.fetchmany)
+            return self.do_fetch(request, fetchmany)
         else:
             raise APIError("Unknown fetchtype: %s" % fetchtype)
 
     def do_fetch(self, request: Request, fetch):
         data = request_data_dict(request)
         context = {
-            "connection_id": actions.get_or_403(data, "connection_id"),
-            "cursor_id": actions.get_or_403(data, "cursor_id"),
+            "connection_id": get_or_403(data, "connection_id"),
+            "cursor_id": get_or_403(data, "cursor_id"),
             "user": request.user,
         }
         return OEPStream(
@@ -989,7 +1044,7 @@ class AdvancedFetchAPIView(APIView):
 
     def transform_row(self, row):
         return json.dumps(
-            [actions._translate_fetched_cell(cell) for cell in row],
+            [_translate_fetched_cell(cell) for cell in row],
             default=date_handler,
         )
 
@@ -1226,49 +1281,47 @@ class TableSizeAPIView(APIView):
         table = request.query_params.get("table")
 
         if table:
-            data = actions.get_single_table_size(table=table)
+            data = get_single_table_size(table=table)
             if not data:
                 raise APIError(f"Relation {table} not found.", status=404)
             return Response(data)
 
         # list mode
-        data = actions.list_table_sizes()
+        data = list_table_sizes()
         return Response(data, status=status.HTTP_200_OK)
 
 
 AdvancedSearchAPIView = create_ajax_handler(
-    actions.data_search, allow_cors=True, requires_cursor=True
+    data_search, allow_cors=True, requires_cursor=True
 )
-AdvancedInsertAPIView = create_ajax_handler(actions.data_insert, requires_cursor=True)
-AdvancedDeleteAPIView = create_ajax_handler(actions.data_delete, requires_cursor=True)
-AdvancedUpdateAPIView = create_ajax_handler(actions.data_update, requires_cursor=True)
-AdvancedInfoAPIView = create_ajax_handler(actions.data_info)
-AdvancedHasSchemaAPIView = create_ajax_handler(actions.has_schema)
-AdvancedHasTableAPIView = create_ajax_handler(actions.has_table)
-AdvancedHasSequenceAPIView = create_ajax_handler(actions.has_sequence)
-AdvancedHasTypeAPIView = create_ajax_handler(actions.has_type)
-AdvancedGetSchemaNamesAPIView = create_ajax_handler(actions.get_schema_names)
-AdvancedGetTableNamesAPIView = create_ajax_handler(actions.get_table_names)
-AdvancedGetViewNamesAPIView = create_ajax_handler(actions.get_view_names)
-AdvancedGetViewDefinitionAPIView = create_ajax_handler(actions.get_view_definition)
-AdvancedGetColumnsAPIView = create_ajax_handler(actions.get_columns)
-AdvancedGetPkConstraintAPIView = create_ajax_handler(actions.get_pk_constraint)
-AdvancedGetForeignKeysAPIView = create_ajax_handler(actions.get_foreign_keys)
-AdvancedGetIndexesAPIView = create_ajax_handler(actions.get_indexes)
-AdvancedGetUniqueConstraintsAPIView = create_ajax_handler(
-    actions.get_unique_constraints
-)
-AdvancedConnectionOpenAPIView = create_ajax_handler(actions.open_raw_connection)
-AdvancedConnectionCloseAPIView = create_ajax_handler(actions.close_raw_connection)
-AdvancedConnectionCommitAPIView = create_ajax_handler(actions.commit_raw_connection)
-AdvancedConnectionRollbackAPIView = create_ajax_handler(actions.rollback_raw_connection)
-AdvancedCursorOpenAPIView = create_ajax_handler(actions.open_cursor)
-AdvancedCursorCloseAPIView = create_ajax_handler(actions.close_cursor)
-AdvancedCursorFetchOneAPIView = create_ajax_handler(actions.fetchone)
-AdvancedSetIsolationLevelAPIView = create_ajax_handler(actions.set_isolation_level)
-AdvancedGetIsolationLevelAPIView = create_ajax_handler(actions.get_isolation_level)
-AdvancedDoBeginTwophaseAPIView = create_ajax_handler(actions.do_begin_twophase)
-AdvancedDoPrepareTwophaseAPIView = create_ajax_handler(actions.do_prepare_twophase)
-AdvancedDoRollbackTwophaseAPIView = create_ajax_handler(actions.do_rollback_twophase)
-AdvancedDoCommitTwophaseAPIView = create_ajax_handler(actions.do_commit_twophase)
-AdvancedDoRecoverTwophaseAPIView = create_ajax_handler(actions.do_recover_twophase)
+AdvancedInsertAPIView = create_ajax_handler(data_insert, requires_cursor=True)
+AdvancedDeleteAPIView = create_ajax_handler(data_delete, requires_cursor=True)
+AdvancedUpdateAPIView = create_ajax_handler(data_update, requires_cursor=True)
+AdvancedInfoAPIView = create_ajax_handler(data_info)
+AdvancedHasSchemaAPIView = create_ajax_handler(has_schema)
+AdvancedHasTableAPIView = create_ajax_handler(has_table)
+AdvancedHasSequenceAPIView = create_ajax_handler(has_sequence)
+AdvancedHasTypeAPIView = create_ajax_handler(has_type)
+AdvancedGetSchemaNamesAPIView = create_ajax_handler(get_schema_names)
+AdvancedGetTableNamesAPIView = create_ajax_handler(get_table_names)
+AdvancedGetViewNamesAPIView = create_ajax_handler(get_view_names)
+AdvancedGetViewDefinitionAPIView = create_ajax_handler(get_view_definition)
+AdvancedGetColumnsAPIView = create_ajax_handler(get_columns)
+AdvancedGetPkConstraintAPIView = create_ajax_handler(get_pk_constraint)
+AdvancedGetForeignKeysAPIView = create_ajax_handler(get_foreign_keys)
+AdvancedGetIndexesAPIView = create_ajax_handler(get_indexes)
+AdvancedGetUniqueConstraintsAPIView = create_ajax_handler(get_unique_constraints)
+AdvancedConnectionOpenAPIView = create_ajax_handler(open_raw_connection)
+AdvancedConnectionCloseAPIView = create_ajax_handler(close_raw_connection)
+AdvancedConnectionCommitAPIView = create_ajax_handler(commit_raw_connection)
+AdvancedConnectionRollbackAPIView = create_ajax_handler(rollback_raw_connection)
+AdvancedCursorOpenAPIView = create_ajax_handler(open_cursor)
+AdvancedCursorCloseAPIView = create_ajax_handler(close_cursor)
+AdvancedCursorFetchOneAPIView = create_ajax_handler(fetchone)
+AdvancedSetIsolationLevelAPIView = create_ajax_handler(set_isolation_level)
+AdvancedGetIsolationLevelAPIView = create_ajax_handler(get_isolation_level)
+AdvancedDoBeginTwophaseAPIView = create_ajax_handler(do_begin_twophase)
+AdvancedDoPrepareTwophaseAPIView = create_ajax_handler(do_prepare_twophase)
+AdvancedDoRollbackTwophaseAPIView = create_ajax_handler(do_rollback_twophase)
+AdvancedDoCommitTwophaseAPIView = create_ajax_handler(do_commit_twophase)
+AdvancedDoRecoverTwophaseAPIView = create_ajax_handler(do_recover_twophase)
