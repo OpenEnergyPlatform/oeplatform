@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand
 
 from dataedit.models import Table
 from login.permissions import DELETE_PERM
-from oedb.utils import OedbTableGroup, _OedbSchema, _OedbTable
+from oedb.utils import OedbTableProxy, _OedbSchema, _OedbTable
 from oeplatform.settings import SCHEMA_DATA
 
 data_schema = _OedbSchema(validated_schema_name=SCHEMA_DATA)
@@ -84,8 +84,8 @@ def delete_artefact_oedb_meta_table() -> bool:
     tables_oedb_names = set(data_schema.get_table_names())
     expected_meta_table_names: set[str] = set()
     for name in tables_oedb_names:
-        otg = OedbTableGroup(validated_table_name=name, schema_name=SCHEMA_DATA)
-        expected_meta_table_names.add(otg.main_table.name)
+        otg = OedbTableProxy(validated_table_name=name, schema_name=SCHEMA_DATA)
+        expected_meta_table_names.add(otg._main_table.name)
         expected_meta_table_names.add(otg._edit_table.name)
         expected_meta_table_names.add(otg._insert_table.name)
         expected_meta_table_names.add(otg._delete_table.name)
