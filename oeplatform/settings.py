@@ -450,3 +450,8 @@ SCHEMA_DEFAULT = SCHEMA_DEFAULT_TEST_SANDBOX if IS_SANDBOX else SCHEMA_DATA
 
 USE_ONTOP = bool(ONTOP_SPARQL_ENDPOINT_URL)
 USE_LOEP = bool(DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL)
+
+
+# when running approximate (fast) row count: if number is below this
+# we get the precise row count (slow)
+APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW = 100000
