@@ -93,6 +93,7 @@ from oekg.utils import (
     validate_public_sparql_query,
 )
 from oeplatform.settings import (
+    APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW,
     DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL,
     IS_TEST,
     ONTOP_SPARQL_ENDPOINT_URL,
@@ -100,10 +101,6 @@ from oeplatform.settings import (
     USE_LOEP,
     USE_ONTOP,
 )
-
-# when running approximate (fast) row count: if number is below this
-# we get the precise row count (slow)
-APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW = 0
 
 
 class SequenceAPIView(APIView):
