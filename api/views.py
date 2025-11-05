@@ -8,6 +8,8 @@ Guideline for Developers
 - all name_api_view or get/post/put/delete/patch methods of NAME_APIView classes
   must be @api_exception decorated (as outermost decorator)
 - all must return a JSONLikeResponse
+- all endpoitns that refer to a table action need to do a require_*_permission to
+  check for the existance of a tabel object, pre-fetch it and check permission level
 
 """
 
@@ -1016,46 +1018,6 @@ class RowsAPIView(APIView):
         _execute_sqla(query, cursor)
 
 
-class AdvancedFetchAPIView(APIView):
-    @api_exception
-    def post(self, request: Request, fetchtype) -> JsonLikeResponse:
-        if fetchtype == "all":
-            return self.do_fetch(request, fetchall)
-        elif fetchtype == "many":
-            return self.do_fetch(request, fetchmany)
-        else:
-            raise APIError("Unknown fetchtype: %s" % fetchtype)
-
-    def do_fetch(self, request: Request, fetch):
-        data = request_data_dict(request)
-        context = {
-            "connection_id": get_or_403(data, "connection_id"),
-            "cursor_id": get_or_403(data, "cursor_id"),
-            "user": request.user,
-        }
-        return OEPStream(
-            (
-                part
-                for row in fetch(context)
-                for part in (self.transform_row(row), "\n")
-            ),
-            content_type="application/json",
-        )
-
-    def transform_row(self, row):
-        return json.dumps(
-            [_translate_fetched_cell(cell) for cell in row],
-            default=date_handler,
-        )
-
-
-class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
-    @api_exception
-    def get(self, request: Request) -> JsonLikeResponse:
-        sessions.close_all_for_user(request.user)
-        return JsonResponse({"message": "All connections closed"})
-
-
 @api_exception
 def users_api_view(request: Request) -> JsonLikeResponse:
     query = request.GET.get("name", "")
@@ -1291,12 +1253,53 @@ class TableSizeAPIView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+class AdvancedFetchAPIView(APIView):
+    @api_exception
+    def post(self, request: Request, fetchtype) -> JsonLikeResponse:
+        if fetchtype == "all":
+            return self.do_fetch(request, fetchall)
+        elif fetchtype == "many":
+            return self.do_fetch(request, fetchmany)
+        else:
+            raise APIError("Unknown fetchtype: %s" % fetchtype)
+
+    def do_fetch(self, request: Request, fetch):
+        data = request_data_dict(request)
+        context = {
+            "connection_id": get_or_403(data, "connection_id"),
+            "cursor_id": get_or_403(data, "cursor_id"),
+            "user": request.user,
+        }
+        return OEPStream(
+            (
+                part
+                for row in fetch(context)
+                for part in (self.transform_row(row), "\n")
+            ),
+            content_type="application/json",
+        )
+
+    def transform_row(self, row):
+        return json.dumps(
+            [_translate_fetched_cell(cell) for cell in row],
+            default=date_handler,
+        )
+
+
+class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
+    @api_exception
+    def get(self, request: Request) -> JsonLikeResponse:
+        sessions.close_all_for_user(request.user)
+        return JsonResponse({"message": "All connections closed"})
+
+
 AdvancedSearchAPIView = create_ajax_handler(
     data_search, allow_cors=True, requires_cursor=True
 )
 AdvancedInsertAPIView = create_ajax_handler(data_insert, requires_cursor=True)
 AdvancedDeleteAPIView = create_ajax_handler(data_delete, requires_cursor=True)
 AdvancedUpdateAPIView = create_ajax_handler(data_update, requires_cursor=True)
+
 AdvancedInfoAPIView = create_ajax_handler(data_info)
 AdvancedHasSchemaAPIView = create_ajax_handler(has_schema)
 AdvancedHasTableAPIView = create_ajax_handler(has_table)
@@ -1311,13 +1314,16 @@ AdvancedGetPkConstraintAPIView = create_ajax_handler(get_pk_constraint)
 AdvancedGetForeignKeysAPIView = create_ajax_handler(get_foreign_keys)
 AdvancedGetIndexesAPIView = create_ajax_handler(get_indexes)
 AdvancedGetUniqueConstraintsAPIView = create_ajax_handler(get_unique_constraints)
+
 AdvancedConnectionOpenAPIView = create_ajax_handler(open_raw_connection)
 AdvancedConnectionCloseAPIView = create_ajax_handler(close_raw_connection)
 AdvancedConnectionCommitAPIView = create_ajax_handler(commit_raw_connection)
 AdvancedConnectionRollbackAPIView = create_ajax_handler(rollback_raw_connection)
+
 AdvancedCursorOpenAPIView = create_ajax_handler(open_cursor)
 AdvancedCursorCloseAPIView = create_ajax_handler(close_cursor)
 AdvancedCursorFetchOneAPIView = create_ajax_handler(fetchone)
+
 AdvancedSetIsolationLevelAPIView = create_ajax_handler(set_isolation_level)
 AdvancedGetIsolationLevelAPIView = create_ajax_handler(get_isolation_level)
 AdvancedDoBeginTwophaseAPIView = create_ajax_handler(do_begin_twophase)

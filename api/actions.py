@@ -1843,6 +1843,29 @@ def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
 # -------------------------------------------------------------------------------------
 
 
+def get_schema_names(
+    request: dict | None = None, context: dict | None = None
+) -> list[str]:
+    # TODO: can we remove this endpoint?
+    return [SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX]
+
+
+def get_table_names(
+    request: dict | None = None, context: dict | None = None
+) -> list[str]:
+    return [t.name for t in Table.objects.all()]
+
+
+def data_info(request: dict, context: dict | None = None) -> dict:
+    # TODO: can we remove this endpoint?
+    return request
+
+
+def has_schema(request: dict, context: dict | None = None) -> bool:
+    # TODO can we remove this endpoint
+    return request.get("schema") in get_schema_names()
+
+
 def data_search(request: dict, context: dict | None = None) -> dict:
     query = parse_select(request)
     cursor = load_cursor_from_context(context or {})
@@ -1862,6 +1885,9 @@ def data_search(request: dict, context: dict | None = None) -> dict:
     ]
     result = {"description": description, "rowcount": cursor.rowcount}
     return result
+
+
+# advanced api functions with table in request
 
 
 def data_insert(request: dict, context: dict) -> dict:
@@ -1973,26 +1999,13 @@ def data_update(request: dict, context: dict) -> dict:
     return result
 
 
-def data_info(request: dict, context: dict | None = None) -> dict:
-    return request
-
-
-def has_schema(request: dict, context: dict | None = None) -> bool:
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.has_schema(conn, get_or_403(request, "schema"))
-    finally:
-        conn.close()
-    return bool(result)
-
-
 def has_table(request: dict, context: dict | None = None) -> bool:
     table = get_or_403(request, "table")
     return Table.objects.filter(name=table).exists()
 
 
 def has_sequence(request: dict, context: dict | None = None) -> bool:
+    # TODO can we remove this endpoint
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -2007,6 +2020,7 @@ def has_sequence(request: dict, context: dict | None = None) -> bool:
 
 
 def has_type(request: dict, context: dict | None = None) -> bool:
+    # TODO can we remove this endpoint
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -2020,53 +2034,37 @@ def has_type(request: dict, context: dict | None = None) -> bool:
     return result
 
 
-def get_schema_names(request: dict, context: dict | None = None) -> dict:
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.get_schema_names(engine.connect(), **request)
-    finally:
-        conn.close()
-    return result
+def get_view_names(request: dict, context: dict | None = None) -> list[str]:
+    return []
+    # TODO: can we remove this endpoint?
+    # engine = _get_engine()
+    # conn = engine.connect()
+    # try:
+    #    result = engine.dialect.get_view_names(
+    #        conn, schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX), **request
+    #    )
+    # finally:
+    #    conn.close()
+    # return result
 
 
-def get_table_names(request: dict, context: dict | None = None) -> dict:
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.get_table_names(
-            conn, schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX), **request
-        )
-    finally:
-        conn.close()
-    return result
+def get_view_definition(request: dict, context: dict | None = None) -> None:
+    # TODO: can we remove this endpoint?
+    # it actually just returns the schema names!
+    return None
 
-
-def get_view_names(request: dict, context: dict | None = None) -> dict:
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.get_view_names(
-            conn, schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX), **request
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def get_view_definition(request: dict, context: dict | None = None) -> dict:
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.get_schema_names(
-            conn,
-            get_or_403(request, "view_name"),
-            schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-            **request,
-        )
-    finally:
-        conn.close()
-    return result
+    # engine = _get_engine()
+    # conn = engine.connect()
+    # try:
+    #    result = engine.dialect.get_schema_names(
+    #        conn,
+    #        get_or_403(request, "view_name"),
+    #        schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
+    #        **request,
+    #    )
+    # finally:
+    #    conn.close()
+    # return result
 
 
 def get_columns(request: dict, context: dict | None = None) -> dict:
@@ -2172,6 +2170,7 @@ def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
 
 
 def get_indexes(request: dict, context: dict | None = None) -> dict:
+    # TODO can we remove this endpoint
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
@@ -2197,6 +2196,9 @@ def get_unique_constraints(request: dict, context: dict | None = None) -> dict:
     finally:
         conn.close()
     return result
+
+
+# advanced api functions without table in request
 
 
 def get_isolation_level(request: dict, context: dict) -> dict:
