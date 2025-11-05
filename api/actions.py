@@ -190,10 +190,10 @@ def assert_add_tag_permission(user, table: str, permission: int, schema) -> None
 
     """
     if user.is_anonymous:
-        raise APIError("User is anonymous", 401)
+        raise APIError("User is anonymous", status=401)
 
     if user.get_table_permission_level(Table.load(name=table)) < permission:
-        raise PermissionDenied
+        raise APIError("Permission denied", status=403)
 
 
 def assert_has_metadata(table: str, schema: str) -> bool:

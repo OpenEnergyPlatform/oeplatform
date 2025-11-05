@@ -63,6 +63,7 @@ from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 
 import login.permissions
 from api import actions, utils
+from api.error import APIError
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
     TODO_PSEUDO_TOPIC_DRAFT,
@@ -884,40 +885,48 @@ def tage_table_add_view(request: HttpRequest) -> HttpResponse:
         * Any number of values that start with 'tag_' followed by the id of a tag.
     :return: Redirects to the previous page
     """
-    # check if valid table / schema
-    schema_name, table = actions.get_table_name(
-        schema=request.POST["schema"],
-        table=request.POST["table"],
-        restrict_schemas=False,
-    )
-    # check write permission
-    actions.assert_add_tag_permission(
-        request.user, table, login.permissions.WRITE_PERM, schema=schema_name
-    )
-    tag_prefix = "tag_"
-    tag_prefix_len = len(tag_prefix)
-    tag_ids = {
-        field[tag_prefix_len:] for field in request.POST if field.startswith(tag_prefix)
-    }
-    tags = Tag.objects.filter(pk__in=tag_ids)
-    table_obj = Table.objects.get(name=table)
-    table_obj.tags.clear()
-    for tag in tags:
-        table_obj.tags.add(tag)
-    # TODO: we already do save in update_keywords_from_tags further down
-    table_obj.save()
+    try:
+        # check if valid table / schema
+        schema_name, table = actions.get_table_name(
+            schema=request.POST["schema"],
+            table=request.POST["table"],
+            restrict_schemas=False,
+        )
+        # check write permission
+        actions.assert_add_tag_permission(
+            request.user, table, login.permissions.WRITE_PERM, schema=schema_name
+        )
+        tag_prefix = "tag_"
+        tag_prefix_len = len(tag_prefix)
+        tag_ids = {
+            field[tag_prefix_len:]
+            for field in request.POST
+            if field.startswith(tag_prefix)
+        }
+        tags = Tag.objects.filter(pk__in=tag_ids)
+        table_obj = Table.objects.get(name=table)
+        table_obj.tags.clear()
+        for tag in tags:
+            table_obj.tags.add(tag)
+        # TODO: we already do save in update_keywords_from_tags further down
+        table_obj.save()
 
-    update_keywords_from_tags(table_obj, schema=schema_name)
+        update_keywords_from_tags(table_obj, schema=schema_name)
 
-    messages.success(
-        request,
-        (
-            "Successfully updated table tags! "
-            "Please note that OEMetadata keywords and table tags are synchronized. "
-            "When submitting new tags, you may notice automatic changes to the table "
-            'tags on the OEP and/or the "Keywords" field in the metadata.'
-        ),
-    )
+        messages.success(
+            request,
+            (
+                "Successfully updated table tags! "
+                "Please note that OEMetadata keywords and table tags are synchronized. "
+                "When submitting new tags, you may notice automatic changes to the "
+                'table tags on the OEP and/or the "Keywords" field in the metadata.'
+            ),
+        )
+    except APIError as exp:
+        messages.error(request, str(exp))
+    except Exception:
+        # generic error message
+        messages.error(request, "Something went wrong")
 
     redirect_url = request.META.get("HTTP_REFERER") or reverse("dataedit:index")
     return redirect(redirect_url)
