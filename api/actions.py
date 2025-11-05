@@ -824,6 +824,7 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
 
 def get_column(d):
     schema = d.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
+    schema = validate_schema(schema)
     table = get_or_403(d, "table")
     name = get_or_403(d, "column")
     return Column("%s.%s" % (table, name), schema=schema)
@@ -1707,6 +1708,7 @@ def get_columns(query: dict, context=None) -> dict:
 
     table_name = get_or_403(query, "table")
     schema = query.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
+    schema = validate_schema(schema)
 
     # We need to translate the info_cache from a json-friendly format to the
     # conventional one
