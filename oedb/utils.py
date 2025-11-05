@@ -195,7 +195,7 @@ class _OedbMetaTable(_OedbTable):
         return super().get_sa_table()
 
 
-class OedbTableGroup:
+class OedbTableProxy:
     """represents data table and meta tables in postgres oedb."""
 
     def __init__(
@@ -224,7 +224,7 @@ class OedbTableGroup:
             raise ValueError(f"Invalid schema: {schema_name}")
 
         # readonly properties
-        self.main_table = _OedbMainTable(
+        self._main_table = _OedbMainTable(
             validated_table_name=validated_table_name,
             validated_schema_name=schema_name,
             permission_level=self._permission_level,
@@ -251,10 +251,18 @@ class OedbTableGroup:
 
     def exists(self) -> bool:
         # only check main table
-        return self.main_table.exists()
+        return self._main_table.exists()
 
     def drop_if_exists(self) -> None:
-        self.main_table.drop_if_exists()
+        self._main_table.drop_if_exists()
         self._edit_table.drop_if_exists()
         self._insert_table.drop_if_exists()
         self._delete_table.drop_if_exists()
+
+    def create(
+        self, column_definitions: list, constraints_definitions: list
+    ) -> SATable:
+        return self._main_table._create(
+            column_definitions=column_definitions,
+            constraints_definitions=constraints_definitions,
+        )

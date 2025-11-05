@@ -16,7 +16,7 @@ from api.actions import (
     try_parse_metadata,
     try_validate_metadata,
 )
-from api.services.table_creation import TableCreationOrchestrator
+from dataedit.models import Table
 from oeplatform.settings import SCHEMA_DATA
 
 User = get_user_model()
@@ -84,8 +84,6 @@ class Command(BaseCommand):
             name="test", defaults={"email": "test@mail.com", "is_staff": True}
         )
 
-        orchestrator = TableCreationOrchestrator()
-
         for spec in TABLE_DEFS:
             schema_name = spec["schema"]
             table_name = spec["table"]
@@ -114,12 +112,12 @@ class Command(BaseCommand):
 
             try:
                 # 4) Create physical table → Django metadata
-                orchestrator.create_table(
-                    table=table_name,
+                Table.create_with_oedb_table(
+                    name=table_name,
                     is_sandbox=True,  # tests ALWAYS in sandbox
-                    user=user,
-                    column_defs=column_defs,
-                    constraint_defs=constraint_defs,
+                    user=user,  # type:ignore
+                    column_definitions=column_defs,
+                    constraints_definitions=constraint_defs,
                 )
 
                 self.stdout.write(

@@ -28,12 +28,13 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
-import dataedit.models as datamodels
+from dataedit import models as dataedit_models
 from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM, WRITE_PERM
 
 if TYPE_CHECKING:
     # only import for static typechecking
     # TODO: is there a betetr way of doing this?
+    from dataedit.models import PeerReview, Table
     from factsheet.models import ScenarioBundleAccessControl
 
 
@@ -159,7 +160,7 @@ class UserGroup(Group, PermissionHolder):
         "GroupPermission"
     ]  # related_name, for static type checking
 
-    def get_table_permission_level(self, table: datamodels.Table) -> int:
+    def get_table_permission_level(self, table: "Table") -> int:
         if self.is_admin:
             return ADMIN_PERM
         return max(
@@ -182,7 +183,7 @@ class TablePermission(models.Model):
         (ADMIN_PERM, "Admin"),
     )
     table = models.ForeignKey(
-        datamodels.Table,
+        "dataedit.Table",
         on_delete=models.CASCADE,
         related_name="%(class)s_set",
         # NOTE: we cannot use a simple related name, because we have multiple
@@ -225,12 +226,8 @@ class myuser(AbstractBaseUser, PermissionHolder):
     is_native = models.BooleanField(default=True)
     description = models.TextField(blank=True)
 
-    reviewed_by: QuerySet[
-        "datamodels.PeerReview"
-    ]  # related_name, for static type checking
-    review_received: QuerySet[
-        "datamodels.PeerReview"
-    ]  # related_name, for static type checking
+    reviewed_by: QuerySet["PeerReview"]  # related_name, for static type checking
+    review_received: QuerySet["PeerReview"]  # related_name, for static type checking
     scenario_bundle_creator: QuerySet[
         "ScenarioBundleAccessControl"
     ]  # related_name, for static type checking
@@ -266,7 +263,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
     def get_tables_queryset(
         self, min_permission_level: int = NO_PERM
-    ) -> QuerySet[datamodels.Table]:
+    ) -> QuerySet["Table"]:
         """Return QuerySet of tables that user has some permission
         combine filter (OR) of table with direct permissions
         and with group permissions
@@ -274,12 +271,12 @@ class myuser(AbstractBaseUser, PermissionHolder):
         groups = self.get_groups_queryset()
 
         return (
-            datamodels.Table.objects.filter(
+            dataedit_models.Table.objects.filter(
                 # tables where user has direct UserPermission
                 userpermission_set__holder=self,
                 userpermission_set__level__gte=min_permission_level,
             )
-            | datamodels.Table.objects.filter(
+            | dataedit_models.Table.objects.filter(
                 # tables where user isin a group that has GroupPermission
                 grouppermission_set__holder__in=groups,
                 grouppermission_set__level__gte=min_permission_level,

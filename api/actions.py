@@ -873,10 +873,10 @@ def column_add(schema, table: str, column, description):
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    oeb_table_group = Table.objects.get(name=table).get_oeb_table_group(user=None)
+    oedb_table = Table.objects.get(name=table).get_oeb_table_proxy(user=None)
 
-    edit_sa_table = oeb_table_group._edit_table.get_sa_table()
-    insert_sa_table = oeb_table_group._insert_table.get_sa_table()
+    edit_sa_table = oedb_table._edit_table.get_sa_table()
+    insert_sa_table = oedb_table._insert_table.get_sa_table()
 
     perform_sql(s.format(schema=schema, table=table))
     # Do the same for update and insert tables.
@@ -1205,7 +1205,7 @@ def data_delete(request: dict, context: dict):
     # so we pass user=None
     target_meta_sa_table = (
         Table.objects.get(name=orig_table)
-        .get_oeb_table_group(user=None)
+        .get_oeb_table_proxy(user=None)
         ._delete_table.get_sa_table()
     )
     setter = []
@@ -1236,7 +1236,7 @@ def data_update(query: dict, context: dict):
     # so we pass user=None
     target_sa_table = (
         Table.objects.get(name=orig_table)
-        .get_oeb_table_group(user=None)
+        .get_oeb_table_proxy(user=None)
         ._edit_table.get_sa_table()
     )
     setter = get_or_403(query, "values")
@@ -1366,7 +1366,7 @@ def data_insert(request: dict, context: dict) -> dict:
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
     table_obj = Table.objects.get(name=table_name)
-    insert_sa_table = table_obj.get_oeb_table_group()._insert_table.get_sa_table()
+    insert_sa_table = table_obj.get_oeb_table_proxy()._insert_table.get_sa_table()
 
     request["table"] = insert_sa_table.name
     request["schema"] = insert_sa_table.schema
@@ -2007,9 +2007,9 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
 
         # TODO:permission check is still done outside of this function,
         # so we pass user=None
-        otg = Table.objects.get(name=table).get_oeb_table_group(user=None)
+        oedb_table = Table.objects.get(name=table).get_oeb_table_proxy(user=None)
 
-        insert_sa_table = otg._insert_table.get_sa_table()
+        insert_sa_table = oedb_table._insert_table.get_sa_table()
         cursor_execute(
             cursor,
             "select * "
@@ -2030,7 +2030,7 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
             for row in cursor.fetchall()
         ]
 
-        update_sa_table = otg._edit_table.get_sa_table()
+        update_sa_table = oedb_table._edit_table.get_sa_table()
         cursor_execute(
             cursor,
             "select * "
@@ -2051,7 +2051,7 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
             for row in cursor.fetchall()
         ]
 
-        delete_sa_table = otg._delete_table.get_sa_table()
+        delete_sa_table = oedb_table._delete_table.get_sa_table()
         cursor_execute(
             cursor,
             "select * "
@@ -2114,14 +2114,14 @@ def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    otg = Table.objects.get(name=sa_table.name).get_oeb_table_group(user=None)
+    oedb_table = Table.objects.get(name=sa_table.name).get_oeb_table_proxy(user=None)
 
     if mode == __INSERT:
-        meta_sa_table = otg._insert_table.get_sa_table()
+        meta_sa_table = oedb_table._insert_table.get_sa_table()
     elif mode == __DELETE:
-        meta_sa_table = otg._delete_table.get_sa_table()
+        meta_sa_table = oedb_table._delete_table.get_sa_table()
     elif mode == __UPDATE:
-        meta_sa_table = otg._edit_table.get_sa_table()
+        meta_sa_table = oedb_table._edit_table.get_sa_table()
     else:
         raise NotImplementedError
 

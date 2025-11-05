@@ -79,7 +79,6 @@ from api.services.embargo import (
     apply_embargo,
     parse_embargo_payload,
 )
-from api.services.table_creation import TableCreationOrchestrator
 from api.utils import get_dataset_configs, request_data_dict, validate_schema
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_table_name
@@ -324,9 +323,6 @@ class TableAPIView(APIView):
         except EmbargoValidationError as e:
             raise APIError(str(e))
 
-        # 4) Create the table (physical → metadata) atomically
-        orchestrator = TableCreationOrchestrator()
-
         # during tests, is_sandbox must be true
         # otherwise: can be set as ?is_sandbox=
         if (
@@ -340,8 +336,8 @@ class TableAPIView(APIView):
 
         assert is_sandbox
 
-        table_obj = orchestrator.create_table(
-            table=table,
+        table_obj = Table.create_with_oedb_table(
+            name=table,
             user=request.user,
             is_sandbox=is_sandbox,
             column_definitions=columns,
