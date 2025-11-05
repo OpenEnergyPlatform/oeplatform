@@ -203,6 +203,13 @@ def cors(allow):
 def api_exception(
     f: Callable[..., JsonLikeResponse],
 ) -> Callable[..., JsonLikeResponse]:
+    """Catch all internal errors and ensure than we return JSON-like response
+
+    if we catch an APIError, we return the error message to the user, otherwise
+    a generic error message
+
+    """
+
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
@@ -212,7 +219,6 @@ def api_exception(
             return JsonResponse({"reason": "table does not exist"}, status=404)
 
         # TODO: why cant' we handle all other errors here? (tests failing)
-
         # except Exception as exc:
         #    # All other Errors: dont accidently return sensitive data from error
         #    # but return generic error message

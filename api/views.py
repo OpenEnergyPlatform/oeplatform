@@ -1,4 +1,19 @@
+"""API views
+
+Guideline for Developers
+
+- all module items should be either
+  - name_api_view functions or
+  - NAME_APIView classes
+- all name_api_view or get/post/put/delete/patch methods of NAME_APIView classes
+  must be @api_exception decorated (as outermost decorator)
+- all must return a JSONLikeResponse
+
 """
+
+__licence__ = """
+SPDX-License-Identifier: AGPL-3.0-or-later
+
 SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
@@ -16,8 +31,6 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-
-SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import csv
@@ -427,6 +440,7 @@ class ColumnAPIView(APIView):
 
 class FieldsAPIView(APIView):
     # TODO: is this really used?
+    @api_exception
     @method_decorator(never_cache)
     def get(
         self,
@@ -1069,6 +1083,7 @@ class OekgSparqlAPIView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @api_exception
     def post(self, request: Request) -> JsonLikeResponse:
         request_data_dict = get_request_data_dict(request)
         payload_query = request_data_dict.get("query", "")
