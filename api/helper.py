@@ -37,7 +37,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-import login.models as login_models
+import login.permissions
 from api import actions, parser, sessions
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
@@ -116,6 +116,8 @@ def load_cursor(named=False):
                 if fetch_all:
                     cursor = actions.load_cursor_from_context(context)
                     session = actions.load_session_from_context(context)
+                    connection = session.connection
+
                     if not result:
                         result = {}
                     # Initial server-side cursors do not contain any description before
@@ -130,7 +132,7 @@ def load_cursor(named=False):
                     triggers = [
                         actions.close_cursor,
                         actions.close_raw_connection,
-                        session.connection.commit,
+                        connection.commit,
                     ]
                     trigger_args = [({}, context), ({}, context), tuple()]
                     first = None
@@ -169,7 +171,7 @@ def load_cursor(named=False):
                             result["rowcount"] = cursor.rowcount
                             triggered_close = True
                     if not triggered_close and artificial_connection:
-                        session.connection.commit()
+                        connection.commit()
             finally:
                 if not triggered_close:
                     if fetch_all and not artificial_connection:
@@ -230,15 +232,15 @@ def permission_wrapper(permission: int, f: Callable) -> Callable:
 
 
 def require_write_permission(f: Callable) -> Callable:
-    return permission_wrapper(login_models.WRITE_PERM, f)
+    return permission_wrapper(login.permissions.WRITE_PERM, f)
 
 
 def require_delete_permission(f: Callable) -> Callable:
-    return permission_wrapper(login_models.DELETE_PERM, f)
+    return permission_wrapper(login.permissions.DELETE_PERM, f)
 
 
 def require_admin_permission(f: Callable) -> Callable:
-    return permission_wrapper(login_models.ADMIN_PERM, f)
+    return permission_wrapper(login.permissions.ADMIN_PERM, f)
 
 
 def conjunction(clauses) -> dict:

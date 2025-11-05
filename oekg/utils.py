@@ -53,6 +53,9 @@ def execute_sparql_query(sparql_query, response_format):
         raise ValueError(f"Unsupported format: {response_format}")
 
     endpoint_url = OEKG_SPARQL_ENDPOINT_URL
+    if not endpoint_url:
+        raise NotImplementedError()
+
     headers = {
         "Accept": SUPPORTED_FORMATS[response_format],
         # "Content-Type": SUPPORTED_FORMATS[response_format],

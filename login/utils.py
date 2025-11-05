@@ -4,17 +4,23 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from typing import List
+from typing import TYPE_CHECKING, List
 
-from dataedit.models import Table
-from login.models import GroupPermission, UserGroup
+from login.models import GroupPermission, UserGroup, UserPermission
+from login.models import myuser as User
+from login.permissions import ADMIN_PERM
+
+if TYPE_CHECKING:
+    # only import for static typechecking
+    # TODO: is there a betetr way of doing this?
+    from dataedit.models import Table
 
 ###############################################################
 # Utilities mainly used for the Group Management profile page #
 ###############################################################
 
 
-def get_tables_if_group_assigned(group: UserGroup) -> List[Table]:
+def get_tables_if_group_assigned(group: UserGroup) -> List["Table"]:
     """
     Get all tables assinged to a group
     """
@@ -30,8 +36,16 @@ def get_tables_if_group_assigned(group: UserGroup) -> List[Table]:
     return group_tables
 
 
-#######################################################
-# Utilities mainly used for the Settings profile page #
-#######################################################
+def assign_table_holder(user: User, table: "Table") -> None:
+    """
+    Grant ADMIN permission level to user for the specified table.
+    """
 
-# Add functionality here
+    perm, created = UserPermission.objects.get_or_create(
+        table=table,
+        holder=user,
+        defaults={"level": ADMIN_PERM},
+    )
+    if not created:
+        perm.level = ADMIN_PERM
+        perm.save()

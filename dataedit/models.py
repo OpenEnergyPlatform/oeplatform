@@ -39,13 +39,18 @@ from django.urls import reverse
 from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
 
+from api.error import APIError
+from api.parser import parse_table_parts
 from dataedit.utils import get_badge_icon_path, validate_badge_name_match
+from login.permissions import ADMIN_PERM, NO_PERM
+from login.utils import assign_table_holder
+from oedb.utils import OedbTableProxy, is_valid_name
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 if TYPE_CHECKING:
     # only import for static typechecking
     # TODO: is there a betetr way of doing this?
-    from login.models import GroupPermission, UserPermission
+    from login.models import GroupPermission, UserPermission, myuser
     from modelview.models import BasicFactsheet
 
 logger = logging.getLogger("oeplatform")
@@ -195,12 +200,79 @@ class Table(Tagable):
     class Meta:
         unique_together = (("name",),)
 
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        # ensure oedb tables are deleted, so we use ADMIN_PERM
+        self._get_oeb_table_proxy_w_permission(
+            permission_level=ADMIN_PERM
+        ).drop_if_exists()
+
+    def save(self, *args, **kwargs):
+        # validate name on first save, never change name again
+        if self.pk:  # object already exists
+            old_name = Table.objects.get(pk=self.pk).name
+            if old_name != self.name:
+                raise ValidationError("name cannot be changed")
+        else:  # first time creation
+            if not is_valid_name(self.name):
+                raise ValidationError(f"Invalid name: {self.name}")
+        super().save(*args, **kwargs)
+
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
 
     @property
     def oedb_schema(self) -> str:
         return SCHEMA_DEFAULT_TEST_SANDBOX if self.is_sandbox else SCHEMA_DATA
+
+    @classmethod
+    def create_with_oedb_table(
+        cls,
+        name: str,
+        is_sandbox: bool,
+        user: "myuser",
+        column_definitions: list,
+        constraints_definitions: list,
+    ) -> "Table":
+        """Perform multiple actions to create table, cleanup if any step fails
+
+        This used to be thejob of the TableCreationOrchestrator.
+        We need to make sure that if creation of one of the parts fails,
+        artefacts like oedb tables need to be cleand up.
+
+        """
+
+        # pre-parse table structure
+        column_definitions, constraints_definitions = parse_table_parts(
+            column_definitions=column_definitions,
+            constraints_definitions=constraints_definitions,
+        )
+
+        table_obj = None
+
+        try:
+            # create django table object
+            table_obj = Table.objects.create(name=name, is_sandbox=is_sandbox)
+
+            # assign creator permission holder
+            assign_table_holder(user=user, table=table_obj)
+
+            # create oedb table
+            table_obj.get_oeb_table_proxy(user=user).create(
+                column_definitions=column_definitions,
+                constraints_definitions=constraints_definitions,
+            )
+
+        except Exception as exc:
+            logger.error(exc)
+            if table_obj:
+                # if anything goes wrong:
+                # delete django object which will also automatically clean up
+                # left over oedb tables
+                table_obj.delete()
+            raise APIError(f"Could not create table {name}")
+
+        return table_obj
 
     @classmethod
     def load(cls, name: str) -> "Table":
@@ -351,6 +423,29 @@ class Table(Tagable):
                 "is_badge": False,
                 "err_msg": f"No match found for badge name: {badge}",
             }
+
+    def __str__(self) -> str:
+        return self.name
+
+    def get_user_permission_level(self, user: Union["myuser", None] = None) -> int:
+        if not user:
+            return NO_PERM
+        return user.get_table_permission_level(self)
+
+    def get_oeb_table_proxy(self, user: Union["myuser", None] = None) -> OedbTableProxy:
+        # permission_level = self.get_user_permission_level(user)
+        # FIXME: permission_level does not work properly
+        permission_level = ADMIN_PERM
+        return self._get_oeb_table_proxy_w_permission(permission_level=permission_level)
+
+    def _get_oeb_table_proxy_w_permission(
+        self, permission_level: int
+    ) -> OedbTableProxy:
+        return OedbTableProxy(
+            validated_table_name=self.name,
+            schema_name=self.oedb_schema,
+            permission_level=permission_level,
+        )
 
 
 class Embargo(models.Model):

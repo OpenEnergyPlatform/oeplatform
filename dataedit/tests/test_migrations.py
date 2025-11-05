@@ -30,8 +30,9 @@ def populate_peerreview_oemetadata():
 
 class MigrationTest(TestCase):
     @classmethod
-    def setUpTestData(cls):
-        table = Table.objects.create(
+    def setUpClass(cls):
+        super(MigrationTest, cls).setUpClass()
+        cls.table = Table.objects.create(
             name="test_table",
             oemetadata=OEMETADATA_V20_EXAMPLE,
         )
@@ -45,12 +46,17 @@ class MigrationTest(TestCase):
 
         PeerReview.objects.create(
             # Make sure this assignment matches your model's expectations
-            table=table.name,
+            table=cls.table.name,
             contributor=test_contributor,
             reviewer=test_reviewer,
             # Simulate a record that needs migration
             oemetadata={},
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.table.delete()
+        super(MigrationTest, cls).tearDownClass()
 
     def test_migration(self):
         # Apply the migration

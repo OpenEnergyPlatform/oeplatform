@@ -13,7 +13,7 @@ from django.contrib.auth.models import AbstractUser
 
 from api.actions import get_or_403
 from api.error import APIError
-from oedb.connection import _get_engine
+from oedb.connection import AbstractCursor, DBAPIConnection, _get_engine
 from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION_LIMIT
 
 _SESSION_CONTEXTS = {}
@@ -53,7 +53,7 @@ class SessionContext:
                 )
 
         engine = _get_engine()
-        self.connection = engine.connect().connection
+        self.connection: DBAPIConnection = engine.connect().connection  # type:ignore
         if connection_id is None:
             connection_id = _add_entry(self, _SESSION_CONTEXTS)
         elif connection_id not in _SESSION_CONTEXTS:
@@ -61,11 +61,14 @@ class SessionContext:
         else:
             raise Exception("Tried to open existing")
         self.owner = owner
-        self.connection._id = connection_id
+
+        # FIXME: is this a good idea, to add a custom attribute?
+        setattr(self.connection, "_id", connection_id)
+
         self.session_context = self
         self.cursors = {}
 
-    def get_cursor(self, cursor_id):
+    def get_cursor(self, cursor_id) -> AbstractCursor:
         try:
             return self.cursors[cursor_id]
         except KeyError:
@@ -80,23 +83,23 @@ class SessionContext:
         self.cursors[cursor_id] = cursor
         return cursor_id
 
-    def close_cursor(self, cursor_id):
+    def close_cursor(self, cursor_id) -> None:
         cursor = self.get_cursor(cursor_id)
         cursor.close()
         del self.cursors[cursor_id]
 
-    def close(self):
+    def close(self) -> None:
         self.connection.close()
         if self.connection._id in _SESSION_CONTEXTS:
             del _SESSION_CONTEXTS[self.connection._id]
 
-    def rollback(self):
+    def rollback(self) -> None:
         self.connection.rollback()
         if not self.cursors:
             self.close()
 
 
-def close_all_for_user(owner):
+def close_all_for_user(owner) -> None:
     if owner.is_anonymous:
         raise PermissionError
     for sid in dict(_SESSION_CONTEXTS):
@@ -111,13 +114,13 @@ def close_all_for_user(owner):
             pass
 
 
-def load_cursor_from_context(context):
+def load_cursor_from_context(context: dict) -> AbstractCursor:
     session = load_session_from_context(context)
     cursor_id = get_or_403(context, "cursor_id")
     return session.get_cursor(cursor_id)
 
 
-def load_session_from_context(context: dict):
+def load_session_from_context(context: dict) -> SessionContext:
     connection_id = get_or_403(context, "connection_id")
     user = context.get("user")
     try:

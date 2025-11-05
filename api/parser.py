@@ -19,8 +19,15 @@ import dateutil
 import geoalchemy2  # Although this import seems unused is has to be here
 from sqlalchemy import (
     ARRAY,
+    BigInteger,
+    Column,
+    ForeignKey,
     MetaData,
-    Table,
+    PrimaryKeyConstraint,
+)
+from sqlalchemy import Table as SATable
+from sqlalchemy import (
+    UniqueConstraint,
     and_,
 )
 from sqlalchemy import case as sa_case
@@ -50,6 +57,7 @@ from sqlalchemy.sql.sqltypes import Interval
 from api.error import APIError, APIKeyError
 from api.utils import validate_schema
 from oedb.connection import _get_engine
+from oedb.utils import MAX_NAME_LENGTH, NAME_PATTERN
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
@@ -75,6 +83,155 @@ _POSTGIS_MAP = {
     "raster": geoalchemy2.types.Raster,
     "rasterelement": geoalchemy2.types.RasterElement,
 }
+
+
+def assert_valid_identifier_name(identifier):
+    if not NAME_PATTERN.match(identifier):
+        raise APIError(
+            f"Unsupported table name: {identifier}\n"
+            "Table names must consist of lowercase alpha-numeric words or underscores "
+            "and start with a letter "
+            f"and must not exceed {MAX_NAME_LENGTH} characters "
+            f"(current table name length: {len(identifier)})."
+        )
+
+
+def get_column_definition_query(d):
+    name = get_or_403(d, "name")
+    args = []
+    kwargs = {}
+    dt_string = get_or_403(d, "data_type")
+    dt, autoincrement = parse_type(dt_string)
+
+    if autoincrement:
+        d["autoincrement"] = True
+
+    for fk in d.get("foreign_key", []):
+        fkschema = fk.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
+        if fkschema is None:
+            fkschema = SCHEMA_DEFAULT_TEST_SANDBOX
+
+        fk_sa_table = SATable(get_or_403(fk, "table"), MetaData(), schema=fkschema)
+
+        fkcolumn = Column(get_or_403(fk, "column"))
+
+        fkcolumn.table = fk_sa_table
+
+        args.append(ForeignKey(fkcolumn))
+
+    if "autoincrement" in d:
+        kwargs["autoincrement"] = d["autoincrement"]
+
+    if not d.get("is_nullable", True):
+        kwargs["nullable"] = d["is_nullable"]  # True
+
+    if d.get("primary_key", False):
+        kwargs["primary_key"] = True
+
+    if "column_default" in d:
+        kwargs["default"] = read_pgvalue(d["column_default"])
+
+    if d.get("character_maximum_length"):
+        max_len = int(d["character_maximum_length"])
+        dt = dt(max_len)  # type:ignore
+
+    assert_valid_identifier_name(name)
+    c = Column(name, dt, *args, **kwargs)
+
+    return c
+
+
+def parse_table_parts(
+    column_definitions: list, constraints_definitions: list
+) -> tuple[list, list]:
+    """
+    Creates a new table
+
+    IMPORTANT: permission checks have to be performed before
+
+    :param column_definitions: Description of columns
+    :param constraints_definitions: Description of constraints
+    :return: list
+    """
+
+    primary_key_col_names = None
+    columns_by_name = {}
+
+    columns = []
+    for cdef in column_definitions:
+        col = get_column_definition_query(cdef)
+        columns.append(col)
+
+        # check for duplicate column names
+        if col.name in columns_by_name:
+            raise APIError("Duplicate column name: %s" % col.name)
+        columns_by_name[col.name] = col
+        if col.primary_key:
+            if primary_key_col_names:
+                raise APIError("Multiple definitions of primary key")
+            primary_key_col_names = [col.name]
+
+    constraints = []
+
+    for constraint in constraints_definitions:
+        constraint_type = constraint.get("constraint_type") or constraint.get("type")
+        if constraint_type is None:
+            raise APIError("constraint_type required in %s" % str(constraint))
+
+        constraint_type = constraint_type.lower().replace(" ", "_")
+        if constraint_type == "primary_key":
+            kwargs = {}
+            cname = constraint.get("name")
+            if cname:
+                kwargs["name"] = cname
+            if "columns" in constraint:
+                ccolumns = constraint["columns"]
+            else:
+                ccolumns = [constraint["constraint_parameter"]]
+
+            if primary_key_col_names:
+                # if table level PK constraint is set in addition
+                # to column level PK, both must be the same (#1110)
+                if set(ccolumns) == set(primary_key_col_names):
+                    continue
+                raise APIError("Multiple definitions of primary key.")
+            primary_key_col_names = ccolumns
+
+            const = PrimaryKeyConstraint(*ccolumns, **kwargs)
+            constraints.append(const)
+        elif constraint_type == "unique":
+            kwargs = {}
+            cname = constraint.get("name")
+            if cname:
+                kwargs["name"] = cname
+            if "columns" in constraint:
+                ccolumns = constraint["columns"]
+            else:
+                ccolumns = [constraint["constraint_parameter"]]
+            constraints.append(UniqueConstraint(*ccolumns, **kwargs))
+
+    # autogenerate id column if missing
+    if "id" not in columns_by_name:
+        columns_by_name["id"] = Column("id", BigInteger, autoincrement=True)
+        columns.insert(0, columns_by_name["id"])
+
+    # check id column type
+    id_col_type = str(columns_by_name["id"].type).upper()
+    if "INT" not in id_col_type or "SERIAL" in id_col_type:
+        raise APIError("Id column must be of int type")
+
+    # autogenerate primary key
+    if not primary_key_col_names:
+        constraints.append(PrimaryKeyConstraint("id"))
+        primary_key_col_names = ["id"]
+
+    # check pk == id
+    if tuple(primary_key_col_names) != ("id",):
+        raise APIError("Primary key must be column id")
+
+    return columns, constraints
+
+
 __PARSER_META = MetaData(bind=_get_engine())
 
 
@@ -82,7 +239,8 @@ def query_typecast_select(select) -> Select:
     return cast_type(Select, select)
 
 
-def get_or_403(dictionary, key):
+def get_or_403(dictionary: dict | None, key):
+    dictionary = dictionary or {}
     try:
         return dictionary[key]
     except KeyError:
@@ -141,7 +299,7 @@ def set_meta_info(method, user, message=None):
 
 
 def parse_insert(d, context, message=None, mapper=None):
-    table = Table(
+    sa_table = SATable(
         read_pgid(get_or_403(d, "table")),
         MetaData(bind=_get_engine()),
         autoload=True,
@@ -158,9 +316,9 @@ def parse_insert(d, context, message=None, mapper=None):
         field_strings.append(parse_expression(field))
 
     # NOTE: type casting probably no longer needed in later sqlalchemay
-    table = cast_type(Table, table)
+    sa_table = cast_type(SATable, sa_table)
 
-    query = table.insert()
+    query = sa_table.insert()
 
     if "method" not in d:
         d["method"] = "values"
@@ -350,26 +508,26 @@ def parse_from_item(d):
             ext_name = schema_name + "." + ext_name
             tkwargs["schema"] = schema_name
 
-        tables: Mapping[str, Table] = __PARSER_META.tables  # type: ignore
+        sa_tables: Mapping[str, SATable] = __PARSER_META.tables  # type: ignore
 
-        if ext_name in tables:
-            item = tables[ext_name]
+        if ext_name in sa_tables:
+            sa_table = sa_tables[ext_name]
         else:
             try:
-                item = Table(d["table"], __PARSER_META, **tkwargs)
+                sa_table = SATable(d["table"], __PARSER_META, **tkwargs)
                 # NOTE: type casting probably no longer needed in later sqlalchemay
-                item = cast_type(Table, item)
+                sa_table = cast_type(SATable, sa_table)
             except NoSuchTableError:
                 raise APIError("Table {table} not found".format(table=ext_name))
 
         engine = _get_engine()
         conn = engine.connect()
-        exists = engine.dialect.has_table(conn, item.name, schema_name)
+        exists = engine.dialect.has_table(conn, sa_table.name, schema_name)
         conn.close()
         if not exists:
-            raise APIError("Table not found: " + str(item), status=400)
+            raise APIError("Table not found: " + str(sa_table), status=400)
     elif dtype == "select":
-        item = parse_select(d)
+        sa_table = parse_select(d)
     elif dtype == "join":
         left = parse_from_item(get_or_403(d, "left"))
         right = parse_from_item(get_or_403(d, "right"))
@@ -378,37 +536,37 @@ def parse_from_item(d):
         on_clause = None
         if "on" in d:
             on_clause = parse_condition(d["on"])
-        item = left.join(right, onclause=on_clause, isouter=is_outer, full=full)
+        sa_table = left.join(right, onclause=on_clause, isouter=is_outer, full=full)
     else:
         raise APIError("Unknown from-item: " + dtype)
 
     if "alias" in d:
-        item = item.alias(read_pgid(d["alias"]))
-    return item
+        sa_table = sa_table.alias(read_pgid(d["alias"]))
+    return sa_table
 
 
-def load_table_from_metadata(table, schema=None):
+def load_table_from_metadata(table: str, schema: str | None = None) -> SATable | None:
     ext_name = table
     schema = validate_schema(schema)
     if schema:
         ext_name = schema + "." + ext_name
 
-    tables: Mapping[str, Table] = __PARSER_META.tables  # type: ignore
+    sa_tables: Mapping[str, SATable] = __PARSER_META.tables  # type: ignore
 
-    if ext_name and ext_name in tables:
-        return tables[ext_name]
+    if ext_name and ext_name in sa_tables:
+        return sa_tables[ext_name]
     else:
         if _get_engine().dialect.has_table(
             _get_engine().connect(), table, schema=schema
         ):
-            return Table(table, __PARSER_META, autoload=True, schema=schema)
+            return SATable(table, __PARSER_META, autoload=True, schema=schema)
 
 
 def parse_column(d, mapper):
     name = get_or_403(d, "column")
     is_literal = parse_single(d.get("is_literal", False), bool)
     table_name = d.get("table")
-    table = None
+    sa_table = None
     if table_name:
         table_name = read_pgid(table_name)
         if mapper is None:
@@ -420,9 +578,9 @@ def parse_column(d, mapper):
         schema_name = read_pgid(do_map(d["schema"])) if "schema" in d else None
         schema_name = validate_schema(schema_name)
 
-        table = load_table_from_metadata(table_name, schema=schema_name)
-    if table is not None and name in table.c:
-        col = table.c[name]
+        sa_table = load_table_from_metadata(table_name, schema=schema_name)
+    if sa_table is not None and name in sa_table.c:
+        col = sa_table.c[name]
         if isinstance(col.type, INTERVAL):
             col.type = Interval(col.type)
         return col
@@ -661,7 +819,7 @@ def parse_case(dl):
 def parse_operator(d):
     query = parse_sqla_operator(
         get_or_403(d, "operator"),
-        *list(map(parse_expression, get_or_403(d, "operands")))
+        *list(map(parse_expression, get_or_403(d, "operands"))),
     )
     return query
 
@@ -669,7 +827,7 @@ def parse_operator(d):
 def parse_modifier(d):
     query = parse_sqla_modifier(
         get_or_403(d, "operator"),
-        *list(map(parse_expression, get_or_403(d, "operands")))
+        *list(map(parse_expression, get_or_403(d, "operands"))),
     )
     return query
 

@@ -14,10 +14,8 @@ from typing import cast
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 
-from api.services.permissions import assign_table_holder
-from api.services.table_creation import TableCreationOrchestrator
 from base.tests import TestViewsTestCase
-from dataedit.models import PeerReview, PeerReviewManager, Tag
+from dataedit.models import PeerReview, PeerReviewManager, Table, Tag
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 
@@ -32,22 +30,13 @@ class TestViewsDataedit(TestViewsTestCase):
         super(TestViewsDataedit, cls).setUpClass()
 
         # create a test table
-        cls.orchestrator = TableCreationOrchestrator()
         # ensure test table doesnot exist
-        cls.orchestrator.drop_table(
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
-        )
-        cls.table = cls.orchestrator.create_table(
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
-            column_defs=[],
-            constraint_defs=[],
-        )
-        assign_table_holder(
-            cls.user,
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
+        cls.table = Table.create_with_oedb_table(
+            is_sandbox=True,  # tests ALWAYS in sandbox
+            name=cls.kwargs_w_table["table"],
+            user=cls.user,
+            column_definitions=[],
+            constraints_definitions=[],
         )
 
         cls.tag = Tag.objects.create(name="tag1")
@@ -61,10 +50,7 @@ class TestViewsDataedit(TestViewsTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.peerreview.delete()
-        cls.orchestrator.drop_table(
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
-        )
+        cls.table.delete()
         super(TestViewsDataedit, cls).tearDownClass()
 
     def test_views_wizard(self):
