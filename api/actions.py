@@ -368,7 +368,9 @@ def describe_columns(schema, table):
         "LEFT JOIN information_schema.element_types e "
         "ON ((c.table_catalog, c.table_schema, c.table_name, 'TABLE', c.dtd_identifier) "  # noqa
         "= (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier)) where table_name = "  # noqa
-        "'{table}' and table_schema='{schema}';".format(table=table, schema=schema)
+        "'{table}' and table_schema='{schema}' ORDER BY c.dtd_identifier;".format(
+            table=table, schema=schema
+        )
     )
     response = session_execute(session, query)
 
@@ -1814,7 +1816,6 @@ def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
         row = resp.fetchone()
         row_count = row[0] if row else 0
 
-    print(row_count, precise_below)
     if row_count >= precise_below:
         return row_count
 
