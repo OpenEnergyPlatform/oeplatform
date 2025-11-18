@@ -16,7 +16,7 @@ SPDX-License-Identifier: CC0-1.0
 
 - Order columns present in column api endpoint by the ordinal position (which
   was specified when creating the table)
-  [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+  [(#2176)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2176)
 
 ## Documentation updates
 
