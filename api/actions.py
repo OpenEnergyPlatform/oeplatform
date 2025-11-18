@@ -383,7 +383,7 @@ def describe_columns(schema, table):
         "LEFT JOIN information_schema.element_types e "
         "ON ((c.table_catalog, c.table_schema, c.table_name, 'TABLE', c.dtd_identifier) "  # noqa
         "= (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier)) where table_name = "  # noqa
-        "'{table}' and table_schema='{schema}' ORDER BY c.dtd_identifier;".format(
+        "'{table}' and table_schema='{schema}' ORDER BY c.ordinal_position;".format(
             table=table, schema=schema
         )
     )
