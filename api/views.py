@@ -331,8 +331,6 @@ class TableAPIView(APIView):
         else:
             is_sandbox = False
 
-        assert is_sandbox
-
         table_obj = Table.create_with_oedb_table(
             name=table,
             user=request.user,
