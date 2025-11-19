@@ -28,7 +28,7 @@ import {
 } from './peer_review.js';
 import {selectNextField, switchCategoryTab} from "./navigation.js";
 import {getFieldState, setGetFieldState} from "./state_current_review.js";
-import {updateFieldColor} from "./utilities.js";
+import {isEmptyValue, updateFieldColor} from "./utilities.js";
 import {renderSummaryPageFields, updateTabProgressIndicatorClasses} from "./summary.js";
 window.selectState = common.selectState;
 var selectedField;
@@ -103,48 +103,127 @@ export function getFieldStateForContributor(fieldKey) {
  */
 
 function renderSummaryPageFields() {
-  const categoriesMap = {};
+  const acceptedFields = [];
+  const suggestingFields = [];
+  const rejectedFields = [];
+  const missingFields = [];
+  const emptyFields = [];
 
-  function addFieldToCategory(category, field) {
-    if (!categoriesMap[category]) categoriesMap[category] = [];
-    categoriesMap[category].push(field);
+  const processedFields = new Set();
 
-    // Removed incorrect use of 'continue' and refactored loop variable declaration
-    const category_fields = category.querySelectorAll(".field");
-    for (const field of category_fields) {
+  if (window.state_dict && Object.keys(window.state_dict).length > 0) {
+    const fields = document.querySelectorAll('.field');
+    for (let field of fields) {
       const field_id = field.id.slice(6);
       const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
-      const found = current_review.reviews.some((review) => review.key === field_id);
       const fieldState = getFieldState(field_id);
       const fieldCategory = field.getAttribute('data-category');
+      const fieldSuggestion = field.querySelector('.suggestion.suggestion--highlight')?.textContent.trim() || "";
+
+      // remove the numbers and replace the dots with spaces
       let fieldName = field_id.replace(/\./g, ' ');
+
+      if (fieldCategory !== "general") {
+        fieldName = fieldName.split(' ').slice(1).join(' '); // remove first word
+      }
+
       const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
-      if (isEmptyValue(fieldValue) && !processedFields.has(uniqueFieldIdentifier)) {
-        emptyFields.push({ fieldName, fieldValue, fieldCategory: "emptyFields", fieldSuggestion });
-      } else if (!found && fieldState !== 'ok' && fieldState !== 'rejected' && !isEmptyValue(fieldValue)) {
-        missingFields.push({ fieldName, fieldValue, fieldCategory });
+      if (isEmptyValue(fieldValue)) {
+        emptyFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
+      } else if (fieldState === 'ok') {
+        acceptedFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
         processedFields.add(uniqueFieldIdentifier);
       }
     }
   }
 
-  const fields = document.querySelectorAll('.field');
-  fields.forEach(field => {
-    const field_id = field.id.slice(6);
-    const fieldValue = $(field).find('.value').text().trim();
-    const fieldState = getFieldState(field_id);
-    const fieldCategory = field.getAttribute('data-category');
-    let fieldName = field_id.replace(/\./g, ' ');
+  for (const review of current_review.reviews) {
+    const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
+    const fieldValue = $(field_id).find('.value').text().replace(/\s+/g, ' ').trim();
+    const fieldState = review.fieldReview.state;
+    const fieldCategory = review.category;
+    const fieldSuggestion = review.fieldReview.reviewerSuggestion || "";
+
+    let fieldName = review.key.replace(/\./g, ' ');
+
     if (fieldCategory !== "general") {
       fieldName = fieldName.split(' ').slice(1).join(' ');
     }
 
-    let fieldStatus = isEmptyValue(fieldValue) ? 'Empty' :
-                      fieldState === 'ok' ? 'Accepted' :
-                      fieldState === 'rejected' ? 'Rejected' : 'Missing';
+    const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
-    addFieldToCategory(fieldCategory, { fieldName, fieldValue, fieldStatus });
+    if (processedFields.has(uniqueFieldIdentifier)) {
+      continue;
+    }
+
+    if (isEmptyValue(fieldValue)) {
+      emptyFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
+    } else if (fieldState === 'ok') {
+      acceptedFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
+    } else if (fieldState === 'suggestion') {
+      suggestingFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
+    } else if (fieldState === 'rejected') {
+      rejectedFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
+    }
+
+    processedFields.add(uniqueFieldIdentifier);
+  }
+
+  const categories = document.querySelectorAll(".tab-pane");
+
+  for (const category of categories) {
+    const category_name = category.id;
+
+    if (category_name === "summary") {
+      continue;
+    }
+    const category_fields = category.querySelectorAll(".field");
+    for (let field of category_fields) {
+      const field_id = field.id.slice(6);
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      const found = current_review.reviews.some((review) => review.key === field_id);
+      const fieldState = getFieldState(field_id);
+      const fieldCategory = field.getAttribute('data-category');
+      const fieldSuggestion = field.querySelector('.suggestion.suggestion--highlight')?.textContent.trim() || "";
+
+      let fieldName = field_id.replace(/\./g, ' ');
+
+      if (fieldCategory !== "general") {
+        fieldName = fieldName.split(' ').slice(1).join(' ');
+      }
+
+      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
+
+      if (
+        !found &&
+        fieldState !== 'ok' &&
+        !isEmptyValue(fieldValue) &&
+        !processedFields.has(uniqueFieldIdentifier)
+      ) {
+        missingFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
+        processedFields.add(uniqueFieldIdentifier);
+      }
+    }
+  }
+
+  const allData = [];
+  allData.push(...missingFields.map((item) => ({ ...item, fieldStatus: 'Missing' })));
+  allData.push(...acceptedFields.map((item) => ({ ...item, fieldStatus: 'Accepted' })));
+  allData.push(...suggestingFields.map((item) => ({ ...item, fieldStatus: 'Suggested' })));
+  allData.push(...rejectedFields.map((item) => ({ ...item, fieldStatus: 'Rejected' })));
+  allData.push(...emptyFields.map((item) => ({ ...item, fieldStatus: 'Empty' })));
+
+  const categoriesMap = {};
+
+  function addFieldToCategory(category, field) {
+    if (!categoriesMap[category]) categoriesMap[category] = [];
+    categoriesMap[category].push(field);
+  }
+
+  allData.forEach(item => {
+    const category = item.fieldCategory || 'general';
+    addFieldToCategory(category, item);
   });
 
   const summaryContainer = document.getElementById("summary");
@@ -163,18 +242,22 @@ function renderSummaryPageFields() {
 
     const navItem = document.createElement('li');
     navItem.className = 'nav-item';
-    navItem.innerHTML = `<button class="nav-link${firstTab ? ' active' : ''}" data-bs-toggle="tab" data-bs-target="#${tabId}">${category}</button>`;
+    navItem.innerHTML = `
+      <button class="nav-link${firstTab ? ' active' : ''}" data-bs-toggle="tab" data-bs-target="#${tabId}">
+        ${category}
+      </button>
+    `;
     tabsNav.appendChild(navItem);
 
     const tabPane = document.createElement('div');
     tabPane.className = `tab-pane fade${firstTab ? ' show active' : ''}`;
     tabPane.id = tabId;
 
-    const fields = categoriesMap[category];
+    const fieldsForCategory = categoriesMap[category];
     const singleFields = [];
     const groupedFields = {};
 
-    fields.forEach(field => {
+    fieldsForCategory.forEach(field => {
       const words = field.fieldName.split(' ');
       if (words.length === 1) {
         singleFields.push(field);
@@ -193,28 +276,32 @@ function renderSummaryPageFields() {
         } else {
           groupedFields[prefix].noIndex.push({ ...field, fieldName: nameWithoutIndices });
         }
-
-        let th = document.createElement('th');
-        th.scope = "row";
-        th.className = "status";
-        if (item.fieldStatus === "Pending") {
-          th.className = "status missing";
-        }
-      } // <-- Add closing brace here for else block
-    }); // <-- Closing fields.forEach
+      }
+    });
 
     if (singleFields.length > 0) {
       const table = document.createElement('table');
       table.className = 'table review-summary';
       table.innerHTML = `
-        <thead><tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr></thead>
-        <tbody>${singleFields.map(f => `
+        <thead>
           <tr>
-            <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-            <td>${f.fieldName}</td>
-            <td>${f.fieldValue}</td>
-          </tr>`).join('')}
-        </tbody>`;
+            <th>Status</th>
+            <th>Field Name</th>
+            <th>Field Value</th>
+            <th>Field Suggestion</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${singleFields.map(f => `
+            <tr>
+              <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+              <td>${f.fieldName}</td>
+              <td>${f.fieldValue}</td>
+              <td>${f.fieldSuggestion || ''}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      `;
       tabPane.appendChild(table);
     }
 
@@ -237,15 +324,26 @@ function renderSummaryPageFields() {
         if (noIndex.length > 0) {
           innerHTML += `
             <table class="table table-sm table-bordered">
-              <thead><tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr></thead>
-              <tbody>${noIndex.map(f => `
+              <thead>
                 <tr>
-                  <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-                  <td>${f.fieldName}</td>
-                  <td>${f.fieldValue}</td>
-                </tr>`).join('')}
+                  <th>Status</th>
+                  <th>Field Name</th>
+                  <th>Field Value</th>
+                  <th>Field Suggestion</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${noIndex.map(f => `
+                  <tr>
+                    <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+                    <td>${f.fieldName}</td>
+                    <td>${f.fieldValue}</td>
+                    <td>${f.fieldSuggestion || ''}</td>
+                  </tr>
+                `).join('')}
               </tbody>
-            </table>`;
+            </table>
+          `;
         }
 
         if (Object.keys(indexed).length > 0) {
@@ -268,62 +366,102 @@ function renderSummaryPageFields() {
                 <div id="${idxCollapseId}" class="accordion-collapse collapse" data-bs-parent="#${subAccordionId}">
                   <div class="accordion-body">
                     <table class="table table-sm table-bordered">
-                      <thead><tr><th>Status</th><th>Field Name</th><th>Field Value</th></tr></thead>
-                      <tbody>${idxFields.map(f => `
+                      <thead>
                         <tr>
-                          <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-                          <td>${f.fieldName}</td>
-                          <td>${f.fieldValue}</td>
-                        </tr>`).join('')}
+                          <th>Status</th>
+                          <th>Field Name</th>
+                          <th>Field Value</th>
+                          <th>Field Suggestion</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${idxFields.map(f => `
+                          <tr>
+                            <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+                            <td>${f.fieldName}</td>
+                            <td>${f.fieldValue}</td>
+                            <td>${f.fieldSuggestion || ''}</td>
+                          </tr>
+                        `).join('')}
                       </tbody>
                     </table>
                   </div>
                 </div>
-              </div>`;
+              </div>
+            `;
           });
 
           innerHTML += `</div>`;
         }
 
+        accordionItem.innerHTML = `
+          <h2 class="accordion-header" id="${headingId}">
+            <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
+              ${['source', 'license'].includes(category) ? 'fields name' : prefix}
+            </button>
+          </h2>
+          <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#accordion-${category}">
+            <div class="accordion-body">
+              ${innerHTML}
+            </div>
+          </div>
+        `;
+
+        accordionContainer.appendChild(accordionItem);
+        accordionIndex++;
+      }
+
+      tabPane.appendChild(accordionContainer);
+    }
+
     tabsContent.appendChild(tabPane);
     firstTab = false;
   }
+
   const viewsNavItem = document.createElement('li');
   viewsNavItem.className = 'nav-item';
-  viewsNavItem.innerHTML = '<button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-views">views</button>';
-
-
+  viewsNavItem.innerHTML = `
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-views">
+      views
+    </button>
+  `;
   tabsNav.appendChild(viewsNavItem);
 
   const viewsPane = document.createElement('div');
   viewsPane.className = 'tab-pane fade';
   viewsPane.id = 'tab-views';
 
-  const allFields = Object.entries(categoriesMap).flatMap(([category, fields]) =>
-    fields.map(f => ({...f, category}))
-  );
-
-  viewsPane.innerHTML =
+  viewsPane.innerHTML = `
     <table class="table review-summary">
       <thead>
-        <tr><th>Status</th><th>Category</th><th>Field Name</th><th>Field Value</th></tr>
-      </thead>
-      <tbody>${allFields.map(f =>
         <tr>
-          <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-          <td>${f.category}</td>
-          <td>${f.fieldName}</td>
-          <td>${f.fieldValue}</td>
-        </tr>).join('')}
+          <th>Status</th>
+          <th>Category</th>
+          <th>Field Name</th>
+          <th>Field Value</th>
+          <th>Field Suggestion</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${allData.map(f => `
+          <tr>
+            <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
+            <td>${f.fieldCategory}</td>
+            <td>${f.fieldName}</td>
+            <td>${f.fieldValue}</td>
+            <td>${f.fieldSuggestion || ''}</td>
+          </tr>
+        `).join('')}
       </tbody>
-    </table>;
+    </table>
+  `;
 
   tabsContent.appendChild(viewsPane);
   summaryContainer.appendChild(tabsNav);
   summaryContainer.appendChild(tabsContent);
+
   updateTabProgressIndicatorClasses();
 }
-
 /**
  * Creates an HTML list of fields with their categories
  * @param {Array} fields Array of field objects
@@ -476,5 +614,5 @@ function saveEntrancesForContributor() {
   updateTabProgressIndicatorClasses();
 }
 initializeEventBindings(saveEntrancesForContributor);
-}}}
+}
 
