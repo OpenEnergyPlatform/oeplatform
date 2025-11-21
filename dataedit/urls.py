@@ -48,7 +48,7 @@ pgsql_qualifier = r"[\w\d_]+"
 
 urlpatterns_view_schema = [
     re_path(
-        r"^(?P<schema>{qual})$".format(qual=pgsql_qualifier),
+        r"^(?P<topic>{qual})$".format(qual=pgsql_qualifier),
         tables_view,
         name="tables",
     ),

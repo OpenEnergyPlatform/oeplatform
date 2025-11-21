@@ -62,7 +62,6 @@ from django.views.generic import View
 from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 
 import login.permissions
-from api import utils
 from api.actions import (
     apply_queued_column,
     apply_queued_constraint,
@@ -96,7 +95,9 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import (
+    Embargo,
+)
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -112,6 +113,23 @@ from login import models as login_models
 from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SCHEMA_DATA
 
 ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
+
+
+class StandaloneMetaEditView(View):
+    def get(self, request: HttpRequest) -> HttpResponse:
+        context_dict = {
+            "config": json.dumps(
+                {"cancle_url": get_cancle_state(self.request), "standalone": True}
+            ),
+            "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
+            "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
+            "oemetabuilder_tutorial": EXTERNAL_URLS["tutorials_oemetabuilder"],
+        }
+        return render(
+            request,
+            "dataedit/meta_edit.html",
+            context=context_dict,
+        )
 
 
 @require_POST
@@ -388,7 +406,7 @@ def metadata_widget_view(request: HttpRequest) -> HttpResponse:
     return render(request, "partials/metadata_viewer.html", context=context)
 
 
-def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
+def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
     """
     :param request: A HTTP-request object sent by the Django framework
     :param schema_name: Name of a schema
@@ -402,7 +420,7 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
 
     # find all tables (layzy query set) in this schema
     tables = find_tables(
-        topic_name=schema,
+        topic_name=topic,
         query_string=searched_query_string,
         tag_ids=searched_tag_ids,
     )
@@ -419,7 +437,6 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
         request,
         "dataedit/dataedit_tablelist.html",
         {
-            "schema": schema,
             "tables_paginated": tables_paginated,
             "query": searched_query_string,
             "tags": searched_tag_ids,
@@ -431,14 +448,20 @@ def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
 def table_show_revision_view(
     request: HttpRequest, schema: str, table: str, date: str
 ) -> HttpResponse:
-    rev = TableRevision.objects.get(schema=schema, table=table, date=date)
+    table_obj = table_or_404(table=table)
+    schema_name = table_obj.oedb_schema
+
+    rev = TableRevision.objects.get(schema=schema_name, table=table, date=date)
     rev.last_accessed = timezone.now()
     rev.save()
-    return send_dump(schema, table, date)
+    return send_dump(schema_name, table, date)
 
 
 @require_POST
 def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpResponse:
+    table_obj = table_or_404(table=table)
+    schema_name = table_obj.oedb_schema
+
     post_name = request.POST.get("name")
     post_type = request.POST.get("type")
     post_id = request.POST.get("id")
@@ -482,7 +505,7 @@ def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpR
             type=post_type,
             options=post_options,
             table=table,
-            schema=schema,
+            schema=schema_name,
         )
 
     update_view.save()
@@ -525,7 +548,7 @@ def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpR
                 curr_filter.save()
 
     return redirect(
-        reverse("dataedit:view", kwargs={"schema": schema, "table": table})
+        reverse("dataedit:view", kwargs={"schema": schema_name, "table": table})
         + f"?view={update_view.pk}"
     )
 
@@ -533,39 +556,53 @@ def table_view_save_view(request: HttpRequest, schema: str, table: str) -> HttpR
 def table_view_set_default_view(
     request: HttpRequest, schema: str, table: str
 ) -> HttpResponse:
+    table_obj = table_or_404(table=table)
+    schema_name = table_obj.oedb_schema
+
     # TODO: shouldnt this be POST only?
     post_id = request.GET.get("id")
 
-    for view in DBView.objects.filter(schema=schema, table=table):
+    for view in DBView.objects.filter(schema=schema_name, table=table):
         if str(view.pk) == post_id:
             view.is_default = True
         else:
             view.is_default = False
         view.save()
-    return redirect("dataedit:view", schema=schema, table=table)
+    return redirect("dataedit:view", schema=schema_name, table=table)
 
 
 def table_view_delete_view(
     request: HttpRequest, schema: str, table: str
 ) -> HttpResponse:
+    table_obj = table_or_404(table=table)
+    schema_name = table_obj.oedb_schema
+
     # TODO: shouldnt this be POST only?
     post_id = request.GET.get("id")
 
-    view = DBView.objects.get(id=post_id, schema=schema, table=table)
+    view = DBView.objects.get(id=post_id, schema=schema_name, table=table)
     view.delete()
 
-    return redirect("dataedit:view", schema=schema, table=table)
+    return redirect("dataedit:view", schema=schema_name, table=table)
 
 
 class TableGraphView(View):
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
+
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         # get the columns id from the schema and the table
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        columns = [(c, c) for c in describe_columns(schema_name, table).keys()]
         formset = GraphViewForm(columns=columns)
 
         return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
 
     def post(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
+
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         # save an instance of View, look at GraphViewForm fields in forms.py
         # for information to the options
         opt = dict(x=request.POST.get("column_x"), y=request.POST.get("column_y"))
@@ -579,7 +616,7 @@ class TableGraphView(View):
         gview.save()
 
         return redirect(
-            reverse("dataedit:view", kwargs={"schema": schema, "table": table})
+            reverse("dataedit:view", kwargs={"schema": schema_name, "table": table})
             + f"?view={gview.pk}"
         )
 
@@ -588,7 +625,10 @@ class TableMapView(View):
     def get(
         self, request: HttpRequest, schema: str, table: str, maptype: str
     ) -> HttpResponse:
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
+        columns = [(c, c) for c in describe_columns(schema_name, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(columns=columns)
         elif maptype == "geom":
@@ -601,7 +641,10 @@ class TableMapView(View):
     def post(
         self, request: HttpRequest, schema: str, table: str, maptype: str
     ) -> HttpResponse:
-        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
+        columns = [(c, c) for c in describe_columns(schema_name, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(request.POST, columns=columns)
             options = dict(lat=request.POST.get("lat"), lon=request.POST.get("lon"))
@@ -616,12 +659,12 @@ class TableMapView(View):
         if form.is_valid():
             view_id = form.save(commit=True)
             return redirect(
-                reverse("dataedit:view", kwargs={"schema": schema, "table": table})
+                reverse("dataedit:view", kwargs={"schema": schema_name, "table": table})
                 + f"?view={view_id}"
             )
         else:
             return self.get(
-                request=request, schema=schema, table=table, maptype=maptype
+                request=request, schema=schema_name, table=table, maptype=maptype
             )
 
 
@@ -649,6 +692,9 @@ class TableDataView(View):
         :return:
         """
 
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         metadata = load_metadata_from_db(table=table)
         table_obj = Table.load(name=table)
         if table_obj is None:
@@ -667,7 +713,7 @@ class TableDataView(View):
         meta_widget = MetaDataWidget(ordered_oem_151)
         revisions = []
 
-        api_changes = change_requests(schema, table)
+        api_changes = change_requests(schema_name, table)
         data = api_changes.get("data")
         display_message = api_changes.get("display_message")
         display_items = api_changes.get("display_items")
@@ -769,7 +815,7 @@ class TableDataView(View):
             "kinds": ["table", "map", "graph"],
             "table": table,
             "table_obj": table_obj,
-            "schema": schema,
+            "schema": schema_name,  # TODO:remove
             "table_label": table_label,
             # "tags": tags,
             "data": data,
@@ -798,6 +844,9 @@ class TableDataView(View):
         :param table: Name of a table
         :return: Redirects to the view of the table the data was sent to.
         """
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         if request.POST and request.FILES:
             csvfile = TextIOWrapper(
                 request.FILES["csv_file"].file, encoding=request.encoding
@@ -807,14 +856,14 @@ class TableDataView(View):
 
             data_insert(
                 {
-                    "schema": schema,
+                    "schema": schema_name,
                     "table": table,
                     "method": "values",
                     "values": reader,
                 },
                 {"user": request.user},
             )
-        return redirect("dataedit:view", schema=schema, table=table)
+        return redirect("dataedit:view", schema=schema_name, table=table)
 
 
 class TablePermissionView(View):
@@ -824,7 +873,8 @@ class TablePermissionView(View):
 
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
 
-        table_obj = Table.load(name=table)
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
 
         user_perms = login_models.UserPermission.objects.filter(table=table_obj)
         group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
@@ -843,7 +893,7 @@ class TablePermissionView(View):
             "dataedit/table_permissions.html",
             {
                 "table": table,
-                "schema": schema,
+                "schema": schema_name,
                 "user_perms": user_perms,
                 "group_perms": group_perms,
                 "choices": login_models.TablePermission.choices,
@@ -855,7 +905,9 @@ class TablePermissionView(View):
         )
 
     def post(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
-        table_obj = Table.load(name=table)
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         user: login_models.myuser = request.user  # type: ignore
         if (
             user.is_anonymous
@@ -863,21 +915,25 @@ class TablePermissionView(View):
         ):
             raise PermissionDenied
         if request.POST["mode"] == "add_user":
-            return self.__add_user(request, schema, table)
+            return self.__add_user(request, schema_name, table)
         if request.POST["mode"] == "alter_user":
-            return self.__change_user(request, schema, table)
+            return self.__change_user(request, schema_name, table)
         if request.POST["mode"] == "remove_user":
-            return self.__remove_user(request, schema, table)
+            return self.__remove_user(request, schema_name, table)
         if request.POST["mode"] == "add_group":
-            return self.__add_group(request, schema, table)
+            return self.__add_group(request, schema_name, table)
         if request.POST["mode"] == "alter_group":
-            return self.__change_group(request, schema, table)
+            return self.__change_group(request, schema_name, table)
         if request.POST["mode"] == "remove_group":
-            return self.__remove_group(request, schema, table)
+            return self.__remove_group(request, schema_name, table)
         else:
             raise NotImplementedError()
 
     def __add_user(self, request: HttpRequest, schema: str, table: str):
+
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         user_name = request.POST.get("name")
         # Check if the user name is empty
         if not user_name:
@@ -885,14 +941,18 @@ class TablePermissionView(View):
             return HttpResponseBadRequest("User name is required.")
 
         user = login_models.myuser.objects.filter(name=user_name).first()
-        table_obj = Table.load(name=table)
+
         p, _ = login_models.UserPermission.objects.get_or_create(
             holder=user, table=table_obj
         )
         p.save()
-        return self.get(request, schema, table)
+        return self.get(request, schema_name, table)
 
     def __change_user(self, request: HttpRequest, schema: str, table: str):
+
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         user_id = request.POST.get("user_id")
         # Check if the user id is empty
         if not user_id:
@@ -900,13 +960,17 @@ class TablePermissionView(View):
             return HttpResponseBadRequest("User id is required.")
 
         user = login_models.myuser.objects.filter(id=user_id).first()
-        table_obj = Table.load(name=table)
+
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.level = int(request.POST["level"])
         p.save()
-        return self.get(request, schema, table)
+        return self.get(request, schema_name, table)
 
     def __remove_user(self, request: HttpRequest, schema: str, table: str):
+
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         user_id = request.POST.get("user_id")
         # Check if the user id is empty
         if not user_id:
@@ -914,12 +978,16 @@ class TablePermissionView(View):
             return HttpResponseBadRequest("User id is required.")
 
         user = get_object_or_404(login_models.myuser, id=user_id)
-        table_obj = Table.load(name=table)
+
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.delete()
-        return self.get(request, schema, table)
+        return self.get(request, schema_name, table)
 
     def __add_group(self, request: HttpRequest, schema: str, table: str):
+
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         group_name = request.POST.get("name")
         # Check if the group name is empty
         if not group_name:
@@ -927,81 +995,92 @@ class TablePermissionView(View):
             return HttpResponseBadRequest("Group name is required.")
 
         group = get_object_or_404(login_models.UserGroup, name=group_name)
-        table_obj = Table.load(name=table)
+
         p, _ = login_models.GroupPermission.objects.get_or_create(
             holder=group, table=table_obj
         )
         p.save()
-        return self.get(request, schema, table)
+        return self.get(request, schema_name, table)
 
     def __change_group(self, request: HttpRequest, schema: str, table: str):
+
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         group_id = request.POST.get("group_id")
         if not group_id:
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group id is required.")
 
         group = get_object_or_404(login_models.UserGroup, id=group_id)
-        table_obj = Table.load(name=table)
+
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
         )
         p.level = int(request.POST["level"])
         p.save()
-        return self.get(request, schema, table)
+        return self.get(request, schema_name, table)
 
     def __remove_group(self, request: HttpRequest, schema: str, table: str):
+
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         group_id = request.POST.get("group_id")
         if not group_id:
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group id is required.")
 
         group = get_object_or_404(login_models.UserGroup, id=group_id)
-        table_obj = Table.load(name=table)
+
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
         )
         p.delete()
-        return self.get(request, schema, table)
+        return self.get(request, schema_name, table)
 
 
 class TableWizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv)."""
 
     def get(
-        self, request: HttpRequest, schema: str = SCHEMA_DATA, table: str | None = None
+        self, request: HttpRequest, schema: str | None = None, table: str | None = None
     ) -> HttpResponse:
         """Handle GET request (render the page)."""
-
-        schema = utils.validate_schema(schema)
 
         can_add = False
         columns = None
         # pk_fields = None
         n_rows = None
         if table:
-            table_obj = Table.objects.get(name=table)
+
+            table_obj = table_or_404(table=table)
+            schema_name = table_obj.oedb_schema
+
             user: login_models.myuser = request.user  # type: ignore
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login.permissions.WRITE_PERM
-            columns = get_column_description(schema, table)
+            columns = get_column_description(schema_name, table)
             # get number of rows
             sql = 'SELECT COUNT(*) FROM "{schema}"."{table}"'.format(
-                schema=schema, table=table
+                schema=schema_name, table=table
             )
             res = perform_sql(sql)
             n_rows = res["result"].fetchone()[0]
+        else:
+            schema_name = SCHEMA_DATA
 
         context = {
             "config": json.dumps(
                 {  # pass as json string
                     "canAdd": can_add,
                     "columns": columns,
-                    "schema": schema,
+                    "schema": schema_name,
                     "table": table,
                     "nRows": n_rows,
                 }
             ),
-            "schema": schema,
+            "schema": schema_name,
             "table": table,
             "can_add": can_add,
             "wizard_academy_link": EXTERNAL_URLS["tutorials_wizard"],
@@ -1017,33 +1096,37 @@ class TableMetaEditView(LoginRequiredMixin, View):
     """Metadata editor (cliet side json forms)."""
 
     def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
-        columns = get_column_description(schema, table)
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
+        columns = get_column_description(schema_name, table)
 
         can_add = False
-        table_obj = Table.load(name=table)
+
         user: login_models.myuser = request.user  # type: ignore
         if not user.is_anonymous:
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login.permissions.WRITE_PERM
 
         url_table_id = request.build_absolute_uri(
-            reverse("dataedit:view", kwargs={"schema": schema, "table": table})
+            reverse("dataedit:view", kwargs={"schema": schema_name, "table": table})
         )
 
         context_dict = {
-            "schema": schema,
+            "schema": schema_name,
             "table": table,
             "config": json.dumps(
                 {
-                    "schema": schema,
+                    "schema": schema_name,
                     "table": table,
                     "columns": columns,
                     "url_table_id": url_table_id,
                     "url_api_meta": reverse(
-                        "api:api_table_meta", kwargs={"schema": schema, "table": table}
+                        "api:api_table_meta",
+                        kwargs={"schema": schema_name, "table": table},
                     ),
                     "url_view_table": reverse(
-                        "dataedit:view", kwargs={"schema": schema, "table": table}
+                        "dataedit:view", kwargs={"schema": schema_name, "table": table}
                     ),
                     "cancle_url": get_cancle_state(self.request),
                     "standalone": False,
@@ -1056,23 +1139,6 @@ class TableMetaEditView(LoginRequiredMixin, View):
             "oemetabuilder_tutorial": EXTERNAL_URLS["tutorials_oemetabuilder"],
         }
 
-        return render(
-            request,
-            "dataedit/meta_edit.html",
-            context=context_dict,
-        )
-
-
-class StandaloneMetaEditView(View):
-    def get(self, request: HttpRequest) -> HttpResponse:
-        context_dict = {
-            "config": json.dumps(
-                {"cancle_url": get_cancle_state(self.request), "standalone": True}
-            ),
-            "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
-            "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
-            "oemetabuilder_tutorial": EXTERNAL_URLS["tutorials_oemetabuilder"],
-        }
         return render(
             request,
             "dataedit/meta_edit.html",
@@ -1299,6 +1365,10 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         Returns:
             HttpResponse: Rendered HTML response.
         """
+
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
@@ -1311,14 +1381,14 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login.permissions.WRITE_PERM
 
-        oemetadata = self.load_json(schema, table, review_id)
+        oemetadata = self.load_json(schema_name, table, review_id)
         metadata = self.sort_in_category(
-            schema, table, oemetadata=oemetadata
+            schema_name, table, oemetadata=oemetadata
         )  # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
                 "dataedit:peer_review_reviewer",
-                kwargs={"schema": schema, "table": table, "review_id": review_id},
+                kwargs={"schema": schema_name, "table": table, "review_id": review_id},
             )
             opr_review = PeerReviewManager.get_opr_by_id(opr_id=review_id)
 
@@ -1336,7 +1406,8 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             )
         else:
             url_peer_review = reverse(
-                "dataedit:peer_review_create", kwargs={"schema": schema, "table": table}
+                "dataedit:peer_review_create",
+                kwargs={"schema": schema_name, "table": table},
             )
             # existing_review={}
             state_dict = None
@@ -1346,9 +1417,9 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             "can_add": can_add,
             "url_peer_review": url_peer_review,
             "url_table": reverse(
-                "dataedit:view", kwargs={"schema": schema, "table": table}
+                "dataedit:view", kwargs={"schema": schema_name, "table": table}
             ),
-            "topic": schema,
+            "topic": schema_name,
             "table": table,
             "review_finished": review_finished,
             "review_id": review_id,
@@ -1357,7 +1428,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             # need this here as json.dumps breaks the template syntax access
             # like {{ config.table }} now you can use {{ table }}
             "table": table,
-            "topic": schema,
+            "topic": table_obj.topics,
             "config": json.dumps(config_data),
             "meta": metadata,
             "json_schema": json_schema,
@@ -1410,6 +1481,9 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             - After a review is finished, the table's metadata is updated, and the table
             can be moved to a different schema or topic (TODO).
         """
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         context = {}
         user: login_models.myuser = request.user  # type: ignore
 
@@ -1475,9 +1549,9 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         if review_finished is True:
             review_table = Table.load(name=table)
             review_table.set_is_reviewed()
-            metadata = self.load_json(schema, table, review_id=review_id)
+            metadata = self.load_json(schema_name, table, review_id=review_id)
             updated_metadata = recursive_update(metadata, review_data)
-            save_metadata_to_db(schema, table, updated_metadata)
+            save_metadata_to_db(schema_name, table, updated_metadata)
             active_peer_review = PeerReview.load(table=table)
 
             if active_peer_review:
@@ -1515,6 +1589,9 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         Returns:
             HttpResponse: Rendered HTML response for contributor review.
         """
+        table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         can_add = False
         peer_review = PeerReview.objects.get(id=review_id)
         table_obj = Table.load(peer_review.table)
@@ -1522,8 +1599,8 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         if not user.is_anonymous:
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login.permissions.WRITE_PERM
-        oemetadata = self.load_json(schema, table, review_id)
-        metadata = self.sort_in_category(schema, table, oemetadata=oemetadata)
+        oemetadata = self.load_json(schema_name, table, review_id)
+        metadata = self.sort_in_category(schema_name, table, oemetadata=oemetadata)
         json_schema = self.load_json_schema()
         field_descriptions = self.get_all_field_descriptions(json_schema)
         review_data = (peer_review.review or {}).get("reviews", [])
@@ -1545,20 +1622,20 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
                     "url_peer_review": reverse(
                         "dataedit:peer_review_contributor",
                         kwargs={
-                            "schema": schema,
+                            "schema": schema_name,
                             "table": table,
                             "review_id": review_id,
                         },
                     ),
                     "url_table": reverse(
-                        "dataedit:view", kwargs={"schema": schema, "table": table}
+                        "dataedit:view", kwargs={"schema": schema_name, "table": table}
                     ),
-                    "topic": schema,
+                    "topic": schema_name,
                     "table": table,
                 }
             ),
             "table": table,
-            "topic": schema,
+            "topic": schema_name,
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
@@ -1583,6 +1660,8 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             HttpResponse: Rendered HTML response for contributor review.
 
         """
+        # table_obj = table_or_404(table=table)
+        # TODO: why unused argument "table"?
 
         context = {}
         if request.method == "POST":

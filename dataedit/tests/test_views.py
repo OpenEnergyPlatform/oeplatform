@@ -116,7 +116,7 @@ class TestViewsDataedit(TestViewsTestCase):
             "dataedit:table-permission",
             kwargs={"schema": SCHEMA, "table": table},
         )
-        self.get("dataedit:tables", kwargs={"schema": SCHEMA})
+        self.get("dataedit:tables", kwargs={"topic": SCHEMA})
         self.get("dataedit:tags")
         self.get("dataedit:tags-edit", kwargs={"tag_pk": "tag1"})
         self.get("dataedit:tags-new")
