@@ -96,9 +96,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import (
-    Embargo,
-)
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -884,7 +882,7 @@ class TablePermissionView(View):
 
 @require_POST
 @login_required
-def tage_table_add_view(request: HttpRequest) -> HttpResponse:
+def tag_table_add_view(request: HttpRequest) -> HttpResponse:
     """
     Updates the tags on a table according to the tag values in request.
     The update will delete all tags that are not present
