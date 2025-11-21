@@ -21,7 +21,7 @@ from oeplatform.settings import IS_TEST, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class APITestCase(TestCase):
-    test_schema = SCHEMA_DEFAULT_TEST_SANDBOX
+    test_schema = "todo_ignore_schema"
     test_table = "test_table"
 
     @classmethod
@@ -92,6 +92,7 @@ class APITestCase(TestCase):
         auth=None,
         exp_code: int | None = None,
         exp_res=None,
+        params: dict | None = None,
     ) -> dict:
         if not url:
             path = path or ""
@@ -121,6 +122,7 @@ class APITestCase(TestCase):
             data=str_data,
             content_type="application/json",
             HTTP_AUTHORIZATION=auth,
+            params=params,
         )
 
         try:
@@ -160,7 +162,15 @@ class APITestCase(TestCase):
     ):
         # default structure
         structure = structure or {"columns": [{"name": "id", "data_type": "bigint"}]}
-        self.api_req("put", table, schema, data={"query": structure})
+        params = {"is_sandbox": True}  # IMPORTANT when creating tables in tests
+        self.api_req(
+            "put",
+            table,
+            schema,
+            data={"query": structure},
+            params=params,
+            exp_code=exp_code,
+        )
         if data:
             self.api_req(
                 "post",
@@ -168,7 +178,7 @@ class APITestCase(TestCase):
                 schema,
                 "rows/new",
                 data={"query": data},
-                exp_code=exp_code,
+                exp_code=201,
             )
 
     def drop_table(self, schema=None, table=None, exp_code=200):

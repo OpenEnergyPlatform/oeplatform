@@ -18,11 +18,14 @@ from base.tests import TestViewsTestCase
 from dataedit.models import PeerReview, PeerReviewManager, Table, Tag
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
+SCHEMA = "todo_ignore_schema"
+
 
 class TestViewsDataedit(TestViewsTestCase):
     """Call all (most) views (after creation of some test data)"""
 
-    kwargs_w_table = {"table": "test_table", "schema": SCHEMA_DEFAULT_TEST_SANDBOX}
+    table = "test_table"
+    kwargs_w_table = {"table": table, "schema": SCHEMA_DEFAULT_TEST_SANDBOX}
     kwargs_wo_table = {"schema": SCHEMA_DEFAULT_TEST_SANDBOX}
 
     @classmethod
@@ -82,48 +85,45 @@ class TestViewsDataedit(TestViewsTestCase):
         """Call all (most) views that can be found with reverse lookup.
         We only test method GET
         """
+        table = "test_table"
 
         self.get("dataedit:index")
         self.get("dataedit:index-view")
-        self.get(
-            "dataedit:meta_edit", kwargs={"schema": "sandbox", "table": "test_table"}
-        )
+        self.get("dataedit:meta_edit", kwargs={"schema": SCHEMA, "table": table})
         self.get(
             "dataedit:metadata-widget",
-            query={"schema": "sandbox", "table": "test_table"},
+            query={"schema": SCHEMA, "table": table},
         )
         self.get("dataedit:oemetabuilder")
         self.get(
             "dataedit:peer_review_contributor",
-            kwargs={"schema": "sandbox", "table": "test_table", "review_id": 1},
+            kwargs={"schema": SCHEMA, "table": table, "review_id": 1},
         )
         self.get(
             "dataedit:peer_review_create",
-            kwargs={"schema": "sandbox", "table": "test_table"},
+            kwargs={"schema": SCHEMA, "table": table},
         )
         self.get(
             "dataedit:peer_review_reviewer",
-            kwargs={"schema": "sandbox", "table": "test_table", "review_id": 1},
+            kwargs={"schema": SCHEMA, "table": table, "review_id": 1},
         )
-        self.get(
-            "dataedit:table-graph", kwargs={"schema": "sandbox", "table": "test_table"}
-        )
+        self.get("dataedit:table-graph", kwargs={"schema": SCHEMA, "table": table})
         self.get(
             "dataedit:table-map",
-            kwargs={"schema": "sandbox", "table": "test_table", "maptype": "latlon"},
+            kwargs={"schema": SCHEMA, "table": table, "maptype": "latlon"},
         )
         self.get(
             "dataedit:table-permission",
-            kwargs={"schema": "sandbox", "table": "test_table"},
+            kwargs={"schema": SCHEMA, "table": table},
         )
-        self.get("dataedit:tables", kwargs={"schema": "sandbox"})
+        self.get("dataedit:tables", kwargs={"schema": SCHEMA})
         self.get("dataedit:tags")
         self.get("dataedit:tags-edit", kwargs={"tag_pk": "tag1"})
         self.get("dataedit:tags-new")
         self.get("dataedit:topic-list")
-        self.get("dataedit:view", kwargs={"schema": "sandbox", "table": "test_table"})
+        self.get("dataedit:view", kwargs={"schema": SCHEMA, "table": table})
         self.get("dataedit:wizard_create")
         self.get(
             "dataedit:wizard_upload",
-            kwargs={"schema": "sandbox", "table": "test_table"},
+            kwargs={"schema": SCHEMA, "table": table},
         )

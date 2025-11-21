@@ -56,6 +56,7 @@ from sqlalchemy.sql.sqltypes import Interval
 
 from api.error import APIError, APIKeyError
 from api.utils import validate_schema
+from dataedit import models as dataedit_models
 from oedb.connection import _get_engine
 from oedb.utils import MAX_NAME_LENGTH, NAME_PATTERN
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
@@ -490,20 +491,28 @@ def parse_from_item(d):
         [ LATERAL ] function_name ( [ argument [, ...] ] )
             AS ( column_definition [, ...] )
     """
+    if isinstance(d, list):
+        return [parse_from_item(f) for f in d]
+
     # TODO: If 'type' is not set assume just a table name is present
     if isinstance(d, str):
         d = {"type": "table", "table": d}
-    if isinstance(d, list):
-        return [parse_from_item(f) for f in d]
-    dtype = get_or_403(d, "type")
 
-    schema_name = read_pgid(d["schema"]) if "schema" in d else None
-    schema_name = validate_schema(schema_name)
+    dtype = get_or_403(d, "type")
 
     if dtype == "table":
         # only = d.get("only", False)
         ext_name = read_pgid(get_or_403(d, "table"))
+
         tkwargs: dict = dict(autoload=True)
+
+        # schema_name = read_pgid(d["schema"]) if "schema" in d else None
+        # schema_name = validate_schema(schema_name)
+
+        # TODO: find a better way than loading table in parse?
+        table_obj = dataedit_models.Table.objects.get(name=ext_name)
+        schema_name = table_obj.oedb_schema
+
         if schema_name:
             ext_name = schema_name + "." + ext_name
             tkwargs["schema"] = schema_name

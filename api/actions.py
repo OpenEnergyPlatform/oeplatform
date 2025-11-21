@@ -1034,14 +1034,14 @@ def __internal_select(query, context):
 
 
 def __change_rows(
-    request, context, target_sa_table: SATable, setter, fields=None
+    table: Table, request, context, target_sa_table: SATable, setter, fields=None
 ) -> dict:
-    orig_table = read_pgid(request["table"])
+
     query: dict = {
         "from": {
             "type": "table",
-            "schema": read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)),
-            "table": orig_table,
+            "schema": table.oedb_schema,
+            "table": table.name,
         }
     }
 
@@ -1061,10 +1061,9 @@ def __change_rows(
         fields = [field[0] for field in rows["description"]]
     fields += [f[0] for f in meta_fields]
 
-    table_name = orig_table
     meta = MetaData(bind=_get_engine())
     sa_table = SATable(
-        table_name,
+        table.name,
         meta,
         autoload=True,
         schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
@@ -1162,7 +1161,11 @@ def data_insert_check(schema, table: str, values, context):
             for row in values:
                 # TODO: This is horribly inefficient!
                 query = {
-                    "from": {"type": "table", "schema": schema, "table": table},
+                    "from": {
+                        "type": "table",
+                        # "schema": schema,
+                        "table": table,
+                    },
                     "where": {
                         "type": "operator",
                         "operator": "AND",
@@ -1922,7 +1925,9 @@ def data_delete(request: dict, context: dict) -> dict:
         target_meta_sa_table.name, target_meta_sa_table.schema
     )
 
-    result = __change_rows(request, context, target_meta_sa_table, setter, ["id"])
+    result = __change_rows(
+        table_obj, request, context, target_meta_sa_table, setter, ["id"]
+    )
     apply_changes(schema_name, table, cursor)
     return result
 
@@ -1948,7 +1953,7 @@ def data_update(request: dict, context: dict) -> dict:
         field_names = [read_pgid(d["column"]) for d in request["fields"]]
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)  # TODO:
-    result = __change_rows(request, context, target_sa_table, setter)
+    result = __change_rows(table_obj, request, context, target_sa_table, setter)
     apply_changes(schema_name, table, cursor)
     return result
 
