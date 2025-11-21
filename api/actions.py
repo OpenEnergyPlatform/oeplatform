@@ -46,7 +46,6 @@ from sqlalchemy import types as sqltypes
 from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.schema import Sequence
 from sqlalchemy.sql.expression import Select
 
 import dataedit.metadata
@@ -101,17 +100,6 @@ def _create_oedb_session():
     Should only be created once per user request.
     """
     return sessionmaker(bind=_get_engine())()
-
-
-def delete_sequence(sequence: str, schema: str) -> None:
-    seq = Sequence(sequence, schema=schema)
-    seq.drop(bind=_get_engine())
-
-
-def create_sequence(sequence: str, schema: str) -> None:
-    seq = Sequence(sequence, schema=schema)
-    # FIXME: no permission control
-    seq.create(bind=_get_engine())
 
 
 def get_columns_select(columns: list[str]) -> Select:

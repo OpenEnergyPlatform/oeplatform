@@ -62,7 +62,6 @@ from api.views import (
     OekgSparqlAPIView,
     RowsAPIView,
     ScenarioDataTablesListAPIView,
-    SequenceAPIView,
     TableAPIView,
     TableSizeAPIView,
     TableUnpublishAPIView,
@@ -133,14 +132,6 @@ urlpatterns_v0_schema_table = [
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rowcount$",
         table_approx_row_count_view,
         name="approx-row-count",
-    ),
-]
-
-urlpatterns_v0_schema = urlpatterns_v0_schema_table + [
-    re_path(
-        r"^(?P<schema>[\w\d_\s]+)/sequences/(?P<sequence>[\w\d_\s]+)/$",
-        SequenceAPIView.as_view(),
-        # TODO: do we actually use this?
     ),
 ]
 
@@ -282,7 +273,7 @@ urlpatterns_v0_advanced = [
 ]
 
 urlpatterns_v0 = [
-    path("schema/", include(urlpatterns_v0_schema)),
+    path("schema/", include(urlpatterns_v0_schema_table)),
     path("advanced/", include(urlpatterns_v0_advanced)),
     re_path(
         r"^oekg/sparql/?$",

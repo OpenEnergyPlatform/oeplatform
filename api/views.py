@@ -72,13 +72,11 @@ from api.actions import (
     column_add,
     column_alter,
     commit_raw_connection,
-    create_sequence,
     data_delete,
     data_info,
     data_insert,
     data_search,
     data_update,
-    delete_sequence,
     describe_columns,
     describe_constraints,
     describe_indexes,
@@ -183,43 +181,6 @@ from oeplatform.settings import (
     USE_LOEP,
     USE_ONTOP,
 )
-
-
-class SequenceAPIView(APIView):
-    @api_exception
-    def put(self, request: Request, schema: str, sequence: str) -> JsonLikeResponse:
-        schema = validate_schema(schema)
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
-        if request.user.is_anonymous:
-            raise APIError("User is anonymous", 401)
-        if has_table(dict(schema=schema, sequence_name=sequence), {}):
-            raise APIError("Sequence already exists", 409)
-        return JsonResponse(self.__create_sequence(request, schema, sequence))
-
-    @api_exception
-    @require_delete_permission
-    def delete(self, request: Request, schema: str, sequence: str) -> JsonLikeResponse:
-        schema = validate_schema(schema)
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
-        if request.user.is_anonymous:
-            raise APIError("User is anonymous", 401)
-        return JsonResponse(self.__delete_sequence(request, schema, sequence))
-
-    @load_cursor()
-    def __delete_sequence(
-        self, request: Request, schema: str, sequence: str
-    ) -> JsonLikeResponse:
-        delete_sequence(sequence=sequence, schema=schema)
-        return JsonResponse({}, status=status.HTTP_200_OK)
-
-    @load_cursor()
-    def __create_sequence(
-        self, request: Request, schema: str, sequence: str
-    ) -> JsonLikeResponse:
-        create_sequence(sequence=sequence, schema=schema)
-        return JsonResponse({}, status=status.HTTP_201_CREATED)
 
 
 class MetadataAPIView(APIView):
