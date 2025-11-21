@@ -183,7 +183,7 @@ from oeplatform.settings import (
 )
 
 
-class MetadataAPIView(APIView):
+class TableMetadataAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
@@ -421,7 +421,7 @@ class TableAPIView(APIView):
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
-class ColumnAPIView(APIView):
+class TableColumnAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(
@@ -458,7 +458,7 @@ class ColumnAPIView(APIView):
         return JsonResponse({}, status=201)
 
 
-class FieldsAPIView(APIView):
+class TableFieldsAPIView(APIView):
     # TODO: is this really used?
     @api_exception
     @method_decorator(never_cache)
@@ -486,7 +486,7 @@ class FieldsAPIView(APIView):
             return JsonResponse(returnValue, status=200)
 
 
-class MovePublishAPIView(APIView):
+class TableMovePublishAPIView(APIView):
     @api_exception
     @require_admin_permission
     def post(
@@ -514,7 +514,7 @@ class TableUnpublishAPIView(APIView):
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
-class MoveAPIView(APIView):
+class TableMoveAPIView(APIView):
     @api_exception
     @require_admin_permission
     def post(
@@ -524,7 +524,7 @@ class MoveAPIView(APIView):
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
-class RowsAPIView(APIView):
+class TableRowsAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(
@@ -978,7 +978,7 @@ class RowsAPIView(APIView):
 
 
 @api_exception
-def users_api_view(request: Request) -> JsonLikeResponse:
+def usrprop_api_view(request: Request) -> JsonLikeResponse:
     query = request.GET.get("name", "")
 
     # Ensure query is not empty to proceed with filtering
@@ -1003,7 +1003,7 @@ def users_api_view(request: Request) -> JsonLikeResponse:
 
 
 @api_exception
-def groups_api_view(request: Request) -> JsonLikeResponse:
+def grpprop_api_view(request: Request) -> JsonLikeResponse:
     """
     Return all Groups where this user is a member that match
     the current query. The query is input by the User.
@@ -1082,7 +1082,7 @@ class OekgSparqlAPIView(APIView):
 
 
 @api_exception
-def oevkg_search_api_view(request: Request) -> JsonLikeResponse:
+def oevkg_query_api_view(request: Request) -> JsonLikeResponse:
     if USE_ONTOP and ONTOP_SPARQL_ENDPOINT_URL:
         # get query from user request # TODO validate input to prevent sneaky stuff
         try:
@@ -1189,7 +1189,7 @@ def table_approx_row_count_view(
     return JsonResponse(response)
 
 
-class TableSizeAPIView(APIView):
+class AllTableSizesAPIView(APIView):
     """
     GET /api/v0/db/table-sizes/?schema=<schema>&table=<table>
     - schema+table -> single relation (detailed)

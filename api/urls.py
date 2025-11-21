@@ -51,25 +51,25 @@ from api.views import (
     AdvancedSearchAPIView,
     AdvancedSetIsolationLevelAPIView,
     AdvancedUpdateAPIView,
-    ColumnAPIView,
+    AllTableSizesAPIView,
     EnergyframeworkFactsheetListAPIView,
     EnergymodelFactsheetListAPIView,
-    FieldsAPIView,
     ManageOekgScenarioDatasetsAPIView,
-    MetadataAPIView,
-    MoveAPIView,
-    MovePublishAPIView,
     OekgSparqlAPIView,
-    RowsAPIView,
     ScenarioDataTablesListAPIView,
     TableAPIView,
-    TableSizeAPIView,
+    TableColumnAPIView,
+    TableFieldsAPIView,
+    TableMetadataAPIView,
+    TableMoveAPIView,
+    TableMovePublishAPIView,
+    TableRowsAPIView,
     TableUnpublishAPIView,
-    groups_api_view,
+    grpprop_api_view,
     oeo_search_api_view,
-    oevkg_search_api_view,
+    oevkg_query_api_view,
     table_approx_row_count_view,
-    users_api_view,
+    usrprop_api_view,
 )
 
 app_name = "api"
@@ -78,7 +78,7 @@ pgsql_qualifier = r"[\w\d_]+"
 equal_qualifier = r"[\w\d\s\'\=]"
 structures = r"table|sequence"
 
-
+# all endpoints referring to table
 urlpatterns_v0_schema_table = [
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/$",
@@ -87,19 +87,19 @@ urlpatterns_v0_schema_table = [
     ),
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/meta/$",
-        MetadataAPIView.as_view(),
+        TableMetadataAPIView.as_view(),
         name="api_table_meta",
     ),
     # TODO: Remove this endpoint later on - MovePublish includes optional
     # embargo time and marks table as published
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<to_schema>[\w\d_\s]+)/",  # noqa
-        MoveAPIView.as_view(),
+        TableMoveAPIView.as_view(),
         name="move",
     ),
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move_publish/(?P<to_schema>[\w\d_\s]+)/",  # noqa
-        MovePublishAPIView.as_view(),
+        TableMovePublishAPIView.as_view(),
         name="move_publish",
     ),
     re_path(
@@ -109,22 +109,22 @@ urlpatterns_v0_schema_table = [
     ),
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa
-        ColumnAPIView.as_view(),
+        TableColumnAPIView.as_view(),
         name="table-columns",
     ),
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/id/(?P<column_id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
-        FieldsAPIView.as_view(),
+        TableFieldsAPIView.as_view(),
         name="table-fields",
     ),
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",  # noqa
-        RowsAPIView.as_view(),
+        TableRowsAPIView.as_view(),
         name="api_rows",
     ),
     re_path(
         r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$",
-        RowsAPIView.as_view(),
+        TableRowsAPIView.as_view(),
         {"action": "new"},
         name="api_rows_new",
     ),
@@ -300,14 +300,14 @@ urlpatterns_v0 = [
         ManageOekgScenarioDatasetsAPIView.as_view(),
         name="add-scenario-datasets",
     ),
-    path("db/table-sizes/", TableSizeAPIView.as_view(), name="table-sizes"),
+    path("db/table-sizes/", AllTableSizesAPIView.as_view(), name="table-sizes"),
 ]
 
 
 urlpatterns = [
     path("v0/", include(urlpatterns_v0)),
-    path("usrprop/", users_api_view, name="usrprop"),
-    path("grpprop/", groups_api_view, name="grpprop"),
+    path("usrprop/", usrprop_api_view, name="usrprop"),
+    path("grpprop/", grpprop_api_view, name="grpprop"),
     path("oeo-search", oeo_search_api_view, name="oeo-search"),
-    path("oevkg-query", oevkg_search_api_view, name="oevkg-query"),
+    path("oevkg-query", oevkg_query_api_view, name="oevkg-query"),
 ]
