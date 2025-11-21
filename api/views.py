@@ -187,6 +187,7 @@ class TableMetadataAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
     def get(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         metadata = get_table_metadata(schema, table)
         return JsonResponse(metadata)
 
@@ -194,6 +195,7 @@ class TableMetadataAPIView(APIView):
     @require_write_permission
     @load_cursor()
     def post(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         raw_input = request.data
         metadata, error = try_parse_metadata(raw_input)
 
@@ -244,7 +246,7 @@ class TableAPIView(APIView):
         :param request:
         :return:
         """
-
+        table_obj = table_or_404(table=table)
         schema, table = get_table_name(schema, table, restrict_schemas=False)
 
         return JsonResponse(
@@ -266,6 +268,7 @@ class TableAPIView(APIView):
         :param table:
         :return:
         """
+        table_obj = table_or_404(table=table)
         schema = validate_schema(schema)
         if schema.startswith("_"):
             raise APIError("Schema starts with _, which is not allowed")
@@ -389,30 +392,6 @@ class TableAPIView(APIView):
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
-    def validate_column_names(self, column_definitions):
-        """Raise APIError if any column name is invalid"""
-
-        for c in column_definitions:
-            colname = c["name"]
-
-            err_msg = (
-                f"Unsupported column name: '{colname}'\n"
-                "Column name must consist of lowercase alpha-numeric "
-                f"words or underscores and start with a letter. "
-                "It must not start with an underscore or exceed "
-                f"{MAX_COL_NAME_LENGTH} characters "
-                f"(current column name length: {len(colname)})."
-            )
-            if not colname.isidentifier():
-                raise APIError(f"{err_msg}")
-            if re.search(r"[A-Z]", colname) or re.match(r"_", colname):
-                raise APIError(
-                    "Column names must not contain capital letters "
-                    f"or start with an underscore! {err_msg}"
-                )
-            if len(colname) > MAX_COL_NAME_LENGTH:
-                raise APIError(f"Column name is too long! {err_msg}")
-
     @api_exception
     @require_delete_permission
     def delete(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
@@ -427,6 +406,7 @@ class TableColumnAPIView(APIView):
     def get(
         self, request: Request, schema: str, table: str, column: str | None = None
     ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         schema, table = get_table_name(schema, table, restrict_schemas=False)
         response = describe_columns(schema, table)
         if column:
@@ -441,6 +421,7 @@ class TableColumnAPIView(APIView):
     def post(
         self, request: Request, schema: str, table: str, column: str
     ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         schema, table = get_table_name(schema, table)
 
         request_data_dict = get_request_data_dict(request)
@@ -452,6 +433,7 @@ class TableColumnAPIView(APIView):
     def put(
         self, request: Request, schema: str, table: str, column: str
     ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         schema, table = get_table_name(schema, table)
         request_data_dict = get_request_data_dict(request)
         column_add(schema, table, column, request_data_dict["query"])
@@ -470,6 +452,7 @@ class TableFieldsAPIView(APIView):
         column_id: int,
         column: str | None = None,
     ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         schema, table = get_table_name(schema, table, restrict_schemas=False)
         if (
             not parser.is_pg_qual(table)
@@ -492,6 +475,7 @@ class TableMovePublishAPIView(APIView):
     def post(
         self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         # Make payload more friendly as users tend to use the query wrapper in payload
         request_data_dict = get_request_data_dict(request)
         payload_query = request_data_dict.get("query", {})
@@ -508,7 +492,7 @@ class TableUnpublishAPIView(APIView):
     @require_admin_permission
     def post(self, request: HttpRequest, schema: str, table: str) -> JsonLikeResponse:
         """Set table to `not published`"""
-        table_obj = Table.objects.get(name=table)
+        table_obj = table_or_404(table=table)
         table_obj.is_publish = False
         table_obj.save()
         return JsonResponse({}, status=status.HTTP_200_OK)
@@ -520,6 +504,7 @@ class TableMoveAPIView(APIView):
     def post(
         self, request: Request, schema: str, table: str, to_schema: str
     ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         move(schema, table, to_schema)
         return JsonResponse({}, status=status.HTTP_200_OK)
 
@@ -530,6 +515,7 @@ class TableRowsAPIView(APIView):
     def get(
         self, request: Request, schema: str, table: str, row_id: int | None = None
     ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -695,6 +681,7 @@ class TableRowsAPIView(APIView):
         row_id: int | None = None,
         action: str | None = None,
     ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -730,6 +717,7 @@ class TableRowsAPIView(APIView):
         row_id: int | None = None,
         action: str | None = None,
     ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -784,6 +772,7 @@ class TableRowsAPIView(APIView):
     def delete(
         self, request: Request, table: str, schema: str, row_id: int | None = None
     ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
         if check_embargo(schema, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -978,6 +967,21 @@ class TableRowsAPIView(APIView):
 
 
 @api_exception
+def table_approx_row_count_view(
+    request: HttpRequest, table: str, schema: str | None = None
+) -> JsonResponse:
+    table_obj = table_or_404(table=table)
+    precise_below = int(
+        request.GET.get("precise-below", APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW)
+    )
+    approx_row_count = table_get_approx_row_count(
+        table=table_obj, precise_below=precise_below
+    )
+    response = {"data": [[approx_row_count]]}
+    return JsonResponse(response)
+
+
+@api_exception
 def usrprop_api_view(request: Request) -> JsonLikeResponse:
     query = request.GET.get("name", "")
 
@@ -1055,32 +1059,6 @@ def oeo_search_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(res, safe=False)
 
 
-class OekgSparqlAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    @api_exception
-    def post(self, request: Request) -> JsonLikeResponse:
-        request_data_dict = get_request_data_dict(request)
-        payload_query = request_data_dict.get("query", "")
-        response_format = request_data_dict.get("format", "json")  # Default format
-
-        if not validate_public_sparql_query(payload_query):
-            raise ValidationError(
-                "Invalid SPARQL query. Update/delete queries are not allowed."
-            )
-
-        try:
-            content, content_type = execute_sparql_query(payload_query, response_format)
-        except ValueError as e:
-            raise ValidationError(str(e))
-
-        if content_type == "application/sparql-results+json":
-            return Response(content)
-        else:
-            return Response(content, content_type=content_type)
-
-
 @api_exception
 def oevkg_query_api_view(request: Request) -> JsonLikeResponse:
     if USE_ONTOP and ONTOP_SPARQL_ENDPOINT_URL:
@@ -1114,6 +1092,32 @@ def oevkg_query_api_view(request: Request) -> JsonLikeResponse:
         )
     # send back to client
     return JsonResponse(res, safe=False)
+
+
+class OekgSparqlAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @api_exception
+    def post(self, request: Request) -> JsonLikeResponse:
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict.get("query", "")
+        response_format = request_data_dict.get("format", "json")  # Default format
+
+        if not validate_public_sparql_query(payload_query):
+            raise ValidationError(
+                "Invalid SPARQL query. Update/delete queries are not allowed."
+            )
+
+        try:
+            content, content_type = execute_sparql_query(payload_query, response_format)
+        except ValueError as e:
+            raise ValidationError(str(e))
+
+        if content_type == "application/sparql-results+json":
+            return Response(content)
+        else:
+            return Response(content, content_type=content_type)
 
 
 # Energyframework, Energymodel
@@ -1174,21 +1178,6 @@ class ManageOekgScenarioDatasetsAPIView(APIView):
         return Response(response_data, status=status.HTTP_200_OK)
 
 
-@api_exception
-def table_approx_row_count_view(
-    request: HttpRequest, table: str, schema: str | None = None
-) -> JsonResponse:
-    table_obj = Table.objects.get(name=table)
-    precise_below = int(
-        request.GET.get("precise-below", APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW)
-    )
-    approx_row_count = table_get_approx_row_count(
-        table=table_obj, precise_below=precise_below
-    )
-    response = {"data": [[approx_row_count]]}
-    return JsonResponse(response)
-
-
 class AllTableSizesAPIView(APIView):
     """
     GET /api/v0/db/table-sizes/?schema=<schema>&table=<table>
@@ -1202,6 +1191,7 @@ class AllTableSizesAPIView(APIView):
         table = request.query_params.get("table")
 
         if table:
+            table_obj = table_or_404(table=table)
             data = get_single_table_size(table=table)
             if not data:
                 raise APIError(f"Relation {table} not found.", status=404)

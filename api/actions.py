@@ -139,7 +139,7 @@ def get_table_name(
 def table_or_404(table: str) -> Table:
     table_obj = Table.objects.filter(name=table).first()
     if table_obj is None:
-        raise APIError("Table doesnot exist", 401)
+        raise APIError("Table does not exist", 404)
     return table_obj
 
 
@@ -1884,6 +1884,8 @@ def data_insert(request: dict, context: dict) -> dict:
     cursor = load_cursor_from_context(context)
     # If the insert request is not for a meta table, change the request to do so
     table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+
     if table_name.startswith("_") or table_name.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     schema_name = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
@@ -1927,6 +1929,8 @@ def data_insert(request: dict, context: dict) -> dict:
 
 def data_delete(request: dict, context: dict) -> dict:
     orig_table = get_or_403(request, "table")
+    table_obj = table_or_404(table=orig_table)
+
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     orig_schema = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
@@ -1959,6 +1963,8 @@ def data_delete(request: dict, context: dict) -> dict:
 
 def data_update(request: dict, context: dict) -> dict:
     orig_table = read_pgid(get_or_403(request, "table"))
+    table_obj = table_or_404(table=orig_table)
+
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     orig_schema = read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX))
@@ -2061,6 +2067,8 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
     connection: Connection = engine.connect()
 
     table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+
     schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
     schema = validate_schema(schema)
 
@@ -2125,12 +2133,16 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
 
 
 def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
+    table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+
     engine = _get_engine()
     conn = engine.connect()
+
     try:
         result = engine.dialect.get_pk_constraint(
             conn,
-            get_or_403(request, "table"),
+            table_name,
             schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
             **request,
         )
@@ -2142,12 +2154,16 @@ def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
 def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
     engine = _get_engine()
     conn = engine.connect()
+
+    table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+
     if not request.get("schema", None):
         request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
     try:
         result = engine.dialect.get_foreign_keys(
             conn,
-            get_or_403(request, "table"),
+            table_name,
             postgresql_ignore_search_path=request.pop(
                 "postgresql_ignore_search_path", False
             ),
@@ -2160,6 +2176,10 @@ def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
 
 def get_indexes(request: dict, context: dict | None = None) -> dict:
     # TODO can we remove this endpoint
+
+    table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):
@@ -2174,6 +2194,9 @@ def get_indexes(request: dict, context: dict | None = None) -> dict:
 
 
 def get_unique_constraints(request: dict, context: dict | None = None) -> dict:
+    table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+
     engine = _get_engine()
     conn = engine.connect()
     if not request.get("schema", None):

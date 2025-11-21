@@ -30,7 +30,7 @@ class TestViewsDataedit(TestViewsTestCase):
         super(TestViewsDataedit, cls).setUpClass()
 
         # create a test table
-        # ensure test table doesnot exist
+        # ensure test table does not exist
         cls.table = Table.create_with_oedb_table(
             is_sandbox=True,  # tests ALWAYS in sandbox
             name=cls.kwargs_w_table["table"],
