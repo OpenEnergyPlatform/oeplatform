@@ -26,7 +26,6 @@ from dataedit.views import (
     TablePeerReviewView,
     TablePeerRreviewContributorView,
     TablePermissionView,
-    TableRevisionView,
     TableWizardView,
     admin_column_view,
     admin_constraints_view,
@@ -57,11 +56,6 @@ urlpatterns_view_schema = [
         r"^(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
         TableDataView.as_view(),
         name="view",
-    ),
-    re_path(
-        r"^(?P<schema>{qual})/(?P<table>{qual})/download$".format(qual=pgsql_qualifier),
-        TableRevisionView.as_view(),
-        name="table-revision-download",  # TODO: do we actually need this?
     ),
     re_path(
         r"^(?P<schema>{qual})/(?P<table>{qual})/permissions$".format(

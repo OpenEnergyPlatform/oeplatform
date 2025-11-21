@@ -96,9 +96,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import (
-    Embargo,
-)
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -1601,9 +1599,3 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             current_opr.update(review_type=review_post_type)
 
         return render(request, "dataedit/opr_contributor.html", context=context)
-
-
-class TableRevisionView(View):
-    def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
-        # TODO: why is this a redirect to API? do we still need it?
-        return redirect("api:api_rows", schema=schema, table=table)
