@@ -440,6 +440,7 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
             "tables_paginated": tables_paginated,
             "query": searched_query_string,
             "tags": searched_tag_ids,
+            "topic": topic,
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
         },
     )

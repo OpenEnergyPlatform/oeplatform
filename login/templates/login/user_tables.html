@@ -443,7 +443,7 @@
         .reverseUrl("api:move_publish", {
           schema: schema,
           table: tableName,
-          to_schema: toSchema,
+          topic: toSchema,
         })
         .then((apiUrl) => {
           return fetch(apiUrl, {

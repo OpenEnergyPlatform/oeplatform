@@ -49,7 +49,7 @@
                           </select>
                         </label>
                         <button class="btn btn-secondary confirm-publish"
-                                hx-post="{% url 'api:move_publish' schema=table.schema table=table.name to_schema=toSchema %}"
+                                hx-post="{% url 'api:move_publish' schema=table.schema table=table.name topic=toSchema %}"
                                 hx-target="#tableContainer"
                                 hx-swap="outerHTML"
                                 hx-include="#publish-options-{{ table.name }}">

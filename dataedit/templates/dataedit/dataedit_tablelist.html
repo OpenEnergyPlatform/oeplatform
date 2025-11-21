@@ -29,7 +29,7 @@
     <tbody>
       {% for table in tables_paginated %}
         <tr>
-          <td onclick="window.open('{% url 'dataedit:tables' topic=schema %}/{{ table.name }}', name='_blank')">
+          <td onclick="window.open('{% url 'dataedit:view' schema=table.oedb_schema table=table.name %}', name='_blank')">
             {% if table.human_readable_name %}
               {{ table.human_readable_name }}
             {% else %}
@@ -42,7 +42,7 @@
           <td>
             {% for tag in table.tags.all %}
               <a class="btn tag"
-                 href="{% url 'dataedit:tables' topic=schema %}?query=&tags={{ tag.pk }}"
+                 href="{% url 'dataedit:tables' topic=topic %}?query=&tags={{ tag.pk }}"
                  style="background:{{ tag.color_hex }};
                         color:{% readable_text_color tag.color_hex %}">{{ tag.name }}</a>
             {% endfor %}
