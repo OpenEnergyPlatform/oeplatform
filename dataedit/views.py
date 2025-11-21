@@ -96,7 +96,9 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import (
+    Embargo,
+)
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -234,61 +236,6 @@ def topic_view(request: HttpRequest) -> HttpResponse:
     )
 
 
-def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
-    """
-    :param request: A HTTP-request object sent by the Django framework
-    :param schema_name: Name of a schema
-    :return: Renders the list of all tables in the specified schema
-    """
-
-    searched_query_string = request.GET.get("query")
-    searched_tag_ids = request.GET.getlist("tags")
-
-    Tag.increment_usage_count_many(searched_tag_ids)
-
-    # find all tables (layzy query set) in this schema
-    tables = find_tables(
-        topic_name=schema,
-        query_string=searched_query_string,
-        tag_ids=searched_tag_ids,
-    )
-
-    tables = tables.order_by(
-        F("date_updated").desc(nulls_last=True), "human_readable_name"
-    )
-
-    # paginate tables
-    paginator = Paginator(tables, ITEMS_PER_PAGE)
-    tables_paginated = paginator.get_page(get_page(request))
-
-    return render(
-        request,
-        "dataedit/dataedit_tablelist.html",
-        {
-            "schema": schema,
-            "tables_paginated": tables_paginated,
-            "query": searched_query_string,
-            "tags": searched_tag_ids,
-            "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
-        },
-    )
-
-
-class TableRevisionView(View):
-    def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
-        # TODO: why is this a redirect to API? do we still need it?
-        return redirect("api:api_rows", schema=schema, table=table)
-
-
-def table_show_revision_view(
-    request: HttpRequest, schema: str, table: str, date: str
-) -> HttpResponse:
-    rev = TableRevision.objects.get(schema=schema, table=table, date=date)
-    rev.last_accessed = timezone.now()
-    rev.save()
-    return send_dump(schema, table, date)
-
-
 @login_required
 def tag_overview_view(request: HttpRequest) -> HttpResponse:
     # if rename or adding of tag fails: display error message
@@ -351,6 +298,145 @@ def tag_update_view(request: HttpRequest) -> HttpResponse:
         delete_tag(id)
 
     return redirect(reverse("dataedit:tags") + f"?status={status}")
+
+
+@require_POST
+@login_required
+def tag_table_add_view(request: HttpRequest) -> HttpResponse:
+    """
+    Updates the tags on a table according to the tag values in request.
+    The update will delete all tags that are not present
+    in request and add all tags that are.
+
+    :param request: A HTTP-request object sent by the Django framework.
+        The *POST* field must contain the following values:
+        * schema: The name of a schema
+        * table: The name of a table
+        * Any number of values that start with 'tag_' followed by the id of a tag.
+    :return: Redirects to the previous page
+    """
+    table = get_or_403(request.POST, "table")
+    table_obj = table_or_404(table=table)
+    schema_name = table_obj.oedb_schema
+
+    try:
+        # check write permission
+        assert_add_tag_permission(
+            request.user, table, login.permissions.WRITE_PERM, schema=schema_name
+        )
+        tag_prefix = "tag_"
+        tag_prefix_len = len(tag_prefix)
+        tag_ids = {
+            field[tag_prefix_len:]
+            for field in request.POST
+            if field.startswith(tag_prefix)
+        }
+        tags = Tag.objects.filter(pk__in=tag_ids)
+        table_obj = Table.objects.get(name=table)
+        table_obj.tags.clear()
+        for tag in tags:
+            table_obj.tags.add(tag)
+        # TODO: we already do save in update_keywords_from_tags further down
+        table_obj.save()
+
+        update_keywords_from_tags(table_obj, schema=schema_name)
+
+        messages.success(
+            request,
+            (
+                "Successfully updated table tags! "
+                "Please note that OEMetadata keywords and table tags are synchronized. "
+                "When submitting new tags, you may notice automatic changes to the "
+                'table tags on the OEP and/or the "Keywords" field in the metadata.'
+            ),
+        )
+    except APIError as exp:
+        messages.error(request, str(exp))
+    except Exception:
+        # generic error message
+        messages.error(request, "Something went wrong")
+
+    redirect_url = request.META.get("HTTP_REFERER") or reverse("dataedit:index")
+    return redirect(redirect_url)
+
+
+def metadata_widget_view(request: HttpRequest) -> HttpResponse:
+    """
+    A view to render the metadata widget for the dataedit app.
+    The metadata widget is a small widget that can be embedded in other
+    applications to display metadata information.
+
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+
+    Returns:
+        HttpResponse: Rendered HTML response for the metadata widget.
+    """
+    # TODO: schema and table should be in path?
+    schema = request.GET.get("schema")
+    table = request.GET.get("table")
+
+    if schema is None or table is None:
+        return JsonResponse(
+            {"error": "Schema and table parameters are required."}, status=400
+        )
+
+    context = {
+        "meta_api": reverse(
+            "api:api_table_meta", kwargs={"schema": schema, "table": table}
+        )
+    }
+
+    return render(request, "partials/metadata_viewer.html", context=context)
+
+
+def tables_view(request: HttpRequest, schema: str) -> HttpResponse:
+    """
+    :param request: A HTTP-request object sent by the Django framework
+    :param schema_name: Name of a schema
+    :return: Renders the list of all tables in the specified schema
+    """
+
+    searched_query_string = request.GET.get("query")
+    searched_tag_ids = request.GET.getlist("tags")
+
+    Tag.increment_usage_count_many(searched_tag_ids)
+
+    # find all tables (layzy query set) in this schema
+    tables = find_tables(
+        topic_name=schema,
+        query_string=searched_query_string,
+        tag_ids=searched_tag_ids,
+    )
+
+    tables = tables.order_by(
+        F("date_updated").desc(nulls_last=True), "human_readable_name"
+    )
+
+    # paginate tables
+    paginator = Paginator(tables, ITEMS_PER_PAGE)
+    tables_paginated = paginator.get_page(get_page(request))
+
+    return render(
+        request,
+        "dataedit/dataedit_tablelist.html",
+        {
+            "schema": schema,
+            "tables_paginated": tables_paginated,
+            "query": searched_query_string,
+            "tags": searched_tag_ids,
+            "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
+        },
+    )
+
+
+def table_show_revision_view(
+    request: HttpRequest, schema: str, table: str, date: str
+) -> HttpResponse:
+    rev = TableRevision.objects.get(schema=schema, table=table, date=date)
+    rev.last_accessed = timezone.now()
+    rev.save()
+    return send_dump(schema, table, date)
 
 
 @require_POST
@@ -878,66 +964,6 @@ class TablePermissionView(View):
         )
         p.delete()
         return self.get(request, schema, table)
-
-
-@require_POST
-@login_required
-def tag_table_add_view(request: HttpRequest) -> HttpResponse:
-    """
-    Updates the tags on a table according to the tag values in request.
-    The update will delete all tags that are not present
-    in request and add all tags that are.
-
-    :param request: A HTTP-request object sent by the Django framework.
-        The *POST* field must contain the following values:
-        * schema: The name of a schema
-        * table: The name of a table
-        * Any number of values that start with 'tag_' followed by the id of a tag.
-    :return: Redirects to the previous page
-    """
-    table = get_or_403(request.POST, "table")
-    table_obj = table_or_404(table=table)
-    schema_name = table_obj.oedb_schema
-
-    try:
-        # check write permission
-        assert_add_tag_permission(
-            request.user, table, login.permissions.WRITE_PERM, schema=schema_name
-        )
-        tag_prefix = "tag_"
-        tag_prefix_len = len(tag_prefix)
-        tag_ids = {
-            field[tag_prefix_len:]
-            for field in request.POST
-            if field.startswith(tag_prefix)
-        }
-        tags = Tag.objects.filter(pk__in=tag_ids)
-        table_obj = Table.objects.get(name=table)
-        table_obj.tags.clear()
-        for tag in tags:
-            table_obj.tags.add(tag)
-        # TODO: we already do save in update_keywords_from_tags further down
-        table_obj.save()
-
-        update_keywords_from_tags(table_obj, schema=schema_name)
-
-        messages.success(
-            request,
-            (
-                "Successfully updated table tags! "
-                "Please note that OEMetadata keywords and table tags are synchronized. "
-                "When submitting new tags, you may notice automatic changes to the "
-                'table tags on the OEP and/or the "Keywords" field in the metadata.'
-            ),
-        )
-    except APIError as exp:
-        messages.error(request, str(exp))
-    except Exception:
-        # generic error message
-        messages.error(request, "Something went wrong")
-
-    redirect_url = request.META.get("HTTP_REFERER") or reverse("dataedit:index")
-    return redirect(redirect_url)
 
 
 class TableWizardView(LoginRequiredMixin, View):
@@ -1577,31 +1603,7 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         return render(request, "dataedit/opr_contributor.html", context=context)
 
 
-def metadata_widget_view(request: HttpRequest) -> HttpResponse:
-    """
-    A view to render the metadata widget for the dataedit app.
-    The metadata widget is a small widget that can be embedded in other
-    applications to display metadata information.
-
-    Args:
-        request (HttpRequest): The incoming HTTP request.
-
-    Returns:
-        HttpResponse: Rendered HTML response for the metadata widget.
-    """
-    # TODO: schema and table should be in path?
-    schema = request.GET.get("schema")
-    table = request.GET.get("table")
-
-    if schema is None or table is None:
-        return JsonResponse(
-            {"error": "Schema and table parameters are required."}, status=400
-        )
-
-    context = {
-        "meta_api": reverse(
-            "api:api_table_meta", kwargs={"schema": schema, "table": table}
-        )
-    }
-
-    return render(request, "partials/metadata_viewer.html", context=context)
+class TableRevisionView(View):
+    def get(self, request: HttpRequest, schema: str, table: str) -> HttpResponse:
+        # TODO: why is this a redirect to API? do we still need it?
+        return redirect("api:api_rows", schema=schema, table=table)
