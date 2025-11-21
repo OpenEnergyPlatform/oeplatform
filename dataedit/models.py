@@ -221,9 +221,16 @@ class Table(Tagable):
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
 
+    def get_metadata(self) -> dict:
+        return self.oemetadata or {}
+
     @property
     def oedb_schema(self) -> str:
-        return SCHEMA_DEFAULT_TEST_SANDBOX if self.is_sandbox else SCHEMA_DATA
+        return self.get_oedb_schema(is_sandbox=self.is_sandbox)
+
+    @classmethod
+    def get_oedb_schema(cls, is_sandbox: bool) -> str:
+        return SCHEMA_DEFAULT_TEST_SANDBOX if is_sandbox else SCHEMA_DATA
 
     @classmethod
     def create_with_oedb_table(

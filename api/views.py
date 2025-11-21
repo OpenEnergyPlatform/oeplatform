@@ -100,8 +100,6 @@ from api.actions import (
     get_response_dict,
     get_schema_names,
     get_single_table_size,
-    get_table_metadata,
-    get_table_name,
     get_table_names,
     get_unique_constraints,
     get_view_definition,
@@ -159,14 +157,13 @@ from api.services.embargo import (
     apply_embargo,
     parse_embargo_payload,
 )
-from api.utils import get_dataset_configs, request_data_dict, validate_schema
+from api.utils import get_dataset_configs, request_data_dict
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_table_name
 from dataedit.models import Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oedb.connection import _get_engine
-from oedb.utils import MAX_COL_NAME_LENGTH
 from oekg.utils import (
     execute_sparql_query,
     process_datasets_sparql_query,
@@ -177,7 +174,6 @@ from oeplatform.settings import (
     DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL,
     IS_TEST,
     ONTOP_SPARQL_ENDPOINT_URL,
-    SCHEMA_DEFAULT_TEST_SANDBOX,
     USE_LOEP,
     USE_ONTOP,
 )
@@ -188,7 +184,7 @@ class TableMetadataAPIView(APIView):
     @method_decorator(never_cache)
     def get(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
-        metadata = get_table_metadata(schema, table)
+        metadata = table_obj.get_metadata()
         return JsonResponse(metadata)
 
     @api_exception
@@ -196,6 +192,7 @@ class TableMetadataAPIView(APIView):
     @load_cursor()
     def post(self, request: Request, schema: str, table: str) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
+
         raw_input = request.data
         metadata, error = try_parse_metadata(raw_input)
 
@@ -209,14 +206,14 @@ class TableMetadataAPIView(APIView):
             # TODO make this iter over all resources
             keywords = metadata["resources"][0].get("keywords", []) or []
             metadata["resources"][0]["keywords"] = update_tags_from_keywords(
-                table=table, keywords=keywords
+                table=table_obj.name, keywords=keywords
             )
 
             # make sure extra metadata is removed
             metadata.pop("connection_id", None)
             metadata.pop("cursor_id", None)
 
-            set_table_metadata(table=table, metadata=metadata)
+            set_table_metadata(table=table_obj.name, metadata=metadata)
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
@@ -247,15 +244,15 @@ class TableAPIView(APIView):
         :return:
         """
         table_obj = table_or_404(table=table)
-        schema, table = get_table_name(schema, table, restrict_schemas=False)
+        schema_name = table_obj.oedb_schema
 
         return JsonResponse(
             {
-                "schema": schema,
+                "schema": schema_name,  # TODO: return nothing
                 "name": table,
-                "columns": describe_columns(schema, table),
-                "indexed": describe_indexes(schema, table),
-                "constraints": describe_constraints(schema, table),
+                "columns": describe_columns(schema_name, table),
+                "indexed": describe_indexes(schema_name, table),
+                "constraints": describe_constraints(schema_name, table),
             }
         )
 
@@ -269,16 +266,15 @@ class TableAPIView(APIView):
         :return:
         """
         table_obj = table_or_404(table=table)
-        schema = validate_schema(schema)
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
+        schema_name = table_obj.oedb_schema
+
         request_data_dict = get_request_data_dict(request)
 
         if "column" in request_data_dict["type"]:
             column_definition = api.parser.parse_scolumnd_from_columnd(
-                schema, table, request_data_dict["name"], request_data_dict
+                schema_name, table, request_data_dict["name"], request_data_dict
             )
-            result = queue_column_change(schema, table, column_definition)
+            result = queue_column_change(schema_name, table, column_definition)
             return ModJsonResponse(result)
 
         elif "constraint" in request_data_dict["type"]:
@@ -299,7 +295,7 @@ class TableAPIView(APIView):
                 "reference_column": request_data_dict.get("reference_column"),
             }
 
-            result = queue_constraint_change(schema, table, constraint_definition)
+            result = queue_constraint_change(schema_name, table, constraint_definition)
             return ModJsonResponse(result)
         else:
             return ModJsonResponse(get_response_dict(False, 400, "type not recognised"))
@@ -328,17 +324,28 @@ class TableAPIView(APIView):
             JsonResponse: A JSON response with the status code 201 CREATED
 
         """
-        schema = validate_schema(schema)
-        # 1) Basic schema checks
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
-        if has_table({"schema": schema, "table": table}, {}):
-            raise APIError("Table already exists", 409)
+
+        # 1) Basic schema checks
+        # during tests, is_sandbox must be true
+        # otherwise: can be set as ?is_sandbox=
+        if (
+            IS_TEST
+            # or schema == SCHEMA_DEFAULT_TEST_SANDBOX
+            or request.GET.get("is_sandbox")
+        ):
+            is_sandbox = True
+        else:
+            is_sandbox = False
+
+        schema_name = Table.get_oedb_schema(is_sandbox=is_sandbox)
 
         # 2) Validate identifiers
         assert_valid_table_name(table)
+
+        if has_table({"table": table}):
+            raise APIError("Table already exists", 409)
 
         # 3) Parse and validate payload
         request_data_dict = get_request_data_dict(request)
@@ -347,12 +354,12 @@ class TableAPIView(APIView):
         if not columns:
             raise APIError("Table contains no columns")
         for col in columns:
-            col.update({"c_schema": schema, "c_table": table})
+            col.update({"c_schema": schema_name, "c_table": table})
         validate_column_names(columns)
 
         constraints = payload_query.get("constraints", [])
         for cons in constraints:
-            cons.update({"action": "ADD", "c_schema": schema, "c_table": table})
+            cons.update({"action": "ADD", "c_schema": schema_name, "c_table": table})
 
         embargo_data = request_data_dict.get("embargo") or payload_query.get(
             "embargo", {}
@@ -361,17 +368,6 @@ class TableAPIView(APIView):
             embargo_required = parse_embargo_payload(embargo_data)
         except EmbargoValidationError as e:
             raise APIError(str(e))
-
-        # during tests, is_sandbox must be true
-        # otherwise: can be set as ?is_sandbox=
-        if (
-            IS_TEST
-            or schema == SCHEMA_DEFAULT_TEST_SANDBOX
-            or request.GET.get("is_sandbox")
-        ):
-            is_sandbox = True
-        else:
-            is_sandbox = False
 
         table_obj = Table.create_with_oedb_table(
             name=table,
@@ -407,8 +403,9 @@ class TableColumnAPIView(APIView):
         self, request: Request, schema: str, table: str, column: str | None = None
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
-        schema, table = get_table_name(schema, table, restrict_schemas=False)
-        response = describe_columns(schema, table)
+        schema_name = table_obj.oedb_schema
+
+        response = describe_columns(schema_name, table)
         if column:
             try:
                 response = response[column]
@@ -422,10 +419,12 @@ class TableColumnAPIView(APIView):
         self, request: Request, schema: str, table: str, column: str
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
-        schema, table = get_table_name(schema, table)
+        schema_name = table_obj.oedb_schema
 
         request_data_dict = get_request_data_dict(request)
-        response = column_alter(request_data_dict["query"], {}, schema, table, column)
+        response = column_alter(
+            request_data_dict["query"], {}, schema_name, table, column
+        )
         return JsonResponse(response)
 
     @api_exception
@@ -434,9 +433,9 @@ class TableColumnAPIView(APIView):
         self, request: Request, schema: str, table: str, column: str
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
-        schema, table = get_table_name(schema, table)
+        schema_name = table_obj.oedb_schema
         request_data_dict = get_request_data_dict(request)
-        column_add(schema, table, column, request_data_dict["query"])
+        column_add(schema_name, table, column, request_data_dict["query"])
         return JsonResponse({}, status=201)
 
 
@@ -453,16 +452,17 @@ class TableFieldsAPIView(APIView):
         column: str | None = None,
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
-        schema, table = get_table_name(schema, table, restrict_schemas=False)
+        schema_name = table_obj.oedb_schema
+
         if (
             not parser.is_pg_qual(table)
-            or not parser.is_pg_qual(schema)
+            or not parser.is_pg_qual(schema_name)
             or not parser.is_pg_qual(column_id)
             or not parser.is_pg_qual(column)
         ):
             return ModJsonResponse({"error": "Bad Request", "http_status": 400})
 
-        returnValue = getValue(schema, table, column, column_id)
+        returnValue = getValue(schema_name, table, column, column_id)
         if returnValue is None:
             return JsonResponse({}, status=404)
         else:
@@ -473,16 +473,18 @@ class TableMovePublishAPIView(APIView):
     @api_exception
     @require_admin_permission
     def post(
-        self, request: Request, schema: str, table: str, to_schema: str
+        self, request: Request, schema: str, table: str, topic: str
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
+        schema_name = table_obj.oedb_schema
+
         # Make payload more friendly as users tend to use the query wrapper in payload
         request_data_dict = get_request_data_dict(request)
         payload_query = request_data_dict.get("query", {})
         embargo_period = request_data_dict.get("embargo", {}).get(
             "duration", None
         ) or payload_query.get("embargo", {}).get("duration", None)
-        move_publish(schema, table, to_schema, embargo_period)
+        move_publish(schema_name, table, topic, embargo_period)
 
         return JsonResponse({}, status=status.HTTP_200_OK)
 
@@ -502,10 +504,11 @@ class TableMoveAPIView(APIView):
     @api_exception
     @require_admin_permission
     def post(
-        self, request: Request, schema: str, table: str, to_schema: str
+        self, request: Request, schema: str, table: str, topic: str
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
-        move(schema, table, to_schema)
+        schema_name = table_obj.oedb_schema
+        move(schema_name, table, topic)
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
@@ -516,13 +519,14 @@ class TableRowsAPIView(APIView):
         self, request: Request, schema: str, table: str, row_id: int | None = None
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
-        if check_embargo(schema, table):
+        schema_name = table_obj.oedb_schema
+
+        if check_embargo(schema_name, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
                 status=403,
             )
 
-        schema, table = get_table_name(schema, table, restrict_schemas=False)
         columns = request.GET.getlist("column")
 
         where = request.GET.getlist("where")
@@ -578,7 +582,7 @@ class TableRowsAPIView(APIView):
 
         # TODO: Validate where_clauses. Should not be vulnerable
         data = {
-            "schema": schema,
+            "schema": schema_name,
             "table": table,
             "columns": columns,
             "where": where_clauses,
@@ -618,16 +622,14 @@ class TableRowsAPIView(APIView):
                 session=session,
             )
             response["Content-Disposition"] = (
-                'attachment; filename="{schema}__{table}.csv"'.format(
-                    schema=schema, table=table
-                )
+                'attachment; filename="{table}.csv"'.format(table=table)
             )
             return response
         elif format == "datapackage":
             pseudo_buffer = Echo()
             writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
             zf = zipstream.ZipFile(mode="w", compression=zipstream.ZIP_DEFLATED)
-            csv_name = "{schema}__{table}.csv".format(schema=schema, table=table)
+            csv_name = "{table}.csv".format(table=table)
             zf.write_iter(
                 csv_name,
                 (
@@ -652,9 +654,7 @@ class TableRowsAPIView(APIView):
                 session=session,
             )
             response["Content-Disposition"] = (
-                'attachment; filename="{schema}__{table}.zip"'.format(
-                    schema=schema, table=table
-                )
+                'attachment; filename="{table}.zip"'.format(table=table)
             )
             return response
         else:
@@ -682,29 +682,32 @@ class TableRowsAPIView(APIView):
         action: str | None = None,
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
-        if check_embargo(schema, table):
+        schema_name = table_obj.oedb_schema
+
+        if check_embargo(schema_name, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
                 status=403,
             )
 
-        schema, table = get_table_name(schema, table)
         request_data_dict = get_request_data_dict(request)
         payload_query = request_data_dict["query"]
         status_code = status.HTTP_200_OK
         if row_id:
-            response = self.__update_rows(request, schema, table, payload_query, row_id)
+            response = self.__update_rows(
+                request, schema_name, table, payload_query, row_id
+            )
         else:
             if action == "new":
                 response = self.__insert_row(
-                    request, schema, table, payload_query, row_id
+                    request, schema_name, table, payload_query, row_id
                 )
                 status_code = status.HTTP_201_CREATED
             else:
                 response = self.__update_rows(
-                    request, schema, table, payload_query, None
+                    request, schema_name, table, payload_query, None
                 )
-        apply_changes(schema, table)
+        apply_changes(schema_name, table)
         return stream(response, status_code=status_code)
 
     @api_exception
@@ -718,7 +721,9 @@ class TableRowsAPIView(APIView):
         action: str | None = None,
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
-        if check_embargo(schema, table):
+        schema_name = table_obj.oedb_schema
+
+        if check_embargo(schema_name, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
                 status=403,
@@ -729,7 +734,7 @@ class TableRowsAPIView(APIView):
                 "This request type (PUT) is not supported. The "
                 "'new' statement is only possible in POST requests."
             )
-        schema, table = get_table_name(schema, table)
+
         if not row_id:
             return JsonResponse(
                 _response_error("This methods requires an id"),
@@ -753,18 +758,22 @@ class TableRowsAPIView(APIView):
         resp = engine_execute(
             engine,
             'select count(*) from "{schema}"."{table}" where id = {id};'.format(
-                schema=schema, table=table, id=row_id
+                schema=schema_name, table=table, id=row_id
             ),
         ).first()
         count = resp[0] if resp else 0
         exists = count > 0 if row_id else False
         if exists:
-            response = self.__update_rows(request, schema, table, payload_query, row_id)
-            apply_changes(schema, table)
+            response = self.__update_rows(
+                request, schema_name, table, payload_query, row_id
+            )
+            apply_changes(schema_name, table)
             return JsonResponse(response)
         else:
-            result = self.__insert_row(request, schema, table, payload_query, row_id)
-            apply_changes(schema, table)
+            result = self.__insert_row(
+                request, schema_name, table, payload_query, row_id
+            )
+            apply_changes(schema_name, table)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
     @api_exception
@@ -773,15 +782,16 @@ class TableRowsAPIView(APIView):
         self, request: Request, table: str, schema: str, row_id: int | None = None
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
-        if check_embargo(schema, table):
+        schema_name = table_obj.oedb_schema
+
+        if check_embargo(schema_name, table):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
                 status=403,
             )
 
-        schema, table = get_table_name(schema, table)
-        result = self.__delete_rows(request, schema, table, row_id)
-        apply_changes(schema, table)
+        result = self.__delete_rows(request, schema_name, table, row_id)
+        apply_changes(schema_name, table)
         return JsonResponse(result)
 
     @load_cursor()
@@ -1192,7 +1202,7 @@ class AllTableSizesAPIView(APIView):
 
         if table:
             table_obj = table_or_404(table=table)
-            data = get_single_table_size(table=table)
+            data = get_single_table_size(table=table_obj.name)
             if not data:
                 raise APIError(f"Relation {table} not found.", status=404)
             return Response(data)

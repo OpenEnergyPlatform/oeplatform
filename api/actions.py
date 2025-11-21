@@ -31,9 +31,8 @@ from typing import cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
-from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
-from django.http import Http404, HttpRequest
+from django.http import HttpRequest
 from omi.base import get_metadata_version
 from omi.conversion import convert_metadata
 from omi.validation import ValidationError, parse_metadata, validate_metadata
@@ -119,21 +118,6 @@ def get_column_obj(sa_table: SATable, column: str):
         return getattr(tc, column)
     except AttributeError:
         raise APIError("Column '%s' does not exist." % column)
-
-
-def get_table_name(
-    schema: str | None, table: str, restrict_schemas: bool = True
-) -> tuple[str, str]:
-    schema = validate_schema(schema)
-
-    if not has_schema(dict(schema=schema)):
-        raise Http404
-    if not has_table(dict(schema=schema, table=table)):
-        raise Http404
-    if schema.startswith("_") or schema == "public" or schema is None:
-        raise PermissionDenied
-
-    return schema, table
 
 
 def table_or_404(table: str) -> Table:
@@ -1024,17 +1008,12 @@ ACTIONS FROM OLD API
 """
 
 
-def _get_table(schema, table) -> SATable:
+def _get_table(schema: str, table: str) -> SATable:
+    # TODO: ensure table and schema are validated
     engine = _get_engine()
     metadata = MetaData(bind=_get_engine())
 
     return SATable(table, metadata, autoload=True, autoload_with=engine, schema=schema)
-
-
-def get_table_metadata(schema: str, table: str) -> dict:
-    django_obj = Table.load(name=table)
-    oemetadata = django_obj.oemetadata
-    return oemetadata if oemetadata else {}
 
 
 def __internal_select(query, context):
@@ -1310,7 +1289,7 @@ def clear_dict(d):
     }
 
 
-def move(from_schema, table: str, to_schema):
+def move(from_schema, table: str, topic):
     """
     Implementation note:
         Currently we implemented two versions of the move functionality
@@ -1319,12 +1298,12 @@ def move(from_schema, table: str, to_schema):
     move_publish(
         from_schema=from_schema,
         table=table,
-        to_schema=to_schema,
+        topic=topic,
         embargo_period="none",
     )
 
 
-def move_publish(from_schema, table: str, to_schema, embargo_period):
+def move_publish(from_schema, table: str, topic, embargo_period):
     """
     The issue about publishing datatables  in the context of the OEP
     is that tables must be moved physically in the postgreSQL database.
@@ -1389,9 +1368,9 @@ def move_publish(from_schema, table: str, to_schema, embargo_period):
     all_peer_reviews = PeerReview.objects.filter(table=table_obj)
 
     for peer_review in all_peer_reviews:
-        peer_review.update_all_table_peer_reviews_after_table_moved(topic=to_schema)
+        peer_review.update_all_table_peer_reviews_after_table_moved(topic=topic)
 
-    table_obj.set_is_published(topic_name=to_schema)
+    table_obj.set_is_published(topic_name=topic)
 
 
 def connect():
@@ -1885,12 +1864,7 @@ def data_insert(request: dict, context: dict) -> dict:
     # If the insert request is not for a meta table, change the request to do so
     table_name = get_or_403(request, "table")
     table_obj = table_or_404(table=table_name)
-
-    if table_name.startswith("_") or table_name.endswith("_cor"):
-        raise APIError("Insertions on meta tables is not allowed", status=403)
-    schema_name = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-
-    schema_name, table_name = get_table_name(schema_name, table_name)
+    schema_name = table_obj.oedb_schema
 
     assert_permission(user=context["user"], table=table_name, permission=WRITE_PERM)
 
@@ -1928,24 +1902,16 @@ def data_insert(request: dict, context: dict) -> dict:
 
 
 def data_delete(request: dict, context: dict) -> dict:
-    orig_table = get_or_403(request, "table")
-    table_obj = table_or_404(table=orig_table)
-
-    if orig_table.startswith("_") or orig_table.endswith("_cor"):
-        raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-
-    schema, table = get_table_name(orig_schema, orig_table)
-
-    if schema is None:
-        schema = SCHEMA_DEFAULT_TEST_SANDBOX
+    table = get_or_403(request, "table")
+    table_obj = table_or_404(table=table)
+    schema_name = table_obj.oedb_schema
 
     assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
     target_meta_sa_table = (
-        Table.objects.get(name=orig_table)
+        Table.objects.get(name=table)
         .get_oeb_table_proxy(user=None)
         ._delete_table.get_sa_table()
     )
@@ -1957,28 +1923,21 @@ def data_delete(request: dict, context: dict) -> dict:
     )
 
     result = __change_rows(request, context, target_meta_sa_table, setter, ["id"])
-    apply_changes(schema, table, cursor)
+    apply_changes(schema_name, table, cursor)
     return result
 
 
 def data_update(request: dict, context: dict) -> dict:
-    orig_table = read_pgid(get_or_403(request, "table"))
-    table_obj = table_or_404(table=orig_table)
-
-    if orig_table.startswith("_") or orig_table.endswith("_cor"):
-        raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX))
-    schema, table = get_table_name(orig_schema, orig_table)
-
-    if schema is None:
-        schema = SCHEMA_DEFAULT_TEST_SANDBOX
+    table = read_pgid(get_or_403(request, "table"))
+    table_obj = table_or_404(table=table)
+    schema_name = table_obj.oedb_schema
 
     assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
     target_sa_table = (
-        Table.objects.get(name=orig_table)
+        Table.objects.get(name=table)
         .get_oeb_table_proxy(user=None)
         ._edit_table.get_sa_table()
     )
@@ -1990,7 +1949,7 @@ def data_update(request: dict, context: dict) -> dict:
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)  # TODO:
     result = __change_rows(request, context, target_sa_table, setter)
-    apply_changes(schema, table, cursor)
+    apply_changes(schema_name, table, cursor)
     return result
 
 
@@ -2001,6 +1960,7 @@ def has_table(request: dict, context: dict | None = None) -> bool:
 
 def has_sequence(request: dict, context: dict | None = None) -> bool:
     # TODO can we remove this endpoint
+    raise Exception()
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -2016,6 +1976,7 @@ def has_sequence(request: dict, context: dict | None = None) -> bool:
 
 def has_type(request: dict, context: dict | None = None) -> bool:
     # TODO can we remove this endpoint
+    raise Exception()
     engine = _get_engine()
     conn = engine.connect()
     try:
@@ -2031,35 +1992,12 @@ def has_type(request: dict, context: dict | None = None) -> bool:
 
 def get_view_names(request: dict, context: dict | None = None) -> list[str]:
     return []
-    # TODO: can we remove this endpoint?
-    # engine = _get_engine()
-    # conn = engine.connect()
-    # try:
-    #    result = engine.dialect.get_view_names(
-    #        conn, schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX), **request
-    #    )
-    # finally:
-    #    conn.close()
-    # return result
 
 
 def get_view_definition(request: dict, context: dict | None = None) -> None:
     # TODO: can we remove this endpoint?
     # it actually just returns the schema names!
     return None
-
-    # engine = _get_engine()
-    # conn = engine.connect()
-    # try:
-    #    result = engine.dialect.get_schema_names(
-    #        conn,
-    #        get_or_403(request, "view_name"),
-    #        schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-    #        **request,
-    #    )
-    # finally:
-    #    conn.close()
-    # return result
 
 
 def get_columns(request: dict, context: dict | None = None) -> dict:
@@ -2068,9 +2006,7 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
 
     table_name = get_or_403(request, "table")
     table_obj = table_or_404(table=table_name)
-
-    schema = request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-    schema = validate_schema(schema)
+    schema = table_obj.oedb_schema
 
     # We need to translate the info_cache from a json-friendly format to the
     # conventional one
@@ -2135,6 +2071,7 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
 def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
     table_name = get_or_403(request, "table")
     table_obj = table_or_404(table=table_name)
+    schema_name = table_obj.oedb_schema
 
     engine = _get_engine()
     conn = engine.connect()
@@ -2143,7 +2080,7 @@ def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
         result = engine.dialect.get_pk_constraint(
             conn,
             table_name,
-            schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
+            schema=schema_name,
             **request,
         )
     finally:
@@ -2157,9 +2094,8 @@ def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
 
     table_name = get_or_403(request, "table")
     table_obj = table_or_404(table=table_name)
+    request["schema"] = table_obj.oedb_schema
 
-    if not request.get("schema", None):
-        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
     try:
         result = engine.dialect.get_foreign_keys(
             conn,
@@ -2179,15 +2115,12 @@ def get_indexes(request: dict, context: dict | None = None) -> dict:
 
     table_name = get_or_403(request, "table")
     table_obj = table_or_404(table=table_name)
+    schema_name = table_obj.oedb_schema
 
     engine = _get_engine()
     conn = engine.connect()
-    if not request.get("schema", None):
-        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
     try:
-        result = engine.dialect.get_indexes(
-            conn, get_or_403(request, "table"), **request
-        )
+        result = engine.dialect.get_indexes(conn, schema_name, **request)
     finally:
         conn.close()
     return result
@@ -2196,15 +2129,12 @@ def get_indexes(request: dict, context: dict | None = None) -> dict:
 def get_unique_constraints(request: dict, context: dict | None = None) -> dict:
     table_name = get_or_403(request, "table")
     table_obj = table_or_404(table=table_name)
+    request["schema"] = table_obj.oedb_schema
 
     engine = _get_engine()
     conn = engine.connect()
-    if not request.get("schema", None):
-        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
     try:
-        result = engine.dialect.get_foreign_keys(
-            conn, get_or_403(request, "table"), **request
-        )
+        result = engine.dialect.get_foreign_keys(conn, table_name, **request)
     finally:
         conn.close()
     return result

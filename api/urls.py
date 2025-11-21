@@ -93,12 +93,12 @@ urlpatterns_v0_schema_table = [
     # TODO: Remove this endpoint later on - MovePublish includes optional
     # embargo time and marks table as published
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<to_schema>[\w\d_\s]+)/",  # noqa
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<topic>[\w\d_\s]+)/",  # noqa
         TableMoveAPIView.as_view(),
         name="move",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move_publish/(?P<to_schema>[\w\d_\s]+)/",  # noqa
+        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move_publish/(?P<topic>[\w\d_\s]+)/",  # noqa
         TableMovePublishAPIView.as_view(),
         name="move_publish",
     ),

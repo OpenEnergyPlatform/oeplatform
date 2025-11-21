@@ -69,10 +69,11 @@ from api.actions import (
     assert_add_tag_permission,
     data_insert,
     describe_columns,
-    get_table_name,
+    get_or_403,
     perform_sql,
     remove_queued_column,
     remove_queued_constraint,
+    table_or_404,
 )
 from api.error import APIError
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
@@ -896,13 +897,11 @@ def tage_table_add_view(request: HttpRequest) -> HttpResponse:
         * Any number of values that start with 'tag_' followed by the id of a tag.
     :return: Redirects to the previous page
     """
+    table = get_or_403(request.POST, "table")
+    table_obj = table_or_404(table=table)
+    schema_name = table_obj.oedb_schema
+
     try:
-        # check if valid table / schema
-        schema_name, table = get_table_name(
-            schema=request.POST["schema"],
-            table=request.POST["table"],
-            restrict_schemas=False,
-        )
         # check write permission
         assert_add_tag_permission(
             request.user, table, login.permissions.WRITE_PERM, schema=schema_name

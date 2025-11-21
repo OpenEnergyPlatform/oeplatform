@@ -239,7 +239,7 @@ def query_typecast_select(select) -> Select:
     return cast_type(Select, select)
 
 
-def get_or_403(dictionary: dict | None, key):
+def get_or_403(dictionary: Mapping | None, key):
     dictionary = dictionary or {}
     try:
         return dictionary[key]
