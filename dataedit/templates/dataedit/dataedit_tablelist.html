@@ -1,5 +1,5 @@
 {% extends "dataedit/filter.html" %}
-{% block title %}- {{ schema }}{% endblock %}
+{% block title %}- {{ topic }}{% endblock %}
 {% block site-header %}
   <div class="main-header">
     <h1 class="main-header__title">
@@ -13,7 +13,7 @@
       Database
     </h1>
     <div class="main-header__wizard">
-      <a href="{% url 'dataedit:topic-list' %}">Topics</a> / {{ schema }}
+      <a href="{% url 'dataedit:topic-list' %}">Topics</a> / {{ topic }}
     </div>
   </div>
 {% endblock site-header %}
