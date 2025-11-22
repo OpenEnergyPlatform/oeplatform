@@ -15,8 +15,7 @@ SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> Â© Ã
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from django.http import HttpResponseRedirect
-from django.urls import include, path, re_path, reverse
+from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 
 from dataedit.views import (
@@ -127,21 +126,14 @@ urlpatterns_tag = [
 ]
 
 
-def get_legacy_redirect(name: str, *keys: str):
-    def legacy_redirect(request, **kwargs):
-        return HttpResponseRedirect(reverse(name, kwargs={k: kwargs[k] for k in keys}))
-
-    return legacy_redirect
-
-
 urlpatterns = [
     re_path(
         # redirecting old /dataedit/view/SCHEMA/TABLE
-        r"^view/{qual}/(?P<path>.*)".format(qual=pgsql_qualifier),
+        r"^view/{qual}/(?P<path>.*)$".format(qual=pgsql_qualifier),
         # NOTE: redirect url must be absolute (including "/database/")
-        RedirectView.as_view(url="/database/table/%(path)s"),
+        RedirectView.as_view(url="/database/tables/%(path)s"),
     ),
-    re_path(r"^table/", include(urlpatterns_view_schema)),
+    re_path(r"^tables/", include(urlpatterns_view_schema)),
     re_path(
         r"^view/(?P<topic>{qual})$".format(qual=pgsql_qualifier),
         tables_view,
@@ -166,8 +158,11 @@ urlpatterns = [
         name="admin-contraints",  # TODO: do we need this
     ),
     re_path(
-        r"^wizard/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
-        get_legacy_redirect("dataedit:wizard_upload", "table"),
+        # redirecting old /dataedit/wizard/SCHEMA/TABLE
+        r"^wizard/{qual}/(?P<path>.*)$".format(qual=pgsql_qualifier),
+        # NOTE: redirect url must be absolute (including "/database/")
+        # NOTE: redirect url must be absolute (including "/database/")
+        RedirectView.as_view(url="/database/wizard/%(path)s"),
     ),
     re_path(
         r"^wizard/(?P<table>{qual})$".format(qual=pgsql_qualifier),

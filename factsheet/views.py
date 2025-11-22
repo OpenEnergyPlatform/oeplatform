@@ -1864,7 +1864,7 @@ def filter_scenario_bundles_view(request):
     table_iri = request.GET.get("table_iri", "")
     # table_iri = "dataedit/view/scenario/abbb_emob"
 
-    table_name = table_iri.split("/scenario/")[1]
+    table_name = table_iri.strip("/").split("/")[-1]
 
     # Create an instance of OekgQuery
     oekg_query = OekgQuery()

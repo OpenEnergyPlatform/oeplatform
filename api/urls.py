@@ -15,7 +15,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.urls import include, path, re_path
-from django.views.generic import RedirectView
 
 from api.views import (
     AdvancedCloseAllAPIView,
@@ -78,6 +77,7 @@ app_name = "api"
 pgsql_qualifier = r"[\w\d_]+"
 equal_qualifier = r"[\w\d\s\'\=]"
 structures = r"table|sequence"
+
 
 # all endpoints referring to table
 urlpatterns_v0_schema_table = [
@@ -274,11 +274,11 @@ urlpatterns_v0_advanced = [
 ]
 
 urlpatterns_v0 = [
-    # path("schema/", include(urlpatterns_v0_schema_table)),
-    re_path(
-        r"^schema/{qual}/tables/(?P<path>.*)".format(qual=pgsql_qualifier),
-        # NOTE: redirect url must be absolute ( including "/api/v0/tables/"
-        RedirectView.as_view(url="/api/v0/tables/%(path)s"),
+    # PROBLEM: redirect does not work with POST/PUT/..., only GET
+    # so we cannot redirect
+    re_path(  # legacy API url for tables
+        r"^schema/{qual}/tables/".format(qual=pgsql_qualifier),
+        include(urlpatterns_v0_schema_table),
     ),
     path("tables/", include(urlpatterns_v0_schema_table)),
     path("advanced/", include(urlpatterns_v0_advanced)),

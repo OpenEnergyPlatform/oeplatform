@@ -44,7 +44,7 @@ urlpatterns = [
     re_path(r"^api/", include("api.urls")),
     re_path(r"^database/", include("dataedit.urls")),
     re_path(
-        r"^dataedit/(?P<path>.*)",
+        r"^dataedit/(?P<path>.*)$",
         # NOTE: redirect url must be absolute ( including "/database/"
         RedirectView.as_view(url="/database/%(path)s"),
     ),
