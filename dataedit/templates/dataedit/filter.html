@@ -22,7 +22,7 @@
                   data-bs-toggle="popover"
                   data-trigger="focus"
                   title="How to use search and filter"
-                  {% if not tables %} data-bs-content="Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata. If you filter for multiple Tags, only topics containing tables with all selected Tags will be displayed. To see all schemas and tables again use the reset filter button." {% else %} data-bs-content="Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata." {% endif %}
+                  {% if not tables %} data-bs-content="Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata. If you filter for multiple Tags, only topics containing tables with all selected Tags will be displayed. To see all topics and tables again use the reset filter button." {% else %} data-bs-content="Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata." {% endif %}
                   style="margin-left: 10px">
             <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
           </button>
@@ -200,10 +200,6 @@
               <div class="col-md-4">
                 <div class="info-section__stats">
                   <h6 class="info-section__subtitle">Database Statistics</h6>
-                  <div class="stat-item">
-                    <span class="stat-number">{{ schemas|length }}</span>
-                    <span class="stat-label">Topics Available</span>
-                  </div>
                   <div class="stat-item">
                     <span class="stat-number">{{ total_table_count|default:"None" }}</span>
                     <span class="stat-label">Total Tables</span>

@@ -43,9 +43,6 @@
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{ value.new|get_item:'id' }}" />
                 <input type="hidden" name="action" value="apply" />
-                <input type="hidden"
-                       name="schema"
-                       value="{{ value.new|get_item:'c_schema' }}" />
                 <input type="hidden" name="table" value="{{ value.new|get_item:'c_table' }}" />
                 <button type="submit"
                         value="apply"
@@ -56,9 +53,6 @@
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{ value.new|get_item:'id' }}" />
                 <input type="hidden" name="action" value="deny" />
-                <input type="hidden"
-                       name="schema"
-                       value="{{ value.new|get_item:'c_schema' }}" />
                 <input type="hidden" name="table" value="{{ value.new|get_item:'c_table' }}" />
                 <button type="submit" value="deny" class="btn btn-danger">Deny</button>
               </form>
@@ -97,7 +91,6 @@
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{ value.id }}" />
                 <input type="hidden" name="action" value="apply" />
-                <input type="hidden" name="schema" value="{{ value.c_schema }}" />
                 <input type="hidden" name="table" value="{{ value.c_table }}" />
                 <button type="submit"
                         value="apply"
@@ -108,7 +101,6 @@
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{ value.id }}" />
                 <input type="hidden" name="action" value="deny" />
-                <input type="hidden" name="schema" value="{{ value.c_schema }}" />
                 <input type="hidden" name="table" value="{{ value.c_table }}" />
                 <button type="submit" value="deny" class="btn btn-danger">Deny</button>
               </form>

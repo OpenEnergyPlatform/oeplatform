@@ -433,7 +433,7 @@
       return cookieValue;
     }
 
-    function publishTable(tableName, toSchema, embargoPeriod) {
+    function publishTable(tableName, topic, embargoPeriod) {
       const data = embargoPeriod
         ? { embargo: { duration: embargoPeriod } }
         : {};
@@ -515,10 +515,10 @@
           const embargo_dropdown = document.querySelector(".embargo-dropdown");
           if (relatedButton) {
             const tableName = relatedButton.getAttribute("data-tableName");
-            const toTopic = topic_dropdown.value;
+            const topic = topic_dropdown.value;
             const embargoPeriod = embargo_dropdown.value;
 
-            publishTable(tableName, toTopic, embargoPeriod);
+            publishTable(tableName, topic, embargoPeriod);
           } else {
             console.error("relatedButton is not defined.");
           }

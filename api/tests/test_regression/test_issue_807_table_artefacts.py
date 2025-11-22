@@ -24,6 +24,7 @@ def _table_exists_in_oedb(table):
     Returns:
         bool
     """
+    # TODO: use existing function
     engine = _get_engine()
     conn = engine.connect()
     try:

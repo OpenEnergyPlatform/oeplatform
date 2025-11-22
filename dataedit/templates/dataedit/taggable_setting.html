@@ -4,7 +4,7 @@
   {% get_tags as all_tags %}
   {% if not selected %}No tags were added, yet.{% endif %}
   {% for t in selected %}
-    <a href="{% url 'dataedit:tables' topic=schema %}?query=&tags={{ t.pk }}"
+    <a href="{% url 'dataedit:tables' topic=topic %}?query=&tags={{ t.pk }}"
        class="btn tag"
        style="background:{{ t.color_hex }};
               color:{% readable_text_color t.color_hex %}">{{ t.name }}</a>
@@ -30,7 +30,6 @@
                  for="select_{{ t.pk }}">{{ t.name }}</label>
         </span>
       {% endfor %}
-      <input type="hidden" name="schema" value="{{ schema }}" />
       {% if table %}
         <input type="hidden" name="table" value="{{ table }}" />
       {% endif %}

@@ -95,9 +95,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import (
-    Embargo,
-)
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -180,8 +178,8 @@ def admin_column_view(request: HttpRequest) -> HttpResponse:
 
 def topic_view(request: HttpRequest) -> HttpResponse:
     """
-    Loads all schemas that are present in the external database specified in
-    oeplatform/securitysettings.py. Only schemas that are present in the
+    Loads all topics that are present in the external database specified in
+    oeplatform/securitysettings.py. Only topics that are present in the
     whitelist are processed that do not start with an underscore.
 
     :param request: A HTTP-request object sent by the Django framework
