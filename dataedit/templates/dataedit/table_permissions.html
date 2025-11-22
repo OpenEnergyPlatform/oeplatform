@@ -1,7 +1,7 @@
 {% extends "dataedit/base.html" %}
 {% load static %}
 {% load compress %}
-{% block title %}- {{ schema }}{% endblock %}
+{% block title %}{% endblock %}
 {% block site-header %}
   <div class="main-header">
     <h1 class="main-header__title">
@@ -16,9 +16,8 @@
     </h1>
     <div class="main-header__wizard">
       <span class="main-header__wizard-process">Permissions :</span>
-      <span class="main-header__wizard-path"><a href="{% url 'dataedit:topic-list' %}">Topics</a> /
-        <a href="{% url 'dataedit:tables' schema=schema %}">{{ schema }}</a> /
-        <a href="{% url 'dataedit:view' schema table %}">{{ table }}</a></span>
+      <span class="main-header__wizard-path"><a href="{% url 'dataedit:topic-list' %}">Table</a> /
+        <a href="{% url 'dataedit:view' table=table %}">{{ table }}</a></span>
     </div>
   </div>
 {% endblock site-header %}
@@ -39,7 +38,7 @@
 {% endblock %}
 {% block data_content %}
   {% load dataedit.taghandler %}
-  <h3>Manage permissions on {{ schema }}.{{ table }}</h3>
+  <h3>Manage permissions on {{ table }}</h3>
   <div class="card ">
     <div class="card-header">
       {% if is_admin %}
@@ -47,7 +46,7 @@
           <form id="addGroupForm"
                 style="position:absolute;
                        right: 0%"
-                action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+                action="{% url 'dataedit:table-permission' table=table %}"
                 method="post">
             {% csrf_token %}
             <input type="hidden" name="mode" value="add_group" />
@@ -67,7 +66,7 @@
           {% if is_admin %}
             <label class="form-label" for="group_level">{{ perm.holder.name }}</label>
             <form class="form-inline"
-                  action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+                  action="{% url 'dataedit:table-permission' table=table %}"
                   method="post"
                   style="display:inline-block">
               {% csrf_token %}
@@ -85,11 +84,11 @@
                 {% endfor %}
               </select>
             </form>
-            <form action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+            <form action="{% url 'dataedit:table-permission' table=table %}"
                   method="post"
                   style="display:inline-block;
                          float:right"
-                  onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ schema.table }}.{{ table }} and retract all permissions?')">
+                  onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ table }} and retract all permissions?')">
               {% csrf_token %}
               <input type="hidden" name="mode" value="remove_group" />
               <input type="hidden" name="group_id" value="{{ perm.holder.id }}" />
@@ -113,7 +112,7 @@
           <form id="addUserForm"
                 style="position:absolute;
                        right: 0%"
-                action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+                action="{% url 'dataedit:table-permission' table=table %}"
                 method="post">
             {% csrf_token %}
             <input type="hidden" name="mode" value="add_user" />
@@ -133,7 +132,7 @@
           {% if is_admin %}
             <label class="form-label" for="level">{{ perm.holder.name }}</label>
             <form class="form-inline"
-                  action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+                  action="{% url 'dataedit:table-permission' table=table %}"
                   method="post"
                   style="display:inline-block">
               {% csrf_token %}
@@ -153,11 +152,11 @@
                 {% endfor %}
               </select>
             </form>
-            <form action="{% url 'dataedit:table-permission' schema=schema table=table %}"
+            <form action="{% url 'dataedit:table-permission' table=table %}"
                   method="post"
                   style="display:inline-block;
                          float:right"
-                  onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ schema.table }}.{{ table }} and retract all permissions?')">
+                  onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ table }} and retract all permissions?')">
               {% csrf_token %}
               <input type="hidden" name="mode" value="remove_user" />
               <input type="hidden" name="user_id" value="{{ perm.holder.id }}" />

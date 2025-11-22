@@ -26,7 +26,6 @@
                for="select_{{ t.pk }}">{{ t.name }}</label>
       </span>
     {% endfor %}
-    <input type="hidden" name="schema" value="{{ schema }}" />
     {% if table %}
       <input type="hidden" name="table" value="{{ table }}" />
     {% endif %}

@@ -16,7 +16,7 @@ class TestAdvancedApiGetColumns(APITestCaseWithTable):
         resp = self.api_req(
             "post",
             url=url,
-            data={"query": {"schema": self.test_schema, "table": self.test_table}},
+            data={"query": {"table": self.test_table}},
             exp_code=200,
         )
         assert resp  # this will always return json data

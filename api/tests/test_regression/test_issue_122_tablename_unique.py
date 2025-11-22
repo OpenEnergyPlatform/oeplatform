@@ -21,4 +21,4 @@ class TestTableNameUnique(APITestCase):
 
         # create same table
         # should fail
-        self.assertRaises(AssertionError, self.create_table, schema=self.schema_sandbox)
+        self.assertRaises(AssertionError, self.create_table)

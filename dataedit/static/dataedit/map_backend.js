@@ -1,23 +1,18 @@
-// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-// SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-// SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
+/* eslint-disable max-len */
+/*
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
 
-var getMapData = function (schema, table, column, bounds, callback) {
+SPDX-License-Identifier: AGPL-3.0-or-later
+*/
+/* eslint-enable max-len */
+
+var getMapData = function (table, column, bounds, callback) {
   let left = bounds.getEast();
   let right = bounds.getWest();
   let top = bounds.getNorth();
   let bottom = bounds.getSouth();
-
-  //  SELECT ST_AsGeoJSON(ST_Collect(ST_Transform(column, 4326)))
-  //  FROM (
-  //    SELECT *
-  //    FROM schema.table
-  //    WHERE ST_IsValid(column)
-  //    AND ST_Intersects(ST_Transform(column, 4326), ST_SetSRID(ST_GeomFromGeoJSON(bounds, 4326))
-  //    LIMIT 250
-  //  ) AS stuff
 
   window.reverseUrl("api:advanced-search").then((url) => {
     $.ajax({
@@ -50,7 +45,6 @@ var getMapData = function (schema, table, column, bounds, callback) {
           ],
           from: {
             type: "table",
-            schema: schema,
             table: table,
           },
           where: [

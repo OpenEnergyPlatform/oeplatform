@@ -21,7 +21,6 @@ from oeplatform.settings import IS_TEST, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class APITestCase(TestCase):
-    test_schema = SCHEMA_DEFAULT_TEST_SANDBOX
     test_table = "test_table"
 
     @classmethod
@@ -85,23 +84,22 @@ class APITestCase(TestCase):
         self,
         method: str,
         table: str | None = None,
-        schema: str | None = None,
         path: str | None = None,
         url: str | None = None,
         data: dict | None = None,
         auth=None,
         exp_code: int | None = None,
         exp_res=None,
+        params: dict | None = None,
     ) -> dict:
         if not url:
             path = path or ""
             if path.startswith("/"):
-                assert not table and not schema
+                assert not table
                 url = f"/api/v0{path}"
             else:
                 table = table or self.test_table
-                schema = schema or self.test_schema
-                url = f"/api/v0/schema/{schema}/tables/{table}/{path}"
+                url = f"/api/v0/tables/{table}/{path}"
 
         str_data = json.dumps(data) if data else ""  # IMPORTANT: keep empty string
 
@@ -121,6 +119,7 @@ class APITestCase(TestCase):
             data=str_data,
             content_type="application/json",
             HTTP_AUTHORIZATION=auth,
+            params=params,
         )
 
         try:
@@ -155,24 +154,28 @@ class APITestCase(TestCase):
 
         return json_resp
 
-    def create_table(
-        self, structure=None, data=None, schema=None, table=None, exp_code=201
-    ):
+    def create_table(self, structure=None, data=None, table=None, exp_code=201):
         # default structure
         structure = structure or {"columns": [{"name": "id", "data_type": "bigint"}]}
-        self.api_req("put", table, schema, data={"query": structure})
+        params = {"is_sandbox": True}  # IMPORTANT when creating tables in tests
+        self.api_req(
+            "put",
+            table,
+            data={"query": structure},
+            params=params,
+            exp_code=exp_code,
+        )
         if data:
             self.api_req(
                 "post",
                 table,
-                schema,
                 "rows/new",
                 data={"query": data},
-                exp_code=exp_code,
+                exp_code=201,
             )
 
-    def drop_table(self, schema=None, table=None, exp_code=200):
-        self.api_req("delete", table, schema, exp_code=exp_code)
+    def drop_table(self, table=None, exp_code=200):
+        self.api_req("delete", table, exp_code=exp_code)
 
 
 class APITestCaseWithTable(APITestCase):

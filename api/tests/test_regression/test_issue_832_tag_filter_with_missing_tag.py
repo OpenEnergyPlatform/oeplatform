@@ -12,9 +12,9 @@ from api.tests import APITestCase
 class Test_issue_832_tag_filter_with_missing_tag(APITestCase):
     def test_issue_832_tag_filter_with_missing_tag(self):
         # index without filter
-        res = self.client.post(reverse("dataedit:index"))
+        res = self.client.post(reverse("dataedit:topic-list"))
         self.assertEqual(res.status_code, 200)
 
         # index with tag filter with non existent tag_id
-        res = self.client.post(reverse("dataedit:index") + "?tags=xyz")
+        res = self.client.post(reverse("dataedit:topic-list") + "?tags=xyz")
         self.assertEqual(res.status_code, 200)

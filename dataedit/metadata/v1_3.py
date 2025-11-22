@@ -7,8 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from api import actions
-
-from . import v1_2
+from dataedit.metadata import v1_2
 
 TEMPLATE_v1_3 = {
     "title": "",

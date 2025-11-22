@@ -175,9 +175,8 @@
             <div class="profile-rvw__item-btm">
               <!-- placeholder table name -->
               <div class="profile-rvw__item-name">
-                <a href="{% url 'dataedit:peer_review_reviewer' reviewer_reviewed.latest_active.schema reviewer_reviewed.latest_active.table reviewer_reviewed.latest_active.id %}"
+                <a href="{% url 'dataedit:peer_review_reviewer' reviewer_reviewed.latest_active.table reviewer_reviewed.latest_active.id %}"
                    class="btn btn-primary">
-                  {{ reviewer_reviewed.latest_active.schema }} -
                   {{ reviewer_reviewed.latest_active.table }}
                 </a>
                 <button class="btn btn-dark" id="peer_review-delete">Delete</button>
@@ -219,8 +218,7 @@
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
           <ul class="profile-rvw__list">
             <li>
-              <span>{{ reviewer_reviewed.latest_active.schema }} -
-              {{ reviewer_reviewed.latest_active.table }}</span>
+              <span>{{ reviewer_reviewed.latest_active.table }}</span>
               waits for the Data Publisher to submit the review.
             </li>
           </ul>
@@ -255,9 +253,8 @@
           <div class="profile-rvw__item-btm">
             <!-- placeholder table name -->
             <div class="button profile-rvw__item-name">
-              <a href="{% url 'dataedit:peer_review_contributor' contributor_reviewed.latest_active.schema contributor_reviewed.latest_active.table contributor_reviewed.latest_active.id %}"
+              <a href="{% url 'dataedit:peer_review_contributor' contributor_reviewed.latest_active.table contributor_reviewed.latest_active.id %}"
                  class="btn btn-primary">
-                {{ contributor_reviewed.latest_active.schema }} -
                 {{ contributor_reviewed.latest_active.table }}
               </a>
             </div>
@@ -297,8 +294,7 @@
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
           <ul class="profile-rvw__list">
             <li>
-              <span>{{ contributor_reviewed.latest_active.schema }} -
-              {{ contributor_reviewed_active.latest.table }}</span>
+              <span>{{ contributor_reviewed_active.latest.table }}</span>
               waits for the Reviewer to submit the review.
             </li>
           </ul>
@@ -362,9 +358,9 @@
                 <!-- placeholder table name -->
                 <div class="profile-rvw__item-name">
                   {% if review.is_finished == True %}
-                    <a href="{% url 'dataedit:view' schema=review.schema table=review.table %}">{{ review.schema }} - {{ review.table }}</a>
+                    <a href="{% url 'dataedit:view' table=review.table %}">{{ review.table }}</a>
                   {% else %}
-                    <a href="{% url 'dataedit:peer_review_reviewer' table=review.table schema=review.schema review_id=review.id %}">{{ review.schema }} - {{ review.table }}</a>
+                    <a href="{% url 'dataedit:peer_review_reviewer' table=review.table review_id=review.id %}">{{ review.table }}</a>
                   {% endif %}
                 </div>
                 <div class="profile-rvw__item-history">
@@ -452,9 +448,9 @@
                 <!-- placeholder table name -->
                 <div class="profile-rvw__item-name">
                   {% if review.is_finished == True %}
-                    <a href="{% url 'dataedit:view' schema=review.schema table=review.table %}">{{ review.schema }} - {{ review.table }}</a>
+                    <a href="{% url 'dataedit:view' table=review.table %}">{{ review.table }}</a>
                   {% else %}
-                    <a href="{% url 'dataedit:peer_review_contributor' table=review.table schema=review.schema review_id=review.id %}">{{ review.schema }} - {{ review.table }}</a>
+                    <a href="{% url 'dataedit:peer_review_contributor' table=review.table review_id=review.id %}">{{ review.table }}</a>
                   {% endif %}
                 </div>
                 <div class="profile-rvw__item-history">

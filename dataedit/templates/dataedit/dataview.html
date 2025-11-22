@@ -16,8 +16,7 @@
       Database
     </h1>
     <div class="main-header__wizard">
-      <a href="{% url 'dataedit:topic-list' %}">Topics</a> /
-      <a href="{% url 'dataedit:tables' schema=schema %}">{{ schema }}</a> /
+      <a href="{% url 'dataedit:topic-list' %}">Table</a> /
       {% if table_label %}
         {{ table_label }}
       {% else %}
@@ -118,7 +117,7 @@
           <ul class="nav nav-tabs data-view__tabs">
             <li class="nav-item data-view__tab">
               <a class="nav-link data-view__link {% if current_view.type == " table" %}active{% endif %}"
-                 href="{% url 'dataedit:view' schema=schema table=table %}">
+                 href="{% url 'dataedit:view' table=table %}">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      width="16"
                      height="16"
@@ -156,7 +155,7 @@
                 {% endfor %}
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item"
-                   href="{% url 'dataedit:table-graph' schema=schema table=table %}">Add Graph View</a>
+                   href="{% url 'dataedit:table-graph' table=table %}">Add Graph View</a>
               </div>
             </li>
             <li class="nav-item dropdown data-view__tab">
@@ -185,9 +184,9 @@
                 {% endfor %}
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item"
-                   href="{% url 'dataedit:table-map' schema=schema table=table maptype='geom' %}">Add gis view</a>
+                   href="{% url 'dataedit:table-map' table=table maptype='geom' %}">Add gis view</a>
                 <a class="dropdown-item"
-                   href="{% url 'dataedit:table-map' schema=schema table=table maptype='latlon' %}">Add lat/lon view</a>
+                   href="{% url 'dataedit:table-map' table=table maptype='latlon' %}">Add lat/lon view</a>
               </div>
             </li>
           </ul>
@@ -297,7 +296,7 @@
       </div>
       <div hx-get="{% url 'dataedit:metadata-widget' %}"
            hx-trigger="revealed once"
-           hx-vals='{"schema": "{{ schema }}", "table": "{{ table }}"}'
+           hx-vals='{"table": "{{ table }}"}'
            hx-target="#metadata-container"></div>
       <div id="metadata-container"></div>
     </div>
@@ -384,7 +383,7 @@
           </table>
         </div>
         <a class="btn btn-primary"
-           href="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr_result.review_id %}">Review details</a>
+           href="{% url 'dataedit:peer_review_reviewer' table=table review_id=opr_result.review_id %}">Review details</a>
       {% endif %}
       <!-- If user is not the data contributor  -->
       {% if not opr.is_finished and user.is_authenticated %}
@@ -394,7 +393,7 @@
               <button type="button"
                       class="table-sidebar__btn-review table-sidebar__btn-review--start"
                       id="opr-button-start"
-                      data-url="{% url 'dataedit:peer_review_create' table=table schema=schema %}">
+                      data-url="{% url 'dataedit:peer_review_create' table=table %}">
                 <svg height="16"
                      width="16"
                      fill="currentColor"
@@ -441,7 +440,7 @@
             <button type="button"
                     class="table-sidebar__btn-review table-sidebar__btn-review--start"
                     id="opr-button-contributor-continue"
-                    data-url="{% url 'dataedit:peer_review_contributor' table=table schema=schema review_id=opr.opr_id %}">
+                    data-url="{% url 'dataedit:peer_review_contributor' table=table review_id=opr.opr_id %}">
               <svg height="16"
                    width="16"
                    fill="currentColor"
@@ -459,7 +458,7 @@
             <button type="button"
                     class="table-sidebar__btn-review table-sidebar__btn-review--start"
                     id="opr-button-reviewer-continue"
-                    data-url="{% url 'dataedit:peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
+                    data-url="{% url 'dataedit:peer_review_reviewer' table=table review_id=opr.opr_id %}">
               <svg height="16"
                    width="16"
                    fill="currentColor"
@@ -480,13 +479,13 @@
     <div class="table-sidebar__section">
       <h2 class="table-sidebar__heading">Tags</h2>
       {% load dataedit.taghandler %}
-      {% get_tags table=table schema=schema as table_tags %}
-      {% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=table_tags %}
+      {% get_tags table=table as table_tags %}
+      {% include 'dataedit/taggable_setting.html' with table=table selected=table_tags %}
     </div>
-    {% if schema == "scenario" %}
+    {% if is_in_scenario %}
       <div class="table-sidebar__section">
         <div id="filteredScenariosContainer"
-             hx-get="{% url 'factsheet:filter_bundles_view' %}?table_iri={% url 'dataedit:view' schema=schema table=table %}"
+             hx-get="{% url 'factsheet:filter_bundles_view' %}?table_iri={% url 'dataedit:view' table=table %}"
              hx-target="#filteredScenariosContainer"
              hx-swap="outerHTML"
              hx-trigger="load">Loading ...</div>
@@ -494,7 +493,7 @@
     {% endif %}
     <div class="table-sidebar__section">
       <h2 class="table-sidebar__heading">Downloads</h2>
-      <a href="{% url 'api:api_rows' schema=schema table=table %}?form=csv"
+      <a href="{% url 'api:api_rows' table=table %}?form=csv"
          type="button"
          class="table-sidebar__btn">
         <svg width="14"
@@ -508,7 +507,7 @@
         </svg>
         CSV
       </a>
-      <a href="{% url 'api:api_rows' schema=schema table=table %}?form=datapackage"
+      <a href="{% url 'api:api_rows' table=table %}?form=datapackage"
          type="button"
          class="table-sidebar__btn">
         <svg width="14"
@@ -529,7 +528,7 @@
         <span class="mb-2"
               {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
           <a class="table-sidebar__btn {% if not can_add %}disabled{% endif %}"
-             href="{% url 'dataedit:wizard_upload' schema=schema table=table %}">
+             href="{% url 'dataedit:wizard_upload' table=table %}">
             <svg width="14"
                  height="14"
                  version="1.1"
@@ -584,7 +583,7 @@
           <textarea class="form-control" id="apiContent" rows="6" cols="50">
 from requests import get
 
-result = get("https://{{ host }}{% url 'api:api_rows' schema=schema table=table %}")
+result = get("https://{{ host }}{% url 'api:api_rows' table=table %}")
 for row in result.json():
   # Process the row
         </textarea>
@@ -684,15 +683,14 @@ for row in result.json():
   <script>
     var csrftoken = getCookie("csrftoken");
     var table = "{{table}}";
-    var schema = "{{schema}}";
     var view = {
       type: "{{ current_view.type }}",
       options: JSON5.parse("{{ current_view.options | escapejs }}"),
     };
-    load_view(schema, table, csrftoken, view);
+    load_view(table, csrftoken, view);
 
     var downloadMetadata = function () {
-      var metaUrl = "{% url 'api:api_table_meta' schema=schema table=table %}";
+      var metaUrl = "{% url 'api:api_table_meta' table=table %}";
       $.get(metaUrl).then(function (json) {
         // create data url
         var json = JSON.stringify(json, null, 1);
@@ -713,11 +711,11 @@ for row in result.json():
     };
 
     var openMetadataApiPage = function () {
-      var metaUrl = "{% url 'api:api_table_meta' schema=schema table=table %}";
+      var metaUrl = "{% url 'api:api_table_meta' table=table %}";
       window.open(metaUrl, "_blank");
     };
 
-    DataEdit((table = table), (schema = schema));
+    DataEdit((table = table));
 
     $(function () {
       $('[data-toggle="tooltip"]').tooltip();

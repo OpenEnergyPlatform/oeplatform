@@ -3,9 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-var DataEdit = function (table, schema) {
+var DataEdit = function (table) {
   var state = {
-    schema: schema,
     apiVersion: "v0",
   };
 
@@ -30,7 +29,7 @@ var DataEdit = function (table, schema) {
     var tablename = table;
 
     Promise.all([
-      window.reverseUrl("api:api_table", { schema: "data", table: tablename }),
+      window.reverseUrl("api:api_table", { table: tablename }),
       window.reverseUrl("dataedit:topic-list"),
     ]).then(([urlTable, urlTopics]) => {
       sendJson("DELETE", urlTable)

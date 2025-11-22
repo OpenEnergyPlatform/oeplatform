@@ -11,8 +11,8 @@ from random import randrange
 
 from django.contrib.auth.models import AbstractUser
 
-from api.actions import get_or_403
 from api.error import APIError
+from api.parser import get_or_403
 from oedb.connection import AbstractCursor, DBAPIConnection, _get_engine
 from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION_LIMIT
 
@@ -74,7 +74,7 @@ class SessionContext:
         except KeyError:
             raise APIError("Cursor not found %s" % cursor_id)
 
-    def open_cursor(self, named=False):
+    def open_cursor(self, named: bool = False):
         cursor_id = _get_new_key(self.cursors)
         if named:
             cursor = self.connection.cursor(name=str(cursor_id))
@@ -99,7 +99,7 @@ class SessionContext:
             self.close()
 
 
-def close_all_for_user(owner) -> None:
+def close_all_for_user(owner: AbstractUser) -> None:
     if owner.is_anonymous:
         raise PermissionError
     for sid in dict(_SESSION_CONTEXTS):
@@ -133,14 +133,14 @@ def load_session_from_context(context: dict) -> SessionContext:
         return SessionContext(connection_id=connection_id, owner=user)
 
 
-def _get_new_key(dictionary):
+def _get_new_key(dictionary: dict):
     key = randrange(0, sys.maxsize)
     while key in dictionary:
         key = randrange(0, sys.maxsize)
     return key
 
 
-def _add_entry(value, dictionary, key=None):
+def _add_entry(value, dictionary: dict, key=None):
     if key is None:
         key = _get_new_key(dictionary)
     dictionary[key] = value

@@ -31,9 +31,8 @@ from typing import cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
-from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
-from django.http import Http404, HttpRequest
+from django.http import HttpRequest
 from omi.base import get_metadata_version
 from omi.conversion import convert_metadata
 from omi.validation import ValidationError, parse_metadata, validate_metadata
@@ -46,7 +45,6 @@ from sqlalchemy import types as sqltypes
 from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.schema import Sequence
 from sqlalchemy.sql.expression import Select
 
 import dataedit.metadata
@@ -65,7 +63,6 @@ from api.parser import (
 )
 from api.sessions import (
     SessionContext,
-    close_all_for_user,
     load_cursor_from_context,
     load_session_from_context,
 )
@@ -104,17 +101,6 @@ def _create_oedb_session():
     return sessionmaker(bind=_get_engine())()
 
 
-def delete_sequence(sequence: str, schema: str) -> None:
-    seq = Sequence(sequence, schema=schema)
-    seq.drop(bind=_get_engine())
-
-
-def create_sequence(sequence: str, schema: str) -> None:
-    seq = Sequence(sequence, schema=schema)
-    # FIXME: no permission control
-    seq.create(bind=_get_engine())
-
-
 def get_columns_select(columns: list[str]) -> Select:
     return select(columns=columns)
 
@@ -134,29 +120,10 @@ def get_column_obj(sa_table: SATable, column: str):
         raise APIError("Column '%s' does not exist." % column)
 
 
-def get_table_name(
-    schema: str | None, table: str, restrict_schemas: bool = True
-) -> tuple[str, str]:
-    schema = validate_schema(schema)
-
-    if not has_schema(dict(schema=schema)):
-        raise Http404
-    if not has_table(dict(schema=schema, table=table)):
-        raise Http404
-    if schema.startswith("_") or schema == "public" or schema is None:
-        raise PermissionDenied
-
-    return schema, table
-
-
-class ResponsiveException(Exception):
-    pass
-
-
 def table_or_404(table: str) -> Table:
     table_obj = Table.objects.filter(name=table).first()
     if table_obj is None:
-        raise APIError("Table doesnot exist", 401)
+        raise APIError("Table does not exist", 404)
     return table_obj
 
 
@@ -194,20 +161,10 @@ def assert_add_tag_permission(user, table: str, permission: int, schema) -> None
 
     """
     if user.is_anonymous:
-        raise APIError("User is anonymous", 401)
+        raise APIError("User is anonymous", status=401)
 
     if user.get_table_permission_level(Table.load(name=table)) < permission:
-        raise PermissionDenied
-
-
-def assert_has_metadata(table: str, schema: str) -> bool:
-    table_obj = Table.load(name=table)
-    if table_obj.oemetadata is None:
-        result = False
-    else:
-        result = True
-
-    return result
+        raise APIError("Permission denied", status=403)
 
 
 def _translate_fetched_cell(cell):
@@ -1046,36 +1003,17 @@ def table_change_constraint(constraint_definition):
     return perform_sql(sql_string)
 
 
-def put_rows(schema, table: str, column_data):
-    keys = list(column_data.keys())
-    values = list(column_data.values())
-
-    keys = ['"{0}"'.format(key) for key in keys]
-    values = ["'{0}'".format(value) for value in values]
-
-    sql = 'INSERT INTO "{schema}"."{table}" ({keys}) VALUES({values})'.format(
-        schema=schema, table=table, keys=",".join(keys), values=",".join(values)
-    )
-
-    return perform_sql(sql)
-
-
 """
 ACTIONS FROM OLD API
 """
 
 
-def _get_table(schema, table) -> SATable:
+def _get_table(schema: str, table: str) -> SATable:
+    # TODO: ensure table and schema are validated
     engine = _get_engine()
     metadata = MetaData(bind=_get_engine())
 
     return SATable(table, metadata, autoload=True, autoload_with=engine, schema=schema)
-
-
-def get_table_metadata(schema: str, table: str) -> dict:
-    django_obj = Table.load(name=table)
-    oemetadata = django_obj.oemetadata
-    return oemetadata if oemetadata else {}
 
 
 def __internal_select(query, context):
@@ -1096,14 +1034,14 @@ def __internal_select(query, context):
 
 
 def __change_rows(
-    request, context, target_sa_table: SATable, setter, fields=None
+    table: Table, request, context, target_sa_table: SATable, setter, fields=None
 ) -> dict:
-    orig_table = read_pgid(request["table"])
+
     query: dict = {
         "from": {
             "type": "table",
-            "schema": read_pgid(request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)),
-            "table": orig_table,
+            "schema": table.oedb_schema,
+            "table": table.name,
         }
     }
 
@@ -1123,10 +1061,9 @@ def __change_rows(
         fields = [field[0] for field in rows["description"]]
     fields += [f[0] for f in meta_fields]
 
-    table_name = orig_table
     meta = MetaData(bind=_get_engine())
     sa_table = SATable(
-        table_name,
+        table.name,
         meta,
         autoload=True,
         schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
@@ -1191,69 +1128,6 @@ def drop_not_null_constraints_from_delete_meta_table(
     engine_execute(engine, query)
 
 
-def data_delete(request: dict, context: dict):
-    orig_table = get_or_403(request, "table")
-    if orig_table.startswith("_") or orig_table.endswith("_cor"):
-        raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-
-    schema, table = get_table_name(orig_schema, orig_table)
-
-    if schema is None:
-        schema = SCHEMA_DEFAULT_TEST_SANDBOX
-
-    assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
-
-    # TODO:permission check is still done outside of this function,
-    # so we pass user=None
-    target_meta_sa_table = (
-        Table.objects.get(name=orig_table)
-        .get_oeb_table_proxy(user=None)
-        ._delete_table.get_sa_table()
-    )
-    setter = []
-    cursor = load_cursor_from_context(context)
-
-    drop_not_null_constraints_from_delete_meta_table(
-        target_meta_sa_table.name, target_meta_sa_table.schema
-    )
-
-    result = __change_rows(request, context, target_meta_sa_table, setter, ["id"])
-    apply_changes(schema, table, cursor)
-    return result
-
-
-def data_update(query: dict, context: dict):
-    orig_table = read_pgid(get_or_403(query, "table"))
-    if orig_table.startswith("_") or orig_table.endswith("_cor"):
-        raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = read_pgid(query.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX))
-    schema, table = get_table_name(orig_schema, orig_table)
-
-    if schema is None:
-        schema = SCHEMA_DEFAULT_TEST_SANDBOX
-
-    assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
-
-    # TODO:permission check is still done outside of this function,
-    # so we pass user=None
-    target_sa_table = (
-        Table.objects.get(name=orig_table)
-        .get_oeb_table_proxy(user=None)
-        ._edit_table.get_sa_table()
-    )
-    setter = get_or_403(query, "values")
-    if isinstance(setter, list):
-        if "fields" not in query:
-            raise APIError("values passed in list format without field info")
-        field_names = [read_pgid(d["column"]) for d in query["fields"]]
-        setter = dict(zip(field_names, setter))
-    cursor = load_cursor_from_context(context)  # TODO:
-    result = __change_rows(query, context, target_sa_table, setter)
-    apply_changes(schema, table, cursor)
-    return result
-
-
 def data_insert_check(schema, table: str, values, context):
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
@@ -1287,7 +1161,11 @@ def data_insert_check(schema, table: str, values, context):
             for row in values:
                 # TODO: This is horribly inefficient!
                 query = {
-                    "from": {"type": "table", "schema": schema, "table": table},
+                    "from": {
+                        "type": "table",
+                        # "schema": schema,
+                        "table": table,
+                    },
                     "where": {
                         "type": "operator",
                         "operator": "AND",
@@ -1353,52 +1231,6 @@ def data_insert_check(schema, table: str, values, context):
                         )
 
 
-def data_insert(request: dict, context: dict) -> dict:
-
-    cursor = load_cursor_from_context(context)
-    # If the insert request is not for a meta table, change the request to do so
-    table_name = get_or_403(request, "table")
-    if table_name.startswith("_") or table_name.endswith("_cor"):
-        raise APIError("Insertions on meta tables is not allowed", status=403)
-    schema_name = request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-
-    schema_name, table_name = get_table_name(schema_name, table_name)
-
-    assert_permission(user=context["user"], table=table_name, permission=WRITE_PERM)
-
-    # TODO:permission check is still done outside of this function,
-    # so we pass user=None
-    table_obj = Table.objects.get(name=table_name)
-    insert_sa_table = table_obj.get_oeb_table_proxy()._insert_table.get_sa_table()
-
-    request["table"] = insert_sa_table.name
-    request["schema"] = insert_sa_table.schema
-
-    query, values = parse_insert(request, context)
-    data_insert_check(schema_name, table_name, values, context)
-    _execute_sqla(query, cursor)
-    description = cursor.description
-    response = {}
-    if description:
-        response["description"] = [
-            [
-                col.name,
-                col.type_code,
-                col.display_size,
-                col.internal_size,
-                col.precision,
-                col.scale,
-                col.null_ok,
-            ]
-            for col in description
-        ]
-    response["rowcount"] = cursor.rowcount
-
-    apply_changes(schema_name, table_name, cursor)
-
-    return response
-
-
 def _execute_sqla(query, cursor: AbstractCursor | Session) -> None:
     dialect = _get_engine().dialect
     try:
@@ -1442,47 +1274,6 @@ def _execute_sqla(query, cursor: AbstractCursor | Session) -> None:
         raise
 
 
-def process_value(val):
-    if isinstance(val, str):
-        return "'" + val.replace("'", "\\'") + "'"
-    if isinstance(val, datetime):
-        return "'" + str(val) + "'"
-    if val is None:
-        return "null"
-    else:
-        return str(val)
-
-
-def data_search(request, context: dict | None = None):
-    query = parse_select(request)
-    cursor = load_cursor_from_context(context or {})
-    _execute_sqla(query, cursor)
-
-    description = [
-        [
-            col.name,
-            col.type_code,
-            col.display_size,
-            col.internal_size,
-            col.precision,
-            col.scale,
-            col.null_ok,
-        ]
-        for col in cursor.description
-    ]
-    result = {"description": description, "rowcount": cursor.rowcount}
-    return result
-
-
-def count_all(request, context=None):
-    table = get_or_403(request, "table")
-    schema = get_or_403(request, "schema")
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
-    sa_table = _get_table(schema, table)
-    return session.query(sa_table).count()
-
-
 def analyze_columns(schema, table):
     engine = _get_engine()
     result = engine_execute(
@@ -1501,7 +1292,7 @@ def clear_dict(d):
     }
 
 
-def move(from_schema, table: str, to_schema):
+def move(from_schema, table: str, topic):
     """
     Implementation note:
         Currently we implemented two versions of the move functionality
@@ -1510,12 +1301,12 @@ def move(from_schema, table: str, to_schema):
     move_publish(
         from_schema=from_schema,
         table=table,
-        to_schema=to_schema,
+        topic=topic,
         embargo_period="none",
     )
 
 
-def move_publish(from_schema, table: str, to_schema, embargo_period):
+def move_publish(from_schema, table: str, topic, embargo_period):
     """
     The issue about publishing datatables  in the context of the OEP
     is that tables must be moved physically in the postgreSQL database.
@@ -1580,62 +1371,15 @@ def move_publish(from_schema, table: str, to_schema, embargo_period):
     all_peer_reviews = PeerReview.objects.filter(table=table_obj)
 
     for peer_review in all_peer_reviews:
-        peer_review.update_all_table_peer_reviews_after_table_moved(topic=to_schema)
+        peer_review.update_all_table_peer_reviews_after_table_moved(topic=topic)
 
-    table_obj.set_is_published(topic_name=to_schema)
-
-
-def data_info(request, context=None):
-    return request
+    table_obj.set_is_published(topic_name=topic)
 
 
 def connect():
     engine = _get_engine()
     insp = inspect(engine)
     return insp
-
-
-def has_schema(request: dict, context=None) -> bool:
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.has_schema(conn, get_or_403(request, "schema"))
-    finally:
-        conn.close()
-    return bool(result)
-
-
-def has_table(request, context=None):
-    table = get_or_403(request, "table")
-    return Table.objects.filter(name=table).exists()
-
-
-def has_sequence(request, context=None):
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.has_sequence(
-            conn,
-            get_or_403(request, "sequence_name"),
-            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def has_type(request, context=None):
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.has_schema(
-            conn,
-            get_or_403(request, "sequence_name"),
-            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-        )
-    finally:
-        conn.close()
-    return result
 
 
 def get_table_oid(request: dict, context=None):
@@ -1653,298 +1397,6 @@ def get_table_oid(request: dict, context=None):
     finally:
         conn.close()
     return result
-
-
-def get_schema_names(request: dict, context=None):
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.get_schema_names(engine.connect(), **request)
-    finally:
-        conn.close()
-    return result
-
-
-def get_table_names(request: dict, context=None):
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.get_table_names(
-            conn, schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX), **request
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def get_view_names(request: dict, context=None):
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.get_view_names(
-            conn, schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX), **request
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def get_view_definition(request: dict, context=None):
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.get_schema_names(
-            conn,
-            get_or_403(request, "view_name"),
-            schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-            **request,
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def get_columns(query: dict, context=None) -> dict:
-    engine = _get_engine()
-    connection: Connection = engine.connect()
-
-    table_name = get_or_403(query, "table")
-    schema = query.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-    schema = validate_schema(schema)
-
-    # We need to translate the info_cache from a json-friendly format to the
-    # conventional one
-    info_cache = None
-    if query.get("info_cache"):
-        info_cache = {
-            ("get_columns", tuple(k.split("+")), tuple()): v
-            for k, v in query.get("info_cache", {}).items()
-        }
-
-    try:
-        table_oid = engine.dialect.get_table_oid(
-            connection, table_name, schema, info_cache=info_cache
-        )
-    except NoSuchTableError as e:
-        raise ConnectionError(str(e))
-    SQL_COLS = """
-                SELECT a.attname,
-                  pg_catalog.format_type(a.atttypid, a.atttypmod),
-                  (SELECT pg_catalog.pg_get_expr(d.adbin, d.adrelid)
-                    FROM pg_catalog.pg_attrdef d
-                   WHERE d.adrelid = a.attrelid AND d.adnum = a.attnum
-                   AND a.atthasdef)
-                  AS DEFAULT,
-                  a.attnotnull, a.attnum, a.attrelid as table_oid
-                FROM pg_catalog.pg_attribute a
-                WHERE a.attrelid = :table_oid
-                AND a.attnum > 0 AND NOT a.attisdropped
-                ORDER BY a.attnum
-            """
-    s = sql.text(
-        SQL_COLS,
-        bindparams=[sql.bindparam("table_oid", type_=sqltypes.Integer)],
-        typemap={"attname": sqltypes.Unicode, "default": sqltypes.Unicode},
-    )
-    c = connection_execute(connection, s, table_oid=table_oid)
-    rows = c.fetchall() or []
-
-    domains = engine.dialect._load_domains(connection)
-
-    enums = dict(
-        (
-            (
-                "%s.%s" % (rec["schema"], rec["name"])
-                if not rec["visible"]
-                else rec["name"]
-            ),
-            rec,
-        )
-        for rec in engine.dialect._load_enums(connection, schema="*")
-    )
-
-    columns = [
-        (name, format_type, default, notnull, attnum, table_oid)
-        for name, format_type, default, notnull, attnum, table_oid in rows
-    ]
-
-    # format columns
-    return {"columns": columns, "domains": domains, "enums": enums}
-
-
-def get_pk_constraint(request: dict, context=None):
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.get_pk_constraint(
-            conn,
-            get_or_403(request, "table"),
-            schema=request.pop("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-            **request,
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def get_foreign_keys(request: dict, context=None):
-    engine = _get_engine()
-    conn = engine.connect()
-    if not request.get("schema", None):
-        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
-    try:
-        result = engine.dialect.get_foreign_keys(
-            conn,
-            get_or_403(request, "table"),
-            postgresql_ignore_search_path=request.pop(
-                "postgresql_ignore_search_path", False
-            ),
-            **request,
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def get_indexes(request: dict, context=None):
-    engine = _get_engine()
-    conn = engine.connect()
-    if not request.get("schema", None):
-        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
-    try:
-        result = engine.dialect.get_indexes(
-            conn, get_or_403(request, "table"), **request
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def get_unique_constraints(request: dict, context=None):
-    engine = _get_engine()
-    conn = engine.connect()
-    if not request.get("schema", None):
-        request["schema"] = SCHEMA_DEFAULT_TEST_SANDBOX
-    try:
-        result = engine.dialect.get_foreign_keys(
-            conn, get_or_403(request, "table"), **request
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def get_isolation_level(request: dict, context: dict):
-    engine = _get_engine()
-    cursor = load_cursor_from_context(context)
-    result = engine.dialect.get_isolation_level(cursor)
-    return result
-
-
-def set_isolation_level(request: dict, context: dict):
-    level = request.get("level", None)
-    engine = _get_engine()
-    cursor = load_cursor_from_context(context)
-    try:
-        engine.dialect.set_isolation_level(cursor, level)
-    except exc.ArgumentError as ae:
-        return _response_error(str(ae))
-    return __response_success()
-
-
-def do_begin_twophase(request: dict, context: dict):
-    xid = request.get("xid", None)
-    engine = _get_engine()
-    cursor = load_cursor_from_context(context)
-    engine.dialect.do_begin_twophase(cursor, xid)
-    return __response_success()
-
-
-def do_prepare_twophase(request: dict, context: dict):
-    xid = request.get("xid", None)
-    engine = _get_engine()
-    cursor = load_cursor_from_context(context)
-    engine.dialect.do_prepare_twophase(cursor, xid)
-    return __response_success()
-
-
-def do_rollback_twophase(request: dict, context: dict):
-    xid = request.get("xid", None)
-    is_prepared = request.get("is_prepared", True)
-    recover = request.get("recover", False)
-    engine = _get_engine()
-    cursor = load_cursor_from_context(context)
-    engine.dialect.do_rollback_twophase(
-        cursor, xid, is_prepared=is_prepared, recover=recover
-    )
-    return __response_success()
-
-
-def do_commit_twophase(request: dict, context: dict):
-    xid = request.get("xid", None)
-    is_prepared = request.get("is_prepared", True)
-    recover = request.get("recover", False)
-    engine = _get_engine()
-    cursor = load_cursor_from_context(context)
-    engine.dialect.do_commit_twophase(
-        cursor, xid, is_prepared=is_prepared, recover=recover
-    )
-    return __response_success()
-
-
-def do_recover_twophase(request, context: dict):
-    engine = _get_engine()
-    cursor = load_cursor_from_context(context)
-    return engine.dialect.do_commit_twophase(cursor)
-
-
-def open_raw_connection(request, context: dict):
-    session_context = SessionContext(owner=context.get("user"))
-    return {"connection_id": session_context.connection._id}
-
-
-def commit_raw_connection(request, context: dict):
-    connection = load_session_from_context(context).connection
-    connection.commit()
-    return __response_success()
-
-
-def rollback_raw_connection(request, context: dict):
-    load_session_from_context(context).rollback()
-    return __response_success()
-
-
-def close_raw_connection(request, context: dict):
-    load_session_from_context(context).close()
-    return __response_success()
-
-
-def close_all_connections(request: dict, context):
-    close_all_for_user(request)
-    return __response_success()
-
-
-def open_cursor(request: dict, context: dict, named: bool = False):
-    session_context = load_session_from_context(context)
-    cursor_id = session_context.open_cursor(named=named)
-    return {"cursor_id": cursor_id}
-
-
-def close_cursor(request, context: dict):
-    session_context = load_session_from_context(context)
-    cursor_id = int(context["cursor_id"])
-    session_context.close_cursor(cursor_id)
-    return {"cursor_id": cursor_id}
-
-
-def fetchone(request, context: dict):
-    cursor = load_cursor_from_context(context)
-    row = cursor.fetchone()
-    if row:
-        row = [_translate_fetched_cell(cell) for cell in row]
-        return row
-    else:
-        return row
 
 
 def fetchall(context: dict):
@@ -2351,6 +1803,462 @@ def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
         row_count = row[0] if row else 0
 
     return row_count
+
+
+# -------------------------------------------------------------------------------------
+# advanced api: functions will be wrapped in create_ajax_handler
+#
+# all functions must accept (request: dict, context: dict), but may have
+# additional kwargs
+#
+# -------------------------------------------------------------------------------------
+
+
+def get_schema_names(
+    request: dict | None = None, context: dict | None = None
+) -> list[str]:
+    # TODO: can we remove this endpoint?
+    return [SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX]
+
+
+def get_table_names(
+    request: dict | None = None, context: dict | None = None
+) -> list[str]:
+    return [t.name for t in Table.objects.all()]
+
+
+def data_info(request: dict, context: dict | None = None) -> dict:
+    # TODO: can we remove this endpoint?
+    return request
+
+
+def has_schema(request: dict, context: dict | None = None) -> bool:
+    # TODO can we remove this endpoint
+    return request.get("schema") in get_schema_names()
+
+
+def data_search(request: dict, context: dict | None = None) -> dict:
+    query = parse_select(request)
+    cursor = load_cursor_from_context(context or {})
+    _execute_sqla(query, cursor)
+
+    description = [
+        [
+            col.name,
+            col.type_code,
+            col.display_size,
+            col.internal_size,
+            col.precision,
+            col.scale,
+            col.null_ok,
+        ]
+        for col in cursor.description
+    ]
+    result = {"description": description, "rowcount": cursor.rowcount}
+    return result
+
+
+# advanced api functions with table in request
+
+
+def data_insert(request: dict, context: dict) -> dict:
+
+    cursor = load_cursor_from_context(context)
+    # If the insert request is not for a meta table, change the request to do so
+    table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+    schema_name = table_obj.oedb_schema
+
+    assert_permission(user=context["user"], table=table_name, permission=WRITE_PERM)
+
+    # TODO:permission check is still done outside of this function,
+    # so we pass user=None
+    table_obj = Table.objects.get(name=table_name)
+    insert_sa_table = table_obj.get_oeb_table_proxy()._insert_table.get_sa_table()
+
+    request["table"] = insert_sa_table.name
+    request["schema"] = insert_sa_table.schema
+
+    query, values = parse_insert(request, context)
+    data_insert_check(schema_name, table_name, values, context)
+    _execute_sqla(query, cursor)
+    description = cursor.description
+    response = {}
+    if description:
+        response["description"] = [
+            [
+                col.name,
+                col.type_code,
+                col.display_size,
+                col.internal_size,
+                col.precision,
+                col.scale,
+                col.null_ok,
+            ]
+            for col in description
+        ]
+    response["rowcount"] = cursor.rowcount
+
+    apply_changes(schema_name, table_name, cursor)
+
+    return response
+
+
+def data_delete(request: dict, context: dict) -> dict:
+    table = get_or_403(request, "table")
+    table_obj = table_or_404(table=table)
+    schema_name = table_obj.oedb_schema
+
+    assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
+
+    # TODO:permission check is still done outside of this function,
+    # so we pass user=None
+    target_meta_sa_table = (
+        Table.objects.get(name=table)
+        .get_oeb_table_proxy(user=None)
+        ._delete_table.get_sa_table()
+    )
+    setter = []
+    cursor = load_cursor_from_context(context)
+
+    drop_not_null_constraints_from_delete_meta_table(
+        target_meta_sa_table.name, target_meta_sa_table.schema
+    )
+
+    result = __change_rows(
+        table_obj, request, context, target_meta_sa_table, setter, ["id"]
+    )
+    apply_changes(schema_name, table, cursor)
+    return result
+
+
+def data_update(request: dict, context: dict) -> dict:
+    table = read_pgid(get_or_403(request, "table"))
+    table_obj = table_or_404(table=table)
+    schema_name = table_obj.oedb_schema
+
+    assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
+
+    # TODO:permission check is still done outside of this function,
+    # so we pass user=None
+    target_sa_table = (
+        Table.objects.get(name=table)
+        .get_oeb_table_proxy(user=None)
+        ._edit_table.get_sa_table()
+    )
+    setter = get_or_403(request, "values")
+    if isinstance(setter, list):
+        if "fields" not in request:
+            raise APIError("values passed in list format without field info")
+        field_names = [read_pgid(d["column"]) for d in request["fields"]]
+        setter = dict(zip(field_names, setter))
+    cursor = load_cursor_from_context(context)  # TODO:
+    result = __change_rows(table_obj, request, context, target_sa_table, setter)
+    apply_changes(schema_name, table, cursor)
+    return result
+
+
+def has_table(request: dict, context: dict | None = None) -> bool:
+    table = get_or_403(request, "table")
+    return Table.objects.filter(name=table).exists()
+
+
+def has_sequence(request: dict, context: dict | None = None) -> bool:
+    # TODO can we remove this endpoint
+    raise Exception()
+    engine = _get_engine()
+    conn = engine.connect()
+    try:
+        result = engine.dialect.has_sequence(
+            conn,
+            get_or_403(request, "sequence_name"),
+            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
+        )
+    finally:
+        conn.close()
+    return result
+
+
+def has_type(request: dict, context: dict | None = None) -> bool:
+    # TODO can we remove this endpoint
+    raise Exception()
+    engine = _get_engine()
+    conn = engine.connect()
+    try:
+        result = engine.dialect.has_schema(
+            conn,
+            get_or_403(request, "sequence_name"),
+            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
+        )
+    finally:
+        conn.close()
+    return result
+
+
+def get_view_names(request: dict, context: dict | None = None) -> list[str]:
+    return []
+
+
+def get_view_definition(request: dict, context: dict | None = None) -> None:
+    # TODO: can we remove this endpoint?
+    # it actually just returns the schema names!
+    return None
+
+
+def get_columns(request: dict, context: dict | None = None) -> dict:
+    engine = _get_engine()
+    connection: Connection = engine.connect()
+
+    table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+    schema = table_obj.oedb_schema
+
+    # We need to translate the info_cache from a json-friendly format to the
+    # conventional one
+    info_cache = None
+    if request.get("info_cache"):
+        info_cache = {
+            ("get_columns", tuple(k.split("+")), tuple()): v
+            for k, v in request.get("info_cache", {}).items()
+        }
+
+    try:
+        table_oid = engine.dialect.get_table_oid(
+            connection, table_name, schema, info_cache=info_cache
+        )
+    except NoSuchTableError as e:
+        raise ConnectionError(str(e))
+    SQL_COLS = """
+                SELECT a.attname,
+                  pg_catalog.format_type(a.atttypid, a.atttypmod),
+                  (SELECT pg_catalog.pg_get_expr(d.adbin, d.adrelid)
+                    FROM pg_catalog.pg_attrdef d
+                   WHERE d.adrelid = a.attrelid AND d.adnum = a.attnum
+                   AND a.atthasdef)
+                  AS DEFAULT,
+                  a.attnotnull, a.attnum, a.attrelid as table_oid
+                FROM pg_catalog.pg_attribute a
+                WHERE a.attrelid = :table_oid
+                AND a.attnum > 0 AND NOT a.attisdropped
+                ORDER BY a.attnum
+            """
+    s = sql.text(
+        SQL_COLS,
+        bindparams=[sql.bindparam("table_oid", type_=sqltypes.Integer)],
+        typemap={"attname": sqltypes.Unicode, "default": sqltypes.Unicode},
+    )
+    c = connection_execute(connection, s, table_oid=table_oid)
+    rows = c.fetchall() or []
+
+    domains = engine.dialect._load_domains(connection)
+
+    enums = dict(
+        (
+            (
+                "%s.%s" % (rec["schema"], rec["name"])
+                if not rec["visible"]
+                else rec["name"]
+            ),
+            rec,
+        )
+        for rec in engine.dialect._load_enums(connection, schema="*")
+    )
+
+    columns = [
+        (name, format_type, default, notnull, attnum, table_oid)
+        for name, format_type, default, notnull, attnum, table_oid in rows
+    ]
+
+    # format columns
+    return {"columns": columns, "domains": domains, "enums": enums}
+
+
+def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
+    table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+    schema_name = table_obj.oedb_schema
+
+    engine = _get_engine()
+    conn = engine.connect()
+
+    try:
+        result = engine.dialect.get_pk_constraint(
+            conn,
+            table_name,
+            schema=schema_name,
+            **request,
+        )
+    finally:
+        conn.close()
+    return result
+
+
+def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
+    engine = _get_engine()
+    conn = engine.connect()
+
+    table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+    request["schema"] = table_obj.oedb_schema
+
+    try:
+        result = engine.dialect.get_foreign_keys(
+            conn,
+            table_name,
+            postgresql_ignore_search_path=request.pop(
+                "postgresql_ignore_search_path", False
+            ),
+            **request,
+        )
+    finally:
+        conn.close()
+    return result
+
+
+def get_indexes(request: dict, context: dict | None = None) -> dict:
+    # TODO can we remove this endpoint
+
+    table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+    schema_name = table_obj.oedb_schema
+
+    engine = _get_engine()
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_indexes(conn, schema_name, **request)
+    finally:
+        conn.close()
+    return result
+
+
+def get_unique_constraints(request: dict, context: dict | None = None) -> dict:
+    table_name = get_or_403(request, "table")
+    table_obj = table_or_404(table=table_name)
+    request["schema"] = table_obj.oedb_schema
+
+    engine = _get_engine()
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_foreign_keys(conn, table_name, **request)
+    finally:
+        conn.close()
+    return result
+
+
+# advanced api functions without table in request
+
+
+def get_isolation_level(request: dict, context: dict) -> dict:
+    engine = _get_engine()
+    cursor = load_cursor_from_context(context)
+    result = engine.dialect.get_isolation_level(cursor)
+    return result
+
+
+def set_isolation_level(request: dict, context: dict) -> dict:
+    level = request.get("level", None)
+    engine = _get_engine()
+    cursor = load_cursor_from_context(context)
+    try:
+        engine.dialect.set_isolation_level(cursor, level)
+    except exc.ArgumentError as ae:
+        return _response_error(str(ae))
+    return __response_success()
+
+
+def do_begin_twophase(request: dict, context: dict) -> dict:
+    xid = request.get("xid", None)
+    engine = _get_engine()
+    cursor = load_cursor_from_context(context)
+    engine.dialect.do_begin_twophase(cursor, xid)
+    return __response_success()
+
+
+def do_prepare_twophase(request: dict, context: dict) -> dict:
+    xid = request.get("xid", None)
+    engine = _get_engine()
+    cursor = load_cursor_from_context(context)
+    engine.dialect.do_prepare_twophase(cursor, xid)
+    return __response_success()
+
+
+def do_rollback_twophase(request: dict, context: dict) -> dict:
+    xid = request.get("xid", None)
+    is_prepared = request.get("is_prepared", True)
+    recover = request.get("recover", False)
+    engine = _get_engine()
+    cursor = load_cursor_from_context(context)
+    engine.dialect.do_rollback_twophase(
+        cursor, xid, is_prepared=is_prepared, recover=recover
+    )
+    return __response_success()
+
+
+def do_commit_twophase(request: dict, context: dict) -> dict:
+    xid = request.get("xid", None)
+    is_prepared = request.get("is_prepared", True)
+    recover = request.get("recover", False)
+    engine = _get_engine()
+    cursor = load_cursor_from_context(context)
+    engine.dialect.do_commit_twophase(
+        cursor, xid, is_prepared=is_prepared, recover=recover
+    )
+    return __response_success()
+
+
+def do_recover_twophase(request: dict, context: dict) -> dict:
+    engine = _get_engine()
+    cursor = load_cursor_from_context(context)
+    return engine.dialect.do_commit_twophase(cursor)
+
+
+def open_raw_connection(request: dict, context: dict) -> dict:
+    session_context = SessionContext(owner=context.get("user"))
+    return {"connection_id": session_context.connection._id}
+
+
+def commit_raw_connection(request: dict, context: dict) -> dict:
+    connection = load_session_from_context(context).connection
+    connection.commit()
+    return __response_success()
+
+
+def rollback_raw_connection(request: dict, context: dict) -> dict:
+    load_session_from_context(context).rollback()
+    return __response_success()
+
+
+def close_raw_connection(request: dict, context: dict) -> dict:
+    load_session_from_context(context).close()
+    return __response_success()
+
+
+def open_cursor(request: dict, context: dict, named: bool = False) -> dict:
+    session_context = load_session_from_context(context)
+    cursor_id = session_context.open_cursor(named=named)
+    return {"cursor_id": cursor_id}
+
+
+def close_cursor(request: dict, context: dict) -> dict:
+    session_context = load_session_from_context(context)
+    cursor_id = int(context["cursor_id"])
+    session_context.close_cursor(cursor_id)
+    return {"cursor_id": cursor_id}
+
+
+def fetchone(request: dict, context: dict) -> list | None:
+    cursor = load_cursor_from_context(context)
+    row = cursor.fetchone()
+    if row:
+        row = [_translate_fetched_cell(cell) for cell in row]
+        return row
+    else:
+        return row
+
+
+# -------------------------------------------------------------------------------------
+# temporarily extracted functions doing sqlalchemy execute
+# -------------------------------------------------------------------------------------
 
 
 def session_execute(session: Session, sql) -> ResultProxy:

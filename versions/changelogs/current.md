@@ -10,6 +10,11 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- changes to urls:
+  - `/dataedit/*` -> `/database/*`
+  - `/api/v0/schema/<SCHEMA>/tables/*` -> `/api/v0//tables/*` (but old urls
+    still supported)
+
 ## Features
 
 ## Bugs
@@ -21,3 +26,8 @@ SPDX-License-Identifier: CC0-1.0
 ## Documentation updates
 
 ## Code Quality
+
+- harmonized all api endpoints
+  - names
+  - validate existing table objects instead of passing table names
+  - remove schema argument from views

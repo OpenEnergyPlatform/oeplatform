@@ -2432,7 +2432,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "dataedit/templates/dataedit/dataedit_schemalist.html"
+path = "dataedit/templates/dataedit/dataedit_topiclist.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [

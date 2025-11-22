@@ -5,8 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from api import actions
-
-from .error import MetadataException
+from dataedit.metadata.error import MetadataException
 
 
 def from_v0(comment_on_table, schema, table):
