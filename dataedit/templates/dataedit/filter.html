@@ -196,7 +196,7 @@
                 </li>
               </ul>
             </div>
-            {% if not schema %}
+            {% if not topic %}
               <div class="col-md-4">
                 <div class="info-section__stats">
                   <h6 class="info-section__subtitle">Database Statistics</h6>
@@ -252,7 +252,7 @@
       location.href = "{{ request.path }}";
     }
 
-    // blongs to dataedit_schemalist.hmtl
+    // belongs to dataedit_topiclist.hmtl
     function open_wizzard() {
       location.href = "{% url 'dataedit:wizard_create' %}";
     }

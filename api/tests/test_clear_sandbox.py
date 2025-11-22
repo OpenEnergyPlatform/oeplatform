@@ -11,20 +11,17 @@ from dataedit.management.commands.clear_sandbox import (
     get_sandbox_tables_django,
     get_sandbox_tables_oedb,
 )
-from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 from . import APITestCase
 
 
 class TestCommandClearSandbox(APITestCase):
-    test_schema = SCHEMA_DEFAULT_TEST_SANDBOX
 
     def test_clear_sandbox(self):
         # create a test table with data
         # so that sandbox is not empty
         self.create_table(
             table="test_sandbox_table",
-            schema=SCHEMA_DEFAULT_TEST_SANDBOX,
             structure={"columns": [{"name": "id", "data_type": "bigint"}]},
             data=[{"id": 1}],
         )

@@ -42,8 +42,7 @@ var table_info = {
   columns: [],
   columnTypes: {},
   rows: null,
-  name: null,
-  schema: null,
+  name: null,  
 };
 
 function getCookie(name) {
@@ -179,8 +178,7 @@ function request_data(data, callback, settings) {
   $("#loading-indicator").show();
   var base_query = {
     from: {
-      type: "table",
-      schema: schema,
+      type: "table",      
       table: table,
     },
   };
@@ -428,20 +426,19 @@ function flash_handler(i) {
 
 /**
  *
- * @param {string} schema
  * @param {string} table
  * @param {string} csrftoken
  * @param {object} current_view
  */
-function load_view(schema, table, csrftoken, current_view) {
+function load_view(table, csrftoken, current_view) {
   view = current_view;
   table_info.name = table;
-  table_info.schema = schema;
+  
 
   Promise.all([
     window.reverseUrl("api:advanced-search"),
-    window.reverseUrl("api:table-columns", { schema: schema, table: table }),
-    window.reverseUrl("api:approx-row-count", { schema: "data", table: table }),
+    window.reverseUrl("api:table-columns", { table: table }),
+    window.reverseUrl("api:approx-row-count", { table: table }),
   ]).then(([urlSearch, urlColumns, urlApproxRowCount]) => {
     $.when(
       $.ajax({
@@ -514,7 +511,6 @@ function parse_download() {
     fields: [],
     from: {
       type: "table",
-      schema: schema,
       table: table,
     },
   };
@@ -549,7 +545,7 @@ function parse_download() {
       var responseBlob = new Blob(temp);
       var tempElement = document.createElement("a");
       tempElement.href = window.URL.createObjectURL(responseBlob);
-      tempElement.download = "Partial_" + schema + "_" + table + ".csv";
+      tempElement.download = "Partial_" + table + ".csv";
       tempElement.click();
       tempElement.remove();
     });

@@ -32,6 +32,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.urls import path, re_path
+from django.views.generic import RedirectView
 
 from oeplatform import settings
 
@@ -41,7 +42,12 @@ handler404 = "base.views.handler404"
 urlpatterns = [
     path("", include("base.urls")),
     re_path(r"^api/", include("api.urls")),
-    re_path(r"^dataedit/", include("dataedit.urls")),
+    re_path(r"^database/", include("dataedit.urls")),
+    re_path(
+        r"^dataedit/(?P<path>.*)",
+        # NOTE: redirect url must be absolute ( including "/database/"
+        RedirectView.as_view(url="/database/%(path)s"),
+    ),
     re_path(r"^user/", include("login.urls")),
     re_path(r"^oeo_ext/", include("oeo_ext.urls")),
     re_path(r"^factsheets/", include("modelview.urls")),

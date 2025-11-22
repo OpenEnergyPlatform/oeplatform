@@ -195,7 +195,7 @@ class TestGet(APITestCaseWithTable):
             "get",
             url=reverse(
                 "api:approx-row-count",
-                kwargs={"table": self.test_table, "schema": self.test_schema},
+                kwargs={"table": self.test_table},
             )
             + "?precise-below=1000",
             exp_code=200,

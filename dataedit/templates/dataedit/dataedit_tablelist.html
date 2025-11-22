@@ -29,7 +29,7 @@
     <tbody>
       {% for table in tables_paginated %}
         <tr>
-          <td onclick="window.open('{% url 'dataedit:view' schema=table.oedb_schema table=table.name %}', name='_blank')">
+          <td onclick="window.open('{% url 'dataedit:view' table=table.name %}', name='_blank')">
             {% if table.human_readable_name %}
               {{ table.human_readable_name }}
             {% else %}

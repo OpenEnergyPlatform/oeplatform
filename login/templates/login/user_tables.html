@@ -65,7 +65,7 @@
                       </div>
                       <div class="profile-table-card__content--right">
                         <button class="profile-table-card__btn profile-table-card__btn--sm publish-button"
-                                hx-post="{% url 'api:table-unpublish' schema='data' table=table.name %}"
+                                hx-post="{% url 'api:table-unpublish' table=table.name %}"
                                 hx-confirm="Are you sure you want to mark the table as draft?"
                                 hx-target="">Unpublish</button>
                       </div>
@@ -91,7 +91,7 @@
                         {% endif %}
                         {% endcomment %}
                         <div class="profile-table-card__link">
-                          <a href="{% url 'dataedit:view' schema='data' table=table.name %}">
+                          <a href="{% url 'dataedit:view' table=table.name %}">
                             {% if table.human_readable_name %}
                               {{ table.human_readable_name }}
                             {% else %}
@@ -272,7 +272,7 @@
                           </button>
                         {% endif %}
                         <button class="profile-table-card__btn profile-table-card__btn--sm"
-                                hx-delete="{% url 'api:api_table' schema='data' table=table.name %}"
+                                hx-delete="{% url 'api:api_table' table=table.name %}"
                                 hx-confirm="Are you sure you want to delete the table?"
                                 hx-target="">Delete</button>
                       </div>
@@ -298,7 +298,7 @@
                         {% endif %}
                         {% endcomment %}
                         <div class="profile-table-card__link">
-                          <a href="{% url 'dataedit:view' schema='data' table=table.name %}">
+                          <a href="{% url 'dataedit:view' table=table.name %}">
                             {% if table.table_label %}
                               {{ table.table_label }}
                             {% else %}
@@ -433,7 +433,7 @@
       return cookieValue;
     }
 
-    function publishTable(schema, tableName, toSchema, embargoPeriod) {
+    function publishTable(tableName, toSchema, embargoPeriod) {
       const data = embargoPeriod
         ? { embargo: { duration: embargoPeriod } }
         : {};
@@ -441,7 +441,6 @@
       /* dynamically reverse url */
       return window
         .reverseUrl("api:move_publish", {
-          schema: schema,
           table: tableName,
           topic: toSchema,
         })
@@ -500,10 +499,10 @@
         "show.bs.modal",
         function (event) {
           relatedButton = event.relatedTarget;
-          const dropdown = this.querySelector(".schema-dropdown");
+          const dropdown = this.querySelector(".topic-dropdown");
           dropdown.innerHTML = "";
-          topics.forEach((schema) => {
-            dropdown.innerHTML += `<option value="${schema}">${schema}</option>`;
+          topics.forEach((topic) => {
+            dropdown.innerHTML += `<option value="${topic}">${topic}</option>`;
           });
         }
       );
@@ -512,15 +511,14 @@
       document
         .querySelector(".confirm-publish")
         .addEventListener("click", function () {
-          const schema_dropdown = document.querySelector(".schema-dropdown");
+          const topic_dropdown = document.querySelector(".topic-dropdown");
           const embargo_dropdown = document.querySelector(".embargo-dropdown");
           if (relatedButton) {
-            const schema = 'data';
             const tableName = relatedButton.getAttribute("data-tableName");
-            const toTopic = schema_dropdown.value;
+            const toTopic = topic_dropdown.value;
             const embargoPeriod = embargo_dropdown.value;
 
-            publishTable(schema, tableName, toTopic, embargoPeriod);
+            publishTable(tableName, toTopic, embargoPeriod);
           } else {
             console.error("relatedButton is not defined.");
           }

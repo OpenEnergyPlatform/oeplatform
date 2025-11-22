@@ -9,7 +9,6 @@
 
 window.Wizard = function (config) {
   var state = {
-    schema: "model_draft",
     apiVersion: "v0",
     previewSizeRecords: 10,
     exampleRows: 5,
@@ -535,7 +534,6 @@ window.Wizard = function (config) {
     }
     if (insertValues) {
       var query = {
-        schema: state.schema,
         table: state.table,
         values: insertValues,
       };
@@ -776,10 +774,9 @@ window.Wizard = function (config) {
     };
 
     Promise.all([
-      window.reverseUrl("api:api_table", { schema: "data", table: tablename }),
+      window.reverseUrl("api:api_table", { table: tablename }),
       window.reverseUrl("dataedit:wizard_upload", {
-        table: tablename,
-        schema: "data",
+        table: tablename,        
       }),
     ]).then(([urlTable, urlSuccess]) => {
       sendJson("PUT", urlTable, JSON.stringify(data))
@@ -828,7 +825,7 @@ window.Wizard = function (config) {
     var tablename = $("#wizard-tablename").val();
 
     Promise.all([
-      window.reverseUrl("api:api_table", { schema: "data", table: tablename }),
+      window.reverseUrl("api:api_table", { table: tablename }),
       window.reverseUrl("dataedit:wizard_create"),
     ]).then(([urlTable, urlSuccess]) => {
       sendJson("DELETE", urlTable)

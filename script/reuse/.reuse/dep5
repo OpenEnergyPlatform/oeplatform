@@ -1428,7 +1428,7 @@ Copyright: user <martimanovadarina@gmail.com>
 Copyright: Christian Winger <Christian Winger@oeko.de>
 License: MIT
 
-Files: dataedit/templates/dataedit/dataedit_schemalist.html
+Files: dataedit/templates/dataedit/dataedit_topiclist.html
 Copyright: Martin Glauer <martinglauer89@googlemail.com>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Jonas H <jonas.huber@rl-institut.de>

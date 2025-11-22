@@ -20,7 +20,6 @@ class TestIssue2136TagsNewTable(APITestCaseWithTable):
         resp = self.client.post(
             url,
             data={
-                "schema": self.test_schema,
                 "table": self.test_table,
                 # NOTE: weirdly, adding tags is done by adding tag_<pk> field
                 f"tag_{tag.pk}": "",

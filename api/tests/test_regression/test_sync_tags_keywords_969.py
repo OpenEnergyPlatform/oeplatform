@@ -6,6 +6,7 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from django.urls import reverse
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from api.tests import APITestCaseWithTable, Client
@@ -17,7 +18,7 @@ class Test_sync_tags_keywords_969(APITestCaseWithTable):
     test_structure = {"columns": [{"name": "id", "data_type": "bigserial"}]}
 
     def test_sync_tags_keywords_969(self):
-        post_tag_url = "/dataedit/tags/add/"
+        post_tag_url = reverse("dataedit:tags-add")
         meta_template = OEMETADATA_V20_EXAMPLE  # must have id
         client = Client()
         client.force_login(self.user)
@@ -60,7 +61,6 @@ class Test_sync_tags_keywords_969(APITestCaseWithTable):
         def set_tag_names_via_web_http(names: list[str], client=client):
             data = {
                 "table": self.test_table,
-                "schema": self.test_schema,
             }
             added_ids = [Tag.get_or_create_from_name(name=n).pk for n in names]
             for i in added_ids:

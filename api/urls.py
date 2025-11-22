@@ -15,6 +15,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.urls import include, path, re_path
+from django.views.generic import RedirectView
 
 from api.views import (
     AdvancedCloseAllAPIView,
@@ -81,55 +82,55 @@ structures = r"table|sequence"
 # all endpoints referring to table
 urlpatterns_v0_schema_table = [
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/$",
+        r"^(?P<table>[\w\d_\s]+)/$",
         TableAPIView.as_view(),
         name="api_table",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/meta/$",
+        r"^(?P<table>[\w\d_\s]+)/meta/$",
         TableMetadataAPIView.as_view(),
         name="api_table_meta",
     ),
     # TODO: Remove this endpoint later on - MovePublish includes optional
     # embargo time and marks table as published
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<topic>[\w\d_\s]+)/",  # noqa
+        r"^(?P<table>[\w\d_\s]+)/move/(?P<topic>[\w\d_\s]+)/",  # noqa
         TableMoveAPIView.as_view(),
         name="move",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move_publish/(?P<topic>[\w\d_\s]+)/",  # noqa
+        r"^(?P<table>[\w\d_\s]+)/move_publish/(?P<topic>[\w\d_\s]+)/",  # noqa
         TableMovePublishAPIView.as_view(),
         name="move_publish",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/unpublish$",
+        r"^(?P<table>[\w\d_\s]+)/unpublish$",
         TableUnpublishAPIView.as_view(),
         name="table-unpublish",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa
+        r"^(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa
         TableColumnAPIView.as_view(),
         name="table-columns",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/id/(?P<column_id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
+        r"^(?P<table>[\w\d_\s]+)/id/(?P<column_id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
         TableFieldsAPIView.as_view(),
         name="table-fields",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",  # noqa
+        r"^(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",  # noqa
         TableRowsAPIView.as_view(),
         name="api_rows",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$",
+        r"^(?P<table>[\w\d_\s]+)/rows/new?$",
         TableRowsAPIView.as_view(),
         {"action": "new"},
         name="api_rows_new",
     ),
     re_path(
-        r"^(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rowcount$",
+        r"^(?P<table>[\w\d_\s]+)/rowcount$",
         table_approx_row_count_view,
         name="approx-row-count",
     ),
@@ -273,7 +274,13 @@ urlpatterns_v0_advanced = [
 ]
 
 urlpatterns_v0 = [
-    path("schema/", include(urlpatterns_v0_schema_table)),
+    # path("schema/", include(urlpatterns_v0_schema_table)),
+    re_path(
+        r"^schema/{qual}/tables/(?P<path>.*)".format(qual=pgsql_qualifier),
+        # NOTE: redirect url must be absolute ( including "/api/v0/tables/"
+        RedirectView.as_view(url="/api/v0/tables/%(path)s"),
+    ),
+    path("tables/", include(urlpatterns_v0_schema_table)),
     path("advanced/", include(urlpatterns_v0_advanced)),
     re_path(
         r"^oekg/sparql/?$",

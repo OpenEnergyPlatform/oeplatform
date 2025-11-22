@@ -362,9 +362,9 @@
                 <!-- placeholder table name -->
                 <div class="profile-rvw__item-name">
                   {% if review.is_finished == True %}
-                    <a href="{% url 'dataedit:view' schema=review.schema table=review.table %}">{{ review.schema }} - {{ review.table }}</a>
+                    <a href="{% url 'dataedit:view' table=review.table %}">{{ review.schema }} - {{ review.table }}</a>
                   {% else %}
-                    <a href="{% url 'dataedit:peer_review_reviewer' table=review.table schema=review.schema review_id=review.id %}">{{ review.schema }} - {{ review.table }}</a>
+                    <a href="{% url 'dataedit:peer_review_reviewer' table=review.table review_id=review.id %}">{{ review.schema }} - {{ review.table }}</a>
                   {% endif %}
                 </div>
                 <div class="profile-rvw__item-history">
@@ -452,9 +452,9 @@
                 <!-- placeholder table name -->
                 <div class="profile-rvw__item-name">
                   {% if review.is_finished == True %}
-                    <a href="{% url 'dataedit:view' schema=review.schema table=review.table %}">{{ review.schema }} - {{ review.table }}</a>
+                    <a href="{% url 'dataedit:view' table=review.table %}">{{ review.table }}</a>
                   {% else %}
-                    <a href="{% url 'dataedit:peer_review_contributor' table=review.table schema=review.schema review_id=review.id %}">{{ review.schema }} - {{ review.table }}</a>
+                    <a href="{% url 'dataedit:peer_review_contributor' table=review.table review_id=review.id %}">{{ review.table }}</a>
                   {% endif %}
                 </div>
                 <div class="profile-rvw__item-history">

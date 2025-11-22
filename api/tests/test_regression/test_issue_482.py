@@ -30,13 +30,11 @@ class TestAliasesTracking(APITestCaseWithTable):
                     "left": {
                         "type": "table",
                         "table": self.test_table,
-                        "schema": self.test_schema,
                         "alias": "a",
                     },
                     "right": {
                         "type": "table",
                         "table": self.test_table,
-                        "schema": self.test_schema,
                         "alias": "b",
                     },
                     "on": [
