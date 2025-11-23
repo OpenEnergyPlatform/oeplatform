@@ -4,7 +4,6 @@
 
 // My idea v0´s code :)
 function initMetadataViewer() {
-  console.log(window.meta_api);
   const metadataViewer = document.getElementById("metadata-viewer");
   if (!metadataViewer) return;
 
