@@ -12,12 +12,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import re
-from wsgiref.util import FileWrapper
 
 from django.contrib.postgres.search import SearchQuery
 from django.db.models import Q, QuerySet
-from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.utils.encoding import smart_str
+from django.http import HttpRequest, JsonResponse
 
 import api.parser
 from api.actions import (
@@ -29,7 +27,7 @@ from api.actions import (
 )
 from dataedit.metadata import load_metadata_from_db
 from dataedit.models import PeerReview, Table, Tag
-from oeplatform.settings import MEDIA_ROOT, PSEUDO_TOPIC_DRAFT
+from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 ##############################################
 #       Open Peer Review related             #
@@ -458,7 +456,7 @@ def find_tables(
         )
 
     if tag_ids:  # filter by tags:
-        # find tables (in schema), that use all of the tags
+        # find tables that use all of the tags
         # by adding a filter for each tag
         # (instead of all at once, which would be OR)
         for tag_id in tag_ids:
@@ -513,22 +511,6 @@ def add_tag(name: str, color: str) -> None:
         color(str): hexadecimal color code, eg #aaf0f0
     """
     Tag(name=name, color=Tag.color_from_hex(color)).save()
-
-
-def send_dump(schema, table, fname):
-    path = MEDIA_ROOT + "/dumps/{schema}/{table}/{fname}.dump".format(
-        fname=fname, schema=schema, table=table
-    )
-    f = FileWrapper(open(path, "rb"))
-    response = HttpResponse(f, content_type="application/x-gzip")
-
-    response["Content-Disposition"] = "attachment; filename=%s" % smart_str(
-        "{schema}_{table}_{date}.tar.gz".format(date=fname, schema=schema, table=table)
-    )
-
-    # It's usually a good idea to set the 'Content-Length' header too.
-    # You can also set any other required headers: Cache-Control, etc.
-    return response
 
 
 def update_keywords_from_tags(table: Table) -> None:
