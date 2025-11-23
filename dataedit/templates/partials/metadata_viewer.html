@@ -1,4 +1,5 @@
 {% load static %}
+{% load compress %}
 {% block extra_css %}
   <link rel="stylesheet"
         href="{% static 'metadata-viewer/metadata-viewer.css' %}" />
@@ -22,5 +23,7 @@
 {% endblock %}
 {% block after-body-bottom-js %}
   <script>window.meta_api = "{{ meta_api|escapejs }}";</script>
-  <script src="{% static 'metadata-viewer/metadata-viewer.js' %}"></script>
+  {% compress js %}
+    <script src="{% static 'metadata-viewer/metadata-viewer.js' %}"></script>
+  {% endcompress %}
 {% endblock %}
