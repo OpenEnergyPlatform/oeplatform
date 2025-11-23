@@ -1,90 +1,90 @@
 [
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 2,
     "fields": {
       "name": "boundaries"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 3,
     "fields": {
       "name": "climate"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 4,
     "fields": {
       "name": "demand"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 5,
     "fields": {
       "name": "economy"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 6,
     "fields": {
       "name": "emission"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 7,
     "fields": {
       "name": "environment"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 8,
     "fields": {
       "name": "grid"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 9,
     "fields": {
       "name": "openstreetmap"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 10,
     "fields": {
       "name": "policy"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 11,
     "fields": {
       "name": "reference"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 12,
     "fields": {
       "name": "scenario"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 13,
     "fields": {
       "name": "society"
     }
   },
   {
-    "model": "dataedit.schema",
+    "model": "dataedit.topic",
     "pk": 14,
     "fields": {
       "name": "supply"
