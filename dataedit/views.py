@@ -1480,7 +1480,6 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             HttpResponse: Rendered HTML response for contributor review.
         """
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
 
         can_add = False
         peer_review = PeerReview.objects.get(id=review_id)
@@ -1519,12 +1518,12 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
                     "url_table": reverse(
                         "dataedit:view", kwargs={"table": table_obj.name}
                     ),
-                    "topic": schema_name,
+                    "topic": table_obj.topics,
                     "table": table_obj.name,
                 }
             ),
             "table": table_obj.name,
-            "topic": schema_name,
+            "topic": table_obj.topics,
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),

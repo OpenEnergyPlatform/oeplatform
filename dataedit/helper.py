@@ -296,18 +296,14 @@ def delete_peer_review(review_id):
 ##############################################
 
 
-def get_popular_tags(
-    schema_name: str | None = None, table_name: str | None = None, limit=10
-):
+def get_popular_tags(table_name: str | None = None, limit=10):
     tags = get_all_tags(table_name=table_name)
     sort_tags_by_popularity(tags)
 
     return tags[:limit]
 
 
-def get_all_tags(
-    schema_name: str | None = None, table_name: str | None = None
-) -> QuerySet[Tag]:
+def get_all_tags(table_name: str | None = None) -> QuerySet[Tag]:
     """
     Load all tags of a specific table
     :param table: Name of a table
