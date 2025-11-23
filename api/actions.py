@@ -1930,38 +1930,6 @@ def has_table(request: dict, context: dict | None = None) -> bool:
     return Table.objects.filter(name=table).exists()
 
 
-def has_sequence(request: dict, context: dict | None = None) -> bool:
-    # TODO can we remove this endpoint
-    raise Exception()
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.has_sequence(
-            conn,
-            get_or_403(request, "sequence_name"),
-            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def has_type(request: dict, context: dict | None = None) -> bool:
-    # TODO can we remove this endpoint
-    raise Exception()
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.has_schema(
-            conn,
-            get_or_403(request, "sequence_name"),
-            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-        )
-    finally:
-        conn.close()
-    return result
-
-
 def get_view_names(request: dict, context: dict | None = None) -> list[str]:
     return []
 

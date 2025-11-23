@@ -15,6 +15,7 @@ SPDX-License-Identifier: CC0-1.0
   - `/api/v0/schema/<SCHEMA>/tables/*` -> `/api/v0//tables/*` (but old urls
     still supported)
 - removed api endpoint `move` (we have already `move_publish`)
+- remove `sequence` API endpoints
 
 ## Features
 

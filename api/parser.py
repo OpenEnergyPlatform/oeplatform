@@ -59,7 +59,6 @@ from api.utils import validate_schema
 from dataedit import models as dataedit_models
 from oedb.connection import _get_engine
 from oedb.utils import MAX_NAME_LENGTH, NAME_PATTERN
-from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 sql_operators = {
@@ -733,9 +732,8 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
         if dtype == "label":
             return parse_label(d)
         if dtype == "sequence":
-            schema_name = (
-                read_pgid(d["schema"]) if "schema" in d else SCHEMA_DEFAULT_TEST_SANDBOX
-            )
+            # NOTE/TODO: we need to keep it for sqlalchemy testsuite
+            schema_name = read_pgid(d["schema"]) if "schema" in d else None
             schema_name = validate_schema(schema_name)
             # s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
             return Sequence(get_or_403(d, "sequence"), schema=schema_name)

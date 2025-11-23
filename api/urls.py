@@ -43,9 +43,7 @@ from api.views import (
     AdvancedGetViewDefinitionAPIView,
     AdvancedGetViewNamesAPIView,
     AdvancedHasSchemaAPIView,
-    AdvancedHasSequenceAPIView,
     AdvancedHasTableAPIView,
-    AdvancedHasTypeAPIView,
     AdvancedInfoAPIView,
     AdvancedInsertAPIView,
     AdvancedSearchAPIView,
@@ -75,7 +73,7 @@ app_name = "api"
 
 pgsql_qualifier = r"[\w\d_]+"
 equal_qualifier = r"[\w\d\s\'\=]"
-structures = r"table|sequence"
+structures = r"table"
 
 
 # all endpoints referring to table
@@ -141,8 +139,6 @@ urlpatterns_v0_advanced = [
     re_path(r"^info", AdvancedInfoAPIView, name="advanced-info"),
     re_path(r"^has_schema", AdvancedHasSchemaAPIView, name="advanced-has-schema"),
     re_path(r"^has_table", AdvancedHasTableAPIView, name="advanced-has-table"),
-    re_path(r"^has_sequence", AdvancedHasSequenceAPIView, name="advanced-has-sequence"),
-    re_path(r"^has_type", AdvancedHasTypeAPIView, name="advanced-has-type"),
     re_path(
         r"^get_schema_names",
         AdvancedGetSchemaNamesAPIView,

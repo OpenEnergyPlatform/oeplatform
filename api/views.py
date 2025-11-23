@@ -105,9 +105,7 @@ from api.actions import (
     get_view_names,
     getValue,
     has_schema,
-    has_sequence,
     has_table,
-    has_type,
     list_table_sizes,
     move_publish,
     open_cursor,
@@ -1190,8 +1188,6 @@ AdvancedUpdateAPIView = create_ajax_handler(data_update, requires_cursor=True)
 AdvancedInfoAPIView = create_ajax_handler(data_info)
 AdvancedHasSchemaAPIView = create_ajax_handler(has_schema)
 AdvancedHasTableAPIView = create_ajax_handler(has_table)
-AdvancedHasSequenceAPIView = create_ajax_handler(has_sequence)
-AdvancedHasTypeAPIView = create_ajax_handler(has_type)
 AdvancedGetSchemaNamesAPIView = create_ajax_handler(get_schema_names)
 AdvancedGetTableNamesAPIView = create_ajax_handler(get_table_names)
 AdvancedGetViewNamesAPIView = create_ajax_handler(get_view_names)
