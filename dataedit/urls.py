@@ -31,7 +31,6 @@ from dataedit.views import (
     admin_column_view,
     admin_constraints_view,
     metadata_widget_view,
-    table_show_revision_view,
     table_view_delete_view,
     table_view_save_view,
     table_view_set_default_view,
