@@ -437,18 +437,6 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
     )
 
 
-def table_show_revision_view(
-    request: HttpRequest, table: str, date: str
-) -> HttpResponse:
-    table_obj = table_or_404(table=table)
-    schema_name = table_obj.oedb_schema
-
-    rev = TableRevision.objects.get(table=table, date=date)
-    rev.last_accessed = timezone.now()
-    rev.save()
-    return send_dump(schema_name, table, date)
-
-
 @require_POST
 def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     table_obj = table_or_404(table=table)

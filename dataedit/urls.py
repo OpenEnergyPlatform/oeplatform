@@ -79,12 +79,6 @@ urlpatterns_view_schema = [
         name="table-view-delete-default",  # TODO: should be POST, but is GET?
     ),
     re_path(
-        r"^(?P<table>{qual})/(?P<rev_id>\d+)$".format(qual=pgsql_qualifier),
-        table_show_revision_view,
-        name="table-revision",
-        # TODO: do we need it??, also: rev_id (int) in args, but view wants a date?
-    ),
-    re_path(
         r"^(?P<table>{qual})/graph/new".format(qual=pgsql_qualifier),
         TableCreateGraphView.as_view(),
         name="table-graph",
