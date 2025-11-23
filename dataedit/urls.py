@@ -128,18 +128,16 @@ urlpatterns_tag = [
 
 urlpatterns = [
     re_path(
-        # redirecting old /dataedit/view/SCHEMA/TABLE
+        # legacy redirecting old /dataedit/view/SCHEMA/TABLE
         r"^view/{qual}/(?P<path>.*)$".format(qual=pgsql_qualifier),
         # NOTE: redirect url must be absolute (including "/database/")
         RedirectView.as_view(url="/database/tables/%(path)s"),
     ),
-    re_path(r"^tables/", include(urlpatterns_view_schema)),
     re_path(
+        # legacy redirecting old /dataedit/view/SCHEMA
         r"^view/(?P<topic>{qual})$".format(qual=pgsql_qualifier),
-        tables_view,
-        name="tables-in-topic",
+        RedirectView.as_view(url="/database/topic/%(topic)s"),
     ),
-    re_path(r"^$", topic_view, name="topic-list"),
     re_path(
         r"^view$", RedirectView.as_view(pattern_name="dataedit:topic-list")
     ),  # legacy
@@ -147,6 +145,13 @@ urlpatterns = [
         r"^schemas$", RedirectView.as_view(pattern_name="dataedit:topic-list")
     ),  # legacy
     path("tags/", include(urlpatterns_tag)),
+    re_path(r"^tables/", include(urlpatterns_view_schema)),
+    re_path(
+        r"^topic/(?P<topic>{qual})$".format(qual=pgsql_qualifier),
+        tables_view,
+        name="tables-in-topic",
+    ),
+    re_path(r"^$", topic_view, name="topic-list"),
     re_path(
         r"^admin/columns/",
         admin_column_view,
