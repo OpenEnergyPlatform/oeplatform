@@ -16,6 +16,7 @@ from django.urls import reverse
 
 from base.tests import TestViewsTestCase
 from dataedit.models import PeerReview, PeerReviewManager, Table, Tag
+from oeplatform.settings import TOPIC_SCENARIO
 
 
 class TestViewsDataedit(TestViewsTestCase):
@@ -111,7 +112,7 @@ class TestViewsDataedit(TestViewsTestCase):
             "dataedit:table-permission",
             kwargs={"table": table},
         )
-        self.get("dataedit:tables-in-topic", kwargs={"topic": "scenario"})
+        self.get("dataedit:tables-in-topic", kwargs={"topic": TOPIC_SCENARIO})
         self.get("dataedit:tags")
         self.get("dataedit:tags-edit", kwargs={"tag_pk": "tag1"})
         self.get("dataedit:tags-new")

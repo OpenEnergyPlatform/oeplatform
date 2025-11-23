@@ -72,7 +72,7 @@
       {% endif %}
     {% endfor %}
     {% for topic, description, tables in topics_descriptions_tablecounts %}
-      {% if topic == "scenario" %}
+      {% if topic == TOPIC_SCENARIO %}
         <div class="topics__row">
           <div class="topics__col">
             <div class="topic-card">
@@ -113,7 +113,7 @@
     <div class="topics__row">
       {% for topic, description, tables in topics_descriptions_tablecounts %}
         {% if topic != PSEUDO_TOPIC_DRAFT %}
-          {% if topic != "scenario" %}
+          {% if topic != TOPIC_SCENARIO %}
             <div class="topics__col topics__col--4">
               <div class="topic-card">
                 <div class="topic-card__header"

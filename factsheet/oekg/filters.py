@@ -25,15 +25,15 @@ class OekgQuery:
             step.
 
         Supported IRI formats:
-            IRI Like 'dataedit/view/scenario/abbb_emob' or '
-            https://openenergyplatform.org/dataedit/view/scenario/abbb_emob'
+            IRI Like 'dataedit/tables/abbb_emob' or '
+            https://openenergyplatform.org/database/tables/abbb_emob'
             becomes comparable even with more variation options.
 
 
         """
 
         # Trim down variations of table iri´s down to harmonized part.
-        id_from_url = table_iri.split("view/")
+        id_from_url = table_iri.split("tables/")
         # check if the table_iri contains expected part
         if len(id_from_url) == 2:
             result = id_from_url[1]
@@ -55,7 +55,7 @@ class OekgQuery:
 
         Args:
             table_iri(str): IRI of any table in the scenario topic on the OEP.
-                            IRI Like 'dataedit/view/scenario/abbb_emob'
+                            IRI Like 'dataedit/tables/abbb_emob'
         """
         related_scenarios = set()
         table_iri = self.serialize_table_iri(table_iri)
@@ -89,7 +89,7 @@ class OekgQuery:
 
         Args:
             table_iri(str): IRI of any table in the scenario topic on the OEP.
-                            IRI Like 'dataedit/view/scenario/abbb_emob'
+                            IRI Like 'dataedit/tables/abbb_emob'
         """
         related_scenarios = set()
         table_iri = self.serialize_table_iri(table_iri)
@@ -131,7 +131,7 @@ class OekgQuery:
 
         Args:
             table_iri(str): IRI of any table in the scenario topic on the OEP.
-                            IRI Like 'dataedit/view/scenario/abbb_emob'
+                            IRI Like 'dataedit/tables/abbb_emob'
         """
         related_scenarios_input = (
             self.get_related_scenarios_where_table_is_input_dataset(table_iri=table_iri)
@@ -162,7 +162,7 @@ class OekgQuery:
 
         Args:
             table_iri(str): IRI of any table in the scenario topic on the OEP.
-                            IRI Like 'dataedit/view/scenario/abbb_emob'
+                            IRI Like 'dataedit/tables/abbb_emob'
         """
 
         related_scenarios_output = (

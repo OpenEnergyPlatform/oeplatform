@@ -14,18 +14,18 @@ class OekgQueryTests(TestCase):
 
     def test_serialize_table_iri_internal_urls(self):
         cases = [
-            ("dataedit/view/scenario/test_scenario", "scenario/test_scenario"),
+            ("database/tables/test_scenario", "test_scenario"),
             (
-                "https://openenergyplatform.org/dataedit/view/scenario/test_scenario",
-                "scenario/test_scenario",
+                "https://openenergyplatform.org/database/tables/test_scenario",
+                "test_scenario",
             ),
             (
-                "https://databus.openenergyplatform.org/dataedit/view/scenario/test_scenario",  # noqa E501
-                "scenario/test_scenario",
+                "https://databus.openenergyplatform.org/database/tables/test_scenario",  # noqa E501
+                "test_scenario",
             ),
             (
-                "http://example.com/dataedit/view/scenario/another_test",
-                "scenario/another_test",
+                "http://example.com/database/tables/another_test",
+                "another_test",
             ),
         ]
 

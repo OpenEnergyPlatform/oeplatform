@@ -174,6 +174,7 @@ from oeplatform.settings import (
     DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL,
     IS_TEST,
     ONTOP_SPARQL_ENDPOINT_URL,
+    TOPIC_SCENARIO,
     USE_LOEP,
     USE_ONTOP,
 )
@@ -591,7 +592,7 @@ class TableRowsAPIView(APIView):
             pseudo_buffer = Echo()
 
             # NOTE: the csv downloader for views (client side)
-            # in dataedit/static/dataedit/backend.js: parse_download()
+            # in dataedit/static/database/backend.js: parse_download()
             # uses JSON.stringify, so we use csv.QUOTE_NONNUMERIC
             # to get somewhat consistent results
 
@@ -1126,7 +1127,7 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     form select options with existing datasets from scenario topic.
     """
 
-    queryset = Table.objects.filter(topics__name="scenario")
+    queryset = Table.objects.filter(topics__name=TOPIC_SCENARIO)
     serializer_class = ScenarioDataTablesSerializer
 
 

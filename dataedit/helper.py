@@ -29,10 +29,7 @@ from api.actions import (
 )
 from dataedit.metadata import load_metadata_from_db
 from dataedit.models import PeerReview, Table, Tag
-from oeplatform.settings import MEDIA_ROOT
-
-PSEUDO_TOPIC_DRAFT = "draft"
-
+from oeplatform.settings import MEDIA_ROOT, PSEUDO_TOPIC_DRAFT
 
 ##############################################
 #       Open Peer Review related             #
