@@ -85,7 +85,6 @@ from api.actions import (
     do_prepare_twophase,
     do_recover_twophase,
     do_rollback_twophase,
-    engine_execute,
     fetchall,
     fetchmany,
     fetchone,
@@ -120,6 +119,7 @@ from api.actions import (
     set_isolation_level,
     set_table_metadata,
     table_get_approx_row_count,
+    table_has_row_with_id,
     table_or_404,
     try_convert_metadata_to_v2,
     try_parse_metadata,
@@ -163,7 +163,6 @@ from api.validators.identifier import assert_valid_table_name
 from dataedit.models import Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
-from oedb.connection import _get_engine
 from oekg.utils import (
     execute_sparql_query,
     process_datasets_sparql_query,
@@ -728,17 +727,7 @@ class TableRowsAPIView(APIView):
                 status=status.HTTP_409_CONFLICT,
             )
 
-        engine = _get_engine()
-
-        # check whether id is already in use
-        resp = engine_execute(
-            engine,
-            'select count(*) from "{schema}"."{table}" where id = {id};'.format(
-                schema=schema_name, table=table, id=row_id
-            ),
-        ).first()
-        count = resp[0] if resp else 0
-        exists = count > 0 if row_id else False
+        exists = table_has_row_with_id(table_obj, id=row_id) if row_id else False
         if exists:
             response = self.__update_rows(request, table_obj, payload_query, row_id)
             apply_changes(schema_name, table)

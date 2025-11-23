@@ -36,7 +36,7 @@ METADATA_HIDDEN_FIELDS = [
 ]
 
 
-def save_metadata_to_db(schema: str, table: str, updated_metadata):
+def save_metadata_to_db(table: str, updated_metadata):
     """
     Save updated metadata for a specific table in the OEP database.
 

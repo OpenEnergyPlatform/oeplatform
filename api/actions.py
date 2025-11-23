@@ -27,7 +27,7 @@ import logging
 import re
 from copy import deepcopy
 from datetime import datetime, timedelta
-from typing import cast
+from typing import Mapping, cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
@@ -127,7 +127,7 @@ def table_or_404(table: str) -> Table:
     return table_obj
 
 
-def table_or_404_from_dict(dct: dict) -> Table:
+def table_or_404_from_dict(dct: Mapping) -> Table:
     return table_or_404(get_or_403(dct, "table"))
 
 
@@ -143,7 +143,7 @@ def assert_permission(user, table: str, permission: int) -> None:
         raise APIError("Permission denied", 403)
 
 
-def assert_add_tag_permission(user, table: str, permission: int, schema) -> None:
+def assert_add_tag_permission(user, table: str, permission: int) -> None:
     """
     Tags can be added to tables that are in any schema. However,
     it is necessary to check whether the user has write permission
@@ -782,11 +782,9 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
 
 
 def get_column(d):
-    schema = d.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-    schema = validate_schema(schema)
-    table = get_or_403(d, "table")
-    name = get_or_403(d, "column")
-    return Column("%s.%s" % (table, name), schema=schema)
+    table_obj = table_or_404_from_dict(d)
+    name = read_pgid(get_or_403(d, "column"))
+    return Column("%s.%s" % (table_obj.name, name))
 
 
 def column_alter(query, context, schema, table: str, column):
@@ -1383,12 +1381,13 @@ def connect():
 
 
 def get_table_oid(request: dict, context=None):
+    table_obj = table_or_404_from_dict(request)
     engine = _get_engine()
     conn = engine.connect()
     try:
         result = engine.dialect.get_table_oid(
             conn,
-            get_or_403(request, "table"),
+            table_obj.name,
             schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
             **request,
         )
@@ -1756,6 +1755,43 @@ def list_table_sizes() -> list[dict]:
         sess.close()
 
 
+def table_has_row_with_id(table: Table, id: int | str, id_col: str = "id") -> bool:
+    query = text(
+        f"""
+        SELECT count(*)
+        FROM "{table.oedb_schema}"."{table.name}"
+        WHERE {id_col} = :id
+        ;
+    """
+    )
+
+    engine = _get_engine()
+    with engine.connect() as conn:
+        resp = connection_execute(conn, query, id=id)
+        row = resp.fetchone()
+        row_count = row[0] if row else 0
+
+    return row_count > 0
+
+
+def table_get_row_count(table: Table) -> int:
+    query = text(
+        f"""
+        SELECT count(*)
+        FROM "{table.oedb_schema}"."{table.name}"
+        ;
+    """
+    )
+
+    engine = _get_engine()
+    with engine.connect() as conn:
+        resp = connection_execute(conn, query)
+        row = resp.fetchone()
+        row_count = row[0] if row else 0
+
+    return row_count
+
+
 def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
     """Get approximate number of rows quickly.
 
@@ -1789,20 +1825,7 @@ def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
     if row_count >= precise_below:
         return row_count
 
-    query = text(
-        f"""
-        SELECT count(*)
-        FROM "{table.oedb_schema}"."{table.name}"
-        ;
-    """
-    )
-
-    with engine.connect() as conn:
-        resp = connection_execute(conn, query)
-        row = resp.fetchone()
-        row_count = row[0] if row else 0
-
-    return row_count
+    return table_get_row_count(table)
 
 
 # -------------------------------------------------------------------------------------
@@ -1865,22 +1888,21 @@ def data_insert(request: dict, context: dict) -> dict:
 
     cursor = load_cursor_from_context(context)
     # If the insert request is not for a meta table, change the request to do so
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
+    table_obj = table_or_404_from_dict(request)
     schema_name = table_obj.oedb_schema
 
-    assert_permission(user=context["user"], table=table_name, permission=WRITE_PERM)
+    assert_permission(user=context["user"], table=table_obj.name, permission=WRITE_PERM)
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    table_obj = Table.objects.get(name=table_name)
+    table_obj = Table.objects.get(name=table_obj.name)
     insert_sa_table = table_obj.get_oeb_table_proxy()._insert_table.get_sa_table()
 
     request["table"] = insert_sa_table.name
     request["schema"] = insert_sa_table.schema
 
     query, values = parse_insert(request, context)
-    data_insert_check(schema_name, table_name, values, context)
+    data_insert_check(schema_name, table_obj.name, values, context)
     _execute_sqla(query, cursor)
     description = cursor.description
     response = {}
@@ -1899,22 +1921,23 @@ def data_insert(request: dict, context: dict) -> dict:
         ]
     response["rowcount"] = cursor.rowcount
 
-    apply_changes(schema_name, table_name, cursor)
+    apply_changes(schema_name, table_obj.name, cursor)
 
     return response
 
 
 def data_delete(request: dict, context: dict) -> dict:
-    table = get_or_403(request, "table")
-    table_obj = table_or_404(table=table)
+    table_obj = table_or_404_from_dict(request)
     schema_name = table_obj.oedb_schema
 
-    assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
+    assert_permission(
+        user=context["user"], table=table_obj.name, permission=DELETE_PERM
+    )
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
     target_meta_sa_table = (
-        Table.objects.get(name=table)
+        Table.objects.get(name=table_obj.name)
         .get_oeb_table_proxy(user=None)
         ._delete_table.get_sa_table()
     )
@@ -1928,21 +1951,20 @@ def data_delete(request: dict, context: dict) -> dict:
     result = __change_rows(
         table_obj, request, context, target_meta_sa_table, setter, ["id"]
     )
-    apply_changes(schema_name, table, cursor)
+    apply_changes(schema_name, table_obj.name, cursor)
     return result
 
 
 def data_update(request: dict, context: dict) -> dict:
-    table = read_pgid(get_or_403(request, "table"))
-    table_obj = table_or_404(table=table)
+    table_obj = table_or_404_from_dict(request)
     schema_name = table_obj.oedb_schema
 
-    assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
+    assert_permission(user=context["user"], table=table_obj.name, permission=WRITE_PERM)
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
     target_sa_table = (
-        Table.objects.get(name=table)
+        Table.objects.get(name=table_obj.name)
         .get_oeb_table_proxy(user=None)
         ._edit_table.get_sa_table()
     )
@@ -1954,7 +1976,7 @@ def data_update(request: dict, context: dict) -> dict:
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)  # TODO:
     result = __change_rows(table_obj, request, context, target_sa_table, setter)
-    apply_changes(schema_name, table, cursor)
+    apply_changes(schema_name, table_obj.name, cursor)
     return result
 
 
@@ -2009,8 +2031,7 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
     engine = _get_engine()
     connection: Connection = engine.connect()
 
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
+    table_obj = table_or_404_from_dict(request)
     schema = table_obj.oedb_schema
 
     # We need to translate the info_cache from a json-friendly format to the
@@ -2024,7 +2045,7 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
 
     try:
         table_oid = engine.dialect.get_table_oid(
-            connection, table_name, schema, info_cache=info_cache
+            connection, table_obj.name, schema, info_cache=info_cache
         )
     except NoSuchTableError as e:
         raise ConnectionError(str(e))
@@ -2074,8 +2095,7 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
 
 
 def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
+    table_obj = table_or_404_from_dict(request)
     schema_name = table_obj.oedb_schema
 
     engine = _get_engine()
@@ -2084,7 +2104,7 @@ def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
     try:
         result = engine.dialect.get_pk_constraint(
             conn,
-            table_name,
+            table_obj.name,
             schema=schema_name,
             **request,
         )
@@ -2097,14 +2117,13 @@ def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
     engine = _get_engine()
     conn = engine.connect()
 
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
+    table_obj = table_or_404_from_dict(request)
     request["schema"] = table_obj.oedb_schema
 
     try:
         result = engine.dialect.get_foreign_keys(
             conn,
-            table_name,
+            table_obj.name,
             postgresql_ignore_search_path=request.pop(
                 "postgresql_ignore_search_path", False
             ),
@@ -2118,8 +2137,7 @@ def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
 def get_indexes(request: dict, context: dict | None = None) -> dict:
     # TODO can we remove this endpoint
 
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
+    table_obj = table_or_404_from_dict(request)
     schema_name = table_obj.oedb_schema
 
     engine = _get_engine()
@@ -2132,14 +2150,13 @@ def get_indexes(request: dict, context: dict | None = None) -> dict:
 
 
 def get_unique_constraints(request: dict, context: dict | None = None) -> dict:
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
+    table_obj = table_or_404_from_dict(request)
     request["schema"] = table_obj.oedb_schema
 
     engine = _get_engine()
     conn = engine.connect()
     try:
-        result = engine.dialect.get_foreign_keys(conn, table_name, **request)
+        result = engine.dialect.get_foreign_keys(conn, table_obj.name, **request)
     finally:
         conn.close()
     return result

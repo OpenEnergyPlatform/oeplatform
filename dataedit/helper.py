@@ -312,7 +312,6 @@ def get_all_tags(
 ) -> QuerySet[Tag]:
     """
     Load all tags of a specific table
-    :param schema: Name of a schema
     :param table: Name of a table
     :return:
     """
@@ -534,7 +533,7 @@ def send_dump(schema, table, fname):
     return response
 
 
-def update_keywords_from_tags(table: Table, schema: str) -> None:
+def update_keywords_from_tags(table: Table) -> None:
     """synchronize keywords in metadata with tags"""
 
     metadata = load_metadata_from_db(table=table.name)

@@ -108,11 +108,10 @@ def get_column_definition_query(d):
         d["autoincrement"] = True
 
     for fk in d.get("foreign_key", []):
-        fkschema = fk.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-        if fkschema is None:
-            fkschema = SCHEMA_DEFAULT_TEST_SANDBOX
+        table_name = get_or_403(fk, "table")
+        table_obj = dataedit_models.Table.objects.get(name=table_name)
 
-        fk_sa_table = SATable(get_or_403(fk, "table"), MetaData(), schema=fkschema)
+        fk_sa_table = SATable(table_obj.name, MetaData(), schema=table_obj.oedb_schema)
 
         fkcolumn = Column(get_or_403(fk, "column"))
 
@@ -506,9 +505,6 @@ def parse_from_item(d):
 
         tkwargs: dict = dict(autoload=True)
 
-        # schema_name = read_pgid(d["schema"]) if "schema" in d else None
-        # schema_name = validate_schema(schema_name)
-
         # TODO: find a better way than loading table in parse?
         table_obj = dataedit_models.Table.objects.get(name=ext_name)
         schema_name = table_obj.oedb_schema
@@ -572,7 +568,7 @@ def load_table_from_metadata(table: str, schema: str | None = None) -> SATable |
 
 
 def parse_column(d, mapper):
-    name = get_or_403(d, "column")
+    name = read_pgid(get_or_403(d, "column"))
     is_literal = parse_single(d.get("is_literal", False), bool)
     table_name = d.get("table")
     sa_table = None
@@ -689,7 +685,6 @@ def parse_type(dt_string, **kwargs):
 
 
 def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=True):
-    # TODO: Implement
     if isinstance(d, dict):
         if allow_untyped_dicts and "type" not in d:
             return d

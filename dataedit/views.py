@@ -68,11 +68,11 @@ from api.actions import (
     assert_add_tag_permission,
     data_insert,
     describe_columns,
-    get_or_403,
-    perform_sql,
     remove_queued_column,
     remove_queued_constraint,
+    table_get_row_count,
     table_or_404,
+    table_or_404_from_dict,
 )
 from api.error import APIError
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
@@ -94,9 +94,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import (
-    Embargo,
-)
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -147,8 +145,7 @@ def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     action = request.POST.get("action")
     id = request.POST.get("id")
 
-    table = get_or_403(request.POST, "table")
-    table_obj = table_or_404(table=table)
+    table_obj = table_or_404_from_dict(request.POST)
 
     if action == "deny":
         remove_queued_constraint(id)
@@ -170,8 +167,7 @@ def admin_column_view(request: HttpRequest) -> HttpResponse:
 
     action = request.POST.get("action")
     id = request.POST.get("id")
-    table = get_or_403(request.POST, "table")
-    table_obj = table_or_404(table=table)
+    table_obj = table_or_404_from_dict(request.POST)
 
     if action == "deny":
         remove_queued_column(id)
@@ -337,14 +333,12 @@ def tag_table_add_view(request: HttpRequest) -> HttpResponse:
         * Any number of values that start with 'tag_' followed by the id of a tag.
     :return: Redirects to the previous page
     """
-    table = get_or_403(request.POST, "table")
-    table_obj = table_or_404(table=table)
-    schema_name = table_obj.oedb_schema
+    table_obj = table_or_404_from_dict(request.POST)
 
     try:
         # check write permission
         assert_add_tag_permission(
-            request.user, table, login.permissions.WRITE_PERM, schema=schema_name
+            request.user, table_obj.name, login.permissions.WRITE_PERM
         )
         tag_prefix = "tag_"
         tag_prefix_len = len(tag_prefix)
@@ -361,7 +355,7 @@ def tag_table_add_view(request: HttpRequest) -> HttpResponse:
         # TODO: we already do save in update_keywords_from_tags further down
         table_obj.save()
 
-        update_keywords_from_tags(table_obj, schema=schema_name)
+        update_keywords_from_tags(table_obj)
 
         messages.success(
             request,
@@ -394,10 +388,9 @@ def metadata_widget_view(request: HttpRequest) -> HttpResponse:
     Returns:
         HttpResponse: Rendered HTML response for the metadata widget.
     """
-    # TODO: schema and table should be in path?
+    # TODO: table should be in path?
 
-    table = get_or_403(request.GET, "table")
-    table_obj = table_or_404(table=table)
+    table_obj = table_or_404_from_dict(request.GET)
     context = {
         "meta_api": reverse("api:api_table_meta", kwargs={"table": table_obj.name})
     }
@@ -1017,11 +1010,7 @@ class TableWizardView(LoginRequiredMixin, View):
             can_add = level >= login.permissions.WRITE_PERM
             columns = get_column_description(schema_name, table)
             # get number of rows
-            sql = 'SELECT COUNT(*) FROM "{schema}"."{table}"'.format(
-                schema=schema_name, table=table
-            )
-            res = perform_sql(sql)
-            n_rows = res["result"].fetchone()[0]
+            n_rows = table_get_row_count(table_obj)
         else:
             schema_name = SCHEMA_DATA
 
@@ -1423,7 +1412,6 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             can be moved to a different topic (TODO).
         """
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
 
         context = {}
         user: login_models.myuser = request.user  # type: ignore
@@ -1449,21 +1437,21 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         if review_post_type == "delete":
             return delete_peer_review(review_id)
 
-        contributor = PeerReviewManager.load_contributor(table=table)
+        contributor = PeerReviewManager.load_contributor(table=table_obj.name)
 
         if contributor is not None:
             # Überprüfen, ob ein aktiver PeerReview existiert
-            active_peer_review = PeerReview.load(table=table)
+            active_peer_review = PeerReview.load(table=table_obj.name)
             if active_peer_review is None or active_peer_review.is_finished:
                 # Kein aktiver PeerReview vorhanden
                 # oder der aktive PeerReview ist abgeschlossen
                 table_review = PeerReview(
-                    table=table,
+                    table=table_obj.name,
                     is_finished=review_finished,
                     review=review_datamodel,
                     reviewer=user,
                     contributor=contributor,
-                    oemetadata=load_metadata_from_db(table=table),
+                    oemetadata=load_metadata_from_db(table=table_obj.name),
                 )
                 table_review.save(review_type=review_post_type)
             else:
@@ -1481,19 +1469,19 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         else:
             error_msg = (
                 "Failed to retrieve any user that identifies "
-                f"as table holder for the current table: {table}!"
+                f"as table holder for the current table: {table_obj.name}!"
             )
             return JsonResponse({"error": error_msg}, status=400)
 
         # TODO: Check for topic as reviewed finished also indicates the table
         # needs to be or has to be moved.
         if review_finished is True:
-            review_table = Table.load(name=table)
+            review_table = Table.load(name=table_obj.name)
             review_table.set_is_reviewed()
-            metadata = self.load_json(table, review_id=review_id)
+            metadata = self.load_json(table_obj.name, review_id=review_id)
             updated_metadata = recursive_update(metadata, review_data)
-            save_metadata_to_db(schema_name, table, updated_metadata)
-            active_peer_review = PeerReview.load(table=table)
+            save_metadata_to_db(table_obj.name, updated_metadata)
+            active_peer_review = PeerReview.load(table=table_obj.name)
 
             if active_peer_review:
                 updated_oemetadata = recursive_update(
@@ -1532,13 +1520,13 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
 
         can_add = False
         peer_review = PeerReview.objects.get(id=review_id)
-        table_obj = Table.load(peer_review.table)
+
         user: login_models.myuser = request.user  # type: ignore
         if not user.is_anonymous:
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login.permissions.WRITE_PERM
-        oemetadata = self.load_json(table, review_id)
-        metadata = self.sort_in_category(table, oemetadata=oemetadata)
+        oemetadata = self.load_json(table_obj.name, review_id)
+        metadata = self.sort_in_category(table_obj.name, oemetadata=oemetadata)
         json_schema = self.load_json_schema()
         field_descriptions = self.get_all_field_descriptions(json_schema)
         review_data = (peer_review.review or {}).get("reviews", [])
@@ -1560,16 +1548,18 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
                     "url_peer_review": reverse(
                         "dataedit:peer_review_contributor",
                         kwargs={
-                            "table": table,
+                            "table": table_obj.name,
                             "review_id": review_id,
                         },
                     ),
-                    "url_table": reverse("dataedit:view", kwargs={"table": table}),
+                    "url_table": reverse(
+                        "dataedit:view", kwargs={"table": table_obj.name}
+                    ),
                     "topic": schema_name,
-                    "table": table,
+                    "table": table_obj.name,
                 }
             ),
-            "table": table,
+            "table": table_obj.name,
             "topic": schema_name,
             "meta": metadata,
             "json_schema": json_schema,
