@@ -41,8 +41,7 @@ def save_metadata_to_db(table: str, updated_metadata):
     Save updated metadata for a specific table in the OEP database.
 
     Args:
-        schema (str): The name of the OEP schema.
-        table (str): The name of the table in the OEP schema.
+        table (str): The name of the table in the OEP.
         updated_metadata (dict): The updated metadata dictionary.
 
     Note:
@@ -66,7 +65,7 @@ def load_metadata_from_db(table: str) -> dict:
     Load metadata for a specific table from the OEP database.
 
     Args:
-        table (str): The name of the table in the OEP schema.
+        table (str): The name of the table in the OEP.
 
     Returns:
         dict: The loaded metadata dictionary.
