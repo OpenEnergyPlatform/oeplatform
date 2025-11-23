@@ -88,9 +88,8 @@ API using standard HTTP methods.
 - User can use the UI of the Website and the Rest-API to do all datasets related
   tasks
 - Users want to find data and publish it: Data is grouped in topics and all
-  datasets are uploaded to the model_draft as a initial editing space, later
-  datasets can be published and are considered complete, multiple versions might
-  follow
+  datasets are uploaded, later datasets can be published and are considered
+  complete, multiple versions might follow
 - Users may want to add Datasets to multiple topics
 - Users want to use well known functionality like the Legacy API functionality.
   They think that it cannot be changed suddenly. (if we need to add

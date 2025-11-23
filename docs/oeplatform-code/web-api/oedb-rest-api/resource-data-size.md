@@ -52,13 +52,13 @@ curl -s \
 ```bash
 curl -s \
   -H "Authorization: Token <YOUR_API_TOKEN>" \
-  "https://openenergyplatform.org/api/v0/db/table-sizes/?schema=model_draft&table=oeko_testtable"
+  "https://openenergyplatform.org/api/v0/db/table-sizes/?table=oeko_testtable"
 ```
 
 ### Raw HTTP Example
 
 ```http
-GET /api/v0/db/table-sizes/?schema=model_draft&table=oeko_testtable HTTP/1.1
+GET /api/v0/db/table-sizes/?table=oeko_testtable HTTP/1.1
 Host: openenergyplatform.org
 Authorization: Token <YOUR_API_TOKEN>
 ```
@@ -67,7 +67,6 @@ Authorization: Token <YOUR_API_TOKEN>
 
 ```json
 {
-  "table_schema": "model_draft",
   "table_name": "oeko_testtable",
   "table_bytes": 0,
   "index_bytes": 0,
@@ -115,7 +114,7 @@ r.raise_for_status()
 print(r.json())
 
 # Single table
-params = {"schema": "model_draft", "table": "oeko_testtable"}
+params = {"table": "testtable"}
 r = requests.get(BASE_URL, headers=HEADERS, params=params)
 r.raise_for_status()
 print(r.json())

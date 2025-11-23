@@ -77,7 +77,7 @@ from api.actions import (
 from api.error import APIError
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
-    TODO_PSEUDO_TOPIC_DRAFT,
+    PSEUDO_TOPIC_DRAFT,
     add_tag,
     change_requests,
     delete_peer_review,
@@ -198,6 +198,7 @@ def topic_view(request: HttpRequest) -> HttpResponse:
     tables = find_tables(query_string=searched_query_string, tag_ids=searched_tag_ids)
 
     description = {
+        PSEUDO_TOPIC_DRAFT: "Unfinished data of any kind. Note: there is no version control and data is still volatile.",  # noqa
         "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",  # noqa
         "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",  # noqa
         "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",  # noqa
@@ -206,7 +207,6 @@ def topic_view(request: HttpRequest) -> HttpResponse:
         "supply": "Data on supply. Supply can relate to commodities but also to services.",  # noqa
         "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",  # noqa
         "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",  # noqa
-        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",  # noqa
         "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",  # noqa
         "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",  # noqa
         "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",  # noqa
@@ -219,12 +219,11 @@ def topic_view(request: HttpRequest) -> HttpResponse:
     total_table_count = tables.count()
 
     topics_descriptions_tablecounts = []
-    # NOTE/TODO:WINGECHR: model_draft is not a proper topic
-    # but currently, all unpublished datastes are displayed in frontend
+    # NOTE: draft is not a proper topic
     topics_descriptions_tablecounts.append(
         (
-            TODO_PSEUDO_TOPIC_DRAFT,
-            description[TODO_PSEUDO_TOPIC_DRAFT],
+            PSEUDO_TOPIC_DRAFT,
+            description[PSEUDO_TOPIC_DRAFT],
             tables.filter(is_publish=False).count(),
         )
     )
@@ -249,6 +248,7 @@ def topic_view(request: HttpRequest) -> HttpResponse:
             "query": searched_query_string,
             "tags": searched_tag_ids,
             "doc_oem_builder_link": EXTERNAL_URLS["tutorials_oemetabuilder"],
+            "PSEUDO_TOPIC_DRAFT": PSEUDO_TOPIC_DRAFT,
         },
     )
 

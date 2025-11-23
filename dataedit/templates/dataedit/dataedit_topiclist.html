@@ -18,7 +18,7 @@
 {% block data_content %}
   <div class="topics">
     {% for topic, description, tables in topics_descriptions_tablecounts %}
-      {% if topic == "model_draft" %}
+      {% if topic == PSEUDO_TOPIC_DRAFT %}
         <div class="topics__row">
           <div class="topics__col">
             <div class="topic-card">
@@ -112,7 +112,7 @@
     {% endfor %}
     <div class="topics__row">
       {% for topic, description, tables in topics_descriptions_tablecounts %}
-        {% if topic != "model_draft" %}
+        {% if topic != PSEUDO_TOPIC_DRAFT %}
           {% if topic != "scenario" %}
             <div class="topics__col topics__col--4">
               <div class="topic-card">

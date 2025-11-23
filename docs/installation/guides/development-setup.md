@@ -168,9 +168,9 @@ UI. The related functionality is part of the `dataedit` app in the django
 project.
 
 Before we can get started we have to register the topics where data can be
-grouped to. Initially all data is uploaded to the topic `model_draft`. Once it
-is published it is moved to another topic e.g. `demand` or `scenario`. You can
-use the management command to register our predefined topics:
+grouped to. Initially all data is uploaded as draft. Once it is published it is
+moved to another topic e.g. `demand` or `scenario`. You can use the management
+command to register our predefined topics:
 
     python manage.py create_topics
 
@@ -181,8 +181,7 @@ following command:
 
 The command will read the example dataset form our representative, minimal
 example. Once successfully seeded the database contains the dataset
-'example_wind_farm_capacity' in the 'model_draft' topic, including 4 rows of
-data and metadata.
+'example_wind_farm_capacity', including 4 rows of data and metadata.
 
 ### Using the HTTP-API
 
@@ -201,11 +200,10 @@ to this by changing the beginning of the url from something like
 ### Using the OEP-Website UI
 
 The OEP-Website includes a features that is called upload wizard internally.
-This features usually is used by the user to add datasets to the `model_draft`
-topic and can be accessed via the database page. Initially the database is empty
-and the topic cards are not visible. You have to navigate to the page manually.
-Once you have started your local instance of the OEP you can navigate to this
-URL:
+This features usually is used by the user to add datasets and can be accessed
+via the database page. Initially the database is empty and the topic cards are
+not visible. You have to navigate to the page manually. Once you have started
+your local instance of the OEP you can navigate to this URL:
 
     http://127.0.0.1/dataedit/wizard/
 
@@ -243,9 +241,8 @@ website.
     http://127.0.0.1/user/profile/
 
 There you find a tab called tables. If you include an open data license in the
-metadata of your test table you previously create in the `model_draft` topic, a
-publish button becomes visible. Once you click it you can select a topic to move
-the table to.
+metadata of your test table you previously created, a publish button becomes
+visible. Once you click it you can select a topic to move the table to.
 
 You can edit the metadata for a table by visiting the detail page of a table
 then click the tab meta information and click the button edit. The license

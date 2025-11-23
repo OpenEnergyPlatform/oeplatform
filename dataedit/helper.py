@@ -31,9 +31,7 @@ from dataedit.metadata import load_metadata_from_db
 from dataedit.models import PeerReview, Table, Tag
 from oeplatform.settings import MEDIA_ROOT
 
-# TODO: WINGECHR: model_draft is not a topic, but currently,
-# frontend still usses it to filter / search for unpublished data
-TODO_PSEUDO_TOPIC_DRAFT = "model_draft"
+PSEUDO_TOPIC_DRAFT = "draft"
 
 
 ##############################################
@@ -450,9 +448,7 @@ def find_tables(
     tables = tables.filter(is_sandbox=False)
 
     if topic_name:
-        # TODO: WINGECHR: model_draft is not a topic, but currently,
-        # frontend still usses it to filter / search for unpublished data
-        if topic_name == TODO_PSEUDO_TOPIC_DRAFT:
+        if topic_name == PSEUDO_TOPIC_DRAFT:
             tables = tables.filter(is_publish=False)
         else:
             tables = tables.filter(topics__pk=topic_name)
