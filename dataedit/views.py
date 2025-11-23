@@ -95,7 +95,9 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import (
+    Embargo,
+)
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
