@@ -20,9 +20,9 @@ from django.views.generic import RedirectView
 
 from dataedit.views import (
     StandaloneMetaEditView,
+    TableCreateGraphView,
+    TableCreateMapView,
     TableDataView,
-    TableGraphView,
-    TableMapView,
     TableMetaEditView,
     TablePeerReviewView,
     TablePeerRreviewContributorView,
@@ -86,14 +86,14 @@ urlpatterns_view_schema = [
     ),
     re_path(
         r"^(?P<table>{qual})/graph/new".format(qual=pgsql_qualifier),
-        TableGraphView.as_view(),
+        TableCreateGraphView.as_view(),
         name="table-graph",
     ),
     re_path(
         r"^(?P<table>{qual})/map/(?P<maptype>(latlon|geom))/new".format(  # noqa
             qual=pgsql_qualifier
         ),
-        TableMapView.as_view(),
+        TableCreateMapView.as_view(),
         name="table-map",
     ),
     re_path(

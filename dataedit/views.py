@@ -95,9 +95,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import (
-    Embargo,
-)
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import (
     PeerReview,
@@ -568,7 +566,7 @@ def table_view_delete_view(request: HttpRequest, table: str) -> HttpResponse:
     return redirect("dataedit:view", table=table_obj.name)
 
 
-class TableGraphView(View):
+class TableCreateGraphView(View):
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
 
         table_obj = table_or_404(table=table)
@@ -602,7 +600,7 @@ class TableGraphView(View):
         )
 
 
-class TableMapView(View):
+class TableCreateMapView(View):
     def get(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
         schema_name = table_obj.oedb_schema

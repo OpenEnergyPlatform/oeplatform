@@ -42,7 +42,7 @@ var table_info = {
   columns: [],
   columnTypes: {},
   rows: null,
-  name: null,  
+  name: null,
 };
 
 function getCookie(name) {
@@ -178,7 +178,7 @@ function request_data(data, callback, settings) {
   $("#loading-indicator").show();
   var base_query = {
     from: {
-      type: "table",      
+      type: "table",
       table: table,
     },
   };
@@ -300,11 +300,7 @@ function request_data(data, callback, settings) {
 
         select_response[0].data = select_response[0].data || [];
 
-        if (map !== undefined) {
-          build_map(select_response[0].data, select_response[0].description);
-        }
-
-        if (view.type === "map") {
+        if (view.type === "map" && map !== undefined) {
           build_map(select_response[0].data, select_response[0].description);
         } else if (view.type === "graph") {
           build_graph(select_response[0].data);
@@ -333,29 +329,50 @@ function build_map(data, description) {
     }
   });
   var geo_columns = get_selected_geo_columns();
+  var maptype = get_maptype();
+
   var col_idxs = description.reduce(function (l, r, i) {
     if (geo_columns.includes(r[0])) {
       l.push(i);
     }
     return l;
   }, []);
-  var bounds = [];
-  for (var row_id in data) {
-    var row = data[row_id];
-    var geo_values = col_idxs.map(function (i) {
-      if (row[i] !== null) {
-        var buf = new buffer.Buffer(row[i], "hex");
+
+  var geomItems = [];
+
+  if (maptype == "geom") {
+    var colIdxGeom = col_idxs[0]; /* only one */
+    for (var row_id in data) {
+      var row = data[row_id];
+      var geo = row[colIdxGeom];
+      if (geo !== null) {
+        var buf = new buffer.Buffer(geo, "hex");
         var wkb = wkx.Geometry.parse(buf);
         var gj = L.geoJSON(wkb.toGeoJSON());
         gj.on("click", flash_handler(row_id));
-        gj.addTo(map);
-        return gj;
+        geomItems.push(gj);
       }
-    });
-    bounds.push(L.featureGroup(geo_values.filter((x) => !!x)));
+    }
+  } else if (maptype == "latlon") {
+    var colIdxLat = col_idxs[0];
+    var colIdxLon = col_idxs[1];
+    for (var row_id in data) {
+      var row = data[row_id];
+      var lat = row[colIdxLat];
+      var lon = row[colIdxLon];
+      if (lat !== null && lon !== null) {
+        var gj = L.marker([lat, lon]);
+        gj.on("click", flash_handler(row_id));
+        geomItems.push(gj);
+      }
+    }
   }
-  var b = L.featureGroup(bounds).getBounds();
-  map.fitBounds(b);
+
+  if (geomItems.length > 0) {
+    geomItems.forEach((gj) => gj.addTo(map));
+    var bounds = L.featureGroup(geomItems).getBounds();
+    map.fitBounds(bounds);
+  }
 }
 
 function get_selected_geo_columns() {
@@ -366,6 +383,19 @@ function get_selected_geo_columns() {
     view.options.hasOwnProperty("lon")
   ) {
     return [view.options.lat, view.options.lon];
+  } else {
+    showMessage("Unrecognised map type", "warning");
+  }
+}
+
+function get_maptype() {
+  if (view.options.hasOwnProperty("geom")) {
+    return "geom";
+  } else if (
+    view.options.hasOwnProperty("lat") &&
+    view.options.hasOwnProperty("lon")
+  ) {
+    return "latlon";
   } else {
     showMessage("Unrecognised map type", "warning");
   }
@@ -433,7 +463,6 @@ function flash_handler(i) {
 function load_view(table, csrftoken, current_view) {
   view = current_view;
   table_info.name = table;
-  
 
   Promise.all([
     window.reverseUrl("api:advanced-search"),

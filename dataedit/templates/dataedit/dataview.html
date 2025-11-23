@@ -116,7 +116,7 @@
           <span class="data-view__label">View</span>
           <ul class="nav nav-tabs data-view__tabs">
             <li class="nav-item data-view__tab">
-              <a class="nav-link data-view__link {% if current_view.type == " table" %}active{% endif %}"
+              <a class="nav-link data-view__link {% if current_view.type == 'table' %}active{% endif %}"
                  href="{% url 'dataedit:view' table=table %}">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      width="16"
@@ -131,7 +131,7 @@
               </a>
             </li>
             <li class="nav-item dropdown data-view__tab">
-              <a class="nav-link data-view__link dropdown-toggle {% if current_view.type == " graph" %}active{% endif %}"
+              <a class="nav-link data-view__link dropdown-toggle {% if current_view.type == 'graph' %}active{% endif %}"
                  data-bs-toggle="dropdown"
                  href="#"
                  role="button"
