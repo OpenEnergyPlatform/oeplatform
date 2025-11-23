@@ -1130,7 +1130,7 @@ class AllTableSizesAPIView(APIView):
 
         if table:
             table_obj = table_or_404(table=table)
-            data = get_single_table_size(table=table_obj.name)
+            data = get_single_table_size(table_obj=table_obj)
             if not data:
                 raise APIError(f"Relation {table} not found.", status=404)
             return Response(data)

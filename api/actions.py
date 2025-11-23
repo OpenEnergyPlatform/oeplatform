@@ -139,7 +139,7 @@ def assert_permission(user, table: Table, permission: int) -> None:
 
 def assert_add_tag_permission(user, table_obj: Table, permission: int) -> None:
     """
-    Tags can be added to tables that are in any schema. However,
+    Tags can be added to tables. However,
     it is necessary to check whether the user has write permission
     to the table, since not every user should be able to add tags
     to every table.
@@ -148,7 +148,6 @@ def assert_add_tag_permission(user, table_obj: Table, permission: int) -> None:
         user (_type_): _description_
         table (_type_): _description_
         permission (_type_): _description_
-        schema (_type_): _description_
 
     Raises:
         PermissionDenied: _description_
@@ -309,8 +308,6 @@ def describe_columns(table_obj: Table):
     * dtd_identifier
     * is_updatable
 
-    :param schema: Schema name
-
     :param table: Table name
 
     :return: A dictionary of describing dictionaries representing the columns
@@ -372,8 +369,6 @@ def describe_indexes(table_obj: Table):
     * indexname: The name of the index
     * indexdef: The SQL-Statement used to create this index
 
-    :param schema: Schema name
-
     :param table: Table name
 
     :return: A dictionary of describing dictionaries representing the indexed
@@ -407,8 +402,6 @@ def describe_constraints(table_obj: Table):
     * initially_deferred
     * definition: This additional entry contains the SQL-query used to create
         this constraints
-
-    :param schema: Schema name
 
     :param table: Table name
 
@@ -821,14 +814,11 @@ def column_add(table_obj: Table, column, description):
 def table_change_column(column_definition):
     """
     Changes a table column.
-    :param schema: schema
     :param table: table
     :param column_definition: column definition according to Issue #184
     :return: Dictionary with results
     """
 
-    schema = get_or_403(column_definition, "c_schema")
-    schema = validate_schema(schema)
     table = get_or_403(column_definition, "c_table")
     table_obj = table_or_404(table)
 
@@ -854,8 +844,8 @@ def table_change_column(column_definition):
             # Rename table
             sql.append(
                 'ALTER TABLE "{schema}"."{table}" RENAME COLUMN "{name}" TO "{new_name}";'.format(  # noqa
-                    schema=schema,
-                    table=table,
+                    schema=table_obj.oedb_schema,
+                    table=table_obj.name,
                     name=current_name,
                     new_name=column_definition["new_name"],
                 )
@@ -872,8 +862,8 @@ def table_change_column(column_definition):
         ):
             sql.append(
                 'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" TYPE {c_datatype};'.format(  # noqa
-                    schema=schema,
-                    table=table,
+                    schema=table_obj.oedb_schema,
+                    table=table_obj.name,
                     c_name=current_name,
                     c_datatype=column_definition["data_type"],
                 )
@@ -886,14 +876,18 @@ def table_change_column(column_definition):
                 # Change to nullable
                 sql.append(
                     '"ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" DROP NOT NULL;'.format(  # noqa
-                        schema=schema, table=table, c_name=current_name
+                        schema=table_obj.oedb_schema,
+                        table=table_obj.name,
+                        c_name=current_name,
                     )
                 )
             else:
                 # Change to not null
                 sql.append(
                     'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" SET NOT NULL;'.format(  # noqa
-                        schema=schema, table=table, c_name=current_name
+                        schema=table_obj.oedb_schema,
+                        table=table_obj.name,
+                        c_name=current_name,
                     )
                 )
     else:
@@ -901,8 +895,8 @@ def table_change_column(column_definition):
         # Request will end in 500, if an argument is missing.
         sql.append(
             'ALTER TABLE "{schema}"."{table}" ADD "{c_name}" {c_datatype} {c_notnull};'.format(  # noqa
-                schema=schema,
-                table=table,
+                schema=table_obj.oedb_schema,
+                table=table_obj.name,
                 c_name=current_name,
                 c_datatype=get_or_403(column_definition, "data_type"),
                 c_notnull="NOT NULL" if column_definition.get("notnull", False) else "",
@@ -917,15 +911,12 @@ def table_change_column(column_definition):
 def table_change_constraint(constraint_definition):
     """
     Changes constraint of table
-    :param schema: schema
     :param table: table
     :param constraint_definition: constraint definition according to Issue #184
     :return: Dictionary with results
     """
 
     table = get_or_403(constraint_definition, "c_table")
-    schema = get_or_403(constraint_definition, "c_schema")
-    schema = validate_schema(schema)
     table_obj = table_or_404(table)
 
     existing_column_description = describe_columns(table_obj)
@@ -966,8 +957,8 @@ def table_change_constraint(constraint_definition):
     elif "DROP" in constraint_definition["action"]:
         sql.append(
             'ALTER TABLE "{schema}"."{table}" DROP CONSTRAINT "{constraint_name}"'.format(  # noqa
-                schema=schema,
-                table=table,
+                schema=table_obj.oedb_schema,
+                table=table_obj.name,
                 constraint_name=constraint_definition["constraint_name"],
             )
         )
@@ -1036,7 +1027,7 @@ def __change_rows(
         table.name,
         meta,
         autoload=True,
-        schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
+        schema=table.oedb_schema,
     )
 
     pks = [c for c in sa_table.columns if c.primary_key]  # type:ignore
@@ -1346,7 +1337,7 @@ def get_table_oid(request: dict, context=None):
         result = engine.dialect.get_table_oid(
             conn,
             table_obj.name,
-            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
+            schema=table_obj.oedb_schema,
             **request,
         )
     except NoSuchTableError as e:
@@ -1643,9 +1634,9 @@ def set_table_metadata(table: str, metadata):
     update_meta_search(table=table)
 
 
-def get_single_table_size(table: str) -> dict | None:
+def get_single_table_size(table_obj: Table) -> dict | None:
     """
-    Return size details for one schema.table or None if not found.
+    Return size details for one table or None if not found.
     """
 
     sql = text(
@@ -1662,10 +1653,11 @@ def get_single_table_size(table: str) -> dict | None:
     """  # noqa: E501
     )
 
-    schema = Table.load(name=table).oedb_schema
     sess = _create_oedb_session()
     try:
-        res = session_execute_parameter(sess, sql, {"schema": schema, "table": table})
+        res = session_execute_parameter(
+            sess, sql, {"schema": table_obj.oedb_schema, "table": table_obj.name}
+        )
         row = res.fetchone()
         if not row:
             return None
@@ -1763,7 +1755,7 @@ def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
 
     engine = _get_engine()
     # NOTE: cannot use :parameter, because we insert
-    # table / schema name. but its validated by constraints
+    # table name. but its validated by constraints
     # on django table.name field
 
     query = text(
@@ -1850,7 +1842,7 @@ def data_insert(request: dict, context: dict) -> dict:
 
     assert_permission(user=context["user"], table=table_obj, permission=WRITE_PERM)
 
-    # TODO:permission check is still done outside of this function,
+    # FIXME: permission check is still done outside of this function,
     # so we pass user=None
     table_obj = Table.objects.get(name=table_obj.name)
     insert_sa_table = table_obj.get_oeb_table_proxy()._insert_table.get_sa_table()
@@ -1985,7 +1977,6 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
     connection: Connection = engine.connect()
 
     table_obj = table_or_404_from_dict(request)
-    schema = table_obj.oedb_schema
 
     # We need to translate the info_cache from a json-friendly format to the
     # conventional one
@@ -1998,7 +1989,7 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
 
     try:
         table_oid = engine.dialect.get_table_oid(
-            connection, table_obj.name, schema, info_cache=info_cache
+            connection, table_obj.name, table_obj.oedb_schema, info_cache=info_cache
         )
     except NoSuchTableError as e:
         raise ConnectionError(str(e))
@@ -2049,7 +2040,6 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
 
 def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
     table_obj = table_or_404_from_dict(request)
-    schema_name = table_obj.oedb_schema
 
     engine = _get_engine()
     conn = engine.connect()
@@ -2058,7 +2048,7 @@ def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
         result = engine.dialect.get_pk_constraint(
             conn,
             table_obj.name,
-            schema=schema_name,
+            schema=table_obj.oedb_schema,
             **request,
         )
     finally:
