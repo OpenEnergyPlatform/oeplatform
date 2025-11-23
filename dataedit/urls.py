@@ -137,7 +137,7 @@ urlpatterns = [
     re_path(
         r"^view/(?P<topic>{qual})$".format(qual=pgsql_qualifier),
         tables_view,
-        name="tables",
+        name="tables-in-topic",
     ),
     re_path(r"^$", topic_view, name="topic-list"),
     re_path(
