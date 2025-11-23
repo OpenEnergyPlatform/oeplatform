@@ -89,21 +89,13 @@ from dataedit.helper import (
     merge_field_reviews,
     process_review_data,
     recursive_update,
-    send_dump,
     update_keywords_from_tags,
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
-from dataedit.models import (
-    PeerReview,
-    PeerReviewManager,
-    Table,
-    TableRevision,
-    Tag,
-    Topic,
-)
+from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from login import models as login_models
@@ -111,7 +103,6 @@ from oeplatform.settings import (
     DOCUMENTATION_LINKS,
     EXTERNAL_URLS,
     PSEUDO_TOPIC_DRAFT,
-    SCHEMA_DATA,
     TOPIC_SCENARIO,
 )
 
@@ -337,9 +328,7 @@ def tag_table_add_view(request: HttpRequest) -> HttpResponse:
 
     try:
         # check write permission
-        assert_add_tag_permission(
-            request.user, table_obj.name, login.permissions.WRITE_PERM
-        )
+        assert_add_tag_permission(request.user, table_obj, login.permissions.WRITE_PERM)
         tag_prefix = "tag_"
         tag_prefix_len = len(tag_prefix)
         tag_ids = {
@@ -559,10 +548,9 @@ class TableCreateGraphView(View):
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
 
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
 
         # get the columns id from the table
-        columns = [(c, c) for c in describe_columns(schema_name, table).keys()]
+        columns = [(c, c) for c in describe_columns(table_obj).keys()]
         formset = GraphViewForm(columns=columns)
 
         return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
@@ -592,9 +580,8 @@ class TableCreateGraphView(View):
 class TableCreateMapView(View):
     def get(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
 
-        columns = [(c, c) for c in describe_columns(schema_name, table).keys()]
+        columns = [(c, c) for c in describe_columns(table_obj).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(columns=columns)
         elif maptype == "geom":
@@ -606,9 +593,8 @@ class TableCreateMapView(View):
 
     def post(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
 
-        columns = [(c, c) for c in describe_columns(schema_name, table).keys()]
+        columns = [(c, c) for c in describe_columns(table_obj).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(request.POST, columns=columns)
             options = dict(lat=request.POST.get("lat"), lon=request.POST.get("lon"))
@@ -653,10 +639,7 @@ class TableDataView(View):
         """
 
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
-
         metadata = load_metadata_from_db(table=table)
-        table_obj = Table.load(name=table)
         if table_obj is None:
             raise Http404("Table object could not be loaded")
 
@@ -673,7 +656,7 @@ class TableDataView(View):
         meta_widget = MetaDataWidget(ordered_oem_151)
         revisions = []
 
-        api_changes = change_requests(schema_name, table)
+        api_changes = change_requests(table_obj)
         data = api_changes.get("data")
         display_message = api_changes.get("display_message")
         display_items = api_changes.get("display_items")
@@ -991,16 +974,13 @@ class TableWizardView(LoginRequiredMixin, View):
         if table:
 
             table_obj = table_or_404(table=table)
-            schema_name = table_obj.oedb_schema
 
             user: login_models.myuser = request.user  # type: ignore
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login.permissions.WRITE_PERM
-            columns = get_column_description(schema_name, table)
+            columns = get_column_description(table_obj)
             # get number of rows
             n_rows = table_get_row_count(table_obj)
-        else:
-            schema_name = SCHEMA_DATA
 
         context = {
             "config": json.dumps(
@@ -1027,10 +1007,7 @@ class TableMetaEditView(LoginRequiredMixin, View):
 
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
-
-        columns = get_column_description(schema_name, table)
-
+        columns = get_column_description(table_obj)
         can_add = False
 
         user: login_models.myuser = request.user  # type: ignore
@@ -1290,12 +1267,11 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
 
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
+        topic = table_obj.topics
 
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
-        table_obj = Table.load(name=table)
         field_descriptions = self.get_all_field_descriptions(json_schema)
 
         # Check user permissions
@@ -1340,7 +1316,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             "can_add": can_add,
             "url_peer_review": url_peer_review,
             "url_table": reverse("dataedit:view", kwargs={"table": table}),
-            "topic": schema_name,
+            "topic": topic,
             "table": table,
             "review_finished": review_finished,
             "review_id": review_id,

@@ -327,7 +327,7 @@ def sort_tags_by_popularity(tags: QuerySet[Tag]) -> QuerySet[Tag]:
     return tags.order_by("-usage_count")
 
 
-def change_requests(schema, table):
+def change_requests(table_obj: Table):
     """
     Loads the dataedit admin interface
     :param request:
@@ -336,10 +336,8 @@ def change_requests(schema, table):
     # I want to display old and new data, if different.
 
     display_message = None
-    api_columns = get_column_changes(reviewed=False, schema=schema, table=table)
-    api_constraints = get_constraints_changes(
-        reviewed=False, schema=schema, table=table
-    )
+    api_columns = get_column_changes(reviewed=False, table_obj=table_obj)
+    api_constraints = get_constraints_changes(reviewed=False, table_obj=table_obj)
 
     data = dict()
 
@@ -355,7 +353,7 @@ def change_requests(schema, table):
         "id",
     ]
 
-    old_description = describe_columns(schema, table)
+    old_description = describe_columns(table_obj)
 
     for change in api_columns:
         name = change["column_name"]
@@ -372,7 +370,7 @@ def change_requests(schema, table):
 
         if old_cd is not None:
             old = api.parser.parse_scolumnd_from_columnd(
-                schema, table, name, old_description.get(name)
+                table_obj, name, old_description.get(name)
             )
 
             for key in list(change):
@@ -384,8 +382,8 @@ def change_requests(schema, table):
                     change.pop(key)
             data["api_columns"][id]["old"] = old
         else:
-            data["api_columns"][id]["old"]["c_schema"] = schema
-            data["api_columns"][id]["old"]["c_table"] = table
+            data["api_columns"][id]["old"]["c_schema"] = table_obj.oedb_schema
+            data["api_columns"][id]["old"]["c_table"] = table_obj.name
             data["api_columns"][id]["old"]["column_name"] = name
 
         data["api_columns"][id]["new"] = change
@@ -544,7 +542,7 @@ def update_keywords_from_tags(table: Table) -> None:
     set_table_metadata(table=table.name, metadata=metadata)
 
 
-def get_column_description(schema, table):
+def get_column_description(table_obj: Table):
     """Return list of column descriptions:
     [{
        "name": str,
@@ -608,8 +606,8 @@ def get_column_description(schema, table):
                     pk_fields = [x.strip() for x in m.groups()[0].split(",")]
         return pk_fields
 
-    _columns = describe_columns(schema, table)
-    _constraints = describe_constraints(schema, table)
+    _columns = describe_columns(table_obj)
+    _constraints = describe_constraints(table_obj)
     pk_fields = get_pk_fields(_constraints)
     # order by ordinal_position
     columns = []

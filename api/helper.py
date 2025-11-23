@@ -48,6 +48,7 @@ from api.actions import (
     load_session_from_context,
     open_cursor,
     open_raw_connection,
+    table_or_404_from_dict,
 )
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
@@ -240,8 +241,8 @@ def api_exception(
 
 def permission_wrapper(permission: int, f: Callable) -> Callable:
     def wrapper(caller, request: HttpRequest, *args, **kwargs):
-        table = kwargs.get("table") or kwargs.get("sequence") or ""
-        assert_permission(user=request.user, table=table, permission=permission)
+        table_obj = table_or_404_from_dict(kwargs)
+        assert_permission(user=request.user, table=table_obj, permission=permission)
         return f(caller, request, *args, **kwargs)
 
     return wrapper
@@ -263,9 +264,8 @@ def conjunction(clauses) -> dict:
     return {"type": "operator", "operator": "AND", "operands": clauses}
 
 
-def check_embargo(schema: str, table: str) -> bool:
+def check_embargo(table_obj: Table) -> bool:
     try:
-        table_obj = Table.objects.get(name=table)
         embargo = Embargo.objects.filter(table=table_obj).first()
         if embargo and embargo.date_ended and embargo.date_ended > timezone.now():
             return True

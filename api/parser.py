@@ -568,7 +568,7 @@ def load_table_from_metadata(table: str, schema: str | None = None) -> SATable |
 
 
 def parse_column(d, mapper):
-    name = read_pgid(get_or_403(d, "column"))
+    name = get_or_403(d, "column")
     is_literal = parse_single(d.get("is_literal", False), bool)
     table_name = d.get("table")
     sa_table = None
@@ -867,9 +867,10 @@ def parse_function(d):
             return function(*operands)
 
 
-def parse_scolumnd_from_columnd(schema, table, name, column_description):
+def parse_scolumnd_from_columnd(
+    table_obj: "dataedit_models.Table", name, column_description
+):
     # Migrate Postgres to Python Structures
-    schema_name = validate_schema(schema)
     data_type = column_description.get("data_type")
     size = column_description.get("character_maximum_length")
     if size is not None and data_type is not None:
@@ -882,8 +883,7 @@ def parse_scolumnd_from_columnd(schema, table, name, column_description):
         "not_null": notnull,
         "data_type": data_type,
         "new_name": column_description.get("new_name"),
-        "c_schema": schema_name,
-        "c_table": table,
+        "c_table": table_obj.name,
     }
 
 
