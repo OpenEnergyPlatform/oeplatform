@@ -1247,11 +1247,11 @@ def _execute_sqla(query, cursor: AbstractCursor | Session) -> None:
                     params[key] = dialect._json_serializer(value)
         cursor_execute_parameter(cursor, str(compiled), params)
     except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
-        raise APIError(repr(e))
+        raise APIError(str(e))
     except psycopg2.InternalError as e:
-        if re.match(r"Input geometry has unknown \(\d+\) SRID", repr(e)):
+        if re.match(r".*Input geometry has unknown \(\d+\) SRID", str(e)):
             # Return only SRID errors
-            raise APIError(repr(e))
+            raise APIError(str(e))
         else:
             raise e
     except psycopg2.ProgrammingError as e:
