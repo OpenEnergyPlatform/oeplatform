@@ -1236,12 +1236,12 @@ def _execute_sqla(query, cursor: AbstractCursor | Session) -> None:
         raise
 
 
-def analyze_columns(schema, table):
+def analyze_columns(table_obj: Table):
     engine = _get_engine()
     result = engine_execute(
         engine,
         "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(  # noqa
-            schema=schema, table=table
+            schema=table_obj.oedb_schema, table=table_obj.name
         ),
     )
     return [{"id": get_or_403(r, "id"), "type": get_or_403(r, "type")} for r in result]

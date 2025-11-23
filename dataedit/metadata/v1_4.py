@@ -12,6 +12,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from api import actions
 from dataedit.metadata import v1_3
+from dataedit.models import Table
 
 TEMPLATE_V1_4 = {
     "name": "",
@@ -75,9 +76,9 @@ TEMPLATE_V1_4 = {
 }
 
 
-def get_empty(schema, table):
+def get_empty(table_obj: Table):
     template = TEMPLATE_V1_4.copy()
-    columns = actions.analyze_columns(schema, table)
+    columns = actions.analyze_columns(table_obj)
     # TODO: check how the fields should
     template["resources"][0]["schema"]["fields"] = [
         {"name": col["id"], "description": "", "unit": ""} for col in columns
@@ -85,12 +86,12 @@ def get_empty(schema, table):
     return template
 
 
-def from_v0(comment_on_table, schema, table):
-    return from_v1_3(v1_3.from_v0(comment_on_table, schema, table))
+def from_v0(comment_on_table, table_obj: Table):
+    return from_v1_3(v1_3.from_v0(comment_on_table, table_obj))
 
 
-def from_v1_1(comment_on_table, schema, table):
-    return from_v1_3(v1_3.from_v1_1(comment_on_table, schema, table))
+def from_v1_1(comment_on_table, table_obj: Table):
+    return from_v1_3(v1_3.from_v1_1(comment_on_table, table_obj))
 
 
 def from_v1_2(comment_on_table):
