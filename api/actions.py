@@ -1290,20 +1290,6 @@ def clear_dict(d):
     }
 
 
-def move(from_schema, table: str, topic):
-    """
-    Implementation note:
-        Currently we implemented two versions of the move functionality
-        this will later be harmonized. See 'move_publish'.
-    """
-    move_publish(
-        from_schema=from_schema,
-        table=table,
-        topic=topic,
-        embargo_period="none",
-    )
-
-
 def move_publish(from_schema, table: str, topic, embargo_period):
     """
     The issue about publishing datatables  in the context of the OEP

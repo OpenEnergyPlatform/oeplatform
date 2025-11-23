@@ -61,7 +61,6 @@ from api.views import (
     TableColumnAPIView,
     TableFieldsAPIView,
     TableMetadataAPIView,
-    TableMoveAPIView,
     TableMovePublishAPIView,
     TableRowsAPIView,
     TableUnpublishAPIView,
@@ -90,13 +89,6 @@ urlpatterns_v0_schema_table = [
         r"^(?P<table>[\w\d_\s]+)/meta/$",
         TableMetadataAPIView.as_view(),
         name="api_table_meta",
-    ),
-    # TODO: Remove this endpoint later on - MovePublish includes optional
-    # embargo time and marks table as published
-    re_path(
-        r"^(?P<table>[\w\d_\s]+)/move/(?P<topic>[\w\d_\s]+)/",  # noqa
-        TableMoveAPIView.as_view(),
-        name="move",
     ),
     re_path(
         r"^(?P<table>[\w\d_\s]+)/move_publish/(?P<topic>[\w\d_\s]+)/",  # noqa

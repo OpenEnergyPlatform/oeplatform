@@ -109,7 +109,6 @@ from api.actions import (
     has_table,
     has_type,
     list_table_sizes,
-    move,
     move_publish,
     open_cursor,
     open_raw_connection,
@@ -483,16 +482,6 @@ class TableUnpublishAPIView(APIView):
         table_obj = table_or_404(table=table)
         table_obj.is_publish = False
         table_obj.save()
-        return JsonResponse({}, status=status.HTTP_200_OK)
-
-
-class TableMoveAPIView(APIView):
-    @api_exception
-    @require_admin_permission
-    def post(self, request: Request, table: str, topic: str) -> JsonLikeResponse:
-        table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
-        move(schema_name, table, topic)
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
