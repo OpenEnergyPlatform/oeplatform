@@ -41,7 +41,6 @@ from sqlalchemy import Table as SATable
 from sqlalchemy import UniqueConstraint, exc, inspect, select, sql, text
 from sqlalchemy import types as sqltypes
 from sqlalchemy.exc import NoSuchTableError
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql.expression import Select
 
@@ -88,8 +87,6 @@ from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 logger = logging.getLogger("oeplatform")
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
-
-Base = declarative_base()
 
 __INSERT = 0
 __UPDATE = 1
