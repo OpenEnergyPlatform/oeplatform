@@ -12,8 +12,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import decimal
 import re
-from typing import TYPE_CHECKING, Mapping
-from typing import cast as cast_type  # cast already used from sqlalchemy
+from typing import TYPE_CHECKING
+from typing import cast as cast_type  # cast already used by sqlalchemy
 
 import dateutil
 import geoalchemy2  # Although this import seems unused is has to be here
@@ -22,11 +22,7 @@ from sqlalchemy import (
     BigInteger,
     Column,
     ForeignKey,
-    MetaData,
     PrimaryKeyConstraint,
-)
-from sqlalchemy import Table as SATable
-from sqlalchemy import (
     UniqueConstraint,
     and_,
 )
@@ -42,30 +38,27 @@ from sqlalchemy import (
     or_,
     select,
 )
-from sqlalchemy import types as sqltypes
+from sqlalchemy import types as sa_types
 from sqlalchemy import (
     util,
 )
 from sqlalchemy.dialects.postgresql.base import INTERVAL
-from sqlalchemy.exc import ArgumentError, NoSuchTableError
+from sqlalchemy.exc import ArgumentError
 from sqlalchemy.schema import Sequence
-from sqlalchemy.sql import functions as fun
+from sqlalchemy.sql import functions
 from sqlalchemy.sql.elements import Slice
 from sqlalchemy.sql.expression import ClauseElement, CompoundSelect, Select
-from sqlalchemy.sql.sqltypes import Interval
 
 from api.error import APIError
 from api.utils import get_or_403, table_or_404_from_dict, table_or_none
-from dataedit import models as dataedit_models
-from oedb.connection import _SA_METADATA, _get_engine
 from oedb.utils import MAX_NAME_LENGTH, NAME_PATTERN
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 if TYPE_CHECKING:
+    from sqlalchemy import Table as SATable
+
     from dataedit.models import Table
 
-
-__PARSER_META = _SA_METADATA
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 sql_operators = {
@@ -103,7 +96,7 @@ def assert_valid_identifier_name(identifier):
         )
 
 
-def get_column_definition_query(d):
+def get_column_definition_query(d: dict):
     name = get_or_403(d, "name")
     args = []
     kwargs = {}
@@ -114,10 +107,12 @@ def get_column_definition_query(d):
         d["autoincrement"] = True
 
     for fk in d.get("foreign_key", []):
-        table_name = get_or_403(fk, "table")
-        table_obj = dataedit_models.Table.objects.get(name=table_name)
 
-        fk_sa_table = SATable(table_obj.name, MetaData(), schema=table_obj.oedb_schema)
+        table_obj = table_or_404_from_dict(fk)
+
+        # NOTE: previously, this used a sqlalchemy MetaData without bind=engine.
+        # could this be a problem?
+        fk_sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
 
         fkcolumn = Column(get_or_403(fk, "column"))
 
@@ -293,13 +288,9 @@ def set_meta_info(method, user, message=None):
     return val_dict
 
 
-def parse_insert(d, context, message=None, mapper=None):
-    sa_table = SATable(
-        read_pgid(get_or_403(d, "table")),
-        MetaData(bind=_get_engine()),
-        autoload=True,
-        schema=read_pgid(get_or_403(d, "schema")),
-    )
+def parse_insert(
+    sa_table_insert: "SATable", d: dict, context: dict, message=None, mapper=None
+):
 
     field_strings = []
     for field in d.get("fields", []):
@@ -310,10 +301,7 @@ def parse_insert(d, context, message=None, mapper=None):
             raise APIError("Only pure column expressions are allowed in insert")
         field_strings.append(parse_expression(field))
 
-    # NOTE: type casting probably no longer needed in later sqlalchemay
-    sa_table = cast_type(SATable, sa_table)
-
-    query = sa_table.insert()
+    query = sa_table_insert.insert()
 
     if "method" not in d:
         d["method"] = "values"
@@ -496,31 +484,9 @@ def parse_from_item(d):
 
     if dtype == "table":
         table_obj = table_or_404_from_dict(d)
-        ext_name = table_obj.oedb_schema + "." + table_obj.name
-
-        sa_tables: Mapping[str, SATable] = __PARSER_META.tables  # type: ignore
-
-        if ext_name in sa_tables:
-            sa_table = sa_tables[ext_name]
-        else:
-            try:
-                sa_table = SATable(
-                    d["table"],
-                    __PARSER_META,
-                    autoload=True,
-                    schema=table_obj.oedb_schema,
-                )
-                # NOTE: type casting probably no longer needed in later sqlalchemay
-                sa_table = cast_type(SATable, sa_table)
-            except NoSuchTableError:
-                raise APIError("Table {table} not found".format(table=ext_name))
-
-        engine = _get_engine()
-        conn = engine.connect()
-        exists = engine.dialect.has_table(conn, sa_table.name, table_obj.oedb_schema)
-        conn.close()
-        if not exists:
-            raise APIError("Table not found: " + str(sa_table), status=400)
+        sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table(
+            shared_metadata=True
+        )
     elif dtype == "select":
         sa_table = parse_select(d)
     elif dtype == "join":
@@ -557,7 +523,7 @@ def parse_column(d, mapper):
     if sa_table is not None and name in sa_table.c:
         col = sa_table.c[name]
         if isinstance(col.type, INTERVAL):
-            col.type = Interval(col.type)
+            col.type = sa_types.Interval(col.type)
         return col
     else:
         if is_literal:
@@ -603,51 +569,51 @@ def parse_type(dt_string, **kwargs):
         dt_string = dt_string.lower()
 
         if dt_string in ("int", "integer"):
-            dt = sqltypes.INTEGER
+            dt = sa_types.INTEGER
         elif dt_string in ("bigint", "biginteger"):
-            dt = sqltypes.BigInteger
+            dt = sa_types.BigInteger
         elif dt_string in ("bit",):
-            dt = sqltypes.LargeBinary
+            dt = sa_types.LargeBinary
         elif dt_string in ("boolean", "bool"):
-            dt = sqltypes.Boolean
+            dt = sa_types.Boolean
         elif dt_string in ("char",):
-            dt = sqltypes.CHAR
+            dt = sa_types.CHAR
         elif dt_string in ("date",):
-            dt = sqltypes.Date
+            dt = sa_types.Date
         elif dt_string in ("datetime",):
-            dt = sqltypes.DateTime
+            dt = sa_types.DateTime
         elif dt_string in ("timestamp", "timestamp without time zone"):
-            dt = sqltypes.TIMESTAMP
+            dt = sa_types.TIMESTAMP
         elif dt_string in ("time", "time without time zone"):
-            dt = sqltypes.TIME
+            dt = sa_types.TIME
         elif dt_string in ("float"):
-            dt = sqltypes.FLOAT
+            dt = sa_types.FLOAT
         elif dt_string in ("decimal"):
-            dt = sqltypes.DECIMAL
+            dt = sa_types.DECIMAL
         elif dt_string in ("interval",):
-            dt = sqltypes.Interval
+            dt = sa_types.Interval
         elif dt_string in ("json",):
-            dt = sqltypes.JSON
+            dt = sa_types.JSON
         elif dt_string in ("nchar",):
-            dt = sqltypes.NCHAR
+            dt = sa_types.NCHAR
         elif dt_string in ("numerical", "numeric"):
-            dt = sqltypes.Numeric
+            dt = sa_types.Numeric
         elif dt_string in ["varchar", "character varying"]:
-            dt = sqltypes.VARCHAR
+            dt = sa_types.VARCHAR
         elif dt_string in ("real",):
-            dt = sqltypes.REAL
+            dt = sa_types.REAL
         elif dt_string in ("smallint",):
-            dt = sqltypes.SMALLINT
+            dt = sa_types.SMALLINT
         # there was a problem here with later versions of sqlalchemy:
         # attribute "text" returns a function, not a valid type
         elif "geo" in dt_string and hasattr(geoalchemy2, dt_string):
             dt = getattr(geoalchemy2, dt_string)
         elif dt_string in _POSTGIS_MAP:
             dt = _POSTGIS_MAP[dt_string]
-        elif hasattr(sqltypes, dt_string.upper()):
-            dt = getattr(sqltypes, dt_string.upper())
+        elif hasattr(sa_types, dt_string.upper()):
+            dt = getattr(sa_types, dt_string.upper())
         elif dt_string == "bigserial":
-            dt = sqltypes.BigInteger
+            dt = sa_types.BigInteger
             autoincrement = True
         else:
             raise APIError("Unknown type (%s)." % dt_string)
@@ -921,7 +887,7 @@ def parse_sqla_operator(raw_key, *operands):
             if key in ["divide", "/"]:
                 return x / y
             if key in ["concatenate", "||"]:
-                return fun.concat(x, y)
+                return functions.concat(x, y)
             if key in ["is"]:
                 return x is y
             if key in ["is not"]:

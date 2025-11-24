@@ -123,7 +123,8 @@ class _OedbTable:
     def get_sa_table(self, shared_metadata: bool = False) -> SATable:
         # don't create the table, just get/reflect sqlalchemy table object
         # also, don't create twice in MetaData:
-        # FIXME: whydoes this not work - we have to use a new MetaData object every time
+        # FIXME: why does this not work -
+        # we have to use a new MetaData object every time
 
         if shared_metadata:
             metadata = _SA_METADATA

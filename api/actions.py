@@ -27,7 +27,7 @@ import logging
 import re
 from copy import deepcopy
 from datetime import datetime, timedelta
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
@@ -36,10 +36,18 @@ from omi.base import get_metadata_version
 from omi.conversion import convert_metadata
 from omi.validation import ValidationError, parse_metadata, validate_metadata
 from shapely import wkb
-from sqlalchemy import Column, ForeignKeyConstraint, MetaData, PrimaryKeyConstraint
-from sqlalchemy import Table as SATable
-from sqlalchemy import UniqueConstraint, exc, inspect, select, sql, text
-from sqlalchemy import types as sqltypes
+from sqlalchemy import (
+    Column,
+    ForeignKeyConstraint,
+    PrimaryKeyConstraint,
+    UniqueConstraint,
+    exc,
+    inspect,
+    select,
+    sql,
+    text,
+)
+from sqlalchemy import types as sa_types
 from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql.expression import Select
@@ -83,6 +91,9 @@ from oedb.connection import (
 from oedb.utils import ID_COLUMN_NAME
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
+if TYPE_CHECKING:
+    from sqlalchemy import Table as SATable
+
 logger = logging.getLogger("oeplatform")
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -104,7 +115,7 @@ def get_columns_select(columns: list[str]) -> Select:
     return select(columns=columns)
 
 
-def get_column_obj(sa_table: SATable, column: str):
+def get_column_obj(sa_table: "SATable", column: str):
     """
 
     :param talbe: A sqla-table object
@@ -809,6 +820,7 @@ def table_change_column(column_definition):
     :return: Dictionary with results
     """
 
+    # Check if table exists
     table = get_or_403(column_definition, "c_table")
     table_obj = table_or_404(table)
 
@@ -818,7 +830,6 @@ def table_change_column(column_definition):
     if len(existing_column_description) <= 0:
         return get_response_dict(False, 400, "table is not defined.")
 
-    # There is a table named schema.table.
     sql = []
 
     start_name = get_or_403(column_definition, "column_name")
@@ -963,10 +974,6 @@ ACTIONS FROM OLD API
 """
 
 
-def _get_table(table_obj: Table) -> SATable:
-    return table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
-
-
 def __internal_select(query, context):
     # engine = _get_engine()
     context2 = dict(user=context.get("user"))
@@ -985,14 +992,14 @@ def __internal_select(query, context):
 
 
 def __change_rows(
-    table: Table, request, context, target_sa_table: SATable, setter, fields=None
+    table_obj: Table, request, context, target_sa_table: "SATable", setter, fields=None
 ) -> dict:
 
     query: dict = {
         "from": {
             "type": "table",
-            "schema": table.oedb_schema,
-            "table": table.name,
+            "schema": table_obj.oedb_schema,
+            "table": table_obj.name,
         }
     }
 
@@ -1012,13 +1019,7 @@ def __change_rows(
         fields = [field[0] for field in rows["description"]]
     fields += [f[0] for f in meta_fields]
 
-    meta = MetaData(bind=_get_engine())
-    sa_table = SATable(
-        table.name,
-        meta,
-        autoload=True,
-        schema=table.oedb_schema,
-    )
+    sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
 
     pks = [c for c in sa_table.columns if c.primary_key]  # type:ignore
 
@@ -1492,7 +1493,7 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
             connection.close()
 
 
-def _apply_stack(cursor: AbstractCursor, sa_table: SATable, changes, change_type):
+def _apply_stack(cursor: AbstractCursor, sa_table: "SATable", changes, change_type):
     distilled_change, rids = zip(*changes)
     if change_type == "insert":
         apply_insert(cursor, sa_table, distilled_change, rids)
@@ -1502,7 +1503,9 @@ def _apply_stack(cursor: AbstractCursor, sa_table: SATable, changes, change_type
         apply_deletion(cursor, sa_table, distilled_change, rids)
 
 
-def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode: int):
+def set_applied(
+    session: AbstractCursor | Session, sa_table: "SATable", rids, mode: int
+):
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
@@ -1526,7 +1529,7 @@ def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode
     session_execute_parameter(session, str(update_query), update_query.params)
 
 
-def apply_insert(session: AbstractCursor | Session, sa_table: SATable, rows, rids):
+def apply_insert(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
     logger.debug("apply inserts (%d)", len(rids))
     query = sa_table.insert().values(rows)
     _execute_sqla(query, session)
@@ -1544,7 +1547,7 @@ def apply_update(session: AbstractCursor | Session, sa_table, rows, rids):
         set_applied(session, sa_table, [rid], __UPDATE)
 
 
-def apply_deletion(session: AbstractCursor | Session, sa_table: SATable, rows, rids):
+def apply_deletion(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
     logger.debug("apply deletion (%d)", len(rids))
     for row, rid in zip(rows, rids):
         query = sa_table.delete().where(
@@ -1835,10 +1838,10 @@ def data_insert(request: dict, context: dict) -> dict:
     table_obj = Table.objects.get(name=table_obj.name)
     insert_sa_table = table_obj.get_oedb_table_proxy()._insert_table.get_sa_table()
 
-    request["table"] = insert_sa_table.name
-    request["schema"] = insert_sa_table.schema
+    # request["table"] = insert_sa_table.name
+    # request["schema"] = insert_sa_table.schema
 
-    query, values = parse_insert(request, context)
+    query, values = parse_insert(insert_sa_table, request, context)
     data_insert_check(table_obj, values, context)
     _execute_sqla(query, cursor)
     description = cursor.description
@@ -1870,7 +1873,7 @@ def data_delete(request: dict, context: dict) -> dict:
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    target_meta_sa_table = (
+    sa_table_delete = (
         Table.objects.get(name=table_obj.name)
         .get_oedb_table_proxy(user=None)
         ._delete_table.get_sa_table()
@@ -1879,12 +1882,10 @@ def data_delete(request: dict, context: dict) -> dict:
     cursor = load_cursor_from_context(context)
 
     _drop_not_null_constraints_from_delete_meta_table(
-        target_meta_sa_table.name, target_meta_sa_table.schema
+        sa_table_delete.name, sa_table_delete.schema
     )
 
-    result = __change_rows(
-        table_obj, request, context, target_meta_sa_table, setter, ["id"]
-    )
+    result = __change_rows(table_obj, request, context, sa_table_delete, setter, ["id"])
     apply_changes(table_obj, cursor)
     return result
 
@@ -1896,7 +1897,7 @@ def data_update(request: dict, context: dict) -> dict:
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    target_sa_table = (
+    sa_table_edit = (
         Table.objects.get(name=table_obj.name)
         .get_oedb_table_proxy(user=None)
         ._edit_table.get_sa_table()
@@ -1908,7 +1909,7 @@ def data_update(request: dict, context: dict) -> dict:
         field_names = [read_pgid(d["column"]) for d in request["fields"]]
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)  # TODO:
-    result = __change_rows(table_obj, request, context, target_sa_table, setter)
+    result = __change_rows(table_obj, request, context, sa_table_edit, setter)
     apply_changes(table_obj, cursor)
     return result
 
@@ -1965,8 +1966,8 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
             """
     s = sql.text(
         SQL_COLS,
-        bindparams=[sql.bindparam("table_oid", type_=sqltypes.Integer)],
-        typemap={"attname": sqltypes.Unicode, "default": sqltypes.Unicode},
+        bindparams=[sql.bindparam("table_oid", type_=sa_types.Integer)],
+        typemap={"attname": sa_types.Unicode, "default": sa_types.Unicode},
     )
     c = connection_execute(connection, s, table_oid=table_oid)
     rows = c.fetchall() or []

@@ -63,7 +63,6 @@ import login.models as login_models
 from api import parser, sessions
 from api.actions import (
     _execute_sqla,
-    _get_table,
     _response_error,
     _translate_fetched_cell,
     apply_changes,
@@ -864,7 +863,7 @@ class TableRowsAPIView(APIView):
 
     @load_cursor(named=True)
     def __get_rows(self, request: Request, table_obj: Table, data):
-        sa_table = _get_table(table_obj)
+        sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
         columns = data.get("columns")
 
         if not columns:
