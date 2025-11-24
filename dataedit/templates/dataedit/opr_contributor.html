@@ -47,6 +47,15 @@
   </div>
 
   <div class="content content-finish-review">
+      <div class="ok-progress-wrapper">
+  <div class="ok-progress-circle">
+    <svg>
+      <circle class="bg"></circle>
+      <circle class="progress" id="okProgressCircle"></circle>
+    </svg>
+    <div class="percentage-text" id="okPercentageText">0%</div>
+  </div>
+</div>
     <!-- Modal -->
     <div class="modal fade modal-xl" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -327,6 +336,64 @@
       </div>
     </div>
   </div>
+<style>
+  .ok-progress-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .ok-progress-circle {
+    width: 130px;
+    height: 130px;
+    position: relative;
+  }
+
+  .ok-progress-circle svg {
+    width: 130px;
+    height: 130px;
+    transform: rotate(-90deg);
+  }
+
+  .ok-progress-circle circle {
+    fill: none;
+    stroke-width: 10;
+    r: 52;
+    cx: 65;
+    cy: 65;
+  }
+
+  .ok-progress-circle circle.bg {
+    stroke: #e6e6e6;
+  }
+
+  .ok-progress-circle circle.progress {
+    stroke: #4caf50;
+    stroke-linecap: round;
+    stroke-dasharray: 326.72;
+    stroke-dashoffset: 326.72;
+    transition: stroke-dashoffset 0.4s ease;
+  }
+
+  .percentage-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 22px;
+    font-weight: bold;
+  }
+</style>
+
+<div class="ok-progress-wrapper">
+  <div class="ok-progress-circle">
+    <svg>
+      <circle class="bg"></circle>
+      <circle class="progress" id="okProgressCircle"></circle>
+    </svg>
+    <div class="percentage-text" id="okPercentageText">0%</div>
+  </div>
+</div>
 </main>
 
 
