@@ -139,6 +139,7 @@ export function peerReview(config, checkState = false) {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
 
   if (checkState && typeof window.state_dict !== 'undefined') {
     check_if_review_finished();

@@ -363,6 +363,7 @@ export function renderSummaryPageFields() {
   summaryContainer.appendChild(tabsContent);
 
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
 }
 
 export function updateSubmitButtonColor() {
