@@ -42,7 +42,6 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     UniqueConstraint,
     exc,
-    inspect,
     select,
     sql,
     text,
@@ -153,9 +152,9 @@ def assert_add_tag_permission(user, table_obj: Table, permission: int) -> None:
         raise APIError("Permission denied", status=403)
 
 
-def _translate_fetched_cell(cell):
+def translate_fetched_cell(cell):
     if isinstance(cell, geoalchemy2.WKBElement):
-        return engine_execute(_get_engine(), cell.ST_AsText()).scalar()
+        return new_engine_execute(cell.ST_AsText()).scalar()
     elif isinstance(cell, memoryview):
         return wkb.dumps(wkb.loads(cell.tobytes()), hex=True)
     else:
@@ -166,7 +165,7 @@ def __response_success():
     return {"success": True}
 
 
-def _response_error(message: str):
+def response_error(message: str):
     return {"success": False, "message": message}
 
 
@@ -927,21 +926,21 @@ def table_change_constraint(constraint_definition):
             ]
 
             constraint = ForeignKeyConstraint(columns, refcolumns)
-            constraint.create(_get_engine())
         elif ctype == "primary key":
             columns = [
                 get_column(c) for c in get_or_403(constraint_definition, "columns")
             ]
             constraint = PrimaryKeyConstraint(columns)
-            constraint.create(_get_engine())
         elif ctype == "unique":
             columns = [
                 get_column(c) for c in get_or_403(constraint_definition, "columns")
             ]
             constraint = UniqueConstraint(*columns)
-            constraint.create(_get_engine())
+            # FIXME: check permissions
         elif ctype == "check":
             raise APIError("Not supported")
+        # FIXME: check permissions
+        constraint.create(_get_engine())
     elif "DROP" in constraint_definition["action"]:
         sql.append(
             'ALTER TABLE "{schema}"."{table}" DROP CONSTRAINT "{constraint_name}"'.format(  # noqa
@@ -1027,7 +1026,7 @@ def __change_rows(
             inserts.append(dict(insert))
         # Add metadata for insertions
         query = target_sa_table.insert(values=inserts)
-        _execute_sqla(query, cursor)
+        execute_sqla(query, cursor)
     return {"rowcount": rows["rowcount"]}
 
 
@@ -1037,8 +1036,6 @@ def _drop_not_null_constraints_from_delete_meta_table(
     # https://github.com/OpenEnergyPlatform/oeplatform/issues/1548
     # we only want id column (and meta colums, wich start with a "_")
 
-    engine = _get_engine()
-
     # find not nullable columns in meta tables
     query = f"""
     SELECT column_name
@@ -1047,7 +1044,7 @@ def _drop_not_null_constraints_from_delete_meta_table(
     AND table_schema = '{meta_schema}'
     AND is_nullable = 'NO'
     """
-    resp = engine_execute(engine, query).fetchall()
+    resp = new_engine_execute(query).fetchall()
     column_names = [x[0] for x in resp] if resp else []
     # filter meta columns and id
     column_names = [
@@ -1061,7 +1058,7 @@ def _drop_not_null_constraints_from_delete_meta_table(
     # drop not null from these columns
     col_drop = ", ".join(f'ALTER "{c}" DROP NOT NULL' for c in column_names)
     query = f'ALTER TABLE "{meta_schema}"."{meta_table_delete}" {col_drop};'
-    engine_execute(engine, query)
+    new_engine_execute(query)
 
 
 def data_insert_check(table_obj: Table, values, context):
@@ -1094,7 +1091,7 @@ def data_insert_check(table_obj: Table, values, context):
             #       Use joins instead to avoid piping your results through
             #       python.
             if isinstance(values, Select):
-                values = engine_execute(_get_engine(), values)
+                values = new_engine_execute(values)
             for row in values:
                 # TODO: This is horribly inefficient!
                 query = {
@@ -1167,7 +1164,7 @@ def data_insert_check(table_obj: Table, values, context):
                         )
 
 
-def _execute_sqla(query, cursor: AbstractCursor | Session) -> None:
+def execute_sqla(query, cursor: AbstractCursor | Session) -> None:
     dialect = _get_engine().dialect
     try:
         compiled = query.compile(dialect=dialect)
@@ -1211,9 +1208,7 @@ def _execute_sqla(query, cursor: AbstractCursor | Session) -> None:
 
 
 def analyze_columns(table_obj: Table):
-    engine = _get_engine()
-    result = engine_execute(
-        engine,
+    result = new_engine_execute(
         "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(  # noqa
             schema=table_obj.oedb_schema, table=table_obj.name
         ),
@@ -1295,12 +1290,6 @@ def move_publish(table_obj: Table, topic, embargo_period):
         peer_review.update_all_table_peer_reviews_after_table_moved(topic=topic)
 
     table_obj.set_is_published(topic_name=topic)
-
-
-def connect():
-    engine = _get_engine()
-    insp = inspect(engine)
-    return insp
 
 
 def get_table_oid(request: dict, context=None):
@@ -1516,7 +1505,7 @@ def set_applied(
 def apply_insert(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
     logger.debug("apply inserts (%d)", len(rids))
     query = sa_table.insert().values(rows)
-    _execute_sqla(query, session)
+    execute_sqla(query, session)
     set_applied(session, sa_table, rids, __INSERT)
 
 
@@ -1527,7 +1516,7 @@ def apply_update(session: AbstractCursor | Session, sa_table, rows, rids):
         query = sa_table.update(
             *[getattr(sa_table.c, pk) == row[pk] for pk in pks]
         ).values(row)
-        _execute_sqla(query, session)
+        execute_sqla(query, session)
         set_applied(session, sa_table, [rid], __UPDATE)
 
 
@@ -1537,7 +1526,7 @@ def apply_deletion(session: AbstractCursor | Session, sa_table: "SATable", rows,
         query = sa_table.delete().where(
             *[getattr(sa_table.c, col) == row[col] for col in row]
         )
-        _execute_sqla(query, session)
+        execute_sqla(query, session)
         set_applied(session, sa_table, [rid], __DELETE)
 
 
@@ -1788,7 +1777,7 @@ def has_schema(request: dict, context: dict | None = None) -> bool:
 def data_search(request: dict, context: dict | None = None) -> dict:
     query = parse_select(request)
     cursor = load_cursor_from_context(context or {})
-    _execute_sqla(query, cursor)
+    execute_sqla(query, cursor)
 
     description = [
         [
@@ -1827,7 +1816,7 @@ def data_insert(request: dict, context: dict) -> dict:
 
     query, values = parse_insert(insert_sa_table, request, context)
     data_insert_check(table_obj, values, context)
-    _execute_sqla(query, cursor)
+    execute_sqla(query, cursor)
     description = cursor.description
     response = {}
     if description:
@@ -2062,7 +2051,7 @@ def set_isolation_level(request: dict, context: dict) -> dict:
     try:
         engine.dialect.set_isolation_level(cursor, level)
     except exc.ArgumentError as ae:
-        return _response_error(str(ae))
+        return response_error(str(ae))
     return __response_success()
 
 
@@ -2150,7 +2139,7 @@ def fetchone(request: dict, context: dict) -> list | None:
     cursor = load_cursor_from_context(context)
     row = cursor.fetchone()
     if row:
-        row = [_translate_fetched_cell(cell) for cell in row]
+        row = [translate_fetched_cell(cell) for cell in row]
         return row
     else:
         return row
@@ -2177,6 +2166,10 @@ def session_execute_parameter(
     # should disappear once we migrate to sqlalchemy >= 1.4
     response = cast(ResultProxy, response)
     return response
+
+
+def new_engine_execute(sql) -> ResultProxy:
+    return engine_execute(_get_engine(), sql)
 
 
 def engine_execute(engine: Engine, sql) -> ResultProxy:

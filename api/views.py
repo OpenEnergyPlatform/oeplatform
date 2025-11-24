@@ -61,9 +61,6 @@ from rest_framework.views import APIView
 import login.models as login_models
 from api import sessions
 from api.actions import (
-    _execute_sqla,
-    _response_error,
-    _translate_fetched_cell,
     apply_changes,
     close_cursor,
     close_raw_connection,
@@ -83,6 +80,7 @@ from api.actions import (
     do_prepare_twophase,
     do_recover_twophase,
     do_rollback_twophase,
+    execute_sqla,
     fetchall,
     fetchmany,
     fetchone,
@@ -109,11 +107,13 @@ from api.actions import (
     open_raw_connection,
     queue_column_change,
     queue_constraint_change,
+    response_error,
     rollback_raw_connection,
     set_isolation_level,
     set_table_metadata,
     table_get_approx_row_count,
     table_has_row_with_id,
+    translate_fetched_cell,
     try_convert_metadata_to_v2,
     try_parse_metadata,
     try_validate_metadata,
@@ -682,7 +682,7 @@ class TableRowsAPIView(APIView):
 
         if not row_id:
             return JsonResponse(
-                _response_error("This methods requires an id"),
+                response_error("This methods requires an id"),
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -794,7 +794,7 @@ class TableRowsAPIView(APIView):
         row_id: int | None = None,
     ):
         if row_id and row.get("id", int(row_id)) != int(row_id):
-            return _response_error(
+            return response_error(
                 "The id given in the query does not " "match the id given in the url"
             )
         if row_id:
@@ -900,7 +900,7 @@ class TableRowsAPIView(APIView):
             query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
         cursor = sessions.load_cursor_from_context(request_data_dict(request))
-        _execute_sqla(query, cursor)
+        execute_sqla(query, cursor)
 
 
 @api_exception
@@ -1164,7 +1164,7 @@ class AdvancedFetchAPIView(APIView):
 
     def transform_row(self, row):
         return json.dumps(
-            [_translate_fetched_cell(cell) for cell in row],
+            [translate_fetched_cell(cell) for cell in row],
             default=date_handler,
         )
 

@@ -40,7 +40,6 @@ from rest_framework.views import APIView
 import login.permissions
 from api import parser, sessions
 from api.actions import (
-    _translate_fetched_cell,
     assert_permission,
     close_cursor,
     close_raw_connection,
@@ -48,6 +47,7 @@ from api.actions import (
     load_session_from_context,
     open_cursor,
     open_raw_connection,
+    translate_fetched_cell,
 )
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
@@ -82,7 +82,7 @@ class ModJsonResponse(JsonResponse):
 def transform_results(cursor, triggers, trigger_args):
     row = cursor.fetchone() if not cursor.closed else None
     while row is not None:
-        yield list(map(_translate_fetched_cell, row))
+        yield list(map(translate_fetched_cell, row))
         row = cursor.fetchone()
     for t, targs in zip(triggers, trigger_args):
         t(*targs)
@@ -156,7 +156,7 @@ def load_cursor(named=False):
                         except psycopg2.errors.InvalidCursorName as e:
                             logger.error(str(e))
                     if first:
-                        first = map(_translate_fetched_cell, first)
+                        first = map(translate_fetched_cell, first)
                         if cursor.description:
                             description = [
                                 [
