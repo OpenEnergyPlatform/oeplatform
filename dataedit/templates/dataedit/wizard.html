@@ -30,8 +30,6 @@
         {% else %}
           <a href="{% url 'dataedit:view' table=table %}">{{ table }}</a>
         {% endif %}
-      {% else %}
-        <a href="{% url 'dataedit:topic-list' %}">Topics</a> / Wizard
       {% endif %}
       <!-- Indicate weather the user got permissions fot this table -->
     </div>
