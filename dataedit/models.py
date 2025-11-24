@@ -49,7 +49,6 @@ from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 if TYPE_CHECKING:
     # only import for static typechecking
-    # TODO: is there a betetr way of doing this?
     from login.models import GroupPermission, UserPermission, myuser
     from modelview.models import BasicFactsheet
 

@@ -12,7 +12,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import decimal
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from typing import cast as cast_type  # cast already used by sqlalchemy
 
 import dateutil
@@ -85,7 +85,7 @@ _POSTGIS_MAP = {
 }
 
 
-def assert_valid_identifier_name(identifier):
+def _assert_valid_identifier_name(identifier: str):
     if not NAME_PATTERN.match(identifier):
         raise APIError(
             f"Unsupported table name: {identifier}\n"
@@ -96,12 +96,12 @@ def assert_valid_identifier_name(identifier):
         )
 
 
-def get_column_definition_query(d: dict):
+def get_column_definition_query(d: dict) -> Column:
     name = get_or_403(d, "name")
     args = []
     kwargs = {}
     dt_string = get_or_403(d, "data_type")
-    dt, autoincrement = parse_type(dt_string)
+    dt, autoincrement = _parse_type(dt_string)
 
     if autoincrement:
         d["autoincrement"] = True
@@ -136,7 +136,7 @@ def get_column_definition_query(d: dict):
         max_len = int(d["character_maximum_length"])
         dt = dt(max_len)  # type:ignore
 
-    assert_valid_identifier_name(name)
+    _assert_valid_identifier_name(name)
     c = Column(name, dt, *args, **kwargs)
 
     return c
@@ -237,17 +237,17 @@ def query_typecast_select(select) -> Select:
     return cast_type(Select, select)
 
 
-def parse_single(x, caster):
+def _parse_single(x, caster):
     try:
         return caster(x)
     except ValueError:
         raise APIError("Could not parse %s as %s" % (x, caster))
 
 
-def is_pg_qual(x):
+def is_pg_qual(x) -> bool:
     if not isinstance(x, str):
         return False
-    return pgsql_qualifier.search(x)
+    return bool(pgsql_qualifier.search(x))
 
 
 def read_pgvalue(x):
@@ -257,13 +257,7 @@ def read_pgvalue(x):
     return x
 
 
-class ValidationError(Exception):
-    def __init__(self, message, value):
-        self.message = message
-        self.value = value
-
-
-def read_bool(s):
+def read_bool(s) -> bool:
     if isinstance(s, bool):
         return s
     if s.lower() in ["true", "false"]:
@@ -280,7 +274,7 @@ def read_pgid(s):
     raise APIError("Invalid identifier: '%s'" % s)
 
 
-def set_meta_info(method, user, message=None):
+def set_meta_info(method, user, message=None) -> dict:
     val_dict = {}
     val_dict["_user"] = user  # TODO: Add user handling
     val_dict["_message"] = message
@@ -353,7 +347,7 @@ def parse_insert(
     return query, values
 
 
-def parse_select(d):
+def parse_select(d: dict):
     """
     Defintion of a select query according to
     http://www.postgresql.org/docs/9.3/static/sql-select.html
@@ -401,7 +395,7 @@ def parse_select(d):
                     col.label(read_pgid(field["as"]))
                 L.append(col)
         if "from" in d:
-            kwargs["from_obj"] = parse_from_item(get_or_403(d, "from"))
+            kwargs["from_obj"] = _parse_from_item(get_or_403(d, "from"))
         else:
             kwargs["from_obj"] = []
         if not L:
@@ -459,7 +453,7 @@ def parse_select(d):
     return query
 
 
-def parse_from_item(d):
+def _parse_from_item(d):
     """
     Defintion of a from_item according to
     http://www.postgresql.org/docs/9.3/static/sql-select.html
@@ -474,7 +468,7 @@ def parse_from_item(d):
             AS ( column_definition [, ...] )
     """
     if isinstance(d, list):
-        return [parse_from_item(f) for f in d]
+        return [_parse_from_item(f) for f in d]
 
     # TODO: If 'type' is not set assume just a table name is present
     if isinstance(d, str):
@@ -490,14 +484,19 @@ def parse_from_item(d):
     elif dtype == "select":
         sa_table = parse_select(d)
     elif dtype == "join":
-        left = parse_from_item(get_or_403(d, "left"))
-        right = parse_from_item(get_or_403(d, "right"))
+        left = _parse_from_item(get_or_403(d, "left"))
+        right = _parse_from_item(get_or_403(d, "right"))
         is_outer = d.get("is_outer", False)
         full = d.get("is_full", False)
         on_clause = None
         if "on" in d:
             on_clause = parse_condition(d["on"])
-        sa_table = left.join(right, onclause=on_clause, isouter=is_outer, full=full)
+        sa_table = left.join(  # type:ignore
+            right,
+            onclause=on_clause,
+            isouter=is_outer,  # type:ignore
+            full=full,  # type:ignore
+        )
     else:
         raise APIError("Unknown from-item: " + dtype)
 
@@ -506,9 +505,9 @@ def parse_from_item(d):
     return sa_table
 
 
-def parse_column(d, mapper):
+def _parse_column(d: dict, mapper: dict | None = None):
     name = get_or_403(d, "column")
-    is_literal = parse_single(d.get("is_literal", False), bool)
+    is_literal = _parse_single(d.get("is_literal", False), bool)
     table_name = d.get("table")
 
     sa_table = None
@@ -535,9 +534,9 @@ def parse_column(d, mapper):
                 return column(name)
 
 
-def parse_type(dt_string, **kwargs):
+def _parse_type(dt_string, **kwargs):
     if isinstance(dt_string, dict):
-        dt = parse_type(
+        dt = _parse_type(
             get_or_403(dt_string, "datatype"), **dt_string.get("kwargs", {})
         )
         return dt
@@ -548,7 +547,7 @@ def parse_type(dt_string, **kwargs):
         if arr_match:
             # is_array = True
             dt_string = arr_match.groups()[0]
-            dt, autoincrement = parse_type(dt_string)
+            dt, autoincrement = _parse_type(dt_string)
             return ARRAY(dt), autoincrement
 
         # Is the datatypestring of form NAME(NUMBER)?
@@ -560,7 +559,7 @@ def parse_type(dt_string, **kwargs):
                 return geoalchemy2.Geometry(geometry_type=match.groups()[1]), False
             else:
                 dt_cardinality = map(int, match.groups()[1].replace(" ", "").split(","))
-            dt, autoincrement = parse_type(dt_string)
+            dt, autoincrement = _parse_type(dt_string)
             return dt(*dt_cardinality, **kwargs), autoincrement
 
         # So it's a plain type
@@ -620,13 +619,18 @@ def parse_type(dt_string, **kwargs):
         return dt, autoincrement
 
 
-def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=True):
+def parse_expression(
+    d: dict | list | str,
+    mapper: dict | None = None,
+    allow_untyped_dicts: bool = False,
+    escape_quotes: bool = True,
+) -> Any:
     if isinstance(d, dict):
         if allow_untyped_dicts and "type" not in d:
             return d
         dtype = get_or_403(d, "type")
         if dtype == "column":
-            return parse_column(d, mapper)
+            return _parse_column(d, mapper)
         if dtype == "grouping":
             grouping = get_or_403(d, "grouping")
             if isinstance(grouping, list):
@@ -634,15 +638,15 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
             else:
                 return parse_expression(grouping)
         if dtype == "operator":
-            return parse_operator(d)
+            return _parse_operator(d)
         if dtype == "case":
-            return parse_case(d)
+            return _parse_case(d)
         if dtype == "modifier":
-            return parse_modifier(d)
+            return _parse_modifier(d)
         if dtype == "function":
-            return parse_function(d)
+            return _parse_function(d)
         if dtype == "slice":
-            return parse_slice(d)
+            return _parse_slice(d)
         if dtype == "star":
             return "*"
         if dtype == "literal":
@@ -667,7 +671,7 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
             else:
                 return None
         if dtype == "label":
-            return parse_label(d)
+            return _parse_label(d)
         if dtype == "sequence":
             return Sequence(
                 get_or_403(d, "sequence"), schema=SCHEMA_DEFAULT_TEST_SANDBOX
@@ -677,7 +681,7 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
             return parse_select(d)
         if dtype == "cast":
             expr = parse_expression(get_or_403(d, "source"))
-            t, _ = parse_type(get_or_403(d, "as"))
+            t, _ = _parse_type(get_or_403(d, "as"))
             return cast(expr, t)
         else:
             raise APIError("Unknown expression type: " + dtype)
@@ -696,14 +700,14 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
     return d
 
 
-def parse_label(d):
+def _parse_label(d: dict):
     element = parse_expression(get_or_403(d, "element"))
     if not isinstance(element, ClauseElement):
         element = literal(element)
     return element.label(get_or_403(d, "label"))
 
 
-def parse_slice(d):
+def _parse_slice(d: dict):
     kwargs = {"step": 1}
     if "start" in d:
         kwargs["start"] = d["start"]
@@ -733,7 +737,7 @@ def parse_condition(dl):
     return parse_expression(clean_dl)
 
 
-def parse_case(dl):
+def _parse_case(dl):
     else_clause = parse_expression(dl["else"])
     if "expression" in dl:
         return sa_case(
@@ -754,23 +758,23 @@ def parse_case(dl):
         )
 
 
-def parse_operator(d):
-    query = parse_sqla_operator(
+def _parse_operator(d: dict):
+    query = _parse_sqla_operator(
         get_or_403(d, "operator"),
         *list(map(parse_expression, get_or_403(d, "operands"))),
     )
     return query
 
 
-def parse_modifier(d):
-    query = parse_sqla_modifier(
+def _parse_modifier(d: dict):
+    query = _parse_sqla_modifier(
         get_or_403(d, "operator"),
         *list(map(parse_expression, get_or_403(d, "operands"))),
     )
     return query
 
 
-def parse_function(d):
+def _parse_function(d: dict):
     fname = get_or_403(d, "function")
 
     operand_struc = get_or_403(d, "operands")
@@ -801,7 +805,9 @@ def parse_function(d):
             return function(*operands)
 
 
-def parse_scolumnd_from_columnd(table_obj: "Table", name, column_description):
+def parse_scolumnd_from_columnd(
+    table_obj: "Table", name: str, column_description: dict
+):
     # Migrate Postgres to Python Structures
     data_type = column_description.get("data_type")
     size = column_description.get("character_maximum_length")
@@ -828,21 +834,7 @@ def replace_None_with_NULL(dictonary: dict) -> dict:
     return dictonary
 
 
-def split(string, seperator):
-    if string is None:
-        return None
-    else:
-        return str(string).split(seperator)
-
-
-def replace(string, occuring_symb, replace_symb):
-    if string is None:
-        return None
-    else:
-        return str(string).replace(occuring_symb, replace_symb)
-
-
-def parse_sqla_operator(raw_key, *operands):
+def _parse_sqla_operator(raw_key, *operands):
     try:
         key = raw_key.lower().strip()
         if not operands:
@@ -898,7 +890,7 @@ def parse_sqla_operator(raw_key, *operands):
                 return x.distance_centroid(y)
             if key in ["getitem"]:
                 if isinstance(y, Slice):
-                    ystart, ystop = parse_single(y.start, int), parse_single(
+                    ystart, ystop = _parse_single(y.start, int), _parse_single(
                         y.stop, int
                     )
                     return x[ystart:ystop]
@@ -911,7 +903,7 @@ def parse_sqla_operator(raw_key, *operands):
     raise APIError("Operator '%s' not supported" % key)
 
 
-def parse_sqla_modifier(raw_key, *operands):
+def _parse_sqla_modifier(raw_key, *operands):
     key = raw_key.lower().strip()
     if not operands:
         raise APIError("Missing arguments for '%s'." % key)

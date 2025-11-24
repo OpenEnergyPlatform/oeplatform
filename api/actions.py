@@ -49,7 +49,6 @@ from sqlalchemy import (
 )
 from sqlalchemy import types as sa_types
 from sqlalchemy.exc import NoSuchTableError
-from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql.expression import Select
 
 import dataedit.metadata
@@ -86,6 +85,7 @@ from oedb.connection import (
     Engine,
     ResultProxy,
     Session,
+    _create_oedb_session,
     _get_engine,
 )
 from oedb.utils import ID_COLUMN_NAME
@@ -101,14 +101,6 @@ pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
-
-
-def _create_oedb_session():
-    """Return a sqlalchemy session to the oedb
-
-    Should only be created once per user request.
-    """
-    return sessionmaker(bind=_get_engine())()
 
 
 def get_columns_select(columns: list[str]) -> Select:
@@ -315,8 +307,7 @@ def describe_columns(table_obj: Table):
     identified by their column names
     """
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
     query = (
         "select column_name, "
         "c.ordinal_position, c.column_default, c.is_nullable, c.data_type, "
@@ -375,8 +366,7 @@ def describe_indexes(table_obj: Table):
     :return: A dictionary of describing dictionaries representing the indexed
     identified by their column names
     """
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
     query = (
         "select indexname, indexdef from pg_indexes where tablename = "
         "'{table}' and schemaname='{schema}';".format(
@@ -410,8 +400,7 @@ def describe_constraints(table_obj: Table):
     identified by their column names
     """
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
     query = "select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name='{table}' AND constraint_schema='{schema}';".format(  # noqa
         table=table_obj.name, schema=table_obj.oedb_schema
     )
@@ -438,8 +427,7 @@ def perform_sql(sql_statement, parameter: dict | None = None) -> dict:
     if not parameter:
         parameter = {}
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
 
     # Statement built and no changes required, so statement is empty.
     if not sql_statement or sql_statement.isspace():
@@ -652,8 +640,7 @@ def get_column_changes(reviewed=None, changed=None, table_obj: Table | None = No
     :return: List with Column Definitions
     """
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
     query = ["SELECT * FROM public.api_columns"]
 
     if reviewed is not None or changed is not None or table_obj is not None:
@@ -705,8 +692,8 @@ def get_constraints_changes(
     :param changed: Applied Changes
     :return: List with Column Definitons
     """
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+
+    session = _create_oedb_session()
     query = ["SELECT * FROM public.api_constraints"]
 
     if reviewed is not None or changed is not None or table_obj is not None:
@@ -975,7 +962,6 @@ ACTIONS FROM OLD API
 
 
 def __internal_select(query, context):
-    # engine = _get_engine()
     context2 = dict(user=context.get("user"))
     context2.update(open_raw_connection({}, context2))
     try:
@@ -1079,8 +1065,7 @@ def _drop_not_null_constraints_from_delete_meta_table(
 
 
 def data_insert_check(table_obj: Table, values, context):
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
     query = (
         "SELECT array_agg(column_name::text) as columns, conname, "
         "   contype AS type "
@@ -1109,7 +1094,7 @@ def data_insert_check(table_obj: Table, values, context):
             #       Use joins instead to avoid piping your results through
             #       python.
             if isinstance(values, Select):
-                values = engine_execute(engine, values)
+                values = engine_execute(_get_engine(), values)
             for row in values:
                 # TODO: This is horribly inefficient!
                 query = {
@@ -1351,8 +1336,7 @@ def getValue(table_obj: Table, column, id):
         column=column, schema=table_obj.oedb_schema, table=table_obj.name, id=id
     )
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
 
     try:
         result = session_execute(session, sql)

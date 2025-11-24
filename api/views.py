@@ -58,9 +58,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-import api.parser
 import login.models as login_models
-from api import parser, sessions
+from api import sessions
 from api.actions import (
     _execute_sqla,
     _response_error,
@@ -139,7 +138,13 @@ from api.helper import (
     stream,
     update_tags_from_keywords,
 )
-from api.parser import query_typecast_select
+from api.parser import (
+    is_pg_qual,
+    parse_condition,
+    parse_expression,
+    parse_scolumnd_from_columnd,
+    query_typecast_select,
+)
 from api.serializers import (
     EnergyframeworkSerializer,
     EnergymodelSerializer,
@@ -260,7 +265,7 @@ class TableAPIView(APIView):
         request_data_dict = get_request_data_dict(request)
 
         if "column" in request_data_dict["type"]:
-            column_definition = api.parser.parse_scolumnd_from_columnd(
+            column_definition = parse_scolumnd_from_columnd(
                 table_obj, request_data_dict["name"], request_data_dict
             )
             result = queue_column_change(table_obj, column_definition)
@@ -426,11 +431,7 @@ class TableFieldsAPIView(APIView):
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
 
-        if (
-            not parser.is_pg_qual(table)
-            or not parser.is_pg_qual(column_id)
-            or not parser.is_pg_qual(column)
-        ):
+        if not is_pg_qual(table) or not is_pg_qual(column_id) or not is_pg_qual(column):
             return ModJsonResponse({"error": "Bad Request", "http_status": 400})
 
         returnValue = getValue(table_obj, column, column_id)
@@ -512,9 +513,9 @@ class TableRowsAPIView(APIView):
             raise APIError("Offset must be integer")
         if limit is not None and not limit.isdigit():
             raise APIError("Limit must be integer")
-        if not all(parser.is_pg_qual(c) for c in columns):
+        if not all(is_pg_qual(c) for c in columns):
             raise APIError("Columns are no postgres qualifiers")
-        if not all(parser.is_pg_qual(c) for c in orderby):
+        if not all(is_pg_qual(c) for c in orderby):
             raise APIError("Columns in groupby-clause are no postgres qualifiers")
 
         # OPERATORS could be EQUALS, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
@@ -875,13 +876,13 @@ class TableRowsAPIView(APIView):
         where_clauses = data.get("where")
 
         if where_clauses:
-            query = query.where(parser.parse_condition(where_clauses))
+            query = query.where(parse_condition(where_clauses))
             query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
         orderby = data.get("orderby")
         if orderby:
             if isinstance(orderby, list):
-                query = query.order_by(*map(parser.parse_expression, orderby))
+                query = query.order_by(*map(parse_expression, orderby))
             elif isinstance(orderby, str):
                 query = query.order_by(orderby)
             else:
