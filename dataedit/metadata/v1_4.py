@@ -10,9 +10,13 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # from omi.dialects.oep.dialect import OEP_V_1_3_Dialect, OEP_V_1_4_Dialect
 
+from typing import TYPE_CHECKING
+
 from api import actions
 from dataedit.metadata import v1_3
-from dataedit.models import Table
+
+if TYPE_CHECKING:
+    from dataedit.models import Table
 
 TEMPLATE_V1_4 = {
     "name": "",
@@ -76,7 +80,7 @@ TEMPLATE_V1_4 = {
 }
 
 
-def get_empty(table_obj: Table):
+def get_empty(table_obj: "Table"):
     template = TEMPLATE_V1_4.copy()
     columns = actions.analyze_columns(table_obj)
     # TODO: check how the fields should
@@ -86,11 +90,11 @@ def get_empty(table_obj: Table):
     return template
 
 
-def from_v0(comment_on_table, table_obj: Table):
+def from_v0(comment_on_table, table_obj: "Table"):
     return from_v1_3(v1_3.from_v0(comment_on_table, table_obj))
 
 
-def from_v1_1(comment_on_table, table_obj: Table):
+def from_v1_1(comment_on_table, table_obj: "Table"):
     return from_v1_3(v1_3.from_v1_1(comment_on_table, table_obj))
 
 

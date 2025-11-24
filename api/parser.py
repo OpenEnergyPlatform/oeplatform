@@ -12,7 +12,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import decimal
 import re
-from typing import Mapping
+from typing import TYPE_CHECKING, Mapping
 from typing import cast as cast_type  # cast already used from sqlalchemy
 
 import dateutil
@@ -55,10 +55,14 @@ from sqlalchemy.sql.expression import ClauseElement, CompoundSelect, Select
 from sqlalchemy.sql.sqltypes import Interval
 
 from api.error import APIError, APIKeyError
-from api.utils import validate_schema
+from api.utils import get_or_403, table_or_404_from_dict, validate_schema
 from dataedit import models as dataedit_models
 from oedb.connection import _get_engine
 from oedb.utils import MAX_NAME_LENGTH, NAME_PATTERN
+
+if TYPE_CHECKING:
+    from dataedit.models import Table
+
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 sql_operators = {
@@ -236,14 +240,6 @@ __PARSER_META = MetaData(bind=_get_engine())
 
 def query_typecast_select(select) -> Select:
     return cast_type(Select, select)
-
-
-def get_or_403(dictionary: Mapping | None, key):
-    dictionary = dictionary or {}
-    try:
-        return dictionary[key]
-    except KeyError:
-        raise APIKeyError(dictionary, key)
 
 
 def parse_single(x, caster):
@@ -570,6 +566,7 @@ def parse_column(d, mapper):
     name = get_or_403(d, "column")
     is_literal = parse_single(d.get("is_literal", False), bool)
     table_name = d.get("table")
+
     sa_table = None
     if table_name:
         table_name = read_pgid(table_name)
@@ -865,9 +862,7 @@ def parse_function(d):
             return function(*operands)
 
 
-def parse_scolumnd_from_columnd(
-    table_obj: "dataedit_models.Table", name, column_description
-):
+def parse_scolumnd_from_columnd(table_obj: "Table", name, column_description):
     # Migrate Postgres to Python Structures
     data_type = column_description.get("data_type")
     size = column_description.get("character_maximum_length")

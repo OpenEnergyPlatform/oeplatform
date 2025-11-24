@@ -94,7 +94,6 @@ from api.actions import (
     get_foreign_keys,
     get_indexes,
     get_isolation_level,
-    get_or_403,
     get_pk_constraint,
     get_response_dict,
     get_schema_names,
@@ -117,7 +116,6 @@ from api.actions import (
     set_table_metadata,
     table_get_approx_row_count,
     table_has_row_with_id,
-    table_or_404,
     try_convert_metadata_to_v2,
     try_parse_metadata,
     try_validate_metadata,
@@ -154,7 +152,7 @@ from api.services.embargo import (
     apply_embargo,
     parse_embargo_payload,
 )
-from api.utils import get_dataset_configs, request_data_dict
+from api.utils import get_dataset_configs, get_or_403, request_data_dict, table_or_404
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_table_name
 from dataedit.models import Table

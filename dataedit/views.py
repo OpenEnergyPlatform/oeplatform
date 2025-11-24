@@ -71,10 +71,9 @@ from api.actions import (
     remove_queued_column,
     remove_queued_constraint,
     table_get_row_count,
-    table_or_404,
-    table_or_404_from_dict,
 )
 from api.error import APIError
+from api.utils import table_or_404, table_or_404_from_dict
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
     add_tag,

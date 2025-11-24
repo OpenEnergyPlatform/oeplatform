@@ -48,10 +48,10 @@ from api.actions import (
     load_session_from_context,
     open_cursor,
     open_raw_connection,
-    table_or_404_from_dict,
 )
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
+from api.utils import table_or_404_from_dict
 from dataedit.models import Embargo, Table, Tag
 
 logger = logging.getLogger("oeplatform")

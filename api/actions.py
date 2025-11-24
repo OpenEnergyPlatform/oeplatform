@@ -27,7 +27,7 @@ import logging
 import re
 from copy import deepcopy
 from datetime import datetime, timedelta
-from typing import Mapping, cast
+from typing import cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
@@ -49,7 +49,6 @@ import dataedit.metadata
 from api.error import APIError
 from api.parser import (
     get_column_definition_query,
-    get_or_403,
     is_pg_qual,
     parse_insert,
     parse_select,
@@ -64,7 +63,13 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from api.utils import check_if_oem_license_exists, validate_schema
+from api.utils import (
+    check_if_oem_license_exists,
+    get_or_403,
+    table_or_404,
+    table_or_404_from_dict,
+    validate_schema,
+)
 from dataedit.models import Embargo, PeerReview, Table
 from login.models import myuser as User
 from login.permissions import DELETE_PERM, WRITE_PERM
@@ -116,17 +121,6 @@ def get_column_obj(sa_table: SATable, column: str):
         return getattr(tc, column)
     except AttributeError:
         raise APIError("Column '%s' does not exist." % column)
-
-
-def table_or_404(table: str) -> Table:
-    table_obj = Table.objects.filter(name=table).first()
-    if table_obj is None:
-        raise APIError("Table does not exist", 404)
-    return table_obj
-
-
-def table_or_404_from_dict(dct: Mapping) -> Table:
-    return table_or_404(get_or_403(dct, "table"))
 
 
 def assert_permission(user, table: Table, permission: int) -> None:
@@ -2049,12 +2043,11 @@ def get_indexes(request: dict, context: dict | None = None) -> dict:
     # TODO can we remove this endpoint
 
     table_obj = table_or_404_from_dict(request)
-    schema_name = table_obj.oedb_schema
 
     engine = _get_engine()
     conn = engine.connect()
     try:
-        result = engine.dialect.get_indexes(conn, schema_name, **request)
+        result = engine.dialect.get_indexes(conn, table_obj.oedb_schema, **request)
     finally:
         conn.close()
     return result
