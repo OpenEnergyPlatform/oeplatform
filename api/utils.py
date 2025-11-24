@@ -7,14 +7,13 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from typing import TYPE_CHECKING, Mapping, cast
+from typing import TYPE_CHECKING, Mapping, Union, cast
 
 from rest_framework.request import Request
 
 from api.error import APIError, APIKeyError
 from dataedit import models as dataedit_models
 from oekg.sparqlModels import DatasetConfig
-from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 if TYPE_CHECKING:
     from dataedit.models import Table
@@ -44,21 +43,6 @@ def check_if_oem_license_exists(metadata: dict) -> tuple[dict | None, str | None
     return metadata["metaMetadata"]["metadataVersion"], None
 
 
-def validate_schema(schema: str | None) -> str:
-    schema = schema or SCHEMA_DEFAULT_TEST_SANDBOX  # default fallback
-    if schema.startswith("_"):
-        prefix = "_"
-        schema = schema[1:]
-    else:
-        prefix = ""
-
-    if schema != SCHEMA_DEFAULT_TEST_SANDBOX:
-        schema = SCHEMA_DATA
-
-    schema = prefix + schema
-    return schema
-
-
 def request_data_dict(request: Request) -> dict:
     if request.data:
         return cast(dict, request.data)
@@ -74,8 +58,12 @@ def get_or_403(dictionary: Mapping | None, key):
         raise APIKeyError(dictionary, key)
 
 
+def table_or_none(table: str) -> Union["Table", None]:
+    return dataedit_models.Table.objects.filter(name=table).first()
+
+
 def table_or_404(table: str) -> "Table":
-    table_obj = dataedit_models.Table.objects.filter(name=table).first()
+    table_obj = table_or_none(table=table)
     if table_obj is None:
         raise APIError("Table does not exist", 404)
     return table_obj

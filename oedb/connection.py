@@ -35,7 +35,7 @@ __ENGINE = create_engine(
     __get_connection_string(), pool_size=0, pool_recycle=600, max_overflow=200
 )
 
-__SA_METADATA = MetaData(bind=__ENGINE)
+_SA_METADATA = MetaData(bind=__ENGINE)
 
 
 def _get_engine() -> Engine:

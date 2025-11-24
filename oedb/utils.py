@@ -12,7 +12,7 @@ from sqlalchemy import MetaData
 from sqlalchemy import Table as SATable
 
 from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM
-from oedb.connection import __SA_METADATA, _get_engine, _get_inspector
+from oedb.connection import _SA_METADATA, _get_engine, _get_inspector
 from oedb.structures import EditBase
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT, SCHEMA_DEFAULT_TEST_SANDBOX
 
@@ -120,15 +120,25 @@ class _OedbTable:
             )
         )
 
-    def get_sa_table(self) -> SATable:
+    def get_sa_table(self, shared_metadata: bool = False) -> SATable:
         # don't create the table, just get/reflect sqlalchemy table object
-        metadata = MetaData(bind=self._engine)
-        return SATable(
-            self._validated_table_name,
-            metadata,
-            autoload=True,
-            schema=self._validated_schema_name,
-        )
+        # also, don't create twice in MetaData:
+        # FIXME: whydoes this not work - we have to use a new MetaData object every time
+
+        if shared_metadata:
+            metadata = _SA_METADATA
+        else:
+            metadata = MetaData(bind=_get_engine())
+
+        key = f"{self._validated_schema_name}.{self._validated_table_name}"
+        if key not in metadata.tables:  # type:ignore
+            SATable(
+                self._validated_table_name,
+                metadata,
+                autoload=True,
+                schema=self._validated_schema_name,
+            )
+        return metadata.tables[key]  # type:ignore
 
     def _execute(self, query, requires_permission: int = ADMIN_PERM):
         if self._permission_level < requires_permission:
@@ -143,11 +153,11 @@ class _OedbMainTable(_OedbTable):
     def _create(
         self, column_definitions: list, constraints_definitions: list
     ) -> SATable:
-        # don create the table, just get/reflect sqlalchemy table object
-
+        # don't create the table, just get/reflect sqlalchemy table object
+        metadata = MetaData()
         sa_table = SATable(
             self._validated_table_name,
-            MetaData(),
+            metadata,
             *column_definitions,
             *constraints_definitions,
             schema=self._validated_schema_name,

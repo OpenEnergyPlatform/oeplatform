@@ -54,15 +54,18 @@ from sqlalchemy.sql.elements import Slice
 from sqlalchemy.sql.expression import ClauseElement, CompoundSelect, Select
 from sqlalchemy.sql.sqltypes import Interval
 
-from api.error import APIError, APIKeyError
-from api.utils import get_or_403, table_or_404_from_dict, validate_schema
+from api.error import APIError
+from api.utils import get_or_403, table_or_404_from_dict, table_or_none
 from dataedit import models as dataedit_models
-from oedb.connection import _get_engine
+from oedb.connection import _SA_METADATA, _get_engine
 from oedb.utils import MAX_NAME_LENGTH, NAME_PATTERN
+from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
 if TYPE_CHECKING:
     from dataedit.models import Table
 
+
+__PARSER_META = _SA_METADATA
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 sql_operators = {
@@ -233,9 +236,6 @@ def parse_table_parts(
         raise APIError("Primary key must be column id")
 
     return columns, constraints
-
-
-__PARSER_META = MetaData(bind=_get_engine())
 
 
 def query_typecast_select(select) -> Select:
@@ -495,18 +495,8 @@ def parse_from_item(d):
     dtype = get_or_403(d, "type")
 
     if dtype == "table":
-        # only = d.get("only", False)
-        ext_name = read_pgid(get_or_403(d, "table"))
-
-        tkwargs: dict = dict(autoload=True)
-
-        # TODO: find a better way than loading table in parse?
-        table_obj = dataedit_models.Table.objects.get(name=ext_name)
-        schema_name = table_obj.oedb_schema
-
-        if schema_name:
-            ext_name = schema_name + "." + ext_name
-            tkwargs["schema"] = schema_name
+        table_obj = table_or_404_from_dict(d)
+        ext_name = table_obj.oedb_schema + "." + table_obj.name
 
         sa_tables: Mapping[str, SATable] = __PARSER_META.tables  # type: ignore
 
@@ -514,7 +504,12 @@ def parse_from_item(d):
             sa_table = sa_tables[ext_name]
         else:
             try:
-                sa_table = SATable(d["table"], __PARSER_META, **tkwargs)
+                sa_table = SATable(
+                    d["table"],
+                    __PARSER_META,
+                    autoload=True,
+                    schema=table_obj.oedb_schema,
+                )
                 # NOTE: type casting probably no longer needed in later sqlalchemay
                 sa_table = cast_type(SATable, sa_table)
             except NoSuchTableError:
@@ -522,7 +517,7 @@ def parse_from_item(d):
 
         engine = _get_engine()
         conn = engine.connect()
-        exists = engine.dialect.has_table(conn, sa_table.name, schema_name)
+        exists = engine.dialect.has_table(conn, sa_table.name, table_obj.oedb_schema)
         conn.close()
         if not exists:
             raise APIError("Table not found: " + str(sa_table), status=400)
@@ -545,23 +540,6 @@ def parse_from_item(d):
     return sa_table
 
 
-def load_table_from_metadata(table: str, schema: str | None = None) -> SATable | None:
-    ext_name = table
-    schema = validate_schema(schema)
-    if schema:
-        ext_name = schema + "." + ext_name
-
-    sa_tables: Mapping[str, SATable] = __PARSER_META.tables  # type: ignore
-
-    if ext_name and ext_name in sa_tables:
-        return sa_tables[ext_name]
-    else:
-        if _get_engine().dialect.has_table(
-            _get_engine().connect(), table, schema=schema
-        ):
-            return SATable(table, __PARSER_META, autoload=True, schema=schema)
-
-
 def parse_column(d, mapper):
     name = get_or_403(d, "column")
     is_literal = parse_single(d.get("is_literal", False), bool)
@@ -570,16 +548,12 @@ def parse_column(d, mapper):
     sa_table = None
     if table_name:
         table_name = read_pgid(table_name)
-        if mapper is None:
-            mapper = dict()
+        table_obj = table_or_none(table_name)
+        if table_obj:
+            sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table(
+                shared_metadata=True
+            )
 
-        def do_map(x):
-            return mapper.get(x, x)
-
-        schema_name = read_pgid(do_map(d["schema"])) if "schema" in d else None
-        schema_name = validate_schema(schema_name)
-
-        sa_table = load_table_from_metadata(table_name, schema=schema_name)
     if sa_table is not None and name in sa_table.c:
         col = sa_table.c[name]
         if isinstance(col.type, INTERVAL):
@@ -729,11 +703,10 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
         if dtype == "label":
             return parse_label(d)
         if dtype == "sequence":
-            # NOTE/TODO: we need to keep it for sqlalchemy testsuite
-            schema_name = read_pgid(d["schema"]) if "schema" in d else None
-            schema_name = validate_schema(schema_name)
-            # s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
-            return Sequence(get_or_403(d, "sequence"), schema=schema_name)
+            return Sequence(
+                get_or_403(d, "sequence"), schema=SCHEMA_DEFAULT_TEST_SANDBOX
+            )
+
         if dtype == "select":
             return parse_select(d)
         if dtype == "cast":

@@ -67,7 +67,6 @@ from api.utils import (
     get_or_403,
     table_or_404,
     table_or_404_from_dict,
-    validate_schema,
 )
 from dataedit.models import Embargo, PeerReview, Table
 from login.models import myuser as User
@@ -789,7 +788,7 @@ def column_add(table_obj: Table, column, description):
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    oedb_table = table_obj.get_oeb_table_proxy(user=None)
+    oedb_table = table_obj.get_oedb_table_proxy(user=None)
 
     edit_sa_table = oedb_table._edit_table.get_sa_table()
     insert_sa_table = oedb_table._insert_table.get_sa_table()
@@ -965,7 +964,7 @@ ACTIONS FROM OLD API
 
 
 def _get_table(table_obj: Table) -> SATable:
-    return table_obj.get_oeb_table_proxy()._main_table.get_sa_table()
+    return table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
 
 
 def __internal_select(query, context):
@@ -1045,13 +1044,11 @@ def __change_rows(
     return {"rowcount": rows["rowcount"]}
 
 
-def drop_not_null_constraints_from_delete_meta_table(
+def _drop_not_null_constraints_from_delete_meta_table(
     meta_table_delete: str, meta_schema: str
 ) -> None:
     # https://github.com/OpenEnergyPlatform/oeplatform/issues/1548
     # we only want id column (and meta colums, wich start with a "_")
-
-    meta_schema = validate_schema(meta_schema)
 
     engine = _get_engine()
 
@@ -1402,7 +1399,7 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
 
         # TODO:permission check is still done outside of this function,
         # so we pass user=None
-        oedb_table = table_obj.get_oeb_table_proxy(user=None)
+        oedb_table = table_obj.get_oedb_table_proxy(user=None)
 
         insert_sa_table = oedb_table._insert_table.get_sa_table()
         cursor_execute(
@@ -1509,7 +1506,7 @@ def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    oedb_table = Table.objects.get(name=sa_table.name).get_oeb_table_proxy(user=None)
+    oedb_table = Table.objects.get(name=sa_table.name).get_oedb_table_proxy(user=None)
 
     if mode == __INSERT:
         meta_sa_table = oedb_table._insert_table.get_sa_table()
@@ -1836,7 +1833,7 @@ def data_insert(request: dict, context: dict) -> dict:
     # FIXME: permission check is still done outside of this function,
     # so we pass user=None
     table_obj = Table.objects.get(name=table_obj.name)
-    insert_sa_table = table_obj.get_oeb_table_proxy()._insert_table.get_sa_table()
+    insert_sa_table = table_obj.get_oedb_table_proxy()._insert_table.get_sa_table()
 
     request["table"] = insert_sa_table.name
     request["schema"] = insert_sa_table.schema
@@ -1875,13 +1872,13 @@ def data_delete(request: dict, context: dict) -> dict:
     # so we pass user=None
     target_meta_sa_table = (
         Table.objects.get(name=table_obj.name)
-        .get_oeb_table_proxy(user=None)
+        .get_oedb_table_proxy(user=None)
         ._delete_table.get_sa_table()
     )
     setter = []
     cursor = load_cursor_from_context(context)
 
-    drop_not_null_constraints_from_delete_meta_table(
+    _drop_not_null_constraints_from_delete_meta_table(
         target_meta_sa_table.name, target_meta_sa_table.schema
     )
 
@@ -1901,7 +1898,7 @@ def data_update(request: dict, context: dict) -> dict:
     # so we pass user=None
     target_sa_table = (
         Table.objects.get(name=table_obj.name)
-        .get_oeb_table_proxy(user=None)
+        .get_oedb_table_proxy(user=None)
         ._edit_table.get_sa_table()
     )
     setter = get_or_403(request, "values")

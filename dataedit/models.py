@@ -265,7 +265,7 @@ class Table(Tagable):
             assign_table_holder(user=user, table=table_obj)
 
             # create oedb table
-            table_obj.get_oeb_table_proxy(user=user).create(
+            table_obj.get_oedb_table_proxy(user=user).create(
                 column_definitions=column_definitions,
                 constraints_definitions=constraints_definitions,
             )
@@ -439,7 +439,9 @@ class Table(Tagable):
             return NO_PERM
         return user.get_table_permission_level(self)
 
-    def get_oeb_table_proxy(self, user: Union["myuser", None] = None) -> OedbTableProxy:
+    def get_oedb_table_proxy(
+        self, user: Union["myuser", None] = None
+    ) -> OedbTableProxy:
         # permission_level = self.get_user_permission_level(user)
         # FIXME: permission_level does not work properly
         permission_level = ADMIN_PERM
