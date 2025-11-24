@@ -334,6 +334,9 @@ function saveEntrancesForReviewer() {
     }
 
     updateFieldColor();
+    if (window.updatePercentageDisplay) {
+      window.updatePercentageDisplay();
+    }
     if (selectedState === "ok" ) {
         document.getElementById("valuearea").value = "";
         document.getElementById("commentarea").value = "";
@@ -390,19 +393,63 @@ function getTotalFieldCount() {
 
 
 function calculateOkPercentage(stateDict) {
-  let totalCount = getTotalFieldCount();
+  let totalCount = 0;
   let okCount = 0;
 
+  if (!stateDict) {
+    return "0.00";
+  }
+
   for (let key in stateDict) {
-    if (stateDict[key] === "ok") {
-      okCount++;
+    const fieldElement = document.getElementById(`field_${key}`);
+    if (!fieldElement) continue;
+
+    const fieldValue = $(fieldElement).find('.value').text().replace(/\s+/g, ' ').trim();
+    if (!isEmptyValue(fieldValue)) {
+      totalCount++;
+      if (stateDict[key] === "ok") {
+        okCount++;
+      }
     }
   }
 
-  let percentage = (okCount / totalCount) * 100;
+  const percentage = totalCount === 0 ? 0 : (okCount / totalCount) * 100;
   return percentage.toFixed(2);
 }
 
 function updatePercentageDisplay() {
-  document.getElementById("percentageDisplay").textContent = calculateOkPercentage(window.state_dict);
+  if (!window.state_dict) return;
+
+  const percentage = parseFloat(calculateOkPercentage(window.state_dict));
+
+  // Circle elements
+  const circle = document.getElementById("okProgressCircle");
+  const textEl =
+    document.getElementById("okPercentageText") ||
+    document.getElementById("percentageDisplay");
+
+  if (circle) {
+    // radius must match the SVG circle (r="52" in CSS)
+    const radius = 52;
+    const circumference = 2 * Math.PI * radius;
+
+    // ensure dasharray is set
+    circle.style.strokeDasharray = `${circumference}`;
+
+    const offset = circumference - (percentage / 100) * circumference;
+    circle.style.strokeDashoffset = `${offset}`;
+  }
+
+  if (textEl) {
+    textEl.textContent = `${percentage.toFixed(2)}%`;
+  }
 }
+
+// Expose for other modules (e.g. summary.js)
+window.updatePercentageDisplay = updatePercentageDisplay;
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.updatePercentageDisplay) {
+    window.updatePercentageDisplay();
+  }
+});
