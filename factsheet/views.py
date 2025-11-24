@@ -1862,8 +1862,6 @@ def populate_factsheets_elements_view(request, *args, **kwargs):
 def filter_scenario_bundles_view(request):
     # Get the table IRI from the request or any other source
     table_iri = request.GET.get("table_iri", "")
-    # table_iri = "dataedit/view/scenario/abbb_emob"
-
     table_name = table_iri.strip("/").split("/")[-1]
 
     # Create an instance of OekgQuery

@@ -4,12 +4,17 @@ SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from typing import TYPE_CHECKING
+
 from api import actions
 from dataedit.metadata.error import MetadataException
 
+if TYPE_CHECKING:
+    from dataedit.models import Table
 
-def from_v0(comment_on_table, schema, table):
-    columns = actions.analyze_columns(schema, table)
+
+def from_v0(comment_on_table, table_obj: "Table"):
+    columns = actions.analyze_columns(table_obj)
     refdate = comment_on_table.get("Reference date")
     try:
         if "resources" not in comment_on_table:

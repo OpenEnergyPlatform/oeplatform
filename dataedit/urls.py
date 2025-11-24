@@ -31,7 +31,6 @@ from dataedit.views import (
     admin_column_view,
     admin_constraints_view,
     metadata_widget_view,
-    table_show_revision_view,
     table_view_delete_view,
     table_view_save_view,
     table_view_set_default_view,
@@ -79,12 +78,6 @@ urlpatterns_view_schema = [
         name="table-view-delete-default",  # TODO: should be POST, but is GET?
     ),
     re_path(
-        r"^(?P<table>{qual})/(?P<rev_id>\d+)$".format(qual=pgsql_qualifier),
-        table_show_revision_view,
-        name="table-revision",
-        # TODO: do we need it??, also: rev_id (int) in args, but view wants a date?
-    ),
-    re_path(
         r"^(?P<table>{qual})/graph/new".format(qual=pgsql_qualifier),
         TableCreateGraphView.as_view(),
         name="table-graph",
@@ -128,18 +121,16 @@ urlpatterns_tag = [
 
 urlpatterns = [
     re_path(
-        # redirecting old /dataedit/view/SCHEMA/TABLE
+        # legacy redirecting old /dataedit/view/SCHEMA/TABLE
         r"^view/{qual}/(?P<path>.*)$".format(qual=pgsql_qualifier),
         # NOTE: redirect url must be absolute (including "/database/")
         RedirectView.as_view(url="/database/tables/%(path)s"),
     ),
-    re_path(r"^tables/", include(urlpatterns_view_schema)),
     re_path(
+        # legacy redirecting old /dataedit/view/SCHEMA
         r"^view/(?P<topic>{qual})$".format(qual=pgsql_qualifier),
-        tables_view,
-        name="tables-in-topic",
+        RedirectView.as_view(url="/database/topic/%(topic)s"),
     ),
-    re_path(r"^$", topic_view, name="topic-list"),
     re_path(
         r"^view$", RedirectView.as_view(pattern_name="dataedit:topic-list")
     ),  # legacy
@@ -147,6 +138,13 @@ urlpatterns = [
         r"^schemas$", RedirectView.as_view(pattern_name="dataedit:topic-list")
     ),  # legacy
     path("tags/", include(urlpatterns_tag)),
+    re_path(r"^tables/", include(urlpatterns_view_schema)),
+    re_path(
+        r"^topic/(?P<topic>{qual})$".format(qual=pgsql_qualifier),
+        tables_view,
+        name="tables-in-topic",
+    ),
+    re_path(r"^$", topic_view, name="topic-list"),
     re_path(
         r"^admin/columns/",
         admin_column_view,

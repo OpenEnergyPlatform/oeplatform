@@ -48,8 +48,7 @@ agreement.
 
 1. Uploading Metadata:
 
-> Any registered user can upload metadata to the database page in the
-> model_draft schema.
+> Any registered user can upload metadata to the database page
 
 2. Review Process:
 

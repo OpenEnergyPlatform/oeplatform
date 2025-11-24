@@ -442,7 +442,7 @@
       return window
         .reverseUrl("api:move_publish", {
           table: tableName,
-          topic: toSchema,
+          topic: topic,
         })
         .then((apiUrl) => {
           return fetch(apiUrl, {

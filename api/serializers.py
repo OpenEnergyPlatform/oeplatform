@@ -50,7 +50,7 @@ class ScenarioDataTablesSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
     def get_url(self, obj):
-        kwargs = {"schema": "scenario", "table": obj.name}
+        kwargs = {"table": obj.name}
         detail_url = reverse(
             "dataedit:view",
             kwargs=kwargs,
@@ -118,7 +118,7 @@ class DatasetSerializer(serializers.Serializer):
             # ✅ Generate internal distribution URL
             reversed_url = reverse(
                 "dataedit:view",
-                kwargs={"schema": "scenario", "table": name},
+                kwargs={"table": name},
             )
             data["external_url"] = f"{URL}{reversed_url}"
 

@@ -283,7 +283,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
             )
         ).distinct()
 
-    def get_table_permission_level(self, table) -> int:
+    def get_table_permission_level(self, table: "Table") -> int:
         # Check admin permissions for user
         if self.is_admin:
             return ADMIN_PERM

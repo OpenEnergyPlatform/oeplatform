@@ -10,8 +10,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from typing import Any, Iterable, List, Optional, Protocol
 
-import sqlalchemy as sqla
-from sqlalchemy import inspect
+from sqlalchemy import MetaData, create_engine, inspect
 from sqlalchemy.engine import ResultProxy
 from sqlalchemy.engine.base import Connection  # from engine.connect()
 from sqlalchemy.engine.base import Engine
@@ -32,9 +31,11 @@ def __get_connection_string():
     )
 
 
-__ENGINE = sqla.create_engine(
+__ENGINE = create_engine(
     __get_connection_string(), pool_size=0, pool_recycle=600, max_overflow=200
 )
+
+_SA_METADATA = MetaData(bind=__ENGINE)
 
 
 def _get_engine() -> Engine:

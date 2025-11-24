@@ -15,7 +15,7 @@ register = template.Library()
 
 
 @register.simple_tag
-def get_tags(schema: str | None = None, table: str | None = None, limit=None):
+def get_tags(table: str | None = None, limit=None):
     if limit:
         return get_popular_tags(table_name=table, limit=limit)
     else:

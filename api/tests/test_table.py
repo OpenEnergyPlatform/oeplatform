@@ -12,6 +12,7 @@ from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from api.tests import APITestCase, APITestCaseWithTable
 from dataedit.models import Table
+from oeplatform.settings import TOPIC_SCENARIO
 
 _TYPES = [
     "bigint",
@@ -305,7 +306,7 @@ class TestDelete(APITestCaseWithTable):
 
 class TestMovePublish(APITestCaseWithTable):
     test_table = "test_table_move_publish"
-    target_schema = "scenario"
+    target_topic = TOPIC_SCENARIO
 
     def test_move_publish(self):
 
@@ -313,7 +314,7 @@ class TestMovePublish(APITestCaseWithTable):
 
         # this will fail, because the licenses check fails
         self.api_req(
-            "post", path=f"move_publish/{self.target_schema}/", exp_code=400, exp_res={}
+            "post", path=f"move_publish/{self.target_topic}/", exp_code=400, exp_res={}
         )
 
         # so we set the metadata ...
@@ -328,7 +329,7 @@ class TestMovePublish(APITestCaseWithTable):
         embargo_duration = "6_months"
         self.api_req(
             "post",
-            path=f"move_publish/{self.target_schema}/",
+            path=f"move_publish/{self.target_topic}/",
             data={"embargo": {"duration": embargo_duration}},
             exp_code=200,
         )
@@ -338,7 +339,7 @@ class TestMovePublish(APITestCaseWithTable):
         embargo_duration = "none"
         self.api_req(
             "post",
-            path=f"move_publish/{self.target_schema}/",
+            path=f"move_publish/{self.target_topic}/",
             data={"embargo": {"duration": embargo_duration}},
             exp_code=200,
         )

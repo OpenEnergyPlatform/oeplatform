@@ -12,7 +12,7 @@ from random import randrange
 from django.contrib.auth.models import AbstractUser
 
 from api.error import APIError
-from api.parser import get_or_403
+from api.utils import get_or_403
 from oedb.connection import AbstractCursor, DBAPIConnection, _get_engine
 from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION_LIMIT
 

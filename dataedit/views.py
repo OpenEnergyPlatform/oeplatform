@@ -68,16 +68,14 @@ from api.actions import (
     assert_add_tag_permission,
     data_insert,
     describe_columns,
-    get_or_403,
-    perform_sql,
     remove_queued_column,
     remove_queued_constraint,
-    table_or_404,
+    table_get_row_count,
 )
 from api.error import APIError
+from api.utils import table_or_404, table_or_404_from_dict
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
-    TODO_PSEUDO_TOPIC_DRAFT,
     add_tag,
     change_requests,
     delete_peer_review,
@@ -90,27 +88,22 @@ from dataedit.helper import (
     merge_field_reviews,
     process_review_data,
     recursive_update,
-    send_dump,
     update_keywords_from_tags,
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import (
-    Embargo,
-)
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
-from dataedit.models import (
-    PeerReview,
-    PeerReviewManager,
-    Table,
-    TableRevision,
-    Tag,
-    Topic,
-)
+from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from login import models as login_models
-from oeplatform.settings import DOCUMENTATION_LINKS, EXTERNAL_URLS, SCHEMA_DATA
+from oeplatform.settings import (
+    DOCUMENTATION_LINKS,
+    EXTERNAL_URLS,
+    PSEUDO_TOPIC_DRAFT,
+    TOPIC_SCENARIO,
+)
 
 ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
 
@@ -142,8 +135,7 @@ def admin_constraints_view(request: HttpRequest) -> HttpResponse:
     action = request.POST.get("action")
     id = request.POST.get("id")
 
-    table = get_or_403(request.POST, "table")
-    table_obj = table_or_404(table=table)
+    table_obj = table_or_404_from_dict(request.POST)
 
     if action == "deny":
         remove_queued_constraint(id)
@@ -165,8 +157,7 @@ def admin_column_view(request: HttpRequest) -> HttpResponse:
 
     action = request.POST.get("action")
     id = request.POST.get("id")
-    table = get_or_403(request.POST, "table")
-    table_obj = table_or_404(table=table)
+    table_obj = table_or_404_from_dict(request.POST)
 
     if action == "deny":
         remove_queued_column(id)
@@ -198,6 +189,8 @@ def topic_view(request: HttpRequest) -> HttpResponse:
     tables = find_tables(query_string=searched_query_string, tag_ids=searched_tag_ids)
 
     description = {
+        PSEUDO_TOPIC_DRAFT: "Unfinished data of any kind. Note: there is no version control and data is still volatile.",  # noqa
+        TOPIC_SCENARIO: "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",  # noqa
         "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",  # noqa
         "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",  # noqa
         "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",  # noqa
@@ -206,8 +199,6 @@ def topic_view(request: HttpRequest) -> HttpResponse:
         "supply": "Data on supply. Supply can relate to commodities but also to services.",  # noqa
         "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",  # noqa
         "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",  # noqa
-        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",  # noqa
-        "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",  # noqa
         "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",  # noqa
         "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",  # noqa
         "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",  # noqa
@@ -219,12 +210,11 @@ def topic_view(request: HttpRequest) -> HttpResponse:
     total_table_count = tables.count()
 
     topics_descriptions_tablecounts = []
-    # NOTE/TODO:WINGECHR: model_draft is not a proper topic
-    # but currently, all unpublished datastes are displayed in frontend
+    # NOTE: draft is not a proper topic
     topics_descriptions_tablecounts.append(
         (
-            TODO_PSEUDO_TOPIC_DRAFT,
-            description[TODO_PSEUDO_TOPIC_DRAFT],
+            PSEUDO_TOPIC_DRAFT,
+            description[PSEUDO_TOPIC_DRAFT],
             tables.filter(is_publish=False).count(),
         )
     )
@@ -249,6 +239,8 @@ def topic_view(request: HttpRequest) -> HttpResponse:
             "query": searched_query_string,
             "tags": searched_tag_ids,
             "doc_oem_builder_link": EXTERNAL_URLS["tutorials_oemetabuilder"],
+            "PSEUDO_TOPIC_DRAFT": PSEUDO_TOPIC_DRAFT,
+            "TOPIC_SCENARIO": TOPIC_SCENARIO,
         },
     )
 
@@ -331,15 +323,11 @@ def tag_table_add_view(request: HttpRequest) -> HttpResponse:
         * Any number of values that start with 'tag_' followed by the id of a tag.
     :return: Redirects to the previous page
     """
-    table = get_or_403(request.POST, "table")
-    table_obj = table_or_404(table=table)
-    schema_name = table_obj.oedb_schema
+    table_obj = table_or_404_from_dict(request.POST)
 
     try:
         # check write permission
-        assert_add_tag_permission(
-            request.user, table, login.permissions.WRITE_PERM, schema=schema_name
-        )
+        assert_add_tag_permission(request.user, table_obj, login.permissions.WRITE_PERM)
         tag_prefix = "tag_"
         tag_prefix_len = len(tag_prefix)
         tag_ids = {
@@ -355,7 +343,7 @@ def tag_table_add_view(request: HttpRequest) -> HttpResponse:
         # TODO: we already do save in update_keywords_from_tags further down
         table_obj.save()
 
-        update_keywords_from_tags(table_obj, schema=schema_name)
+        update_keywords_from_tags(table_obj)
 
         messages.success(
             request,
@@ -388,10 +376,9 @@ def metadata_widget_view(request: HttpRequest) -> HttpResponse:
     Returns:
         HttpResponse: Rendered HTML response for the metadata widget.
     """
-    # TODO: schema and table should be in path?
+    # TODO: table should be in path?
 
-    table = get_or_403(request.GET, "table")
-    table_obj = table_or_404(table=table)
+    table_obj = table_or_404_from_dict(request.GET)
     context = {
         "meta_api": reverse("api:api_table_meta", kwargs={"table": table_obj.name})
     }
@@ -436,18 +423,6 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
         },
     )
-
-
-def table_show_revision_view(
-    request: HttpRequest, table: str, date: str
-) -> HttpResponse:
-    table_obj = table_or_404(table=table)
-    schema_name = table_obj.oedb_schema
-
-    rev = TableRevision.objects.get(table=table, date=date)
-    rev.last_accessed = timezone.now()
-    rev.save()
-    return send_dump(schema_name, table, date)
 
 
 @require_POST
@@ -572,10 +547,9 @@ class TableCreateGraphView(View):
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
 
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
 
         # get the columns id from the table
-        columns = [(c, c) for c in describe_columns(schema_name, table).keys()]
+        columns = [(c, c) for c in describe_columns(table_obj).keys()]
         formset = GraphViewForm(columns=columns)
 
         return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
@@ -605,9 +579,8 @@ class TableCreateGraphView(View):
 class TableCreateMapView(View):
     def get(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
 
-        columns = [(c, c) for c in describe_columns(schema_name, table).keys()]
+        columns = [(c, c) for c in describe_columns(table_obj).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(columns=columns)
         elif maptype == "geom":
@@ -619,9 +592,8 @@ class TableCreateMapView(View):
 
     def post(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
 
-        columns = [(c, c) for c in describe_columns(schema_name, table).keys()]
+        columns = [(c, c) for c in describe_columns(table_obj).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(request.POST, columns=columns)
             options = dict(lat=request.POST.get("lat"), lon=request.POST.get("lon"))
@@ -666,10 +638,7 @@ class TableDataView(View):
         """
 
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
-
         metadata = load_metadata_from_db(table=table)
-        table_obj = Table.load(name=table)
         if table_obj is None:
             raise Http404("Table object could not be loaded")
 
@@ -686,7 +655,7 @@ class TableDataView(View):
         meta_widget = MetaDataWidget(ordered_oem_151)
         revisions = []
 
-        api_changes = change_requests(schema_name, table)
+        api_changes = change_requests(table_obj)
         data = api_changes.get("data")
         display_message = api_changes.get("display_message")
         display_items = api_changes.get("display_items")
@@ -789,7 +758,7 @@ class TableDataView(View):
             "table": table,
             "table_obj": table_obj,
             "is_in_scenario": table_obj.topics.contains(
-                Topic.objects.get(name="scenario")
+                Topic.objects.get(name=TOPIC_SCENARIO)
             ),
             "table_label": table_label,
             # "tags": tags,
@@ -1004,20 +973,13 @@ class TableWizardView(LoginRequiredMixin, View):
         if table:
 
             table_obj = table_or_404(table=table)
-            schema_name = table_obj.oedb_schema
 
             user: login_models.myuser = request.user  # type: ignore
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login.permissions.WRITE_PERM
-            columns = get_column_description(schema_name, table)
+            columns = get_column_description(table_obj)
             # get number of rows
-            sql = 'SELECT COUNT(*) FROM "{schema}"."{table}"'.format(
-                schema=schema_name, table=table
-            )
-            res = perform_sql(sql)
-            n_rows = res["result"].fetchone()[0]
-        else:
-            schema_name = SCHEMA_DATA
+            n_rows = table_get_row_count(table_obj)
 
         context = {
             "config": json.dumps(
@@ -1044,10 +1006,7 @@ class TableMetaEditView(LoginRequiredMixin, View):
 
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
-
-        columns = get_column_description(schema_name, table)
-
+        columns = get_column_description(table_obj)
         can_add = False
 
         user: login_models.myuser = request.user  # type: ignore
@@ -1307,12 +1266,11 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
 
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
+        topic = table_obj.topics
 
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
-        table_obj = Table.load(name=table)
         field_descriptions = self.get_all_field_descriptions(json_schema)
 
         # Check user permissions
@@ -1357,7 +1315,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             "can_add": can_add,
             "url_peer_review": url_peer_review,
             "url_table": reverse("dataedit:view", kwargs={"table": table}),
-            "topic": schema_name,
+            "topic": topic,
             "table": table,
             "review_finished": review_finished,
             "review_id": review_id,
@@ -1417,7 +1375,6 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             can be moved to a different topic (TODO).
         """
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
 
         context = {}
         user: login_models.myuser = request.user  # type: ignore
@@ -1443,21 +1400,21 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         if review_post_type == "delete":
             return delete_peer_review(review_id)
 
-        contributor = PeerReviewManager.load_contributor(table=table)
+        contributor = PeerReviewManager.load_contributor(table=table_obj.name)
 
         if contributor is not None:
             # Überprüfen, ob ein aktiver PeerReview existiert
-            active_peer_review = PeerReview.load(table=table)
+            active_peer_review = PeerReview.load(table=table_obj.name)
             if active_peer_review is None or active_peer_review.is_finished:
                 # Kein aktiver PeerReview vorhanden
                 # oder der aktive PeerReview ist abgeschlossen
                 table_review = PeerReview(
-                    table=table,
+                    table=table_obj.name,
                     is_finished=review_finished,
                     review=review_datamodel,
                     reviewer=user,
                     contributor=contributor,
-                    oemetadata=load_metadata_from_db(table=table),
+                    oemetadata=load_metadata_from_db(table=table_obj.name),
                 )
                 table_review.save(review_type=review_post_type)
             else:
@@ -1475,19 +1432,19 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         else:
             error_msg = (
                 "Failed to retrieve any user that identifies "
-                f"as table holder for the current table: {table}!"
+                f"as table holder for the current table: {table_obj.name}!"
             )
             return JsonResponse({"error": error_msg}, status=400)
 
         # TODO: Check for topic as reviewed finished also indicates the table
         # needs to be or has to be moved.
         if review_finished is True:
-            review_table = Table.load(name=table)
+            review_table = Table.load(name=table_obj.name)
             review_table.set_is_reviewed()
-            metadata = self.load_json(table, review_id=review_id)
+            metadata = self.load_json(table_obj.name, review_id=review_id)
             updated_metadata = recursive_update(metadata, review_data)
-            save_metadata_to_db(schema_name, table, updated_metadata)
-            active_peer_review = PeerReview.load(table=table)
+            save_metadata_to_db(table_obj.name, updated_metadata)
+            active_peer_review = PeerReview.load(table=table_obj.name)
 
             if active_peer_review:
                 updated_oemetadata = recursive_update(
@@ -1522,17 +1479,16 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             HttpResponse: Rendered HTML response for contributor review.
         """
         table_obj = table_or_404(table=table)
-        schema_name = table_obj.oedb_schema
 
         can_add = False
         peer_review = PeerReview.objects.get(id=review_id)
-        table_obj = Table.load(peer_review.table)
+
         user: login_models.myuser = request.user  # type: ignore
         if not user.is_anonymous:
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login.permissions.WRITE_PERM
-        oemetadata = self.load_json(table, review_id)
-        metadata = self.sort_in_category(table, oemetadata=oemetadata)
+        oemetadata = self.load_json(table_obj.name, review_id)
+        metadata = self.sort_in_category(table_obj.name, oemetadata=oemetadata)
         json_schema = self.load_json_schema()
         field_descriptions = self.get_all_field_descriptions(json_schema)
         review_data = (peer_review.review or {}).get("reviews", [])
@@ -1554,17 +1510,19 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
                     "url_peer_review": reverse(
                         "dataedit:peer_review_contributor",
                         kwargs={
-                            "table": table,
+                            "table": table_obj.name,
                             "review_id": review_id,
                         },
                     ),
-                    "url_table": reverse("dataedit:view", kwargs={"table": table}),
-                    "topic": schema_name,
-                    "table": table,
+                    "url_table": reverse(
+                        "dataedit:view", kwargs={"table": table_obj.name}
+                    ),
+                    "topic": table_obj.topics,
+                    "table": table_obj.name,
                 }
             ),
-            "table": table,
-            "topic": schema_name,
+            "table": table_obj.name,
+            "topic": table_obj.topics,
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),

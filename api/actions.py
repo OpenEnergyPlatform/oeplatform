@@ -27,31 +27,33 @@ import logging
 import re
 from copy import deepcopy
 from datetime import datetime, timedelta
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 from django.db.models import Func, Value
-from django.http import HttpRequest
 from omi.base import get_metadata_version
 from omi.conversion import convert_metadata
 from omi.validation import ValidationError, parse_metadata, validate_metadata
-from rest_framework.request import Request
 from shapely import wkb
-from sqlalchemy import Column, ForeignKeyConstraint, MetaData, PrimaryKeyConstraint
-from sqlalchemy import Table as SATable
-from sqlalchemy import UniqueConstraint, exc, inspect, select, sql, text
-from sqlalchemy import types as sqltypes
+from sqlalchemy import (
+    Column,
+    ForeignKeyConstraint,
+    PrimaryKeyConstraint,
+    UniqueConstraint,
+    exc,
+    select,
+    sql,
+    text,
+)
+from sqlalchemy import types as sa_types
 from sqlalchemy.exc import NoSuchTableError
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql.expression import Select
 
 import dataedit.metadata
 from api.error import APIError
 from api.parser import (
     get_column_definition_query,
-    get_or_403,
     is_pg_qual,
     parse_insert,
     parse_select,
@@ -66,7 +68,12 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from api.utils import check_if_oem_license_exists, validate_schema
+from api.utils import (
+    check_if_oem_license_exists,
+    get_or_403,
+    table_or_404,
+    table_or_404_from_dict,
+)
 from dataedit.models import Embargo, PeerReview, Table
 from login.models import myuser as User
 from login.permissions import DELETE_PERM, WRITE_PERM
@@ -77,35 +84,29 @@ from oedb.connection import (
     Engine,
     ResultProxy,
     Session,
+    _create_oedb_session,
     _get_engine,
 )
 from oedb.utils import ID_COLUMN_NAME
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
+if TYPE_CHECKING:
+    from sqlalchemy import Table as SATable
+
 logger = logging.getLogger("oeplatform")
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
-
-Base = declarative_base()
 
 __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
 
 
-def _create_oedb_session():
-    """Return a sqlalchemy session to the oedb
-
-    Should only be created once per user request.
-    """
-    return sessionmaker(bind=_get_engine())()
-
-
 def get_columns_select(columns: list[str]) -> Select:
     return select(columns=columns)
 
 
-def get_column_obj(sa_table: SATable, column: str):
+def get_column_obj(sa_table: "SATable", column: str):
     """
 
     :param talbe: A sqla-table object
@@ -120,32 +121,17 @@ def get_column_obj(sa_table: SATable, column: str):
         raise APIError("Column '%s' does not exist." % column)
 
 
-def table_or_404(table: str) -> Table:
-    table_obj = Table.objects.filter(name=table).first()
-    if table_obj is None:
-        raise APIError("Table does not exist", 404)
-    return table_obj
-
-
-def table_or_404_from_dict(dct: dict) -> Table:
-    return table_or_404(get_or_403(dct, "table"))
-
-
-def table_or_404_from_req(request: Request | HttpRequest) -> Table:
-    return table_or_404_from_req(request.GET)  # type:ignore TODO
-
-
-def assert_permission(user, table: str, permission: int) -> None:
+def assert_permission(user, table: Table, permission: int) -> None:
     if user.is_anonymous or not isinstance(user, User):
         raise APIError("User is anonymous", 401)
 
-    if user.get_table_permission_level(Table.load(name=table)) < permission:
+    if user.get_table_permission_level(table) < permission:
         raise APIError("Permission denied", 403)
 
 
-def assert_add_tag_permission(user, table: str, permission: int, schema) -> None:
+def assert_add_tag_permission(user, table_obj: Table, permission: int) -> None:
     """
-    Tags can be added to tables that are in any schema. However,
+    Tags can be added to tables. However,
     it is necessary to check whether the user has write permission
     to the table, since not every user should be able to add tags
     to every table.
@@ -154,7 +140,6 @@ def assert_add_tag_permission(user, table: str, permission: int, schema) -> None
         user (_type_): _description_
         table (_type_): _description_
         permission (_type_): _description_
-        schema (_type_): _description_
 
     Raises:
         PermissionDenied: _description_
@@ -163,13 +148,13 @@ def assert_add_tag_permission(user, table: str, permission: int, schema) -> None
     if user.is_anonymous:
         raise APIError("User is anonymous", status=401)
 
-    if user.get_table_permission_level(Table.load(name=table)) < permission:
+    if user.get_table_permission_level(table_obj) < permission:
         raise APIError("Permission denied", status=403)
 
 
-def _translate_fetched_cell(cell):
+def translate_fetched_cell(cell):
     if isinstance(cell, geoalchemy2.WKBElement):
-        return engine_execute(_get_engine(), cell.ST_AsText()).scalar()
+        return new_engine_execute(cell.ST_AsText()).scalar()
     elif isinstance(cell, memoryview):
         return wkb.dumps(wkb.loads(cell.tobytes()), hex=True)
     else:
@@ -180,12 +165,8 @@ def __response_success():
     return {"success": True}
 
 
-def _response_error(message: str):
+def response_error(message: str):
     return {"success": False, "message": message}
-
-
-class InvalidRequest(Exception):
-    pass
 
 
 def _translate_sqla_type(column):
@@ -297,7 +278,7 @@ def try_convert_metadata_to_v2(metadata: dict) -> dict:
     return metadata
 
 
-def describe_columns(schema, table):
+def describe_columns(table_obj: Table):
     """
     Loads the description of all columns of the specified table and return their
     description as a dictionary. Each column is identified by its name and
@@ -319,16 +300,13 @@ def describe_columns(schema, table):
     * dtd_identifier
     * is_updatable
 
-    :param schema: Schema name
-
     :param table: Table name
 
     :return: A dictionary of describing dictionaries representing the columns
     identified by their column names
     """
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
     query = (
         "select column_name, "
         "c.ordinal_position, c.column_default, c.is_nullable, c.data_type, "
@@ -341,7 +319,7 @@ def describe_columns(schema, table):
         "ON ((c.table_catalog, c.table_schema, c.table_name, 'TABLE', c.dtd_identifier) "  # noqa
         "= (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier)) where table_name = "  # noqa
         "'{table}' and table_schema='{schema}' ORDER BY c.ordinal_position;".format(
-            table=table, schema=schema
+            table=table_obj.name, schema=table_obj.oedb_schema
         )
     )
     response = session_execute(session, query)
@@ -373,7 +351,7 @@ def describe_columns(schema, table):
     }
 
 
-def describe_indexes(schema, table):
+def describe_indexes(table_obj: Table):
     """
     Loads the description of all indexes of the specified table and return their
     description as a dictionary. Each index is identified by its name and
@@ -382,18 +360,17 @@ def describe_indexes(schema, table):
     * indexname: The name of the index
     * indexdef: The SQL-Statement used to create this index
 
-    :param schema: Schema name
-
     :param table: Table name
 
     :return: A dictionary of describing dictionaries representing the indexed
     identified by their column names
     """
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
     query = (
         "select indexname, indexdef from pg_indexes where tablename = "
-        "'{table}' and schemaname='{schema}';".format(table=table, schema=schema)
+        "'{table}' and schemaname='{schema}';".format(
+            table=table_obj.name, schema=table_obj.oedb_schema
+        )
     )
     response = session_execute(session, query)
     session.close()
@@ -403,7 +380,7 @@ def describe_indexes(schema, table):
     return {column.indexname: {"indexdef": column.indexdef} for column in response}
 
 
-def describe_constraints(schema, table):
+def describe_constraints(table_obj: Table):
     """
     Loads the description of all constraints of the specified table and return their
     description as a dictionary. Each constraints is identified by its name and
@@ -416,18 +393,15 @@ def describe_constraints(schema, table):
     * definition: This additional entry contains the SQL-query used to create
         this constraints
 
-    :param schema: Schema name
-
     :param table: Table name
 
     :return: A dictionary of describing dictionaries representing the columns
     identified by their column names
     """
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
     query = "select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name='{table}' AND constraint_schema='{schema}';".format(  # noqa
-        table=table, schema=schema
+        table=table_obj.name, schema=table_obj.oedb_schema
     )
     response = session_execute(session, query)
     session.close()
@@ -452,8 +426,7 @@ def perform_sql(sql_statement, parameter: dict | None = None) -> dict:
     if not parameter:
         parameter = {}
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
 
     # Statement built and no changes required, so statement is empty.
     if not sql_statement or sql_statement.isspace():
@@ -576,10 +549,9 @@ def get_response_dict(
     return dict
 
 
-def queue_constraint_change(schema: str, table: str, constraint_def: dict):
+def queue_constraint_change(table_obj: Table, constraint_def: dict):
     """
     Queue a change to a constraint
-    :param schema: Schema
     :param table: Table
     :param constraint_def: Dict with constraint definition
     :return: Result of database command
@@ -598,18 +570,17 @@ def queue_constraint_change(schema: str, table: str, constraint_def: dict):
             c_parameter=get_or_403(cd, "constraint_parameter"),
             r_table=get_or_403(cd, "reference_table"),
             r_column=get_or_403(cd, "reference_column"),
-            c_schema=schema,
-            c_table=table,
+            c_schema=table_obj.oedb_schema,
+            c_table=table_obj.name,
         ).replace("'NULL'", "NULL")
     )
 
     return perform_sql(sql_string)
 
 
-def queue_column_change(schema: str, table: str, column_definition: dict) -> dict:
+def queue_column_change(table_obj: Table, column_definition: dict) -> dict:
     """
     Quere a change to a column
-    :param schema: Schema
     :param table: Table
     :param column_definition: Dict with column definition
     :return: Result of database command
@@ -622,8 +593,8 @@ def queue_column_change(schema: str, table: str, column_definition: dict) -> dic
         not_null=get_or_403(column_definition, "not_null"),
         data_type=get_or_403(column_definition, "data_type"),
         new_name=get_or_403(column_definition, "new_name"),
-        c_schema=schema,
-        c_table=table,
+        c_schema=table_obj.oedb_schema,
+        c_table=table_obj.name,
     ).replace(
         "'NULL'", "NULL"
     )
@@ -660,7 +631,7 @@ def get_constraint_change(i_id):
     return None
 
 
-def get_column_changes(reviewed=None, changed=None, schema=None, table=None):
+def get_column_changes(reviewed=None, changed=None, table_obj: Table | None = None):
     """
     Get all column changes
     :param reviewed: Reviewed Changes
@@ -668,16 +639,10 @@ def get_column_changes(reviewed=None, changed=None, schema=None, table=None):
     :return: List with Column Definitions
     """
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
     query = ["SELECT * FROM public.api_columns"]
 
-    if (
-        reviewed is not None
-        or changed is not None
-        or schema is not None
-        or table is not None
-    ):
+    if reviewed is not None or changed is not None or table_obj is not None:
         query.append(" WHERE ")
 
         where = []
@@ -688,11 +653,8 @@ def get_column_changes(reviewed=None, changed=None, schema=None, table=None):
         if changed is not None:
             where.append("changed = " + str(changed))
 
-        if schema is not None:
-            where.append("c_schema = '{schema}'".format(schema=schema))
-
-        if table is not None:
-            where.append("c_table = '{table}'".format(table=table))
+        if table_obj is not None:
+            where.append("c_table = '{table}'".format(table=table_obj.name))
 
         query.append(" AND ".join(where))
 
@@ -720,23 +682,20 @@ def get_column_changes(reviewed=None, changed=None, schema=None, table=None):
     ]
 
 
-def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None):
+def get_constraints_changes(
+    reviewed=None, changed=None, table_obj: Table | None = None
+):
     """
     Get all constraint changes
     :param reviewed: Reviewed Changes
     :param changed: Applied Changes
     :return: List with Column Definitons
     """
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+
+    session = _create_oedb_session()
     query = ["SELECT * FROM public.api_constraints"]
 
-    if (
-        reviewed is not None
-        or changed is not None
-        or schema is not None
-        or table is not None
-    ):
+    if reviewed is not None or changed is not None or table_obj is not None:
         query.append(" WHERE ")
 
         where = []
@@ -747,11 +706,8 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
         if changed is not None:
             where.append("changed = " + str(changed))
 
-        if schema is not None:
-            where.append("c_schema = '{schema}'".format(schema=schema))
-
-        if table is not None:
-            where.append("c_table = '{table}'".format(table=table))
+        if table_obj is not None:
+            where.append("c_table = '{table}'".format(table=table_obj.name))
 
         query.append(" AND ".join(where))
 
@@ -782,20 +738,17 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
 
 
 def get_column(d):
-    schema = d.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX)
-    schema = validate_schema(schema)
-    table = get_or_403(d, "table")
-    name = get_or_403(d, "column")
-    return Column("%s.%s" % (table, name), schema=schema)
+    table_obj = table_or_404_from_dict(d)
+    name = read_pgid(get_or_403(d, "column"))
+    return Column("%s.%s" % (table_obj.name, name))
 
 
-def column_alter(query, context, schema, table: str, column):
-    schema = validate_schema(schema)
+def column_alter(query, table_obj: Table, column):
 
     if column == "id":
         raise APIError("You cannot alter the id column")
     alter_preamble = 'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{column}" '.format(
-        schema=schema, table=table, column=column
+        schema=table_obj.oedb_schema, table=table_obj.name, column=column
     )
     if "data_type" in query:
         sql = alter_preamble + "SET DATA TYPE " + read_pgid(query["data_type"])
@@ -816,13 +769,12 @@ def column_alter(query, context, schema, table: str, column):
         sql = (
             'ALTER TABLE "{schema}"."{table}" RENAME COLUMN "{column}" TO '
             + read_pgid(query["name"])
-        ).format(schema=schema, table=table, column=column)
+        ).format(schema=table_obj.oedb_schema, table=table_obj.name, column=column)
         perform_sql(sql)
     return get_response_dict(success=True)
 
 
-def column_add(schema, table: str, column, description):
-    schema = validate_schema(schema)
+def column_add(table_obj: Table, column, description):
     description["name"] = column
     settings = get_column_definition_query(description)
     name = settings.name
@@ -833,12 +785,12 @@ def column_add(schema, table: str, column, description):
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    oedb_table = Table.objects.get(name=table).get_oeb_table_proxy(user=None)
+    oedb_table = table_obj.get_oedb_table_proxy(user=None)
 
     edit_sa_table = oedb_table._edit_table.get_sa_table()
     insert_sa_table = oedb_table._insert_table.get_sa_table()
 
-    perform_sql(s.format(schema=schema, table=table))
+    perform_sql(s.format(schema=table_obj.oedb_schema, table=table_obj.name))
     # Do the same for update and insert tables.
     perform_sql(s.format(schema=edit_sa_table.schema, table=edit_sa_table.name))
     perform_sql(s.format(schema=insert_sa_table.schema, table=insert_sa_table.name))
@@ -849,23 +801,21 @@ def column_add(schema, table: str, column, description):
 def table_change_column(column_definition):
     """
     Changes a table column.
-    :param schema: schema
     :param table: table
     :param column_definition: column definition according to Issue #184
     :return: Dictionary with results
     """
 
-    schema = get_or_403(column_definition, "c_schema")
-    schema = validate_schema(schema)
+    # Check if table exists
     table = get_or_403(column_definition, "c_table")
+    table_obj = table_or_404(table)
 
     # Check if column exists
-    existing_column_description = describe_columns(schema, table)
+    existing_column_description = describe_columns(table_obj)
 
     if len(existing_column_description) <= 0:
         return get_response_dict(False, 400, "table is not defined.")
 
-    # There is a table named schema.table.
     sql = []
 
     start_name = get_or_403(column_definition, "column_name")
@@ -881,8 +831,8 @@ def table_change_column(column_definition):
             # Rename table
             sql.append(
                 'ALTER TABLE "{schema}"."{table}" RENAME COLUMN "{name}" TO "{new_name}";'.format(  # noqa
-                    schema=schema,
-                    table=table,
+                    schema=table_obj.oedb_schema,
+                    table=table_obj.name,
                     name=current_name,
                     new_name=column_definition["new_name"],
                 )
@@ -899,8 +849,8 @@ def table_change_column(column_definition):
         ):
             sql.append(
                 'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" TYPE {c_datatype};'.format(  # noqa
-                    schema=schema,
-                    table=table,
+                    schema=table_obj.oedb_schema,
+                    table=table_obj.name,
                     c_name=current_name,
                     c_datatype=column_definition["data_type"],
                 )
@@ -913,14 +863,18 @@ def table_change_column(column_definition):
                 # Change to nullable
                 sql.append(
                     '"ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" DROP NOT NULL;'.format(  # noqa
-                        schema=schema, table=table, c_name=current_name
+                        schema=table_obj.oedb_schema,
+                        table=table_obj.name,
+                        c_name=current_name,
                     )
                 )
             else:
                 # Change to not null
                 sql.append(
                     'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{c_name}" SET NOT NULL;'.format(  # noqa
-                        schema=schema, table=table, c_name=current_name
+                        schema=table_obj.oedb_schema,
+                        table=table_obj.name,
+                        c_name=current_name,
                     )
                 )
     else:
@@ -928,8 +882,8 @@ def table_change_column(column_definition):
         # Request will end in 500, if an argument is missing.
         sql.append(
             'ALTER TABLE "{schema}"."{table}" ADD "{c_name}" {c_datatype} {c_notnull};'.format(  # noqa
-                schema=schema,
-                table=table,
+                schema=table_obj.oedb_schema,
+                table=table_obj.name,
                 c_name=current_name,
                 c_datatype=get_or_403(column_definition, "data_type"),
                 c_notnull="NOT NULL" if column_definition.get("notnull", False) else "",
@@ -944,17 +898,15 @@ def table_change_column(column_definition):
 def table_change_constraint(constraint_definition):
     """
     Changes constraint of table
-    :param schema: schema
     :param table: table
     :param constraint_definition: constraint definition according to Issue #184
     :return: Dictionary with results
     """
 
     table = get_or_403(constraint_definition, "c_table")
-    schema = get_or_403(constraint_definition, "c_schema")
-    schema = validate_schema(schema)
+    table_obj = table_or_404(table)
 
-    existing_column_description = describe_columns(schema, table)
+    existing_column_description = describe_columns(table_obj)
 
     if len(existing_column_description) <= 0:
         raise APIError("Table does not exist")
@@ -974,26 +926,26 @@ def table_change_constraint(constraint_definition):
             ]
 
             constraint = ForeignKeyConstraint(columns, refcolumns)
-            constraint.create(_get_engine())
         elif ctype == "primary key":
             columns = [
                 get_column(c) for c in get_or_403(constraint_definition, "columns")
             ]
             constraint = PrimaryKeyConstraint(columns)
-            constraint.create(_get_engine())
         elif ctype == "unique":
             columns = [
                 get_column(c) for c in get_or_403(constraint_definition, "columns")
             ]
             constraint = UniqueConstraint(*columns)
-            constraint.create(_get_engine())
+            # FIXME: check permissions
         elif ctype == "check":
             raise APIError("Not supported")
+        # FIXME: check permissions
+        constraint.create(_get_engine())
     elif "DROP" in constraint_definition["action"]:
         sql.append(
             'ALTER TABLE "{schema}"."{table}" DROP CONSTRAINT "{constraint_name}"'.format(  # noqa
-                schema=schema,
-                table=table,
+                schema=table_obj.oedb_schema,
+                table=table_obj.name,
                 constraint_name=constraint_definition["constraint_name"],
             )
         )
@@ -1008,16 +960,7 @@ ACTIONS FROM OLD API
 """
 
 
-def _get_table(schema: str, table: str) -> SATable:
-    # TODO: ensure table and schema are validated
-    engine = _get_engine()
-    metadata = MetaData(bind=_get_engine())
-
-    return SATable(table, metadata, autoload=True, autoload_with=engine, schema=schema)
-
-
 def __internal_select(query, context):
-    # engine = _get_engine()
     context2 = dict(user=context.get("user"))
     context2.update(open_raw_connection({}, context2))
     try:
@@ -1034,14 +977,14 @@ def __internal_select(query, context):
 
 
 def __change_rows(
-    table: Table, request, context, target_sa_table: SATable, setter, fields=None
+    table_obj: Table, request, context, target_sa_table: "SATable", setter, fields=None
 ) -> dict:
 
     query: dict = {
         "from": {
             "type": "table",
-            "schema": table.oedb_schema,
-            "table": table.name,
+            "schema": table_obj.oedb_schema,
+            "table": table_obj.name,
         }
     }
 
@@ -1061,13 +1004,7 @@ def __change_rows(
         fields = [field[0] for field in rows["description"]]
     fields += [f[0] for f in meta_fields]
 
-    meta = MetaData(bind=_get_engine())
-    sa_table = SATable(
-        table.name,
-        meta,
-        autoload=True,
-        schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-    )
+    sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
 
     pks = [c for c in sa_table.columns if c.primary_key]  # type:ignore
 
@@ -1083,25 +1020,21 @@ def __change_rows(
                     if not (key in pks and value != setter[key]):
                         value = setter[key]
                     else:
-                        raise InvalidRequest("Primary keys must remain unchanged.")
+                        raise APIError("Primary keys must remain unchanged.")
                 insert.append((key, value))
 
             inserts.append(dict(insert))
         # Add metadata for insertions
         query = target_sa_table.insert(values=inserts)
-        _execute_sqla(query, cursor)
+        execute_sqla(query, cursor)
     return {"rowcount": rows["rowcount"]}
 
 
-def drop_not_null_constraints_from_delete_meta_table(
+def _drop_not_null_constraints_from_delete_meta_table(
     meta_table_delete: str, meta_schema: str
 ) -> None:
     # https://github.com/OpenEnergyPlatform/oeplatform/issues/1548
     # we only want id column (and meta colums, wich start with a "_")
-
-    meta_schema = validate_schema(meta_schema)
-
-    engine = _get_engine()
 
     # find not nullable columns in meta tables
     query = f"""
@@ -1111,7 +1044,7 @@ def drop_not_null_constraints_from_delete_meta_table(
     AND table_schema = '{meta_schema}'
     AND is_nullable = 'NO'
     """
-    resp = engine_execute(engine, query).fetchall()
+    resp = new_engine_execute(query).fetchall()
     column_names = [x[0] for x in resp] if resp else []
     # filter meta columns and id
     column_names = [
@@ -1125,12 +1058,11 @@ def drop_not_null_constraints_from_delete_meta_table(
     # drop not null from these columns
     col_drop = ", ".join(f'ALTER "{c}" DROP NOT NULL' for c in column_names)
     query = f'ALTER TABLE "{meta_schema}"."{meta_table_delete}" {col_drop};'
-    engine_execute(engine, query)
+    new_engine_execute(query)
 
 
-def data_insert_check(schema, table: str, values, context):
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+def data_insert_check(table_obj: Table, values, context):
+    session = _create_oedb_session()
     query = (
         "SELECT array_agg(column_name::text) as columns, conname, "
         "   contype AS type "
@@ -1140,7 +1072,9 @@ def data_insert_check(schema, table: str, values, context):
         "WHERE table_name='{table}' "
         "   AND table_schema='{schema}' "
         "   AND conrelid='{schema}.{table}'::regclass::oid "
-        "GROUP BY conname, contype;".format(table=table, schema=schema)
+        "GROUP BY conname, contype;".format(
+            table=table_obj.name, schema=table_obj.oedb_schema
+        )
     )
     response = session_execute(session, query)
     session.close()
@@ -1157,14 +1091,13 @@ def data_insert_check(schema, table: str, values, context):
             #       Use joins instead to avoid piping your results through
             #       python.
             if isinstance(values, Select):
-                values = engine_execute(engine, values)
+                values = new_engine_execute(values)
             for row in values:
                 # TODO: This is horribly inefficient!
                 query = {
                     "from": {
                         "type": "table",
-                        # "schema": schema,
-                        "table": table,
+                        "table": table_obj.name,
                     },
                     "where": {
                         "type": "operator",
@@ -1202,7 +1135,7 @@ def data_insert_check(schema, table: str, values, context):
                         + ")"
                     )
 
-    for column_name, column in describe_columns(schema, table).items():
+    for column_name, column in describe_columns(table_obj).items():
         if not column.get("is_nullable", True):
             for row in values:
                 val = row.get(column_name, None)
@@ -1231,7 +1164,7 @@ def data_insert_check(schema, table: str, values, context):
                         )
 
 
-def _execute_sqla(query, cursor: AbstractCursor | Session) -> None:
+def execute_sqla(query, cursor: AbstractCursor | Session) -> None:
     dialect = _get_engine().dialect
     try:
         compiled = query.compile(dialect=dialect)
@@ -1274,12 +1207,10 @@ def _execute_sqla(query, cursor: AbstractCursor | Session) -> None:
         raise
 
 
-def analyze_columns(schema, table):
-    engine = _get_engine()
-    result = engine_execute(
-        engine,
+def analyze_columns(table_obj: Table):
+    result = new_engine_execute(
         "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(  # noqa
-            schema=schema, table=table
+            schema=table_obj.oedb_schema, table=table_obj.name
         ),
     )
     return [{"id": get_or_403(r, "id"), "type": get_or_403(r, "type")} for r in result]
@@ -1292,21 +1223,7 @@ def clear_dict(d):
     }
 
 
-def move(from_schema, table: str, topic):
-    """
-    Implementation note:
-        Currently we implemented two versions of the move functionality
-        this will later be harmonized. See 'move_publish'.
-    """
-    move_publish(
-        from_schema=from_schema,
-        table=table,
-        topic=topic,
-        embargo_period="none",
-    )
-
-
-def move_publish(from_schema, table: str, topic, embargo_period):
+def move_publish(table_obj: Table, topic, embargo_period):
     """
     The issue about publishing datatables  in the context of the OEP
     is that tables must be moved physically in the postgreSQL database.
@@ -1330,7 +1247,6 @@ def move_publish(from_schema, table: str, topic, embargo_period):
 
     """
 
-    table_obj = Table.objects.get(name=table)
     validate_open_data_license = table_obj.validate_open_data_license()
 
     license_check = validate_open_data_license["status"]
@@ -1376,20 +1292,15 @@ def move_publish(from_schema, table: str, topic, embargo_period):
     table_obj.set_is_published(topic_name=topic)
 
 
-def connect():
-    engine = _get_engine()
-    insp = inspect(engine)
-    return insp
-
-
 def get_table_oid(request: dict, context=None):
+    table_obj = table_or_404_from_dict(request)
     engine = _get_engine()
     conn = engine.connect()
     try:
         result = engine.dialect.get_table_oid(
             conn,
-            get_or_403(request, "table"),
-            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
+            table_obj.name,
+            schema=table_obj.oedb_schema,
             **request,
         )
     except NoSuchTableError as e:
@@ -1409,13 +1320,12 @@ def fetchmany(request: dict, context):
     return cursor.fetchmany(int(request["size"]))
 
 
-def getValue(schema, table: str, column, id):
+def getValue(table_obj: Table, column, id):
     sql = 'SELECT {column} FROM "{schema}"."{table}" WHERE id={id}'.format(
-        column=column, schema=schema, table=table, id=id
+        column=column, schema=table_obj.oedb_schema, table=table_obj.name, id=id
     )
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
+    session = _create_oedb_session()
 
     try:
         result = session_execute(session, sql)
@@ -1433,7 +1343,7 @@ def getValue(schema, table: str, column, id):
     return None
 
 
-def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None):
+def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
     """Apply changes from the meta tables to the actual table.
 
     Meta tables are :
@@ -1458,12 +1368,12 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
 
     try:
 
-        columns = list(describe_columns(schema, table).keys())
+        columns = list(describe_columns(table_obj).keys())
         extended_columns = columns + ["_submitted", "_id"]
 
         # TODO:permission check is still done outside of this function,
         # so we pass user=None
-        oedb_table = Table.objects.get(name=table).get_oeb_table_proxy(user=None)
+        oedb_table = table_obj.get_oedb_table_proxy(user=None)
 
         insert_sa_table = oedb_table._insert_table.get_sa_table()
         cursor_execute(
@@ -1529,7 +1439,7 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
         ]
 
         changes = list(changes)
-        sa_table = SATable(table, MetaData(bind=engine), autoload=True, schema=schema)
+        sa_table = oedb_table._main_table.get_sa_table()
 
         # ToDo: This may require some kind of dependency tree resolution
         prev_type = None
@@ -1556,7 +1466,7 @@ def apply_changes(schema: str, table: str, cursor: AbstractCursor | None = None)
             connection.close()
 
 
-def _apply_stack(cursor: AbstractCursor, sa_table: SATable, changes, change_type):
+def _apply_stack(cursor: AbstractCursor, sa_table: "SATable", changes, change_type):
     distilled_change, rids = zip(*changes)
     if change_type == "insert":
         apply_insert(cursor, sa_table, distilled_change, rids)
@@ -1566,11 +1476,13 @@ def _apply_stack(cursor: AbstractCursor, sa_table: SATable, changes, change_type
         apply_deletion(cursor, sa_table, distilled_change, rids)
 
 
-def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode: int):
+def set_applied(
+    session: AbstractCursor | Session, sa_table: "SATable", rids, mode: int
+):
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    oedb_table = Table.objects.get(name=sa_table.name).get_oeb_table_proxy(user=None)
+    oedb_table = Table.objects.get(name=sa_table.name).get_oedb_table_proxy(user=None)
 
     if mode == __INSERT:
         meta_sa_table = oedb_table._insert_table.get_sa_table()
@@ -1590,10 +1502,10 @@ def set_applied(session: AbstractCursor | Session, sa_table: SATable, rids, mode
     session_execute_parameter(session, str(update_query), update_query.params)
 
 
-def apply_insert(session: AbstractCursor | Session, sa_table: SATable, rows, rids):
+def apply_insert(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
     logger.debug("apply inserts (%d)", len(rids))
     query = sa_table.insert().values(rows)
-    _execute_sqla(query, session)
+    execute_sqla(query, session)
     set_applied(session, sa_table, rids, __INSERT)
 
 
@@ -1604,17 +1516,17 @@ def apply_update(session: AbstractCursor | Session, sa_table, rows, rids):
         query = sa_table.update(
             *[getattr(sa_table.c, pk) == row[pk] for pk in pks]
         ).values(row)
-        _execute_sqla(query, session)
+        execute_sqla(query, session)
         set_applied(session, sa_table, [rid], __UPDATE)
 
 
-def apply_deletion(session: AbstractCursor | Session, sa_table: SATable, rows, rids):
+def apply_deletion(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
     logger.debug("apply deletion (%d)", len(rids))
     for row, rid in zip(rows, rids):
         query = sa_table.delete().where(
             *[getattr(sa_table.c, col) == row[col] for col in row]
         )
-        _execute_sqla(query, session)
+        execute_sqla(query, session)
         set_applied(session, sa_table, [rid], __DELETE)
 
 
@@ -1686,9 +1598,9 @@ def set_table_metadata(table: str, metadata):
     update_meta_search(table=table)
 
 
-def get_single_table_size(table: str) -> dict | None:
+def get_single_table_size(table_obj: Table) -> dict | None:
     """
-    Return size details for one schema.table or None if not found.
+    Return size details for one table or None if not found.
     """
 
     sql = text(
@@ -1705,10 +1617,11 @@ def get_single_table_size(table: str) -> dict | None:
     """  # noqa: E501
     )
 
-    schema = Table.load(name=table).oedb_schema
     sess = _create_oedb_session()
     try:
-        res = session_execute_parameter(sess, sql, {"schema": schema, "table": table})
+        res = session_execute_parameter(
+            sess, sql, {"schema": table_obj.oedb_schema, "table": table_obj.name}
+        )
         row = res.fetchone()
         if not row:
             return None
@@ -1756,6 +1669,43 @@ def list_table_sizes() -> list[dict]:
         sess.close()
 
 
+def table_has_row_with_id(table: Table, id: int | str, id_col: str = "id") -> bool:
+    query = text(
+        f"""
+        SELECT count(*)
+        FROM "{table.oedb_schema}"."{table.name}"
+        WHERE {id_col} = :id
+        ;
+    """
+    )
+
+    engine = _get_engine()
+    with engine.connect() as conn:
+        resp = connection_execute(conn, query, id=id)
+        row = resp.fetchone()
+        row_count = row[0] if row else 0
+
+    return row_count > 0
+
+
+def table_get_row_count(table: Table) -> int:
+    query = text(
+        f"""
+        SELECT count(*)
+        FROM "{table.oedb_schema}"."{table.name}"
+        ;
+    """
+    )
+
+    engine = _get_engine()
+    with engine.connect() as conn:
+        resp = connection_execute(conn, query)
+        row = resp.fetchone()
+        row_count = row[0] if row else 0
+
+    return row_count
+
+
 def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
     """Get approximate number of rows quickly.
 
@@ -1769,7 +1719,7 @@ def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
 
     engine = _get_engine()
     # NOTE: cannot use :parameter, because we insert
-    # table / schema name. but its validated by constraints
+    # table name. but its validated by constraints
     # on django table.name field
 
     query = text(
@@ -1789,20 +1739,7 @@ def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
     if row_count >= precise_below:
         return row_count
 
-    query = text(
-        f"""
-        SELECT count(*)
-        FROM "{table.oedb_schema}"."{table.name}"
-        ;
-    """
-    )
-
-    with engine.connect() as conn:
-        resp = connection_execute(conn, query)
-        row = resp.fetchone()
-        row_count = row[0] if row else 0
-
-    return row_count
+    return table_get_row_count(table)
 
 
 # -------------------------------------------------------------------------------------
@@ -1840,7 +1777,7 @@ def has_schema(request: dict, context: dict | None = None) -> bool:
 def data_search(request: dict, context: dict | None = None) -> dict:
     query = parse_select(request)
     cursor = load_cursor_from_context(context or {})
-    _execute_sqla(query, cursor)
+    execute_sqla(query, cursor)
 
     description = [
         [
@@ -1865,23 +1802,21 @@ def data_insert(request: dict, context: dict) -> dict:
 
     cursor = load_cursor_from_context(context)
     # If the insert request is not for a meta table, change the request to do so
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
-    schema_name = table_obj.oedb_schema
+    table_obj = table_or_404_from_dict(request)
 
-    assert_permission(user=context["user"], table=table_name, permission=WRITE_PERM)
+    assert_permission(user=context["user"], table=table_obj, permission=WRITE_PERM)
 
-    # TODO:permission check is still done outside of this function,
+    # FIXME: permission check is still done outside of this function,
     # so we pass user=None
-    table_obj = Table.objects.get(name=table_name)
-    insert_sa_table = table_obj.get_oeb_table_proxy()._insert_table.get_sa_table()
+    table_obj = Table.objects.get(name=table_obj.name)
+    insert_sa_table = table_obj.get_oedb_table_proxy()._insert_table.get_sa_table()
 
-    request["table"] = insert_sa_table.name
-    request["schema"] = insert_sa_table.schema
+    # request["table"] = insert_sa_table.name
+    # request["schema"] = insert_sa_table.schema
 
-    query, values = parse_insert(request, context)
-    data_insert_check(schema_name, table_name, values, context)
-    _execute_sqla(query, cursor)
+    query, values = parse_insert(insert_sa_table, request, context)
+    data_insert_check(table_obj, values, context)
+    execute_sqla(query, cursor)
     description = cursor.description
     response = {}
     if description:
@@ -1899,51 +1834,45 @@ def data_insert(request: dict, context: dict) -> dict:
         ]
     response["rowcount"] = cursor.rowcount
 
-    apply_changes(schema_name, table_name, cursor)
+    apply_changes(table_obj, cursor)
 
     return response
 
 
 def data_delete(request: dict, context: dict) -> dict:
-    table = get_or_403(request, "table")
-    table_obj = table_or_404(table=table)
-    schema_name = table_obj.oedb_schema
+    table_obj = table_or_404_from_dict(request)
 
-    assert_permission(user=context["user"], table=table, permission=DELETE_PERM)
+    assert_permission(user=context["user"], table=table_obj, permission=DELETE_PERM)
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    target_meta_sa_table = (
-        Table.objects.get(name=table)
-        .get_oeb_table_proxy(user=None)
+    sa_table_delete = (
+        Table.objects.get(name=table_obj.name)
+        .get_oedb_table_proxy(user=None)
         ._delete_table.get_sa_table()
     )
     setter = []
     cursor = load_cursor_from_context(context)
 
-    drop_not_null_constraints_from_delete_meta_table(
-        target_meta_sa_table.name, target_meta_sa_table.schema
+    _drop_not_null_constraints_from_delete_meta_table(
+        sa_table_delete.name, sa_table_delete.schema
     )
 
-    result = __change_rows(
-        table_obj, request, context, target_meta_sa_table, setter, ["id"]
-    )
-    apply_changes(schema_name, table, cursor)
+    result = __change_rows(table_obj, request, context, sa_table_delete, setter, ["id"])
+    apply_changes(table_obj, cursor)
     return result
 
 
 def data_update(request: dict, context: dict) -> dict:
-    table = read_pgid(get_or_403(request, "table"))
-    table_obj = table_or_404(table=table)
-    schema_name = table_obj.oedb_schema
+    table_obj = table_or_404_from_dict(request)
 
-    assert_permission(user=context["user"], table=table, permission=WRITE_PERM)
+    assert_permission(user=context["user"], table=table_obj, permission=WRITE_PERM)
 
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
-    target_sa_table = (
-        Table.objects.get(name=table)
-        .get_oeb_table_proxy(user=None)
+    sa_table_edit = (
+        Table.objects.get(name=table_obj.name)
+        .get_oedb_table_proxy(user=None)
         ._edit_table.get_sa_table()
     )
     setter = get_or_403(request, "values")
@@ -1953,46 +1882,14 @@ def data_update(request: dict, context: dict) -> dict:
         field_names = [read_pgid(d["column"]) for d in request["fields"]]
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)  # TODO:
-    result = __change_rows(table_obj, request, context, target_sa_table, setter)
-    apply_changes(schema_name, table, cursor)
+    result = __change_rows(table_obj, request, context, sa_table_edit, setter)
+    apply_changes(table_obj, cursor)
     return result
 
 
 def has_table(request: dict, context: dict | None = None) -> bool:
     table = get_or_403(request, "table")
     return Table.objects.filter(name=table).exists()
-
-
-def has_sequence(request: dict, context: dict | None = None) -> bool:
-    # TODO can we remove this endpoint
-    raise Exception()
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.has_sequence(
-            conn,
-            get_or_403(request, "sequence_name"),
-            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-        )
-    finally:
-        conn.close()
-    return result
-
-
-def has_type(request: dict, context: dict | None = None) -> bool:
-    # TODO can we remove this endpoint
-    raise Exception()
-    engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.has_schema(
-            conn,
-            get_or_403(request, "sequence_name"),
-            schema=request.get("schema", SCHEMA_DEFAULT_TEST_SANDBOX),
-        )
-    finally:
-        conn.close()
-    return result
 
 
 def get_view_names(request: dict, context: dict | None = None) -> list[str]:
@@ -2009,9 +1906,7 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
     engine = _get_engine()
     connection: Connection = engine.connect()
 
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
-    schema = table_obj.oedb_schema
+    table_obj = table_or_404_from_dict(request)
 
     # We need to translate the info_cache from a json-friendly format to the
     # conventional one
@@ -2024,7 +1919,7 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
 
     try:
         table_oid = engine.dialect.get_table_oid(
-            connection, table_name, schema, info_cache=info_cache
+            connection, table_obj.name, table_obj.oedb_schema, info_cache=info_cache
         )
     except NoSuchTableError as e:
         raise ConnectionError(str(e))
@@ -2044,8 +1939,8 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
             """
     s = sql.text(
         SQL_COLS,
-        bindparams=[sql.bindparam("table_oid", type_=sqltypes.Integer)],
-        typemap={"attname": sqltypes.Unicode, "default": sqltypes.Unicode},
+        bindparams=[sql.bindparam("table_oid", type_=sa_types.Integer)],
+        typemap={"attname": sa_types.Unicode, "default": sa_types.Unicode},
     )
     c = connection_execute(connection, s, table_oid=table_oid)
     rows = c.fetchall() or []
@@ -2074,9 +1969,7 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
 
 
 def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
-    schema_name = table_obj.oedb_schema
+    table_obj = table_or_404_from_dict(request)
 
     engine = _get_engine()
     conn = engine.connect()
@@ -2084,8 +1977,8 @@ def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
     try:
         result = engine.dialect.get_pk_constraint(
             conn,
-            table_name,
-            schema=schema_name,
+            table_obj.name,
+            schema=table_obj.oedb_schema,
             **request,
         )
     finally:
@@ -2097,14 +1990,13 @@ def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
     engine = _get_engine()
     conn = engine.connect()
 
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
+    table_obj = table_or_404_from_dict(request)
     request["schema"] = table_obj.oedb_schema
 
     try:
         result = engine.dialect.get_foreign_keys(
             conn,
-            table_name,
+            table_obj.name,
             postgresql_ignore_search_path=request.pop(
                 "postgresql_ignore_search_path", False
             ),
@@ -2118,28 +2010,25 @@ def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
 def get_indexes(request: dict, context: dict | None = None) -> dict:
     # TODO can we remove this endpoint
 
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
-    schema_name = table_obj.oedb_schema
+    table_obj = table_or_404_from_dict(request)
 
     engine = _get_engine()
     conn = engine.connect()
     try:
-        result = engine.dialect.get_indexes(conn, schema_name, **request)
+        result = engine.dialect.get_indexes(conn, table_obj.oedb_schema, **request)
     finally:
         conn.close()
     return result
 
 
 def get_unique_constraints(request: dict, context: dict | None = None) -> dict:
-    table_name = get_or_403(request, "table")
-    table_obj = table_or_404(table=table_name)
+    table_obj = table_or_404_from_dict(request)
     request["schema"] = table_obj.oedb_schema
 
     engine = _get_engine()
     conn = engine.connect()
     try:
-        result = engine.dialect.get_foreign_keys(conn, table_name, **request)
+        result = engine.dialect.get_foreign_keys(conn, table_obj.name, **request)
     finally:
         conn.close()
     return result
@@ -2162,7 +2051,7 @@ def set_isolation_level(request: dict, context: dict) -> dict:
     try:
         engine.dialect.set_isolation_level(cursor, level)
     except exc.ArgumentError as ae:
-        return _response_error(str(ae))
+        return response_error(str(ae))
     return __response_success()
 
 
@@ -2250,7 +2139,7 @@ def fetchone(request: dict, context: dict) -> list | None:
     cursor = load_cursor_from_context(context)
     row = cursor.fetchone()
     if row:
-        row = [_translate_fetched_cell(cell) for cell in row]
+        row = [translate_fetched_cell(cell) for cell in row]
         return row
     else:
         return row
@@ -2277,6 +2166,10 @@ def session_execute_parameter(
     # should disappear once we migrate to sqlalchemy >= 1.4
     response = cast(ResultProxy, response)
     return response
+
+
+def new_engine_execute(sql) -> ResultProxy:
+    return engine_execute(_get_engine(), sql)
 
 
 def engine_execute(engine: Engine, sql) -> ResultProxy:

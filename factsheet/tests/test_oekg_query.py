@@ -42,15 +42,15 @@ class TestOekgQuery(unittest.TestCase):
     # -------- input dataset tests --------
 
     def test_input_basic_relative_path(self):
-        iri = "dataedit/view/scenario/test_table"
+        iri = "database/tables/test_table"
         g, _, scenario = self._make_graph_with_input(iri)
         self.oekg_query.oekg = g
         got = self.oekg_query.get_related_scenarios_where_table_is_input_dataset(iri)
         self.assertEqual(got, {scenario})
 
     def test_input_full_url_matches_relative(self):
-        stored = "https://openenergyplatform.org/dataedit/view/scenario/test_table"
-        query = "dataedit/view/scenario/test_table"
+        stored = "https://openenergyplatform.org/database/tables/test_table"
+        query = "database/tables/test_table"
         g, _, scenario = self._make_graph_with_input(stored)
         self.oekg_query.oekg = g
         got = self.oekg_query.get_related_scenarios_where_table_is_input_dataset(query)
@@ -59,15 +59,15 @@ class TestOekgQuery(unittest.TestCase):
     # -------- output dataset tests --------
 
     def test_output_basic_relative_path(self):
-        iri = "dataedit/view/scenario/out_table"
+        iri = "database/tables/out_table"
         g, _, scenario = self._make_graph_with_output(iri)
         self.oekg_query.oekg = g
         got = self.oekg_query.get_related_scenarios_where_table_is_output_dataset(iri)
         self.assertEqual(got, {scenario})
 
     def test_output_full_url_matches_relative(self):
-        stored = "https://openenergyplatform.org/dataedit/view/scenario/out_table"
-        query = "dataedit/view/scenario/out_table"
+        stored = "https://openenergyplatform.org/database/tables/out_table"
+        query = "database/tables/out_table"
         g, _, scenario = self._make_graph_with_output(stored)
         self.oekg_query.oekg = g
         got = self.oekg_query.get_related_scenarios_where_table_is_output_dataset(query)
@@ -76,7 +76,7 @@ class TestOekgQuery(unittest.TestCase):
     # -------- bundle mapping helpers --------
 
     def test_get_scenario_bundles_where_table_is_input(self):
-        iri = "dataedit/view/scenario/in_table"
+        iri = "database/tables/in_table"
         g, bundle, scenario = self._make_graph_with_input(iri)
         self.oekg_query.oekg = g
         pairs = self.oekg_query.get_scenario_bundles_where_table_is_input(iri)
@@ -85,7 +85,7 @@ class TestOekgQuery(unittest.TestCase):
         self.assertEqual(pairs, {(bundle, bundle)})
 
     def test_get_scenario_bundles_where_table_is_output(self):
-        iri = "dataedit/view/scenario/out_table"
+        iri = "database/tables/out_table"
         g, bundle, scenario = self._make_graph_with_output(iri)
         self.oekg_query.oekg = g
         pairs = self.oekg_query.get_scenario_bundles_where_table_is_output(iri)

@@ -223,7 +223,7 @@ An example of input parameters
           "idx": 0,
           "value ": {
             "label ": "abbb_transmission_capacity ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transmission_capacity "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transmission_capacity "
           }
         },
         {
@@ -231,7 +231,7 @@ An example of input parameters
           "idx ": 1,
           "value ": {
             "label ": "abbb_demand ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_demand "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_demand "
           }
         }
       ],
@@ -241,7 +241,7 @@ An example of input parameters
           "idx ": 0,
           "value ": {
             "label ": "abbb_transformer ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transformer "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transformer "
           }
         }
       ]
@@ -292,7 +292,7 @@ An example of input parameters
           "idx ": 0,
           "value ": {
             "label ": "abbb_transformer ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transformer "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transformer "
           }
         }
       ],
@@ -302,7 +302,7 @@ An example of input parameters
           "idx ": 0,
           "value ": {
             "label ": "ego_slp_parameters ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/ego_slp_parameters "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/ego_slp_parameters "
           }
         }
       ]
@@ -522,7 +522,7 @@ identical to those in the create bundle API.
           "idx": 0,
           "value ": {
             "label ": "abbb_transmission_capacity ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transmission_capacity "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transmission_capacity "
           }
         },
         {
@@ -530,7 +530,7 @@ identical to those in the create bundle API.
           "idx ": 1,
           "value ": {
             "label ": "abbb_demand ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_demand "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_demand "
           }
         }
       ],
@@ -540,7 +540,7 @@ identical to those in the create bundle API.
           "idx ": 0,
           "value ": {
             "label ": "abbb_transformer ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transformer "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transformer "
           }
         }
       ]
@@ -591,7 +591,7 @@ identical to those in the create bundle API.
           "idx ": 0,
           "value ": {
             "label ": "abbb_transformer ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transformer "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transformer "
           }
         }
       ],
@@ -601,7 +601,7 @@ identical to those in the create bundle API.
           "idx ": 0,
           "value ": {
             "label ": "ego_slp_parameters ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/ego_slp_parameters "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/ego_slp_parameters "
           }
         }
       ]

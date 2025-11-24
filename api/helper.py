@@ -40,7 +40,6 @@ from rest_framework.views import APIView
 import login.permissions
 from api import parser, sessions
 from api.actions import (
-    _translate_fetched_cell,
     assert_permission,
     close_cursor,
     close_raw_connection,
@@ -48,9 +47,11 @@ from api.actions import (
     load_session_from_context,
     open_cursor,
     open_raw_connection,
+    translate_fetched_cell,
 )
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
+from api.utils import table_or_404_from_dict
 from dataedit.models import Embargo, Table, Tag
 
 logger = logging.getLogger("oeplatform")
@@ -81,7 +82,7 @@ class ModJsonResponse(JsonResponse):
 def transform_results(cursor, triggers, trigger_args):
     row = cursor.fetchone() if not cursor.closed else None
     while row is not None:
-        yield list(map(_translate_fetched_cell, row))
+        yield list(map(translate_fetched_cell, row))
         row = cursor.fetchone()
     for t, targs in zip(triggers, trigger_args):
         t(*targs)
@@ -155,7 +156,7 @@ def load_cursor(named=False):
                         except psycopg2.errors.InvalidCursorName as e:
                             logger.error(str(e))
                     if first:
-                        first = map(_translate_fetched_cell, first)
+                        first = map(translate_fetched_cell, first)
                         if cursor.description:
                             description = [
                                 [
@@ -240,8 +241,8 @@ def api_exception(
 
 def permission_wrapper(permission: int, f: Callable) -> Callable:
     def wrapper(caller, request: HttpRequest, *args, **kwargs):
-        table = kwargs.get("table") or kwargs.get("sequence") or ""
-        assert_permission(user=request.user, table=table, permission=permission)
+        table_obj = table_or_404_from_dict(kwargs)
+        assert_permission(user=request.user, table=table_obj, permission=permission)
         return f(caller, request, *args, **kwargs)
 
     return wrapper
@@ -263,9 +264,8 @@ def conjunction(clauses) -> dict:
     return {"type": "operator", "operator": "AND", "operands": clauses}
 
 
-def check_embargo(schema: str, table: str) -> bool:
+def check_embargo(table_obj: Table) -> bool:
     try:
-        table_obj = Table.objects.get(name=table)
         embargo = Embargo.objects.filter(table=table_obj).first()
         if embargo and embargo.date_ended and embargo.date_ended > timezone.now():
             return True
