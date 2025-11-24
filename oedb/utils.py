@@ -12,7 +12,7 @@ from sqlalchemy import MetaData
 from sqlalchemy import Table as SATable
 
 from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM
-from oedb.connection import _get_engine, _get_inspector
+from oedb.connection import __SA_METADATA, _get_engine, _get_inspector
 from oedb.structures import EditBase
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT, SCHEMA_DEFAULT_TEST_SANDBOX
 
@@ -145,10 +145,9 @@ class _OedbMainTable(_OedbTable):
     ) -> SATable:
         # don create the table, just get/reflect sqlalchemy table object
 
-        metadata = MetaData()
         sa_table = SATable(
             self._validated_table_name,
-            metadata,
+            MetaData(),
             *column_definitions,
             *constraints_definitions,
             schema=self._validated_schema_name,
