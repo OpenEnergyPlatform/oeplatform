@@ -854,24 +854,32 @@ window.Wizard = function (config) {
       data_type: "bigserial",
       is_nullable: false,
     });
+    
+    
     new bootstrap.Collapse("#wizard-container-create", {
       toggle: false,
     }).show();
     new bootstrap.Collapse("#wizard-container-upload", {
       toggle: false,
     }).hide();
+
     $("#wizard-table-delete").hide();
     $("#wizard-container-upload").find(".btn").hide();
     $("#wizard-container-upload").find("input").prop("readonly", true);
   }
 
   function showUpload() {
-    new bootstrap.Collapse("#wizard-container-create", {
-      toggle: false,
-    }).hide();
+    
     new bootstrap.Collapse("#wizard-container-upload", {
       toggle: false,
     }).show();
+    /* removed, because we removed it: $("#wizard-container-create").closest(".card").remove();
+    
+    new bootstrap.Collapse("#wizard-container-create", {
+      toggle: false,
+    }).hide();
+    */
+    
     $("#wizard-table-delete").show();
 
     $("#wizard-container-create").find(".btn").hide();
