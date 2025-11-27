@@ -1,4 +1,4 @@
-cff-version: 1.5.2
+cff-version: 1.6.0
 message: "If you use this software, please cite it using these metadata."
 authors:
   - family-names: "Hülk"
@@ -28,7 +28,7 @@ authors:
 title: "Open Energy Family - Open Energy Platform (OEP)"
 type: software
 license: AGPL-3.0-or-later
-version: 1.5.2
+version: 1.6.0
 doi:
 date-released: 2025-10-30
 url: "https://github.com/OpenEnergyPlatform/oeplatform/"
