@@ -956,12 +956,6 @@ window.Wizard = function (config) {
         tgt.addClass("is-invalid");
       }
     });
-    // Add this block to remove the "Create Table" card if canAdd is true
-    if (state.canAdd) {
-      // Remove the "Create Table" card
-      $("#wizard-container-create").closest(".card").remove();
-    }
-
     resetUpload();
     if (state.table) {
       $("#wizard-tablename").val(state.table);
