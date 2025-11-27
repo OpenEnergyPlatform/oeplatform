@@ -1,11 +1,15 @@
-// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-// SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-// SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
+/* eslint-disable max-len */
+/*
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+*/
+/* eslint-enable max-len */
+
 
 window.Wizard = function (config) {
   var state = {
@@ -172,7 +176,6 @@ window.Wizard = function (config) {
    * add a new column in the csv upload section
    */
   function addColumnCsv(columnDef) {
-    // console.log("add column csv", columnDef)
     columnDef = columnDef || {};
     var columns = $("#wizard-csv-columns");
     var n = columns.find(".wizard-csv-column").length;
@@ -375,7 +378,6 @@ window.Wizard = function (config) {
    * Update the upload  preview table
    */
   function updatePreview() {
-    // console.log('updatePreview', state)
     var tbody = $("#wizard-csv-preview").find("tbody");
     tbody.empty();
     var rows = state.previewRows.length
@@ -434,7 +436,6 @@ window.Wizard = function (config) {
    * Update the example data
    */
   function updateExample() {
-    // console.log('updateExample')
     var exampleText = "";
     if (state.columns) {
       var delim = state.delimiter || ",";
@@ -462,7 +463,6 @@ window.Wizard = function (config) {
    * a file settings option (e.g. delimiter, encoding, ...) has been changed
    */
   function changeFileSettings() {
-    // console.log('changeFileSettings')
     updateFile();
     state.csvColumns = [];
     state.previewRows = [];
@@ -587,8 +587,9 @@ window.Wizard = function (config) {
   }
 
   /** *
-   * NOTE: the api returns Bigints as connection/cursor ids, and the normal JSON.parse truncates those
-   *       so we need to parse those manually to extract the id and keep it as string
+   * NOTE: the api returns Bigints as connection/cursor ids, and the normal JSON.parse
+   * truncates those so we need to parse those manually to extract the id
+   * and keep it as string
    */
   function getJSONBigintKey(key, str) {
     var pat = new RegExp('"' + key + '":[ ]*([0-9]+)');
@@ -602,11 +603,6 @@ window.Wizard = function (config) {
    * First we open a new advanced connection and cursor
    * We read the csv in chunks (set size in state variable)
    *   on each chunk we pause and and post the data. on success we resume the csv parser
-   *
-   ,
-   
-   
-   * 
    */
   function csvUpload() {
     Promise.all([
@@ -669,7 +665,10 @@ window.Wizard = function (config) {
                     data.data = data.data.slice(1);
                   }
                   if (data.data.length > 0) {
-                    // if chunk size is too small, you can get a chunk with 0 complete rows, but the database does not allow empty insert
+                    /* 
+                    if chunk size is too small, you can get a chunk with 0 complete 
+                    rows, but the database does not allow empty insert
+                    */
                     state.csvParser = parser;
                     // pause the csv parser
                     state.csvParser.pause();
@@ -714,7 +713,6 @@ window.Wizard = function (config) {
                       return sendJson("POST", urlConClose, createContext());
                     })
                     .then(function () {
-                      // setStatusUpload("success", false, "Upload ok: " + state.uploadedRows + " rows", false);
                       resetUpload(); // reset or reload page
                       setStatusUpload(
                         "success",
@@ -768,7 +766,8 @@ window.Wizard = function (config) {
     var data = {
       query: {
         columns: colDefs,
-        embargo: embargoValue === "none" ? null : { duration: embargoValue }, // Conditional check
+        // Conditional check
+        embargo: embargoValue === "none" ? null : { duration: embargoValue }, 
         // "embargo": embargoData
       },
     };
@@ -873,12 +872,6 @@ window.Wizard = function (config) {
     new bootstrap.Collapse("#wizard-container-upload", {
       toggle: false,
     }).show();
-    /* removed, because we removed it: $("#wizard-container-create").closest(".card").remove();
-    
-    new bootstrap.Collapse("#wizard-container-create", {
-      toggle: false,
-    }).hide();
-    */
     
     $("#wizard-table-delete").show();
 
@@ -939,7 +932,6 @@ window.Wizard = function (config) {
   }
 
   (function init() {
-    // console.log('init')
     var cParseDiv = $("#wizard-csv-column-template .wizard-csv-column-parse");
     Object.keys(columnParsers).map(function (k) {
       cParseDiv.append(

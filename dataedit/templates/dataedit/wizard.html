@@ -346,16 +346,15 @@
             <div class="row">
               <table id="wizard-csv-preview" class="table table-striped">
                 <thead>
-                  <tr></tr>
+                  <tr id="wizard-csv-preview-thead-row"></tr>
                 </thead>
-                <tbody>
+                <tbody id="wizard-csv-preview-body">
                 </tbody>
               </table>
             </div>
             <div class="row my-3">
               <div class="col-2">
-                <span class=""
-                      {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
+                <span {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
                   <a href="#wizard-table-upload"
                      class="btn btn-primary {% if not can_add %}disabled{% endif %}"
                      id="wizard-table-upload"><i class="fa fa-upload"></i> Upload</a>
