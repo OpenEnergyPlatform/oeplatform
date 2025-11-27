@@ -52,6 +52,9 @@ class GraphViewForm(ModelForm):
 
 
 class MapViewForm(ModelForm):
+    table: str  # type hints: TODO: MapView not working currently
+    options: dict  # type hints: TODO: MapView not working currently
+
     def __init__(self, *args, **kwargs):
         self.columns = [c for (c, _) in kwargs.pop("columns", {})]
         super(MapViewForm, self).__init__(*args, **kwargs)
@@ -71,7 +74,7 @@ class MapViewForm(ModelForm):
         )
         if commit:
             view.save()
-            return view.id
+            return view.pk
         else:
             return None
 

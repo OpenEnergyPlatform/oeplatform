@@ -21,8 +21,6 @@ from collections import OrderedDict
 from typing import Type
 
 from django.contrib.postgres.fields import ArrayField
-from django.db.models import Model
-from django.forms import ModelForm
 from django.shortcuts import get_object_or_404
 
 from modelview.forms import EnergyframeworkForm, EnergymodelForm
@@ -434,7 +432,12 @@ FRAMEWORK_DEFAULT_COLUMNS = {
 }
 
 
-def getClasses(sheettype: str) -> tuple[Type[Model] | None, Type[ModelForm] | None]:
+def getClasses(
+    sheettype: str,
+) -> tuple[
+    Type[Energymodel] | Type[Energyframework] | None,
+    Type[EnergymodelForm] | Type[EnergyframeworkForm] | None,
+]:
     """
     Returns the model and form class w.r.t sheettype.
     """

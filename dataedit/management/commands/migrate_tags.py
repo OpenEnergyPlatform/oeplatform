@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from sqlalchemy import text
 
-from api.actions import _get_engine
+from oedb.connection import _get_engine
 
 
 class Command(BaseCommand):

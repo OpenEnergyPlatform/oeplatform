@@ -1,6 +1,5 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
-
 {% block main-content-body %}
   {% load static %}
   <div>
@@ -8,13 +7,13 @@
       <!-- full title and acronym -->
       <h1>{{ project.fullTitle }}</h1>
       <!-- logo -->
-      <img
-        class="flex-item"
-        src="{% static 'logos/project/' %}{{ project.logo }}"
-        alt="{{ project.fullTitle }}"
-        width="200"
-        border="0"
-      />
+      {% if project.logo %}
+        <img class="flex-item"
+             src="{% static 'logos/project/' %}{{ project.logo }}"
+             alt="{{ project.fullTitle }}"
+             width="200"
+             border="0" />
+      {% endif %}
       <p>last updated on: {{ project.meta.lastUpdated }}</p>
     </div>
     <!-- general -->
@@ -23,9 +22,7 @@
     <!-- tasks -->
     <h2>Tasks</h2>
     {% if entry in project.tasks %}
-      {% for task in project.tasks %}
-        <li>{{ task }}</li>
-      {% endfor %}
+      {% for task in project.tasks %}<li>{{ task }}</li>{% endfor %}
     {% else %}
       {{ project.tasks }}
     {% endif %}
@@ -35,12 +32,14 @@
       <ul>
         <div class="d-flex flex-md-wrap">
           <!-- <li>{{ partner.name }}</li> -->
-          <img
-            src="{% static 'logos/partner/' %}{{ partner.logo }}"
-            alt="{{ partner.name }}"
-            width="200"
-            border="0"
-          />
+          {% if partner.logo %}
+            <img src="{% static 'logos/partner/' %}{{ partner.logo }}"
+                 alt="{{ partner.name }}"
+                 width="200"
+                 border="0" />
+          {% else %}
+            {{ partner.name }}
+          {% endif %}
         </div>
       </ul>
     {% endfor %}

@@ -16,6 +16,9 @@ from omi.validation import validate_metadata
 
 from dataedit.models import Table
 
+# Configure logging to write errors to a file
+logger = logging.getLogger("oeplatform")
+
 # Define the constants used in your conversion process.
 cc_by_4 = {
     "name": "CC-BY-4.0",
@@ -25,10 +28,6 @@ cc_by_4 = {
     "attribution": "",
     "copyrightStatement": "https://www.ipcc.ch/copyright/",
 }
-
-
-# Configure logging to write errors to a file
-logger = logging.getLogger("oeplatform")
 
 
 def fix_metadata_v2(metadata, table_name, table_schema):

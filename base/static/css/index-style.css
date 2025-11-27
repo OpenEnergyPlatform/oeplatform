@@ -53,11 +53,9 @@
   transform: scale(0.8);
   margin: -1.8em;
   margin-bottom: 1em;
-  height: 350px;
-  width: 350px;
+  max-width: 350px;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
   align-items: center;
   padding: 0.5em;
 }
@@ -69,6 +67,12 @@
   align-items: flex-start;
   justify-content: space-around;
 }
+
+.index-tile .btn{
+  /* button on bottom of box */
+  margin-top: auto;
+}
+
 
 .index-tile img {
   align-self: center;
@@ -143,15 +147,21 @@
 }
 
 .index-about-column {
+  transform: scale(0.8);
   display: flex;
-  flex-flow: column;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  min-height: 150px;
+
+
+
 }
 
-.index-about-column *:not(:first-child) {
-  margin-top: 1em;
+.index-about-column .btn{
+  /* button on bottom of box */
+  margin-top: auto;
 }
+
+
 
 .index-about-column a {
   color: var(--white);

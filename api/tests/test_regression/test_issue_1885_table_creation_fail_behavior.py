@@ -25,13 +25,12 @@ class TestTableNameUnique(APITestCase):
                 {"name": "id", "data_type": "bigint"},
             ]
         }
-        # create table in default (test) schema (django_db)
+        # create table
         self.assertRaises(
             AssertionError,
             self.create_table,
             table=test_duplicate_column_table_name,
             structure=duplicate_field_error_data_struct,
-            schema=self.schema_sandbox,
         )
 
         # also check: table should not have been created in oedb
@@ -39,7 +38,6 @@ class TestTableNameUnique(APITestCase):
             has_table(
                 {
                     "table": test_duplicate_column_table_name,
-                    "schema": self.schema_sandbox,
                 }
             )
         )

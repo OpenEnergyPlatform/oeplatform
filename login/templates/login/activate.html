@@ -22,16 +22,12 @@
         <fieldset class="module aligned">
           <div class="mb-3 field-email">
             {{ form.email.errors }}
-            <label class="form-label" for="id_email"
-              >{% trans 'Email address:' %}</label
-            >
+            <label class="form-label" for="id_email">{% trans 'Email address:' %}</label>
             {{ form.email | addclass:"form-control" }}
           </div>
-          <input
-            class="btn btn-success"
-            type="submit"
-            value="{% trans 'Send again' %}"
-          />
+          <input class="btn btn-success"
+                 type="submit"
+                 value="{% trans 'Send again' %}" />
         </fieldset>
       </form>
     {% endif %}

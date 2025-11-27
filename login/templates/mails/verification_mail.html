@@ -1,8 +1,10 @@
 {% extends "mails/base.html" %}
-
 {% block message %}
-  Thank you for registering at {{ site_name }}.<br />
-  To finally activate your account please click the following link.<br />
+  Thank you for registering at {{ site_name }}.
   <br />
-  <a href="{{ url }}">{{ url }}</a><br />
+  To finally activate your account please click the following link.
+  <br />
+  <br />
+  <a href="{{ url }}">{{ url }}</a>
+  <br />
 {% endblock %}

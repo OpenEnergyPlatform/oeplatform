@@ -12,23 +12,22 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import re
-from wsgiref.util import FileWrapper
 
 from django.contrib.postgres.search import SearchQuery
 from django.db.models import Q, QuerySet
-from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.utils.encoding import smart_str
+from django.http import HttpRequest, JsonResponse
 
 import api.parser
-from api import actions
+from api.actions import (
+    describe_columns,
+    describe_constraints,
+    get_column_changes,
+    get_constraints_changes,
+    set_table_metadata,
+)
 from dataedit.metadata import load_metadata_from_db
 from dataedit.models import PeerReview, Table, Tag
-from oeplatform.settings import MEDIA_ROOT
-
-# TODO: WINGECHR: model_draft is not a topic, but currently,
-# frontend still usses it to filter / search for unpublished data
-TODO_PSEUDO_TOPIC_DRAFT = "model_draft"
-
+from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 ##############################################
 #       Open Peer Review related             #
@@ -125,7 +124,7 @@ def recursive_update(metadata, review_data):
     not 'rejected'.
     """
 
-    def delete_nested_field(data, keys):
+    def delete_nested_field(data: list | dict | None, keys: list[str]):
         """
         Removes a nested field from a dictionary based on a list of keys.
 
@@ -134,10 +133,15 @@ def recursive_update(metadata, review_data):
             to remove the field.
             keys (list): A list of keys pointing to the field to remove.
         """
+
         for key in keys[:-1]:
             if isinstance(data, list):
                 key = int(key)
-            data = data.get(key) if isinstance(data, dict) else data[key]
+                data = data[key]
+            elif isinstance(data, dict):
+                data = data.get(key)
+            else:
+                raise NotImplementedError()
 
         last_key = keys[-1]
         if isinstance(data, list) and last_key.isdigit():
@@ -292,21 +296,16 @@ def delete_peer_review(review_id):
 ##############################################
 
 
-def get_popular_tags(
-    schema_name: str | None = None, table_name: str | None = None, limit=10
-):
+def get_popular_tags(table_name: str | None = None, limit=10):
     tags = get_all_tags(table_name=table_name)
     sort_tags_by_popularity(tags)
 
     return tags[:limit]
 
 
-def get_all_tags(
-    schema_name: str | None = None, table_name: str | None = None
-) -> QuerySet[Tag]:
+def get_all_tags(table_name: str | None = None) -> QuerySet[Tag]:
     """
     Load all tags of a specific table
-    :param schema: Name of a schema
     :param table: Name of a table
     :return:
     """
@@ -322,7 +321,7 @@ def sort_tags_by_popularity(tags: QuerySet[Tag]) -> QuerySet[Tag]:
     return tags.order_by("-usage_count")
 
 
-def change_requests(schema, table):
+def change_requests(table_obj: Table):
     """
     Loads the dataedit admin interface
     :param request:
@@ -331,10 +330,8 @@ def change_requests(schema, table):
     # I want to display old and new data, if different.
 
     display_message = None
-    api_columns = actions.get_column_changes(reviewed=False, schema=schema, table=table)
-    api_constraints = actions.get_constraints_changes(
-        reviewed=False, schema=schema, table=table
-    )
+    api_columns = get_column_changes(reviewed=False, table_obj=table_obj)
+    api_constraints = get_constraints_changes(reviewed=False, table_obj=table_obj)
 
     data = dict()
 
@@ -350,7 +347,7 @@ def change_requests(schema, table):
         "id",
     ]
 
-    old_description = actions.describe_columns(schema, table)
+    old_description = describe_columns(table_obj)
 
     for change in api_columns:
         name = change["column_name"]
@@ -367,7 +364,7 @@ def change_requests(schema, table):
 
         if old_cd is not None:
             old = api.parser.parse_scolumnd_from_columnd(
-                schema, table, name, old_description.get(name)
+                table_obj, name, old_description.get(name)
             )
 
             for key in list(change):
@@ -379,8 +376,8 @@ def change_requests(schema, table):
                     change.pop(key)
             data["api_columns"][id]["old"] = old
         else:
-            data["api_columns"][id]["old"]["c_schema"] = schema
-            data["api_columns"][id]["old"]["c_table"] = table
+            data["api_columns"][id]["old"]["c_schema"] = table_obj.oedb_schema
+            data["api_columns"][id]["old"]["c_table"] = table_obj.name
             data["api_columns"][id]["old"]["column_name"] = name
 
         data["api_columns"][id]["new"] = change
@@ -439,9 +436,7 @@ def find_tables(
     tables = tables.filter(is_sandbox=False)
 
     if topic_name:
-        # TODO: WINGECHR: model_draft is not a topic, but currently,
-        # frontend still usses it to filter / search for unpublished data
-        if topic_name == TODO_PSEUDO_TOPIC_DRAFT:
+        if topic_name == PSEUDO_TOPIC_DRAFT:
             tables = tables.filter(is_publish=False)
         else:
             tables = tables.filter(topics__pk=topic_name)
@@ -457,7 +452,7 @@ def find_tables(
         )
 
     if tag_ids:  # filter by tags:
-        # find tables (in schema), that use all of the tags
+        # find tables that use all of the tags
         # by adding a filter for each tag
         # (instead of all at once, which would be OR)
         for tag_id in tag_ids:
@@ -493,8 +488,6 @@ def edit_tag(id: str, name: str, color: str) -> None:
         id(int): tag id
         name(str): max 40 character tag text
         color(str): hexadecimal color code, eg #aaf0f0
-    Raises:
-        sqlalchemy.exc.IntegrityError if name is not ok
 
     """
     tag = Tag.objects.get(pk=id)
@@ -516,23 +509,7 @@ def add_tag(name: str, color: str) -> None:
     Tag(name=name, color=Tag.color_from_hex(color)).save()
 
 
-def send_dump(schema, table, fname):
-    path = MEDIA_ROOT + "/dumps/{schema}/{table}/{fname}.dump".format(
-        fname=fname, schema=schema, table=table
-    )
-    f = FileWrapper(open(path, "rb"))
-    response = HttpResponse(f, content_type="application/x-gzip")
-
-    response["Content-Disposition"] = "attachment; filename=%s" % smart_str(
-        "{schema}_{table}_{date}.tar.gz".format(date=fname, schema=schema, table=table)
-    )
-
-    # It's usually a good idea to set the 'Content-Length' header too.
-    # You can also set any other required headers: Cache-Control, etc.
-    return response
-
-
-def update_keywords_from_tags(table: Table, schema: str) -> None:
+def update_keywords_from_tags(table: Table) -> None:
     """synchronize keywords in metadata with tags"""
 
     metadata = load_metadata_from_db(table=table.name)
@@ -540,10 +517,10 @@ def update_keywords_from_tags(table: Table, schema: str) -> None:
     keywords = [tag.name_normalized for tag in table.tags.all()]
     metadata["resources"][0]["keywords"] = keywords
 
-    actions.set_table_metadata(table=table.name, metadata=metadata)
+    set_table_metadata(table=table.name, metadata=metadata)
 
 
-def get_column_description(schema, table):
+def get_column_description(table_obj: Table):
     """Return list of column descriptions:
     [{
        "name": str,
@@ -607,8 +584,8 @@ def get_column_description(schema, table):
                     pk_fields = [x.strip() for x in m.groups()[0].split(",")]
         return pk_fields
 
-    _columns = actions.describe_columns(schema, table)
-    _constraints = actions.describe_constraints(schema, table)
+    _columns = describe_columns(table_obj)
+    _constraints = describe_constraints(table_obj)
     pk_fields = get_pk_fields(_constraints)
     # order by ordinal_position
     columns = []

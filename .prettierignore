@@ -1,3 +1,16 @@
 # prettier: could not determine a constructor for the tag 'tag:yaml.org,2002:python/name:material.extensions.emoji.twemoji' in "mkdocs.yml"
-
 mkdocs.yml
+
+**/*.min.js
+**/*.min.css
+
+# django templates will be handled by djlint
+*/templates/**/*.html
+
+# ignore these for now
+**/*.js
+**/*.tsx
+**/*.jsx
+**/*.css
+**/*.scss
+**/*.jsonc

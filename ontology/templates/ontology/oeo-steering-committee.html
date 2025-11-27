@@ -1,16 +1,13 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
-
 {% block site-header %}
   <div class="main-header">
     <h1 class="main-header__title">
-      <img
-        src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
-        width="16"
-        height="16"
-        alt="OEO"
-      />
+      <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
+           width="16"
+           height="16"
+           alt="OEO" />
       Ontology
     </h1>
     <div class="main-header__wizard">
@@ -19,11 +16,9 @@
     </div>
   </div>
 {% endblock site-header %}
-
 {% block main-content-body %}
   <h2>Open Energy Ontology Steering Committee (OEO-SC)</h2>
   <br />
-
   <h3 id="oeo-sc">What is the Steering Committee?</h3>
   <p>
     The OEO Steering Committee (OEO-SC) was established to enhance the
@@ -33,103 +28,76 @@
     planned and completed tasks. Continuous communication between ontology
     developers and the OEO-SC is maintained via GitHub.
   </p>
-
   <h3 id="oeo-sc-members">Who is involved with the OEO-SC?</h3>
   <p>
     The Steering Committee is coordinated by the NFDI4energy project team and
     moderated by Mirjam Stappel (University of Osnabrück). The members are:
   </p>
   <ul>
-    <li>Amanda Wein - <a href="{{ EXTERNAL_URLS.offis }}">OFFIS e. V.</a></li>
+    <li>
+      Amanda Wein - <a href="{{ EXTERNAL_URLS.offis }}">OFFIS e. V.</a>
+    </li>
     <li>
       Aleksandar Rakić -
-      <a href="{{ EXTERNAL_URLS.ptj_energiesystemanalyse }}"
-        >Projektträger Jülich (PtJ) - Bereich Energiesystemanalyse</a
-      >
+      <a href="{{ EXTERNAL_URLS.ptj }}">Projektträger Jülich (PtJ) - Bereich Energiesystemanalyse</a>
     </li>
     <li>
       Berit Müller -
-      <a href="{{ EXTERNAL_URLS.dgs_berlin }}"
-        >Deutsche Gesellschaft für Sonnenenergie (DGS) - Landesverband Berlin
-        Brandenburg</a
-      >
+      <a href="{{ EXTERNAL_URLS.dgs_berlin }}">Deutsche Gesellschaft für Sonnenenergie (DGS) - Landesverband Berlin
+      Brandenburg</a>
     </li>
     <li>
       Carsten Hoyer-Klick -
-      <a href="{{ EXTERNAL_URLS.dlr_tt }}"
-        >Deutsches Zentrum für Luft- und Raumfahrt (DLR) - Institut für
-        Technische Thermodynamik</a
-      >
+      <a href="{{ EXTERNAL_URLS.dlr_tt }}">Deutsches Zentrum für Luft- und Raumfahrt (DLR) - Institut für
+      Technische Thermodynamik</a>
     </li>
     <li>
       Fabian Neuhaus -
-      <a href="{{ EXTERNAL_URLS.fin_ovgu }}"
-        >Otto-von-Guericke Universität Magdeburg - Fakultät für Informatik</a
-      >
+      <a href="{{ EXTERNAL_URLS.fin_ovgu }}">Otto-von-Guericke Universität Magdeburg - Fakultät für Informatik</a>
     </li>
     <li>
       Hans-Christian Gils -
-      <a href="{{ EXTERNAL_URLS.dlr_tt }}"
-        >Deutsches Zentrum für Luft- und Raumfahrt (DLR) - Institut für
-        Technische Thermodynamik</a
-      >
+      <a href="{{ EXTERNAL_URLS.dlr_tt }}">Deutsches Zentrum für Luft- und Raumfahrt (DLR) - Institut für
+      Technische Thermodynamik</a>
     </li>
     <li>
       Lars Vogt -
-      <a href="{{ EXTERNAL_URLS.tib_eu_de }}"
-        >Technische Informationsbibliothek (TIB)</a
-      >
+      <a href="{{ EXTERNAL_URLS.tib_eu_de }}">Technische Informationsbibliothek (TIB)</a>
     </li>
     <li>
       Ludwig Hülk -
-      <a href="{{ EXTERNAL_URLS.reiner_lemoine_institut }}"
-        >Reiner Lemoine Institut (RLI)</a
-      >
+      <a href="{{ EXTERNAL_URLS.reiner_lemoine_institut }}">Reiner Lemoine Institut (RLI)</a>
     </li>
     <li>
       Lukas Emele - <a href="{{ EXTERNAL_URLS.oeko }}">Öko-Institut e.V.</a>
     </li>
     <li>
       Michael Dembach -
-      <a href="{{ EXTERNAL_URLS.fkie_fraunhofer }}"
-        >Fraunhofer-Institut für Kommunikation, Informationsverarbeitung und
-        Ergonomie (FKIE)</a
-      >
+      <a href="{{ EXTERNAL_URLS.fkie_fraunhofer }}">Fraunhofer-Institut für Kommunikation, Informationsverarbeitung und
+      Ergonomie (FKIE)</a>
     </li>
     <li>
       Mirjam Stappel (Coordination and Moderation) -
-      <a
-        href="{{ EXTERNAL_URLS.informatik_uni_osnabrueck_institut_fuer_informatik }}"
-        >University of Osnabrück (UOS) - Institut für Informatik</a
-      >
+      <a href="{{ EXTERNAL_URLS.informatik_uni_osnabrueck_institut_fuer_informatik }}">University of Osnabrück (UOS) - Institut für Informatik</a>
     </li>
     <li>
       Patrick Kuckertz -
-      <a href="{{ EXTERNAL_URLS.fz_juelich_iek_iek_3 }}"
-        >Forschungszentrum Jülich (FZJ) - Institut für Technoökonomische
-        Systemanalyse</a
-      >
+      <a href="{{ EXTERNAL_URLS.fz_juelich_iek_iek_3 }}">Forschungszentrum Jülich (FZJ) - Institut für Technoökonomische
+      Systemanalyse</a>
     </li>
     <li>
       Robbie Morrison -
-      <a href="{{ EXTERNAL_URLS.openmod_initiative }}"
-        >Open Energy Modelling Community (openmod)</a
-      >
+      <a href="{{ EXTERNAL_URLS.openmod_initiative }}">Open Energy Modelling Community (openmod)</a>
     </li>
     <li>
       Sophie Decher -
-      <a href="{{ EXTERNAL_URLS.fkie_fraunhofer }}"
-        >Fraunhofer-Institut für Kommunikation, Informationsverarbeitung und
-        Ergonomie (FKIE)</a
-      >
+      <a href="{{ EXTERNAL_URLS.fkie_fraunhofer }}">Fraunhofer-Institut für Kommunikation, Informationsverarbeitung und
+      Ergonomie (FKIE)</a>
     </li>
     <li>
       Till Mossakowski -
-      <a
-        href="{{ EXTERNAL_URLS.informatik_uni_osnabrueck_institut_fuer_informatik }}"
-        >University of Osnabrück (UOS) - Institut für Informatik, Professur
-        Wissensverarbeitung in hybriden KI-Systemen</a
-      >
+      <a href="{{ EXTERNAL_URLS.informatik_uni_osnabrueck_institut_fuer_informatik }}">University of Osnabrück (UOS) - Institut für Informatik, Professur
+      Wissensverarbeitung in hybriden KI-Systemen</a>
     </li>
   </ul>
 {% endblock main-content-body %}

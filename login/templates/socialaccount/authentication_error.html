@@ -3,7 +3,6 @@
 {% load allauth %}
 {% load static %}
 {% load account socialaccount %}
-
 {% block head_title %}
   {% trans "" %}
 {% endblock head_title %}
@@ -17,11 +16,10 @@
         </div>
         <!-- Be sure to use h1 for the heading -->
         <h1 class="login__heading">{% trans "Third-Party Login Failure" %}</h1>
-
         {% element p %}
-          {% trans "An error occurred while attempting to login via your third-party account." %}
-        {% endelement %}
-      </div>
+        {% trans "An error occurred while attempting to login via your third-party account." %}
+      {% endelement %}
     </div>
-  {% endblock inner %}
+  </div>
+{% endblock inner %}
 {% endblock content %}

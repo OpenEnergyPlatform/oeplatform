@@ -13,12 +13,14 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import json
+import logging
 import os
 import re
 from functools import lru_cache
 
 import markdown2
 
+logger = logging.getLogger("oeplatform")
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -36,14 +38,16 @@ def read_version_changes() -> dict:
     os.path.dirname(os.path.realpath(__file__))
     version_expr = r"^(?P<major>\d+)\.(?P<minor>\d+)+\.(?P<patch>\d+)$"
     markdowner = markdown2.Markdown()
-    import logging
 
-    logging.info("READING VERSION file.")
+    logger.info("READING VERSION file.")
     try:
         with open(
             os.path.join(SITE_ROOT, "..", "VERSION"), encoding="utf-8"
         ) as version_file:
-            match = re.match(version_expr, version_file.read())
+            text = version_file.read()
+            match = re.match(version_expr, text)
+            if not match:
+                raise ValueError(text)
             major, minor, patch = match.groups()
         with open(
             os.path.join(
@@ -57,7 +61,7 @@ def read_version_changes() -> dict:
                 "\n".join(line for line in change_file.readlines())
             )
     except Exception:
-        logging.error("READING VERSION file.")
+        logger.error("READING VERSION file.")
         # probably because change_file is missing
         major, minor, patch, changes = "", "", "", ""
     return {"version": (major, minor, patch), "changes": changes}

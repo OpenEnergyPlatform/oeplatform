@@ -14,40 +14,28 @@ from typing import cast
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 
-from api.services.permissions import assign_table_holder
-from api.services.table_creation import TableCreationOrchestrator
 from base.tests import TestViewsTestCase
-from dataedit.models import PeerReview, PeerReviewManager, Tag
-from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
+from dataedit.models import PeerReview, PeerReviewManager, Table, Tag
+from oeplatform.settings import TOPIC_SCENARIO
 
 
 class TestViewsDataedit(TestViewsTestCase):
     """Call all (most) views (after creation of some test data)"""
 
-    kwargs_w_table = {"table": "test_table", "schema": SCHEMA_DEFAULT_TEST_SANDBOX}
-    kwargs_wo_table = {"schema": SCHEMA_DEFAULT_TEST_SANDBOX}
+    table_name = "test_table"
 
     @classmethod
     def setUpClass(cls):
         super(TestViewsDataedit, cls).setUpClass()
 
         # create a test table
-        cls.orchestrator = TableCreationOrchestrator()
-        # ensure test table doesnot exist
-        cls.orchestrator.drop_table(
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
-        )
-        cls.table = cls.orchestrator.create_table(
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
-            column_defs=[],
-            constraint_defs=[],
-        )
-        assign_table_holder(
-            cls.user,
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
+        # ensure test table does not exist
+        cls.table = Table.create_with_oedb_table(
+            is_sandbox=True,  # IMPORTANT for test
+            name=cls.table_name,
+            user=cls.user,
+            column_definitions=[],
+            constraints_definitions=[],
         )
 
         cls.tag = Tag.objects.create(name="tag1")
@@ -61,10 +49,7 @@ class TestViewsDataedit(TestViewsTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.peerreview.delete()
-        cls.orchestrator.drop_table(
-            schema=cls.kwargs_w_table["schema"],
-            table=cls.kwargs_w_table["table"],
-        )
+        cls.table.delete()
         super(TestViewsDataedit, cls).tearDownClass()
 
     def test_views_wizard(self):
@@ -81,7 +66,7 @@ class TestViewsDataedit(TestViewsTestCase):
         self.assertEqual(response.status_code, 200)
 
         # GET with table
-        url = reverse("dataedit:wizard_upload", kwargs=self.kwargs_w_table)
+        url = reverse("dataedit:wizard_upload", kwargs={"table": self.table_name})
 
         # try without logging in -> redirect to login
         response = self.client.get(url)
@@ -96,48 +81,45 @@ class TestViewsDataedit(TestViewsTestCase):
         """Call all (most) views that can be found with reverse lookup.
         We only test method GET
         """
+        table = "test_table"
 
-        self.get("dataedit:index")
-        self.get("dataedit:index-view")
-        self.get(
-            "dataedit:meta_edit", kwargs={"schema": "sandbox", "table": "test_table"}
-        )
+        self.get("dataedit:topic-list")
+        self.get("dataedit:topic-list")
+        self.get("dataedit:meta_edit", kwargs={"table": table})
         self.get(
             "dataedit:metadata-widget",
-            query={"schema": "sandbox", "table": "test_table"},
+            query={"table": table},
         )
         self.get("dataedit:oemetabuilder")
         self.get(
             "dataedit:peer_review_contributor",
-            kwargs={"schema": "sandbox", "table": "test_table", "review_id": 1},
+            kwargs={"table": table, "review_id": 1},
         )
         self.get(
             "dataedit:peer_review_create",
-            kwargs={"schema": "sandbox", "table": "test_table"},
+            kwargs={"table": table},
         )
         self.get(
             "dataedit:peer_review_reviewer",
-            kwargs={"schema": "sandbox", "table": "test_table", "review_id": 1},
+            kwargs={"table": table, "review_id": 1},
         )
-        self.get(
-            "dataedit:table-graph", kwargs={"schema": "sandbox", "table": "test_table"}
-        )
+        self.get("dataedit:table-graph", kwargs={"table": table})
         self.get(
             "dataedit:table-map",
-            kwargs={"schema": "sandbox", "table": "test_table", "maptype": "latlon"},
+            kwargs={"table": table, "maptype": "latlon"},
         )
         self.get(
             "dataedit:table-permission",
-            kwargs={"schema": "sandbox", "table": "test_table"},
+            kwargs={"table": table},
         )
-        self.get("dataedit:tables", kwargs={"schema": "sandbox"})
+        self.get("dataedit:tables-in-topic", kwargs={"topic": TOPIC_SCENARIO})
         self.get("dataedit:tags")
         self.get("dataedit:tags-edit", kwargs={"tag_pk": "tag1"})
         self.get("dataedit:tags-new")
         self.get("dataedit:topic-list")
-        self.get("dataedit:view", kwargs={"schema": "sandbox", "table": "test_table"})
+        self.get("dataedit:view", kwargs={"table": table})
         self.get("dataedit:wizard_create")
         self.get(
             "dataedit:wizard_upload",
-            kwargs={"schema": "sandbox", "table": "test_table"},
+            kwargs={"table": table},
         )

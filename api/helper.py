@@ -25,26 +25,39 @@ import json
 import logging
 import re
 from decimal import Decimal
-from typing import Callable
+from typing import Callable, Union
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpRequest, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import HttpRequest, JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
-import login.models as login_models
-from api import actions, parser, sessions
+import login.permissions
+from api import parser, sessions
+from api.actions import (
+    assert_permission,
+    close_cursor,
+    close_raw_connection,
+    load_cursor_from_context,
+    load_session_from_context,
+    open_cursor,
+    open_raw_connection,
+    translate_fetched_cell,
+)
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
-from dataedit.models import Embargo
-from dataedit.models import Table as DBTable
-from dataedit.models import Tag
-from oeplatform.settings import SCHEMA_DEFAULT
+from api.utils import table_or_404_from_dict
+from dataedit.models import Embargo, Table, Tag
 
 logger = logging.getLogger("oeplatform")
+
+# Response is from rest framework, OEPStream has content_type json
+JsonLikeResponse = Union[JsonResponse, Response, "OEPStream", "ModJsonResponse"]
 
 
 WHERE_EXPRESSION = re.compile(
@@ -54,10 +67,22 @@ WHERE_EXPRESSION = re.compile(
 )
 
 
+class ModJsonResponse(JsonResponse):
+    def __init__(self, dictionary: dict):
+        if dictionary["success"]:
+            super().__init__({}, status=200)
+        elif dictionary["error"] is not None:
+            super().__init__(
+                {}, status=dictionary["http_status"], reason=dictionary["error"]
+            )
+        else:
+            super().__init__({}, status=dictionary["http_status"])
+
+
 def transform_results(cursor, triggers, trigger_args):
     row = cursor.fetchone() if not cursor.closed else None
     while row is not None:
-        yield list(map(actions._translate_fetched_cell, row))
+        yield list(map(translate_fetched_cell, row))
         row = cursor.fetchone()
     for t, targs in zip(triggers, trigger_args):
         t(*targs)
@@ -74,8 +99,8 @@ class OEPStream(StreamingHttpResponse):
 
 
 def load_cursor(named=False):
-    def inner(f):
-        def wrapper(*args, **kwargs):
+    def inner(f: Callable):
+        def wrapper(*args, **kwargs) -> dict:
             artificial_connection = "connection_id" not in args[1].data
             fetch_all = "cursor_id" not in args[1].data
             triggered_close = False
@@ -90,18 +115,20 @@ def load_cursor(named=False):
                 if not artificial_connection:
                     context["connection_id"] = args[1].data["connection_id"]
                 else:
-                    context.update(actions.open_raw_connection({}, context))
+                    context.update(open_raw_connection({}, context))
                     args[1].data["connection_id"] = context["connection_id"]
                 if "cursor_id" in args[1].data:
                     context["cursor_id"] = args[1].data["cursor_id"]
                 else:
-                    context.update(actions.open_cursor({}, context, named=named))
+                    context.update(open_cursor({}, context, named=named))
                     args[1].data["cursor_id"] = context["cursor_id"]
             try:
                 result = f(*args, **kwargs)
                 if fetch_all:
-                    cursor = actions.load_cursor_from_context(context)
-                    session = actions.load_session_from_context(context)
+                    cursor = load_cursor_from_context(context)
+                    session = load_session_from_context(context)
+                    connection = session.connection
+
                     if not result:
                         result = {}
                     # Initial server-side cursors do not contain any description before
@@ -114,9 +141,9 @@ def load_cursor(named=False):
                     # Set of triggers after all the data was fetched.
                     # The cursor must not be closed earlier!
                     triggers = [
-                        actions.close_cursor,
-                        actions.close_raw_connection,
-                        session.connection.commit,
+                        close_cursor,
+                        close_raw_connection,
+                        connection.commit,
                     ]
                     trigger_args = [({}, context), ({}, context), tuple()]
                     first = None
@@ -127,9 +154,9 @@ def load_cursor(named=False):
                             if not e.args or e.args[0] != "no results to fetch":
                                 raise e
                         except psycopg2.errors.InvalidCursorName as e:
-                            logging.error(str(e))
+                            logger.error(str(e))
                     if first:
-                        first = map(actions._translate_fetched_cell, first)
+                        first = map(translate_fetched_cell, first)
                         if cursor.description:
                             description = [
                                 [
@@ -155,13 +182,13 @@ def load_cursor(named=False):
                             result["rowcount"] = cursor.rowcount
                             triggered_close = True
                     if not triggered_close and artificial_connection:
-                        session.connection.commit()
+                        connection.commit()
             finally:
                 if not triggered_close:
                     if fetch_all and not artificial_connection:
-                        actions.close_cursor({}, context)
+                        close_cursor({}, context)
                     if artificial_connection:
-                        actions.close_raw_connection({}, context)
+                        close_raw_connection({}, context)
             return result
 
         return wrapper
@@ -184,50 +211,63 @@ def cors(allow):
     return doublewrapper
 
 
-def api_exception(f: Callable) -> Callable:
+def api_exception(
+    f: Callable[..., JsonLikeResponse],
+) -> Callable[..., JsonLikeResponse]:
+    """Catch all internal errors and ensure than we return JSON-like response
+
+    if we catch an APIError, we return the error message to the user, otherwise
+    a generic error message
+
+    """
+
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
-        except actions.APIError as e:
+        except APIError as e:
             return JsonResponse({"reason": e.message}, status=e.status)
-        except KeyError as e:
-            return JsonResponse({"reason": e}, status=400)
-        except DBTable.DoesNotExist:
+        except Table.DoesNotExist:
             return JsonResponse({"reason": "table does not exist"}, status=404)
+
+        # TODO: why cant' we handle all other errors here? (tests failing)
+        # except Exception as exc:
+        #    # All other Errors: dont accidently return sensitive data from error
+        #    # but return generic error message
+        #    logger.error(str(exc))
+        #    return JsonResponse({"reason": "Invalid request."}, status=400)
 
     return wrapper
 
 
-def permission_wrapper(permission: int, f: Callable):
-    def wrapper(caller, request, *args, **kwargs):
-        table = kwargs.get("table") or kwargs.get("sequence")
-        actions.assert_permission(user=request.user, table=table, permission=permission)
+def permission_wrapper(permission: int, f: Callable) -> Callable:
+    def wrapper(caller, request: HttpRequest, *args, **kwargs):
+        table_obj = table_or_404_from_dict(kwargs)
+        assert_permission(user=request.user, table=table_obj, permission=permission)
         return f(caller, request, *args, **kwargs)
 
     return wrapper
 
 
 def require_write_permission(f: Callable) -> Callable:
-    return permission_wrapper(login_models.WRITE_PERM, f)
+    return permission_wrapper(login.permissions.WRITE_PERM, f)
 
 
 def require_delete_permission(f: Callable) -> Callable:
-    return permission_wrapper(login_models.DELETE_PERM, f)
+    return permission_wrapper(login.permissions.DELETE_PERM, f)
 
 
 def require_admin_permission(f: Callable) -> Callable:
-    return permission_wrapper(login_models.ADMIN_PERM, f)
+    return permission_wrapper(login.permissions.ADMIN_PERM, f)
 
 
-def conjunction(clauses):
+def conjunction(clauses) -> dict:
     return {"type": "operator", "operator": "AND", "operands": clauses}
 
 
-def check_embargo(schema, table):
+def check_embargo(table_obj: Table) -> bool:
     try:
-        table_obj = DBTable.objects.get(name=table)
         embargo = Embargo.objects.filter(table=table_obj).first()
-        if embargo and embargo.date_ended > timezone.now():
+        if embargo and embargo.date_ended and embargo.date_ended > timezone.now():
             return True
         return False
     except ObjectDoesNotExist:
@@ -249,9 +289,6 @@ def date_handler(obj):
         return str(obj)
 
 
-# Create your views here.
-
-
 def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     """
     Implements a mapper from api pages to the corresponding functions in
@@ -264,14 +301,12 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     class AJAX_View(APIView):
         @cors(allow_cors)
         @api_exception
-        def options(self, request, *args, **kwargs):
-            response = HttpResponse()
-
-            return response
+        def options(self, request: HttpRequest, *args, **kwargs) -> JsonLikeResponse:
+            return JsonResponse({})
 
         @cors(allow_cors)
         @api_exception
-        def post(self, request: HttpRequest):
+        def post(self, request: HttpRequest) -> JsonLikeResponse:
             result = self.execute(request)
             session = (
                 sessions.load_session_from_context(result.pop("context"))
@@ -327,7 +362,9 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     return AJAX_View.as_view()
 
 
-def stream(data, allow_cors=False, status_code=status.HTTP_200_OK, session=None):
+def stream(
+    data, allow_cors=False, status_code=status.HTTP_200_OK, session=None
+) -> OEPStream:
     encoder = GeneratorJSONEncoder()
     response = OEPStream(
         encoder.iterencode(data),
@@ -341,7 +378,7 @@ def stream(data, allow_cors=False, status_code=status.HTTP_200_OK, session=None)
 
 
 def update_tags_from_keywords(table: str, keywords: list[str]) -> list[str]:
-    table_obj = DBTable.objects.get(name=table)
+    table_obj = Table.objects.get(name=table)
     table_obj.tags.clear()
     keywords_new = set()
     for keyword in keywords:
@@ -352,12 +389,7 @@ def update_tags_from_keywords(table: str, keywords: list[str]) -> list[str]:
     return list(keywords_new)
 
 
-def get_json_columns(table: str, schema: str | None = None, **_kwargs) -> set[str]:
-    """Get set of json/jsonb column names in table"""
-    schema = schema or SCHEMA_DEFAULT
-    column_descriptions = actions.describe_columns(schema=schema, table=table)
-    return {
-        name
-        for name, spec in column_descriptions.items()
-        if "json" in spec["data_type"]
-    }
+def get_request_data_dict(request: Request) -> dict:
+    if isinstance(request.data, dict):
+        return request.data
+    raise TypeError(type(request.data))

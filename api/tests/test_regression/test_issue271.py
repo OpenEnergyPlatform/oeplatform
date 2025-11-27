@@ -27,7 +27,6 @@ class Test271(APITestCaseWithTable):
                 "from": {
                     "type": "table",
                     "table": self.test_table,
-                    "schema": self.test_schema,
                 },
             }
         }
@@ -41,7 +40,6 @@ class Test271(APITestCaseWithTable):
                 "from": {
                     "type": "table",
                     "table": self.test_table,
-                    "schema": self.test_schema,
                 },
             }
         }

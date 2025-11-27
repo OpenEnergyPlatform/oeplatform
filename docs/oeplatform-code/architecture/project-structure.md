@@ -46,7 +46,7 @@ developers become enabled to get started with the development.
 │   └── ...
 ├── modelview       # Django app
 │   └── ...
-├── oedb_datamodels # Alembic migrations to manage the database structure
+├── oedb # Alembic migrations to manage the database structure
 │   └── ...
 ├── oeo_viewer      # Django app with react frontend
 │   └── ...
@@ -185,7 +185,7 @@ includes the latest release of the oeo)
 ### oedatabase
 
 ```plaintext
-├── oedb_datamodels
+├── oedb
 │   ├── README
 │   ├── env.py
 │   ├── script.py.mako

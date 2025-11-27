@@ -6,11 +6,17 @@ SPDX-License-Identifier: CC0-1.0
 
 # Scenario Bundles feature
 
-The scenario bundles feature is a response to the complex requirements for the transparent publication of scenarios in a complete and comprehensible manner. Various technologies are used to enable researchers to publish scenarios and any additional information. In addition, existing resources from the open energy platform are used and bundled together. This is intended to increase the visibility of available research work and enable comparability of the scenarios.
+The scenario bundles feature is a response to the complex requirements for the
+transparent publication of scenarios in a complete and comprehensible manner.
+Various technologies are used to enable researchers to publish scenarios and any
+additional information. In addition, existing resources from the open energy
+platform are used and bundled together. This is intended to increase the
+visibility of available research work and enable comparability of the scenarios.
 
 ## What are Scenario Bundles in detail?
 
-Please continue reading [here](https://openenergyplatform.github.io/organisation/family_members/templates-and-specification/scenario-bundles/).
+Please continue reading
+[here](https://openenergyplatform.github.io/organisation/family_members/templates-and-specification/scenario-bundles/).
 
 ## Technologies
 
@@ -20,12 +26,19 @@ User Interface
 
 Backend & Web-API
 
-- We build on the backend of the Open Energy Platform and use Django to implement functionalities such as saving and deleting scenario bundles and thus enable communication with the database. In addition, Django provides the WEB-API endpoints that are used to create a scenario bundle or query the database using JSON requests, for example.
-- A Python integration of the SPARQL query language is used to interact with the Grpah database.
+- We build on the backend of the Open Energy Platform and use Django to
+  implement functionalities such as saving and deleting scenario bundles and
+  thus enable communication with the database. In addition, Django provides the
+  WEB-API endpoints that are used to create a scenario bundle or query the
+  database using JSON requests, for example.
+- A Python integration of the SPARQL query language is used to interact with the
+  Grpah database.
 
 Database
 
-- A graph database is used to store the complex data structure of the scenario bundles in the long term. We use Appache Jenna-Fuseki as a reliable technology.
+- A graph database is used to store the complex data structure of the scenario
+  bundles in the long term. We use Appache Jenna-Fuseki as a reliable
+  technology.
 
 ## Code Documentation
 
@@ -39,11 +52,27 @@ Database
 
 ### The scenario bundle object construction and API in django
 
-Below we describe how we construct the Scenario bundles in the scenario bundles django app. Using JSON as an input format the complex scenario bundle object becomes more manageable when working with WEB-technologies. Users will create a scenario bundle using a user interface with input text and selection fields this information is send and processed as JSON before it is stored in the OEKG using RDF´s triple notation.
+Below we describe how we construct the Scenario bundles in the scenario bundles
+django app. Using JSON as an input format the complex scenario bundle object
+becomes more manageable when working with WEB-technologies. Users will create a
+scenario bundle using a user interface with input text and selection fields this
+information is send and processed as JSON before it is stored in the OEKG using
+RDF´s triple notation.
 
-You can read the following sections as: This is how django processes the data, and this is where the data is send once the user submits or changes a scenario bundles. The URL pointing out what django view will handle the JSON object below. This is very similar to what general web api´s do like REST-API´s. The exception here is that there is an CSRF Token involved which is required by the django backend to make sure requests are save and do not originate form an unsafe source allowing the scenario bundle frontend to send data to the backend.
+You can read the following sections as: This is how django processes the data,
+and this is where the data is send once the user submits or changes a scenario
+bundles. The URL pointing out what django view will handle the JSON object
+below. This is very similar to what general web api´s do like REST-API´s. The
+exception here is that there is an CSRF Token involved which is required by the
+django backend to make sure requests are save and do not originate form an
+unsafe source allowing the scenario bundle frontend to send data to the backend.
 
-The technology that drives this implementation is HTTP. The JSON objects and key:value information is send in packaged as a payload that is send along with each requests. A requests can be triggered by multiple actions for example a button that is pressed by the user. Based on the URL and the payload the backend can determine what functionality must be triggered. This can be for example creating a scenario bundle or retrieving a specific bundle by its ID.
+The technology that drives this implementation is HTTP. The JSON objects and
+key:value information is send in packaged as a payload that is send along with
+each requests. A requests can be triggered by multiple actions for example a
+button that is pressed by the user. Based on the URL and the payload the backend
+can determine what functionality must be triggered. This can be for example
+creating a scenario bundle or retrieving a specific bundle by its ID.
 
 !!! note
 
@@ -194,7 +223,7 @@ An example of input parameters
           "idx": 0,
           "value ": {
             "label ": "abbb_transmission_capacity ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transmission_capacity "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transmission_capacity "
           }
         },
         {
@@ -202,7 +231,7 @@ An example of input parameters
           "idx ": 1,
           "value ": {
             "label ": "abbb_demand ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_demand "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_demand "
           }
         }
       ],
@@ -212,7 +241,7 @@ An example of input parameters
           "idx ": 0,
           "value ": {
             "label ": "abbb_transformer ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transformer "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transformer "
           }
         }
       ]
@@ -263,7 +292,7 @@ An example of input parameters
           "idx ": 0,
           "value ": {
             "label ": "abbb_transformer ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transformer "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transformer "
           }
         }
       ],
@@ -273,7 +302,7 @@ An example of input parameters
           "idx ": 0,
           "value ": {
             "label ": "ego_slp_parameters ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/ego_slp_parameters "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/ego_slp_parameters "
           }
         }
       ]
@@ -331,7 +360,7 @@ Retrieve a bundle by its `uid`
 An example of input parameters
 
 ```json
-"uid" : "6157d6d6-7a7b-a61e-21d3-a8f936b19056",
+{ "uid": "6157d6d6-7a7b-a61e-21d3-a8f936b19056" }
 ```
 
 #### Remove a bundle from OEKG
@@ -343,7 +372,7 @@ To delete a bundle, the `uid` of the bundle should be provided.
 An example of input parameters
 
 ```json
-"uid" : "6157d6d6-7a7b-a61e-21d3-a8f936b19056",
+{ "uid": "6157d6d6-7a7b-a61e-21d3-a8f936b19056" }
 ```
 
 #### Update a bundle in OEKG
@@ -352,7 +381,8 @@ An example of input parameters
 
 An example of input parameters
 
-The `uid` should belong to an existing bundle in OEKG. The remaining fields are identical to those in the create bundle API.
+The `uid` should belong to an existing bundle in OEKG. The remaining fields are
+identical to those in the create bundle API.
 
 ```json
 {
@@ -492,7 +522,7 @@ The `uid` should belong to an existing bundle in OEKG. The remaining fields are 
           "idx": 0,
           "value ": {
             "label ": "abbb_transmission_capacity ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transmission_capacity "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transmission_capacity "
           }
         },
         {
@@ -500,7 +530,7 @@ The `uid` should belong to an existing bundle in OEKG. The remaining fields are 
           "idx ": 1,
           "value ": {
             "label ": "abbb_demand ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_demand "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_demand "
           }
         }
       ],
@@ -510,7 +540,7 @@ The `uid` should belong to an existing bundle in OEKG. The remaining fields are 
           "idx ": 0,
           "value ": {
             "label ": "abbb_transformer ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transformer "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transformer "
           }
         }
       ]
@@ -561,7 +591,7 @@ The `uid` should belong to an existing bundle in OEKG. The remaining fields are 
           "idx ": 0,
           "value ": {
             "label ": "abbb_transformer ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/abbb_transformer "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/abbb_transformer "
           }
         }
       ],
@@ -571,7 +601,7 @@ The `uid` should belong to an existing bundle in OEKG. The remaining fields are 
           "idx ": 0,
           "value ": {
             "label ": "ego_slp_parameters ",
-            "iri ": "https://openenergy-platform.org/dataedit/view/scenario/ego_slp_parameters "
+            "iri ": "https://openenergy-platform.org/database/tables/scenario/ego_slp_parameters "
           }
         }
       ]

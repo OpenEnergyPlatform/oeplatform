@@ -2,17 +2,14 @@
 {% load compress %}
 {% load static %}
 {% load django_bootstrap5 %}
-
 {% block after-head %}
   <link href="{% static 'metaedit/metaedit.css' %}" rel="stylesheet" />
 {% endblock after-head %}
-
 {% block site-header %}
   <h2 class="site-header">
     <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i>
   </h2>
 {% endblock site-header %}
-
 {% block main %}
   <div class="main-header">
     <h1 class="main-header__title">
@@ -20,16 +17,10 @@
     </h1>
     <div class="main-header__wizard">
       {% if table %}
-        {{ schema }}
-        /
         {% if table_label %}
-          <a href="{% url 'dataedit:view' schema=schema table=table %}"
-            >{{ table_label }}</a
-          >
+          <a href="{% url 'dataedit:view' table=table %}">{{ table_label }}</a>
         {% else %}
-          <a href="{% url 'dataedit:view' schema=schema table=table %}"
-            >{{ table }}</a
-          >
+          <a href="{% url 'dataedit:view' table=table %}">{{ table }}</a>
         {% endif %}
         /
       {% else %}
@@ -39,7 +30,7 @@
       OEMetaBuilder
       <!-- Indicate weather the user got permissions fot this table -->
       {% if can_add %}
-        <span class="success-badge"> You can edit the metadata. </span>
+        <span class="success-badge">You can edit the metadata.</span>
       {% endif %}
     </div>
     <br />
@@ -54,33 +45,20 @@
     </div>
   </div>
   <div class=" d-flex justify-content-center">
-    <div
-      class="spinner-border text-primary m-5 d-none"
-      role="status"
-      id="metaedit-loading"
-    >
+    <div class="spinner-border text-primary m-5 d-none"
+         role="status"
+         id="metaedit-loading">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
   <div class="row d-none fixed-controls" id="metaedit-controls">
     <div class="col">
-      <span
-        class=""
-        {% if not can_add %}
-          data-bs-toggle="popover" title="You need write permissions on this
-          table to upload meta data"
-        {% endif %}
-      >
-        <a
-          href="#metaedit-submit"
-          class="btn btn-sm btn-success mr-2 {% if not can_add %}disabled{% endif %}"
-          id="metaedit-submit"
-          ><span
-            class="spinner-border text-light d-none mr-2 spinner-border-sm"
-            id="metaedit-submitting"
-          ></span
-          >Submit</a
-        >
+      <span class=""
+            {% if not can_add %} data-bs-toggle="popover" title="You need write permissions on this table to upload meta data" {% endif %}>
+        <a href="#metaedit-submit"
+           class="btn btn-sm btn-success mr-2 {% if not can_add %}disabled{% endif %}"
+           id="metaedit-submit"><span class="spinner-border text-light d-none mr-2 spinner-border-sm"
+      id="metaedit-submitting"></span>Submit</a>
       </span>
       <button class="btn btn-sm btn-primary mr-2" id="metaedit-cancel">
         Cancel
@@ -90,7 +68,6 @@
       </button>
     </div>
   </div>
-
   <div class="row">
     <div class="col">
       <form iv id="metaedit-form">
@@ -98,38 +75,29 @@
       </form>
     </div>
   </div>
-
   <div>
     <!-- Modal for oeo extended -->
-    <div
-      class="modal fade"
-      id="formModal"
-      tabindex="-1"
-      aria-labelledby="modalLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade"
+         id="formModal"
+         tabindex="-1"
+         aria-labelledby="modalLabel"
+         aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modalLabel">
               Add your custom units as extension to the oeo:
             </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <!-- Insert the form here -->
           </div>
           <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               Close
             </button>
           </div>
@@ -138,7 +106,6 @@
     </div>
   </div>
 {% endblock main %}
-
 {% block after-body-bottom-js %}
   <style>
     .fixed-controls {
@@ -159,12 +126,8 @@
   {% endcompress %}
   <!-- fix imports below - we dont use cdn anymore -->
   <script src="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js }}"></script>
-
-  <link
-    rel="stylesheet"
-    href="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js_dist_style_css }}"
-  />
-
+  <link rel="stylesheet"
+        href="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js_dist_style_css }}" />
   <script>
     var createUrl = '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}';
     var config = JSON.parse("{{ config|escapejs }}");

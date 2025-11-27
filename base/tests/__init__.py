@@ -17,6 +17,8 @@ from login.models import GroupMembership, UserGroup
 from login.models import myuser as User
 from oeplatform.settings import IS_TEST
 
+logger = logging.getLogger("oeplatform")
+
 
 def recursively_get_patterns(resolver: URLResolver) -> Iterable[URLPattern]:
     for p in resolver.url_patterns:
@@ -53,11 +55,11 @@ def get_app_reverse_lookup_names_and_kwargs(
     for pattern in recursively_get_patterns(resolver):
         name = pattern.name
         if not name:
-            logging.warning("no reverse lookup name for %s: %s", app_name, pattern)
+            logger.warning("no reverse lookup name for %s: %s", app_name, pattern)
             continue
         name = f"{app_name}:{name}" if app_name else name
         if name in results:
-            logging.warning("non unique reverse lookup name: %s", name)
+            logger.warning("non unique reverse lookup name: %s", name)
             continue
         results[name] = get_urlpattern_params(pattern)
     return results

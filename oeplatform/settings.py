@@ -283,7 +283,7 @@ EXTERNAL_URLS = {
     "oeko_en": "https://www.oeko.de/en/",
     "offis": "https://www.offis.de/",
     "pik_potsdam": "https://www.pik-potsdam.de/",
-    "ptj_energiesystemanalyse": "https://www.ptj.de/energiesystemanalyse",
+    "ptj": "https://www.ptj.de",
     "tib_eu_de": "https://www.tib.eu/de/",
     "uni_flensburg_en": "https://www.uni-flensburg.de/en/",
     "cdn_github_cards_widget": "//cdn.jsdelivr.net/github-cards/latest/widget.js",
@@ -298,15 +298,6 @@ DOCUMENTATION_LINKS = {
     "oekg_api": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oekg-api/",  # noqa:E501
 }
 
-
-def external_urls_context_processor(request):
-    """Define hard coded external urls here.
-    Use in templates like this: {{ EXTERNAL_URLS.<name_of_url> }}
-    Also, you may want to add an icon indicating external links, e.g.
-    """
-    return {"EXTERNAL_URLS": EXTERNAL_URLS, "CONTACT_ADDRESSES": CONTACT_ADDRESSES}
-
-
 SITE_ID = 1
 
 TEMPLATES = [
@@ -320,7 +311,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "oeplatform.settings.external_urls_context_processor",
+                "oeplatform.context_processors.external_urls",
                 "oeplatform.context_processors.allauth_settings",
             ]
         },
@@ -450,3 +441,10 @@ SCHEMA_DEFAULT = SCHEMA_DEFAULT_TEST_SANDBOX if IS_SANDBOX else SCHEMA_DATA
 
 USE_ONTOP = bool(ONTOP_SPARQL_ENDPOINT_URL)
 USE_LOEP = bool(DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL)
+
+
+# when running approximate (fast) row count: if number is below this
+# we get the precise row count (slow)
+APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW = 100000
+PSEUDO_TOPIC_DRAFT = "draft"
+TOPIC_SCENARIO = "scenario"

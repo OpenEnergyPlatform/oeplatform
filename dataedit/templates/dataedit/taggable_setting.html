@@ -1,59 +1,42 @@
 {% load fontawesome_5 %}
-
 <div class="tagcontainer">
   {% load dataedit.taghandler %}
   {% get_tags as all_tags %}
-  {% if not selected %}
-    No tags were added, yet.
-  {% endif %}
+  {% if not selected %}No tags were added, yet.{% endif %}
   {% for t in selected %}
-    <a
-      href="{% url 'dataedit:tables' schema=schema %}?query=&tags={{ t.pk }}"
-      class="btn tag"
-      style="background:{{ t.color_hex }};color:{% readable_text_color t.color_hex %}"
-      >{{ t.name }}</a
-    >
+    <a href="{% url 'dataedit:topic-list' %}?query=&tags={{ t.pk }}"
+       class="btn tag"
+       style="background:{{ t.color_hex }};
+              color:{% readable_text_color t.color_hex %}">{{ t.name }}</a>
   {% endfor %}
-  <button
-    data-bs-toggle="collapse"
-    data-bs-target="#tag_handler"
-    class="btn btn-add btn-circle"
-  >
-    {% fa5_icon 'plus' 'fas' %}
-  </button>
+  <button data-bs-toggle="collapse"
+          data-bs-target="#tag_handler"
+          class="btn btn-add btn-circle">{% fa5_icon 'plus' 'fas' %}</button>
   <div id="tag_handler" class="collapse">
     <form action="{% url 'dataedit:tags-add' %}" method="post">
       {% csrf_token %}
       <h4>Choose tags to attach:</h4>
       {% for t in all_tags %}
         <span>
-          <input
-            type="checkbox"
-            class="hidden"
-            name="tag_{{ t.pk }}"
-            id="select_{{ t.pk }}"
-            {% if t in selected %}checked{% endif %}
-          />
-          <label
-            class="form-label"
-            style="background:{{ t.color_hex }};color:{% readable_text_color t.color_hex %}"
-            class="btn tag"
-            for="select_{{ t.pk }}"
-            >{{ t.name }}</label
-          >
+          <input type="checkbox"
+                 class="hidden"
+                 name="tag_{{ t.pk }}"
+                 id="select_{{ t.pk }}"
+                 {% if t in selected %}checked{% endif %} />
+          <label class="form-label"
+                 style="background:{{ t.color_hex }};
+                        color:{% readable_text_color t.color_hex %}"
+                 class="btn tag"
+                 for="select_{{ t.pk }}">{{ t.name }}</label>
         </span>
       {% endfor %}
-      <input type="hidden" name="schema" value="{{ schema }}" />
       {% if table %}
         <input type="hidden" name="table" value="{{ table }}" />
       {% endif %}
       <input type="submit" class="btn btn-success" value="Apply" />
-      <a
-        type="button"
-        class="btn btn-info"
-        href="{% url 'dataedit:topic-list' %}"
-        >Edit</a
-      >
+      <a type="button"
+         class="btn btn-info"
+         href="{% url 'dataedit:topic-list' %}">Edit</a>
     </form>
   </div>
 </div>

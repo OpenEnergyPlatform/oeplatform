@@ -26,30 +26,51 @@ class TestIssue2041SortJson(APITestCaseWithTable):
 
     def test_issue_2041_sort_json(self):
         url = reverse("api:advanced-search")
-
         # {'reason': 'could not identify an ordering operator for type json'}
+        query = {
+            "from": {
+                "type": "table",
+                "table": self.test_table,
+            },
+            "order_by": [
+                {
+                    "type": "column",
+                    "column": self.column_json,
+                    "ordering": "asc",
+                }
+            ],
+            "fields": [
+                {"type": "column", "column": self.column_json},
+            ],
+            "offset": 0,
+            "limit": 10,
+        }
+
+        # this does not work
         self.api_req(
             "post",
             url=url,
-            data={
-                "query": {
-                    "from": {
-                        "type": "table",
-                        "table": self.test_table,
-                    },
-                    "order_by": [
-                        {
-                            "type": "column",
-                            "column": self.column_json,
-                            "ordering": "asc",
-                        }
-                    ],
-                    "fields": [
-                        {"type": "column", "column": self.column_json},
-                    ],
-                    "offset": 0,
-                    "limit": 10,
-                }
-            },
+            data={"query": query},
+            exp_code=400,
+        )
+
+        # with applied change in backend.js:queryCastToText
+        query["order_by"] = [
+            {
+                # "label": self.column_json,
+                "type": "cast",
+                "source": {
+                    "type": "column",
+                    "column": self.column_json,
+                },
+                "as": "text",
+                "ordering": "asc",
+            }
+        ]
+
+        self.api_req(
+            "post",
+            url=url,
+            data={"query": query},
             exp_code=200,
         )

@@ -68,6 +68,8 @@ from oekg.sparqlQuery import (
     normalize_factsheets_rows,
 )
 
+logger = logging.getLogger("oeplatform")
+
 
 def factsheets_index_view(request, *args, **kwargs):
     return render(request, "factsheet/index.html")
@@ -557,7 +559,7 @@ def create_factsheet_view(request, *args, **kwargs):
             "Factsheet saved", safe=False, content_type="application/json"
         )
         result = set_ownership(bundle_uid=uid, user=request.user)
-        logging.info(result)
+        logger.info(result)
         patch_response_headers(response, cache_timeout=1)
 
         return response
@@ -1860,9 +1862,7 @@ def populate_factsheets_elements_view(request, *args, **kwargs):
 def filter_scenario_bundles_view(request):
     # Get the table IRI from the request or any other source
     table_iri = request.GET.get("table_iri", "")
-    # table_iri = "dataedit/view/scenario/abbb_emob"
-
-    table_name = table_iri.split("/scenario/")[1]
+    table_name = table_iri.strip("/").split("/")[-1]
 
     # Create an instance of OekgQuery
     oekg_query = OekgQuery()

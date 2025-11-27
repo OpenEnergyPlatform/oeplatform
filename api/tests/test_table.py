@@ -12,6 +12,7 @@ from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from api.tests import APITestCase, APITestCaseWithTable
 from dataedit.models import Table
+from oeplatform.settings import TOPIC_SCENARIO
 
 _TYPES = [
     "bigint",
@@ -57,7 +58,6 @@ class TestPut(APITestCase):
     def checkStructure(self):
         body = self.api_req("get")
 
-        self.assertEqual(body["schema"], self.test_schema, "Schema does not match.")
         self.assertEqual(body["name"], self.test_table, "Table does not match.")
 
         for column in self._structure_data["columns"]:
@@ -119,7 +119,7 @@ class TestPut(APITestCase):
             ],
         }
         self.test_table = "table_all_columns"
-        self.api_req("put", data={"query": self._structure_data})
+        self.create_table(structure=self._structure_data)
         self.checkStructure()
         # clean up
         self.drop_table(table=self.test_table)
@@ -151,7 +151,7 @@ class TestPut(APITestCase):
             ],
         }
         self.test_table = "Table_all_columns"
-        self.api_req("put", data={"query": self._structure_data}, exp_code=400)
+        self.create_table(structure=self._structure_data, exp_code=400)
 
     def test_create_table_defaults(self):
         self._structure_data = {
@@ -165,10 +165,9 @@ class TestPut(APITestCase):
             ],
         }
         self.test_table = "table_defaults"
-        self.api_req("put", data={"query": self._structure_data})
+        self.create_table(structure=self._structure_data)
         body = self.api_req("get")
 
-        self.assertEqual(body["schema"], self.test_schema, "Schema does not match.")
         self.assertEqual(body["name"], self.test_table, "Table does not match.")
 
         self.assertDictEqualKeywise(
@@ -307,7 +306,7 @@ class TestDelete(APITestCaseWithTable):
 
 class TestMovePublish(APITestCaseWithTable):
     test_table = "test_table_move_publish"
-    target_schema = "scenario"
+    target_topic = TOPIC_SCENARIO
 
     def test_move_publish(self):
 
@@ -315,7 +314,7 @@ class TestMovePublish(APITestCaseWithTable):
 
         # this will fail, because the licenses check fails
         self.api_req(
-            "post", path=f"move_publish/{self.target_schema}/", exp_code=400, exp_res={}
+            "post", path=f"move_publish/{self.target_topic}/", exp_code=400, exp_res={}
         )
 
         # so we set the metadata ...
@@ -330,7 +329,7 @@ class TestMovePublish(APITestCaseWithTable):
         embargo_duration = "6_months"
         self.api_req(
             "post",
-            path=f"move_publish/{self.target_schema}/",
+            path=f"move_publish/{self.target_topic}/",
             data={"embargo": {"duration": embargo_duration}},
             exp_code=200,
         )
@@ -340,7 +339,7 @@ class TestMovePublish(APITestCaseWithTable):
         embargo_duration = "none"
         self.api_req(
             "post",
-            path=f"move_publish/{self.target_schema}/",
+            path=f"move_publish/{self.target_topic}/",
             data={"embargo": {"duration": embargo_duration}},
             exp_code=200,
         )

@@ -30,6 +30,8 @@ from oeplatform.settings import (
     STATIC_ROOT,
 )
 
+logger = logging.getLogger("oeplatform")
+
 
 class WelcomeView(View):
     def get(self, request):
@@ -127,6 +129,5 @@ def reverse_url_view(request: HttpRequest, name: str) -> JsonResponse:
         url = reverse(name, kwargs=kwargs)
         return JsonResponse({"url": url})
     except Exception as exc:
-        logging.error(f"reverse url failed for {name},{request.GET}: {exc}")
-        raise  # FXME: remove after tests
+        logger.error(f"reverse url failed for {name},{request.GET}: {exc}")
         return JsonResponse({"message": "invalid reverse request"}, status=400)

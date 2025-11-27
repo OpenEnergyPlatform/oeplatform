@@ -8,7 +8,8 @@ export default [
     ignores: ["dist/*", "build/*", "node_modules/*"],
   },
   {
-    files: ["**/*.{js,jsx,mjs,cjs,ts,tsx}"],
+    files: ["**/*.{js,jsx,mjs,cjs,ts,tsx,jsonc,scss,css}"],
+
     plugins: {
       prettier,
       jsdoc,

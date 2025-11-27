@@ -9,16 +9,18 @@ import sys
 import time
 from random import randrange
 
-from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION_LIMIT
+from django.contrib.auth.models import AbstractUser
 
-from .actions import _get_engine, get_or_403
-from .error import APIError
+from api.error import APIError
+from api.utils import get_or_403
+from oedb.connection import AbstractCursor, DBAPIConnection, _get_engine
+from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION_LIMIT
 
 _SESSION_CONTEXTS = {}
 
 
 class SessionContext:
-    def __init__(self, connection_id=None, owner=None):
+    def __init__(self, connection_id=None, owner: AbstractUser | None = None):
         user_connections = 0
         current_time = time.time()
 
@@ -34,7 +36,7 @@ class SessionContext:
             except KeyError:
                 pass
 
-        if owner.is_anonymous:
+        if not owner or owner.is_anonymous:
             if user_connections >= ANON_CONNECTION_LIMIT:
                 raise APIError(
                     "Connection limit for anonymous users is exceeded"
@@ -51,7 +53,7 @@ class SessionContext:
                 )
 
         engine = _get_engine()
-        self.connection = engine.connect().connection
+        self.connection: DBAPIConnection = engine.connect().connection  # type:ignore
         if connection_id is None:
             connection_id = _add_entry(self, _SESSION_CONTEXTS)
         elif connection_id not in _SESSION_CONTEXTS:
@@ -59,17 +61,20 @@ class SessionContext:
         else:
             raise Exception("Tried to open existing")
         self.owner = owner
-        self.connection._id = connection_id
+
+        # FIXME: is this a good idea, to add a custom attribute?
+        setattr(self.connection, "_id", connection_id)
+
         self.session_context = self
         self.cursors = {}
 
-    def get_cursor(self, cursor_id):
+    def get_cursor(self, cursor_id) -> AbstractCursor:
         try:
             return self.cursors[cursor_id]
         except KeyError:
             raise APIError("Cursor not found %s" % cursor_id)
 
-    def open_cursor(self, named=False):
+    def open_cursor(self, named: bool = False):
         cursor_id = _get_new_key(self.cursors)
         if named:
             cursor = self.connection.cursor(name=str(cursor_id))
@@ -78,23 +83,23 @@ class SessionContext:
         self.cursors[cursor_id] = cursor
         return cursor_id
 
-    def close_cursor(self, cursor_id):
+    def close_cursor(self, cursor_id) -> None:
         cursor = self.get_cursor(cursor_id)
         cursor.close()
         del self.cursors[cursor_id]
 
-    def close(self):
+    def close(self) -> None:
         self.connection.close()
         if self.connection._id in _SESSION_CONTEXTS:
             del _SESSION_CONTEXTS[self.connection._id]
 
-    def rollback(self):
+    def rollback(self) -> None:
         self.connection.rollback()
         if not self.cursors:
             self.close()
 
 
-def close_all_for_user(owner):
+def close_all_for_user(owner: AbstractUser) -> None:
     if owner.is_anonymous:
         raise PermissionError
     for sid in dict(_SESSION_CONTEXTS):
@@ -109,13 +114,13 @@ def close_all_for_user(owner):
             pass
 
 
-def load_cursor_from_context(context):
+def load_cursor_from_context(context: dict) -> AbstractCursor:
     session = load_session_from_context(context)
     cursor_id = get_or_403(context, "cursor_id")
     return session.get_cursor(cursor_id)
 
 
-def load_session_from_context(context):
+def load_session_from_context(context: dict) -> SessionContext:
     connection_id = get_or_403(context, "connection_id")
     user = context.get("user")
     try:
@@ -128,14 +133,14 @@ def load_session_from_context(context):
         return SessionContext(connection_id=connection_id, owner=user)
 
 
-def _get_new_key(dictionary):
+def _get_new_key(dictionary: dict):
     key = randrange(0, sys.maxsize)
     while key in dictionary:
         key = randrange(0, sys.maxsize)
     return key
 
 
-def _add_entry(value, dictionary, key=None):
+def _add_entry(value, dictionary: dict, key=None):
     if key is None:
         key = _get_new_key(dictionary)
     dictionary[key] = value

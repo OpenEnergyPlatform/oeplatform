@@ -4,13 +4,17 @@ SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from typing import TYPE_CHECKING
+
 from api import actions
+from dataedit.metadata import v1_1
 
-from . import v1_1
+if TYPE_CHECKING:
+    from dataedit.models import Table
 
 
-def from_v1_1(comment_on_table, schema, table):
-    columns = actions.analyze_columns(schema, table)
+def from_v1_1(comment_on_table, table_obj: "Table"):
+    columns = actions.analyze_columns(table_obj)
     try:
         if "resources" not in comment_on_table:
             comment_on_table = {
@@ -97,5 +101,5 @@ def from_v1_1(comment_on_table, schema, table):
     return comment_on_table
 
 
-def from_v0(comment_on_table, schema, table):
-    return from_v1_1(v1_1.from_v0(comment_on_table, schema, table), schema, table)
+def from_v0(comment_on_table, table_obj: "Table"):
+    return from_v1_1(v1_1.from_v0(comment_on_table, table_obj), table_obj)

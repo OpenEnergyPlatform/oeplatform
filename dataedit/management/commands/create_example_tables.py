@@ -16,8 +16,7 @@ from api.actions import (
     try_parse_metadata,
     try_validate_metadata,
 )
-from api.services.permissions import assign_table_holder
-from api.services.table_creation import TableCreationOrchestrator
+from dataedit.models import Table
 from oeplatform.settings import SCHEMA_DATA
 
 User = get_user_model()
@@ -85,8 +84,6 @@ class Command(BaseCommand):
             name="test", defaults={"email": "test@mail.com", "is_staff": True}
         )
 
-        orchestrator = TableCreationOrchestrator()
-
         for spec in TABLE_DEFS:
             schema_name = spec["schema"]
             table_name = spec["table"]
@@ -115,15 +112,13 @@ class Command(BaseCommand):
 
             try:
                 # 4) Create physical table → Django metadata
-                orchestrator.create_table(
-                    schema=schema_name,
-                    table=table_name,
-                    column_defs=column_defs,
-                    constraint_defs=constraint_defs,
+                Table.create_with_oedb_table(
+                    name=table_name,
+                    is_sandbox=True,  # tests ALWAYS in sandbox
+                    user=user,  # type:ignore
+                    column_definitions=column_defs,
+                    constraints_definitions=constraint_defs,
                 )
-
-                # 5) Grant ADMIN to your test user
-                assign_table_holder(user, schema_name, table_name)
 
                 self.stdout.write(
                     self.style.SUCCESS(f"✔ Created table {schema_name}.{table_name}")

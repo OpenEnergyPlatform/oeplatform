@@ -47,15 +47,12 @@ is added (see the [vite getting started guide](https://vite.dev/guide/)).
 The following apps integrate:
 
 - Webpack
-
   - oeo-viewer
   - factsheet (also supported by vite integration)
 
 - Vite
-
   - Open peer review (dataedit js client)
   - factsheet (scenario bundles react client)
 
 - None so far
-
   - MetaBuilder (dataedit js client)

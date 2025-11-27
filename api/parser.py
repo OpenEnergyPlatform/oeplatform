@@ -10,20 +10,24 @@ SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> Â
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-###########
-# Parsers #
-###########
 import decimal
 import re
-from datetime import datetime
+from typing import TYPE_CHECKING, Any
+from typing import cast as cast_type  # cast already used by sqlalchemy
 
 import dateutil
 import geoalchemy2  # Although this import seems unused is has to be here
-import sqlalchemy as sa
 from sqlalchemy import (
-    MetaData,
-    Table,
+    ARRAY,
+    BigInteger,
+    Column,
+    ForeignKey,
+    PrimaryKeyConstraint,
+    UniqueConstraint,
     and_,
+)
+from sqlalchemy import case as sa_case
+from sqlalchemy import (
     cast,
     column,
     func,
@@ -34,45 +38,216 @@ from sqlalchemy import (
     or_,
     select,
 )
-from sqlalchemy import types as sqltypes
+from sqlalchemy import types as sa_types
 from sqlalchemy import (
     util,
 )
 from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.schema import Sequence
-from sqlalchemy.sql import functions as fun
+from sqlalchemy.sql import functions
 from sqlalchemy.sql.elements import Slice
-from sqlalchemy.sql.expression import CompoundSelect
-from sqlalchemy.sql.sqltypes import Interval, Text
+from sqlalchemy.sql.expression import ClauseElement, CompoundSelect, Select
 
-import api  # TODO: we need functions from api.helper but get circular imports
-from api.connection import _get_engine
-from api.error import APIError, APIKeyError
-from api.utils import validate_schema
+from api.error import APIError
+from api.utils import get_or_403, table_or_404_from_dict, table_or_none
+from oedb.utils import MAX_NAME_LENGTH, NAME_PATTERN
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
+if TYPE_CHECKING:
+    from sqlalchemy import Table as SATable
+
+    from dataedit.models import Table
+
+
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
+sql_operators = {
+    "EQUALS": "=",
+    "GREATER": ">",
+    "LOWER": "<",
+    "NOTEQUAL": "!=",
+    "NOTGREATER": "<=",
+    "NOTLOWER": ">=",
+    "=": "=",
+    ">": ">",
+    "<": "<",
+    "!=": "!=",
+    "<>": "!=",
+    "<=": "<=",
+    ">=": ">=",
+}
+_POSTGIS_MAP = {
+    "compositeelement": geoalchemy2.types.CompositeElement,
+    "geography": geoalchemy2.types.Geography,
+    "geometry": geoalchemy2.types.Geometry,
+    "raster": geoalchemy2.types.Raster,
+    "rasterelement": geoalchemy2.types.RasterElement,
+}
 
 
-def get_or_403(dictionary, key):
-    try:
-        return dictionary[key]
-    except KeyError:
-        raise APIKeyError(dictionary, key)
+def _assert_valid_identifier_name(identifier: str):
+    if not NAME_PATTERN.match(identifier):
+        raise APIError(
+            f"Unsupported table name: {identifier}\n"
+            "Table names must consist of lowercase alpha-numeric words or underscores "
+            "and start with a letter "
+            f"and must not exceed {MAX_NAME_LENGTH} characters "
+            f"(current table name length: {len(identifier)})."
+        )
 
 
-def parse_single(x, caster):
+def get_column_definition_query(d: dict) -> Column:
+    name = get_or_403(d, "name")
+    args = []
+    kwargs = {}
+    dt_string = get_or_403(d, "data_type")
+    dt, autoincrement = _parse_type(dt_string)
+
+    if autoincrement:
+        d["autoincrement"] = True
+
+    for fk in d.get("foreign_key", []):
+
+        table_obj = table_or_404_from_dict(fk)
+
+        # NOTE: previously, this used a sqlalchemy MetaData without bind=engine.
+        # could this be a problem?
+        fk_sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
+
+        fkcolumn = Column(get_or_403(fk, "column"))
+
+        fkcolumn.table = fk_sa_table
+
+        args.append(ForeignKey(fkcolumn))
+
+    if "autoincrement" in d:
+        kwargs["autoincrement"] = d["autoincrement"]
+
+    if not d.get("is_nullable", True):
+        kwargs["nullable"] = d["is_nullable"]  # True
+
+    if d.get("primary_key", False):
+        kwargs["primary_key"] = True
+
+    if "column_default" in d:
+        kwargs["default"] = read_pgvalue(d["column_default"])
+
+    if d.get("character_maximum_length"):
+        max_len = int(d["character_maximum_length"])
+        dt = dt(max_len)  # type:ignore
+
+    _assert_valid_identifier_name(name)
+    c = Column(name, dt, *args, **kwargs)
+
+    return c
+
+
+def parse_table_parts(
+    column_definitions: list, constraints_definitions: list
+) -> tuple[list, list]:
+    """
+    Creates a new table
+
+    IMPORTANT: permission checks have to be performed before
+
+    :param column_definitions: Description of columns
+    :param constraints_definitions: Description of constraints
+    :return: list
+    """
+
+    primary_key_col_names = None
+    columns_by_name = {}
+
+    columns = []
+    for cdef in column_definitions:
+        col = get_column_definition_query(cdef)
+        columns.append(col)
+
+        # check for duplicate column names
+        if col.name in columns_by_name:
+            raise APIError("Duplicate column name: %s" % col.name)
+        columns_by_name[col.name] = col
+        if col.primary_key:
+            if primary_key_col_names:
+                raise APIError("Multiple definitions of primary key")
+            primary_key_col_names = [col.name]
+
+    constraints = []
+
+    for constraint in constraints_definitions:
+        constraint_type = constraint.get("constraint_type") or constraint.get("type")
+        if constraint_type is None:
+            raise APIError("constraint_type required in %s" % str(constraint))
+
+        constraint_type = constraint_type.lower().replace(" ", "_")
+        if constraint_type == "primary_key":
+            kwargs = {}
+            cname = constraint.get("name")
+            if cname:
+                kwargs["name"] = cname
+            if "columns" in constraint:
+                ccolumns = constraint["columns"]
+            else:
+                ccolumns = [constraint["constraint_parameter"]]
+
+            if primary_key_col_names:
+                # if table level PK constraint is set in addition
+                # to column level PK, both must be the same (#1110)
+                if set(ccolumns) == set(primary_key_col_names):
+                    continue
+                raise APIError("Multiple definitions of primary key.")
+            primary_key_col_names = ccolumns
+
+            const = PrimaryKeyConstraint(*ccolumns, **kwargs)
+            constraints.append(const)
+        elif constraint_type == "unique":
+            kwargs = {}
+            cname = constraint.get("name")
+            if cname:
+                kwargs["name"] = cname
+            if "columns" in constraint:
+                ccolumns = constraint["columns"]
+            else:
+                ccolumns = [constraint["constraint_parameter"]]
+            constraints.append(UniqueConstraint(*ccolumns, **kwargs))
+
+    # autogenerate id column if missing
+    if "id" not in columns_by_name:
+        columns_by_name["id"] = Column("id", BigInteger, autoincrement=True)
+        columns.insert(0, columns_by_name["id"])
+
+    # check id column type
+    id_col_type = str(columns_by_name["id"].type).upper()
+    if "INT" not in id_col_type or "SERIAL" in id_col_type:
+        raise APIError("Id column must be of int type")
+
+    # autogenerate primary key
+    if not primary_key_col_names:
+        constraints.append(PrimaryKeyConstraint("id"))
+        primary_key_col_names = ["id"]
+
+    # check pk == id
+    if tuple(primary_key_col_names) != ("id",):
+        raise APIError("Primary key must be column id")
+
+    return columns, constraints
+
+
+def query_typecast_select(select) -> Select:
+    return cast_type(Select, select)
+
+
+def _parse_single(x, caster):
     try:
         return caster(x)
     except ValueError:
         raise APIError("Could not parse %s as %s" % (x, caster))
 
 
-def is_pg_qual(x):
+def is_pg_qual(x) -> bool:
     if not isinstance(x, str):
         return False
-    return pgsql_qualifier.search(x)
+    return bool(pgsql_qualifier.search(x))
 
 
 def read_pgvalue(x):
@@ -82,13 +257,7 @@ def read_pgvalue(x):
     return x
 
 
-class ValidationError(Exception):
-    def __init__(self, message, value):
-        self.message = message
-        self.value = value
-
-
-def read_bool(s):
+def read_bool(s) -> bool:
     if isinstance(s, bool):
         return s
     if s.lower() in ["true", "false"]:
@@ -105,7 +274,7 @@ def read_pgid(s):
     raise APIError("Invalid identifier: '%s'" % s)
 
 
-def set_meta_info(method, user, message=None):
+def set_meta_info(method, user, message=None) -> dict:
     val_dict = {}
     val_dict["_user"] = user  # TODO: Add user handling
     val_dict["_message"] = message
@@ -113,13 +282,10 @@ def set_meta_info(method, user, message=None):
     return val_dict
 
 
-def parse_insert(d, context, message=None, mapper=None):
-    table = Table(
-        read_pgid(get_or_403(d, "table")),
-        MetaData(bind=_get_engine()),
-        autoload=True,
-        schema=read_pgid(get_or_403(d, "schema")),
-    )
+def parse_insert(
+    sa_table_insert: "SATable", d: dict, context: dict, message=None, mapper=None
+):
+
     field_strings = []
     for field in d.get("fields", []):
         if not (
@@ -129,7 +295,7 @@ def parse_insert(d, context, message=None, mapper=None):
             raise APIError("Only pure column expressions are allowed in insert")
         field_strings.append(parse_expression(field))
 
-    query = table.insert()
+    query = sa_table_insert.insert()
 
     if "method" not in d:
         d["method"] = "values"
@@ -181,7 +347,7 @@ def parse_insert(d, context, message=None, mapper=None):
     return query, values
 
 
-def parse_select(d):
+def parse_select(d: dict):
     """
     Defintion of a select query according to
     http://www.postgresql.org/docs/9.3/static/sql-select.html
@@ -207,9 +373,9 @@ def parse_select(d):
                 if isinstance(grouping, dict):
                     partials.append(parse_select(grouping))
                 elif isinstance(grouping, list):
-                    partials = map(parse_select, grouping)
+                    partials = list(map(parse_select, grouping))
                 else:
-                    APIError(
+                    raise APIError(
                         "Cannot handle grouping type. Dictionary or list expected."
                     )
             elif t == "select":
@@ -229,7 +395,7 @@ def parse_select(d):
                     col.label(read_pgid(field["as"]))
                 L.append(col)
         if "from" in d:
-            kwargs["from_obj"] = parse_from_item(get_or_403(d, "from"))
+            kwargs["from_obj"] = _parse_from_item(get_or_403(d, "from"))
         else:
             kwargs["from_obj"] = []
         if not L:
@@ -243,9 +409,11 @@ def parse_select(d):
 
     if "group_by" in d:
         query = query.group_by(*[parse_expression(f) for f in d["group_by"]])
+        query = query_typecast_select(query)
 
     if "having" in d:
         query.having([parse_condition(f) for f in d["having"]])
+        query = query_typecast_select(query)
 
     if "select" in d:
         for constraint in d["select"]:
@@ -259,41 +427,33 @@ def parse_select(d):
                 query.except_(subquery)
     if "order_by" in d:
 
-        # issue #2041: order by on json columns fails,
-        # so we try to find json columns and cast them as text for ordering
-        if "from" in d:
-            json_columns = api.helper.get_json_columns(**d["from"])
-        else:
-            json_columns = set()
-
         for ob in d["order_by"]:
             expr = parse_expression(ob)
-
-            # cannot order json fields, so we cast them to string
-            if expr.name in json_columns:
-                expr = cast(expr, Text)
 
             if isinstance(ob, dict):
                 desc = ob.get("ordering", "asc").lower() == "desc"
                 if desc:
                     expr = expr.desc()
             query = query.order_by(expr)
+            query = query_typecast_select(query)
 
     if "limit" in d:
         if isinstance(d["limit"], int) or d["limit"].isdigit():
             query = query.limit(int(d["limit"]))
+            query = query_typecast_select(query)
         else:
             raise APIError("Invalid LIMIT: Expected a digit")
 
     if "offset" in d:
         if isinstance(d["offset"], int) or d["offset"].isdigit():
             query = query.offset(int(d["offset"]))
+            query = query_typecast_select(query)
         else:
             raise APIError("Invalid LIMIT: Expected a digit")
     return query
 
 
-def parse_from_item(d):
+def _parse_from_item(d):
     """
     Defintion of a from_item according to
     http://www.postgresql.org/docs/9.3/static/sql-select.html
@@ -307,94 +467,62 @@ def parse_from_item(d):
         [ LATERAL ] function_name ( [ argument [, ...] ] )
             AS ( column_definition [, ...] )
     """
+    if isinstance(d, list):
+        return [_parse_from_item(f) for f in d]
+
     # TODO: If 'type' is not set assume just a table name is present
     if isinstance(d, str):
         d = {"type": "table", "table": d}
-    if isinstance(d, list):
-        return [parse_from_item(f) for f in d]
+
     dtype = get_or_403(d, "type")
 
-    schema_name = read_pgid(d["schema"]) if "schema" in d else None
-    schema_name = validate_schema(schema_name)
-
     if dtype == "table":
-        # only = d.get("only", False)
-        ext_name = read_pgid(get_or_403(d, "table"))
-        tkwargs = dict(autoload=True)
-        if schema_name:
-            ext_name = schema_name + "." + ext_name
-            tkwargs["schema"] = schema_name
-        if ext_name in __PARSER_META.tables:
-            item = __PARSER_META.tables[ext_name]
-        else:
-            try:
-                item = Table(d["table"], __PARSER_META, **tkwargs)
-            except sa.exc.NoSuchTableError:
-                raise APIError("Table {table} not found".format(table=ext_name))
-
-        engine = _get_engine()
-        conn = engine.connect()
-        exists = engine.dialect.has_table(conn, item.name, schema_name)
-        conn.close()
-        if not exists:
-            raise APIError("Table not found: " + str(item), status=400)
+        table_obj = table_or_404_from_dict(d)
+        sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table(
+            shared_metadata=True
+        )
     elif dtype == "select":
-        item = parse_select(d)
+        sa_table = parse_select(d)
     elif dtype == "join":
-        left = parse_from_item(get_or_403(d, "left"))
-        right = parse_from_item(get_or_403(d, "right"))
+        left = _parse_from_item(get_or_403(d, "left"))
+        right = _parse_from_item(get_or_403(d, "right"))
         is_outer = d.get("is_outer", False)
         full = d.get("is_full", False)
         on_clause = None
         if "on" in d:
             on_clause = parse_condition(d["on"])
-        item = left.join(right, onclause=on_clause, isouter=is_outer, full=full)
+        sa_table = left.join(  # type:ignore
+            right,
+            onclause=on_clause,
+            isouter=is_outer,  # type:ignore
+            full=full,  # type:ignore
+        )
     else:
         raise APIError("Unknown from-item: " + dtype)
 
     if "alias" in d:
-        item = item.alias(read_pgid(d["alias"]))
-    return item
+        sa_table = sa_table.alias(read_pgid(d["alias"]))
+    return sa_table
 
 
-__PARSER_META = MetaData(bind=_get_engine())
-
-
-def load_table_from_metadata(table, schema=None):
-    ext_name = table
-    schema = validate_schema(schema)
-    if schema:
-        ext_name = schema + "." + ext_name
-    if ext_name and ext_name in __PARSER_META.tables:
-        return __PARSER_META.tables[ext_name]
-    else:
-        if _get_engine().dialect.has_table(
-            _get_engine().connect(), table, schema=schema
-        ):
-            return Table(table, __PARSER_META, autoload=True, schema=schema)
-
-
-def parse_column(d, mapper):
+def _parse_column(d: dict, mapper: dict | None = None):
     name = get_or_403(d, "column")
-    is_literal = parse_single(d.get("is_literal", False), bool)
+    is_literal = _parse_single(d.get("is_literal", False), bool)
     table_name = d.get("table")
-    table = None
+
+    sa_table = None
     if table_name:
         table_name = read_pgid(table_name)
-        if mapper is None:
-            mapper = dict()
+        table_obj = table_or_none(table_name)
+        if table_obj:
+            sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table(
+                shared_metadata=True
+            )
 
-        def do_map(x):
-            return mapper.get(x, x)
-
-        schema_name = read_pgid(do_map(d["schema"])) if "schema" in d else None
-        schema_name = validate_schema(schema_name)
-
-        table = load_table_from_metadata(table_name, schema=schema_name)
-    if table is not None and name in table.c:
-        col = table.c[name]
+    if sa_table is not None and name in sa_table.c:
+        col = sa_table.c[name]
         if isinstance(col.type, INTERVAL):
-            col.type = Interval(col.type)
+            col.type = sa_types.Interval(col.type)
         return col
     else:
         if is_literal:
@@ -406,9 +534,9 @@ def parse_column(d, mapper):
                 return column(name)
 
 
-def parse_type(dt_string, **kwargs):
+def _parse_type(dt_string, **kwargs):
     if isinstance(dt_string, dict):
-        dt = parse_type(
+        dt = _parse_type(
             get_or_403(dt_string, "datatype"), **dt_string.get("kwargs", {})
         )
         return dt
@@ -419,8 +547,8 @@ def parse_type(dt_string, **kwargs):
         if arr_match:
             # is_array = True
             dt_string = arr_match.groups()[0]
-            dt, autoincrement = parse_type(dt_string)
-            return sa.ARRAY(dt), autoincrement
+            dt, autoincrement = _parse_type(dt_string)
+            return ARRAY(dt), autoincrement
 
         # Is the datatypestring of form NAME(NUMBER)?
         dt_expression = r"(?P<dtname>[A-z_]+)\s*\((?P<cardinality>.*(,.*)?)\)"
@@ -431,7 +559,7 @@ def parse_type(dt_string, **kwargs):
                 return geoalchemy2.Geometry(geometry_type=match.groups()[1]), False
             else:
                 dt_cardinality = map(int, match.groups()[1].replace(" ", "").split(","))
-            dt, autoincrement = parse_type(dt_string)
+            dt, autoincrement = _parse_type(dt_string)
             return dt(*dt_cardinality, **kwargs), autoincrement
 
         # So it's a plain type
@@ -440,74 +568,69 @@ def parse_type(dt_string, **kwargs):
         dt_string = dt_string.lower()
 
         if dt_string in ("int", "integer"):
-            dt = sa.types.INTEGER
+            dt = sa_types.INTEGER
         elif dt_string in ("bigint", "biginteger"):
-            dt = sa.types.BigInteger
+            dt = sa_types.BigInteger
         elif dt_string in ("bit",):
-            dt = sa.types.LargeBinary
+            dt = sa_types.LargeBinary
         elif dt_string in ("boolean", "bool"):
-            dt = sa.types.Boolean
+            dt = sa_types.Boolean
         elif dt_string in ("char",):
-            dt = sqltypes.CHAR
+            dt = sa_types.CHAR
         elif dt_string in ("date",):
-            dt = sqltypes.Date
+            dt = sa_types.Date
         elif dt_string in ("datetime",):
-            dt = sqltypes.DateTime
+            dt = sa_types.DateTime
         elif dt_string in ("timestamp", "timestamp without time zone"):
-            dt = sqltypes.TIMESTAMP
+            dt = sa_types.TIMESTAMP
         elif dt_string in ("time", "time without time zone"):
-            dt = sqltypes.TIME
+            dt = sa_types.TIME
         elif dt_string in ("float"):
-            dt = sqltypes.FLOAT
+            dt = sa_types.FLOAT
         elif dt_string in ("decimal"):
-            dt = sqltypes.DECIMAL
+            dt = sa_types.DECIMAL
         elif dt_string in ("interval",):
-            dt = sqltypes.Interval
+            dt = sa_types.Interval
         elif dt_string in ("json",):
-            dt = sqltypes.JSON
+            dt = sa_types.JSON
         elif dt_string in ("nchar",):
-            dt = sqltypes.NCHAR
+            dt = sa_types.NCHAR
         elif dt_string in ("numerical", "numeric"):
-            dt = sa.types.Numeric
+            dt = sa_types.Numeric
         elif dt_string in ["varchar", "character varying"]:
-            dt = sqltypes.VARCHAR
+            dt = sa_types.VARCHAR
         elif dt_string in ("real",):
-            dt = sqltypes.REAL
+            dt = sa_types.REAL
         elif dt_string in ("smallint",):
-            dt = sqltypes.SMALLINT
+            dt = sa_types.SMALLINT
         # there was a problem here with later versions of sqlalchemy:
         # attribute "text" returns a function, not a valid type
         elif "geo" in dt_string and hasattr(geoalchemy2, dt_string):
             dt = getattr(geoalchemy2, dt_string)
         elif dt_string in _POSTGIS_MAP:
             dt = _POSTGIS_MAP[dt_string]
-        elif hasattr(sqltypes, dt_string.upper()):
-            dt = getattr(sqltypes, dt_string.upper())
+        elif hasattr(sa_types, dt_string.upper()):
+            dt = getattr(sa_types, dt_string.upper())
         elif dt_string == "bigserial":
-            dt = sa.types.BigInteger
+            dt = sa_types.BigInteger
             autoincrement = True
         else:
             raise APIError("Unknown type (%s)." % dt_string)
         return dt, autoincrement
 
 
-_POSTGIS_MAP = {
-    "compositeelement": geoalchemy2.types.CompositeElement,
-    "geography": geoalchemy2.types.Geography,
-    "geometry": geoalchemy2.types.Geometry,
-    "raster": geoalchemy2.types.Raster,
-    "rasterelement": geoalchemy2.types.RasterElement,
-}
-
-
-def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=True):
-    # TODO: Implement
+def parse_expression(
+    d: dict | list | str,
+    mapper: dict | None = None,
+    allow_untyped_dicts: bool = False,
+    escape_quotes: bool = True,
+) -> Any:
     if isinstance(d, dict):
         if allow_untyped_dicts and "type" not in d:
             return d
         dtype = get_or_403(d, "type")
         if dtype == "column":
-            return parse_column(d, mapper)
+            return _parse_column(d, mapper)
         if dtype == "grouping":
             grouping = get_or_403(d, "grouping")
             if isinstance(grouping, list):
@@ -515,15 +638,15 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
             else:
                 return parse_expression(grouping)
         if dtype == "operator":
-            return parse_operator(d)
+            return _parse_operator(d)
         if dtype == "case":
-            return parse_case(d)
+            return _parse_case(d)
         if dtype == "modifier":
-            return parse_modifier(d)
+            return _parse_modifier(d)
         if dtype == "function":
-            return parse_function(d)
+            return _parse_function(d)
         if dtype == "slice":
-            return parse_slice(d)
+            return _parse_slice(d)
         if dtype == "star":
             return "*"
         if dtype == "literal":
@@ -548,19 +671,17 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
             else:
                 return None
         if dtype == "label":
-            return parse_label(d)
+            return _parse_label(d)
         if dtype == "sequence":
-            schema_name = (
-                read_pgid(d["schema"]) if "schema" in d else SCHEMA_DEFAULT_TEST_SANDBOX
+            return Sequence(
+                get_or_403(d, "sequence"), schema=SCHEMA_DEFAULT_TEST_SANDBOX
             )
-            schema_name = validate_schema(schema_name)
-            # s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
-            return Sequence(get_or_403(d, "sequence"), schema=schema_name)
+
         if dtype == "select":
             return parse_select(d)
         if dtype == "cast":
             expr = parse_expression(get_or_403(d, "source"))
-            t, _ = parse_type(get_or_403(d, "as"))
+            t, _ = _parse_type(get_or_403(d, "as"))
             return cast(expr, t)
         else:
             raise APIError("Unknown expression type: " + dtype)
@@ -579,14 +700,14 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
     return d
 
 
-def parse_label(d):
+def _parse_label(d: dict):
     element = parse_expression(get_or_403(d, "element"))
-    if not isinstance(element, sa.sql.expression.ClauseElement):
-        element = sa.literal(element)
+    if not isinstance(element, ClauseElement):
+        element = literal(element)
     return element.label(get_or_403(d, "label"))
 
 
-def parse_slice(d):
+def _parse_slice(d: dict):
     kwargs = {"step": 1}
     if "start" in d:
         kwargs["start"] = d["start"]
@@ -616,10 +737,10 @@ def parse_condition(dl):
     return parse_expression(clean_dl)
 
 
-def parse_case(dl):
+def _parse_case(dl):
     else_clause = parse_expression(dl["else"])
     if "expression" in dl:
-        return sa.case(
+        return sa_case(
             {
                 parse_expression(case["when"]): parse_expression(case["then"])
                 for case in dl.get("cases", [])
@@ -628,7 +749,7 @@ def parse_case(dl):
             else_=else_clause,
         )
     else:
-        return sa.case(
+        return sa_case(
             [
                 (parse_expression(case["when"]), parse_expression(case["then"]))
                 for case in dl.get("cases", [])
@@ -637,23 +758,23 @@ def parse_case(dl):
         )
 
 
-def parse_operator(d):
-    query = parse_sqla_operator(
+def _parse_operator(d: dict):
+    query = _parse_sqla_operator(
         get_or_403(d, "operator"),
-        *list(map(parse_expression, get_or_403(d, "operands")))
+        *list(map(parse_expression, get_or_403(d, "operands"))),
     )
     return query
 
 
-def parse_modifier(d):
-    query = parse_sqla_modifier(
+def _parse_modifier(d: dict):
+    query = _parse_sqla_modifier(
         get_or_403(d, "operator"),
-        *list(map(parse_expression, get_or_403(d, "operands")))
+        *list(map(parse_expression, get_or_403(d, "operands"))),
     )
     return query
 
 
-def parse_function(d):
+def _parse_function(d: dict):
     fname = get_or_403(d, "function")
 
     operand_struc = get_or_403(d, "operands")
@@ -684,9 +805,10 @@ def parse_function(d):
             return function(*operands)
 
 
-def parse_scolumnd_from_columnd(schema, table, name, column_description):
+def parse_scolumnd_from_columnd(
+    table_obj: "Table", name: str, column_description: dict
+):
     # Migrate Postgres to Python Structures
-    schema_name = validate_schema(schema)
     data_type = column_description.get("data_type")
     size = column_description.get("character_maximum_length")
     if size is not None and data_type is not None:
@@ -699,12 +821,11 @@ def parse_scolumnd_from_columnd(schema, table, name, column_description):
         "not_null": notnull,
         "data_type": data_type,
         "new_name": column_description.get("new_name"),
-        "c_schema": schema_name,
-        "c_table": table,
+        "c_table": table_obj.name,
     }
 
 
-def replace_None_with_NULL(dictonary):
+def replace_None_with_NULL(dictonary: dict) -> dict:
     # Replacing None with null for Database
     for key, value in dictonary.items():
         if value is None:
@@ -713,50 +834,7 @@ def replace_None_with_NULL(dictonary):
     return dictonary
 
 
-def split(string, seperator):
-    if string is None:
-        return None
-    else:
-        return str(string).split(seperator)
-
-
-def replace(string, occuring_symb, replace_symb):
-    if string is None:
-        return None
-    else:
-        return str(string).replace(occuring_symb, replace_symb)
-
-
-def alchemyencoder(obj):
-    """JSON encoder function for SQLAlchemy special classes."""
-    if isinstance(obj, datetime.date):
-        return obj.isoformat()
-    elif isinstance(obj, decimal.Decimal):
-        return float(obj)
-
-
-sql_operators = {
-    "EQUALS": "=",
-    "GREATER": ">",
-    "LOWER": "<",
-    "NOTEQUAL": "!=",
-    "NOTGREATER": "<=",
-    "NOTLOWER": ">=",
-    "=": "=",
-    ">": ">",
-    "<": "<",
-    "!=": "!=",
-    "<>": "!=",
-    "<=": "<=",
-    ">=": ">=",
-}
-
-
-def parse_sql_operator(key: str) -> str:
-    return sql_operators.get(key)
-
-
-def parse_sqla_operator(raw_key, *operands):
+def _parse_sqla_operator(raw_key, *operands):
     try:
         key = raw_key.lower().strip()
         if not operands:
@@ -801,7 +879,7 @@ def parse_sqla_operator(raw_key, *operands):
             if key in ["divide", "/"]:
                 return x / y
             if key in ["concatenate", "||"]:
-                return fun.concat(x, y)
+                return functions.concat(x, y)
             if key in ["is"]:
                 return x is y
             if key in ["is not"]:
@@ -812,7 +890,10 @@ def parse_sqla_operator(raw_key, *operands):
                 return x.distance_centroid(y)
             if key in ["getitem"]:
                 if isinstance(y, Slice):
-                    return x[parse_single(y.start, int) : parse_single(y.stop, int)]
+                    ystart, ystop = _parse_single(y.start, int), _parse_single(
+                        y.stop, int
+                    )
+                    return x[ystart:ystop]
                 else:
                     return x[read_pgid(y)]
             if key in ["in"]:
@@ -822,7 +903,7 @@ def parse_sqla_operator(raw_key, *operands):
     raise APIError("Operator '%s' not supported" % key)
 
 
-def parse_sqla_modifier(raw_key, *operands):
+def _parse_sqla_modifier(raw_key, *operands):
     key = raw_key.lower().strip()
     if not operands:
         raise APIError("Missing arguments for '%s'." % key)

@@ -6,6 +6,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 
 class APIError(Exception):
+    """Instances of APIError will be caught
+    and the error messages will be delivered as payload to the user.
+    """
+
     def __init__(self, message, status=400):
         self.message = message
         self.status = status

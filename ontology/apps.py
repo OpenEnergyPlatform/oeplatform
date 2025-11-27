@@ -18,13 +18,11 @@ from oeplatform.settings import (
     OPEN_ENERGY_ONTOLOGY_FOLDER,
 )
 
+logger = logging.getLogger("oeplatform")
+
 
 class OntologyConfig(AppConfig):
     name = "ontology"
-
-    # Configure the logging module
-    logging.basicConfig(level=logging.WARNING)
-    logger = logging.getLogger(__name__)
 
     def ready(self):
         """
@@ -51,5 +49,5 @@ class OntologyConfig(AppConfig):
                 f"{DOCUMENTATION_LINKS.get(documentation_key)}"
             )
 
-            self.logger.error(msg)
+            logger.error(msg)
             raise ImportError(msg)

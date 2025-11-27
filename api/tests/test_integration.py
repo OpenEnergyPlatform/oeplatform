@@ -54,7 +54,6 @@ class IntegrationTestCase(APITestCase):
     def checkStructure(self):
         body = self.api_req("get")
 
-        self.assertEqual(body["schema"], self.test_schema, "Schema does not match.")
         self.assertEqual(body["name"], self.test_table, "Table does not match.")
 
         for column in self.structure_data["columns"]:
@@ -77,7 +76,7 @@ class IntegrationTestCase(APITestCase):
         self.api_req("get", path="rows/", exp_res=self.content_data)
 
     def step_create_table(self):
-        self.api_req("put", data={"query": self.structure_data})
+        self.create_table(structure=self.structure_data)
         self.checkStructure()
 
     def step_modify_table(self):

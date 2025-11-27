@@ -20,7 +20,6 @@ class TestIssue2136TagsNewTable(APITestCaseWithTable):
         resp = self.client.post(
             url,
             data={
-                "schema": self.test_schema,
                 "table": self.test_table,
                 # NOTE: weirdly, adding tags is done by adding tag_<pk> field
                 f"tag_{tag.pk}": "",
@@ -29,7 +28,7 @@ class TestIssue2136TagsNewTable(APITestCaseWithTable):
         self.assertTrue(resp.status_code < 400)
         table = Table.objects.get(name=self.test_table)
         self.assertTrue(table.tags.contains(tag))
-        self.assertTrue(tag.tables.contains(table))  # type: ignore (reverse field)
+        self.assertTrue(tag.tables.contains(table))
         self.assertTrue(
             tag.name_normalized in table.oemetadata["resources"][0]["keywords"]
         )

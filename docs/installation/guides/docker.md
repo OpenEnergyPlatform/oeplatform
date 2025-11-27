@@ -1,1 +1,1 @@
-!INCLUDE "../../../docker/README.md"
+{% include-markdown '../../../docker/README.md' %}

@@ -21,12 +21,12 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import logging
 import re
 from urllib.parse import urljoin, urlparse, urlunparse
 
 import requests
-from bs4 import BeautifulSoup
+import urllib3
+from bs4 import BeautifulSoup, Tag
 from django.core.management.base import BaseCommand
 
 cache = {}
@@ -34,8 +34,11 @@ cache = {}
 
 def iter_links(url, parent_url=None, root_url=None, no_external=False):
     res = requests.get(
-        url, stream=True
-    )  # stream because sometimes we dont actually load all the content
+        url,
+        stream=True,  # stream because sometimes we dont actually load all the content
+        verify=False,  # sometimes ssl certs fail
+        headers={"User-Agent": "Mozilla/5.0"},
+    )
     cache[url] = res.status_code
 
     # check if page should be parsed
@@ -47,9 +50,7 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
     )
 
     if not res.ok:
-        logging.error("%s %s (SOURCE: %s)", res.status_code, url, parent_url)
-    else:
-        logging.info("%s %s (parse=%s)", res.status_code, url, parse)
+        print("%s %s (SOURCE: %s)", res.status_code, url, parent_url)
 
     if not parse:
         res.close()  # close stream
@@ -58,20 +59,24 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
     # load and parse page
 
     html = BeautifulSoup(res.content, "html.parser")
+
+    def filter_tag(t: Tag) -> bool:
+        return bool(t.get("src") or t.get("href") or t.get("onclick"))
+
     # find all tags with href or src attribute
-    for t in html.find_all(lambda t: t.get("src") or t.get("href") or t.get("onclick")):
-        if t.get("onclick"):
-            ref = t.get("onclick")
+    tag: Tag
+    for tag in html.find_all(filter_tag):
+        if tag.get("onclick"):
+            ref = str(tag.get("onclick", ""))
             match = re.match(
                 r'.*window.location[ ]*=[ ]*["\']([^"\']+)', ref
             ) or re.match(r'.*window.open[ ]*\([ ]*["\']([^"\']+)', ref)
             if match:
                 ref = match.groups()[0]
             else:
-                logging.debug("skipping %s", ref)
                 continue
         else:
-            ref = t.get("src") or t.get("href")
+            ref = str(tag.get("src") or tag.get("href") or "")
 
         if not ref:
             continue
@@ -79,18 +84,21 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
         # create absolute url
         ref = urljoin(url, ref)
 
-        if no_external and not ref.startswith(root_url):
+        is_external = not ref.startswith(root_url)
+        if no_external and is_external:
             continue
 
-        # remove query args and fragments
-        ref = urlparse(ref)
-        if ref.scheme not in ("http", "https"):
+        ref_parts = urlparse(ref)
+        if ref_parts.scheme not in ("http", "https"):
             continue
-        ref = urlunparse(ref._replace(fragment="", query=""))
+        # remove query args and fragments for internals
+        if not is_external:
+            ref = urlunparse(ref_parts._replace(fragment="", query=""))
+
         if ref in cache:  # already processed
             continue
         # only parse local links that come from an <a> tag
-        parse = ref.startswith(root_url) and t.name == "a"
+        parse = ref.startswith(root_url) and tag.name == "a"
         iter_links(ref, root_url=root_url, parent_url=url, no_external=no_external)
 
 
@@ -102,19 +110,11 @@ class Command(BaseCommand):
             "instance", help="url to running test instance (e.g. http://localhost:8000)"
         )
         parser.add_argument(
-            "--show-all", action="store_true", help="show all urls, not just dead links"
-        )
-        parser.add_argument(
-            "--no-external", action="store_true", help="only check local links"
+            "--no-external", action="store_true", help="skip external links"
         )
 
     def handle(self, *args, **options):
-        loglevel = logging.INFO if options["show_all"] else logging.WARNING
-
-        logging.basicConfig(
-            format="[%(asctime)s %(levelname)7s] %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-            level=loglevel,
-        )
+        # Suppress only the insecure request warning
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         iter_links(options["instance"], no_external=options["no_external"])

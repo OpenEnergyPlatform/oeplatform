@@ -1,12 +1,18 @@
-// SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-// SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
-// SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-// SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
+/* eslint-disable max-len */
+/*
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-License-Identifier: AGPL-3.0-or-later
+*/
+/* eslint-enable max-len */
 
 "use strict";
+
+const MAX_ROWCOUNT_ORDER_BY = 100000;
+/* table with more than that: disable filter and sort */
 
 var map;
 var tile_layer;
@@ -17,6 +23,27 @@ var table_container;
 var query_builder;
 var where;
 var view;
+
+var type_maps = {
+  "double precision": "double",
+};
+
+var valid_types = [
+  "string",
+  "integer",
+  "double",
+  "date",
+  "time",
+  "datetime",
+  "boolean",
+];
+
+var table_info = {
+  columns: [],
+  columnTypes: {},
+  rows: null,
+  name: null,
+};
 
 function getCookie(name) {
   var cookieValue = null;
@@ -32,6 +59,65 @@ function getCookie(name) {
     }
   }
   return cookieValue;
+}
+
+/**
+ *
+ * @param {str} colType
+ * @returns {boolean}
+ */
+function columnTypeIsGeometry(colType) {
+  var colTypeLower = colType.toLowerCase();
+  if (colTypeLower.includes("geo")) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ *
+ * @param {str} colType
+ * @returns {boolean}
+ */
+function columnTypeIsJson(colType) {
+  var colTypeLower = colType.toLowerCase();
+  if (colTypeLower.includes("json")) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ *
+ * @param {str} colType
+ * @returns {boolean}
+ */
+function columnTypeIsSortable(colType) {
+  if (columnTypeIsJson(colType) || columnTypeIsGeometry(colType)) {
+    return false; /* cannot sort json/jsonb */
+  }
+  return true;
+}
+
+/**
+ *
+ * @param {*} query
+ * @param {string} label
+ * @returns {object}
+ */
+function queryCastToText(query, label) {
+  var result = {
+    type: "label",
+    element: {
+      type: "cast",
+      source: query,
+      as: "text",
+    },
+  };
+  if (label) {
+    result.label = label;
+  }
+  return result;
 }
 
 function fail_handler(jqXHR, exception) {
@@ -66,21 +152,6 @@ function fail_handler(jqXHR, exception) {
   showMessage(msg, "warning");
 }
 
-var table_info = {
-  columns: [],
-  rows: null,
-  name: null,
-  schema: null,
-};
-
-var geo_datatypes = [
-  "point",
-  "polygon",
-  "polygonwithhole",
-  "collection",
-  "linestring",
-];
-
 /**
  *
  * @param {string} textData
@@ -96,13 +167,18 @@ function customParseJSON(textData) {
   return jsonData;
 }
 
+/**
+ * this function is called by the table widget to update displayed data,
+ * like filtering, sorting, pagination, ...
+ * @param {object} data
+ * @param {function} callback
+ * @param {object} settings
+ */
 function request_data(data, callback, settings) {
   $("#loading-indicator").show();
-
   var base_query = {
     from: {
       type: "table",
-      schema: schema,
       table: table,
     },
   };
@@ -116,24 +192,53 @@ function request_data(data, callback, settings) {
   ];
   count_query.where = where;
   var select_query = JSON.parse(JSON.stringify(base_query));
-  select_query["order_by"] = data.order.map(function (c) {
-    return {
-      type: "column",
-      column: table_info.columns[c.column],
-      ordering: c.dir,
-    };
-  });
+
+  select_query["order_by"] = data.order
+    .map(function (c) {
+      /* some types cannot be sorted by */
+      const colName = table_info.columns[c.column];
+      const colType = table_info.columnTypes[colName];
+
+      if (!columnTypeIsSortable(colType)) {
+        const castCol = queryCastToText(
+          {
+            type: "column",
+            column: colName,
+          },
+          (colName.ordering = c.dir)
+        );
+
+        return castCol;
+        /*
+        showMessage(`Cannot order by column ${colName}(${colType})`, "warning");
+        return undefined;
+        */
+      }
+
+      return {
+        type: "column",
+        column: colName,
+        ordering: c.dir,
+      };
+    })
+    .filter((item) => item !== undefined);
+
   select_query["fields"] = [];
   for (var i in table_info.columns) {
-    var col = table_info.columns[i];
+    var colName = table_info.columns[i];
+    const colType = table_info.columnTypes[colName];
+
     var query = {
       type: "column",
-      column: col,
+      column: colName,
     };
-    if (col == "geom") {
+
+    if (columnTypeIsJson(colType)) {
+      query = queryCastToText(query, colName);
+    } else if (columnTypeIsGeometry(colType)) {
       query = {
         type: "label",
-        label: "geom",
+        label: colName,
         element: {
           type: "function",
           function: "ST_Transform",
@@ -141,6 +246,7 @@ function request_data(data, callback, settings) {
         },
       };
     }
+
     select_query["fields"].push(query);
   }
   select_query.offset = data.start;
@@ -148,18 +254,32 @@ function request_data(data, callback, settings) {
   if (where !== null) {
     select_query.where = where;
   }
+
+  const tableTooLarge = table_info.rows > MAX_ROWCOUNT_ORDER_BY;
+
+  if (tableTooLarge) {
+    showMessage(
+      "Sorting and filtering in preview is disabled for very large tables",
+      "warning"
+    );
+    select_query.where = undefined;
+    select_query.order_by = undefined;
+  }
+
   var draw = Number(data.draw);
   window.reverseUrl("api:advanced-search").then((urlSearch) => {
     $.when(
-      $.ajax({
-        type: "POST",
-        url: urlSearch,
-        dataType: "json",
-        data: {
-          csrfmiddlewaretoken: csrftoken,
-          query: JSON.stringify(count_query),
-        },
-      }),
+      tableTooLarge
+        ? undefined
+        : $.ajax({
+            type: "POST",
+            url: urlSearch,
+            dataType: "json",
+            data: {
+              csrfmiddlewaretoken: csrftoken,
+              query: JSON.stringify(count_query),
+            },
+          }),
       $.ajax({
         type: "POST",
         url: urlSearch,
@@ -180,19 +300,21 @@ function request_data(data, callback, settings) {
 
         select_response[0].data = select_response[0].data || [];
 
-        if (map !== undefined) {
-          build_map(select_response[0].data, select_response[0].description);
-        }
-
-        if (view.type === "map") {
+        if (view.type === "map" && map !== undefined) {
           build_map(select_response[0].data, select_response[0].description);
         } else if (view.type === "graph") {
           build_graph(select_response[0].data);
         }
+
+        const recordsFiltered = tableTooLarge
+          ? table_info.rows /* total row count */
+          : count_response[0]
+              .data[0][0]; /* correct row count of filtered data */
+
         callback({
           data: select_response[0].data,
           draw: draw,
-          recordsFiltered: count_response[0].data[0][0],
+          recordsFiltered: recordsFiltered,
           recordsTotal: table_info.rows,
         });
       })
@@ -207,29 +329,50 @@ function build_map(data, description) {
     }
   });
   var geo_columns = get_selected_geo_columns();
+  var maptype = get_maptype();
+
   var col_idxs = description.reduce(function (l, r, i) {
     if (geo_columns.includes(r[0])) {
       l.push(i);
     }
     return l;
   }, []);
-  var bounds = [];
-  for (var row_id in data) {
-    var row = data[row_id];
-    var geo_values = col_idxs.map(function (i) {
-      if (row[i] !== null) {
-        var buf = new buffer.Buffer(row[i], "hex");
+
+  var geomItems = [];
+
+  if (maptype == "geom") {
+    var colIdxGeom = col_idxs[0]; /* only one */
+    for (var row_id in data) {
+      var row = data[row_id];
+      var geo = row[colIdxGeom];
+      if (geo !== null) {
+        var buf = new buffer.Buffer(geo, "hex");
         var wkb = wkx.Geometry.parse(buf);
         var gj = L.geoJSON(wkb.toGeoJSON());
         gj.on("click", flash_handler(row_id));
-        gj.addTo(map);
-        return gj;
+        geomItems.push(gj);
       }
-    });
-    bounds.push(L.featureGroup(geo_values.filter((x) => !!x)));
+    }
+  } else if (maptype == "latlon") {
+    var colIdxLat = col_idxs[0];
+    var colIdxLon = col_idxs[1];
+    for (var row_id in data) {
+      var row = data[row_id];
+      var lat = row[colIdxLat];
+      var lon = row[colIdxLon];
+      if (lat !== null && lon !== null) {
+        var gj = L.marker([lat, lon]);
+        gj.on("click", flash_handler(row_id));
+        geomItems.push(gj);
+      }
+    }
   }
-  var b = L.featureGroup(bounds).getBounds();
-  map.fitBounds(b);
+
+  if (geomItems.length > 0) {
+    geomItems.forEach((gj) => gj.addTo(map));
+    var bounds = L.featureGroup(geomItems).getBounds();
+    map.fitBounds(bounds);
+  }
 }
 
 function get_selected_geo_columns() {
@@ -241,7 +384,20 @@ function get_selected_geo_columns() {
   ) {
     return [view.options.lat, view.options.lon];
   } else {
-    console.log("Unrecognised map type");
+    showMessage("Unrecognised map type", "warning");
+  }
+}
+
+function get_maptype() {
+  if (view.options.hasOwnProperty("geom")) {
+    return "geom";
+  } else if (
+    view.options.hasOwnProperty("lat") &&
+    view.options.hasOwnProperty("lon")
+  ) {
+    return "latlon";
+  } else {
+    showMessage("Unrecognised map type", "warning");
   }
 }
 
@@ -298,40 +454,31 @@ function flash_handler(i) {
   };
 }
 
-function load_view(schema, table, csrftoken, current_view) {
+/**
+ *
+ * @param {string} table
+ * @param {string} csrftoken
+ * @param {object} current_view
+ */
+function load_view(table, csrftoken, current_view) {
   view = current_view;
   table_info.name = table;
-  table_info.schema = schema;
-  var count_query = {
-    from: {
-      type: "table",
-      schema: schema,
-      table: table,
-    },
-    fields: [
-      {
-        type: "function",
-        function: "count",
-        operands: ["*"],
-      },
-    ],
-  };
 
   Promise.all([
     window.reverseUrl("api:advanced-search"),
-    window.reverseUrl("api:table-columns", { schema: schema, table: table }),
-  ]).then(([urlSearch, urlColumns]) => {
+    window.reverseUrl("api:table-columns", { table: table }),
+    window.reverseUrl("api:approx-row-count", { table: table }),
+  ]).then(([urlSearch, urlColumns, urlApproxRowCount]) => {
     $.when(
       $.ajax({
         url: urlColumns,
       }),
       $.ajax({
-        type: "POST",
-        url: urlSearch,
+        type: "GET",
+        url: urlApproxRowCount,
         dataType: "json",
         data: {
           csrfmiddlewaretoken: csrftoken,
-          query: JSON.stringify(count_query),
         },
       })
     )
@@ -341,6 +488,7 @@ function load_view(schema, table, csrftoken, current_view) {
           $(str).appendTo("#datatable" + ">thead>tr");
           table_info.columns.push(colname);
           var dt = column_response[0][colname]["data_type"];
+          table_info.columnTypes[colname] = dt;
           var mapped_dt;
           if (dt in type_maps) {
             mapped_dt = type_maps[dt];
@@ -359,7 +507,9 @@ function load_view(schema, table, csrftoken, current_view) {
             "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             {
               attribution:
-                'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende',
+                "Kartendaten &copy; " +
+                '<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' +
+                "Mitwirkende",
               useCache: true,
             }
           );
@@ -390,7 +540,6 @@ function parse_download() {
     fields: [],
     from: {
       type: "table",
-      schema: schema,
       table: table,
     },
   };
@@ -425,7 +574,7 @@ function parse_download() {
       var responseBlob = new Blob(temp);
       var tempElement = document.createElement("a");
       tempElement.href = window.URL.createObjectURL(responseBlob);
-      tempElement.download = "Partial_" + schema + "_" + table + ".csv";
+      tempElement.download = "Partial_" + table + ".csv";
       tempElement.click();
       tempElement.remove();
     });
@@ -603,20 +752,6 @@ function parse_rule(r) {
   }
 }
 
-var type_maps = {
-  "double precision": "double",
-};
-
-var valid_types = [
-  "string",
-  "integer",
-  "double",
-  "date",
-  "time",
-  "datetime",
-  "boolean",
-];
-
 /**
  * create a message div in the django message container
  * @param {string} message
@@ -624,7 +759,7 @@ var valid_types = [
  */
 function showMessage(message, level) {
   level = level || "info";
-  console.log(level, message);
+  console.log(level, ":", message); /* also keep message in console */
   const container = document.getElementById("uiMessages");
   const div = document.createElement("div");
   div.innerHTML = `

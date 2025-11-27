@@ -6,7 +6,12 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from typing import TYPE_CHECKING
+
 from api import actions
+
+if TYPE_CHECKING:
+    from dataedit.models import Table
 
 TEMPLATE_V1_5 = {
     "name": "",
@@ -118,9 +123,9 @@ TEMPLATE_V1_5 = {
 }
 
 
-def get_empty(schema, table):
+def get_empty(table_obj: "Table"):
     template = TEMPLATE_V1_5.copy()
-    columns = actions.analyze_columns(schema, table)
+    columns = actions.analyze_columns(table_obj)
     # TODO: check how the fields should
     template["resources"][0]["schema"]["fields"] = [
         {"name": col["id"], "description": "", "unit": ""} for col in columns
