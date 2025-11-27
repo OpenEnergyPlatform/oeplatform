@@ -302,6 +302,9 @@ def tag_update_view(request: HttpRequest) -> HttpResponse:
             # requested changes are not valid because of name conflicts
             status = "invalid"
 
+    if not request.user.has_admin_permissions():
+        raise PermissionDenied
+
     elif "submit_delete" in request.POST:
         id = request.POST["tag_id"]
         delete_tag(id)
