@@ -103,11 +103,11 @@ urlpatterns_v0_schema_table = [
         TableColumnAPIView.as_view(),
         name="table-columns",
     ),
-    re_path(
-        r"^(?P<table>[\w\d_\s]+)/id/(?P<column_id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
-        TableFieldsAPIView.as_view(),
-        name="table-fields",
-    ),
+    # re_path(
+    #    r"^(?P<table>[\w\d_\s]+)/id/(?P<row_id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
+    #    TableFieldsAPIView.as_view(),
+    #    name="table-fields",
+    # ),
     re_path(
         r"^(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",  # noqa
         TableRowsAPIView.as_view(),
@@ -136,7 +136,7 @@ urlpatterns_v0_advanced = [
     ),
     re_path(r"^delete", AdvancedDeleteAPIView, name="advanced-delete"),
     re_path(r"^update", AdvancedUpdateAPIView, name="advanced-update"),
-    re_path(r"^info", AdvancedInfoAPIView, name="advanced-info"),
+    # re_path(r"^info", AdvancedInfoAPIView, name="advanced-info"),
     re_path(r"^has_schema", AdvancedHasSchemaAPIView, name="advanced-has-schema"),
     re_path(r"^has_table", AdvancedHasTableAPIView, name="advanced-has-table"),
     re_path(
@@ -242,11 +242,11 @@ urlpatterns_v0_advanced = [
         AdvancedDoRecoverTwophaseAPIView,
         name="advanced-do-recover-twophase",
     ),
-    re_path(
-        r"^connection/close_all",
-        AdvancedCloseAllAPIView.as_view(),
-        name="advanced-connection-close-all",
-    ),
+    # re_path(
+    #     r"^connection/close_all",
+    #     AdvancedCloseAllAPIView.as_view(),
+    #     name="advanced-connection-close-all",
+    # ),
     re_path(
         r"^cursor/fetch_many",
         AdvancedFetchAPIView.as_view(),
