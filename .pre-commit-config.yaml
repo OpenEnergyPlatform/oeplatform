@@ -21,7 +21,7 @@ repos:
       - id: flake8
         args: ["--max-line-length=88", "--ignore=E20,W503"] # black compatible
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v10.0.0-alpha.0
+    rev: v10.0.0-alpha.1
     hooks:
       - id: eslint
         additional_dependencies:
