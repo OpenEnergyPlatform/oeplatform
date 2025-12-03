@@ -1299,9 +1299,8 @@ def get_table_oid(request: dict, context=None):
     try:
         result = engine.dialect.get_table_oid(
             conn,
-            table_obj.name,
+            table_name=table_obj.name,
             schema=table_obj.oedb_schema,
-            **request,
         )
     except NoSuchTableError as e:
         raise ConnectionError(str(e))
@@ -1919,7 +1918,10 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
 
     try:
         table_oid = engine.dialect.get_table_oid(
-            connection, table_obj.name, table_obj.oedb_schema, info_cache=info_cache
+            connection,
+            table_name=table_obj.name,
+            schema=table_obj.oedb_schema,
+            info_cache=info_cache,
         )
     except NoSuchTableError as e:
         raise ConnectionError(str(e))
@@ -1976,10 +1978,7 @@ def get_pk_constraint(request: dict, context: dict | None = None) -> dict:
 
     try:
         result = engine.dialect.get_pk_constraint(
-            conn,
-            table_obj.name,
-            schema=table_obj.oedb_schema,
-            **request,
+            conn, table_name=table_obj.name, schema=table_obj.oedb_schema
         )
     finally:
         conn.close()
@@ -1991,16 +1990,15 @@ def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
     conn = engine.connect()
 
     table_obj = table_or_404_from_dict(request)
-    request["schema"] = table_obj.oedb_schema
 
     try:
         result = engine.dialect.get_foreign_keys(
             conn,
-            table_obj.name,
+            table_name=table_obj.name,
+            schema=table_obj.oedb_schema,
             postgresql_ignore_search_path=request.pop(
                 "postgresql_ignore_search_path", False
             ),
-            **request,
         )
     finally:
         conn.close()
@@ -2015,7 +2013,9 @@ def get_indexes(request: dict, context: dict | None = None) -> dict:
     engine = _get_engine()
     conn = engine.connect()
     try:
-        result = engine.dialect.get_indexes(conn, table_obj.oedb_schema, **request)
+        result = engine.dialect.get_indexes(
+            conn, table_name=table_obj.name, schema=table_obj.oedb_schema
+        )
     finally:
         conn.close()
     return result
@@ -2028,7 +2028,9 @@ def get_unique_constraints(request: dict, context: dict | None = None) -> dict:
     engine = _get_engine()
     conn = engine.connect()
     try:
-        result = engine.dialect.get_foreign_keys(conn, table_obj.name, **request)
+        result = engine.dialect.get_foreign_keys(
+            conn, table_name=table_obj.name, schema=table_obj.oedb_schema
+        )
     finally:
         conn.close()
     return result
