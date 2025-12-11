@@ -120,5 +120,8 @@ site/
 
 # NPM & VITE
 patches/
+
+# other git repos
 oedialect/
 oep-client/
+saio/

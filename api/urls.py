@@ -44,7 +44,6 @@ from api.views import (
     AdvancedGetViewNamesAPIView,
     AdvancedHasSchemaAPIView,
     AdvancedHasTableAPIView,
-    AdvancedInfoAPIView,
     AdvancedInsertAPIView,
     AdvancedSearchAPIView,
     AdvancedSetIsolationLevelAPIView,
@@ -57,7 +56,6 @@ from api.views import (
     ScenarioDataTablesListAPIView,
     TableAPIView,
     TableColumnAPIView,
-    TableFieldsAPIView,
     TableMetadataAPIView,
     TableMovePublishAPIView,
     TableRowsAPIView,
@@ -69,6 +67,7 @@ from api.views import (
     usrprop_api_view,
 )
 
+# from api.views import TableFieldsAPIView, AdvancedInfoAPIView
 app_name = "api"
 
 pgsql_qualifier = r"[\w\d_]+"
@@ -242,11 +241,11 @@ urlpatterns_v0_advanced = [
         AdvancedDoRecoverTwophaseAPIView,
         name="advanced-do-recover-twophase",
     ),
-    # re_path(
-    #     r"^connection/close_all",
-    #     AdvancedCloseAllAPIView.as_view(),
-    #     name="advanced-connection-close-all",
-    # ),
+    re_path(
+        r"^connection/close_all",
+        AdvancedCloseAllAPIView.as_view(),
+        name="advanced-connection-close-all",
+    ),
     re_path(
         r"^cursor/fetch_many",
         AdvancedFetchAPIView.as_view(),
