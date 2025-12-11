@@ -426,15 +426,15 @@ class TableFieldsAPIView(APIView):
         self,
         request: Request,
         table: str,
-        column_id: int,
+        row_id: int,
         column: str | None = None,
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
 
-        if not is_pg_qual(table) or not is_pg_qual(column_id) or not is_pg_qual(column):
+        if not is_pg_qual(table) or not is_pg_qual(row_id) or not is_pg_qual(column):
             return ModJsonResponse({"error": "Bad Request", "http_status": 400})
 
-        returnValue = getValue(table_obj, column, column_id)
+        returnValue = getValue(table_obj, column, row_id)
         if returnValue is None:
             return JsonResponse({}, status=404)
         else:

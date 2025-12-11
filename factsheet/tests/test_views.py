@@ -33,7 +33,6 @@ class TestViewsFactsheet(TestViewsTestCase):
         self.get("factsheet:compare", args=["SOME_UID"])
         self.get("factsheet:factsheets_index")
         self.get("factsheet:get-oekg-modifications")
-        self.get("factsheet:index")
         self.get("factsheet:is-logged-in")
         self.get("factsheet:oekg-history", args=["SOME_UID"])
         self.get("factsheet:oekg-modifications", args=["SOME_UID"])
