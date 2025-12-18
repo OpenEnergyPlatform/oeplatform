@@ -242,7 +242,7 @@ urlpatterns_v0_advanced = [
     re_path(
         r"^cursor/fetch_many",
         AdvancedFetchAPIView.as_view(),
-        dict(fetchtype="all"),  # TODO: shouldn't this be "many"?
+        dict(fetchtype="many"),
         name="advanced-cursor-fetch-many",
     ),
     re_path(
