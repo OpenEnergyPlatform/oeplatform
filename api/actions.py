@@ -1,5 +1,6 @@
-"""Api actions.
+"""Api actions."""
 
+__license__ = """
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
@@ -744,7 +745,6 @@ def get_column(d):
 
 
 def column_alter(query, table_obj: Table, column):
-
     if column == "id":
         raise APIError("You cannot alter the id column")
     alter_preamble = 'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{column}" '.format(
@@ -979,7 +979,6 @@ def __internal_select(query, context):
 def __change_rows(
     table_obj: Table, request, context, target_sa_table: "SATable", setter, fields=None
 ) -> dict:
-
     query: dict = {
         "from": {
             "type": "table",
@@ -1254,7 +1253,7 @@ def move_publish(table_obj: Table, topic, embargo_period):
 
     if not license_check:
         raise APIError(
-            "A issue with the license from the metadata was found: " f"{license_error}"
+            f"A issue with the license from the metadata was found: {license_error}"
         )
 
     if embargo_period in ["6_months", "1_year"]:
@@ -1319,29 +1318,6 @@ def fetchmany(request: dict, context):
     return cursor.fetchmany(int(request["size"]))
 
 
-def getValue(table_obj: Table, column, id):
-    sql = 'SELECT {column} FROM "{schema}"."{table}" WHERE id={id}'.format(
-        column=column, schema=table_obj.oedb_schema, table=table_obj.name, id=id
-    )
-
-    session = _create_oedb_session()
-
-    try:
-        result = session_execute(session, sql)
-
-        returnValue = None
-        for row in result:
-            returnValue = row[column]
-
-        return returnValue
-    except Exception as e:
-        logger.error("SQL Action failed. \n Error:\n" + str(e))
-        session.rollback()
-    finally:
-        session.close()
-    return None
-
-
 def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
     """Apply changes from the meta tables to the actual table.
 
@@ -1366,7 +1342,6 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
         cursor = cast(AbstractCursor, connection.cursor())  # type:ignore TODO
 
     try:
-
         columns = list(describe_columns(table_obj).keys())
         extended_columns = columns + ["_submitted", "_id"]
 
@@ -1377,9 +1352,7 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
         insert_sa_table = oedb_table._insert_table.get_sa_table()
         cursor_execute(
             cursor,
-            "select * "
-            'from "{schema}"."{table}" '
-            "where _applied = FALSE;".format(
+            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
                 schema=insert_sa_table.schema, table=insert_sa_table.name
             ),
         )
@@ -1398,9 +1371,7 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
         update_sa_table = oedb_table._edit_table.get_sa_table()
         cursor_execute(
             cursor,
-            "select * "
-            'from "{schema}"."{table}" '
-            "where _applied = FALSE;".format(
+            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
                 schema=update_sa_table.schema, table=update_sa_table.name
             ),
         )
@@ -1419,9 +1390,7 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
         delete_sa_table = oedb_table._delete_table.get_sa_table()
         cursor_execute(
             cursor,
-            "select * "
-            'from "{schema}"."{table}" '
-            "where _applied = FALSE;".format(
+            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
                 schema=delete_sa_table.schema, table=delete_sa_table.name
             ),
         )
@@ -1478,7 +1447,6 @@ def _apply_stack(cursor: AbstractCursor, sa_table: "SATable", changes, change_ty
 def set_applied(
     session: AbstractCursor | Session, sa_table: "SATable", rids, mode: int
 ):
-
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
     oedb_table = Table.objects.get(name=sa_table.name).get_oedb_table_proxy(user=None)
@@ -1763,11 +1731,6 @@ def get_table_names(
     return [t.name for t in Table.objects.all()]
 
 
-def data_info(request: dict, context: dict | None = None) -> dict:
-    # TODO: can we remove this endpoint?
-    return request
-
-
 def has_schema(request: dict, context: dict | None = None) -> bool:
     # TODO can we remove this endpoint
     return request.get("schema") in get_schema_names()
@@ -1798,7 +1761,6 @@ def data_search(request: dict, context: dict | None = None) -> dict:
 
 
 def data_insert(request: dict, context: dict) -> dict:
-
     cursor = load_cursor_from_context(context)
     # If the insert request is not for a meta table, change the request to do so
     table_obj = table_or_404_from_dict(request)
