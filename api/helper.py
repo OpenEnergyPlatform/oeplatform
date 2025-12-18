@@ -233,7 +233,7 @@ def api_exception(
             # All other Errors: dont accidently return sensitive data from error
             # but return generic error message
             logger.error(str(exc))
-            return JsonResponse({"reason": f"{type(exc)}: {exc}"}, status=400)
+            return JsonResponse({"reason": "Invalid request"}, status=400)
 
     return wrapper
 

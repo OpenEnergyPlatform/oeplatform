@@ -49,7 +49,7 @@ from sqlalchemy import (
 )
 from sqlalchemy import types as sa_types
 from sqlalchemy.exc import NoSuchTableError
-from sqlalchemy.sql.expression import Select
+from sqlalchemy.sql.expression import Executable, Select
 
 import dataedit.metadata
 from api.error import APIError
@@ -1173,7 +1173,8 @@ def execute_sqla(query, cursor: AbstractCursor | Session) -> None:
                     params[key] = json.dumps(value)
                 else:
                     params[key] = dialect._json_serializer(value)
-        _execute(cursor, str(compiled), params)
+        query = str(compiled)
+        _execute(cursor, query, params)
     except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
         raise APIError(str(e))
     except psycopg2.InternalError as e:
@@ -1463,7 +1464,9 @@ def set_applied(
         .values(_applied=True)
         .compile()
     )
-    _execute(session, str(update_query), update_query.params)
+
+    query = str(update_query)
+    _execute(session, query, update_query.params)
 
 
 def apply_insert(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
@@ -2110,9 +2113,12 @@ def fetchone(request: dict, context: dict) -> list | None:
 
 
 def _execute(
-    con: Session | Engine | Connection | AbstractCursor, sql, *args, **kwargs
+    con: Session | Engine | Connection | AbstractCursor,
+    sql: Executable | str,
+    *args,
+    **kwargs,
 ) -> ResultProxy:
-    response = con.execute(sql, *args, **kwargs)
+    response = con.execute(sql, *args, **kwargs)  # type:ignore
     # Note: cast is only for type checking,
     # should disappear once we migrate to sqlalchemy >= 1.4
     response = cast(ResultProxy, response)
