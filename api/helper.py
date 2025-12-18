@@ -27,10 +27,11 @@ import re
 from decimal import Decimal
 from typing import Callable, Union
 
-import geoalchemy2  # noqa: Although this import seems unused is has to be here
+import geoalchemy2  # noqa:F401 Although this import seems unused is has to be here
 import psycopg2
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest, JsonResponse, StreamingHttpResponse
+from django.http.response import Http404
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.request import Request
@@ -226,15 +227,13 @@ def api_exception(
             return f(*args, **kwargs)
         except APIError as e:
             return JsonResponse({"reason": e.message}, status=e.status)
-        except Table.DoesNotExist:
+        except (Table.DoesNotExist, Http404):
             return JsonResponse({"reason": "table does not exist"}, status=404)
-
-        # TODO: why cant' we handle all other errors here? (tests failing)
-        # except Exception as exc:
-        #    # All other Errors: dont accidently return sensitive data from error
-        #    # but return generic error message
-        #    logger.error(str(exc))
-        #    return JsonResponse({"reason": "Invalid request."}, status=400)
+        except Exception as exc:
+            # All other Errors: dont accidently return sensitive data from error
+            # but return generic error message
+            logger.error(str(exc))
+            return JsonResponse({"reason": f"{type(exc)}: {exc}"}, status=400)
 
     return wrapper
 

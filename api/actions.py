@@ -1968,8 +1968,6 @@ def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
 
 
 def get_indexes(request: dict, context: dict | None = None) -> dict:
-    # TODO can we remove this endpoint
-
     table_obj = table_or_404_from_dict(request)
 
     engine = _get_engine()
