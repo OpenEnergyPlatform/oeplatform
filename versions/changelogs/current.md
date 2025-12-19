@@ -15,6 +15,7 @@ SPDX-License-Identifier: CC0-1.0
 ## Bugs
 
 - fixed bug with meta data editor (#2038)
+- fixed year format in scenario bundles (#2091, #2102)
 
 ## Documentation updates
 
