@@ -1,15 +1,15 @@
-// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
+/* eslint-disable max-len */
+/*
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+*/
+/* eslint-enable max-len */
 
-// e.preventDefault(), e.stopPropagation(), t.saveJSON()
-
-
-var MetaEdit = function(config) {
+var MetaEdit = function (config) {
   /*
     TODO: consolidate functions (same as in wizard and other places)
     */
@@ -38,7 +38,7 @@ var MetaEdit = function(config) {
     var token = getCsrfToken();
     return $.ajax({
       url: url,
-      headers: {"X-CSRFToken": token},
+      headers: { "X-CSRFToken": token },
       data_type: "json",
       cache: false,
       contentType: "application/json; charset=utf-8",
@@ -50,21 +50,21 @@ var MetaEdit = function(config) {
     });
   }
 
-
   function fixSchema(json) {
     /* recursively remove null types */
     function fixRecursive(elem) {
-      Object.keys(elem).map(function(key) {
+      Object.keys(elem).map(function (key) {
         var prop = elem[key];
         prop.title = prop.title || key[0].toLocaleUpperCase() + key.slice(1);
-        if (prop.type == 'array') {
+        if (prop.type == "array") {
           // prop.items = prop.items || {};
-          prop.items.title = prop.items.title || key[0].toLocaleUpperCase() + key.slice(1); // missing title, otherwise the form label is just "item 1, ..."
-          fixRecursive({"": prop.items});
-        } else if (prop.type == 'object') {
+          prop.items.title =
+            prop.items.title || key[0].toLocaleUpperCase() + key.slice(1); // missing title, otherwise the form label is just "item 1, ..."
+          fixRecursive({ "": prop.items });
+        } else if (prop.type == "object") {
           // prop.properties = prop.properties || {};
           fixRecursive(prop.properties);
-        } else if (typeof prop.type == 'object') {
+        } else if (typeof prop.type == "object") {
           // find and remove "null"
           var index = prop.type.indexOf("null");
           if (index >= 0) {
@@ -85,7 +85,7 @@ var MetaEdit = function(config) {
       json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readOnly = true;
       json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readOnly = true;
     } else {
-      json.properties["@context"].options = {hidden: true};
+      json.properties["@context"].options = { hidden: true };
       json.properties["@id"].readOnly = false;
       json.properties.resources.items.properties["@id"].readOnly = false;
       json.properties.resources.items.properties.path.readOnly = false;
@@ -98,18 +98,24 @@ var MetaEdit = function(config) {
     // json.properties.resources.items.properties.embargoPeriod = false;
 
     // hide some
-    json.properties.resources.items.properties.embargoPeriod.options = {hidden: true};
-    json.properties.resources.items.properties.type.options = {hidden: true};
-    json.properties.resources.items.properties.encoding.options = {hidden: true};
-    json.properties.resources.items.properties.dialect.options = {hidden: true};
+    json.properties.resources.items.properties.embargoPeriod.options = {
+      hidden: true,
+    };
+    json.properties.resources.items.properties.type.options = { hidden: true };
+    json.properties.resources.items.properties.encoding.options = {
+      hidden: true,
+    };
+    json.properties.resources.items.properties.dialect.options = {
+      hidden: true,
+    };
     // json.properties.resources.items.properties.review.options = {hidden: true};
-    json.properties.metaMetadata.options = {hidden: true};
+    json.properties.metaMetadata.options = { hidden: true };
 
     // add formats
-    // json.properties.context.properties.homepage.format = 'url'; // uri or url??? 
+    // json.properties.context.properties.homepage.format = 'url'; // uri or url???
 
     json["options"] = {
-      "disable_edit_json": false, // show only for entire form
+      disable_edit_json: false, // show only for entire form
     };
 
     if (config.standalone == false) {
@@ -119,7 +125,7 @@ var MetaEdit = function(config) {
     }
 
     // add names to resources categories
-    json.properties.resources.items.basicCategoryTitle = "General"
+    json.properties.resources.items.basicCategoryTitle = "General";
 
     return json;
   }
@@ -128,7 +134,9 @@ var MetaEdit = function(config) {
     json = json || {};
 
     // Required top-level fields
-    json["@context"] = json["@context"] || "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json";
+    json["@context"] =
+      json["@context"] ||
+      "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json";
 
     json.metaMetadata = json.metaMetadata || {};
     if (!json.metaMetadata.metadataVersion) {
@@ -150,12 +158,12 @@ var MetaEdit = function(config) {
     const fieldMap = new Map();
 
     // Add existing fields to a map for quick lookup
-    existingFields.forEach(field => {
+    existingFields.forEach((field) => {
       if (field.name) fieldMap.set(field.name, field);
     });
 
     // Prepare updated fields array
-    const updatedFields = config.columns.map(col => {
+    const updatedFields = config.columns.map((col) => {
       const existing = fieldMap.get(col.name) || {};
 
       return {
@@ -174,14 +182,14 @@ var MetaEdit = function(config) {
     function fillMissingFromSchema(schemaProps, target) {
       Object.entries(schemaProps).forEach(([key, prop]) => {
         if (target[key] === undefined) {
-          if (prop.type === 'object') {
+          if (prop.type === "object") {
             target[key] = {};
             if (prop.properties) {
               fillMissingFromSchema(prop.properties, target[key]);
             }
-          } else if (prop.type === 'array') {
+          } else if (prop.type === "array") {
             target[key] = [];
-            if (prop.items?.type === 'object' && prop.items.properties) {
+            if (prop.items?.type === "object" && prop.items.properties) {
               const obj = {};
               fillMissingFromSchema(prop.items.properties, obj);
               target[key].push(obj);
@@ -189,11 +197,19 @@ var MetaEdit = function(config) {
           } else {
             target[key] = null;
           }
-        } else if (prop.type === 'object' && typeof target[key] === 'object' && prop.properties) {
+        } else if (
+          prop.type === "object" &&
+          typeof target[key] === "object" &&
+          prop.properties
+        ) {
           fillMissingFromSchema(prop.properties, target[key]);
-        } else if (prop.type === 'array' && Array.isArray(target[key]) && prop.items?.properties) {
-          target[key].forEach(item => {
-            if (typeof item === 'object') {
+        } else if (
+          prop.type === "array" &&
+          Array.isArray(target[key]) &&
+          prop.items?.properties
+        ) {
+          target[key].forEach((item) => {
+            if (typeof item === "object") {
               fillMissingFromSchema(prop.items.properties, item);
             }
           });
@@ -204,9 +220,13 @@ var MetaEdit = function(config) {
     fillMissingFromSchema(config.schema.properties, json);
     // Fix boundingBox in each resource if needed
     if (Array.isArray(json.resources)) {
-      json.resources.forEach(resource => {
+      json.resources.forEach((resource) => {
         const bboxPath = resource?.spatial?.extent?.boundingBox;
-        if (!Array.isArray(bboxPath) || bboxPath.length !== 4 || bboxPath.some(val => typeof val !== 'number')) {
+        if (
+          !Array.isArray(bboxPath) ||
+          bboxPath.length !== 4 ||
+          bboxPath.some((val) => typeof val !== "number")
+        ) {
           if (!resource.spatial) resource.spatial = {};
           if (!resource.spatial.extent) resource.spatial.extent = {};
           resource.spatial.extent.boundingBox = [0, 0, 0, 0]; // fallback valid default
@@ -219,7 +239,7 @@ var MetaEdit = function(config) {
 
   function getErrorMsg(x) {
     try {
-      x = 'Upload failed: ' + JSON.parse(x.responseJSON).reason;
+      x = "Upload failed: " + JSON.parse(x.responseJSON).reason;
     } catch (e) {
       x = x.statusText;
     }
@@ -230,9 +250,9 @@ var MetaEdit = function(config) {
   function convertEmptyStringsToNull(obj) {
     for (var key in obj) {
       if (obj.hasOwnProperty(key)) {
-        if (typeof obj[key] === 'string' && obj[key] === '') {
+        if (typeof obj[key] === "string" && obj[key] === "") {
           obj[key] = null;
-        } else if (typeof obj[key] === 'object') {
+        } else if (typeof obj[key] === "object") {
           convertEmptyStringsToNull(obj[key]);
         }
       }
@@ -241,21 +261,21 @@ var MetaEdit = function(config) {
 
   function bindButtons() {
     // download
-    $('#metaedit-download').bind('click', function downloadMetadata() {
+    $("#metaedit-download").bind("click", function downloadMetadata() {
       var json = config.editor.getValue();
       // create data url
       convertEmptyStringsToNull(json);
       console.log(json);
       json = JSON.stringify(json, null, 1);
-      blob = new Blob([json], {type: "application/json"}),
-      dataUrl = URL.createObjectURL(blob);
+      ((blob = new Blob([json], { type: "application/json" })),
+        (dataUrl = URL.createObjectURL(blob)));
       // create link
       var a = document.createElement("a");
       document.body.appendChild(a);
       // assign url and click
       a.style = "display: none";
       a.href = dataUrl;
-      a.download = config.table + '.metadata.json';
+      a.download = config.table + ".metadata.json";
       a.click();
       // cleanup
       URL.revokeObjectURL(dataUrl);
@@ -263,50 +283,51 @@ var MetaEdit = function(config) {
     });
 
     // submit
-    $('#metaedit-submit').bind('click', function sumbmitMetadata() {
-      $('#metaedit-submitting').removeClass('d-none');
+    $("#metaedit-submit").bind("click", function sumbmitMetadata() {
+      $("#metaedit-submitting").removeClass("d-none");
       // config.editor.remove_empty_properties = true;
       var json = config.editor.getValue();
       convertEmptyStringsToNull(json);
       json = fixData(json);
       json = JSON.stringify(json);
-      sendJson("POST", config.url_api_meta, json).then(function() {
-        window.location = config.url_view_table;
-      }).catch(function(err) {
-        // TODO evaluate error, show user message
-        $('#metaedit-submitting').addClass('d-none');
-        alert(getErrorMsg(err));
-      });
+      sendJson("POST", config.url_api_meta, json)
+        .then(function () {
+          window.location = config.url_view_table;
+        })
+        .catch(function (err) {
+          // TODO evaluate error, show user message
+          $("#metaedit-submitting").addClass("d-none");
+          alert(getErrorMsg(err));
+        });
     });
 
     // Cancel
-    $('#metaedit-cancel').bind('click', function cancel() {
+    $("#metaedit-cancel").bind("click", function cancel() {
       window.location = config.cancle_url;
     });
   }
 
   (function init() {
-    $('#metaedit-loading').removeClass('d-none');
+    $("#metaedit-loading").removeClass("d-none");
 
-    config.form = $('#metaedit-form');
+    config.form = $("#metaedit-form");
 
     // check if the editor should be initialized with metadata from table or as standalone without any initial data
     if (config.standalone == false) {
       $.when(
-          $.getJSON(config.url_api_meta),
-          $.getJSON('/static/metaedit/schema.json'),
-      ).done(function(data, schema) {
+        $.getJSON(config.url_api_meta),
+        $.getJSON("/static/metaedit/schema.json")
+      ).done(function (data, schema) {
         config.schema = fixSchema(schema[0]);
         config.initialData = fixData(data[0]);
-
 
         /*  https://github.com/json-editor/json-editor */
         options = {
           startval: config.initialData,
           schema: config.schema,
-          theme: 'bootstrap5',
-          iconlib: 'fontawesome5',
-          mode: 'form',
+          theme: "bootstrap5",
+          iconlib: "fontawesome5",
+          mode: "form",
           compact: true,
           disable_collapse: true,
           prompt_before_delete: false,
@@ -326,49 +347,69 @@ var MetaEdit = function(config) {
         config.editor = new JSONEditor(config.form[0], options);
 
         /* patch labels */
-        var mainEditBox = config.form.find('.je-object__controls').first();
-        mainEditBox.find('.json-editor-btntype-save').text('Apply');
-        mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
-        mainEditBox.find('.json-editor-btntype-cancel').text('Close');
-        mainEditBox.find('.json-editor-btntype-editjson').text('Edit raw JSON');
+        var mainEditBox = config.form.find(".je-object__controls").first();
+        mainEditBox.find(".json-editor-btntype-save").text("Apply");
+        mainEditBox.find(".json-editor-btntype-copy").text("Copy to Clipboard");
+        mainEditBox.find(".json-editor-btntype-cancel").text("Close");
+        mainEditBox.find(".json-editor-btntype-editjson").text("Edit raw JSON");
 
         bindButtons();
 
         // convertDescriptionIntoPopover();
         // check for new items in dom
-        (new MutationObserver(function(_mutationsList, _observer) {
+        new MutationObserver(function (_mutationsList, _observer) {
           // convertDescriptionIntoPopover()
-        })).observe(config.form[0], {attributes: false, childList: true, subtree: true});
+        }).observe(config.form[0], {
+          attributes: false,
+          childList: true,
+          subtree: true,
+        });
 
         // all done
-        $('#metaedit-loading').addClass('d-none');
-        $('#metaedit-icon').removeClass('d-none');
-        $('#metaedit-controls').removeClass('d-none');
+        $("#metaedit-loading").addClass("d-none");
+        $("#metaedit-icon").removeClass("d-none");
+        $("#metaedit-controls").removeClass("d-none");
 
         // TODO catch init error
 
         window.JSONEditor.defaults.callbacks = {
-          "autocomplete": {
-            "search_name": function search(jseditor_editor, input) {
-              var url = "https://openenergyplatform.org/api/oeo-search?query=" + input;
+          autocomplete: {
+            search_name: function search(jseditor_editor, input) {
+              var url =
+                "https://openenergyplatform.org/api/oeo-search?query=" + input;
 
-              return new Promise(function(resolve) {
+              return new Promise(function (resolve) {
                 fetch(url, {
-                  mode: 'cors',
-                }).then(function(response) {
-                  return response.json();
-                }).then(function(data) {
-                  resolve(data["docs"]);
-                });
+                  mode: "cors",
+                })
+                  .then(function (response) {
+                    return response.json();
+                  })
+                  .then(function (data) {
+                    resolve(data["docs"]);
+                  });
               });
             },
-            "renderResult_name": function(jseditor_editor, result, props) {
-              return ['<li ' + props + '>',
-                '<div class="eiao-object-snippet">' + result.label + '<small>' + '<span style="color:green">' + ' : ' + result.definition + '</span></div>',
-                '</li>'].join('');
+            renderResult_name: function (jseditor_editor, result, props) {
+              return [
+                "<li " + props + ">",
+                '<div class="eiao-object-snippet">' +
+                  result.label +
+                  "<small>" +
+                  '<span style="color:green">' +
+                  " : " +
+                  result.definition +
+                  "</span></div>",
+                "</li>",
+              ].join("");
             },
-            "getResultValue_name": function getResultValue(jseditor_editor, result) {
-              selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
+            getResultValue_name: function getResultValue(
+              jseditor_editor,
+              result
+            ) {
+              selected_value = String(result.label)
+                .replaceAll("<B>", "")
+                .replaceAll("</B>", "");
 
               let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
@@ -377,32 +418,30 @@ var MetaEdit = function(config) {
               return selected_value;
             },
           },
-          "button": {
-            "openModalAction": function openOeoExtPlugin(jseditor, e) {
+          button: {
+            openModalAction: function openOeoExtPlugin(jseditor, e) {
               // Perform the HTMX request or any other desired action
-             
-              htmx.ajax('GET', createUrl, {
-                target: '.modal-body',
-                swap: 'innerHTML',
-                trigger: 'click'
+
+              htmx.ajax("GET", createUrl, {
+                target: ".modal-body",
+                swap: "innerHTML",
+                trigger: "click",
               });
-              $('#formModal').modal('show');
-            }
-          }
+              $("#formModal").modal("show");
+            },
+          },
         };
       });
     } else {
-      $.when(
-          $.getJSON('/static/metaedit/schema.json'),
-      ).done(function(schema) {
+      $.when($.getJSON("/static/metaedit/schema.json")).done(function (schema) {
         config.schema = fixSchema(schema);
 
         standalone_options = {
           schema: config.schema,
           // startval: {"@context": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json"},
-          theme: 'bootstrap5',
-          iconlib: 'fontawesome5',
-          mode: 'form',
+          theme: "bootstrap5",
+          iconlib: "fontawesome5",
+          mode: "form",
           compact: true,
           // remove_button_labels: true,
           disable_collapse: true,
@@ -421,49 +460,69 @@ var MetaEdit = function(config) {
         config.editor = new JSONEditor(config.form[0], standalone_options);
 
         /* patch labels */
-        var mainEditBox = config.form.find('.je-object__controls').first();
-        mainEditBox.find('.json-editor-btntype-save').text('Apply');
-        mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
-        mainEditBox.find('.json-editor-btntype-cancel').text('Close');
-        mainEditBox.find('.json-editor-btntype-editjson').text('Edit raw JSON');
+        var mainEditBox = config.form.find(".je-object__controls").first();
+        mainEditBox.find(".json-editor-btntype-save").text("Apply");
+        mainEditBox.find(".json-editor-btntype-copy").text("Copy to Clipboard");
+        mainEditBox.find(".json-editor-btntype-cancel").text("Close");
+        mainEditBox.find(".json-editor-btntype-editjson").text("Edit raw JSON");
 
         bindButtons();
 
         // convertDescriptionIntoPopover();
         // check for new items in dom
-        (new MutationObserver(function(_mutationsList, _observer) {
+        new MutationObserver(function (_mutationsList, _observer) {
           // convertDescriptionIntoPopover()
-        })).observe(config.form[0], {attributes: false, childList: true, subtree: true});
+        }).observe(config.form[0], {
+          attributes: false,
+          childList: true,
+          subtree: true,
+        });
 
         // all done
-        $('#metaedit-loading').addClass('d-none');
-        $('#metaedit-icon').removeClass('d-none');
-        $('#metaedit-controls').removeClass('d-none');
+        $("#metaedit-loading").addClass("d-none");
+        $("#metaedit-icon").removeClass("d-none");
+        $("#metaedit-controls").removeClass("d-none");
 
         // TODO catch init error
 
         window.JSONEditor.defaults.callbacks = {
-          "autocomplete": {
-            "search_name": function search(jseditor_editor, input) {
-              var url = "https://openenergyplatform.org/api/oeo-search?query=" + input;
+          autocomplete: {
+            search_name: function search(jseditor_editor, input) {
+              var url =
+                "https://openenergyplatform.org/api/oeo-search?query=" + input;
 
-              return new Promise(function(resolve) {
+              return new Promise(function (resolve) {
                 fetch(url, {
-                  mode: 'cors',
-                }).then(function(response) {
-                  return response.json();
-                }).then(function(data) {
-                  resolve(data["docs"]);
-                });
+                  mode: "cors",
+                })
+                  .then(function (response) {
+                    return response.json();
+                  })
+                  .then(function (data) {
+                    resolve(data["docs"]);
+                  });
               });
             },
-            "renderResult_name": function(jseditor_editor, result, props) {
-              return ['<li ' + props + '>',
-                '<div class="eiao-object-snippet">' + result.label + '<small>' + '<span style="color:green">' + ' : ' + result.definition + '</span></div>',
-                '</li>'].join('');
+            renderResult_name: function (jseditor_editor, result, props) {
+              return [
+                "<li " + props + ">",
+                '<div class="eiao-object-snippet">' +
+                  result.label +
+                  "<small>" +
+                  '<span style="color:green">' +
+                  " : " +
+                  result.definition +
+                  "</span></div>",
+                "</li>",
+              ].join("");
             },
-            "getResultValue_name": function getResultValue(jseditor_editor, result) {
-              selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
+            getResultValue_name: function getResultValue(
+              jseditor_editor,
+              result
+            ) {
+              selected_value = String(result.label)
+                .replaceAll("<B>", "")
+                .replaceAll("</B>", "");
 
               let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
@@ -472,18 +531,18 @@ var MetaEdit = function(config) {
               return selected_value;
             },
           },
-          "button": {
-            "openModalAction": function openOeoExtPlugin(jseditor, e) {
+          button: {
+            openModalAction: function openOeoExtPlugin(jseditor, e) {
               // Perform the HTMX request or any other desired action
 
-              htmx.ajax('GET', createUrl, {
-                target: '.modal-body',
-                swap: 'innerHTML',
-                trigger: 'click'
+              htmx.ajax("GET", createUrl, {
+                target: ".modal-body",
+                swap: "innerHTML",
+                trigger: "click",
               });
-              $('#formModal').modal('show');
-            }
-          }
+              $("#formModal").modal("show");
+            },
+          },
         };
       });
     }
