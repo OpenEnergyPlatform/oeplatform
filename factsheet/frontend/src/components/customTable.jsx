@@ -139,22 +139,22 @@ function stableSort(array, comparator) {
 }
 
 /**
- 
+
 possible cells:
- 
+
 {
   "uid": "string",
   "acronym": "string",
   "study_name": "string",
   "abstract": "string",
-  "institutions": "array[string]",    
+  "institutions": "array[string]",
   "funding_sources": "array",
   "models": "array",
   "frameworks": "array",
   "collected_scenario_publication_dates": "array[string]",
   "scenarios": "array[{label,abstract,full_name,uid}]"
 }
- 
+
  */
 const headCells = [
   {
@@ -186,9 +186,9 @@ const headCells = [
     align: 'left'
   },
 
-  /* dont create header for more_details so that we dont 
+  /* dont create header for more_details so that we dont
    show sorting arrows
-  
+
   {
     id: 'more_details',
     numeric: true,
