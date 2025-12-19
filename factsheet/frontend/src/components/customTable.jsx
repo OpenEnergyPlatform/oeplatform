@@ -222,9 +222,9 @@ function EnhancedTableHead(props) {
 
 EnhancedTableHead.propTypes = {
   numSelected: PropTypes.number.isRequired,
-  handleOpenQuery: PropTypes.func.isRequired,
-  handleReset: PropTypes.func.isRequired,
-  filterApplied: PropTypes.bool.isRequired,
+  handleOpenQuery: PropTypes.func,
+  handleReset: PropTypes.func,
+  filterApplied: PropTypes.bool,
   onRequestSort: PropTypes.func.isRequired,
   onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
