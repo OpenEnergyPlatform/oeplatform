@@ -1,6 +1,7 @@
 {% extends "dataedit/base.html" %}
 {% load compress %}
 {% load static %}
+{% load django_vite %}
 {% load django_bootstrap5 %}
 {% block after-head %}
   <link href="{% static 'metaedit/metaedit.css' %}" rel="stylesheet" />
@@ -121,17 +122,20 @@
   </style>
   {% compress js %}
     <script src="{% static 'metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js' %}"></script>
-    <script src="{% static 'metaedit/metaedit.js' %}"></script>
     <script src="{% static 'modelview/htmx.min.js' %}"></script>
   {% endcompress %}
+  {% vite_asset "dataedit/static/metaedit/metaedit.js" %}
   <!-- fix imports below - we dont use cdn anymore -->
   <script src="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js }}"></script>
   <link rel="stylesheet"
         href="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js_dist_style_css }}" />
   <script>
+    /* only execute after MetaEdit is fully loaded */
+    window.addEventListener("MetaEdit:ready", () => {
     var createUrl = '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}';
-    var config = JSON.parse("{{ config|escapejs }}");
-    MetaEdit(config);
+    var config = JSON.parse("{{ config|escapejs }}");    
+    window.MetaEdit(config);
+    
     $(function () {
       $('[data-bs-toggle="popover"]').popover();
 
@@ -139,6 +143,7 @@
         trigger: "focus",
       });
     });
+
     function hideTabsFilter(tabIdsToRemove) {
       const observer = new MutationObserver(() => {
         document.querySelectorAll(".nav-item a.nav-link").forEach((link) => {
@@ -167,5 +172,6 @@
 
     // Set up tab filtering
     hideTabsFilter(["Meta Metadata", "Embargo Period", "Dialect", "Review"]);
+    });
   </script>
 {% endblock after-body-bottom-js %}

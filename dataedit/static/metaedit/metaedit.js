@@ -9,7 +9,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 */
 /* eslint-enable max-len */
 
-var MetaEdit = function (config) {
+"use strict";
+
+window.MetaEdit = function (config) {
   /*
     TODO: consolidate functions (same as in wizard and other places)
     */
@@ -57,9 +59,9 @@ var MetaEdit = function (config) {
         var prop = elem[key];
         prop.title = prop.title || key[0].toLocaleUpperCase() + key.slice(1);
         if (prop.type == "array") {
-          // prop.items = prop.items || {};
+          /* missing title, otherwise the form label is just "item 1, ..." */
           prop.items.title =
-            prop.items.title || key[0].toLocaleUpperCase() + key.slice(1); // missing title, otherwise the form label is just "item 1, ..."
+            prop.items.title || key[0].toLocaleUpperCase() + key.slice(1);
           fixRecursive({ "": prop.items });
         } else if (prop.type == "object") {
           // prop.properties = prop.properties || {};
@@ -80,18 +82,21 @@ var MetaEdit = function (config) {
     fixRecursive(json.properties);
 
     // make some readonly
+    var fieldProperties =
+      json.properties.resources.items.properties.schema.properties.fields.items
+        .properties;
     if (config.standalone == false) {
       json.properties["@id"].readOnly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readOnly = true;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readOnly = true;
+      fieldProperties.name.readOnly = true;
+      fieldProperties.type.readOnly = true;
     } else {
       json.properties["@context"].options = { hidden: true };
       json.properties["@id"].readOnly = false;
       json.properties.resources.items.properties["@id"].readOnly = false;
       json.properties.resources.items.properties.path.readOnly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.nullable.readOnly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readOnly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readOnly = false;
+      fieldProperties.nullable.readOnly = false;
+      fieldProperties.name.readOnly = false;
+      fieldProperties.type.readOnly = false;
     }
 
     // remove some: TODO: but make sure fields are not lost
@@ -136,6 +141,7 @@ var MetaEdit = function (config) {
     // Required top-level fields
     json["@context"] =
       json["@context"] ||
+      // eslint-disable-next-line max-len
       "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json";
 
     json.metaMetadata = json.metaMetadata || {};
@@ -312,7 +318,8 @@ var MetaEdit = function (config) {
 
     config.form = $("#metaedit-form");
 
-    // check if the editor should be initialized with metadata from table or as standalone without any initial data
+    /* check if the editor should be initialized with metadata from table
+    or as standalone without any initial data*/
     if (config.standalone == false) {
       $.when(
         $.getJSON(config.url_api_meta),
@@ -322,7 +329,7 @@ var MetaEdit = function (config) {
         config.initialData = fixData(data[0]);
 
         /*  https://github.com/json-editor/json-editor */
-        options = {
+        const options = {
           startval: config.initialData,
           schema: config.schema,
           theme: "bootstrap5",
@@ -340,7 +347,9 @@ var MetaEdit = function (config) {
           array_controls_top: true,
           no_additional_properties: true,
           required_by_default: false,
-          remove_empty_properties: false, // don't remove, otherwise the metadata will not pass the validation on the server
+          /* keep remove_empty_properties: false
+          otherwise the metadata will not pass  the validation on the server */
+          remove_empty_properties: false,
           show_errors: "interaction",
         };
 
@@ -438,6 +447,7 @@ var MetaEdit = function (config) {
 
         standalone_options = {
           schema: config.schema,
+          // eslint-disable-next-line max-len
           // startval: {"@context": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json"},
           theme: "bootstrap5",
           iconlib: "fontawesome5",
@@ -455,7 +465,9 @@ var MetaEdit = function (config) {
           array_controls_top: true,
           no_additional_properties: true,
           required_by_default: false,
-          remove_empty_properties: false, // don't remove, otherwise the metadata will not pass the validation on the server
+          /* keep remove_empty_properties: false, 
+          otherwise the metadata will not pass the validation on the server */
+          remove_empty_properties: false,
         };
         config.editor = new JSONEditor(config.form[0], standalone_options);
 
@@ -550,3 +562,6 @@ var MetaEdit = function (config) {
 
   return config;
 };
+
+/* notify inline code that MetaEdit is loaded */
+window.dispatchEvent(new Event("MetaEdit:ready"));
