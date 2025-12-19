@@ -140,9 +140,9 @@
     /* only execute after MetaEdit is fully loaded */
     window.addEventListener("MetaEdit:ready", () => {
     var createUrl = '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}';
-    var config = JSON.parse("{{ config|escapejs }}");    
+    var config = JSON.parse("{{ config|escapejs }}");
     window.MetaEdit(config);
-    
+
     $(function () {
       $('[data-bs-toggle="popover"]').popover();
 
