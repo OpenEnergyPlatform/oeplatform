@@ -105,12 +105,12 @@ function TabPanel(props) {
 
 
 /**
- * 
- * @param {integer|Date|string} input 
+ *
+ * @param {integer|Date|string} input
  * @returns {integer}
  */
 function formatYear(input) {
-  
+
   if (typeof input === 'string'){
     // create date object
     input = new Date(input)
