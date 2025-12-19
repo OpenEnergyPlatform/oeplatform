@@ -123,7 +123,7 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: 'study name',
+    id: 'study_name',
     numeric: false,
     disablePadding: true,
     label: 'Study name',
@@ -151,34 +151,22 @@ const headCells = [
   //   label: 'Institutions',
   //   align: 'left'
   // },
-  // {
-  //   id: 'date of publications',
-  //   numeric: true,
-  //   disablePadding: false,
-  //   label: 'Date of publications',
-  //   align: 'left'
-  // },
+
   {
-    id: 'Date of publication',
+    id: 'date_of_publication',
     numeric: true,
     disablePadding: false,
     label: 'Year of publication',
     align: 'left'
   },
   {
-    id: 'More details',
+    id: 'more_details',
     numeric: true,
     disablePadding: false,
     label: '',
     align: 'right'
   },
-  // {
-  //   id: 'more',
-  //   numeric: false,
-  //   disablePadding: true,
-  //   label: '',
-  //   align: 'left'
-  // }
+
 ];
 
 function EnhancedTableHead(props) {
@@ -354,7 +342,7 @@ export default function CustomTable(props) {
   const { factsheets } = props;
 
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('study name');
+  const [orderBy, setOrderBy] = useState('study_name');
   const [selected, setSelected] = useState(new Set());
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
