@@ -445,7 +445,7 @@ window.MetaEdit = function (config) {
       $.when($.getJSON("/static/metaedit/schema.json")).done(function (schema) {
         config.schema = fixSchema(schema);
 
-        standalone_options = {
+        const standalone_options = {
           schema: config.schema,
           // eslint-disable-next-line max-len
           // startval: {"@context": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json"},
