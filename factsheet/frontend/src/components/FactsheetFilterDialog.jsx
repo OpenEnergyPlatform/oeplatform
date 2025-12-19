@@ -51,7 +51,7 @@ export default function FactsheetFilterDialog({
     }
   };
 
-    const isFilterEmpty =
+  const isFilterEmpty =
     selectedInstitution.length === 0 &&
     selectedAuthors.length === 0 &&
     selectedFundingSource.length === 0 &&
@@ -115,9 +115,9 @@ export default function FactsheetFilterDialog({
                 value={startDateOfPublication}
                 renderInput={(params) => <TextField {...params} />}
                 onChange={(newValue) => {
-                    const year = new Date(newValue).getFullYear();
-                    setStartDateOfPublication(year.toString());
-                    setPublicationDateTouched(true);
+                  const year = new Date(newValue).getFullYear();
+                  setStartDateOfPublication(year.toString());
+                  setPublicationDateTouched(true);
                 }}
               />
             </Stack>
@@ -130,9 +130,9 @@ export default function FactsheetFilterDialog({
                 value={endDateOfPublication}
                 renderInput={(params) => <TextField {...params} />}
                 onChange={(newValue) => {
-                    const year = new Date(newValue).getFullYear();
-                    setEndDateOfPublication(year.toString());
-                    setPublicationDateTouched(true);
+                  const year = new Date(newValue).getFullYear();
+                  setEndDateOfPublication(year.toString());
+                  setPublicationDateTouched(true);
                 }}
               />
             </Stack>
@@ -165,17 +165,17 @@ export default function FactsheetFilterDialog({
         </div>
 
         <div style={{ marginTop: "20px" }}>
-            <div>Scenario years:</div>
-            <Slider
+          <div>Scenario years:</div>
+          <Slider
             value={scenarioYearValue}
             onChange={(e, val) => {
-                setScenarioYearValue(val);
-                setScenarioYearTouched(true);
+              setScenarioYearValue(val);
+              setScenarioYearTouched(true);
             }}
             valueLabelDisplay="auto"
             min={2000}
             max={2200}
-            />
+          />
         </div>
       </DialogContent>
 

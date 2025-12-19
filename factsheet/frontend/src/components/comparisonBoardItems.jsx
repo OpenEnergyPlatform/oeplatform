@@ -145,174 +145,174 @@ export default function ComparisonBoardItems(props) {
                             </div>
                           )}
 
-                          {c_aspects.includes("Study name") && <div style= {aspectStyle} >
-                        <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Study name:</b>
-                        </Typography>
-                        <Typography variant="body2">
-                          {item.data.study_label}
-                        </Typography>
-                      </div>}
+                          {c_aspects.includes("Study name") && <div style={aspectStyle} >
+                            <Typography variant="subtitle2" gutterBottom component="div">
+                              <b>Study name:</b>
+                            </Typography>
+                            <Typography variant="body2">
+                              {item.data.study_label}
+                            </Typography>
+                          </div>}
 
-                      {c_aspects.includes("Study abstract") &&<div style= {aspectStyle} >
-                        <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Study abstract:</b>
-                        </Typography>
-                        <Typography variant="body2">
-                          {item.data.study_abstract}
-                        </Typography>
-                      </div>}
+                          {c_aspects.includes("Study abstract") && <div style={aspectStyle} >
+                            <Typography variant="subtitle2" gutterBottom component="div">
+                              <b>Study abstract:</b>
+                            </Typography>
+                            <Typography variant="body2">
+                              {item.data.study_abstract}
+                            </Typography>
+                          </div>}
 
-                      {c_aspects.includes("Scenario abstract") && <div style= {{  marginBottom: '10px', padding: '10px' }} >
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Scenario abstract:</b>
-                        </Typography>
-                        <Typography variant="body2">
-                          {item.data.abstract}
-                        </Typography>
-                      </div>}
+                          {c_aspects.includes("Scenario abstract") && <div style={{ marginBottom: '10px', padding: '10px' }} >
+                            <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                              <b>Scenario abstract:</b>
+                            </Typography>
+                            <Typography variant="body2">
+                              {item.data.abstract}
+                            </Typography>
+                          </div>}
 
-                      {c_aspects.includes("Study descriptors") && <div style={aspectStyle}>
-                        <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Study descriptors:</b>
-                        </Typography>
-                        {item.data.study_descriptors.map((study_descriptor) => (
-                          <StudyChip
-                            key={study_descriptor}
-                            index={index}
-                            label={study_descriptor}
-                            included={state.items[0].data.study_descriptors.includes(study_descriptor)}
-                            onClick={() => {
-                              handleOpenURL((StudyKeywords.find((item) => item[0] === study_descriptor))[1]);
-                            }}
-                          />
-                        ))}
-                      </div>}
-                      {c_aspects.includes("Scenario types") && <div style={aspectStyle}>
-                        <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Scenario types:</b>
-                        </Typography>
-
-                        {item.data.scenario_descriptors.map((scenario_descriptor) => (
-                          <StudyChip
-                            key={scenario_descriptor[0]}
-                            index={index}
-                            label={scenario_descriptor[0]}
-                            included={state.items[0].data.scenario_descriptors.some(desc => desc[0].includes(scenario_descriptor[0]))}
-                            onClick={() => {
-                              handleOpenURL(scenario_descriptor[1]);
-                            }}
-                          />
-                        ))}
-                      </div>}
-
-                      {c_aspects.includes("Regions") && <div style={aspectStyle}>
-                        <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Regions:</b>
-                        </Typography>
-                        {item.data.regions.map((region) => (
-                          <StudyChip
-                            key={region}
-                            index={index}
-                            label={region}
-                            included={state.items[0].data.regions.includes(region)}
-                          />
-                        ))}
-                      </div>}
-
-                      {c_aspects.includes("Interacting regions") && <div style={aspectStyle}>
-                        <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Interacting regions:</b>
-                        </Typography>
-                        {item.data.interacting_regions.map((interacting_region) => (
-                          <StudyChip
-                            key={interacting_region}
-                            index={index}
-                            label={interacting_region}
-                            included={state.items[0].data.interacting_regions.includes(interacting_region)}
-                          />
-                        ))}
-                      </div>}
-
-                      {c_aspects.includes("Scenario years") && <div style={aspectStyle}>
-                        <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Scenario years:</b>
-                        </Typography>
-                        {item.data.scenario_years.map((scenario_year) => (
-                          <StudyChip
-                            key={scenario_year}
-                            index={index}
-                            label={scenario_year}
-                            included={state.items[0].data.scenario_years.includes(scenario_year)}
-                          />
-                        ))}
-                      </div>}
-
-                      {c_aspects.includes("Input datasets") && <div style={aspectStyle}>
-                        <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Input datasets:</b>
-                        </Typography>
-                        {item.data.input_datasets.map((input_dataset) => (
-                          <HtmlTooltip
-                           key={input_dataset[0]}
-                           style={{ marginLeft: '10px' }}
-                           placement="top"
-                           title={
-                             <React.Fragment>
-                               <div>
-                                 {input_dataset[0]}
-                                 {/* Add any other dataset information here if needed */}
-                               </div>
-                             </React.Fragment>
-                           }
-                          >
-                            <div>
+                          {c_aspects.includes("Study descriptors") && <div style={aspectStyle}>
+                            <Typography variant="subtitle2" gutterBottom component="div">
+                              <b>Study descriptors:</b>
+                            </Typography>
+                            {item.data.study_descriptors.map((study_descriptor) => (
                               <StudyChip
+                                key={study_descriptor}
+                                index={index}
+                                label={study_descriptor}
+                                included={state.items[0].data.study_descriptors.includes(study_descriptor)}
+                                onClick={() => {
+                                  handleOpenURL((StudyKeywords.find((item) => item[0] === study_descriptor))[1]);
+                                }}
+                              />
+                            ))}
+                          </div>}
+                          {c_aspects.includes("Scenario types") && <div style={aspectStyle}>
+                            <Typography variant="subtitle2" gutterBottom component="div">
+                              <b>Scenario types:</b>
+                            </Typography>
+
+                            {item.data.scenario_descriptors.map((scenario_descriptor) => (
+                              <StudyChip
+                                key={scenario_descriptor[0]}
+                                index={index}
+                                label={scenario_descriptor[0]}
+                                included={state.items[0].data.scenario_descriptors.some(desc => desc[0].includes(scenario_descriptor[0]))}
+                                onClick={() => {
+                                  handleOpenURL(scenario_descriptor[1]);
+                                }}
+                              />
+                            ))}
+                          </div>}
+
+                          {c_aspects.includes("Regions") && <div style={aspectStyle}>
+                            <Typography variant="subtitle2" gutterBottom component="div">
+                              <b>Regions:</b>
+                            </Typography>
+                            {item.data.regions.map((region) => (
+                              <StudyChip
+                                key={region}
+                                index={index}
+                                label={region}
+                                included={state.items[0].data.regions.includes(region)}
+                              />
+                            ))}
+                          </div>}
+
+                          {c_aspects.includes("Interacting regions") && <div style={aspectStyle}>
+                            <Typography variant="subtitle2" gutterBottom component="div">
+                              <b>Interacting regions:</b>
+                            </Typography>
+                            {item.data.interacting_regions.map((interacting_region) => (
+                              <StudyChip
+                                key={interacting_region}
+                                index={index}
+                                label={interacting_region}
+                                included={state.items[0].data.interacting_regions.includes(interacting_region)}
+                              />
+                            ))}
+                          </div>}
+
+                          {c_aspects.includes("Scenario years") && <div style={aspectStyle}>
+                            <Typography variant="subtitle2" gutterBottom component="div">
+                              <b>Scenario years:</b>
+                            </Typography>
+                            {item.data.scenario_years.map((scenario_year) => (
+                              <StudyChip
+                                key={scenario_year}
+                                index={index}
+                                label={scenario_year}
+                                included={state.items[0].data.scenario_years.includes(scenario_year)}
+                              />
+                            ))}
+                          </div>}
+
+                          {c_aspects.includes("Input datasets") && <div style={aspectStyle}>
+                            <Typography variant="subtitle2" gutterBottom component="div">
+                              <b>Input datasets:</b>
+                            </Typography>
+                            {item.data.input_datasets.map((input_dataset) => (
+                              <HtmlTooltip
                                 key={input_dataset[0]}
-                                index={index}
-                                label={input_dataset[0]}
-                                included={state.items[0].data.input_datasets.some(ds => ds[2] === input_dataset[2])}
-                                onClick={() => {
-                                  handleOpenURL(input_dataset[1]);
-                                }}
-                              />
-                            </div>
-                          </HtmlTooltip>
-                        ))}
-                      </div>}
-
-                      {c_aspects.includes("Output datasets") && <div style={aspectStyle}>
-                        <Typography variant="subtitle2" gutterBottom component="div">
-                          <b>Output datasets:</b>
-                        </Typography>
-                        {item.data.output_datasets.map((output_dataset) => (
-                          <HtmlTooltip
-                            key={output_dataset[0]}
-                            style={{ marginLeft: '10px' }}
-                            placement="top"
-                            title={
-                              <React.Fragment>
+                                style={{ marginLeft: '10px' }}
+                                placement="top"
+                                title={
+                                  <React.Fragment>
+                                    <div>
+                                      {input_dataset[0]}
+                                      {/* Add any other dataset information here if needed */}
+                                    </div>
+                                  </React.Fragment>
+                                }
+                              >
                                 <div>
-                                  {output_dataset[0]}
-                                  {/* Add any other dataset information here if needed */}
+                                  <StudyChip
+                                    key={input_dataset[0]}
+                                    index={index}
+                                    label={input_dataset[0]}
+                                    included={state.items[0].data.input_datasets.some(ds => ds[2] === input_dataset[2])}
+                                    onClick={() => {
+                                      handleOpenURL(input_dataset[1]);
+                                    }}
+                                  />
                                 </div>
-                              </React.Fragment>
-                            }
-                          >
-                            <div>
-                              <StudyChip
+                              </HtmlTooltip>
+                            ))}
+                          </div>}
+
+                          {c_aspects.includes("Output datasets") && <div style={aspectStyle}>
+                            <Typography variant="subtitle2" gutterBottom component="div">
+                              <b>Output datasets:</b>
+                            </Typography>
+                            {item.data.output_datasets.map((output_dataset) => (
+                              <HtmlTooltip
                                 key={output_dataset[0]}
-                                index={index}
-                                label={output_dataset[0]}
-                                included={state.items[0].data.output_datasets.some(ds => ds[2] === output_dataset[2])}
-                                onClick={() => {
-                                  handleOpenURL(output_dataset[1]);
-                                }}
-                              />
-                            </div>
-                          </HtmlTooltip>
-                        ))}
-                      </div>}
+                                style={{ marginLeft: '10px' }}
+                                placement="top"
+                                title={
+                                  <React.Fragment>
+                                    <div>
+                                      {output_dataset[0]}
+                                      {/* Add any other dataset information here if needed */}
+                                    </div>
+                                  </React.Fragment>
+                                }
+                              >
+                                <div>
+                                  <StudyChip
+                                    key={output_dataset[0]}
+                                    index={index}
+                                    label={output_dataset[0]}
+                                    included={state.items[0].data.output_datasets.some(ds => ds[2] === output_dataset[2])}
+                                    onClick={() => {
+                                      handleOpenURL(output_dataset[1]);
+                                    }}
+                                  />
+                                </div>
+                              </HtmlTooltip>
+                            ))}
+                          </div>}
                         </div>
                       </div>
                     )}
