@@ -93,11 +93,28 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
+function getStringValForSort(x, order) {
+  if (Array.isArray(x) && x.length > 0) {
+    x.sort(); /* still does not work if x is array of objects */
+    if (order === "desc") {
+      x = x[x.length - 1]; /* take last element */
+    } else {
+      x = x[0];/* take first element */
+    }
+  }
+  /* make lowercase string */
+  return `${x}`.toLowerCase()
+}
+
+function descendingComparator(a, b, orderBy, order) {
+  const valB = getStringValForSort(b[orderBy], order);
+  const valA = getStringValForSort(a[orderBy], order);
+
+
+  if (valB < valA) {
     return -1;
   }
-  if (b[orderBy] > a[orderBy]) {
+  if (valB > valA) {
     return 1;
   }
   return 0;
@@ -105,8 +122,8 @@ function descendingComparator(a, b, orderBy) {
 
 function getComparator(order, orderBy) {
   return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
+    ? (a, b) => descendingComparator(a, b, orderBy, order)
+    : (a, b) => -descendingComparator(a, b, orderBy, order);
 }
 
 function stableSort(array, comparator) {
@@ -121,6 +138,24 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
+/**
+ 
+possible cells:
+ 
+{
+  "uid": "string",
+  "acronym": "string",
+  "study_name": "string",
+  "abstract": "string",
+  "institutions": "array[string]",    
+  "funding_sources": "array",
+  "models": "array",
+  "frameworks": "array",
+  "collected_scenario_publication_dates": "array[string]",
+  "scenarios": "array[{label,abstract,full_name,uid}]"
+}
+ 
+ */
 const headCells = [
   {
     id: 'study_name',
@@ -143,22 +178,17 @@ const headCells = [
     label: 'Scenarios',
     align: 'left'
   },
-
-  // {
-  //   id: 'institutions',
-  //   numeric: true,
-  //   disablePadding: false,
-  //   label: 'Institutions',
-  //   align: 'left'
-  // },
-
   {
-    id: 'date_of_publication',
+    id: 'collected_scenario_publication_dates',
     numeric: true,
     disablePadding: false,
     label: 'Year of publication',
     align: 'left'
   },
+
+  /* dont create header for more_details so that we dont 
+   show sorting arrows
+  
   {
     id: 'more_details',
     numeric: true,
@@ -166,6 +196,7 @@ const headCells = [
     label: '',
     align: 'right'
   },
+  */
 
 ];
 
@@ -340,9 +371,9 @@ EnhancedTableToolbar.propTypes = {
 
 export default function CustomTable(props) {
   const { factsheets } = props;
-
-  const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('study_name');
+  /* insitially sort by date (newest first) */
+  const [order, setOrder] = useState('desc');
+  const [orderBy, setOrderBy] = useState('collected_scenario_publication_dates');
   const [selected, setSelected] = useState(new Set());
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
@@ -387,6 +418,7 @@ export default function CustomTable(props) {
     [filterApplied, filteredFactsheets, factsheets]
   );
 
+
   const [openBackDrop, setOpenBackDrop] = useState(false);
 
   const handleClose = () => {
@@ -409,8 +441,6 @@ export default function CustomTable(props) {
   };
 
   const handleClick = (event, name) => {
-    console.log(name);
-
     const newSelected = new Set(selected);
     if (newSelected.has(name)) newSelected.delete(name);
     else newSelected.add(name);
