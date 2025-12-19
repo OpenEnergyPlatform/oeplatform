@@ -9,12 +9,109 @@ import {renderSummaryPageFields, updateSubmitButtonColor, updateTabProgressIndic
 import {selectNextField} from "./navigation.js";
 import {isEmptyValue, sendJson, getCookie} from "./utilities.js";
 import {getFieldState, updateClientStateDict} from "./state_current_review.js";
+ function getFieldElByKey(fieldKey) {
+  return document.getElementById(`field_${fieldKey}`);
+}
+function getFieldJqByKey(fieldKey) {
+  const el = getFieldElByKey(fieldKey);
+  return el ? $(el) : null;
+}
 
+function normalizeFieldKey(fieldKey) {
+  return String(fieldKey)
+    .split('.')
+    .filter(part => part !== '' && !/^\d+$/.test(part)) // убрать индексы
+    .join('.');
+}
+
+function getTextFromEl(el, selectors) {
+  if (!el) return '';
+  for (const sel of selectors) {
+    const found = el.querySelector(sel);
+    const txt = found?.textContent?.replace(/\s+/g, ' ')?.trim();
+    if (txt) return txt;
+  }
+  return '';
+}
+
+function getFallbackTitle(fieldKey) {
+  const fieldEl = getFieldElByKey(fieldKey);
+  return getTextFromEl(fieldEl, ['.field__label', '.label', 'label']) || fieldKey;
+}
+
+function getFallbackDescription(fieldKey) {
+  const fieldEl = getFieldElByKey(fieldKey);
+
+  const attr =
+    fieldEl?.getAttribute('data-description') ||
+    fieldEl?.getAttribute('data-help') ||
+    fieldEl?.getAttribute('title') ||
+    fieldEl?.dataset?.description ||
+    fieldEl?.dataset?.help;
+
+  if (attr && String(attr).trim()) return String(attr).trim();
+
+  const helpText = getTextFromEl(fieldEl, [
+    '.help-text',
+    '.helptext',
+    '.field__help',
+    '.field__description',
+    '.description',
+    '[data-role="description"]',
+  ]);
+  if (helpText) return helpText;
+
+  // best-effort: если у вас есть schema на window
+  const schema =
+    window.schema_dict || window.schema || window.json_schema || window.ontology_schema;
+
+  if (schema) {
+    const parts = normalizeFieldKey(fieldKey).split('.');
+    let node = schema;
+
+    for (const part of parts) {
+      if (!node) break;
+
+      if (node.properties && node.properties[part]) {
+        node = node.properties[part];
+        continue;
+      }
+
+      if (node.items) {
+        node = node.items;
+        if (node.properties && node.properties[part]) {
+          node = node.properties[part];
+          continue;
+        }
+      }
+
+      if (node[part]) {
+        node = node[part];
+        continue;
+      }
+
+      node = null;
+    }
+
+    const desc = node?.description || node?.help || node?.comment;
+    if (desc && String(desc).trim()) return String(desc).trim();
+  }
+
+  return '';
+}
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 window.selectedField = window.selectedField ?? null;
 export let selectedFieldValue=null;
 
 export function setSelectedField(fieldKey) {
-  selectedField = fieldKey;
+  window.selectedField = fieldKey;
 }
 export function setselectedFieldValue(fieldValue) {
   selectedFieldValue = fieldValue;
@@ -184,18 +281,37 @@ export function updateFieldDescription(cleanedFieldKey, fieldValue) {
   const fieldDescriptionsElement = document.getElementById("field-descriptions");
   const selectedName = document.querySelector("#review-field-name");
 
-  selectedName.textContent = cleanedFieldKey + " " + fieldValue;
+  // Prefer the real selected key (can include indices/special chars), fallback to cleaned.
+  const rawKey = window.selectedField || cleanedFieldKey;
+  const normalizedKey = normalizeFieldKey(rawKey);
 
-  if (fieldDescriptionsData[cleanedFieldKey]) {
-    const fieldInfo = fieldDescriptionsData[cleanedFieldKey];
+  // Try description dictionary first (by several key forms)
+  const fieldInfo =
+    (fieldDescriptionsData && (fieldDescriptionsData[rawKey] || fieldDescriptionsData[cleanedFieldKey] || fieldDescriptionsData[normalizedKey]))
+      ? (fieldDescriptionsData[rawKey] || fieldDescriptionsData[cleanedFieldKey] || fieldDescriptionsData[normalizedKey])
+      : null;
+
+  // Build header/title text
+  const titleText = fieldInfo?.title || getFallbackTitle(rawKey) || cleanedFieldKey;
+  selectedName.textContent = `${titleText}${fieldValue ? ' — ' + fieldValue : ''}`;
+
+  if (fieldInfo) {
     let fieldInfoText = '<div class="reviewer-item">';
 
     if (fieldInfo.title) {
       fieldInfoText += `<div class="reviewer-item__row"><h2 class="reviewer-item__title">${fieldInfo.title}</h2></div>`;
+    } else {
+      fieldInfoText += `<div class="reviewer-item__row"><h2 class="reviewer-item__title">${escapeHtml(titleText)}</h2></div>`;
     }
+
     if (fieldInfo.description) {
       fieldInfoText += `<div class="reviewer-item__row"><div class="reviewer-item__key">Description:</div><div class="reviewer-item__value">${fieldInfo.description}</div></div>`;
+    } else {
+      const fallback = getFallbackDescription(rawKey) || getFallbackDescription(cleanedFieldKey);
+      fieldInfoText += `<div class="reviewer-item__row"><div class="reviewer-item__key">Description:</div><div class="reviewer-item__value">${escapeHtml(fallback || 'No description available for this field.')}</div></div>`;
+      if (!fallback) console.warn('No description for field:', rawKey);
     }
+
     if (fieldInfo.example) {
       fieldInfoText += `<div class="reviewer-item__row"><div class="reviewer-item__key">Example:</div><div class="reviewer-item__value">${fieldInfo.example}</div></div>`;
     }
@@ -203,14 +319,26 @@ export function updateFieldDescription(cleanedFieldKey, fieldValue) {
       fieldInfoText += `<div class="reviewer-item__row"><div class="reviewer-item__key">Badge:</div><div class="reviewer-item__value">${fieldInfo.badge}</div></div>`;
     }
 
-    fieldInfoText += `<div class="reviewer-item__row">Does it comply with the required ${fieldInfo.title} description convention?</div></div>`;
+    const requiredTitle = fieldInfo.title || titleText;
+    fieldInfoText += `<div class="reviewer-item__row">Does it comply with the required ${escapeHtml(requiredTitle)} description convention?</div></div>`;
     fieldDescriptionsElement.innerHTML = fieldInfoText;
-  } else {
-    fieldDescriptionsElement.textContent = "No description found";
+    return;
   }
+
+  // No dictionary entry: render fallback description instead of a confusing placeholder.
+  const fallbackDesc = getFallbackDescription(rawKey) || getFallbackDescription(cleanedFieldKey);
+
+  let html = '<div class="reviewer-item">';
+  html += `<div class="reviewer-item__row"><h2 class="reviewer-item__title">${escapeHtml(titleText)}</h2></div>`;
+  html += `<div class="reviewer-item__row"><div class="reviewer-item__key">Description:</div><div class="reviewer-item__value">${escapeHtml(fallbackDesc || 'No description available for this field.')}</div></div>`;
+  html += '</div>';
+
+  fieldDescriptionsElement.innerHTML = html;
+  if (!fallbackDesc) console.warn('No description for field:', rawKey);
 }
 
 export function highlightSelectedField(fieldKey, highlightColor = '#F6F9FB') {
+  if (!fieldKey) return;
   const reviewItem = document.querySelectorAll('.review__item');
   const selectedDivId = 'field_' + fieldKey;
   const selectedDiv = document.getElementById(selectedDivId);
@@ -276,7 +404,11 @@ export function selectField(fieldList, field) {
 
 export function selectState(state, shouldUpdateClient = false) {
   selectedState = state;
-  updateClientStateDict(selectedField, state);
+
+  const selectedKey = window.selectedField;
+  if (selectedKey) {
+    updateClientStateDict(selectedKey, state);
+  }
 
   if (shouldUpdateClient) {
     check_if_review_finished();
