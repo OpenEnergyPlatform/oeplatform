@@ -13,7 +13,7 @@ const filter = createFilterOptions();
 
 export default function CustomSearchInput(props) {
   const [value, setValue] = React.useState(null);
-  const {searchHandler, data} = props;
+  const { searchHandler, data } = props;
   return (
     <Autocomplete
       style={{ 'margin': '10px' }}
@@ -57,17 +57,17 @@ export default function CustomSearchInput(props) {
       renderOption={(option) => option.name}
       freeSolo
       renderInput={(params) => (
-        <TextField style={{ 'marginLeft' : '10px', 'margiBottom' : '10px', 'width': '100%' }}
-                   color="primary"
-                   {...params}
-                   label="Search..."
-                   variant="outlined"
-                   size="small"
-        InputProps={{
+        <TextField style={{ 'marginLeft': '10px', 'margiBottom': '10px', 'width': '100%' }}
+          color="primary"
+          {...params}
+          label="Search..."
+          variant="outlined"
+          size="small"
+          InputProps={{
             ...params.InputProps,
             style: {
-                      fontWeight: 600,
-                    },
+              fontWeight: 600,
+            },
             endAdornment: (
               <InputAdornment position="end">
                 <SearchIcon />
