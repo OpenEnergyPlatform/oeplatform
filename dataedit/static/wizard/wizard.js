@@ -862,7 +862,6 @@ window.Wizard = function (config) {
       toggle: false,
     }).hide();
 
-    $("#wizard-table-delete").hide();
     $("#wizard-container-upload").find(".btn").hide();
     $("#wizard-container-upload").find("input").prop("readonly", true);
   }
@@ -873,7 +872,6 @@ window.Wizard = function (config) {
       toggle: false,
     }).show();
     
-    $("#wizard-table-delete").show();
 
     $("#wizard-container-create").find(".btn").hide();
     $("#wizard-container-create").find("input").prop("readonly", true);
@@ -970,16 +968,7 @@ window.Wizard = function (config) {
       state.columns.map(function (c) {
         cN.append("<option>" + c.name + "</option>");
       });
-
-      /* delete table */
-      $("#wizard-table-delete").bind("click", function () {
-        $("#wizard-confirm-delete").modal("show");
-      });
-      $("#wizard-confirm-delete-cancel").bind("click", function () {
-        $("#wizard-confirm-delete").modal("hide");
-      });
-      $("#wizard-confirm-delete-delete").bind("click", deleteTable);
-
+      
       showUpload();
     } else {
       showCreate();
