@@ -44,110 +44,108 @@
   <!-- inside bootstrap column -->
   <div class="content">
     <div class="content__container">
-      <div id="wizard-container-spinner">
-        <span class="spinner-border text-primary" id="wizard-loading"></span>
-      </div>
-      <div id="wizard-container-create"
-           class="collapse"
-           data-bs-parent="#wizard-container">
-        <div class="card-body container-fluid">
-          <div class="row my-2">
-            <div class="col">
-              <input type="text"
-                     class="form-control col-auto is-invalid"
-                     placeholder="insert table name"
-                     id="wizard-tablename"
-                     data-bs-toggle="tooltip"
-                     title="Valid table name (only lower case letters, numbers and underscore, max. 50 chars)" />
+      <div class="content__fullwidth">
+        <div id="wizard-container-spinner" class="col">
+          <span class="spinner-border text-primary" id="wizard-loading"></span>
+        </div>
+        <div id="wizard-container-create"
+             class="collapse"
+             data-bs-parent="#wizard-container">
+          <div class="card-body container-fluid">
+            <div class="row my-2">
+              <div class="col">
+                <input type="text"
+                       class="form-control col-auto is-invalid"
+                       placeholder="insert table name"
+                       id="wizard-tablename"
+                       data-bs-toggle="tooltip"
+                       title="Valid table name (only lower case letters, numbers and underscore, max. 50 chars)" />
+              </div>
             </div>
-          </div>
-          <div class="row wizard-column">
-            <div class="col-12">
-              <datalist id="wizard-column-types">
-                <option value="boolean"></option>
-                <option value="smallint"></option>
-                <option value="integer"></option>
-                <option value="bigint"></option>
-                <option value="float"></option>
-                <option value="real"></option>
-                <option value="date"></option>
-                <option value="time"></option>
-                <option value="datetime"></option>
-                <option value="char(5)"></option>
-                <option value="varchar(128)"></option>
-                <option value="text"></option>
-                <option value="decimal(9, 6)"></option>
-              </datalist>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <td></td>
-                    <td>
-                      <span class="label help-title"
-                            data-bs-toggle="tooltip"
-                            title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars)">
-                        Column name
-                      </span>
-                    </td>
-                    <td>
-                      <span class="label help-title"
-                            data-bs-toggle="tooltip"
-                            title="Valid sql data type for this column">
-                        Column type
-                      </span>
-                    </td>
-                    <td>
-                      <span class="label help-title"
-                            data-bs-toggle="tooltip"
-                            title="Allow column values to be empty (NULL)">
-                        Nullable
-                      </span>
-                    </td>
-                  </tr>
-                  <tr class="wizard-column" id="wizard-column-template">
-                    <td>
-                      <button class="btn btn-danger wizard-column-drop">
-                        <i class="fa fa-trash-alt"></i>
-                      </button>
-                    </td>
-                    <td>
-                      <input type="text"
-                             class="form-control wizard-column-name is-invalid"
-                             placeholder=""
-                             data-bs-toggle="tooltip"
-                             title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars)" />
-                    </td>
-                    <td>
-                      <input type="text"
-                             class="form-control wizard-column-type is-invalid"
-                             list="wizard-column-types"
-                             placeholder=""
-                             data-bs-toggle="tooltip"
-                             title="Valid sql data type for this column" />
-                    </td>
-                    <td>
-                      <input class="wizard-column-nullable"
-                             type="checkbox"
-                             data-bs-toggle="tooltip"
-                             title="Allow column values to be empty (NULL)" />
-                    </td>
-                  </tr>
-                </thead>
-                <tbody id="wizard-columns">
-                  <!-- placeholder for dynamic items -->
-                </tbody>
-              </table>
+            <div class="row wizard-column">
+              <div class="col-12">
+                <datalist id="wizard-column-types">
+                  <option value="boolean"></option>
+                  <option value="smallint"></option>
+                  <option value="integer"></option>
+                  <option value="bigint"></option>
+                  <option value="float"></option>
+                  <option value="real"></option>
+                  <option value="date"></option>
+                  <option value="time"></option>
+                  <option value="datetime"></option>
+                  <option value="char(5)"></option>
+                  <option value="varchar(128)"></option>
+                  <option value="text"></option>
+                  <option value="decimal(9, 6)"></option>
+                </datalist>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <td></td>
+                      <td>
+                        <span class="label help-title"
+                              data-bs-toggle="tooltip"
+                              title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars)">
+                          Column name
+                        </span>
+                      </td>
+                      <td>
+                        <span class="label help-title"
+                              data-bs-toggle="tooltip"
+                              title="Valid sql data type for this column">
+                          Column type
+                        </span>
+                      </td>
+                      <td>
+                        <span class="label help-title"
+                              data-bs-toggle="tooltip"
+                              title="Allow column values to be empty (NULL)">
+                          Nullable
+                        </span>
+                      </td>
+                    </tr>
+                    <tr class="wizard-column" id="wizard-column-template">
+                      <td>
+                        <button class="btn btn-danger wizard-column-drop">
+                          <i class="fa fa-trash-alt"></i>
+                        </button>
+                      </td>
+                      <td>
+                        <input type="text"
+                               class="form-control wizard-column-name is-invalid"
+                               placeholder=""
+                               data-bs-toggle="tooltip"
+                               title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars)" />
+                      </td>
+                      <td>
+                        <input type="text"
+                               class="form-control wizard-column-type is-invalid"
+                               list="wizard-column-types"
+                               placeholder=""
+                               data-bs-toggle="tooltip"
+                               title="Valid sql data type for this column" />
+                      </td>
+                      <td>
+                        <input class="wizard-column-nullable"
+                               type="checkbox"
+                               data-bs-toggle="tooltip"
+                               title="Allow column values to be empty (NULL)" />
+                      </td>
+                    </tr>
+                  </thead>
+                  <tbody id="wizard-columns">
+                    <!-- placeholder for dynamic items -->
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-          <div class="row my-2">
-            <div class="col-4">
+            <div class="my-2">
               <button class="btn btn-primary" id="wizard-column-add">
                 <i class="fa fa-plus"></i> Add column
               </button>
             </div>
-          </div>
-          <div class="row mt-5">
-            <div class="col-4">
+            <div class="mt-3">
               <label for="wizard-embargo">
                 Apply Embargo
                 <span class="label help-title"
@@ -160,200 +158,200 @@
                 <option value="1_year">1 Year</option>
               </select>
             </div>
-          </div>
-          <div class="row mt-5">
-            <div class="col-2">
+            <div class="mt-3">
               <button class="btn btn-success mt-2" id="wizard-table-create">
-                <i class="fa fa-table mr-2"></i>Create table
+                <i class="fa fa-table me-2"></i>Create table
               </button>
               <button class="btn btn-danger mt-2" id="wizard-table-delete">
-                <i class="fa fa-trash mr-2"></i>Delete table
+                <i class="fa fa-trash me-2"></i>Delete table
               </button>
             </div>
-            <div class="col-10 align-self-end">
-              <div id="wizard-table-create-msg" class="invisible wizard-status">
-                <span class="spinner spinner-border spinner-border-sm"></span>
-                <span class="message"></span>
+            <div class="row mt-3">
+              <div class="col-12">
+                <div id="wizard-table-create-msg" class="invisible wizard-status">
+                  <span class="spinner spinner-border spinner-border-sm"></span>
+                  <span class="message"></span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div id="wizard-container-upload"
-           class="collapse"
-           data-bs-parent="#wizard-container">
-        <div class="card-body container-fluid">
-          <div class="row my-2">
-            <h4>Select csv options</h4>
-          </div>
-          <div class="row align-items-left">
-            <div class="col-5">
-              <span class="label help-title"
-                    data-bs-toggle="tooltip"
-                    title="Character encoding of the csv file.">Encoding</span>
+        <div id="wizard-container-upload"
+             class="collapse"
+             data-bs-parent="#wizard-container">
+          <div class="card-body container-fluid">
+            <div class="row my-2">
+              <h4>Select csv options</h4>
             </div>
-            <div class="col-5">
-              <span class="label help-title"
-                    data-bs-toggle="tooltip"
-                    title="Field separation character of the csv file.">Delimiter</span>
-            </div>
-            <div class="col-2">
-              <span class="label help-title"
-                    data-bs-toggle="tooltip"
-                    title="First row of the csv file contains column names.">Header</span>
-            </div>
-          </div>
-          <div class="row my-3">
-            <div class="col-5">
-              <select id="wizard-encoding"
-                      name="encoding"
-                      class="form-control"
+            <div class="row align-items-left">
+              <div class="col-5">
+                <span class="label help-title"
                       data-bs-toggle="tooltip"
-                      title="Character encoding of the csv file.">
-                <option value=""></option>
-                <option value="iso-8859-1">ISO-8859-1</option>
-                <option value="utf-8">UTF-8</option>
-              </select>
-            </div>
-            <div class="col-5">
-              <select id="wizard-delimiter"
-                      name="delimiter"
-                      class="form-control"
+                      title="Character encoding of the csv file.">Encoding</span>
+              </div>
+              <div class="col-5">
+                <span class="label help-title"
                       data-bs-toggle="tooltip"
-                      title="Field separation character of the csv file.">
-                <option value="">(autodetect)</option>
-                <option value=";">semicolon</option>
-                <option value=",">comma</option>
-                <option value="\t">tab</option>
-                <option value="|">bar</option>
-              </select>
+                      title="Field separation character of the csv file.">Delimiter</span>
+              </div>
+              <div class="col-2">
+                <span class="label help-title"
+                      data-bs-toggle="tooltip"
+                      title="First row of the csv file contains column names.">Header</span>
+              </div>
             </div>
-            <div class="col-2">
-              <input id="wizard-header"
-                     type="checkbox"
-                     checked
-                     data-bs-toggle="tooltip"
-                     title="First row of the csv file contains column names." />
-            </div>
-          </div>
-          <div class="row my-2">
-            <h5>
-              <button class="btn btn-link"
-                      data-bs-toggle="collapse"
-                      data-bs-target="#wizard-csv-example-container">
-                Show example csv for current configuration
-              </button>
-            </h5>
-          </div>
-          <div class="row collapse my-3" id="wizard-csv-example-container">
-            <textarea class="form-control mx-3" id="wizard-csv-example" readonly></textarea>
-          </div>
-          <div class="row my-3">
-            <h4>Select csv file</h4>
-          </div>
-          <div class="row">
-            <div class="col-6">
-              <input id="wizard-file" type="file" class="custom-file-input" />
-              <label id="wizard-file-label"
-                     class="custom-file-label mx-3"
-                     for="wizard-file"></label>
-            </div>
-          </div>
-          <div class="row my-2">
-            <h5>
-              <button class="btn btn-link"
-                      data-bs-toggle="collapse"
-                      data-bs-target="#wizard-csv-text-container">
-                Show preview
-              </button>
-            </h5>
-          </div>
-          <div class="row collapse" id="wizard-csv-text-container">
-            <textarea class="form-control mx-3" id="wizard-csv-text" readonly></textarea>
-          </div>
-          <div class="row my-3">
-            <h4>Configure column mapping</h4>
-          </div>
-          <div class="row wizard-csv-column" id="wizard-csv-column-template">
-            <div class="col-3">
-              <input type="text"
-                     class="form-control wizard-csv-column-name"
-                     placeholder="" />
-            </div>
-            <div class="col-3">
-              <select class="form-control wizard-csv-column-name-new"></select>
-            </div>
-            <div class="col-3">
-              <select class="form-control wizard-csv-column-parse"></select>
-            </div>
-            <div class="col-3">
-              <input type="text"
-                     class="form-control wizard-null-value"
-                     list="wizard-null-values" />
-            </div>
-          </div>
-          <div class="row my-3">
-            <div class="col-3">
-              <span class="label">Column name (in csv file)</span>
-            </div>
-            <div class="col-3">
-              <span class="label">Column name in database</span>
-            </div>
-            <div class="col-3">
-              <span class="label help-title"
-                    data-bs-toggle="tooltip"
-                    title="Modify values in this column before upload">
-                (optional) Converter
-              </span>
-            </div>
-            <div class="col-3">
-              <span class="label help-title"
-                    data-bs-toggle="tooltip"
-                    title="String that should be interpreted as NULL (missing value)">
-                (optional) Null value
-                <datalist id="wizard-null-values">
+            <div class="row my-3">
+              <div class="col-5">
+                <select id="wizard-encoding"
+                        name="encoding"
+                        class="form-control"
+                        data-bs-toggle="tooltip"
+                        title="Character encoding of the csv file.">
                   <option value=""></option>
-                  <option value="-"></option>
-                  <option value="n.a."></option>
-                  <option value="null"></option>
-                  <option value="None"></option>
-                </datalist>
-              </span>
+                  <option value="iso-8859-1">ISO-8859-1</option>
+                  <option value="utf-8">UTF-8</option>
+                </select>
+              </div>
+              <div class="col-5">
+                <select id="wizard-delimiter"
+                        name="delimiter"
+                        class="form-control"
+                        data-bs-toggle="tooltip"
+                        title="Field separation character of the csv file.">
+                  <option value="">(autodetect)</option>
+                  <option value=";">semicolon</option>
+                  <option value=",">comma</option>
+                  <option value="\t">tab</option>
+                  <option value="|">bar</option>
+                </select>
+              </div>
+              <div class="col-2">
+                <input id="wizard-header"
+                       type="checkbox"
+                       checked
+                       data-bs-toggle="tooltip"
+                       title="First row of the csv file contains column names." />
+              </div>
             </div>
-          </div>
-          <div id="wizard-csv-columns">
-            <!-- placeholder for dynamic items -->
-          </div>
-          <div class="row my-3">
-            <h4>Preview and upload</h4>
-          </div>
-          <div class="row">
-            <table id="wizard-csv-preview" class="table table-striped">
-              <thead>
-                <tr id="wizard-csv-preview-thead-row"></tr>
-              </thead>
-              <tbody id="wizard-csv-preview-body">
-              </tbody>
-            </table>
-          </div>
-          <div class="row my-3">
-            <div class="col-2">
-              <span {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
-                <a href="#wizard-table-upload"
-                   class="btn btn-primary {% if not can_add %}disabled{% endif %}"
-                   id="wizard-table-upload"><i class="fa fa-upload"></i> Upload</a>
-              </span>
-              <button class="btn btn-danger" id="wizard-table-upload-cancel">
-                <i class="fa fa-stop-circle"></i> Cancel
-              </button>
+            <div class="row my-2">
+              <h5>
+                <button class="btn btn-link"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#wizard-csv-example-container">
+                  Show example csv for current configuration
+                </button>
+              </h5>
             </div>
-            <div class="col-10 align-self-end">
-              <div id="wizard-table-upload-msg" class="invisible wizard-status">
-                <span class="spinner spinner-border spinner-border-sm"></span>
-                <span class="message"></span>
-                <span class="progress">
-                  <span class="progress-bar progress-bar-animated progress-bar-striped"></span>
+            <div class="row collapse my-3" id="wizard-csv-example-container">
+              <textarea class="form-control mx-3" id="wizard-csv-example" readonly></textarea>
+            </div>
+            <div class="row my-3">
+              <h4>Select csv file</h4>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <input id="wizard-file" type="file" class="custom-file-input" />
+                <label id="wizard-file-label"
+                       class="custom-file-label mx-3"
+                       for="wizard-file"></label>
+              </div>
+            </div>
+            <div class="row my-2">
+              <h5>
+                <button class="btn btn-link"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#wizard-csv-text-container">
+                  Show preview
+                </button>
+              </h5>
+            </div>
+            <div class="row collapse" id="wizard-csv-text-container">
+              <textarea class="form-control mx-3" id="wizard-csv-text" readonly></textarea>
+            </div>
+            <div class="row my-3">
+              <h4>Configure column mapping</h4>
+            </div>
+            <div class="row wizard-csv-column" id="wizard-csv-column-template">
+              <div class="col-3">
+                <input type="text"
+                       class="form-control wizard-csv-column-name"
+                       placeholder="" />
+              </div>
+              <div class="col-3">
+                <select class="form-control wizard-csv-column-name-new"></select>
+              </div>
+              <div class="col-3">
+                <select class="form-control wizard-csv-column-parse"></select>
+              </div>
+              <div class="col-3">
+                <input type="text"
+                       class="form-control wizard-null-value"
+                       list="wizard-null-values" />
+              </div>
+            </div>
+            <div class="row my-3">
+              <div class="col-3">
+                <span class="label">Column name (in csv file)</span>
+              </div>
+              <div class="col-3">
+                <span class="label">Column name in database</span>
+              </div>
+              <div class="col-3">
+                <span class="label help-title"
+                      data-bs-toggle="tooltip"
+                      title="Modify values in this column before upload">
+                  (optional) Converter
                 </span>
+              </div>
+              <div class="col-3">
+                <span class="label help-title"
+                      data-bs-toggle="tooltip"
+                      title="String that should be interpreted as NULL (missing value)">
+                  (optional) Null value
+                  <datalist id="wizard-null-values">
+                    <option value=""></option>
+                    <option value="-"></option>
+                    <option value="n.a."></option>
+                    <option value="null"></option>
+                    <option value="None"></option>
+                  </datalist>
+                </span>
+              </div>
+            </div>
+            <div id="wizard-csv-columns">
+              <!-- placeholder for dynamic items -->
+            </div>
+            <div class="row my-3">
+              <h4>Preview and upload</h4>
+            </div>
+            <div class="row">
+              <table id="wizard-csv-preview" class="table table-striped">
+                <thead>
+                  <tr id="wizard-csv-preview-thead-row"></tr>
+                </thead>
+                <tbody id="wizard-csv-preview-body">
+                </tbody>
+              </table>
+            </div>
+            <div class="row my-3">
+              <div class="col-2">
+                <span {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
+                  <a href="#wizard-table-upload"
+                     class="btn btn-primary {% if not can_add %}disabled{% endif %}"
+                     id="wizard-table-upload"><i class="fa fa-upload"></i> Upload</a>
+                </span>
+                <button class="btn btn-danger" id="wizard-table-upload-cancel">
+                  <i class="fa fa-stop-circle"></i> Cancel
+                </button>
+              </div>
+              <div class="col-10 align-self-end">
+                <div id="wizard-table-upload-msg" class="invisible wizard-status">
+                  <span class="spinner spinner-border spinner-border-sm"></span>
+                  <span class="message"></span>
+                  <span class="progress">
+                    <span class="progress-bar progress-bar-animated progress-bar-striped"></span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -372,7 +370,7 @@
           Do you want to delete the table (including data and metadata)?
         </div>
         <div class="modal-body">
-          <button class="btn btn-sm btn-dark mr-2" id="wizard-confirm-delete-delete">
+          <button class="btn btn-sm btn-dark me-2" id="wizard-confirm-delete-delete">
             delete
           </button>
           <button class="btn btn-sm btn-light" id="wizard-confirm-delete-cancel">
