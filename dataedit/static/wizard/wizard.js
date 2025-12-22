@@ -126,7 +126,7 @@ window.Wizard = function (config) {
    * add a new column in the create table section
    */
   function addColumn(columnDef) {
-    columnDef = columnDef || {};
+    columnDef = columnDef || {"is_nullable": true};
     var columns = $("#wizard-columns");
     var n = columns.find(".wizard-column").length;
     var column = $("#wizard-column-template")
