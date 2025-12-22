@@ -200,7 +200,6 @@ class TableMetadataAPIView(APIView):
             metadata, error = try_validate_metadata(metadata)
 
         if metadata is not None:
-
             # update/sync keywords with tags before saving metadata
             # TODO make this iter over all resources
             keywords = metadata["resources"][0].get("keywords", []) or []
@@ -371,7 +370,6 @@ class TableAPIView(APIView):
 
         metadata = payload_query.get("metadata")
         if metadata:
-
             set_table_metadata(table=table, metadata=metadata)
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
@@ -397,7 +395,7 @@ class TableColumnAPIView(APIView):
             try:
                 response = response[column]
             except KeyError:
-                raise APIError("The column specified is not part of " "this table.")
+                raise APIError("The column specified is not part of this table.")
         return JsonResponse(response)
 
     @api_exception
@@ -795,7 +793,7 @@ class TableRowsAPIView(APIView):
     ):
         if row_id and row.get("id", int(row_id)) != int(row_id):
             return response_error(
-                "The id given in the query does not " "match the id given in the url"
+                "The id given in the query does not match the id given in the url"
             )
         if row_id:
             row["id"] = row_id
@@ -904,6 +902,7 @@ class TableRowsAPIView(APIView):
 
 
 @api_exception
+@never_cache
 def table_approx_row_count_view(request: HttpRequest, table: str) -> JsonResponse:
     table_obj = table_or_404(table=table)
     precise_below = int(
@@ -917,6 +916,7 @@ def table_approx_row_count_view(request: HttpRequest, table: str) -> JsonRespons
 
 
 @api_exception
+@never_cache
 def usrprop_api_view(request: Request) -> JsonLikeResponse:
     query = request.GET.get("name", "")
 
@@ -941,6 +941,7 @@ def usrprop_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(user_names, safe=False)
 
 
+@never_cache
 @api_exception
 def grpprop_api_view(request: Request) -> JsonLikeResponse:
     """
@@ -976,6 +977,7 @@ def grpprop_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(group_names, safe=False)
 
 
+@never_cache
 @api_exception
 def oeo_search_api_view(request: Request) -> JsonLikeResponse:
     if USE_LOEP:
@@ -994,6 +996,7 @@ def oeo_search_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(res, safe=False)
 
 
+@never_cache
 @api_exception
 def oevkg_query_api_view(request: Request) -> JsonLikeResponse:
     if USE_ONTOP and ONTOP_SPARQL_ENDPOINT_URL:
@@ -1121,6 +1124,7 @@ class AllTableSizesAPIView(APIView):
     """
 
     @api_exception
+    @method_decorator(never_cache)
     def get(self, request: Request) -> JsonLikeResponse:
         table = request.query_params.get("table")
 
