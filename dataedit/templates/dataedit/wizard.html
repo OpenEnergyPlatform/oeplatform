@@ -1,5 +1,6 @@
 {% extends "dataedit/base_fullwidth.html" %}
 {% load static %}
+{% load django_vite %}
 {% load django_bootstrap5 %}
 {% load compress %}
 {% block after-head %}
@@ -378,9 +379,7 @@
     </div>
   </div>
   <script src="{% static 'wizard/vendor/papaparse-5.0.2/papaparse.min.js' %}"></script>
-  {% compress js %}
-    <script src="{% static 'wizard/wizard.js' %}"></script>
-  {% endcompress %}
+  {% vite_asset "dataedit/static/wizard/wizard.js" %}
   <script>
     $(document).ready(function () {
       var config = JSON.parse("{{ config|escapejs }}");
