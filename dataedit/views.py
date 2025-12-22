@@ -93,9 +93,8 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import Embargo, PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from login import models as login_models
@@ -106,7 +105,7 @@ from oeplatform.settings import (
     TOPIC_SCENARIO,
 )
 
-ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
+ITEMS_PER_PAGE = 1  # how many tabled per page should be displayed
 
 
 class StandaloneMetaEditView(View):
@@ -402,6 +401,11 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
     searched_query_string = request.GET.get("query")
     searched_tag_ids = request.GET.getlist("tags")
 
+    # all query params without "page"
+    params_wo_page = request.GET.copy()
+    params_wo_page.pop("page", None)
+    params_wo_page = params_wo_page.urlencode()
+
     Tag.increment_usage_count_many(searched_tag_ids)
 
     # find all tables (layzy query set) in this topic
@@ -426,6 +430,7 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
             "tables_paginated": tables_paginated,
             "query": searched_query_string,
             "tags": searched_tag_ids,
+            "params_wo_page": params_wo_page,
             "topic": topic,
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
         },
