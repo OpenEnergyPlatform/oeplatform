@@ -105,7 +105,7 @@ from oeplatform.settings import (
     TOPIC_SCENARIO,
 )
 
-ITEMS_PER_PAGE = 1  # how many tabled per page should be displayed
+ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
 
 
 class StandaloneMetaEditView(View):
