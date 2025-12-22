@@ -1,5 +1,6 @@
-"""This is the initial view that initialises the database connection.
+"""This is the initial view that initialises the database connection."""
 
+__license__ = """
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
@@ -109,6 +110,7 @@ ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
 
 
 class StandaloneMetaEditView(View):
+    @method_decorator(never_cache)
     def get(self, request: HttpRequest) -> HttpResponse:
         context_dict = {
             "config": json.dumps(
@@ -169,6 +171,7 @@ def admin_column_view(request: HttpRequest) -> HttpResponse:
     return redirect("dataedit:view", table=table_obj.name)
 
 
+@never_cache
 def topic_view(request: HttpRequest) -> HttpResponse:
     """
     Loads all topics that are present in the external database specified in
@@ -246,6 +249,7 @@ def topic_view(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
+@never_cache
 def tag_overview_view(request: HttpRequest) -> HttpResponse:
     # if rename or adding of tag fails: display error message
     context = {
@@ -260,6 +264,7 @@ def tag_overview_view(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
+@never_cache
 def tag_editor_view(request: HttpRequest, tag_pk: str | None = None) -> HttpResponse:
     tag = Tag.get_or_none(tag_pk or "")
     if tag:
@@ -364,6 +369,7 @@ def tag_table_add_view(request: HttpRequest) -> HttpResponse:
     return redirect(redirect_url)
 
 
+@never_cache
 def metadata_widget_view(request: HttpRequest) -> HttpResponse:
     """
     A view to render the metadata widget for the dataedit app.
@@ -386,6 +392,7 @@ def metadata_widget_view(request: HttpRequest) -> HttpResponse:
     return render(request, "partials/metadata_viewer.html", context=context)
 
 
+@never_cache
 def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
     """
     :param request: A HTTP-request object sent by the Django framework
@@ -394,6 +401,11 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
 
     searched_query_string = request.GET.get("query")
     searched_tag_ids = request.GET.getlist("tags")
+
+    # all query params without "page"
+    params_wo_page = request.GET.copy()
+    params_wo_page.pop("page", None)
+    params_wo_page = params_wo_page.urlencode()
 
     Tag.increment_usage_count_many(searched_tag_ids)
 
@@ -419,6 +431,7 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
             "tables_paginated": tables_paginated,
             "query": searched_query_string,
             "tags": searched_tag_ids,
+            "params_wo_page": params_wo_page,
             "topic": topic,
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
         },
@@ -544,8 +557,8 @@ def table_view_delete_view(request: HttpRequest, table: str) -> HttpResponse:
 
 
 class TableCreateGraphView(View):
+    @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
-
         table_obj = table_or_404(table=table)
 
         # get the columns id from the table
@@ -555,7 +568,6 @@ class TableCreateGraphView(View):
         return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
 
     def post(self, request: HttpRequest, table: str) -> HttpResponse:
-
         table_obj = table_or_404(table=table)
 
         # save an instance of View, look at GraphViewForm fields in forms.py
@@ -577,6 +589,7 @@ class TableCreateGraphView(View):
 
 
 class TableCreateMapView(View):
+    @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
 
@@ -812,8 +825,8 @@ class TablePermissionView(View):
     Initialises the session data (if necessary)
     """
 
+    @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
-
         table_obj = table_or_404(table=table)
 
         user_perms = login_models.UserPermission.objects.filter(table=table_obj)
@@ -868,7 +881,6 @@ class TablePermissionView(View):
             raise NotImplementedError()
 
     def __add_user(self, request: HttpRequest, table_obj: Table):
-
         user_name = request.POST.get("name")
         # Check if the user name is empty
         if not user_name:
@@ -884,7 +896,6 @@ class TablePermissionView(View):
         return self.get(request, table=table_obj.name)
 
     def __change_user(self, request: HttpRequest, table_obj: Table):
-
         user_id = request.POST.get("user_id")
         # Check if the user id is empty
         if not user_id:
@@ -899,7 +910,6 @@ class TablePermissionView(View):
         return self.get(request, table=table_obj.name)
 
     def __remove_user(self, request: HttpRequest, table_obj: Table):
-
         user_id = request.POST.get("user_id")
         # Check if the user id is empty
         if not user_id:
@@ -913,7 +923,6 @@ class TablePermissionView(View):
         return self.get(request, table=table_obj.name)
 
     def __add_group(self, request: HttpRequest, table_obj: Table):
-
         group_name = request.POST.get("name")
         # Check if the group name is empty
         if not group_name:
@@ -929,7 +938,6 @@ class TablePermissionView(View):
         return self.get(request, table=table_obj.name)
 
     def __change_group(self, request: HttpRequest, table_obj: Table):
-
         group_id = request.POST.get("group_id")
         if not group_id:
             # Return an HTTP 400 Bad Request response
@@ -945,7 +953,6 @@ class TablePermissionView(View):
         return self.get(request, table=table_obj.name)
 
     def __remove_group(self, request: HttpRequest, table_obj: Table):
-
         group_id = request.POST.get("group_id")
         if not group_id:
             # Return an HTTP 400 Bad Request response
@@ -963,6 +970,7 @@ class TablePermissionView(View):
 class TableWizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv)."""
 
+    @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str | None = None) -> HttpResponse:
         """Handle GET request (render the page)."""
 
@@ -971,7 +979,6 @@ class TableWizardView(LoginRequiredMixin, View):
         # pk_fields = None
         n_rows = None
         if table:
-
             table_obj = table_or_404(table=table)
 
             user: login_models.myuser = request.user  # type: ignore
@@ -1004,6 +1011,7 @@ class TableWizardView(LoginRequiredMixin, View):
 class TableMetaEditView(LoginRequiredMixin, View):
     """Metadata editor (cliet side json forms)."""
 
+    @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
         columns = get_column_description(table_obj)
@@ -1246,6 +1254,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         extract_descriptions(json_schema["properties"], prefix)
         return field_descriptions
 
+    @method_decorator(never_cache)
     def get(
         self,
         request: HttpRequest,
@@ -1465,6 +1474,7 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
     POST requests for contributor's review.
     """
 
+    @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str, review_id: int) -> HttpResponse:
         """
         Handle GET requests for contributor's review. Loads necessary data and

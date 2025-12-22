@@ -44,7 +44,6 @@ from api.views import (
     AdvancedGetViewNamesAPIView,
     AdvancedHasSchemaAPIView,
     AdvancedHasTableAPIView,
-    AdvancedInfoAPIView,
     AdvancedInsertAPIView,
     AdvancedSearchAPIView,
     AdvancedSetIsolationLevelAPIView,
@@ -57,7 +56,6 @@ from api.views import (
     ScenarioDataTablesListAPIView,
     TableAPIView,
     TableColumnAPIView,
-    TableFieldsAPIView,
     TableMetadataAPIView,
     TableMovePublishAPIView,
     TableRowsAPIView,
@@ -69,6 +67,7 @@ from api.views import (
     usrprop_api_view,
 )
 
+# from api.views import TableFieldsAPIView, AdvancedInfoAPIView
 app_name = "api"
 
 pgsql_qualifier = r"[\w\d_]+"
@@ -103,11 +102,11 @@ urlpatterns_v0_schema_table = [
         TableColumnAPIView.as_view(),
         name="table-columns",
     ),
-    re_path(
-        r"^(?P<table>[\w\d_\s]+)/id/(?P<column_id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
-        TableFieldsAPIView.as_view(),
-        name="table-fields",
-    ),
+    # re_path(
+    #    r"^(?P<table>[\w\d_\s]+)/id/(?P<row_id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
+    #    TableFieldsAPIView.as_view(),
+    #    name="table-fields",
+    # ),
     re_path(
         r"^(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",  # noqa
         TableRowsAPIView.as_view(),
@@ -136,7 +135,7 @@ urlpatterns_v0_advanced = [
     ),
     re_path(r"^delete", AdvancedDeleteAPIView, name="advanced-delete"),
     re_path(r"^update", AdvancedUpdateAPIView, name="advanced-update"),
-    re_path(r"^info", AdvancedInfoAPIView, name="advanced-info"),
+    # re_path(r"^info", AdvancedInfoAPIView, name="advanced-info"),
     re_path(r"^has_schema", AdvancedHasSchemaAPIView, name="advanced-has-schema"),
     re_path(r"^has_table", AdvancedHasTableAPIView, name="advanced-has-table"),
     re_path(
