@@ -18,6 +18,7 @@ SPDX-License-Identifier: CC0-1.0
 - fixed year format in scenario bundles (#2091, #2102)
 - fix sorting of fact sheets (#1974)
 - fixed caching issues (#1818, #1822)
+- keep table filter when using pagination (#2169)
 
 ## Documentation updates
 

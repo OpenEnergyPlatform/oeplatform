@@ -402,6 +402,11 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
     searched_query_string = request.GET.get("query")
     searched_tag_ids = request.GET.getlist("tags")
 
+    # all query params without "page"
+    params_wo_page = request.GET.copy()
+    params_wo_page.pop("page", None)
+    params_wo_page = params_wo_page.urlencode()
+
     Tag.increment_usage_count_many(searched_tag_ids)
 
     # find all tables (layzy query set) in this topic
@@ -426,6 +431,7 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
             "tables_paginated": tables_paginated,
             "query": searched_query_string,
             "tags": searched_tag_ids,
+            "params_wo_page": params_wo_page,
             "topic": topic,
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
         },
