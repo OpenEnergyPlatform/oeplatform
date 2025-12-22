@@ -2082,6 +2082,19 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
+path = "base/templates/base/oefamily-sc.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2020 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut",
+  "2021 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
+  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+
+[[annotations]]
 path = "ontology/templates/ontology/about.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"

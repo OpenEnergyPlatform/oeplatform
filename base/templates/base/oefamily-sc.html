@@ -1,0 +1,21 @@
+{% extends "base/base.html" %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block site-header %}
+  <div class="main-header">
+    <h1 class="main-header__title">Open Energy Family Steering Committee</h1>
+  </div>
+{% endblock site-header %}
+{% block main-content-body %}
+  <br />
+  <h3 id="oeo-sc">What is the Steering Committee?</h3>
+  <p>TODO_TEXT</p>
+  <h3 id="oeo-sc-members">Who is involved?</h3>
+  <p>TODO_TEXT</p>
+  <ul>
+    <li>
+      TODO_NAME -
+      <a href="{{ EXTERNAL_URLS.TODO }}">TODO_ORGANISATION</a>
+    </li>
+  </ul>
+{% endblock main-content-body %}
