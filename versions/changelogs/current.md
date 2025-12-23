@@ -10,9 +10,17 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- various changes to csv upload tool (#1893, #1826, #1819)
+
 ## Features
 
 ## Bugs
+
+- fixed bug with meta data editor (#2038)
+- fixed year format in scenario bundles (#2091, #2102)
+- fix sorting of fact sheets (#1974)
+- fixed caching issues (#1818, #1822)
+- keep table filter when using pagination (#2169)
 
 ## Documentation updates
 

@@ -877,6 +877,7 @@ class TableRowsAPIView(APIView):
 
 
 @api_exception
+@never_cache
 def table_approx_row_count_view(request: HttpRequest, table: str) -> JsonResponse:
     table_obj = table_or_404(table=table)
     precise_below = int(
@@ -890,6 +891,7 @@ def table_approx_row_count_view(request: HttpRequest, table: str) -> JsonRespons
 
 
 @api_exception
+@never_cache
 def usrprop_api_view(request: Request) -> JsonLikeResponse:
     query = request.GET.get("name", "")
 
@@ -914,6 +916,7 @@ def usrprop_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(user_names, safe=False)
 
 
+@never_cache
 @api_exception
 def grpprop_api_view(request: Request) -> JsonLikeResponse:
     """
@@ -949,6 +952,7 @@ def grpprop_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(group_names, safe=False)
 
 
+@never_cache
 @api_exception
 def oeo_search_api_view(request: Request) -> JsonLikeResponse:
     if USE_LOEP:
@@ -967,6 +971,7 @@ def oeo_search_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(res, safe=False)
 
 
+@never_cache
 @api_exception
 def oevkg_query_api_view(request: Request) -> JsonLikeResponse:
     if USE_ONTOP and ONTOP_SPARQL_ENDPOINT_URL:
@@ -1094,6 +1099,7 @@ class AllTableSizesAPIView(APIView):
     """
 
     @api_exception
+    @method_decorator(never_cache)
     def get(self, request: Request) -> JsonLikeResponse:
         table = request.query_params.get("table")
 

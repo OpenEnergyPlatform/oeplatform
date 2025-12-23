@@ -103,6 +103,24 @@ function TabPanel(props) {
   );
 }
 
+
+/**
+ *
+ * @param {integer|Date|string} input
+ * @returns {integer}
+ */
+function formatYear(input) {
+
+  if (typeof input === 'string'){
+    // create date object
+    input = new Date(input)
+  }
+  if (input instanceof Date) {
+    input = input.getFullYear();
+  }
+  return input;
+}
+
 function Factsheet(props) {
 
   const navigate = useNavigate();
@@ -1997,7 +2015,7 @@ const renderScenariosOverview = () => (
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.scenario_years.sort((a, b) => a.id - b.id).map((e) => <span> <span> {e.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
+                    {v.scenario_years.sort((a, b) => a.id - b.id).map((e) => <span> <span> {formatYear(e.name)} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
@@ -2203,7 +2221,7 @@ const renderScenariosOverview = () => (
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    <span> <span> {v.date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                    <span> <span> {formatYear(v.date_of_publication)} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
                   </ContentTableCell>
                 </TableRow>
 

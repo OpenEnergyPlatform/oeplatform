@@ -28,7 +28,7 @@ export default function CustomDatePicker(props) {
             views={["year"]}
             renderInput={(params) => <TextField {...params} />}
           />
-          :<DesktopDatePicker
+          : <DesktopDatePicker
             label={label}
             inputFormat="MM/DD/YYYY"
             value={value}

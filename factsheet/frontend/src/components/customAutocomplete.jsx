@@ -15,11 +15,11 @@ import {
 import { styled } from '@mui/material/styles';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon           from '@mui/icons-material/CheckBox';
-import uuid                   from 'react-uuid';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import uuid from 'react-uuid';
 
-const filter      = createFilterOptions();
-const icon        = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const filter = createFilterOptions();
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 // If you had custom Input styles via `classes.inputRoot`, port them in here:
@@ -42,12 +42,12 @@ export default function CustomAutocomplete({
   width = '100%',
   bgColor = '#FCFCFC',
 }) {
-  const [value, setValue]         = useState(selectedElements);
-  const [open, toggleOpen]        = useState(false);
-  const [openEdit, toggleOpenEdit]= useState(false);
+  const [value, setValue] = useState(selectedElements);
+  const [open, toggleOpen] = useState(false);
+  const [openEdit, toggleOpenEdit] = useState(false);
   const [dialogValue, setDialogValue] = useState({ id: '', name: '' });
-  const [editLabel, setEditLabel]     = useState('');
-  const [editIRI, setEditIRI]         = useState('');
+  const [editLabel, setEditLabel] = useState('');
+  const [editIRI, setEditIRI] = useState('');
   const [updatedLabel, setUpdatedLabel] = useState('');
 
   const handleChange = (_, newVal) => {
