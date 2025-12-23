@@ -10,7 +10,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 */
 /* eslint-enable max-len */
 
-
 window.Wizard = function (config) {
   var state = {
     apiVersion: "v0",
@@ -126,7 +125,7 @@ window.Wizard = function (config) {
    * add a new column in the create table section
    */
   function addColumn(columnDef) {
-    columnDef = columnDef || {"is_nullable": true};
+    columnDef = columnDef || { is_nullable: true };
     var columns = $("#wizard-columns");
     var n = columns.find(".wizard-column").length;
     var column = $("#wizard-column-template")
@@ -399,12 +398,10 @@ window.Wizard = function (config) {
    * The selected file has changed
    */
   function updateFile() {
-     /* reset */
-    state.previewRows = []
+    /* reset */
+    state.previewRows = [];
     updateExample();
     updatePreview();
-    
-    
 
     // console.log('updateFile')
     state.file = $("#wizard-file");
@@ -470,9 +467,8 @@ window.Wizard = function (config) {
    * a file settings option (e.g. delimiter, encoding, ...) has been changed
    */
   function changeFileSettings() {
-
     $("#wizard-table-upload").hide();
-    
+
     updateFile();
 
     state.csvColumns = [];
@@ -481,7 +477,7 @@ window.Wizard = function (config) {
     $("#wizard-csv-columns").empty();
     $("#wizard-csv-text").text("");
     if (state.file) {
-      setStatusUpload("info", false,"checking file", true)  
+      setStatusUpload("info", false, "checking file", true);
       state.file.parse({
         config: {
           encoding: state.encoding,
@@ -529,20 +525,27 @@ window.Wizard = function (config) {
             }
             updateColumnMapping();
             $("#wizard-table-upload").show();
-            setStatusUpload("info", false,"", false) /* remove status message*/
+            setStatusUpload(
+              "info",
+              false,
+              "",
+              false
+            ); /* remove status message*/
           },
-          error: function (error) {            
-            var msg = error.message
+          error: function (error) {
+            var msg = error.message;
             if (msg == "File could not be read") {
-              msg = "File could not be read (Probably too large - should be smaller than 1 GB)"
+              msg =
+                "File could not be read " +
+                "(Probably too large - should be smaller than 1 GB)";
             }
-            console.error(msg)
+            console.error(msg);
             setStatusUpload("danger", false, msg, false);
           },
         },
       });
     } else {
-      updateColumnMapping();            
+      updateColumnMapping();
     }
   }
 
@@ -786,7 +789,7 @@ window.Wizard = function (config) {
       query: {
         columns: colDefs,
         // Conditional check
-        embargo: embargoValue === "none" ? null : { duration: embargoValue }, 
+        embargo: embargoValue === "none" ? null : { duration: embargoValue },
         // "embargo": embargoData
       },
     };
@@ -794,7 +797,7 @@ window.Wizard = function (config) {
     Promise.all([
       window.reverseUrl("api:api_table", { table: tablename }),
       window.reverseUrl("dataedit:wizard_upload", {
-        table: tablename,        
+        table: tablename,
       }),
     ]).then(([urlTable, urlSuccess]) => {
       sendJson("PUT", urlTable, JSON.stringify(data))
@@ -834,8 +837,6 @@ window.Wizard = function (config) {
     };
   }
 
-  
-
   function resetUpload() {
     state.cancel = null;
     $("#wizard-table-upload").hide();
@@ -851,8 +852,7 @@ window.Wizard = function (config) {
       data_type: "bigserial",
       is_nullable: false,
     });
-    
-    
+
     new bootstrap.Collapse("#wizard-container-create", {
       toggle: false,
     }).show();
@@ -865,11 +865,9 @@ window.Wizard = function (config) {
   }
 
   function showUpload() {
-    
     new bootstrap.Collapse("#wizard-container-upload", {
       toggle: false,
     }).show();
-    
 
     $("#wizard-container-create").find(".btn").hide();
     $("#wizard-container-create").find("input").prop("readonly", true);
@@ -966,7 +964,7 @@ window.Wizard = function (config) {
       state.columns.map(function (c) {
         cN.append("<option>" + c.name + "</option>");
       });
-      
+
       showUpload();
     } else {
       showCreate();
