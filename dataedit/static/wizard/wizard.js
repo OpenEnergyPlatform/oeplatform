@@ -834,28 +834,7 @@ window.Wizard = function (config) {
     };
   }
 
-  /**
-   * delete table
-   */
-  function deleteTable() {
-    $("#wizard-confirm-delete").modal("hide");
-    setStatusCreate("primary", true, "deleting table...");
-    var tablename = $("#wizard-tablename").val();
-
-    Promise.all([
-      window.reverseUrl("api:api_table", { table: tablename }),
-      window.reverseUrl("dataedit:wizard_create"),
-    ]).then(([urlTable, urlSuccess]) => {
-      sendJson("DELETE", urlTable)
-        .then(function () {
-          setStatusCreate("success", true, "ok, reloading page...");
-          window.location = urlSuccess;
-        })
-        .catch(function (err) {
-          setStatusCreate("danger", false, getErrorMsg(err));
-        });
-    });
-  }
+  
 
   function resetUpload() {
     state.cancel = null;
