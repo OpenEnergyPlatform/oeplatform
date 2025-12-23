@@ -1,4 +1,4 @@
-"""
+__license__ = """
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
@@ -107,15 +107,9 @@ def get_column_definition_query(d: dict) -> Column:
         d["autoincrement"] = True
 
     for fk in d.get("foreign_key", []):
-
         table_obj = table_or_404_from_dict(fk)
-
-        # NOTE: previously, this used a sqlalchemy MetaData without bind=engine.
-        # could this be a problem?
         fk_sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
-
         fkcolumn = Column(get_or_403(fk, "column"))
-
         fkcolumn.table = fk_sa_table
 
         args.append(ForeignKey(fkcolumn))
@@ -285,7 +279,6 @@ def set_meta_info(method, user, message=None) -> dict:
 def parse_insert(
     sa_table_insert: "SATable", d: dict, context: dict, message=None, mapper=None
 ):
-
     field_strings = []
     for field in d.get("fields", []):
         if not (
@@ -426,7 +419,6 @@ def parse_select(d: dict):
             elif type.lower() == "except":
                 query.except_(subquery)
     if "order_by" in d:
-
         for ob in d["order_by"]:
             expr = parse_expression(ob)
 
@@ -890,8 +882,9 @@ def _parse_sqla_operator(raw_key, *operands):
                 return x.distance_centroid(y)
             if key in ["getitem"]:
                 if isinstance(y, Slice):
-                    ystart, ystop = _parse_single(y.start, int), _parse_single(
-                        y.stop, int
+                    ystart, ystop = (
+                        _parse_single(y.start, int),
+                        _parse_single(y.stop, int),
                     )
                     return x[ystart:ystop]
                 else:

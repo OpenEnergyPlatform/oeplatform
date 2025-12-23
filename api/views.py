@@ -40,7 +40,7 @@ import itertools
 import json
 import re
 
-import geoalchemy2  # noqa: Although this import seems unused is has to be here
+import geoalchemy2  # noqa:F401 Although this import seems unused is has to be here
 import requests
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -68,7 +68,6 @@ from api.actions import (
     column_alter,
     commit_raw_connection,
     data_delete,
-    data_info,
     data_insert,
     data_search,
     data_update,
@@ -98,7 +97,6 @@ from api.actions import (
     get_unique_constraints,
     get_view_definition,
     get_view_names,
-    getValue,
     has_schema,
     has_table,
     list_table_sizes,
@@ -414,29 +412,6 @@ class TableColumnAPIView(APIView):
         request_data_dict = get_request_data_dict(request)
         column_add(table_obj, column, request_data_dict["query"])
         return JsonResponse({}, status=201)
-
-
-class TableFieldsAPIView(APIView):
-    # TODO: is this really used?
-    @api_exception
-    @method_decorator(never_cache)
-    def get(
-        self,
-        request: Request,
-        table: str,
-        row_id: int,
-        column: str | None = None,
-    ) -> JsonLikeResponse:
-        table_obj = table_or_404(table=table)
-
-        if not is_pg_qual(table) or not is_pg_qual(row_id) or not is_pg_qual(column):
-            return ModJsonResponse({"error": "Bad Request", "http_status": 400})
-
-        returnValue = getValue(table_obj, column, row_id)
-        if returnValue is None:
-            return JsonResponse({}, status=404)
-        else:
-            return JsonResponse(returnValue, status=200)
 
 
 class TableMovePublishAPIView(APIView):
@@ -1187,7 +1162,6 @@ AdvancedInsertAPIView = create_ajax_handler(data_insert, requires_cursor=True)
 AdvancedDeleteAPIView = create_ajax_handler(data_delete, requires_cursor=True)
 AdvancedUpdateAPIView = create_ajax_handler(data_update, requires_cursor=True)
 
-AdvancedInfoAPIView = create_ajax_handler(data_info)
 AdvancedHasSchemaAPIView = create_ajax_handler(has_schema)
 AdvancedHasTableAPIView = create_ajax_handler(has_table)
 AdvancedGetSchemaNamesAPIView = create_ajax_handler(get_schema_names)
