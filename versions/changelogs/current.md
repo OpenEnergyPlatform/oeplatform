@@ -10,6 +10,8 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- various changes to csv upload tool (#1893, #1826, #1819)
+
 ## Features
 
 ## Bugs

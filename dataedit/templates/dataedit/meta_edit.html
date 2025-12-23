@@ -8,14 +8,14 @@
 {% endblock after-head %}
 {% block site-header %}
   <h2 class="site-header">
-    <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i>
+    <i class="fa fa-tags d-none me-2" id="metaedit-icon"></i>
   </h2>
 {% endblock site-header %}
 {% block main %}
   <main class="main">
     <div class="main-header">
       <h1 class="main-header__title">
-        <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i> Edit Metadata
+        <i class="fa fa-tags d-none me-2" id="metaedit-icon"></i> Edit Metadata
       </h1>
       <div class="main-header__wizard">
         {% if table %}
@@ -26,8 +26,7 @@
           {% endif %}
           /
         {% else %}
-          <a href="{% url 'dataedit:topic-list' %}">Topics</a> / Standalone (no
-          data table attached)
+          Standalone (no data table attached)
         {% endif %}
         OEMetaBuilder
         <!-- Indicate weather the user got permissions fot this table -->
@@ -57,17 +56,16 @@
           </div>
           <div class="row d-none fixed-controls" id="metaedit-controls">
             <div class="col">
-              <span class=""
-                    {% if not can_add %} data-bs-toggle="popover" title="You need write permissions on this table to upload meta data" {% endif %}>
+              <span {% if not can_add %} data-bs-toggle="popover" title="You need write permissions on this table to upload meta data" {% endif %}>
                 <a href="#metaedit-submit"
-                   class="btn btn-sm btn-success mr-2 {% if not can_add %}disabled{% endif %}"
-                   id="metaedit-submit"><span class="spinner-border text-light d-none mr-2 spinner-border-sm"
+                   class="btn btn-sm btn-success me-2 {% if not can_add %}disabled{% endif %}"
+                   id="metaedit-submit"><span class="spinner-border text-light d-none me-2 spinner-border-sm"
       id="metaedit-submitting"></span>Submit</a>
               </span>
-              <button class="btn btn-sm btn-primary mr-2" id="metaedit-cancel">
+              <button class="btn btn-sm btn-primary me-2" id="metaedit-cancel">
                 Cancel
               </button>
-              <button class="btn btn-sm btn-primary mr-2" id="metaedit-download">
+              <button class="btn btn-sm btn-primary me-2" id="metaedit-download">
                 Download
               </button>
             </div>
