@@ -399,6 +399,13 @@ window.Wizard = function (config) {
    * The selected file has changed
    */
   function updateFile() {
+     /* reset */
+    state.previewRows = []
+    updateExample();
+    updatePreview();
+    
+    
+
     // console.log('updateFile')
     state.file = $("#wizard-file");
     state.encoding = $("#wizard-encoding").find(":selected").val();
@@ -463,13 +470,18 @@ window.Wizard = function (config) {
    * a file settings option (e.g. delimiter, encoding, ...) has been changed
    */
   function changeFileSettings() {
+
+    $("#wizard-table-upload").hide();
+    
     updateFile();
+
     state.csvColumns = [];
     state.previewRows = [];
     updateExample();
     $("#wizard-csv-columns").empty();
     $("#wizard-csv-text").text("");
     if (state.file) {
+      setStatusUpload("info", false,"checking file", true)  
       state.file.parse({
         config: {
           encoding: state.encoding,
@@ -516,14 +528,21 @@ window.Wizard = function (config) {
               }
             }
             updateColumnMapping();
+            $("#wizard-table-upload").show();
+            setStatusUpload("info", false,"", false) /* remove status message*/
           },
-          error: function (error) {
-            setStatusUpload("danger", false, error, false);
+          error: function (error) {            
+            var msg = error.message
+            if (msg == "File could not be read") {
+              msg = "File could not be read (Probably too large - should be smaller than 1 GB)"
+            }
+            console.error(msg)
+            setStatusUpload("danger", false, msg, false);
           },
         },
       });
     } else {
-      updateColumnMapping();
+      updateColumnMapping();            
     }
   }
 
@@ -840,7 +859,7 @@ window.Wizard = function (config) {
 
   function resetUpload() {
     state.cancel = null;
-    $("#wizard-table-upload").show();
+    $("#wizard-table-upload").hide();
     $("#wizard-table-upload-cancel").hide();
     $("#wizard-file").val("");
     changeFileSettings();
