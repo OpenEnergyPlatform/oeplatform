@@ -7,10 +7,3 @@ mkdocs.yml
 # django templates will be handled by djlint
 */templates/**/*.html
 
-# ignore these for now
-**/*.js
-**/*.tsx
-**/*.jsx
-**/*.css
-**/*.scss
-**/*.jsonc
