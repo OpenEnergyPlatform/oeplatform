@@ -154,7 +154,13 @@ from api.services.embargo import (
     apply_embargo,
     parse_embargo_payload,
 )
-from api.utils import get_dataset_configs, get_or_403, request_data_dict, table_or_404
+from api.utils import (
+    get_dataset_configs,
+    get_or_403,
+    request_data_dict,
+    strip_query,
+    table_or_404,
+)
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_table_name
 from dataedit.models import Table
@@ -173,6 +179,10 @@ from oeplatform.settings import (
     TOPIC_SCENARIO,
     USE_LOEP,
     USE_ONTOP,
+)
+
+DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL_WO_QUERY = strip_query(
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
 )
 
 
@@ -960,9 +970,14 @@ def oeo_search_api_view(request: Request) -> JsonLikeResponse:
         query = request.GET["query"]
         # call local search service
         # "http://loep/lookup-application/api/search?query={query}"
-        url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL}{query}"
+
+        # NOTE: to pass snyk security review, user data (request.GET["query"])
+        # put into request.get() is dangerous and needs to be secured by
+        # clearly separating the base url
+        url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL_WO_QUERY}?query={query}"
         res = requests.get(url).json()
-        # res: something like [{"label": "testlabel", "resource": "testresource"}]
+        # res: something like
+        # {"docs": [{"label": "testlabel", "resource": "testresource"}]}
         # send back to client
     else:
         raise APIError(
