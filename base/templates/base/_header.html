@@ -9,8 +9,9 @@
   <span class="navbar-toggler-icon"></span>
 </button>
 <a class="navbar-brand" href="{% url 'base:home' %}">
-  <img style="width:45px;
-              height: 45px"
+  <img width="45"
+       height="45"
+       alt="logo"
        src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}" />
 </a>
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -134,6 +135,7 @@
          aria-expanded="false">About</a>
       <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
         <a class="dropdown-item" href="{% url 'base:about' %}">Overview</a>
+        <a class="dropdown-item" href="{% url 'base:oefamily-sc' %}">Open Energy Family Steering Committee</a>
         <a class="dropdown-item"
            href="{{ EXTERNAL_URLS.compendium }}"
            target="_blank"><i class="fas fa-external-link-alt"></i> Compendium</a>
