@@ -36,7 +36,7 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
     res = requests.get(
         url,
         stream=True,  # stream because sometimes we dont actually load all the content
-        verify=False,  # sometimes ssl certs fail
+        verify=False,  # snyk:ignore this is ok here, because we just run it in development to test if urls still exist # noqa
         headers={"User-Agent": "Mozilla/5.0"},
     )
     cache[url] = res.status_code
@@ -77,6 +77,14 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
                 continue
         else:
             ref = str(tag.get("src") or tag.get("href") or "")
+
+        # dont check vite develop urls
+        if "@vite" in ref or ref.endswith(".jsx") or ref.endswith(".js"):
+            continue
+
+        # dont follow all the OEO classes
+        if "/oeo/" in ref:
+            continue
 
         if not ref:
             continue

@@ -1,13 +1,16 @@
 """
 Collection of utility functions for the API used to define various action
 like processing steps.
+"""
 
+__license__ = """
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from typing import TYPE_CHECKING, Mapping, Union, cast
+from urllib.parse import urlsplit, urlunsplit
 
 from rest_framework.request import Request
 
@@ -71,3 +74,8 @@ def table_or_404(table: str) -> "Table":
 
 def table_or_404_from_dict(dct: Mapping) -> "Table":
     return table_or_404(get_or_403(dct, "table"))
+
+
+def strip_query(url):
+    parts = urlsplit(url)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, "", "")).rstrip("/")

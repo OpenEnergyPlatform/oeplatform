@@ -10,7 +10,7 @@ on:
 
 jobs:
   run-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     env:
       # LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
       # SEGFAULT_SIGNALS: all
@@ -55,8 +55,8 @@ jobs:
       - name: Install linux dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y postgresql-client --no-install-recommends ca-certificates || apt-get install -y --no-install-recommends ca-certificates
-          sudo update-ca-certificates || update-ca-certificates
+          sudo apt-get install -y postgresql-client ca-certificates
+          sudo update-ca-certificates
       - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:

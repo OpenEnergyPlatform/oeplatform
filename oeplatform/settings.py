@@ -231,7 +231,7 @@ EXTERNAL_URLS = {
     "creativecommons_licenses_by_3_0_de": "http://creativecommons.org/licenses/by/3.0/de/",  # noqa:E501
     "iks_cs_ovgu_iks": "http://iks.cs.ovgu.de/IKS.html",
     "reiner_lemoine_institut_en": "http://reiner-lemoine-institut.de/en/",
-    "dgs_berlin": "http://www.dgs-berlin.de/",
+    "dgs_berlin": "https://www.dgs-berlin.de/",
     "znes_flensburg": "http://www.znes-flensburg.de/",
     "creativecommons_licenses_by_3_0_de_deed_en": "https://creativecommons.org/licenses/by/3.0/de/deed.en",  # noqa:E501
     "doi_10_1016_j_egyai_2021_100074": "https://doi.org/10.1016/j.egyai.2021.100074",
@@ -278,7 +278,7 @@ EXTERNAL_URLS = {
     "hereon": "https://www.hereon.de/",
     "iee_fraunhofer_en": "https://www.iee.fraunhofer.de/en.html",
     "ier_uni_stuttgart": "https://www.ier.uni-stuttgart.de/",
-    "informatik_uni_osnabrueck_institut_fuer_informatik": "https://www.informatik.uni-osnabrueck.de/institut_fuer_informatik.html",  # noqa:E501
+    "informatik_uni_osnabrueck_institut_fuer_informatik": "https://www.uni-osnabrueck.de/fb6/informatik",  # noqa:E501
     "oeko": "https://www.oeko.de/",
     "oeko_en": "https://www.oeko.de/en/",
     "offis": "https://www.offis.de/",

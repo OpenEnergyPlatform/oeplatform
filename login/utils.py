@@ -12,7 +12,6 @@ from login.permissions import ADMIN_PERM
 
 if TYPE_CHECKING:
     # only import for static typechecking
-    # TODO: is there a betetr way of doing this?
     from dataedit.models import Table
 
 ###############################################################

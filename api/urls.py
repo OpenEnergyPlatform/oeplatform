@@ -1,4 +1,4 @@
-"""
+__license__ = """
 SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
@@ -67,7 +67,6 @@ from api.views import (
     usrprop_api_view,
 )
 
-# from api.views import TableFieldsAPIView, AdvancedInfoAPIView
 app_name = "api"
 
 pgsql_qualifier = r"[\w\d_]+"
@@ -102,11 +101,6 @@ urlpatterns_v0_schema_table = [
         TableColumnAPIView.as_view(),
         name="table-columns",
     ),
-    # re_path(
-    #    r"^(?P<table>[\w\d_\s]+)/id/(?P<row_id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
-    #    TableFieldsAPIView.as_view(),
-    #    name="table-fields",
-    # ),
     re_path(
         r"^(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",  # noqa
         TableRowsAPIView.as_view(),
@@ -135,7 +129,6 @@ urlpatterns_v0_advanced = [
     ),
     re_path(r"^delete", AdvancedDeleteAPIView, name="advanced-delete"),
     re_path(r"^update", AdvancedUpdateAPIView, name="advanced-update"),
-    # re_path(r"^info", AdvancedInfoAPIView, name="advanced-info"),
     re_path(r"^has_schema", AdvancedHasSchemaAPIView, name="advanced-has-schema"),
     re_path(r"^has_table", AdvancedHasTableAPIView, name="advanced-has-table"),
     re_path(
@@ -249,7 +242,7 @@ urlpatterns_v0_advanced = [
     re_path(
         r"^cursor/fetch_many",
         AdvancedFetchAPIView.as_view(),
-        dict(fetchtype="all"),  # TODO: shouldn't this be "many"?
+        dict(fetchtype="many"),
         name="advanced-cursor-fetch-many",
     ),
     re_path(

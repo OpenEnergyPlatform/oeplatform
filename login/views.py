@@ -831,7 +831,7 @@ class AccountDeleteView_TODO_UNUSED(LoginRequiredMixin, DeleteView):
         return render(request, "login/delete_account.html", {"profile_user": user})
 
 
-# TODO: should be reauire_POST?
+# TODO: should be require_POST?
 def token_reset_view(request):
     if request.user.is_authenticated:
         user_token = get_object_or_404(
