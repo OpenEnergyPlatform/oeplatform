@@ -1,5 +1,6 @@
-"""Api actions.
+"""Api actions."""
 
+__license__ = """
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
@@ -48,7 +49,7 @@ from sqlalchemy import (
 )
 from sqlalchemy import types as sa_types
 from sqlalchemy.exc import NoSuchTableError
-from sqlalchemy.sql.expression import Select
+from sqlalchemy.sql.expression import Executable, Select
 
 import dataedit.metadata
 from api.error import APIError
@@ -154,7 +155,7 @@ def assert_add_tag_permission(user, table_obj: Table, permission: int) -> None:
 
 def translate_fetched_cell(cell):
     if isinstance(cell, geoalchemy2.WKBElement):
-        return new_engine_execute(cell.ST_AsText()).scalar()
+        return _execute(_get_engine(), cell.ST_AsText()).scalar()
     elif isinstance(cell, memoryview):
         return wkb.dumps(wkb.loads(cell.tobytes()), hex=True)
     else:
@@ -322,13 +323,9 @@ def describe_columns(table_obj: Table):
             table=table_obj.name, schema=table_obj.oedb_schema
         )
     )
-    response = session_execute(session, query)
-
-    # Note: cast is only for type checking,
-    # should disappear once we migrate to sqlalchemy >= 1.4
-    response = cast(ResultProxy, response)
-
+    response = _execute(session, query)
     session.close()
+
     return {
         column.column_name: {
             "ordinal_position": column.ordinal_position,
@@ -372,7 +369,7 @@ def describe_indexes(table_obj: Table):
             table=table_obj.name, schema=table_obj.oedb_schema
         )
     )
-    response = session_execute(session, query)
+    response = _execute(session, query)
     session.close()
 
     # Use a single-value dictionary to allow future extension with downward
@@ -403,7 +400,7 @@ def describe_constraints(table_obj: Table):
     query = "select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name='{table}' AND constraint_schema='{schema}';".format(  # noqa
         table=table_obj.name, schema=table_obj.oedb_schema
     )
-    response = session_execute(session, query)
+    response = _execute(session, query)
     session.close()
     return {
         column.constraint_name: {
@@ -433,7 +430,7 @@ def perform_sql(sql_statement, parameter: dict | None = None) -> dict:
         return get_response_dict(success=True)
 
     try:
-        result = session_execute_parameter(session, sql_statement, parameter)
+        result = _execute(session, sql_statement, parameter)
     except Exception as e:
         logger.error("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
@@ -662,7 +659,7 @@ def get_column_changes(reviewed=None, changed=None, table_obj: Table | None = No
 
     sql = "".join(query)
 
-    response = session_execute(session, sql)
+    response = _execute(session, sql)
     session.close()
 
     return [
@@ -715,7 +712,7 @@ def get_constraints_changes(
 
     sql = "".join(query)
 
-    response = session_execute(session, sql)
+    response = _execute(session, sql)
     session.close()
 
     return [
@@ -744,7 +741,6 @@ def get_column(d):
 
 
 def column_alter(query, table_obj: Table, column):
-
     if column == "id":
         raise APIError("You cannot alter the id column")
     alter_preamble = 'ALTER TABLE "{schema}"."{table}" ALTER COLUMN "{column}" '.format(
@@ -979,7 +975,6 @@ def __internal_select(query, context):
 def __change_rows(
     table_obj: Table, request, context, target_sa_table: "SATable", setter, fields=None
 ) -> dict:
-
     query: dict = {
         "from": {
             "type": "table",
@@ -1044,7 +1039,7 @@ def _drop_not_null_constraints_from_delete_meta_table(
     AND table_schema = '{meta_schema}'
     AND is_nullable = 'NO'
     """
-    resp = new_engine_execute(query).fetchall()
+    resp = _execute(_get_engine(), query).fetchall()
     column_names = [x[0] for x in resp] if resp else []
     # filter meta columns and id
     column_names = [
@@ -1058,7 +1053,7 @@ def _drop_not_null_constraints_from_delete_meta_table(
     # drop not null from these columns
     col_drop = ", ".join(f'ALTER "{c}" DROP NOT NULL' for c in column_names)
     query = f'ALTER TABLE "{meta_schema}"."{meta_table_delete}" {col_drop};'
-    new_engine_execute(query)
+    _execute(_get_engine(), query)
 
 
 def data_insert_check(table_obj: Table, values, context):
@@ -1076,7 +1071,7 @@ def data_insert_check(table_obj: Table, values, context):
             table=table_obj.name, schema=table_obj.oedb_schema
         )
     )
-    response = session_execute(session, query)
+    response = _execute(session, query)
     session.close()
 
     for constraint in response:
@@ -1091,7 +1086,7 @@ def data_insert_check(table_obj: Table, values, context):
             #       Use joins instead to avoid piping your results through
             #       python.
             if isinstance(values, Select):
-                values = new_engine_execute(values)
+                values = _execute(_get_engine(), values)
             for row in values:
                 # TODO: This is horribly inefficient!
                 query = {
@@ -1178,7 +1173,8 @@ def execute_sqla(query, cursor: AbstractCursor | Session) -> None:
                     params[key] = json.dumps(value)
                 else:
                     params[key] = dialect._json_serializer(value)
-        cursor_execute_parameter(cursor, str(compiled), params)
+        query = str(compiled)
+        _execute(cursor, query, params)
     except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
         raise APIError(str(e))
     except psycopg2.InternalError as e:
@@ -1208,7 +1204,8 @@ def execute_sqla(query, cursor: AbstractCursor | Session) -> None:
 
 
 def analyze_columns(table_obj: Table):
-    result = new_engine_execute(
+    result = _execute(
+        _get_engine(),
         "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(  # noqa
             schema=table_obj.oedb_schema, table=table_obj.name
         ),
@@ -1254,7 +1251,7 @@ def move_publish(table_obj: Table, topic, embargo_period):
 
     if not license_check:
         raise APIError(
-            "A issue with the license from the metadata was found: " f"{license_error}"
+            f"A issue with the license from the metadata was found: {license_error}"
         )
 
     if embargo_period in ["6_months", "1_year"]:
@@ -1319,29 +1316,6 @@ def fetchmany(request: dict, context):
     return cursor.fetchmany(int(request["size"]))
 
 
-def getValue(table_obj: Table, column, id):
-    sql = 'SELECT {column} FROM "{schema}"."{table}" WHERE id={id}'.format(
-        column=column, schema=table_obj.oedb_schema, table=table_obj.name, id=id
-    )
-
-    session = _create_oedb_session()
-
-    try:
-        result = session_execute(session, sql)
-
-        returnValue = None
-        for row in result:
-            returnValue = row[column]
-
-        return returnValue
-    except Exception as e:
-        logger.error("SQL Action failed. \n Error:\n" + str(e))
-        session.rollback()
-    finally:
-        session.close()
-    return None
-
-
 def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
     """Apply changes from the meta tables to the actual table.
 
@@ -1366,7 +1340,6 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
         cursor = cast(AbstractCursor, connection.cursor())  # type:ignore TODO
 
     try:
-
         columns = list(describe_columns(table_obj).keys())
         extended_columns = columns + ["_submitted", "_id"]
 
@@ -1375,11 +1348,9 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
         oedb_table = table_obj.get_oedb_table_proxy(user=None)
 
         insert_sa_table = oedb_table._insert_table.get_sa_table()
-        cursor_execute(
+        _execute(
             cursor,
-            "select * "
-            'from "{schema}"."{table}" '
-            "where _applied = FALSE;".format(
+            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
                 schema=insert_sa_table.schema, table=insert_sa_table.name
             ),
         )
@@ -1396,11 +1367,9 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
         ]
 
         update_sa_table = oedb_table._edit_table.get_sa_table()
-        cursor_execute(
+        _execute(
             cursor,
-            "select * "
-            'from "{schema}"."{table}" '
-            "where _applied = FALSE;".format(
+            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
                 schema=update_sa_table.schema, table=update_sa_table.name
             ),
         )
@@ -1417,11 +1386,9 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
         ]
 
         delete_sa_table = oedb_table._delete_table.get_sa_table()
-        cursor_execute(
+        _execute(
             cursor,
-            "select * "
-            'from "{schema}"."{table}" '
-            "where _applied = FALSE;".format(
+            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
                 schema=delete_sa_table.schema, table=delete_sa_table.name
             ),
         )
@@ -1478,7 +1445,6 @@ def _apply_stack(cursor: AbstractCursor, sa_table: "SATable", changes, change_ty
 def set_applied(
     session: AbstractCursor | Session, sa_table: "SATable", rids, mode: int
 ):
-
     # TODO:permission check is still done outside of this function,
     # so we pass user=None
     oedb_table = Table.objects.get(name=sa_table.name).get_oedb_table_proxy(user=None)
@@ -1498,7 +1464,9 @@ def set_applied(
         .values(_applied=True)
         .compile()
     )
-    session_execute_parameter(session, str(update_query), update_query.params)
+
+    query = str(update_query)
+    _execute(session, query, update_query.params)
 
 
 def apply_insert(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
@@ -1618,7 +1586,7 @@ def get_single_table_size(table_obj: Table) -> dict | None:
 
     sess = _create_oedb_session()
     try:
-        res = session_execute_parameter(
+        res = _execute(
             sess, sql, {"schema": table_obj.oedb_schema, "table": table_obj.name}
         )
         row = res.fetchone()
@@ -1655,7 +1623,7 @@ def list_table_sizes() -> list[dict]:
 
     sess = _create_oedb_session()
     try:
-        res = session_execute(sess, sql)
+        res = _execute(sess, sql)
         rows = res.fetchall() or []
         out = []
         for r in rows:
@@ -1680,7 +1648,7 @@ def table_has_row_with_id(table: Table, id: int | str, id_col: str = "id") -> bo
 
     engine = _get_engine()
     with engine.connect() as conn:
-        resp = connection_execute(conn, query, id=id)
+        resp = _execute(conn, query, id=id)
         row = resp.fetchone()
         row_count = row[0] if row else 0
 
@@ -1698,7 +1666,7 @@ def table_get_row_count(table: Table) -> int:
 
     engine = _get_engine()
     with engine.connect() as conn:
-        resp = connection_execute(conn, query)
+        resp = _execute(conn, query)
         row = resp.fetchone()
         row_count = row[0] if row else 0
 
@@ -1731,7 +1699,7 @@ def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
     )
 
     with engine.connect() as conn:
-        resp = connection_execute(conn, query)
+        resp = _execute(conn, query)
         row = resp.fetchone()
         row_count = row[0] if row else 0
 
@@ -1761,11 +1729,6 @@ def get_table_names(
     request: dict | None = None, context: dict | None = None
 ) -> list[str]:
     return [t.name for t in Table.objects.all()]
-
-
-def data_info(request: dict, context: dict | None = None) -> dict:
-    # TODO: can we remove this endpoint?
-    return request
 
 
 def has_schema(request: dict, context: dict | None = None) -> bool:
@@ -1798,7 +1761,6 @@ def data_search(request: dict, context: dict | None = None) -> dict:
 
 
 def data_insert(request: dict, context: dict) -> dict:
-
     cursor = load_cursor_from_context(context)
     # If the insert request is not for a meta table, change the request to do so
     table_obj = table_or_404_from_dict(request)
@@ -1944,7 +1906,7 @@ def get_columns(request: dict, context: dict | None = None) -> dict:
         bindparams=[sql.bindparam("table_oid", type_=sa_types.Integer)],
         typemap={"attname": sa_types.Unicode, "default": sa_types.Unicode},
     )
-    c = connection_execute(connection, s, table_oid=table_oid)
+    c = _execute(connection, s, table_oid=table_oid)
     rows = c.fetchall() or []
 
     domains = engine.dialect._load_domains(connection)
@@ -2006,8 +1968,6 @@ def get_foreign_keys(request: dict, context: dict | None = None) -> dict:
 
 
 def get_indexes(request: dict, context: dict | None = None) -> dict:
-    # TODO can we remove this endpoint
-
     table_obj = table_or_404_from_dict(request)
 
     engine = _get_engine()
@@ -2152,47 +2112,14 @@ def fetchone(request: dict, context: dict) -> list | None:
 # -------------------------------------------------------------------------------------
 
 
-def session_execute(session: Session, sql) -> ResultProxy:
-    response = session.execute(sql)
-    # Note: cast is only for type checking,
-    # should disappear once we migrate to sqlalchemy >= 1.4
-    response = cast(ResultProxy, response)
-    return response
-
-
-def session_execute_parameter(
-    session: AbstractCursor | Session, sql, parameter
+def _execute(
+    con: Session | Engine | Connection | AbstractCursor,
+    sql: Executable | str,
+    *args,
+    **kwargs,
 ) -> ResultProxy:
-    response = session.execute(sql, parameter)
+    response = con.execute(sql, *args, **kwargs)  # type:ignore
     # Note: cast is only for type checking,
     # should disappear once we migrate to sqlalchemy >= 1.4
     response = cast(ResultProxy, response)
     return response
-
-
-def new_engine_execute(sql) -> ResultProxy:
-    return engine_execute(_get_engine(), sql)
-
-
-def engine_execute(engine: Engine, sql) -> ResultProxy:
-    response = engine.execute(sql)
-    # Note: cast is only for type checking,
-    # should disappear once we migrate to sqlalchemy >= 1.4
-    response = cast(ResultProxy, response)
-    return response
-
-
-def connection_execute(connection: Connection, sql, **kwargs) -> ResultProxy:
-    response = connection.execute(sql, **kwargs)
-    # Note: cast is only for type checking,
-    # should disappear once we migrate to sqlalchemy >= 1.4
-    response = cast(ResultProxy, response)
-    return response
-
-
-def cursor_execute(cursor: AbstractCursor, sql) -> None:
-    cursor.execute(sql)
-
-
-def cursor_execute_parameter(cursor: AbstractCursor | Session, sql, parameter) -> None:
-    cursor.execute(sql, parameter)

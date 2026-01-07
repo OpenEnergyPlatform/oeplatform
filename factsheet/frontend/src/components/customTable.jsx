@@ -93,11 +93,28 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
+function getStringValForSort(x, order) {
+  if (Array.isArray(x) && x.length > 0) {
+    x.sort(); /* still does not work if x is array of objects */
+    if (order === "desc") {
+      x = x[x.length - 1]; /* take last element */
+    } else {
+      x = x[0];/* take first element */
+    }
+  }
+  /* make lowercase string */
+  return `${x}`.toLowerCase()
+}
+
+function descendingComparator(a, b, orderBy, order) {
+  const valB = getStringValForSort(b[orderBy], order);
+  const valA = getStringValForSort(a[orderBy], order);
+
+
+  if (valB < valA) {
     return -1;
   }
-  if (b[orderBy] > a[orderBy]) {
+  if (valB > valA) {
     return 1;
   }
   return 0;
@@ -105,8 +122,8 @@ function descendingComparator(a, b, orderBy) {
 
 function getComparator(order, orderBy) {
   return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
+    ? (a, b) => descendingComparator(a, b, orderBy, order)
+    : (a, b) => -descendingComparator(a, b, orderBy, order);
 }
 
 function stableSort(array, comparator) {
@@ -121,9 +138,27 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
+/**
+
+possible cells:
+
+{
+  "uid": "string",
+  "acronym": "string",
+  "study_name": "string",
+  "abstract": "string",
+  "institutions": "array[string]",
+  "funding_sources": "array",
+  "models": "array",
+  "frameworks": "array",
+  "collected_scenario_publication_dates": "array[string]",
+  "scenarios": "array[{label,abstract,full_name,uid}]"
+}
+
+ */
 const headCells = [
   {
-    id: 'study name',
+    id: 'study_name',
     numeric: false,
     disablePadding: true,
     label: 'Study name',
@@ -143,42 +178,26 @@ const headCells = [
     label: 'Scenarios',
     align: 'left'
   },
-
-  // {
-  //   id: 'institutions',
-  //   numeric: true,
-  //   disablePadding: false,
-  //   label: 'Institutions',
-  //   align: 'left'
-  // },
-  // {
-  //   id: 'date of publications',
-  //   numeric: true,
-  //   disablePadding: false,
-  //   label: 'Date of publications',
-  //   align: 'left'
-  // },
   {
-    id: 'Date of publication',
+    id: 'collected_scenario_publication_dates',
     numeric: true,
     disablePadding: false,
     label: 'Year of publication',
     align: 'left'
   },
+
+  /* dont create header for more_details so that we dont
+   show sorting arrows
+
   {
-    id: 'More details',
+    id: 'more_details',
     numeric: true,
     disablePadding: false,
     label: '',
     align: 'right'
   },
-  // {
-  //   id: 'more',
-  //   numeric: false,
-  //   disablePadding: true,
-  //   label: '',
-  //   align: 'left'
-  // }
+  */
+
 ];
 
 function EnhancedTableHead(props) {
@@ -222,9 +241,9 @@ function EnhancedTableHead(props) {
 
 EnhancedTableHead.propTypes = {
   numSelected: PropTypes.number.isRequired,
-  handleOpenQuery: PropTypes.func.isRequired,
-  handleReset: PropTypes.func.isRequired,
-  filterApplied: PropTypes.bool.isRequired,
+  handleOpenQuery: PropTypes.func,
+  handleReset: PropTypes.func,
+  filterApplied: PropTypes.bool,
   onRequestSort: PropTypes.func.isRequired,
   onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
@@ -352,9 +371,9 @@ EnhancedTableToolbar.propTypes = {
 
 export default function CustomTable(props) {
   const { factsheets } = props;
-
-  const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('study name');
+  /* insitially sort by date (newest first) */
+  const [order, setOrder] = useState('desc');
+  const [orderBy, setOrderBy] = useState('collected_scenario_publication_dates');
   const [selected, setSelected] = useState(new Set());
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
@@ -386,9 +405,9 @@ export default function CustomTable(props) {
   const [filterApplied, setFilterApplied] = useState(false);
 
 
- const handleChangeView = (event, newAlignment) => {
+  const handleChangeView = (event, newAlignment) => {
     if (newAlignment !== null) {
-     setAlignment(newAlignment);
+      setAlignment(newAlignment);
     }
   };
 
@@ -398,6 +417,7 @@ export default function CustomTable(props) {
     () => (filterApplied ? filteredFactsheets : factsheets),
     [filterApplied, filteredFactsheets, factsheets]
   );
+
 
   const [openBackDrop, setOpenBackDrop] = useState(false);
 
@@ -421,8 +441,6 @@ export default function CustomTable(props) {
   };
 
   const handleClick = (event, name) => {
-    console.log(name);
-
     const newSelected = new Set(selected);
     if (newSelected.has(name)) newSelected.delete(name);
     else newSelected.add(name);
@@ -613,11 +631,11 @@ export default function CustomTable(props) {
   //   page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
   const visibleRows = React.useMemo(() => {
-  return stableSort(data, getComparator(order, orderBy)).slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-}, [data, order, orderBy, page, rowsPerPage]);
+    return stableSort(data, getComparator(order, orderBy)).slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [data, order, orderBy, page, rowsPerPage]);
 
 
   const renderRows = (rs) => {
@@ -759,123 +777,123 @@ export default function CustomTable(props) {
   }
 
   const renderCards = (rs) => {
-  const rowsToRender = rs; // already paged + sorted
+    const rowsToRender = rs; // already paged + sorted
 
-  return (
-    <Grid
-      container
-      justifyContent="space-between"
-      alignItems="flex-start"
-      direction="row"
-      sx={{ pb: 6 }}
-    >
-      {rowsToRender.map((row, index) => {
-        // (optional) if you end up needing these again, you can keep them
-        // const isItemSelected = isSelected(row.study_name);
-        // const labelId = `enhanced-table-checkbox-${index}`;
+    return (
+      <Grid
+        container
+        justifyContent="space-between"
+        alignItems="flex-start"
+        direction="row"
+        sx={{ pb: 6 }}
+      >
+        {rowsToRender.map((row, index) => {
+          // (optional) if you end up needing these again, you can keep them
+          // const isItemSelected = isSelected(row.study_name);
+          // const labelId = `enhanced-table-checkbox-${index}`;
 
-        return (
-          <CardItem key={row.uid ?? index}>
-            <CardHeader>
-              <Link to={`scenario-bundles/id/${row.uid}`}>
-                {row.acronym}
-              </Link>
-            </CardHeader>
+          return (
+            <CardItem key={row.uid ?? index}>
+              <CardHeader>
+                <Link to={`scenario-bundles/id/${row.uid}`}>
+                  {row.acronym}
+                </Link>
+              </CardHeader>
 
-            <CardBody>
-              <CardRow
-                rowKey="Acronym"
-                rowValue={
-                  <Link to={`scenario-bundles/id/${row.uid}`}>
-                    <Typography variant="link">{row.acronym}</Typography>
-                  </Link>
-                }
-              />
-
-              {!!row.collected_scenario_publication_dates?.length && (
+              <CardBody>
                 <CardRow
-                  rowKey="Year of publication"
-                  rowValue={row.collected_scenario_publication_dates
-                    .map((d) => (d ? String(d).substring(0, 4) : 'None'))
-                    .join(' • ')}
+                  rowKey="Acronym"
+                  rowValue={
+                    <Link to={`scenario-bundles/id/${row.uid}`}>
+                      <Typography variant="link">{row.acronym}</Typography>
+                    </Link>
+                  }
                 />
-              )}
 
-              <CardRow rowKey="Abstract" rowValue={row.abstract} />
+                {!!row.collected_scenario_publication_dates?.length && (
+                  <CardRow
+                    rowKey="Year of publication"
+                    rowValue={row.collected_scenario_publication_dates
+                      .map((d) => (d ? String(d).substring(0, 4) : 'None'))
+                      .join(' • ')}
+                  />
+                )}
 
-              <CardRow
-                rowKey="Institutions"
-                rowValue={row.institutions.map((v) => (
-                  <span key={v}>
-                    <span>{v}</span>
-                    <span><b className="separator-dot"> . </b></span>
-                  </span>
-                ))}
-              />
+                <CardRow rowKey="Abstract" rowValue={row.abstract} />
 
-              <CardRow
-                rowKey="Funding sources"
-                rowValue={row.funding_sources.map((v) => (
-                  <span key={v}>
-                    <span>{v}</span>
-                    <span><b className="separator-dot"> . </b></span>
-                  </span>
-                ))}
-              />
+                <CardRow
+                  rowKey="Institutions"
+                  rowValue={row.institutions.map((v) => (
+                    <span key={v}>
+                      <span>{v}</span>
+                      <span><b className="separator-dot"> . </b></span>
+                    </span>
+                  ))}
+                />
 
-              <CardRow
-                rowKey="Models and frameworks"
-                rowValue={
-                  <>
-                    {row.models.map((v) => (
-                      <span key={v}>
-                        <span>{v}</span>
-                        <span><b className="separator-dot"> . </b></span>
-                      </span>
-                    ))}
-                    {row.frameworks.map((v) => (
-                      <span key={v}>
-                        <span>{v}</span>
-                        <span><b className="separator-dot"> . </b></span>
-                      </span>
-                    ))}
-                  </>
-                }
-              />
+                <CardRow
+                  rowKey="Funding sources"
+                  rowValue={row.funding_sources.map((v) => (
+                    <span key={v}>
+                      <span>{v}</span>
+                      <span><b className="separator-dot"> . </b></span>
+                    </span>
+                  ))}
+                />
 
-              <CardRow
-                rowKey="Scenarios"
-                rowValue={row.scenarios.map((v) => (
-                  <HtmlTooltip
-                    key={v.uid}
-                    style={{ marginLeft: '10px' }}
-                    placement="top"
-                    title={
-                      <div>
-                        <b>Full name: </b>{v.full_name}
-                        <Divider sx={{ mt: 1, mb: 1 }} />
-                        <b>Abstract:</b> {v.abstract}
-                      </div>
-                    }
-                  >
-                    <Chip
-                      size="small"
-                      color="primary"
-                      label={v.label}
-                      variant={selected.has(v.uid) ? 'filled' : 'outlined'}
-                      sx={{ ml: 0.5, mt: 0.5 }}
-                      onClick={(event) => handleClick(event, v.uid)}
-                    />
-                  </HtmlTooltip>
-                ))}
-              />
-            </CardBody>
-          </CardItem>
-        );
-      })}
-    </Grid>
-  );
-};
+                <CardRow
+                  rowKey="Models and frameworks"
+                  rowValue={
+                    <>
+                      {row.models.map((v) => (
+                        <span key={v}>
+                          <span>{v}</span>
+                          <span><b className="separator-dot"> . </b></span>
+                        </span>
+                      ))}
+                      {row.frameworks.map((v) => (
+                        <span key={v}>
+                          <span>{v}</span>
+                          <span><b className="separator-dot"> . </b></span>
+                        </span>
+                      ))}
+                    </>
+                  }
+                />
+
+                <CardRow
+                  rowKey="Scenarios"
+                  rowValue={row.scenarios.map((v) => (
+                    <HtmlTooltip
+                      key={v.uid}
+                      style={{ marginLeft: '10px' }}
+                      placement="top"
+                      title={
+                        <div>
+                          <b>Full name: </b>{v.full_name}
+                          <Divider sx={{ mt: 1, mb: 1 }} />
+                          <b>Abstract:</b> {v.abstract}
+                        </div>
+                      }
+                    >
+                      <Chip
+                        size="small"
+                        color="primary"
+                        label={v.label}
+                        variant={selected.has(v.uid) ? 'filled' : 'outlined'}
+                        sx={{ ml: 0.5, mt: 0.5 }}
+                        onClick={(event) => handleClick(event, v.uid)}
+                      />
+                    </HtmlTooltip>
+                  ))}
+                />
+              </CardBody>
+            </CardItem>
+          );
+        })}
+      </Grid>
+    );
+  };
 
 
   return (
@@ -971,41 +989,41 @@ export default function CustomTable(props) {
         )}
 
         {alignment === "list" && data.length > 0 && (
-      <>
-        <TableContainer>
-          <Table
-            sx={{ minWidth: 1400 }}
-            aria-labelledby="tableTitle"
-            size={dense ? 'small' : 'medium'}
-          >
-            <EnhancedTableHead
-              numSelected={selected.size}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
-              rowCount={data.length}
-            />
-            {renderRows(visibleRows)}
-          </Table>
-        </TableContainer>
+          <>
+            <TableContainer>
+              <Table
+                sx={{ minWidth: 1400 }}
+                aria-labelledby="tableTitle"
+                size={dense ? 'small' : 'medium'}
+              >
+                <EnhancedTableHead
+                  numSelected={selected.size}
+                  order={order}
+                  orderBy={orderBy}
+                  onSelectAllClick={handleSelectAllClick}
+                  onRequestSort={handleRequestSort}
+                  rowCount={data.length}
+                />
+                {renderRows(visibleRows)}
+              </Table>
+            </TableContainer>
 
 
-      </>
-    )}
+          </>
+        )}
 
-  {/* CARDS VIEW */}
-  {alignment === "cards" && data.length > 0 && renderCards(visibleRows)}
+        {/* CARDS VIEW */}
+        {alignment === "cards" && data.length > 0 && renderCards(visibleRows)}
       </Container>
       <TablePagination
-          rowsPerPageOptions={[5, 15, 25, 50]}
-          component="div"
-          count={data.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+        rowsPerPageOptions={[5, 15, 25, 50]}
+        component="div"
+        count={data.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </Box>
 
   );

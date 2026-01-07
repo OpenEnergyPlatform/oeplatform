@@ -40,7 +40,7 @@ import itertools
 import json
 import re
 
-import geoalchemy2  # noqa: Although this import seems unused is has to be here
+import geoalchemy2  # noqa:F401 Although this import seems unused is has to be here
 import requests
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -68,7 +68,6 @@ from api.actions import (
     column_alter,
     commit_raw_connection,
     data_delete,
-    data_info,
     data_insert,
     data_search,
     data_update,
@@ -98,7 +97,6 @@ from api.actions import (
     get_unique_constraints,
     get_view_definition,
     get_view_names,
-    getValue,
     has_schema,
     has_table,
     list_table_sizes,
@@ -156,7 +154,13 @@ from api.services.embargo import (
     apply_embargo,
     parse_embargo_payload,
 )
-from api.utils import get_dataset_configs, get_or_403, request_data_dict, table_or_404
+from api.utils import (
+    get_dataset_configs,
+    get_or_403,
+    request_data_dict,
+    strip_query,
+    table_or_404,
+)
 from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_table_name
 from dataedit.models import Table
@@ -175,6 +179,10 @@ from oeplatform.settings import (
     TOPIC_SCENARIO,
     USE_LOEP,
     USE_ONTOP,
+)
+
+DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL_WO_QUERY = strip_query(
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
 )
 
 
@@ -200,7 +208,6 @@ class TableMetadataAPIView(APIView):
             metadata, error = try_validate_metadata(metadata)
 
         if metadata is not None:
-
             # update/sync keywords with tags before saving metadata
             # TODO make this iter over all resources
             keywords = metadata["resources"][0].get("keywords", []) or []
@@ -371,7 +378,6 @@ class TableAPIView(APIView):
 
         metadata = payload_query.get("metadata")
         if metadata:
-
             set_table_metadata(table=table, metadata=metadata)
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
@@ -397,7 +403,7 @@ class TableColumnAPIView(APIView):
             try:
                 response = response[column]
             except KeyError:
-                raise APIError("The column specified is not part of " "this table.")
+                raise APIError("The column specified is not part of this table.")
         return JsonResponse(response)
 
     @api_exception
@@ -416,29 +422,6 @@ class TableColumnAPIView(APIView):
         request_data_dict = get_request_data_dict(request)
         column_add(table_obj, column, request_data_dict["query"])
         return JsonResponse({}, status=201)
-
-
-class TableFieldsAPIView(APIView):
-    # TODO: is this really used?
-    @api_exception
-    @method_decorator(never_cache)
-    def get(
-        self,
-        request: Request,
-        table: str,
-        row_id: int,
-        column: str | None = None,
-    ) -> JsonLikeResponse:
-        table_obj = table_or_404(table=table)
-
-        if not is_pg_qual(table) or not is_pg_qual(row_id) or not is_pg_qual(column):
-            return ModJsonResponse({"error": "Bad Request", "http_status": 400})
-
-        returnValue = getValue(table_obj, column, row_id)
-        if returnValue is None:
-            return JsonResponse({}, status=404)
-        else:
-            return JsonResponse(returnValue, status=200)
 
 
 class TableMovePublishAPIView(APIView):
@@ -795,7 +778,7 @@ class TableRowsAPIView(APIView):
     ):
         if row_id and row.get("id", int(row_id)) != int(row_id):
             return response_error(
-                "The id given in the query does not " "match the id given in the url"
+                "The id given in the query does not match the id given in the url"
             )
         if row_id:
             row["id"] = row_id
@@ -904,6 +887,7 @@ class TableRowsAPIView(APIView):
 
 
 @api_exception
+@never_cache
 def table_approx_row_count_view(request: HttpRequest, table: str) -> JsonResponse:
     table_obj = table_or_404(table=table)
     precise_below = int(
@@ -917,6 +901,7 @@ def table_approx_row_count_view(request: HttpRequest, table: str) -> JsonRespons
 
 
 @api_exception
+@never_cache
 def usrprop_api_view(request: Request) -> JsonLikeResponse:
     query = request.GET.get("name", "")
 
@@ -941,6 +926,7 @@ def usrprop_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(user_names, safe=False)
 
 
+@never_cache
 @api_exception
 def grpprop_api_view(request: Request) -> JsonLikeResponse:
     """
@@ -976,6 +962,7 @@ def grpprop_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(group_names, safe=False)
 
 
+@never_cache
 @api_exception
 def oeo_search_api_view(request: Request) -> JsonLikeResponse:
     if USE_LOEP:
@@ -983,9 +970,14 @@ def oeo_search_api_view(request: Request) -> JsonLikeResponse:
         query = request.GET["query"]
         # call local search service
         # "http://loep/lookup-application/api/search?query={query}"
-        url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL}{query}"
+
+        # NOTE: to pass snyk security review, user data (request.GET["query"])
+        # put into request.get() is dangerous and needs to be secured by
+        # clearly separating the base url
+        url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL_WO_QUERY}?query={query}"
         res = requests.get(url).json()
-        # res: something like [{"label": "testlabel", "resource": "testresource"}]
+        # res: something like
+        # {"docs": [{"label": "testlabel", "resource": "testresource"}]}
         # send back to client
     else:
         raise APIError(
@@ -994,6 +986,7 @@ def oeo_search_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(res, safe=False)
 
 
+@never_cache
 @api_exception
 def oevkg_query_api_view(request: Request) -> JsonLikeResponse:
     if USE_ONTOP and ONTOP_SPARQL_ENDPOINT_URL:
@@ -1121,6 +1114,7 @@ class AllTableSizesAPIView(APIView):
     """
 
     @api_exception
+    @method_decorator(never_cache)
     def get(self, request: Request) -> JsonLikeResponse:
         table = request.query_params.get("table")
 
@@ -1183,7 +1177,6 @@ AdvancedInsertAPIView = create_ajax_handler(data_insert, requires_cursor=True)
 AdvancedDeleteAPIView = create_ajax_handler(data_delete, requires_cursor=True)
 AdvancedUpdateAPIView = create_ajax_handler(data_update, requires_cursor=True)
 
-AdvancedInfoAPIView = create_ajax_handler(data_info)
 AdvancedHasSchemaAPIView = create_ajax_handler(has_schema)
 AdvancedHasTableAPIView = create_ajax_handler(has_table)
 AdvancedGetSchemaNamesAPIView = create_ajax_handler(get_schema_names)

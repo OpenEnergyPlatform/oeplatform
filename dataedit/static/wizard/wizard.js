@@ -1,11 +1,14 @@
-// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-// SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-// SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-// SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
+/* eslint-disable max-len */
+/*
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+*/
+/* eslint-enable max-len */
 
 window.Wizard = function (config) {
   var state = {
@@ -122,7 +125,7 @@ window.Wizard = function (config) {
    * add a new column in the create table section
    */
   function addColumn(columnDef) {
-    columnDef = columnDef || {};
+    columnDef = columnDef || { is_nullable: true };
     var columns = $("#wizard-columns");
     var n = columns.find(".wizard-column").length;
     var column = $("#wizard-column-template")
@@ -172,7 +175,6 @@ window.Wizard = function (config) {
    * add a new column in the csv upload section
    */
   function addColumnCsv(columnDef) {
-    // console.log("add column csv", columnDef)
     columnDef = columnDef || {};
     var columns = $("#wizard-csv-columns");
     var n = columns.find(".wizard-csv-column").length;
@@ -375,7 +377,6 @@ window.Wizard = function (config) {
    * Update the upload  preview table
    */
   function updatePreview() {
-    // console.log('updatePreview', state)
     var tbody = $("#wizard-csv-preview").find("tbody");
     tbody.empty();
     var rows = state.previewRows.length
@@ -397,6 +398,11 @@ window.Wizard = function (config) {
    * The selected file has changed
    */
   function updateFile() {
+    /* reset */
+    state.previewRows = [];
+    updateExample();
+    updatePreview();
+
     // console.log('updateFile')
     state.file = $("#wizard-file");
     state.encoding = $("#wizard-encoding").find(":selected").val();
@@ -434,7 +440,6 @@ window.Wizard = function (config) {
    * Update the example data
    */
   function updateExample() {
-    // console.log('updateExample')
     var exampleText = "";
     if (state.columns) {
       var delim = state.delimiter || ",";
@@ -462,14 +467,17 @@ window.Wizard = function (config) {
    * a file settings option (e.g. delimiter, encoding, ...) has been changed
    */
   function changeFileSettings() {
-    // console.log('changeFileSettings')
+    $("#wizard-table-upload").hide();
+
     updateFile();
+
     state.csvColumns = [];
     state.previewRows = [];
     updateExample();
     $("#wizard-csv-columns").empty();
     $("#wizard-csv-text").text("");
     if (state.file) {
+      setStatusUpload("info", false, "checking file", true);
       state.file.parse({
         config: {
           encoding: state.encoding,
@@ -516,9 +524,23 @@ window.Wizard = function (config) {
               }
             }
             updateColumnMapping();
+            $("#wizard-table-upload").show();
+            setStatusUpload(
+              "info",
+              false,
+              "",
+              false
+            ); /* remove status message*/
           },
           error: function (error) {
-            setStatusUpload("danger", false, error, false);
+            var msg = error.message;
+            if (msg == "File could not be read") {
+              msg =
+                "File could not be read " +
+                "(Probably too large - should be smaller than 1 GB)";
+            }
+            console.error(msg);
+            setStatusUpload("danger", false, msg, false);
           },
         },
       });
@@ -587,8 +609,9 @@ window.Wizard = function (config) {
   }
 
   /** *
-   * NOTE: the api returns Bigints as connection/cursor ids, and the normal JSON.parse truncates those
-   *       so we need to parse those manually to extract the id and keep it as string
+   * NOTE: the api returns Bigints as connection/cursor ids, and the normal JSON.parse
+   * truncates those so we need to parse those manually to extract the id
+   * and keep it as string
    */
   function getJSONBigintKey(key, str) {
     var pat = new RegExp('"' + key + '":[ ]*([0-9]+)');
@@ -602,11 +625,6 @@ window.Wizard = function (config) {
    * First we open a new advanced connection and cursor
    * We read the csv in chunks (set size in state variable)
    *   on each chunk we pause and and post the data. on success we resume the csv parser
-   *
-   ,
-   
-   
-   * 
    */
   function csvUpload() {
     Promise.all([
@@ -669,7 +687,10 @@ window.Wizard = function (config) {
                     data.data = data.data.slice(1);
                   }
                   if (data.data.length > 0) {
-                    // if chunk size is too small, you can get a chunk with 0 complete rows, but the database does not allow empty insert
+                    /* 
+                    if chunk size is too small, you can get a chunk with 0 complete 
+                    rows, but the database does not allow empty insert
+                    */
                     state.csvParser = parser;
                     // pause the csv parser
                     state.csvParser.pause();
@@ -714,7 +735,6 @@ window.Wizard = function (config) {
                       return sendJson("POST", urlConClose, createContext());
                     })
                     .then(function () {
-                      // setStatusUpload("success", false, "Upload ok: " + state.uploadedRows + " rows", false);
                       resetUpload(); // reset or reload page
                       setStatusUpload(
                         "success",
@@ -768,7 +788,8 @@ window.Wizard = function (config) {
     var data = {
       query: {
         columns: colDefs,
-        embargo: embargoValue === "none" ? null : { duration: embargoValue }, // Conditional check
+        // Conditional check
+        embargo: embargoValue === "none" ? null : { duration: embargoValue },
         // "embargo": embargoData
       },
     };
@@ -776,7 +797,7 @@ window.Wizard = function (config) {
     Promise.all([
       window.reverseUrl("api:api_table", { table: tablename }),
       window.reverseUrl("dataedit:wizard_upload", {
-        table: tablename,        
+        table: tablename,
       }),
     ]).then(([urlTable, urlSuccess]) => {
       sendJson("PUT", urlTable, JSON.stringify(data))
@@ -816,32 +837,9 @@ window.Wizard = function (config) {
     };
   }
 
-  /**
-   * delete table
-   */
-  function deleteTable() {
-    $("#wizard-confirm-delete").modal("hide");
-    setStatusCreate("primary", true, "deleting table...");
-    var tablename = $("#wizard-tablename").val();
-
-    Promise.all([
-      window.reverseUrl("api:api_table", { table: tablename }),
-      window.reverseUrl("dataedit:wizard_create"),
-    ]).then(([urlTable, urlSuccess]) => {
-      sendJson("DELETE", urlTable)
-        .then(function () {
-          setStatusCreate("success", true, "ok, reloading page...");
-          window.location = urlSuccess;
-        })
-        .catch(function (err) {
-          setStatusCreate("danger", false, getErrorMsg(err));
-        });
-    });
-  }
-
   function resetUpload() {
     state.cancel = null;
-    $("#wizard-table-upload").show();
+    $("#wizard-table-upload").hide();
     $("#wizard-table-upload-cancel").hide();
     $("#wizard-file").val("");
     changeFileSettings();
@@ -854,25 +852,22 @@ window.Wizard = function (config) {
       data_type: "bigserial",
       is_nullable: false,
     });
+
     new bootstrap.Collapse("#wizard-container-create", {
       toggle: false,
     }).show();
     new bootstrap.Collapse("#wizard-container-upload", {
       toggle: false,
     }).hide();
-    $("#wizard-table-delete").hide();
+
     $("#wizard-container-upload").find(".btn").hide();
     $("#wizard-container-upload").find("input").prop("readonly", true);
   }
 
   function showUpload() {
-    new bootstrap.Collapse("#wizard-container-create", {
-      toggle: false,
-    }).hide();
     new bootstrap.Collapse("#wizard-container-upload", {
       toggle: false,
     }).show();
-    $("#wizard-table-delete").show();
 
     $("#wizard-container-create").find(".btn").hide();
     $("#wizard-container-create").find("input").prop("readonly", true);
@@ -931,7 +926,6 @@ window.Wizard = function (config) {
   }
 
   (function init() {
-    // console.log('init')
     var cParseDiv = $("#wizard-csv-column-template .wizard-csv-column-parse");
     Object.keys(columnParsers).map(function (k) {
       cParseDiv.append(
@@ -956,12 +950,6 @@ window.Wizard = function (config) {
         tgt.addClass("is-invalid");
       }
     });
-    // Add this block to remove the "Create Table" card if canAdd is true
-    if (state.canAdd) {
-      // Remove the "Create Table" card
-      $("#wizard-container-create").closest(".card").remove();
-    }
-
     resetUpload();
     if (state.table) {
       $("#wizard-tablename").val(state.table);
@@ -976,15 +964,6 @@ window.Wizard = function (config) {
       state.columns.map(function (c) {
         cN.append("<option>" + c.name + "</option>");
       });
-
-      /* delete table */
-      $("#wizard-table-delete").bind("click", function () {
-        $("#wizard-confirm-delete").modal("show");
-      });
-      $("#wizard-confirm-delete-cancel").bind("click", function () {
-        $("#wizard-confirm-delete").modal("hide");
-      });
-      $("#wizard-confirm-delete-delete").bind("click", deleteTable);
 
       showUpload();
     } else {

@@ -1,59 +1,53 @@
-{% extends "dataedit/base.html" %}
+{% extends "dataedit/base_fullwidth.html" %}
 {% load static %}
+{% load django_vite %}
 {% load django_bootstrap5 %}
 {% load compress %}
 {% block after-head %}
   <link href="{% static 'wizard/wizard.css' %}" rel="stylesheet" />
 {% endblock after-head %}
 {% block site-header %}
-  <h2 class="site-header">
-    <span class="spinner-border text-primary" id="wizard-loading"></span>
-    <i class="fa fa-table mr-2"></i>Table Upload
-  </h2>
-{% endblock site-header %}
-{% block main %}
   <div class="main-header">
-    <h1 class="main-header__title">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           viewBox="0 0 512 512"
-           width="24"
-           height="24">
-        <path d="M64 416L168.6 180.7c15.3-34.4 40.3-63.5 72-83.7l146.9-94c3-1.9 6.5-2.9 10-2.9C407.7 0 416 8.3 416 18.6l0 1.6c0 2.6-.5 5.1-1.4 7.5L354.8 176.9c-1.9 4.7-2.8 9.7-2.8 14.7c0 5.5 1.2 11 3.4 16.1L448 416l-207.1 0 11.8-35.4 40.4-13.5c6.5-2.2 10.9-8.3 10.9-15.2s-4.4-13-10.9-15.2l-40.4-13.5-13.5-40.4C237 276.4 230.9 272 224 272s-13 4.4-15.2 10.9l-13.5 40.4-40.4 13.5C148.4 339 144 345.1 144 352s4.4 13 10.9 15.2l40.4 13.5L207.1 416 64 416zM279.6 141.5c-1.1-3.3-4.1-5.5-7.6-5.5s-6.5 2.2-7.6 5.5l-6.7 20.2-20.2 6.7c-3.3 1.1-5.5 4.1-5.5 7.6s2.2 6.5 5.5 7.6l20.2 6.7 6.7 20.2c1.1 3.3 4.1 5.5 7.6 5.5s6.5-2.2 7.6-5.5l6.7-20.2 20.2-6.7c3.3-1.1 5.5-4.1 5.5-7.6s-2.2-6.5-5.5-7.6l-20.2-6.7-6.7-20.2zM32 448l448 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 512c-17.7 0-32-14.3-32-32s14.3-32 32-32z" />
-      </svg>
-      Data Table Wizard
-    </h1>
-    <div class="main-header__wizard">
-      {% if table %}
-        Edit Table :
+    {% if table %}
+      <h1 class="main-header__title">
+        <i class="fa fa-table me-2"></i>Upload data from csv
+      </h1>
+      <div class="main-header__wizard">
+        Tables /
         {% if table_label %}
           <a href="{% url 'dataedit:view' table=table %}">{{ table_label }}</a>
         {% else %}
           <a href="{% url 'dataedit:view' table=table %}">{{ table }}</a>
         {% endif %}
-      {% else %}
-        <a href="{% url 'dataedit:topic-list' %}">Topics</a> / Wizard
-      {% endif %}
-      <!-- Indicate weather the user got permissions fot this table -->
-    </div>
-    <br />
-    <div>
-      In the academy you can learn about how to
-      <a href="{{ create_database_conform_data }}" target="_blank">create database conform CSV data</a>
-      and how to work with the
-      <a href="{{ wizard_academy_link }}{% if can_add %}#upload-a-csv-file-using-the-wizard{% endif %}"
-         target="_blank">wizard</a>.
-    </div>
+        <!-- Indicate weather the user got permissions fot this table -->
+      </div>
+      <div>
+        In the academy you can learn about how to
+        <a href="{{ create_database_conform_data }}" target="_blank">create database conform CSV data</a>
+        and how to work with the
+        <a href="{{ wizard_academy_link }}{% if can_add %}#upload-a-csv-file-using-the-wizard{% endif %}"
+           target="_blank">upload wizard</a>.
+      </div>
+    {% else %}
+      <h1 class="main-header__title">
+        <i class="fa fa-table me-2"></i>Create table
+      </h1>
+      <div class="main-header__wizard"></div>
+      <div>
+        In the academy you can learn about how to
+        how to work create new tables using the <a href="{{ wizard_academy_link }}{% if can_add %}#upload-a-csv-file-using-the-wizard{% endif %}"
+    target="_blank">wizard</a>.
+      </div>
+    {% endif %}
   </div>
+{% endblock site-header %}
+{% block data_content %}
   <!-- inside bootstrap column -->
-  <div id="wizard-container">
-    <div class="accordion">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="mb-0">
-            <a href=""
-               data-bs-toggle="collapse"
-               data-bs-target="#wizard-container-create">Create Table</a>
-          </h2>
+  <div class="content">
+    <div class="content__container">
+      <div class="content__fullwidth">
+        <div id="wizard-container-spinner" class="col">
+          <span class="spinner-border text-primary" id="wizard-loading"></span>
         </div>
         <div id="wizard-container-create"
              class="collapse"
@@ -66,7 +60,7 @@
                        placeholder="insert table name"
                        id="wizard-tablename"
                        data-bs-toggle="tooltip"
-                       title="Valid table name (only lower case letters, numbers and underscore, max. 50 chars)" />
+                       title="Valid table name (only lower case letters, numbers and underscore, max. 50 chars, must start with a character)" />
               </div>
             </div>
             <div class="row wizard-column">
@@ -93,7 +87,7 @@
                       <td>
                         <span class="label help-title"
                               data-bs-toggle="tooltip"
-                              title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars)">
+                              title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars, must start with a character)">
                           Column name
                         </span>
                       </td>
@@ -123,7 +117,7 @@
                                class="form-control wizard-column-name is-invalid"
                                placeholder=""
                                data-bs-toggle="tooltip"
-                               title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars)" />
+                               title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars, must start with a character)" />
                       </td>
                       <td>
                         <input type="text"
@@ -147,38 +141,31 @@
                 </table>
               </div>
             </div>
-            <div class="row my-2">
-              <div class="col-4">
-                <button class="btn btn-primary" id="wizard-column-add">
-                  <i class="fa fa-plus"></i> Add column
-                </button>
-              </div>
+            <div class="my-2">
+              <button class="btn btn-primary" id="wizard-column-add">
+                <i class="fa fa-plus"></i> Add column
+              </button>
             </div>
-            <div class="row mt-5">
-              <div class="col-4">
-                <label for="wizard-embargo">
-                  Apply Embargo
-                  <span class="label help-title"
-                        data-bs-toggle="tooltip"
-                        title="Set an embargo period to hide your data and restrict data access for a specific time period of 6 or 12 months. Other users will be able to find the data resource and its metadata but not the data values."></span>
-                </label>
-                <select id="wizard-embargo" class="form-control">
-                  <option value="none">None</option>
-                  <option value="6_months">6 Months</option>
-                  <option value="1_year">1 Year</option>
-                </select>
-              </div>
+            <div class="mt-3">
+              <label for="wizard-embargo">
+                Apply Embargo
+                <span class="label help-title"
+                      data-bs-toggle="tooltip"
+                      title="Set an embargo period to hide your data and restrict data access for a specific time period of 6 or 12 months. Other users will be able to find the data resource and its metadata but not the data values."></span>
+              </label>
+              <select id="wizard-embargo" class="form-control">
+                <option value="none">None</option>
+                <option value="6_months">6 Months</option>
+                <option value="1_year">1 Year</option>
+              </select>
             </div>
-            <div class="row mt-5">
-              <div class="col-2">
-                <button class="btn btn-success mt-2" id="wizard-table-create">
-                  <i class="fa fa-table mr-2"></i>Create table
-                </button>
-                <button class="btn btn-danger mt-2" id="wizard-table-delete">
-                  <i class="fa fa-trash mr-2"></i>Delete table
-                </button>
-              </div>
-              <div class="col-10 align-self-end">
+            <div class="mt-3">
+              <button class="btn btn-success mt-2" id="wizard-table-create">
+                <i class="fa fa-table me-2"></i>Create table
+              </button>
+            </div>
+            <div class="row mt-3">
+              <div class="col-12">
                 <div id="wizard-table-create-msg" class="invisible wizard-status">
                   <span class="spinner spinner-border spinner-border-sm"></span>
                   <span class="message"></span>
@@ -186,16 +173,6 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <h2 class="mb-0">
-            <a href=""
-               data-bs-toggle="collapse"
-               data-bs-target="#wizard-container-upload">Upload CSV</a>
-            <span id="wizard-title-table"></span>
-          </h2>
         </div>
         <div id="wizard-container-upload"
              class="collapse"
@@ -348,16 +325,15 @@
             <div class="row">
               <table id="wizard-csv-preview" class="table table-striped">
                 <thead>
-                  <tr></tr>
+                  <tr id="wizard-csv-preview-thead-row"></tr>
                 </thead>
-                <tbody>
+                <tbody id="wizard-csv-preview-body">
                 </tbody>
               </table>
             </div>
             <div class="row my-3">
               <div class="col-2">
-                <span class=""
-                      {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
+                <span {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
                   <a href="#wizard-table-upload"
                      class="btn btn-primary {% if not can_add %}disabled{% endif %}"
                      id="wizard-table-upload"><i class="fa fa-upload"></i> Upload</a>
@@ -379,30 +355,10 @@
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <h2 class="mb-0">
-            <!-- go to existing form -->
-            <a id="editMetadata"
-               target="_blank"
-               href="{% if table %}{% url 'dataedit:meta_edit' table=table %}{% else %}#{% endif %}">Edit metadata</a>
-          </h2>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <h2 class="mb-0">
-            <!-- go to existing form -->
-            <a id="viewData"
-               target="_blank"
-               href="{% if table %}{% url 'dataedit:view' table=table %}{% else %}#{% endif %}">View data</a>
-          </h2>
-        </div>
-      </div>
     </div>
   </div>
   <!-- id="wizard-container" class="container-fluid" -->
-{% endblock main %}
+{% endblock data_content %}
 {% block after-body-bottom-js %}
   <!-- dialog: keep outside of main container -->
   <div id="wizard-confirm-delete" class="modal fade">
@@ -412,7 +368,7 @@
           Do you want to delete the table (including data and metadata)?
         </div>
         <div class="modal-body">
-          <button class="btn btn-sm btn-dark mr-2" id="wizard-confirm-delete-delete">
+          <button class="btn btn-sm btn-dark me-2" id="wizard-confirm-delete-delete">
             delete
           </button>
           <button class="btn btn-sm btn-light" id="wizard-confirm-delete-cancel">

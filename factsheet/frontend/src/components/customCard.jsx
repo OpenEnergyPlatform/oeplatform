@@ -19,11 +19,11 @@ import '../styles/hexagons.css';
 import Box from '@mui/material/Box';
 
 export default function CustomCard(props) {
-  const { fs, id, study_name, acronym, abstract, institution, create_new, create_new_button  } = props;
+  const { fs, id, study_name, acronym, abstract, institution, create_new, create_new_button } = props;
 
   return (
     <Box>
-            <b>{acronym.substring(0,50)}</b>
+      <b>{acronym.substring(0, 50)}</b>
 
     </Box>
   );

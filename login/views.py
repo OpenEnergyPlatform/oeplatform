@@ -1,4 +1,4 @@
-"""
+__license__ = """
 SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
@@ -31,6 +31,8 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.generic import RedirectView, View
 from django.views.generic.edit import DeleteView
@@ -56,6 +58,7 @@ ITEMS_PER_PAGE = 8
 
 
 class TablesView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
         tables_set = user.get_tables_queryset(min_permission_level=WRITE_PERM)
@@ -100,6 +103,7 @@ class TablesView(View):
 
 
 class ReviewsView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id):
         """
         Load the reviews the user identifyes as reviewer and contributor for.
@@ -300,6 +304,7 @@ def delete_peer_review_simple_view(request):
 
 
 class SettingsView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id):
         """
         Load the user identified by user_id and is OAuth-token.
@@ -332,6 +337,7 @@ class SettingsView(View):
 
 
 class GroupsView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
         Get all groups where the current user is listed as member. Also
@@ -359,6 +365,7 @@ class GroupsView(View):
         )
 
 
+@never_cache
 def group_member_count_view(request, group_id: int):
     """
     Return the member count for the current group.
@@ -375,6 +382,7 @@ def group_member_count_view(request, group_id: int):
     return HttpResponse(f"{member_count} member")
 
 
+# TODO: should be require_POST?
 @login_required
 def group_leave_view(request, group_id: int):
     """ """
@@ -408,6 +416,7 @@ def group_leave_view(request, group_id: int):
 
 
 class PartialGroupsView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
         TBD
@@ -430,6 +439,7 @@ class PartialGroupsView(View):
 class GroupManagementView(View, LoginRequiredMixin):
     form_is_valid = False
 
+    @method_decorator(never_cache)
     def get(self, request, group_id=None):
         """
         Load the chosen action(create or edit) for a group.
@@ -544,6 +554,7 @@ class GroupManagementView(View, LoginRequiredMixin):
 
 
 class PartialGroupMemberManagementView(View, LoginRequiredMixin):
+    @method_decorator(never_cache)
     def get(self, request, group_id: int):
         """
         Renders the group detail page component for user invites and
@@ -655,6 +666,7 @@ class PartialGroupMemberManagementView(View, LoginRequiredMixin):
 
 # TODO: Post should not return render ... Get might never be used
 class PartialGroupEditFormView(View, LoginRequiredMixin):
+    @method_decorator(never_cache)
     def get(self, request, group_id):
         """
         Returns a edit form component for a group.
@@ -708,6 +720,7 @@ class PartialGroupEditFormView(View, LoginRequiredMixin):
 
 
 class PartialGroupInviteView(View, LoginRequiredMixin):
+    @method_decorator(never_cache)
     def get(self, request, group_id):
         group = get_object_or_404(UserGroup, pk=group_id)
         is_admin = False
@@ -771,6 +784,7 @@ class PartialGroupInviteView(View, LoginRequiredMixin):
 
 
 class EditUserView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id):
         if not request.user.id == int(user_id):
             raise PermissionDenied
@@ -817,6 +831,7 @@ class AccountDeleteView_TODO_UNUSED(LoginRequiredMixin, DeleteView):
         return render(request, "login/delete_account.html", {"profile_user": user})
 
 
+# TODO: should be require_POST?
 def token_reset_view(request):
     if request.user.is_authenticated:
         user_token = get_object_or_404(
@@ -831,6 +846,7 @@ def token_reset_view(request):
         return HttpResponseForbidden("You are not authorized to reset the token.")
 
 
+@never_cache
 def metadata_review_badge_indicator_icon_file_view(request, user_id, table_name):
     # is_badge : bool , msg : string -> either error msg or badge name
     table = get_object_or_404(Table, name=table_name)

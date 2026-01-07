@@ -148,12 +148,12 @@ urlpatterns = [
     re_path(
         r"^admin/columns/",
         admin_column_view,
-        name="admin-columns",  # TODO: do we need this
+        name="admin-columns",  # TODO: do we need this?
     ),
     re_path(
         r"^admin/constraints/",
         admin_constraints_view,
-        name="admin-contraints",  # TODO: do we need this
+        name="admin-contraints",  # TODO: do we need this?
     ),
     re_path(
         # redirecting old /dataedit/wizard/SCHEMA/TABLE
