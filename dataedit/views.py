@@ -365,7 +365,7 @@ def tag_table_add_view(request: HttpRequest) -> HttpResponse:
         # generic error message
         messages.error(request, "Something went wrong")
 
-    redirect_url = request.META.get("HTTP_REFERER") or reverse("dataedit:topic-list")
+    redirect_url = reverse("dataedit:view", kwargs={"table": table_obj.name})
     return redirect(redirect_url)
 
 
