@@ -93,9 +93,8 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import Embargo, PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from login import models as login_models
@@ -365,7 +364,7 @@ def tag_table_add_view(request: HttpRequest) -> HttpResponse:
         # generic error message
         messages.error(request, "Something went wrong")
 
-    redirect_url = request.META.get("HTTP_REFERER") or reverse("dataedit:topic-list")
+    redirect_url = reverse("dataedit:view", kwargs={"table": table_obj.name})
     return redirect(redirect_url)
 
 
