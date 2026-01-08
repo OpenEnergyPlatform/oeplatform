@@ -4,7 +4,9 @@
 {% load django_bootstrap5 %}
 {% load compress %}
 {% block after-head %}
-  <link href="{% static 'wizard/wizard.css' %}" rel="stylesheet" />
+  {% compress css %}
+    <link href="{% static 'wizard/wizard.css' %}" rel="stylesheet" />
+  {% endcompress %}
 {% endblock after-head %}
 {% block site-header %}
   <div class="main-header">
@@ -379,11 +381,10 @@
     </div>
   </div>
   <script src="{% static 'wizard/vendor/papaparse-5.0.2/papaparse.min.js' %}"></script>
-  {% compress js %}
-    <script src="{% static 'wizard/wizard.js' %}"></script>
-  {% endcompress %}
+  {% vite_asset "dataedit/static/wizard/wizard.js" %}
   <script>
-    $(document).ready(function () {
+    /* only execute after Wizard is fully loaded */
+    window.addEventListener("Wizard:ready", () => {
       var config = JSON.parse("{{ config|escapejs }}");
       var wizard = Wizard(config);
 

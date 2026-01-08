@@ -128,15 +128,15 @@
   {% compress js %}
     <script src="{% static 'metaedit/vendor/json-editor-2.9.1/jsoneditor.min.js' %}"></script>
     <script src="{% static 'modelview/htmx.min.js' %}"></script>
-    <script src="{% static 'metaedit/metaedit.js' %}"></script>
   {% endcompress %}
+  {% vite_asset "dataedit/static/metaedit/metaedit.js" %}
   <!-- fix imports below - we dont use cdn anymore -->
   <script src="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js }}"></script>
   <link rel="stylesheet"
         href="{{ EXTERNAL_URLS.unpkg__trevoreyre_autocomplete_js_dist_style_css }}" />
   <script>
     /* only execute after MetaEdit is fully loaded */
-    // window.addEventListener("MetaEdit:ready", () => { /* TODO MetaEdit:ready */
+    window.addEventListener("MetaEdit:ready", () => { 
 
     var createUrl = '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}';
     var config = JSON.parse("{{ config|escapejs }}");
@@ -179,6 +179,6 @@
     // Set up tab filtering
     hideTabsFilter(["Meta Metadata", "Embargo Period", "Dialect", "Review"]);
 
-    // }); /* TODO MetaEdit:ready */
+    }); 
   </script>
 {% endblock after-body-bottom-js %}

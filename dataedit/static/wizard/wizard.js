@@ -972,3 +972,6 @@ window.Wizard = function (config) {
     $("#wizard-loading").hide();
   })();
 };
+
+/* notify inline code that Wizard is loaded */
+window.dispatchEvent(new Event("Wizard:ready"));

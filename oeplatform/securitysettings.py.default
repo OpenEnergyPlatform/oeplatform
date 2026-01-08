@@ -55,7 +55,7 @@ EMAIL_PORT = 25
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = [Path(BASE_DIR, "assets", "django-vite")]
+STATICFILES_DIRS = [Path(BASE_DIR, "assets")]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -100,7 +100,7 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-DJANGO_VITE = {"default": {"dev_mode": os.environ.get("VITE_DEV_MODE", DEBUG)}}
+DJANGO_VITE = {"default": {"dev_mode": os.environ.get("VITE_DEV_MODE", DEBUG), "manifest_path": Path(BASE_DIR, "assets", "manifest.json")}}
 VITE_DEV_SERVER_URL = os.environ.get("VITE_DEV_SERVER_URL" "http://vite:5173")
 
 SOCIALACCOUNT_PROVIDERS = {

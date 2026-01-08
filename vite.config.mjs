@@ -66,6 +66,8 @@ export default defineConfig({
         factsheet: resolve("./factsheet/frontend/src/index.jsx"),
         opr_review: resolve("./dataedit/static/peer_review/main.js"),
         oeo_viewer: resolve("./oeo_viewer/frontend/src/index.jsx"),
+        wizard: resolve("./dataedit/static/wizard/wizard.js"),
+        metaedit: resolve("./dataedit/static/metaedit/metaedit.js"),
       },
     },
   },
