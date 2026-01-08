@@ -385,10 +385,12 @@
   <script>
     /* only execute after Wizard is fully loaded */
     window.addEventListener("Wizard:ready", () => {
-      var config = JSON.parse("{{ config|escapejs }}");
-      var wizard = Wizard(config);
-
-      $('[data-bs-toggle="tooltip"]').tooltip();
+      // also ensure jquery has been loaded
+      $(document).ready(function () {
+        var config = JSON.parse("{{ config|escapejs }}");
+        var wizard = Wizard(config);
+        $('[data-bs-toggle="tooltip"]').tooltip();
+      });
     });
   </script>
 {% endblock after-body-bottom-js %}
