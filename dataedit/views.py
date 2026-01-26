@@ -527,14 +527,14 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     )
 
 
-def table_view_set_default_view(request: HttpRequest, table: str) -> HttpResponse:
+@require_POST
+def table_view_set_default_view(
+    request: HttpRequest, table: str, view_id: int
+) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
-    # TODO: shouldnt this be POST only?
-    post_id = request.GET.get("id")
-
     for view in DBView.objects.filter(table=table_obj.name):
-        if str(view.pk) == post_id:
+        if str(view.pk) == view_id:
             view.is_default = True
         else:
             view.is_default = False
@@ -542,13 +542,13 @@ def table_view_set_default_view(request: HttpRequest, table: str) -> HttpRespons
     return redirect("dataedit:view", table=table_obj.name)
 
 
-def table_view_delete_view(request: HttpRequest, table: str) -> HttpResponse:
+@require_POST
+def table_view_delete_view(
+    request: HttpRequest, table: str, view_id: int
+) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
-    # TODO: shouldnt this be POST only?
-    post_id = request.GET.get("id")
-
-    view = DBView.objects.get(id=post_id, table=table_obj.name)
+    view = DBView.objects.get(pk=view_id, table=table_obj.name)
     view.delete()
 
     return redirect("dataedit:view", table=table_obj.name)

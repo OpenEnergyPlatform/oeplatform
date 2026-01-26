@@ -68,14 +68,18 @@ urlpatterns_view_schema = [
         name="table-view-save",
     ),
     re_path(
-        r"^(?P<table>{qual})/view/set-default".format(qual=pgsql_qualifier),
+        # TODO: not used yet
+        r"^(?P<table>{qual})/view/(?P<view_id>{qual})/set-default".format(
+            qual="[0-9]+"
+        ),
         table_view_set_default_view,
-        name="table-view-set-default",  # TODO: should be POST, but is GET?
+        name="table-view-set-default",
     ),
     re_path(
-        r"^(?P<table>{qual})/view/delete".format(qual=pgsql_qualifier),
+        # TODO: not used yet
+        r"^(?P<table>{qual})/view/(?P<view_id>{qual})/delete".format(qual="[0-9]+"),
         table_view_delete_view,
-        name="table-view-delete-default",  # TODO: should be POST, but is GET?
+        name="table-view-delete-default",
     ),
     re_path(
         r"^(?P<table>{qual})/graph/new".format(qual=pgsql_qualifier),
