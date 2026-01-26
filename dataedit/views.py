@@ -37,7 +37,6 @@ import json
 import re
 from collections import defaultdict
 from io import TextIOWrapper
-from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -93,9 +92,8 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import Embargo, PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from login import models as login_models
@@ -684,7 +682,7 @@ class TableDataView(View):
         table_label = table_obj.human_readable_name
 
         table_views = DBView.objects.filter(table=table)
-        default = DBView(name="default", type="table", table=table)
+        default_view = DBView.get_or_create_default(table=table)
         view_id = request.GET.get("view")
 
         embargo = Embargo.objects.filter(table=table_obj).first()
@@ -697,18 +695,13 @@ class TableDataView(View):
         else:
             embargo_time_left = "No embargo data available"
 
-        if view_id == "default":
-            current_view = default
-            current_view.save()
-        else:
-            try:
-                # at first, try to use the view, that is passed as get argument
-                current_view = table_views.get(id=view_id)
-            except ObjectDoesNotExist:
-                current_view = default
-                current_view.save()
+        try:
+            # at first, try to use the view, that is passed as get argument
+            current_view = table_views.get(id=view_id)
+        except ObjectDoesNotExist:
+            current_view = default_view
 
-        table_views = list(chain((default,), table_views))
+        table_views = [default_view, *table_views.exclude(pk=default_view.pk)]
 
         #########################################################
         #   Get open peer review process related metadata       #
