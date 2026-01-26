@@ -92,8 +92,9 @@ from dataedit.helper import (
 )
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo, PeerReview, PeerReviewManager, Table, Tag, Topic
+from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
+from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from login import models as login_models
