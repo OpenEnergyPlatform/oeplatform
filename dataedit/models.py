@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Literal, Mapping, Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import (
     BooleanField,
     CharField,
@@ -370,7 +370,6 @@ class Table(Tagable):
             )
 
         except Exception:
-
             return self.name
 
     def validate_open_data_license(
@@ -510,6 +509,33 @@ class View(models.Model):
 
     def __str__(self):
         return '{}--"{}"({})'.format(self.table, self.name, self.type.upper())
+
+    class Meta:
+        unique_together = [("table", "type", "name")]
+
+    @classmethod
+    def get_or_create_default(
+        cls, table: str, type: str = "table", name: str = "default"
+    ) -> "View":
+        with transaction.atomic():
+            # technically, multiple views per table can be default (or none).
+            view = View.objects.filter(is_default=True, table=table).last()
+            if view:
+                return view
+            # its possible that we have a view named "default", that is not
+            # marked as is_default=True
+            view = View.objects.filter(table=table, type=type, name=name).last()
+            if view is not None:
+                # make it default for next time
+                view.is_default = True
+                view.save()
+                return view
+
+            # create a new one
+            view = View.objects.create(
+                table=table, type=type, name=name, is_default=True
+            )
+            return view
 
 
 class Filter(models.Model):
@@ -708,13 +734,12 @@ class PeerReview(models.Model):
 
             return (
                 True,
-                f"Set current version of table's: '{table}' " "oemetadata for review.",
+                f"Set current version of table's: '{table}' oemetadata for review.",
             )
 
         return (
             False,
-            f"This tables (name: {table}) review "
-            "already got a version of oemetadata.",
+            f"This tables (name: {table}) review already got a version of oemetadata.",
         )
 
     def update_all_table_peer_reviews_after_table_moved(self, *args, topic, **kwargs):
