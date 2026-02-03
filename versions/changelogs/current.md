@@ -14,7 +14,14 @@ SPDX-License-Identifier: CC0-1.0
   a single scenario bundle
   [(#2220)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2220)
 
+- Fix the placement of the pagination widget to ontop instead of below the
+  bundle listings
+  [(#2220)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2220)
+
 ## Features
+
+- Add a text based search to filter the listed scenario bundles
+  [(#2220)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2220)
 
 ## Bugs
 
