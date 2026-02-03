@@ -966,6 +966,7 @@ export default function CustomTable(props) {
 
 
       <Container maxWidth="xl">
+
         <EnhancedTableToolbar
           logged_in={logged_in}
           numSelected={selected.size}
@@ -990,6 +991,15 @@ export default function CustomTable(props) {
 
         {alignment === "list" && data.length > 0 && (
           <>
+            <TablePagination
+              rowsPerPageOptions={[5, 15, 25, 50]}
+              component="div"
+              count={data.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
             <TableContainer>
               <Table
                 sx={{ minWidth: 1400 }}
@@ -1013,17 +1023,17 @@ export default function CustomTable(props) {
         )}
 
         {/* CARDS VIEW */}
+        <TablePagination
+          rowsPerPageOptions={[5, 15, 25, 50]}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
         {alignment === "cards" && data.length > 0 && renderCards(visibleRows)}
       </Container>
-      <TablePagination
-        rowsPerPageOptions={[5, 15, 25, 50]}
-        component="div"
-        count={data.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
     </Box>
 
   );
