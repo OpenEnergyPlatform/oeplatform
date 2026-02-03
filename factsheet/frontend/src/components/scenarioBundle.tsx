@@ -41,7 +41,8 @@ import conf from "../conf.json";
 import { colors, Tooltip } from '@mui/material';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline.js';
-import { styled } from '@mui/material/styles';
+import styled from '@mui/material/styles/styled';
+
 import SaveIcon from '@mui/icons-material/Save.js';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
