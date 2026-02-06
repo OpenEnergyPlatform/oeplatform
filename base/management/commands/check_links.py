@@ -36,7 +36,7 @@ def iter_links(url, parent_url=None, root_url=None, no_external=False):
     res = requests.get(
         url,
         stream=True,  # stream because sometimes we dont actually load all the content
-        verify=False,  # snyk:ignore this is ok here, because we just run it in development to test if urls still exist # noqa
+        verify=False,  # this is ok here, because we just run it in development to test if urls still exist # noqa
         headers={"User-Agent": "Mozilla/5.0"},
     )
     cache[url] = res.status_code
