@@ -18,7 +18,6 @@ import TssAutocomplete from "../features/terminology/components/TssAutocomplete"
 import TssMetadata from "../features/terminology/components/TssMetadata";
 import TssOeoInfo from "../features/terminology/components/TssOeoInfo";
 import TssHierarchy from "../features/terminology/components/TssHierarchy";
-import EntityFlyout from "../features/terminology/components/EntityFlyout";
 import HowToUseViewer from "../features/terminology/components/HowToUseViewer";
 
 function getIriFromSelection(sel) {
@@ -27,13 +26,20 @@ function getIriFromSelection(sel) {
   return item?.iri || "";
 }
 
-/** Lightweight accordion replacement */
-function AccordionShim({ id, title, initialIsOpen = false, children }) {
-  const [open, setOpen] = useState(initialIsOpen);
+function AccordionShim({ id, title, initialIsOpen = false, isOpen, onToggle, children }) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(initialIsOpen);
+  const controlled = typeof isOpen === "boolean";
+  const open = controlled ? isOpen : uncontrolledOpen;
+
+  const setOpen = (next) => {
+    if (!controlled) setUncontrolledOpen(next);
+    onToggle?.(next);
+  };
+
   return (
     <EuiPanel color="transparent" hasShadow={false} paddingSize="s" style={{ paddingInline: 0 }}>
       <EuiButtonEmpty
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen(!open)}
         aria-controls={id}
         aria-expanded={open}
         flush="left"
@@ -54,20 +60,23 @@ export default function OeoViewerPage() {
   const bp = useCurrentEuiBreakpoint();
   const isMobile = bp === "xs" || bp === "s";
 
-  // Autocomplete -> Metadata only
   const [autoSelection, setAutoSelection] = useState(null);
-  const metaIri = useMemo(() => getIriFromSelection(autoSelection), [autoSelection]);
+  const [selectedIri, setSelectedIri] = useState("");
+  const [pathOpen, setPathOpen] = useState(false);
 
-  // Flyout (driven only by hierarchy clicks)
-  const [flyoutIri, setFlyoutIri] = useState("");
-  const [flyoutOpen, setFlyoutOpen] = useState(false);
-
-  // IDs for accordions
   const mobileInfoId = useGeneratedHtmlId({ prefix: "oeoInfoMobile" });
   const mobileHierarchyId = useGeneratedHtmlId({ prefix: "oeoHierarchyMobile" });
+  const mobilePathId = useGeneratedHtmlId({ prefix: "oeoPathMobile" });
   const desktopInfoId = useGeneratedHtmlId({ prefix: "oeoInfoDesktop" });
+  const desktopPathId = useGeneratedHtmlId({ prefix: "oeoPathDesktop" });
 
-  // Hierarchy click → ONLY open flyout
+  const handleAutocompleteChange = (sel) => {
+    setAutoSelection(sel);
+    const iri = getIriFromSelection(sel);
+    setSelectedIri(iri);
+    if (iri) setPathOpen(true);
+  };
+
   const handleHierarchyClick = (...args) => {
     let iri = "";
     if (args.length >= 3) iri = args[2]?.iri || args[2]?.entity?.iri || "";
@@ -75,13 +84,8 @@ export default function OeoViewerPage() {
       const a = args[0];
       iri = typeof a === "string" ? a : a?.entity?.iri || a?.iri || "";
     }
-    if (!iri) {
-      // eslint-disable-next-line no-console
-      console.warn("onNavigateToEntity: unexpected payload", args);
-      return;
-    }
-    setFlyoutIri(iri);
-    setFlyoutOpen(true);
+    if (!iri) return;
+    setSelectedIri(iri);
   };
 
   const handleNavigateToOntology = (...args) => {
@@ -99,74 +103,91 @@ export default function OeoViewerPage() {
     } catch { }
   };
 
+  const fullHierarchy = (
+    <TssHierarchy
+      iri=""
+      keepExpansionStates={true}
+      onNavigateToEntity={handleHierarchyClick}
+      onNavigateToOntology={handleNavigateToOntology}
+    />
+  );
+
+  const pathHierarchy =
+    selectedIri ? (
+      <TssHierarchy
+        iri={selectedIri}
+        showSiblingsOnInit={true}
+        onNavigateToEntity={handleHierarchyClick}
+        onNavigateToOntology={handleNavigateToOntology}
+      />
+    ) : null;
+
   return (
     <EuiPageTemplate paddingSize="m" grow={false} restrictWidth={1400}>
       <EuiPageTemplate.Section grow={false}>
-        {/* 🔹 Top-of-page info banner (collapsed by default) */}
         <HowToUseViewer />
         <EuiSpacer size="m" />
+
         {isMobile ? (
-          <>
-            {/* --- Mobile layout --- */}
-            <EuiPanel hasShadow={false} color="transparent" paddingSize="s">
-              <AccordionShim id={mobileHierarchyId} title="Full hierarchy" initialIsOpen={true}>
-                <div style={{ padding: euiTheme.size.s }}>
-                  <TssHierarchy
-                    onNavigateToEntity={handleHierarchyClick}
-                    onNavigateToOntology={handleNavigateToOntology}
-                  />
-                </div>
-              </AccordionShim>
+          <EuiPanel hasShadow={false} color="transparent" paddingSize="s">
+            <AccordionShim id={mobileHierarchyId} title="Full hierarchy" initialIsOpen={true}>
+              <div style={{ padding: euiTheme.size.s }}>{fullHierarchy}</div>
+            </AccordionShim>
 
-              <EuiSpacer size="m" />
+            <EuiSpacer size="m" />
 
-              <AccordionShim id={mobileInfoId} title="Open Energy Ontology — Info" initialIsOpen={false}>
-                <TssOeoInfo />
-              </AccordionShim>
+            <AccordionShim id={mobilePathId} title="Path to selected entity" isOpen={pathOpen} onToggle={setPathOpen}>
+              <div style={{ padding: euiTheme.size.s }}>{pathHierarchy}</div>
+            </AccordionShim>
 
-              <EuiSpacer size="m" />
+            <EuiSpacer size="m" />
 
-              {/* Autocomplete updates ONLY the metadata below */}
-              <TssAutocomplete onChange={setAutoSelection} />
+            <AccordionShim id={mobileInfoId} title="Open Energy Ontology — Info" initialIsOpen={false}>
+              <TssOeoInfo />
+            </AccordionShim>
 
-              <EuiSpacer size="m" />
-              <EuiPanel paddingSize="m">
-                <EuiText>
-                  <h3 style={{ marginTop: 0 }}>Metadata</h3>
+            <EuiSpacer size="m" />
+
+            <TssAutocomplete onChange={handleAutocompleteChange} />
+
+            <EuiSpacer size="m" />
+
+            <EuiPanel paddingSize="m">
+              <EuiText>
+                <h3 style={{ marginTop: 0 }}>Metadata</h3>
+              </EuiText>
+
+              {selectedIri ? (
+                <TssMetadata iri={selectedIri} tabs={{ crossRef: false, termDepiction: false, terminologyInfo: false }} />
+              ) : (
+                <EuiText size="s" color="subdued" aria-live="polite">
+                  <p>Use the autocomplete search to display the metadata here.</p>
                 </EuiText>
-
-                {/* Placeholder when no IRI yet */}
-                {metaIri ? (
-                  <TssMetadata iri={metaIri} tabs={{ crossRef: false, termDepiction: false, terminologyInfo: false }} />
-                ) : (
-                  <EuiText size="s" color="subdued" aria-live="polite">
-                    <p>Use the autocomplete search to display the metadata here.</p>
-                  </EuiText>
-                )}
-              </EuiPanel>
+              )}
             </EuiPanel>
-          </>
+          </EuiPanel>
         ) : (
-          // --- Desktop layout ---
           <EuiResizableContainer style={{ minHeight: 520 }}>
             {(EuiResizablePanel) => (
               <>
-                {/* Left: hierarchy */}
                 <EuiResizablePanel initialSize={30} minSize="22%" tabIndex={0} paddingSize="none">
                   <div style={{ position: "sticky", top: 16, maxHeight: "calc(100vh - 160px)", overflow: "auto" }}>
                     <EuiPanel hasShadow={false} color="subdued" paddingSize="s">
                       <EuiText size="s">
                         <h3 style={{ marginTop: 0 }}>Full hierarchy</h3>
                       </EuiText>
-                      <TssHierarchy
-                        onNavigateToEntity={handleHierarchyClick}
-                        onNavigateToOntology={handleNavigateToOntology}
-                      />
+
+                      {fullHierarchy}
+
+                      <EuiSpacer size="m" />
+
+                      <AccordionShim id={desktopPathId} title="Path to selected entity" isOpen={pathOpen} onToggle={setPathOpen}>
+                        {pathHierarchy}
+                      </AccordionShim>
                     </EuiPanel>
                   </div>
                 </EuiResizablePanel>
 
-                {/* Right: content (autocomplete + metadata) */}
                 <EuiResizablePanel initialSize={70} minSize="40%" paddingSize="none">
                   <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m" style={{ position: "relative", zIndex: 1 }}>
                     <AccordionShim id={desktopInfoId} title="Open Energy Ontology — Info" initialIsOpen={false}>
@@ -174,17 +195,18 @@ export default function OeoViewerPage() {
                     </AccordionShim>
 
                     <EuiSpacer size="m" />
-                    <TssAutocomplete onChange={setAutoSelection} />
+
+                    <TssAutocomplete onChange={handleAutocompleteChange} />
 
                     <EuiSpacer size="m" />
+
                     <EuiPanel paddingSize="m">
                       <EuiText>
                         <h3 style={{ marginTop: 0 }}>Metadata</h3>
                       </EuiText>
 
-                      {/* Placeholder when no IRI yet */}
-                      {metaIri ? (
-                        <TssMetadata iri={metaIri} tabs={{ crossRef: false, termDepiction: false, terminologyInfo: false }} />
+                      {selectedIri ? (
+                        <TssMetadata iri={selectedIri} tabs={{ crossRef: false, termDepiction: false, terminologyInfo: false }} />
                       ) : (
                         <EuiText size="s" color="subdued" aria-live="polite">
                           <p>Use the autocomplete search to display the metadata here.</p>
@@ -198,14 +220,6 @@ export default function OeoViewerPage() {
           </EuiResizableContainer>
         )}
       </EuiPageTemplate.Section>
-
-      {/* Flyout (opened ONLY by hierarchy clicks) */}
-      <EntityFlyout
-        iri={flyoutIri}
-        isOpen={flyoutOpen}
-        onClose={() => setFlyoutOpen(false)}
-        title="Selected element"
-      />
     </EuiPageTemplate>
   );
 }

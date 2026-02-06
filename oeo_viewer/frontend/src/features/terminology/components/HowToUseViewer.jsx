@@ -49,7 +49,7 @@ export default function TopInfoBanner() {
                             <p><strong>Browse the full hierarchy (left column)</strong></p>
                             <ul>
                                 <li>Expand nodes to explore classes in the ontology.</li>
-                                <li>Click a term to open a details flyout — this won’t change the right-side selection.</li>
+                                <li>Click a term to show the details.</li>
                                 <li>Use badges to jump to the defining ontology in a new tab.</li>
                             </ul>
                         </EuiText>
