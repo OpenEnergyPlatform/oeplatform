@@ -7,7 +7,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -15,52 +15,23 @@ import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import Tooltip from '@mui/material/Tooltip';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+
 
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import CSRFToken from './csrfToken';
 
-import conf from "../conf.json";
 
-const ColorToggleButton = (props) => {
-  const [isOwner, setIsOwner] = useState(false);
+const ColorToggleButton = ({ handleSwap, isOwner, isOwnerLoading }) => {
   const [snackbarOpen, setNotTheOwner] = useState(false);
 
-  const param_2 = String(window.location.href).split('/')[5];
-
-  useEffect(() => {
-    // Replace 'bundle_id' with the actual ID of the ScenarioBundle you want to check
-    const bundleId = param_2; // Assuming you pass the uid as a prop
-    // Make the API call to check if the user is the owner
-    axios.post(conf.toep + `scenario-bundles/check-owner/${bundleId}/`,
-      {
-        uid: bundleId
-      },
-      {
-        headers: { 'X-CSRFToken': CSRFToken() }
-      })
-      .then(response => {
-        // Assuming the response.data contains the ownership information
-        setIsOwner(response.data.isOwner);
-      })
-      .catch(error => {
-        console.error('Error checking ownership:', error);
-        // Handle errors if needed
-      });
-  }, [param_2]); // Dependency array includes props.uid to re-run the effect when it changes
-
   const handleChange = (event, mode) => {
-    // Only allow the 'edit' action if the user is the owner
-    if (mode === 'edit' && !isOwner) {
+    if (mode === "edit" && (isOwnerLoading || !isOwner)) {
       setNotTheOwner(true);
       return;
     }
-
-    props.handleSwap(mode);
+    handleSwap(mode);
   };
-
 
   const handleNotTheOwnerClose = (event, reason) => {
     if (reason === 'clickaway') {
