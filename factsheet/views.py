@@ -52,6 +52,7 @@ from factsheet.helper import (
     get_all_sub_classes,
     get_scenario_type_iri,
     is_owner,
+    parse_dataset_iri,
     set_ownership,
 )
 from factsheet.models import OEKG_Modifications
@@ -1588,10 +1589,42 @@ def get_all_factsheets_view(request, *args, **kwargs):
     return response
 
 
+def dataset_entry(node):
+    """
+    THis function is part of the comparison backend. It helps to retieve data table
+    ID's from the OEKG input / ouput data relations.
+
+    This function especially helps to retrieve the table name from a vaity of enties,
+    some of them are referancing external sources which are not directly usable in our
+    comparison backend.
+
+    :param node: A predicate from the OEKG related to a Node in the graph which is
+                related to an input or output dataset.
+
+    :return: A dict with the dataset label, url and if possible the table name.
+    """
+    label = oekg.value(node, RDFS.label)
+    url_term = oekg.value(node, OEO.OEO_00390094)  # may be None
+    url_str = str(url_term) if url_term else None
+
+    entry = {
+        "label": str(label) if label else "",
+        "url": url_str,
+        **parse_dataset_iri(url_str),
+    }
+
+    # If your KG stores the table name explicitly, prefer it over parsing URLs:
+    table_name = oekg.value(node, OEO.OEO_00000504)
+    if table_name:
+        entry["kind"] = "oep_table"
+        entry["table_name"] = str(table_name)
+
+    return entry
+
+
 def get_scenarios_view(request, *args, **kwargs):
-    scenarios_uid = [
-        i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_uid"))
-    ]
+    raw = request.GET.get("scenarios_uid", "[]")
+    scenarios_uid = [str(u).strip() for u in json.loads(raw)]
 
     scenarios = []
 
@@ -1632,26 +1665,9 @@ def get_scenarios_view(request, *args, **kwargs):
             for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020440, None)):
                 scenario_years.append(o4)
             for s5, p5, o5 in oekg.triples((s, OEO.OEO_00020437, None)):
-                oekg_value = oekg.value(o5, OEO.OEO_00390094)
-                comparable = str(oekg_value).split("scenario/")
-                input_datasets.append(
-                    (
-                        oekg.value(o5, RDFS.label),
-                        oekg.value(o5, OEO.OEO_00390094),
-                        comparable[1],
-                    )
-                )
+                input_datasets.append(dataset_entry(o5))
             for s6, p6, o6 in oekg.triples((s, OEO.OEO_00020436, None)):
-                oekg_value = oekg.value(o6, OEO.OEO_00390094)
-                comparable = str(oekg_value).split("scenario/")
-
-                output_datasets.append(
-                    (
-                        oekg.value(o6, RDFS.label),
-                        oekg.value(o6, OEO.OEO_00390094),
-                        comparable[1],
-                    )
-                )
+                output_datasets.append(dataset_entry(o6))
 
             for s1, p1, o1 in oekg.triples((None, OBO.BFO_0000051, s)):
                 study_label = oekg.value(s1, RDFS.label)
