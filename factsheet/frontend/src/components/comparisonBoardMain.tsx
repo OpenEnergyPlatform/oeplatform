@@ -60,6 +60,28 @@ import Alert from '@mui/material/Alert';
 // import AlertTitle from '@mui/material/AlertTitle';
 import variables from '../styles/oep-theme/variables.js';
 
+
+const OEP_ORIGIN = window.location.origin;
+
+function datasetHref(ds) {
+  if (!ds?.url) return null;
+  // absolute external link
+  if (ds.url.startsWith("http://") || ds.url.startsWith("https://")) return ds.url;
+  // relative internal link
+  return `${OEP_ORIGIN}/${ds.url.replace(/^\/+/, "")}`;
+}
+
+function datasetDisplay(ds) {
+  // Prefer label, fall back to table_name/external_id/url
+  return (
+    ds?.label ||
+    ds?.table_name ||
+    ds?.external_id ||
+    ds?.url ||
+    "Dataset"
+  );
+}
+
 const ComparisonBoardMain = (props) => {
 
   const { params } = props;
@@ -193,19 +215,28 @@ const ComparisonBoardMain = (props) => {
   useEffect(() => {
     getScenarios().then((data) => {
       setScenarios(data);
-      const ScenariosInputTableNames = data.map(obj => obj.data.input_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
-      const allInputDatasets =  Array.from(new Set(ScenariosInputTableNames.flat()));
 
-      setInputTableNames(allInputDatasets);
+      // Input tables (internal only, keep acronym prefix if you still want it)
+      const ScenariosInputTableNames = data.map(obj =>
+        (obj?.data?.input_datasets || [])
+          .filter(ds => ds?.kind === "oep_table" && ds?.table_name)
+          .map(ds => `${obj.acronym}:${ds.table_name}`)
+      );
+      setInputTableNames(Array.from(new Set(ScenariosInputTableNames.flat())));
 
-      // const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => obj.acronym + ':' + elem[1].split('/').pop()));
-      const ScenariosOutputTableNames = data.map(obj => obj.data.output_datasets.map(elem => elem[1].split('/').pop()));
-      const allOutputDatasets = Array.from(new Set(ScenariosOutputTableNames.flat())); //[].concat(...uniqueScenariosOutputTableNames);
+      // Output tables (internal only)
+      const ScenariosOutputTableNames = data.map(obj =>
+        (obj?.data?.output_datasets || [])
+          .filter(ds => ds?.kind === "oep_table" && ds?.table_name)
+          .map(ds => ds.table_name)
+      );
+
+      const allOutputDatasets = Array.from(new Set(ScenariosOutputTableNames.flat()));
       setoutputTableNames(allOutputDatasets);
+
       console.log(allOutputDatasets);
 
       setBarColors(randomColors);
-
     });
   }, []);
 
@@ -1206,6 +1237,8 @@ const sendQuery = async (index) => {
               key={`qualitative-${scenarios.map(s => s.data.uid).join(',')}`}
               elements={scenarios}
               c_aspects={selectedCriteria}
+              datasetHref={datasetHref}
+              datasetDisplay={datasetDisplay}
             />
         </Grid>
       )}
