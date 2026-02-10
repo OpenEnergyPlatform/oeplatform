@@ -1,6 +1,7 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import types
 
@@ -44,7 +45,7 @@ def automated_label_generator(new_unit_class: type):
                             prefix_label = None
                             for sub_class in target_class.Classes:
                                 if isinstance(sub_class, ThingClass):  # The unit part
-                                    unit_label = sub_class.label[0]
+                                    unit_label = sub_class.label[0]  # type:ignore ?
                                 elif (
                                     isinstance(sub_class, Restriction)
                                     and sub_class.property == has_unit_prefix

@@ -1428,7 +1428,7 @@ Copyright: user <martimanovadarina@gmail.com>
 Copyright: Christian Winger <Christian Winger@oeko.de>
 License: MIT
 
-Files: dataedit/templates/dataedit/dataedit_schemalist.html
+Files: dataedit/templates/dataedit/dataedit_topiclist.html
 Copyright: Martin Glauer <martinglauer89@googlemail.com>
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Jonas H <jonas.huber@rl-institut.de>
@@ -1599,11 +1599,11 @@ Files: dataedit/templates/partials/metadata_viewer.html
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
-Files: oedb_datamodels/script.py.mako
+Files: oedb/script.py.mako
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 License: MIT
 
-Files: oedb_datamodels/README
+Files: oedb/README
 Copyright: Martin Glauer <martinglauer89@gmail.com>
 Copyright: Christian Winger <c@wingechr.de>
 License: MIT

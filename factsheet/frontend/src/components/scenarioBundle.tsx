@@ -41,7 +41,8 @@ import conf from "../conf.json";
 import { colors, Tooltip } from '@mui/material';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline.js';
-import { styled } from '@mui/material/styles';
+import styled from '@mui/material/styles/styled';
+
 import SaveIcon from '@mui/icons-material/Save.js';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
@@ -103,6 +104,24 @@ function TabPanel(props) {
   );
 }
 
+
+/**
+ *
+ * @param {integer|Date|string} input
+ * @returns {integer}
+ */
+function formatYear(input) {
+
+  if (typeof input === 'string'){
+    // create date object
+    input = new Date(input)
+  }
+  if (input instanceof Date) {
+    input = input.getFullYear();
+  }
+  return input;
+}
+
 function Factsheet(props) {
 
   const navigate = useNavigate();
@@ -110,6 +129,9 @@ function Factsheet(props) {
 
 
   const { id, fsData } = props;
+
+  const [isOwner, setIsOwner] = useState(id === "new");
+  const [isOwnerLoading, setIsOwnerLoading] = useState(id !== "new");
 
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
@@ -141,6 +163,42 @@ function Factsheet(props) {
   const [sunburstData, setSunburstData] = useState([]);
 
   const [openBackDrop, setOpenBackDrop] = React.useState(false);
+
+  useEffect(() => {
+    if (!id || id === "new") {
+      setIsOwner(true);
+      setIsOwnerLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsOwnerLoading(true);
+
+    axios
+      .post(
+        conf.toep + `scenario-bundles/check-owner/${id}/`,
+        { uid: id },
+        { headers: { "X-CSRFToken": CSRFToken() } }
+      )
+      .then((res) => {
+        if (cancelled) return;
+        setIsOwner(Boolean(res.data?.isOwner));
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("Error checking ownership:", err);
+        setIsOwner(false);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setIsOwnerLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
 
 
   const scenarioYears = Array.from({ length: 101 }, (_, i) => ({
@@ -1997,7 +2055,7 @@ const renderScenariosOverview = () => (
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.scenario_years.sort((a, b) => a.id - b.id).map((e) => <span> <span> {e.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
+                    {v.scenario_years.sort((a, b) => a.id - b.id).map((e) => <span> <span> {formatYear(e.name)} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
@@ -2203,7 +2261,7 @@ const renderScenariosOverview = () => (
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    <span> <span> {v.date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                    <span> <span> {formatYear(v.date_of_publication)} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
                   </ContentTableCell>
                 </TableRow>
 
@@ -2479,7 +2537,11 @@ const renderScenariosOverview = () => (
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <ColorToggleButton handleSwap={handleSwap} />
+                <ColorToggleButton
+                  handleSwap={handleSwap}
+                  isOwner={isOwner}
+                  isOwnerLoading={isOwnerLoading}
+                />
                 <div style={{ 'textAlign': 'center' }}>
                   {/* <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                     <CircularProgress variant="determinate" value={60} size={60} />
@@ -2510,11 +2572,22 @@ const renderScenariosOverview = () => (
                       <Button disableElevation={true} size="small" sx={{ mr: 1 }} variant="outlined" color="primary" startIcon={<ShareIcon />} disabled> Share </Button>
                     </span>
                   </Tooltip>
-                  <Tooltip title="Delete factsheet">
-                  <span>
-                    <Button disableElevation={true} size="small" variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon />}> Delete </Button>
-                  </span>
-                  </Tooltip>
+                  {isOwner && id !== "new" && (
+                    <Tooltip title="Delete factsheet">
+                      <span>
+                        <Button
+                          disableElevation
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                          onClick={handleClickOpenRemovedDialog}
+                          startIcon={<DeleteOutlineIcon />}
+                        >
+                          Delete
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  )}
                 </div >
               </Grid>
             </Grid>

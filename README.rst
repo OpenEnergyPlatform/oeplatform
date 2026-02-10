@@ -21,7 +21,7 @@ Open Energy Platform (OEP)
    * - Documentation
      - |badge_documentation| |badge_mkdocs|
    * - Tests
-     - |badge_tox|
+     - |badge_tox| |badge_precommit|
    * - Publication
      -
    * - Development
@@ -87,6 +87,10 @@ License and Citation
 .. |badge_tox| image:: https://img.shields.io/github/actions/workflow/status/OpenEnergyPlatform/oeplatform/automated-testing.yaml?label=tox
     :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/automated-testing.yaml
     :alt: Tox Tests
+
+.. |badge_precommit| image:: https://results.pre-commit.ci/badge/github/OpenEnergyPlatform/oeplatform/develop.svg
+   :target: https://results.pre-commit.ci/latest/github/OpenEnergyPlatform/oeplatform/develop
+   :alt: pre-commit.ci status
 
 .. |badge_issue_open| image:: https://img.shields.io/github/issues-raw/OpenEnergyPlatform/oeplatform
     :target: https://github.com/OpenEnergyPlatform/oeplatform/issues

@@ -4,9 +4,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 -r requirements.txt
+-r requirements-docs.txt
 flake8
 black
 isort
 pre-commit
 bumpversion
 debugpy
+djlint

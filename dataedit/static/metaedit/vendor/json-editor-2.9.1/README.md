@@ -6,5 +6,6 @@ SPDX-License-Identifier: CC0-1.0
 
 # README
 
-- source: https://cdn.jsdelivr.net/npm/@json-editor/json-editor@2.9.1/dist/jsoneditor.min.js
+- source:
+  https://cdn.jsdelivr.net/npm/@json-editor/json-editor@2.9.1/dist/jsoneditor.min.js
 - git: https://github.com/json-editor/json-editor

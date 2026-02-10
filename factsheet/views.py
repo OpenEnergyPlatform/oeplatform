@@ -1,15 +1,17 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa
-# SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut # noqa
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import json
 import logging
@@ -20,21 +22,43 @@ from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils.cache import patch_response_headers
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
 from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.compare import graph_diff, to_isomorphic
 
+from factsheet.helper import (
+    FUNDING_PROP,
+    HAS_PART,
+    HAS_URL_OR_IRI,
+    INSTITUTION_PROP,
+    OEO_FRAMEWORK,
+    OEO_MODEL,
+    OEO_PUBLICATION,
+    OEO_SCENARIO,
+    PUB_AUTHOR,
+    PUB_DATE,
+    PUB_DOI,
+    PUB_LINK,
+    PUB_UID,
+    SCENARIO_DESCRIPTOR,
+    SCENARIO_INTERREG,
+    SCENARIO_REGION,
+    SCENARIO_YEAR,
+    SECTOR,
+    SECTOR_DIVISION,
+    TECHNOLOGY,
+    build_sector_dropdowns_from_oeo,
+    clean_name,
+    get_all_sub_classes,
+    get_scenario_type_iri,
+    is_owner,
+    parse_dataset_iri,
+    set_ownership,
+)
+from factsheet.models import OEKG_Modifications
 from factsheet.oekg.connection import oekg, oeo, oeo_owl
 from factsheet.oekg.filters import OekgQuery
-from factsheet.oekg.namespaces import (
-    DC,
-    OBO,
-    OEKG,
-    OEO,
-    RDFS,
-    SKOS,
-    XSD,
-    bind_all_namespaces,
-)
+from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, XSD
 from factsheet.permission_decorator import only_if_user_is_owner_of_scenario_bundle
 from factsheet.utils import remove_non_printable, serialize_publication_date
 from login import models as login_models
@@ -45,88 +69,28 @@ from oekg.sparqlQuery import (
     normalize_factsheets_rows,
 )
 
-from .models import OEKG_Modifications, ScenarioBundleAccessControl
-
-oekg = bind_all_namespaces(graph=oekg)
+logger = logging.getLogger("oeplatform")
 
 
-def clean_name(name):
-    return (
-        name.rstrip()
-        .lstrip()
-        .replace("-", "_")
-        .replace(" ", "_")
-        .replace("%", "")
-        .replace("Ö", "Oe")
-        .replace("ö", "oe")
-        .replace("/", "_")
-        .replace(":", "_")
-        .replace("(", "_")
-        .replace(")", "_")
-        .replace("ü", "ue")
-    )
-
-
-def undo_clean_name(name):
-    return name.rstrip().lstrip().replace("_", " ")
-
-
-def factsheets_index(request, *args, **kwargs):
-    # userLoggedIn = False
-    # if request.user.is_authenticated:
-    #     userLoggedIn = True
-
-    # context_data = {
-    #     "userLoggedIn": userLoggedIn,
-    # }
-
+def factsheets_index_view(request, *args, **kwargs):
     return render(request, "factsheet/index.html")
 
 
-def set_ownership(bundle_uid, user):
-    model = ScenarioBundleAccessControl()
-    model.owner_user = user
-    model.bundle_id = bundle_uid
-    model.save()
-    return f"The ownership of bundle {bundle_uid} is now set to User {user.name}"
-
-
-def is_owner(user, bundle_id):
-    return ScenarioBundleAccessControl.user_has_access(user, bundle_id)
-
-
-def check_ownership(request, bundle_id):
+def check_ownership_view(request, bundle_id):
     if bundle_id == "new":
         return JsonResponse({"isOwner": True})
 
     if not request.user.is_authenticated:
         return JsonResponse({"isOwner": False}, status=401)
 
+    if request.user.is_admin:
+        return JsonResponse({"isOwner": True})
+
     is_owner_flag = is_owner(request.user, bundle_id)
     return JsonResponse({"isOwner": is_owner_flag})
 
 
-def add_history(triple_subject, triple_predicate, triple_object, type_of_action, user):
-    histroy_instance = HistoryOfOEKG(  # noqa: F821
-        triple_subject=triple_subject,
-        triple_predicate=triple_predicate,
-        triple_object=triple_object,
-        type_of_action=type_of_action,
-        user=user,
-    )
-    histroy_instance.save()
-    return "saved"
-
-
-def get_history(request, *args, **kwargs):
-    histroy = HistoryOfOEKG.objects.all()  # noqa: F821
-    histroy_json = serializers.serialize("json", histroy)
-    response = JsonResponse(histroy_json, safe=False, content_type="application/json")
-    patch_response_headers(response, cache_timeout=1)
-    return response
-
-
-def get_oekg_modifications(request, *args, **kwargs):
+def get_oekg_modifications_view(request, *args, **kwargs):
     histroy = OEKG_Modifications.objects.all()
     histroy_json = serializers.serialize("json", histroy)
     response = JsonResponse(histroy_json, safe=False, content_type="application/json")
@@ -135,7 +99,8 @@ def get_oekg_modifications(request, *args, **kwargs):
 
 
 # @login_required
-def create_factsheet(request, *args, **kwargs):
+@require_POST
+def create_factsheet_view(request, *args, **kwargs):
     """
     Creates a scenario bundle based on user's data. Currently, the minimum requirement
     to create a bundle is the "acronym". The "acronym" must be unique. If the provided
@@ -595,7 +560,7 @@ def create_factsheet(request, *args, **kwargs):
             "Factsheet saved", safe=False, content_type="application/json"
         )
         result = set_ownership(bundle_uid=uid, user=request.user)
-        logging.info(result)
+        logger.info(result)
         patch_response_headers(response, cache_timeout=1)
 
         return response
@@ -603,7 +568,7 @@ def create_factsheet(request, *args, **kwargs):
 
 @login_required
 @only_if_user_is_owner_of_scenario_bundle
-def update_factsheet(request, *args, **kwargs):
+def update_factsheet_view(request, *args, **kwargs):
     """
     Updates a scenario bundle based on user's data.
 
@@ -1141,7 +1106,7 @@ def update_factsheet(request, *args, **kwargs):
         return response
 
 
-def is_logged_in(request, *args, **kwargs):
+def is_logged_in_view(request, *args, **kwargs):
     user = None
     if request.user.is_authenticated:
         user = True
@@ -1156,49 +1121,7 @@ def is_logged_in(request, *args, **kwargs):
     return response
 
 
-def factsheet_by_name(request, *args, **kwargs):
-    name = request.GET.get("name")
-    factsheet = Factsheet.objects.get(name=name)  # noqa
-    factsheet_json = serializers.serialize("json", factsheet)
-    response = JsonResponse(factsheet_json, safe=False, content_type="application/json")
-    patch_response_headers(response, cache_timeout=1)
-    return response
-
-
-# TODO: Refactor code to usage of constants below
-# Collection of constants to easy DX:
-# used to ease code readability, not used cosistently yet
-# OEO classes for parts
-OEO_SCENARIO = OEO.OEO_00000365  # scenario factsheet
-OEO_PUBLICATION = OEO.OEO_00020012  # study report
-OEO_MODEL = OEO.OEO_00000277  # model factsheet
-OEO_FRAMEWORK = OEO.OEO_00000172  # framework factsheet
-
-# Common props (you already use these elsewhere)
-HAS_PART = OBO.BFO_0000051
-PUB_UID = OEO.OEO_00390095
-PUB_DATE = OEO.OEO_00390096
-PUB_DOI = OEO.OEO_00390098
-PUB_LINK = OEO.OEO_00390078
-PUB_AUTHOR = OEO.OEO_00000506
-
-SCENARIO_YEAR = OEO.OEO_00020440
-SCENARIO_REGION = OEO.OEO_00020220
-SCENARIO_INTERREG = OEO.OEO_00020222
-SCENARIO_DESCRIPTOR = OEO.OEO_00390073
-
-SECTOR_DIVISION = OEO.OEO_00390079
-SECTOR = OEO.OEO_00020439
-TECHNOLOGY = OEO.OEO_00020438
-INSTITUTION_PROP = OEO.OEO_00000510
-FUNDING_PROP = OEO.OEO_00000509
-
-HAS_URL_OR_IRI = (
-    OEO.OEO_00390094
-)  # landing URL on model/framework/scenario/publication nodes (present in your TTL)
-
-
-def factsheet_by_id(request, *args, **kwargs):
+def factsheet_by_id_view(request, *args, **kwargs):
     uid = request.GET.get("id")
     study_URI = URIRef("https://openenergyplatform.org/ontology/oekg/" + uid)
     factsheet = {}
@@ -1451,7 +1374,7 @@ def factsheet_by_id(request, *args, **kwargs):
 
 @only_if_user_is_owner_of_scenario_bundle
 @login_required
-def delete_factsheet_by_id(request, *args, **kwargs):
+def delete_factsheet_by_id_view(request, *args, **kwargs):
     """
     Removes a scenario bundle based on the provided ID.
 
@@ -1474,7 +1397,7 @@ def delete_factsheet_by_id(request, *args, **kwargs):
     return response
 
 
-def test_query(request, *args, **kwargs):
+def test_query_view(request, *args, **kwargs):
     scenario_region = URIRef(
         "https://openenergyplatform.org/ontology/oekg/region/UnitedKingdomOfGreatBritainAndNorthernIreland"  # noqa: E501
     )
@@ -1486,7 +1409,7 @@ def test_query(request, *args, **kwargs):
     return response
 
 
-def get_entities_by_type(request, *args, **kwargs):
+def get_entities_by_type_view(request, *args, **kwargs):
     """
     Returns all entities (from OEKG) with a certain type.
     The type should be supplied by the user.
@@ -1517,7 +1440,7 @@ def get_entities_by_type(request, *args, **kwargs):
 
 
 @login_required
-def add_entities(request, *args, **kwargs):
+def add_entities_view(request, *args, **kwargs):
     """
     Add entities to OEKG. The minimum requirements for
     adding an entity are the type and label.
@@ -1556,7 +1479,7 @@ def add_entities(request, *args, **kwargs):
 
 
 @login_required
-def add_a_fact(request, *args, **kwargs):
+def add_a_fact_view(request, *args, **kwargs):
     request_body = json.loads(request.body)
     _subject = request_body["subject"]
     _predicate = request_body["predicate"]
@@ -1582,37 +1505,7 @@ def add_a_fact(request, *args, **kwargs):
 
 
 @login_required
-def delete_entities(request, *args, **kwargs):
-    """
-    Removes an entity from OEKG. The minimum requirements for
-    removing an entity are the type and label.
-
-    Args:
-        request (HttpRequest): The incoming HTTP GET request.
-        entity_type (str): The type(OEO class) of the entity.
-        entity_label (str): The label of the entity.
-    """
-    entity_type = request.GET.get("entity_type")
-    entity_label = request.GET.get("entity_label")
-
-    entity_URI = URIRef(  # noqa
-        "https://openenergyplatform.org/ontology/oekg/" + entity_type
-    )
-    entity_Label = URIRef(
-        "https://openenergyplatform.org/ontology/oekg/" + (entity_label)
-    )
-
-    oekg.remove((entity_Label, None, None))
-    oekg.remove((None, None, entity_Label))
-    response = JsonResponse(
-        "entity removed!", safe=False, content_type="application/json"
-    )
-    patch_response_headers(response, cache_timeout=1)
-    return response
-
-
-@login_required
-def update_an_entity(request, *args, **kwargs):
+def update_an_entity_view(request, *args, **kwargs):
     """
     Updates an entity in OEKG. The minimum requirements for
     updating an entity are the type, the old label, and the
@@ -1652,7 +1545,7 @@ def update_an_entity(request, *args, **kwargs):
     return response
 
 
-def get_all_factsheets(request, *args, **kwargs):
+def get_all_factsheets_view(request, *args, **kwargs):
     criteria = {
         "institutions": request.GET.getlist("institutions"),
         "authors": request.GET.getlist("authors"),
@@ -1675,7 +1568,7 @@ def get_all_factsheets(request, *args, **kwargs):
     for f in factsheets:
         data = bundle_scenarios_filter(
             f"https://openenergyplatform.org/ontology/oekg/{f['uid']}"
-        )  # noqa:E501
+        )
 
         def bval(row, key):
             cell = row.get(key)
@@ -1696,38 +1589,42 @@ def get_all_factsheets(request, *args, **kwargs):
     return response
 
 
-def search_scenario_type_iris_by_label(label, input):
-    for child in input:
-        result = None
+def dataset_entry(node):
+    """
+    THis function is part of the comparison backend. It helps to retieve data table
+    ID's from the OEKG input / ouput data relations.
 
-        if str(child["label"]) == label:
-            result = str(child["iri"])
-            return result
+    This function especially helps to retrieve the table name from a vaity of enties,
+    some of them are referancing external sources which are not directly usable in our
+    comparison backend.
 
-        elif child.get("children"):
-            result = search_scenario_type_iris_by_label(label, child["children"])
-            if result:
-                return result
-    return result
+    :param node: A predicate from the OEKG related to a Node in the graph which is
+                related to an input or output dataset.
+
+    :return: A dict with the dataset label, url and if possible the table name.
+    """
+    label = oekg.value(node, RDFS.label)
+    url_term = oekg.value(node, OEO.OEO_00390094)  # may be None
+    url_str = str(url_term) if url_term else None
+
+    entry = {
+        "label": str(label) if label else "",
+        "url": url_str,
+        **parse_dataset_iri(url_str),
+    }
+
+    # If your KG stores the table name explicitly, prefer it over parsing URLs:
+    table_name = oekg.value(node, OEO.OEO_00000504)
+    if table_name:
+        entry["kind"] = "oep_table"
+        entry["table_name"] = str(table_name)
+
+    return entry
 
 
-def get_scenario_type_iri(scenario_type_label: str):
-    scenario_class = oeo_owl.search_one(
-        iri="https://openenergyplatform.org/ontology/oeo/OEO_00000364"
-    )
-    scenario_subclasses = get_all_sub_classes(scenario_class)
-
-    result = search_scenario_type_iris_by_label(
-        label=scenario_type_label, input=scenario_subclasses["children"]
-    )
-
-    return result
-
-
-def get_scenarios(request, *args, **kwargs):
-    scenarios_uid = [
-        i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_uid"))
-    ]
+def get_scenarios_view(request, *args, **kwargs):
+    raw = request.GET.get("scenarios_uid", "[]")
+    scenarios_uid = [str(u).strip() for u in json.loads(raw)]
 
     scenarios = []
 
@@ -1768,26 +1665,9 @@ def get_scenarios(request, *args, **kwargs):
             for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020440, None)):
                 scenario_years.append(o4)
             for s5, p5, o5 in oekg.triples((s, OEO.OEO_00020437, None)):
-                oekg_value = oekg.value(o5, OEO.OEO_00390094)
-                comparable = str(oekg_value).split("scenario/")
-                input_datasets.append(
-                    (
-                        oekg.value(o5, RDFS.label),
-                        oekg.value(o5, OEO.OEO_00390094),
-                        comparable[1],
-                    )
-                )
+                input_datasets.append(dataset_entry(o5))
             for s6, p6, o6 in oekg.triples((s, OEO.OEO_00020436, None)):
-                oekg_value = oekg.value(o6, OEO.OEO_00390094)
-                comparable = str(oekg_value).split("scenario/")
-
-                output_datasets.append(
-                    (
-                        oekg.value(o6, RDFS.label),
-                        oekg.value(o6, OEO.OEO_00390094),
-                        comparable[1],
-                    )
-                )
+                output_datasets.append(dataset_entry(o6))
 
             for s1, p1, o1 in oekg.triples((None, OBO.BFO_0000051, s)):
                 study_label = oekg.value(s1, RDFS.label)
@@ -1824,7 +1704,7 @@ def get_scenarios(request, *args, **kwargs):
 
 
 @login_required
-def get_all_factsheets_as_turtle(request, *args, **kwargs):
+def get_all_factsheets_as_turtle_view(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="ttl")
 
     response = HttpResponse(all_factsheets_as_turtle, content_type="text/turtle")
@@ -1832,7 +1712,7 @@ def get_all_factsheets_as_turtle(request, *args, **kwargs):
     return response
 
 
-def get_all_factsheets_as_json_ld(request, *args, **kwargs):
+def get_all_factsheets_as_json_ld_view(request, *args, **kwargs):
     all_factsheets_as_json_ld = oekg.serialize(format="json-ld")
 
     response = HttpResponse(
@@ -1843,94 +1723,8 @@ def get_all_factsheets_as_json_ld(request, *args, **kwargs):
     return response
 
 
-def get_all_sub_classes(cls, visited=None):
-    if visited is None:
-        visited = set()
-
-    visited.add(cls.label.first())
-    # "value": cls.label.first(),  "label": cls.label.first(), , "iri": cls.iri
-
-    childCount = len(list(cls.subclasses()))
-    subclasses = cls.subclasses()
-
-    dict = {
-        "name": cls.label.first(),
-        "label": cls.label.first(),
-        "value": cls.label.first(),
-        "iri": cls.iri,
-        "definition": oeo.value(OEO[str(cls).split(".")[1]], OBO.IAO_0000115),
-    }
-
-    if childCount > 0:
-        dict["children"] = [
-            get_all_sub_classes(subclass, visited)
-            for subclass in subclasses
-            if subclass.label.first() not in visited
-        ]
-    return dict
-
-
-PROP_DEFINED_BY = URIRef(
-    "https://openenergyplatform.org/ontology/oeo/OEO_00000504"
-)  # "is defined by"
-PROP_DEFINITION = URIRef("http://purl.obolibrary.org/obo/IAO_0000115")
-SECTOR_DEVISIONS = [OEO.OEO_00010056, OEO.OEO_00000242, OEO.OEO_00010304]
-PROP_DEFINITION = URIRef("http://purl.obolibrary.org/obo/IAO_0000115")
-
-
-def _label(g: Graph, node: URIRef):
-    lab = g.value(node, RDFS.label)
-    return str(lab) if lab else None
-
-
-def _definition(g: Graph, node: URIRef):
-    # Prefer IAO:definition; fall back to SKOS definition or rdfs:comment
-    for p in (PROP_DEFINITION, SKOS.definition, RDFS.comment):
-        val = g.value(node, p)
-        if val:
-            return str(val)
-    return None
-
-
-def build_sector_dropdowns_from_oeo(g: Graph):
-    sector_divisions_list = []
-    sectors_list = []
-
-    for sd in SECTOR_DEVISIONS:
-        sd_label = _label(g, sd) or sd.n3(g.namespace_manager)
-        sd_def = _definition(g, sd)
-
-        # division dropdown option (+ definition)
-        sector_divisions_list.append(
-            {
-                "class": sd,  # TODO; URIRef; cast to str?
-                "label": sd_label,
-                "name": sd_label,
-                "value": sd_label,
-                "sector_division_definition": sd_def,
-            }
-        )
-
-        # sector individuals: ?sector oeo:is_defined_by ?sd
-        for sector in g.subjects(PROP_DEFINED_BY, sd):
-            sec_label = _label(g, sector)
-            definition = g.value(sector, PROP_DEFINITION)
-
-            sectors_list.append(
-                {
-                    "iri": sector,
-                    "label": sec_label,
-                    "value": sec_label,
-                    "sector_division": sd,
-                    "sector_difinition": (str(definition) if definition else None),
-                }
-            )
-
-    return sector_divisions_list, sectors_list
-
-
 # @login_required
-def populate_factsheets_elements(request, *args, **kwargs):
+def populate_factsheets_elements_view(request, *args, **kwargs):
     """
     This function populates the elements required for creating or updating a factsheet.
     For example: Elements returned form this function populate dropdown elements which
@@ -2084,9 +1878,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
 def filter_scenario_bundles_view(request):
     # Get the table IRI from the request or any other source
     table_iri = request.GET.get("table_iri", "")
-    # table_iri = "dataedit/view/scenario/abbb_emob"
-
-    table_name = table_iri.split("/scenario/")[1]
+    table_name = table_iri.strip("/").split("/")[-1]
 
     # Create an instance of OekgQuery
     oekg_query = OekgQuery()

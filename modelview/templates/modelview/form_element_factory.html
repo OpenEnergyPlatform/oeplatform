@@ -1,14 +1,10 @@
 <div class="border p-3 mb-3 bg-light rounded">
-     <h2 class="mb-3">
-        {{ obj.verbose_name }}
-     </h2>
-    <input value="{{obj.iri}}" type="hidden"/>
-    {% for f in obj.iter_fields %}
-
-        <div {% if not f.field.verbose_name %} hidden {% endif %}>
-            <h3>{{ f.field.verbose_name }}</h3>
-            {{ f.to_form_element }}
-        </div>
-
-    {% endfor %}
+  <h2 class="mb-3">{{ obj.verbose_name }}</h2>
+  <input value="{{ obj.iri }}" type="hidden" />
+  {% for f in obj.iter_fields %}
+    <div {% if not f.field.verbose_name %}hidden{% endif %}>
+      <h3>{{ f.field.verbose_name }}</h3>
+      {{ f.to_form_element }}
+    </div>
+  {% endfor %}
 </div>

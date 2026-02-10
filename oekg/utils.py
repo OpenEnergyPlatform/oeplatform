@@ -1,8 +1,9 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import re
 
@@ -52,6 +53,9 @@ def execute_sparql_query(sparql_query, response_format):
         raise ValueError(f"Unsupported format: {response_format}")
 
     endpoint_url = OEKG_SPARQL_ENDPOINT_URL
+    if not endpoint_url:
+        raise NotImplementedError()
+
     headers = {
         "Accept": SUPPORTED_FORMATS[response_format],
         # "Content-Type": SUPPORTED_FORMATS[response_format],

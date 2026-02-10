@@ -1,42 +1,40 @@
-# SPDX-FileCopyrightText: 2025 AemanMalik <https://github.com/AemanMalik> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Marco Finkendei <https://github.com/MFinkendei>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 AemanMalik <https://github.com/AemanMalik> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Marco Finkendei <https://github.com/MFinkendei>
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import itertools
+from typing import TYPE_CHECKING
 
 import requests
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, Group, UserManager
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.db.models import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
-import dataedit.models as datamodels
+from dataedit import models as dataedit_models
+from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM, WRITE_PERM
 
-try:
-    import oeplatform.securitysettings as sec  # noqa
-except Exception:
-    import logging
-
-    logging.error("No securitysettings found. Triggerd in login/models.py")
-
-
-NO_PERM = 0
-WRITE_PERM = 4
-DELETE_PERM = 8
-ADMIN_PERM = 12
+if TYPE_CHECKING:
+    # only import for static typechecking
+    from dataedit.models import PeerReview, Table
+    from factsheet.models import ScenarioBundleAccessControl
 
 
 class OEPUserManager(UserManager):
@@ -122,28 +120,30 @@ class OEPUserManager(UserManager):
 
 
 class PermissionHolder:
-    def has_write_permissions(self, schema, table):
-        """
-        This function returns the authorization given the schema and table.
-        """
-        return self.__get_perm(schema, table) >= WRITE_PERM
+    table_permissions: QuerySet[
+        "TablePermission"
+    ]  # related_name, for static type checking
 
-    def has_delete_permissions(self, schema, table):
+    def has_write_permissions(self, table: str):
         """
-        This function returns the authorization given the schema and table.
+        This function returns the authorization given the table.
         """
-        return self.__get_perm(schema, table) >= DELETE_PERM
+        return self.__get_perm(table=table) >= WRITE_PERM
 
-    def has_admin_permissions(self, schema, table):
+    def has_delete_permissions(self, table: str):
         """
-        This function returns the authorization given the schema and table.
+        This function returns the authorization given the table.
         """
-        return self.__get_perm(schema, table) >= ADMIN_PERM
+        return self.__get_perm(table=table) >= DELETE_PERM
 
-    def __get_perm(self, schema, table):
-        perm = self.table_permissions.filter(
-            table__name=table, table__schema__name=schema
-        ).first()
+    def has_admin_permissions(self, table: str):
+        """
+        This function returns the authorization given the table.
+        """
+        return self.__get_perm(table=table) >= ADMIN_PERM
+
+    def __get_perm(self, table: str):
+        perm = self.table_permissions.filter(table__name=table).first()
         if perm:
             return perm.level
         else:
@@ -154,7 +154,12 @@ class UserGroup(Group, PermissionHolder):
     description = models.TextField(null=False, default="")
     is_admin = models.BooleanField(null=False, default=False)
 
-    def get_table_permission_level(self, table):
+    memberships: QuerySet["GroupMembership"]  # related_name, for static type checking
+    table_permissions: QuerySet[
+        "GroupPermission"
+    ]  # related_name, for static type checking
+
+    def get_table_permission_level(self, table: "Table") -> int:
         if self.is_admin:
             return ADMIN_PERM
         return max(
@@ -169,9 +174,6 @@ class UserGroup(Group, PermissionHolder):
     #     return GroupPermission.objects.filter(holder__in=self).prefetch_related('table') # noqa
 
 
-# class ScenarioBundlePermissionGroup(Group):
-
-
 class TablePermission(models.Model):
     choices = (
         (NO_PERM, "None"),
@@ -179,7 +181,15 @@ class TablePermission(models.Model):
         (DELETE_PERM, "Delete"),
         (ADMIN_PERM, "Admin"),
     )
-    table = models.ForeignKey(datamodels.Table, on_delete=models.CASCADE)
+    table = models.ForeignKey(
+        "dataedit.Table",
+        on_delete=models.CASCADE,
+        related_name="%(class)s_set",
+        # NOTE: we cannot use a simple related name, because we have multiple
+        # subclasses, so the reference is not deterministic.
+        # With this pattern, reverse lookup is autogenerated for all subclasses
+        # as '<subclass>_set' (all lower case)
+    )
 
     level = models.IntegerField(choices=choices, default=NO_PERM)
 
@@ -212,35 +222,67 @@ class myuser(AbstractBaseUser, PermissionHolder):
     ###################################################################
 
     is_admin = models.BooleanField(default=False)
-
     is_native = models.BooleanField(default=True)
-
     description = models.TextField(blank=True)
 
-    USERNAME_FIELD = "name"
+    reviewed_by: QuerySet["PeerReview"]  # related_name, for static type checking
+    review_received: QuerySet["PeerReview"]  # related_name, for static type checking
+    scenario_bundle_creator: QuerySet[
+        "ScenarioBundleAccessControl"
+    ]  # related_name, for static type checking
+    memberships: QuerySet["GroupMembership"]  # related_name, for static type checking
+    table_permissions: QuerySet[
+        "UserPermission"
+    ]  # related_name, for static type checking
 
-    REQUIRED_FIELDS = [name]
+    USERNAME_FIELD = "name"
+    REQUIRED_FIELDS = [name]  # type:ignore TODO: why do we need this?
 
     objects = OEPUserManager()
 
-    def get_full_name(self):
+    def get_full_name(self) -> str:
         return self.name
 
-    def get_short_name(self):
+    def get_short_name(self) -> str:
         return self.name
 
-    def __str__(self):  # __unicode__ on Python 2
+    def __str__(self) -> str:
         return self.name
 
     @property
-    def is_staff(self):
+    def is_staff(self) -> bool:
         return self.is_admin
 
-    def get_table_memberships(self):
+    def get_table_memberships(self) -> QuerySet["UserPermission"]:
         direct_memberships = self.table_permissions.all().prefetch_related("table")
         return direct_memberships
 
-    def get_table_permission_level(self, table):
+    def get_groups_queryset(self) -> QuerySet["UserGroup"]:
+        return UserGroup.objects.filter(memberships__user=self)
+
+    def get_tables_queryset(
+        self, min_permission_level: int = NO_PERM
+    ) -> QuerySet["Table"]:
+        """Return QuerySet of tables that user has some permission
+        combine filter (OR) of table with direct permissions
+        and with group permissions
+        """
+        groups = self.get_groups_queryset()
+
+        return (
+            dataedit_models.Table.objects.filter(
+                # tables where user has direct UserPermission
+                userpermission_set__holder=self,
+                userpermission_set__level__gte=min_permission_level,
+            )
+            | dataedit_models.Table.objects.filter(
+                # tables where user isin a group that has GroupPermission
+                grouppermission_set__holder__in=groups,
+                grouppermission_set__level__gte=min_permission_level,
+            )
+        ).distinct()
+
+    def get_table_permission_level(self, table: "Table") -> int:
         # Check admin permissions for user
         if self.is_admin:
             return ADMIN_PERM
@@ -316,10 +358,13 @@ class UserBackend(object):
         """
         try:
             user = myuser.objects.get(name=username)
-        except models.ObjectDoesNotExist:
+        except ObjectDoesNotExist:
             return None
 
         if user.is_native:
+            if not password:
+                return None
+
             if user.check_password(password):
                 return user
             else:

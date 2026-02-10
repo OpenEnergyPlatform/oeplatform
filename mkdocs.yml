@@ -1,7 +1,9 @@
 # Project
 site_name: Open Energy Platform Documentation
 site_url:
-site_description: The Open Energy Platform is the Frontend of the Open Energy Family and specifically provides a Webapplication which is documented using mkdocs.
+site_description:
+  The Open Energy Platform is the Frontend of the Open Energy Family and
+  specifically provides a Webapplication which is documented using mkdocs.
 
 # Repository
 repo_name: OpenEnergyFamily/oeplatform
@@ -49,12 +51,15 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.highlight:
       use_pygments: true
+  # support pad width = 2, as formatted with prettier
+  - mdx_truly_sane_lists
   - toc:
       permalink: "#"
 
 plugins:
-- search:
-- mkdocstrings:
+  - search
+  - mkdocstrings
+  - include-markdown
 
 # Customization
 extra:
@@ -69,53 +74,53 @@ extra_css:
 nav:
   - Home: index.md
   - Getting Started:
-    - installation/index.md
-    - Installation Guide: installation/guides/installation-docker-dev.md
-    - Development setup: installation/guides/development-setup.md
-    - Manual Installation Guide: installation/guides/installation.md
+      - installation/index.md
+      - Installation Guide: installation/guides/installation-docker-dev.md
+      - Development setup: installation/guides/development-setup.md
+      - Manual Installation Guide: installation/guides/installation.md
   - Development:
-    - dev/index.md
+      - dev/index.md
 
-    - Best Practices:
-      - Software development process: 
-        - dev/index.md
-      - Frontend and UI:
-        - Workflow: dev/frontend/workflow.md
-        - Design System: dev/frontend/design-system.md
-        - Accessibility: dev/frontend/accessibility.md
-    - Context:
-      - dev/context.md
+      - Best Practices:
+          - Software development process:
+              - dev/index.md
+          - Frontend and UI:
+              - Workflow: dev/frontend/workflow.md
+              - Design System: dev/frontend/design-system.md
+              - Accessibility: dev/frontend/accessibility.md
+      - Context:
+          - dev/context.md
   - Documentation:
-    - oeplatform-code/index.md
-    - Architecture:
-      - oeplatform-code/architecture/index.md
-      - Infrastructure: oeplatform-code/architecture/infrastructure.md
-      - Software Project: oeplatform-code/architecture/project-structure.md
-      - oeplatform Modules: oeplatform-code/architecture/modules.md
-    - Web-API's:
-      - oeplatform-code/web-api/index.md
-      - OEDB REST-API:
-        - oeplatform-code/web-api/oedb-rest-api/index.md
-        - oeplatform-code/web-api/oedb-rest-api/resource-data-size.md
-        # - Draft open-API schema: oeplatform-code/web-api/oedb-rest-api/swagger-ui.html
-      - OEKG API:
-        - oeplatform-code/web-api/oekg-api/index.md
-    - Edit scenario datasets: oeplatform-code/web-api/oekg-api/scenario-dataset.md
-    - Django Apps:
-      - oeplatform-code/apps/index.md
-      - oeplatform-code/apps/login.md
+      - oeplatform-code/index.md
+      - Architecture:
+          - oeplatform-code/architecture/index.md
+          - Infrastructure: oeplatform-code/architecture/infrastructure.md
+          - Software Project: oeplatform-code/architecture/project-structure.md
+          - oeplatform Modules: oeplatform-code/architecture/modules.md
+      - Web-API's:
+          - oeplatform-code/web-api/index.md
+          - OEDB REST-API:
+              - oeplatform-code/web-api/oedb-rest-api/index.md
+              - oeplatform-code/web-api/oedb-rest-api/resource-data-size.md
+            # - Draft open-API schema: oeplatform-code/web-api/oedb-rest-api/swagger-ui.html
+          - OEKG API:
+              - oeplatform-code/web-api/oekg-api/index.md
+      - Edit scenario datasets: oeplatform-code/web-api/oekg-api/scenario-dataset.md
+      - Django Apps:
+          - oeplatform-code/apps/index.md
+          - oeplatform-code/apps/login.md
 
-    - Features:
-      - oeplatform-code/features/index.md
-      - 🚧 OEP-Datasets:
-        - oeplatform-code/features/oep-datasets/datasets.md
-        - oeplatform-code/features/oep-datasets/tech-stack.md
-      - 🚧🔄 Upload-Wizard:
-        - oeplatform-code/features/upload-wizard/tabular-data-upload.md
-      - metaBuilder (Metadata creation):
-        - oeplatform-code/features/metaBuilder/index.md
-      - 🚧 Open Peer Review:
-        - oeplatform-code/features/open-peer-review-process/index.md
-        - Technical docs: oeplatform-code/features/open-peer-review-process/technical-docs.md
-      - Scenario Bundles:
-        - oeplatform-code/features/scenario-bundles/index.md
+      - Features:
+          - oeplatform-code/features/index.md
+          - 🚧 OEP-Datasets:
+              - oeplatform-code/features/oep-datasets/datasets.md
+              - oeplatform-code/features/oep-datasets/tech-stack.md
+          - 🚧🔄 Upload-Wizard:
+              - oeplatform-code/features/upload-wizard/tabular-data-upload.md
+          - metaBuilder (Metadata creation):
+              - oeplatform-code/features/metaBuilder/index.md
+          - 🚧 Open Peer Review:
+              - oeplatform-code/features/open-peer-review-process/index.md
+              - Technical docs: oeplatform-code/features/open-peer-review-process/technical-docs.md
+          - Scenario Bundles:
+              - oeplatform-code/features/scenario-bundles/index.md

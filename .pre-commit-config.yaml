@@ -1,36 +1,46 @@
-exclude: ^.*(.min.js|.min.css|.html|.js|.js.map|docs/.*|mkdocs.yml)$
+exclude: ^.*(.min.js|.min.css|.js.map|js|mkdocs.yml|/dist/.*)$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.12.0
     hooks:
       - id: black
   - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+    rev: 7.0.0
     hooks:
       - id: isort
         args: ["--profile", "black", "--filter-files"]
   - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
+    rev: 7.3.0
     hooks:
       - id: flake8
-        args: ["--max-line-length=88", "--ignore=E20,W503,E501"] # black compatible
+        args: ["--max-line-length=88", "--ignore=E20,W503"] # black compatible
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.38.0
+    rev: v10.0.0-beta.0
     hooks:
       - id: eslint
         additional_dependencies:
-          - eslint@8.14.0
+          - eslint@9.25
           - eslint-config-google@0.14.0
           - eslint-plugin-jsdoc@39.2.9
+          - eslint-plugin-react@7.37.3
+          - eslint-plugin-react-hooks@5.1.0
+          - eslint-plugin-prettier@5.1.3
         args: ["--fix"]
+
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0-alpha.6
+    rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
-        files: \.(css|less|md|json|sql)$
+        files: .*\.(json|md|yaml|yml)$
+  - repo: https://github.com/djlint/djLint
+    # see https://djlint.com/docs/integrations/
+    rev: v1.36.4
+    hooks:
+      - id: djlint-reformat-django
+        files: .*templates/.*\.html$

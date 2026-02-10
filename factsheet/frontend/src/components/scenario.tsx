@@ -14,6 +14,9 @@ import CSRFToken from "./csrfToken.js";
 import conf from "../conf.json";
 import LCC from "../data/countries.json";
 
+
+
+
 export default function Scenario(props) {
   const {
     data,

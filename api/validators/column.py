@@ -1,11 +1,7 @@
 import re
 
-from django.conf import settings
-
 from api.error import APIError
-
-# Fallback default if not specified in settings
-MAX_COL_NAME_LENGTH = getattr(settings, "MAX_COL_NAME_LENGTH", 63)
+from oedb.utils import MAX_COL_NAME_LENGTH
 
 
 def validate_column_names(column_definitions):

@@ -1,19 +1,22 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import logging
 import os
 import tempfile
 import zipfile
+from functools import cache
 from pathlib import Path
 
-from django.http import Http404
+from django.http import Http404, HttpRequest
 from django.shortcuts import HttpResponse, render
 from django.views import View
 
@@ -28,35 +31,42 @@ from oeplatform.settings import (
 )
 from ontology.utils import collect_modules, get_common_data, get_ontology_version
 
-LOGGER = logging.getLogger("oeplatform")
+logger = logging.getLogger("oeplatform")
 
-LOGGER.info("Start loading the oeo from local static files.")
+
 OEO_BASE_PATH = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 OEO_VERSION = get_ontology_version(OEO_BASE_PATH)
 OEO_PATH = OEO_BASE_PATH / OEO_VERSION
-# OEO_GLOSSARY_PATH = OEO_PATH / "glossary"
-# OEO_GLOSSARY_FILE_CSV = OEO_GLOSSARY_PATH / "glossary.csv"
-# OEO_GLOSSARY_FILE_MD = OEO_GLOSSARY_PATH / "glossary.md"
-OEO_MODULES_MAIN = collect_modules(OEO_PATH)
-OEO_MODULES_SUBMODULES = collect_modules(OEO_PATH / "modules")
-OEO_MODULES_IMPORTS = collect_modules(OEO_PATH / "imports")
-OEO_COMMON_DATA = get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
-OEOX_COMMON_DATA = get_common_data(
-    OEO_EXT_NAME, file=OEO_EXT_OWL_NAME, path=OEO_EXT_PATH
-)
-LOGGER.info(
-    "Loading completed! The content form the oeo files is parse into python data types."
-)
 
 
-class OntologyAbout(View):
+@cache
+def get_OEO_MODULES_MAIN() -> dict:
+    return collect_modules(OEO_PATH)
+
+
+@cache
+def get_OEO_MODULES_SUBMODULES() -> dict:
+    return collect_modules(OEO_PATH / "modules")
+
+
+@cache
+def get_OEO_MODULES_IMPORTS() -> dict:
+    return collect_modules(OEO_PATH / "imports")
+
+
+@cache
+def get_OEO_COMMON_DATA() -> dict:
+    return get_common_data(OPEN_ENERGY_ONTOLOGY_NAME)
+
+
+class OntologyAboutView(View):
     def get(self, request, ontology="oeo", version=None):
         onto_base_path = Path(ONTOLOGY_ROOT, ontology)
 
         if not onto_base_path.exists():
             raise Http404
         versions = os.listdir(onto_base_path)
-        LOGGER.info(f"Loaded oeo version {version}")
+        logger.info(f"Loaded oeo version {version}")
         if not version:
             version = max(
                 (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
@@ -70,46 +80,46 @@ class OntologyAbout(View):
         )
 
 
-class PartialOntologyAboutContent(View):
-    def get(self, request):
+class PartialOntologyAboutContentView(View):
+    def get(self, request: HttpRequest) -> HttpResponse:
         if request.headers.get("HX-Request") == "true":
-            if request.method == "GET":
-                ontology_data = OEO_COMMON_DATA
+            ontology_data = get_OEO_COMMON_DATA()
 
-                submodules = OEO_MODULES_SUBMODULES
+            submodules = get_OEO_MODULES_SUBMODULES()
 
-                desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
+            desired_keys = ["oeo-physical", "oeo-model", "oeo-social", "oeo-sector"]
 
-                relevant_modules = {
-                    key: value
-                    for key, value in submodules.items()
-                    if key in desired_keys
-                }
+            relevant_modules = {
+                key: value for key, value in submodules.items() if key in desired_keys
+            }
 
-                # Collect all file names
-                imports = OEO_MODULES_IMPORTS
+            # Collect all file names
+            imports = get_OEO_MODULES_IMPORTS()
 
-                partial = render(
-                    request,
-                    "ontology/partial_ontology_content.html",
-                    dict(
-                        ontology=ontology_data["ontology"],
-                        version=ontology_data["version"],
-                        submodules=relevant_modules.items(),
-                        imports=imports.items(),
-                        ontology_description=ontology_data["oeo_context_data"][
-                            "ontology_description"
-                        ],
-                    ),
-                ).content.decode("utf-8")
+            partial = render(
+                request,
+                "ontology/partial_ontology_content.html",
+                dict(
+                    ontology=ontology_data["ontology"],
+                    version=ontology_data["version"],
+                    submodules=relevant_modules.items(),
+                    imports=imports.items(),
+                    ontology_description=ontology_data["oeo_context_data"][
+                        "ontology_description"
+                    ],
+                ),
+            ).content.decode("utf-8")
 
-                return HttpResponse(partial)
+            return HttpResponse(partial)
+        else:
+            # TODO: why do we only return response for HTMX?
+            return HttpResponse(b"")
 
 
-class PartialOntologyAboutSidebarContent(View):
+class PartialOntologyAboutSidebarContentView(View):
     def get(self, request):
         version = OEO_VERSION
-        main_module = OEO_MODULES_MAIN
+        main_module = get_OEO_MODULES_MAIN()
 
         if OPEN_ENERGY_ONTOLOGY_NAME in main_module.keys():
             main_module_name = OPEN_ENERGY_ONTOLOGY_NAME
@@ -134,13 +144,7 @@ class PartialOntologyAboutSidebarContent(View):
         return HttpResponse(partial)
 
 
-def initial_for_pageload(request):
-    if request.headers.get("HTTP_HX_REQUEST") == "true":
-        if request.method == "GET":
-            return render(request, "ontology/initial_response_htmx.html")
-
-
-class OntologyViewClasses(View):
+class OntologyViewClassesView(View):
     def get(
         self,
         request,
@@ -156,9 +160,8 @@ class OntologyViewClasses(View):
             raise Http404
 
         if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
-            ontology_data = OEO_COMMON_DATA
+            ontology_data = get_OEO_COMMON_DATA()
         elif ontology in [OEO_EXT_NAME]:
-            # ontology_data = OEOX_COMMON_DATA
             ontology_data = get_common_data(
                 OEO_EXT_NAME, file=OEO_EXT_OWL_NAME, path=OEO_EXT_PATH
             )
@@ -277,7 +280,7 @@ class OntologyViewClasses(View):
         )
 
 
-class OntologyStatics(View):
+class OntologyStaticsView(View):
     def get(
         self,
         request,
@@ -321,9 +324,9 @@ class OntologyStatics(View):
                     response = HttpResponse(
                         f, content_type="application/csv; charset=utf-8"
                     )
-                    response[
-                        "Content-Disposition"
-                    ] = f'attachment; filename="{file}.{extension}"'
+                    response["Content-Disposition"] = (
+                        f'attachment; filename="{file}.{extension}"'
+                    )
                     return response
             else:
                 raise Http404
@@ -353,9 +356,9 @@ class OntologyStatics(View):
                     response = HttpResponse(
                         zip_file.read(), content_type="application/zip"
                     )
-                    response[
-                        "Content-Disposition"
-                    ] = f'attachment; filename="{result_file}.{extension}"'
+                    response["Content-Disposition"] = (
+                        f'attachment; filename="{result_file}.{extension}"'
+                    )
                     response["Content-Length"] = os.path.getsize(zip_file_path)
 
                     return response
@@ -379,9 +382,9 @@ class OntologyStatics(View):
                 if not file:
                     file = "oeo-full"
 
-                response[
-                    "Content-Disposition"
-                ] = f'attachment; filename="{file}.{extension}"'
+                response["Content-Disposition"] = (
+                    f'attachment; filename="{file}.{extension}"'
+                )
 
                 return response
         else:
@@ -392,13 +395,13 @@ class OntologyStatics(View):
                 response = HttpResponse(
                     f, content_type="application/rdf+xml; charset=utf-8"
                 )
-                response[
-                    "Content-Disposition"
-                ] = f'attachment; filename="{file}.{extension}"'
+                response["Content-Disposition"] = (
+                    f'attachment; filename="{file}.{extension}"'
+                )
                 return response
 
 
-class OeoExtendedFileServe(View):
+class OeoExtendedFileServeView(View):
     def __init__(self) -> None:
         self.oeo_ext_static = self.read_owl_file()
         self.file_extension = "owl"
@@ -417,9 +420,9 @@ class OeoExtendedFileServe(View):
             response = HttpResponse(
                 self.oeo_ext_static, content_type="application/rdf+xml; charset=utf-8"
             )
-            response[
-                "Content-Disposition"
-            ] = f'attachment; filename="{self.file_name}.{self.file_extension}"'
+            response["Content-Disposition"] = (
+                f'attachment; filename="{self.file_name}.{self.file_extension}"'
+            )
         else:
             response = HttpResponse("File not found!", status_code=404)
 

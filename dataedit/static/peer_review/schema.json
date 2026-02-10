@@ -465,7 +465,7 @@
           },
           "path": {
             "description": "A URL that should be a permanent http(s) address or other path directly linking to the resource.",
-            "example": "https://openenergy-platform.org/dataedit/view/openstreetmap/osm_deu_line",
+            "example": "https://openenergy-platform.org/database/tables/openstreetmap/osm_deu_line",
             "type": ["string", "null"],
             "badge": "Gold",
             "title": "Path",
@@ -628,7 +628,7 @@
                       "properties": {
                         "resource": {
                           "description": "The foreign resource (table).",
-                          "example": "schema.table",
+                          "example": "table",
                           "type": ["string", "null"],
                           "badge": "Iron",
                           "title": "Resource"

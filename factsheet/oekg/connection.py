@@ -1,10 +1,11 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import os
 from pathlib import Path
@@ -23,24 +24,18 @@ from oeplatform.settings import (
     USE_DOCKER,
 )
 
-# from datetime import date
-# from SPARQLWrapper import SPARQLWrapper
-
-
 versions = os.listdir(
     Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 )  # TODO bad - windows dev will get path error
-# print(versions.remove(".DS_Store"))
+
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
 onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 path = onto_base_path / version  # TODO bad - windows dev will get path error
-# file = "reasoned-oeo-full.owl" # TODO- set in settings
 file = "oeo-full.owl"  # TODO- set in settings
 
 Ontology_URI = path / file
 Ontology_URI_STR = Ontology_URI.as_posix()
 
-# sys.path.append(path)
 
 oeo = Graph()
 oeo.parse(Ontology_URI.as_uri())

@@ -1,10 +1,11 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import logging
 import os
@@ -17,13 +18,11 @@ from oeplatform.settings import (
     OPEN_ENERGY_ONTOLOGY_FOLDER,
 )
 
+logger = logging.getLogger("oeplatform")
+
 
 class OntologyConfig(AppConfig):
     name = "ontology"
-
-    # Configure the logging module
-    logging.basicConfig(level=logging.WARNING)
-    logger = logging.getLogger(__name__)
 
     def ready(self):
         """
@@ -50,5 +49,5 @@ class OntologyConfig(AppConfig):
                 f"{DOCUMENTATION_LINKS.get(documentation_key)}"
             )
 
-            self.logger.error(msg)
+            logger.error(msg)
             raise ImportError(msg)

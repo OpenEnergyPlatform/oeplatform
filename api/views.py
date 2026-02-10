@@ -1,35 +1,49 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda> # noqa: E501
-# SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut # noqa: E501
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V. # noqa: E501
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""API views
+
+Guideline for Developers
+
+- all module items should be either
+  - name_api_view functions or
+  - NAME_APIView classes
+- all name_api_view or get/post/put/delete/patch methods of NAME_APIView classes
+  must be @api_exception decorated (as outermost decorator)
+- all must return a JSONLikeResponse
+- all endpoitns that refer to a table action need to do a require_*_permission to
+  check for the existance of a tabel object, pre-fetch it and check permission level
+
+"""
+
+__licence__ = """
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 chrwm <https://github.com/chrwm> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+"""  # noqa: 501
 
 import csv
 import itertools
 import json
-import logging
 import re
 from copy import deepcopy
 from decimal import Decimal
 
-import geoalchemy2  # noqa: Although this import seems unused is has to be here
-import psycopg2
+import geoalchemy2  # noqa:F401 Although this import seems unused is has to be here
 import requests
-import sqlalchemy as sqla
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
@@ -53,17 +67,95 @@ from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-import api.parser
 import login.models as login_models
-from api import actions, parser, sessions
-
-# from api.actions import assert_valid_identifier_name
-from api.encode import Echo, GeneratorJSONEncoder
+from api import sessions
+from api.actions import (
+    apply_changes,
+    close_cursor,
+    close_raw_connection,
+    column_add,
+    column_alter,
+    commit_raw_connection,
+    data_delete,
+    data_insert,
+    data_search,
+    data_update,
+    describe_columns,
+    describe_constraints,
+    describe_indexes,
+    do_begin_twophase,
+    do_commit_twophase,
+    do_prepare_twophase,
+    do_recover_twophase,
+    do_rollback_twophase,
+    execute_sqla,
+    fetchall,
+    fetchmany,
+    fetchone,
+    get_column_obj,
+    get_columns,
+    get_columns_select,
+    get_foreign_keys,
+    get_indexes,
+    get_isolation_level,
+    get_pk_constraint,
+    get_response_dict,
+    get_schema_names,
+    get_single_table_size,
+    get_table_names,
+    get_unique_constraints,
+    get_view_definition,
+    get_view_names,
+    has_schema,
+    has_table,
+    list_table_sizes,
+    move_publish,
+    open_cursor,
+    open_raw_connection,
+    queue_column_change,
+    queue_constraint_change,
+    response_error,
+    rollback_raw_connection,
+    set_isolation_level,
+    set_table_metadata,
+    table_get_approx_row_count,
+    table_has_row_with_id,
+    translate_fetched_cell,
+    try_convert_metadata_to_v2,
+    try_parse_metadata,
+    try_validate_metadata,
+)
+from api.encode import Echo
 from api.error import APIError
-from api.helpers.http import ModHttpResponse
+from api.helper import (
+    WHERE_EXPRESSION,
+    JsonLikeResponse,
+    ModJsonResponse,
+    OEPStream,
+    api_exception,
+    check_embargo,
+    conjunction,
+    create_ajax_handler,
+    date_handler,
+    get_request_data_dict,
+    load_cursor,
+    require_admin_permission,
+    require_delete_permission,
+    require_write_permission,
+    stream,
+    update_tags_from_keywords,
+)
+from api.parser import (
+    is_pg_qual,
+    parse_condition,
+    parse_expression,
+    parse_scolumnd_from_columnd,
+    query_typecast_select,
+)
 from api.serializers import (
     DatasetAssignTablesSerializer,
     DatasetCreateSerializer,
@@ -80,15 +172,21 @@ from api.services.embargo import (
     apply_embargo,
     parse_embargo_payload,
 )
-from api.services.permissions import assign_table_holder
-from api.services.table_creation import TableCreationOrchestrator
-from api.utils import get_dataset_configs
+from api.utils import (
+    get_dataset_configs,
+    get_or_403,
+    request_data_dict,
+    strip_query,
+    table_or_404,
+)
 from api.validators.column import validate_column_names
-from api.validators.identifier import assert_valid_identifier_name
+from api.validators.identifier import _assert_valid_identifier_name
 from dataedit.models import Dataset, Embargo
 from dataedit.models import Table as DBTable
 from dataedit.models import Topic
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
+from api.validators.identifier import assert_valid_table_name
+from dataedit.models import Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -96,234 +194,22 @@ from oekg.utils import (
     process_datasets_sparql_query,
     validate_public_sparql_query,
 )
-from oeplatform.settings import PLAYGROUNDS, UNVERSIONED_SCHEMAS, USE_LOEP, USE_ONTOP
+from oeplatform.settings import (
+    APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW,
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL,
+    IS_TEST,
+    ONTOP_SPARQL_ENDPOINT_URL,
+    TOPIC_SCENARIO,
+    USE_LOEP,
+    USE_ONTOP,
+)
 
-if USE_LOEP:
-    from oeplatform.settings import DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
-
-if USE_ONTOP:
-    from oeplatform.settings import ONTOP_SPARQL_ENDPOINT_URL
-
-
-logger = logging.getLogger("oeplatform")
-
-MAX_COL_NAME_LENGTH = 50
-
-WHERE_EXPRESSION = re.compile(
-    r"^(?P<first>[\w\d_\.]+)\s*(?P<operator>"
-    + r"|".join(parser.sql_operators)
-    + r")\s*(?P<second>(?![>=]).+)$"
+DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL_WO_QUERY = strip_query(
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
 )
 
 
-def transform_results(cursor, triggers, trigger_args):
-    row = cursor.fetchone() if not cursor.closed else None
-    while row is not None:
-        yield list(map(actions._translate_fetched_cell, row))
-        row = cursor.fetchone()
-    for t, targs in zip(triggers, trigger_args):
-        t(*targs)
-
-
-class OEPStream(StreamingHttpResponse):
-    def __init__(self, *args, session=None, **kwargs):
-        self.session = session
-        super(OEPStream, self).__init__(*args, **kwargs)
-
-    def __del__(self):
-        if self.session:
-            self.session.close()
-
-
-def load_cursor(named=False):
-    def inner(f):
-        def wrapper(*args, **kwargs):
-            artificial_connection = "connection_id" not in args[1].data
-            fetch_all = "cursor_id" not in args[1].data
-            triggered_close = False
-            if fetch_all:
-                # django_restframework passes different data dictionaries depending
-                # on the request type: PUT -> Mutable, POST -> Immutable
-                # Thus, we have to replace the data dictionary by one we can mutate.
-                if hasattr(args[1].data, "_mutable"):
-                    args[1].data._mutable = True
-                context = {}
-                context["user"] = args[1].user
-                if not artificial_connection:
-                    context["connection_id"] = args[1].data["connection_id"]
-                else:
-                    context.update(actions.open_raw_connection({}, context))
-                    args[1].data["connection_id"] = context["connection_id"]
-                if "cursor_id" in args[1].data:
-                    context["cursor_id"] = args[1].data["cursor_id"]
-                else:
-                    context.update(actions.open_cursor({}, context, named=named))
-                    args[1].data["cursor_id"] = context["cursor_id"]
-            try:
-                result = f(*args, **kwargs)
-                if fetch_all:
-                    cursor = actions.load_cursor_from_context(context)
-                    session = actions.load_session_from_context(context)
-                    if not result:
-                        result = {}
-                    # Initial server-side cursors do not contain any description before
-                    # the first row is fetched. Therefore, we have to try to fetch the
-                    # first one - if successful, we a description if not,
-                    # nothing is returned.
-                    # But: After the last row the cursor will 'forget' its description.
-                    # Therefore we have to fetch the remaining data later.
-
-                    # Set of triggers after all the data was fetched.
-                    # The cursor must not be closed earlier!
-                    triggers = [
-                        actions.close_cursor,
-                        actions.close_raw_connection,
-                        session.connection.commit,
-                    ]
-                    trigger_args = [({}, context), ({}, context), tuple()]
-                    first = None
-                    if not named or cursor.statusmessage:
-                        try:
-                            first = cursor.fetchone()
-                        except psycopg2.ProgrammingError as e:
-                            if not e.args or e.args[0] != "no results to fetch":
-                                raise e
-                        except psycopg2.errors.InvalidCursorName as e:
-                            print(e)
-                    if first:
-                        first = map(actions._translate_fetched_cell, first)
-                        if cursor.description:
-                            description = [
-                                [
-                                    col.name,
-                                    col.type_code,
-                                    col.display_size,
-                                    col.internal_size,
-                                    col.precision,
-                                    col.scale,
-                                    col.null_ok,
-                                ]
-                                for col in cursor.description
-                            ]
-                            result["data"] = (
-                                x
-                                for x in itertools.chain(
-                                    [first],
-                                    transform_results(cursor, triggers, trigger_args),
-                                )
-                            )
-                            result["description"] = description
-                            result["context"] = context
-                            result["rowcount"] = cursor.rowcount
-                            triggered_close = True
-                    if not triggered_close and artificial_connection:
-                        session.connection.commit()
-            finally:
-                if not triggered_close:
-                    if fetch_all and not artificial_connection:
-                        actions.close_cursor({}, context)
-                    if artificial_connection:
-                        actions.close_raw_connection({}, context)
-            return result
-
-        return wrapper
-
-    return inner
-
-
-def cors(allow):
-    def doublewrapper(f):
-        def wrapper(*args, **kwargs):
-            response = f(*args, **kwargs)
-            if allow:
-                response["Access-Control-Allow-Origin"] = "*"
-                response["Access-Control-Allow-Methods"] = "POST"
-                response["Access-Control-Allow-Headers"] = "Content-Type"
-            return response
-
-        return wrapper
-
-    return doublewrapper
-
-
-def api_exception(f):
-    def wrapper(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except actions.APIError as e:
-            return JsonResponse({"reason": e.message}, status=e.status)
-        except KeyError as e:
-            return JsonResponse({"reason": e}, status=400)
-        except DBTable.DoesNotExist:
-            return JsonResponse({"reason": "table does not exist"}, status=404)
-
-    return wrapper
-
-
-def permission_wrapper(permission, f):
-    def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", actions.DEFAULT_SCHEMA)
-        table = kwargs.get("table") or kwargs.get("sequence")
-        actions.assert_permission(request.user, table, permission, schema=schema)
-        return f(caller, request, *args, **kwargs)
-
-    return wrapper
-
-
-def require_write_permission(f):
-    return permission_wrapper(login_models.WRITE_PERM, f)
-
-
-def require_delete_permission(f):
-    return permission_wrapper(login_models.DELETE_PERM, f)
-
-
-def require_admin_permission(f):
-    return permission_wrapper(login_models.ADMIN_PERM, f)
-
-
-def conjunction(clauses):
-    return {"type": "operator", "operator": "AND", "operands": clauses}
-
-
-class Sequence(APIView):
-    @api_exception
-    def put(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
-        if request.user.is_anonymous:
-            raise APIError("User is anonymous", 401)
-        if actions.has_table(dict(schema=schema, sequence_name=sequence), {}):
-            raise APIError("Sequence already exists", 409)
-        return self.__create_sequence(request, schema, sequence, request.data)
-
-    @api_exception
-    @require_delete_permission
-    def delete(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
-        if request.user.is_anonymous:
-            raise APIError("User is anonymous", 401)
-        return self.__delete_sequence(request, schema, sequence, request.data)
-
-    @load_cursor()
-    def __delete_sequence(self, request, schema, sequence, jsn):
-        seq = sqla.schema.Sequence(sequence, schema=schema)
-        seq.drop(bind=actions._get_engine())
-        return JsonResponse({}, status=status.HTTP_200_OK)
-
-    @load_cursor()
-    def __create_sequence(self, request, schema, sequence, jsn):
-        seq = sqla.schema.Sequence(sequence, schema=schema)
-        seq.create(bind=actions._get_engine())
-        return JsonResponse({}, status=status.HTTP_201_CREATED)
-
-
-class Metadata(APIView):
+class MetadataAPIView(APIView):
     """
     Important note:
     oemetadata v2 introduces datasets which are not relevant on a table level
@@ -331,40 +217,34 @@ class Metadata(APIView):
     makes it easy to integrate as no further changes to validation are required for now.
     Datasets are handled in the model.Datasets & api views.
     """
-
+    
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request, schema, table):
-        metadata = actions.get_table_metadata(schema, table)
+    def get(self, request: Request, table: str) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+        metadata = table_obj.get_metadata()
         return JsonResponse(metadata)
 
     @api_exception
     @require_write_permission
     @load_cursor()
-    def post(self, request, schema, table):
+    def post(self, request: Request, table: str) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+
         raw_input = request.data
-        metadata, error = actions.try_parse_metadata(raw_input)
+        metadata, error = try_parse_metadata(raw_input)
 
         if not error and metadata is not None:
-            metadata = actions.try_convert_metadata_to_v2(metadata)
-
-        if not error:
-            metadata, error = actions.try_validate_metadata(metadata)
+            metadata = try_convert_metadata_to_v2(metadata)
+            metadata, error = try_validate_metadata(metadata)
 
         if metadata is not None:
-            cursor = actions.load_cursor_from_context(request.data)
-
             # update/sync keywords with tags before saving metadata
             # oemetadata v2 introduces datasets which are not relevant on a table level
             # always query for metadata["resources"][0]
             keywords = metadata["resources"][0].get("keywords", []) or []
-
-            # get_tag_keywords_synchronized_metadata returns the OLD metadata
-            # but with the now harmonized keywords (harmonized with tags)
-            # so we only copy the resulting keywords before storing the
-            # metadata
-            _metadata = get_tag_keywords_synchronized_metadata(
-                table=table, schema=schema, keywords_new=keywords
+            metadata["resources"][0]["keywords"] = update_tags_from_keywords(
+                table=table_obj.name, keywords=keywords
             )
             # oemetadata v2 introduces datasets which are not relevant on a table level
             # always query for metadata["resources"][0]
@@ -385,9 +265,7 @@ class Metadata(APIView):
             metadata.pop("connection_id", None)
             metadata.pop("cursor_id", None)
 
-            actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=cursor
-            )
+            set_table_metadata(table=table_obj.name, metadata=metadata)
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
@@ -486,7 +364,7 @@ class AssignDatasetTables(APIView):
         )
 
 
-class Table(APIView):
+class TableAPIView(APIView):
     """
     Handles the creation of tables and serves information on existing tables
     """
@@ -495,13 +373,12 @@ class Table(APIView):
 
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request, schema, table):
+    def get(self, request: Request, table: str) -> JsonLikeResponse:
         """
         Returns a dictionary that describes the DDL-make-up of this table.
         Fields are:
 
         * name : Name of the table,
-        * schema: Name of the schema,
         * columns : as specified in :meth:`api.actions.describe_columns`
         * indexes : as specified in :meth:`api.actions.describe_indexes`
         * constraints: as specified in
@@ -510,70 +387,61 @@ class Table(APIView):
         :param request:
         :return:
         """
-
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        table_obj = table_or_404(table=table)
 
         return JsonResponse(
             {
-                "schema": schema,
                 "name": table,
-                "columns": actions.describe_columns(schema, table),
-                "indexed": actions.describe_indexes(schema, table),
-                "constraints": actions.describe_constraints(schema, table),
+                "columns": describe_columns(table_obj),
+                "indexed": describe_indexes(table_obj),
+                "constraints": describe_constraints(table_obj),
             }
         )
 
     @api_exception
-    def post(self, request, schema, table):
+    def post(self, request: Request, table: str) -> JsonLikeResponse:
         """
         Changes properties of tables and table columns
         :param request:
-        :param schema:
         :param table:
         :return:
         """
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
-        json_data = request.data
+        table_obj = table_or_404(table=table)
 
-        if "column" in json_data["type"]:
-            column_definition = api.parser.parse_scolumnd_from_columnd(
-                schema, table, json_data["name"], json_data
+        request_data_dict = get_request_data_dict(request)
+
+        if "column" in request_data_dict["type"]:
+            column_definition = parse_scolumnd_from_columnd(
+                table_obj, request_data_dict["name"], request_data_dict
             )
-            result = actions.queue_column_change(schema, table, column_definition)
-            return ModHttpResponse(result)
+            result = queue_column_change(table_obj, column_definition)
+            return ModJsonResponse(result)
 
-        elif "constraint" in json_data["type"]:
+        elif "constraint" in request_data_dict["type"]:
             # Input has nothing to do with DDL from Postgres.
             # Input is completely different.
             # dict.get() returns None, if key does not exist
             constraint_definition = {
-                "action": json_data["action"],  # {ADD, DROP}
-                "constraint_type": json_data.get(
+                "action": request_data_dict["action"],  # {ADD, DROP}
+                "constraint_type": request_data_dict.get(
                     "constraint_type"
                 ),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
-                "constraint_name": json_data.get(
+                "constraint_name": request_data_dict.get(
                     "constraint_name"
                 ),  # {myForeignKey, myUniqueConstraint}
-                "constraint_parameter": json_data.get("constraint_parameter"),
+                "constraint_parameter": request_data_dict.get("constraint_parameter"),
                 # Things in Brackets, e.g. name of column
-                "reference_table": json_data.get("reference_table"),
-                "reference_column": json_data.get("reference_column"),
+                "reference_table": request_data_dict.get("reference_table"),
+                "reference_column": request_data_dict.get("reference_column"),
             }
 
-            result = actions.queue_constraint_change(
-                schema, table, constraint_definition
-            )
-            return ModHttpResponse(result)
+            result = queue_constraint_change(table_obj, constraint_definition)
+            return ModJsonResponse(result)
         else:
-            return ModHttpResponse(
-                actions.get_response_dict(False, 400, "type not recognised")
-            )
+            return ModJsonResponse(get_response_dict(False, 400, "type not recognised"))
 
     @api_exception
-    def put(self, request, schema, table):
+    def put(self, request: Request, table: str) -> JsonLikeResponse:
         """
         Creates a new table: physical table first, then metadata row.
         Applies embargo and permissions, and sets metadata if provided.
@@ -589,74 +457,67 @@ class Table(APIView):
 
         Args:
             request: The request object
-            schema: The schema in which the table should be created
             table: The name of the table to be created
 
         Returns:
             JsonResponse: A JSON response with the status code 201 CREATED
 
         """
-        # 1) Basic schema checks
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
-            raise APIError("Schema is not in allowed set of schemes for upload")
-        if schema.startswith("_"):
-            raise APIError("Schema starts with _, which is not allowed")
+
+        # 1) Basic checks
         if request.user.is_anonymous:
             raise APIError("User is anonymous", 401)
-        if actions.has_table({"schema": schema, "table": table}, {}):
-            raise APIError("Table already exists", 409)
+
+        # during tests, is_sandbox must be true
+        # otherwise: can be set as ?is_sandbox=
+        if IS_TEST or request.GET.get("is_sandbox"):
+            is_sandbox = True
+        else:
+            is_sandbox = False
 
         # 2) Validate identifiers
-        assert_valid_identifier_name(schema)
-        assert_valid_identifier_name(table)
+        assert_valid_table_name(table)
+
+        if has_table({"table": table}):
+            raise APIError("Table already exists", 409)
 
         # 3) Parse and validate payload
-        payload = request.data.get("query", {})
-        columns = payload.get("columns")
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict.get("query", {})
+        columns = payload_query.get("columns")
         if not columns:
             raise APIError("Table contains no columns")
         for col in columns:
-            col.update({"c_schema": schema, "c_table": table})
+            col.update({"c_table": table})
         validate_column_names(columns)
 
-        constraints = payload.get("constraints", [])
+        constraints = payload_query.get("constraints", [])
         for cons in constraints:
-            cons.update({"action": "ADD", "c_schema": schema, "c_table": table})
+            cons.update({"action": "ADD", "c_table": table})
 
-        embargo_data = request.data.get("embargo") or payload.get("embargo", {})
+        embargo_data = request_data_dict.get("embargo") or payload_query.get(
+            "embargo", {}
+        )
         try:
             embargo_required = parse_embargo_payload(embargo_data)
         except EmbargoValidationError as e:
             raise APIError(str(e))
 
-        # 4) Create the table (physical → metadata) atomically
-        orchestrator = TableCreationOrchestrator()
-        table_obj = orchestrator.create_table(
-            schema_name=schema,
-            table_name=table,
-            column_defs=columns,
-            constraint_defs=constraints,
+        table_obj = Table.create_with_oedb_table(
+            name=table,
+            user=request.user,
+            is_sandbox=is_sandbox,
+            column_definitions=columns,
+            constraints_definitions=constraints,
         )
 
         # 5) Post-creation hooks
         if embargo_required:
             apply_embargo(table_obj, embargo_data)
 
-        assign_table_holder(request.user, schema, table)
-
-        metadata = payload.get("metadata")
+        metadata = payload_query.get("metadata")
         if metadata:
-            ctx = {
-                "connection_id": actions.get_or_403(request.data, "connection_id"),
-                "cursor_id": actions.get_or_403(request.data, "cursor_id"),
-            }
-            cursor = sessions.load_cursor_from_context(ctx)
-            actions.set_table_metadata(
-                table=table,
-                schema=schema,
-                metadata=metadata,
-                cursor=cursor,
-            )
+            set_table_metadata(table=table, metadata=metadata)
         else:
             # If no metadata is provided, we create a minimal metadata object
             metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
@@ -693,452 +554,124 @@ class Table(APIView):
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
-    def validate_column_names(self, column_definitions):
-        """Raise APIError if any column name is invalid"""
-
-        for c in column_definitions:
-            colname = c["name"]
-
-            err_msg = (
-                f"Unsupported column name: '{colname}'\n"
-                "Column name must consist of lowercase alpha-numeric "
-                f"words or underscores and start with a letter. "
-                "It must not start with an underscore or exceed "
-                f"{MAX_COL_NAME_LENGTH} characters "
-                f"(current column name length: {len(colname)})."
-            )
-            if not colname.isidentifier():
-                raise APIError(f"{err_msg}")
-            if re.search(r"[A-Z]", colname) or re.match(r"_", colname):
-                raise APIError(
-                    "Column names must not contain capital letters "
-                    f"or start with an underscore! {err_msg}"
-                )
-            if len(colname) > MAX_COL_NAME_LENGTH:
-                raise APIError(f"Column name is too long! {err_msg}")
-
-    def oep_create_table_transaction(
-        self,
-        django_schema_object,
-        schema,
-        table,
-        column_definitions,
-        constraint_definitions,
-    ):
-        """
-        This method handles atomic table creation transactions on the OEP. It
-        attempts to create first the django table objects and stored it in
-        dataedit_tables table. Then it attempts to create the OEDB table.
-        If there is an error raised during the first two steps the function
-        will cleanup any table object or table artifacts created during the
-        process. The order of execution matters, it should always first
-        create the django table object.
-
-        Params:
-            django_schema_object: The schema object stored in the django
-                database
-            schema:
-            table
-            column_definitions
-            constraint_definitions
-
-        returns:
-            table_object: The django table objects that was created
-        """
-
-        try:
-            with transaction.atomic():
-                # First create the table object in the django database.
-                table_object = self._create_table_object(django_schema_object, table)
-            # Then attempt to create the OEDB table to check
-            # if creation will succeed - action includes checks
-            # and will raise api errors
-            actions.table_create(
-                schema, table, column_definitions, constraint_definitions
-            )
-        except DatabaseError as e:
-            # remove any oedb table artifacts left after table creation
-            # transaction failed
-            self.__remove_oedb_table_on_exception_raised_during_creation_transaction(
-                table, schema
-            )
-
-            # also remove any django table object
-            # find the created django table object
-            object_to_delete = DBTable.objects.filter(
-                name=table, schema=django_schema_object
-            )
-            # delete it if it exists
-            if object_to_delete.exists():
-                object_to_delete.delete()
-
-            raise APIError(
-                message="Error during table creation transaction. All table fragments"
-                f"have been removed. For further details see: {e}"
-            )
-
-        # for now only return the django table object
-        # TODO: Check if is necessary to return the response dict returned by the oedb
-        # table creation function
-        return table_object
-
-    def __remove_oedb_table_on_exception_raised_during_creation_transaction(
-        self, table, schema
-    ):
-        """
-        This private method handles removing a table form the OEDB only for the case
-        where an error was raised during table creation. It specifically will delete
-        the OEDB table created by the user and also the edit_ meta(revision) table
-        that is automatically created in the background.
-        """
-
-        # find the created oedb table
-        if actions.has_table({"table": table, "schema": schema}):
-            # get table and schema names, also for meta(revision) tables
-            schema, table = actions.get_table_name(schema, table)
-            meta_schema = actions.get_meta_schema_name(schema)
-
-            # drop the revision table with edit_ prefix
-            edit_table = actions.get_edit_table_name(schema, table)
-            actions._get_engine().execute(
-                'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                    schema=meta_schema, table=edit_table
-                )
-            )
-            # drop the data table
-            actions._get_engine().execute(
-                'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                    schema=schema, table=table
-                )
-            )
-
-    @load_cursor()
-    def __create_table(
-        self,
-        request,
-        schema,
-        table,
-        column_definitions,
-        constraint_definitions,
-        metadata=None,
-        embargo_data=None,
-    ):
-        assert_valid_identifier_name(table)
-        self.validate_column_names(column_definitions)
-
-        schema_object, _ = DBSchema.objects.get_or_create(name=schema)
-        context = {
-            "connection_id": actions.get_or_403(request.data, "connection_id"),
-            "cursor_id": actions.get_or_403(request.data, "cursor_id"),
-        }
-        cursor = sessions.load_cursor_from_context(context)
-
-        embargo_error, embargo_payload_check = self._check_embargo_payload_valid(
-            embargo_data
-        )
-        if embargo_error:
-            raise embargo_error
-
-        if embargo_payload_check:
-            table_object = self.oep_create_table_transaction(
-                django_schema_object=schema_object,
-                table=table,
-                schema=schema,
-                column_definitions=column_definitions,
-                constraint_definitions=constraint_definitions,
-            )
-            self._apply_embargo(table_object, embargo_data)
-
-            if metadata:
-                actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata, cursor=cursor
-                )
-
-            try:
-                self._assign_table_holder(request.user, schema, table)
-            except ValueError as e:
-                # Ensure the user is assigned as the table holder
-                self._assign_table_holder(request.user, schema, table)
-                raise APIError(
-                    "Table was created without embargo due to an unexpected "
-                    "error during embargo setup."
-                    f"{e}"
-                )
-
-        else:
-            table_object = self.oep_create_table_transaction(
-                django_schema_object=schema_object,
-                table=table,
-                schema=schema,
-                column_definitions=column_definitions,
-                constraint_definitions=constraint_definitions,
-            )
-            self._assign_table_holder(request.user, schema, table)
-
-            if metadata:
-                actions.set_table_metadata(
-                    table=table, schema=schema, metadata=metadata, cursor=cursor
-                )
-
-    def _create_table_object(self, schema_object, table):
-        try:
-            table_object = DBTable.objects.create(name=table, schema=schema_object)
-        except IntegrityError:
-            raise APIError("Table already exists")
-        return table_object
-
-    def _check_embargo_payload_valid(self, embargo_data):
-        if not embargo_data:
-            return None, False
-
-        if not isinstance(embargo_data, dict):
-            error = APIError("The embargo payload must be a dict")
-            return error, False
-
-        embargo_period = embargo_data.get("duration")
-        if embargo_period in ["6_months", "1_year"]:
-            # self._apply_embargo(table_object, embargo_period)
-            return None, True
-        elif embargo_period == "none":
-            return None, False
-        else:
-            error = actions.APIError(
-                f"Could not parse the embargo period format: {embargo_period}. "
-                "Please use {'embargo': {'duration':'6_months'} } or '1_year' to "
-                "set the embargo or use 'none' to remove the embargo."
-            )
-            return error, False
-
-    def _apply_embargo(self, table_object, embargo_period):
-        unpack_embargo_period = embargo_period.get("duration")
-        duration_in_weeks = 26 if unpack_embargo_period == "6_months" else 52
-        embargo, created = Embargo.objects.get_or_create(
-            table=table_object,
-            defaults={
-                "duration": unpack_embargo_period,
-                "date_ended": datetime.now() + timedelta(weeks=duration_in_weeks),
-            },
-        )
-        if not created:
-            if embargo.date_started:
-                embargo.date_ended = embargo.date_started + timedelta(
-                    weeks=duration_in_weeks
-                )
-            else:
-                embargo.date_started = datetime.now()
-                embargo.date_ended = embargo.date_started + timedelta(
-                    weeks=duration_in_weeks
-                )
-            embargo.save()
-
-    def _assign_table_holder(self, user, schema, table):
-        table_object = DBTable.load(schema, table)
-        perm, _ = login_models.UserPermission.objects.get_or_create(
-            table=table_object, holder=user
-        )
-        perm.level = login_models.ADMIN_PERM
-        perm.save()
-        user.save()
-
     @api_exception
     @require_delete_permission
-    def delete(self, request, schema, table):
-        schema, table = actions.get_table_name(schema, table)
-
-        meta_schema = actions.get_meta_schema_name(schema)
-
-        edit_table = actions.get_edit_table_name(schema, table)
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=meta_schema, table=edit_table
-            )
-        )
-
-        edit_table = actions.get_insert_table_name(schema, table)
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=meta_schema, table=edit_table
-            )
-        )
-
-        edit_table = actions.get_delete_table_name(schema, table)
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=meta_schema, table=edit_table
-            )
-        )
-
-        actions._get_engine().execute(
-            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
-                schema=schema, table=table
-            )
-        )
-        table_object = DBTable.objects.get(name=table)
-        table_object.delete()
+    def delete(self, request: Request, table: str) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+        table_obj.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
-class Index(APIView):
-    def get(self, request):
-        pass
-
-    def post(self, request):
-        pass
-
-    def put(self, request):
-        pass
-
-
-class Column(APIView):
+class TableColumnAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request, schema, table, column=None):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
-        response = actions.describe_columns(schema, table)
+    def get(
+        self, request: Request, table: str, column: str | None = None
+    ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+
+        response = describe_columns(table_obj)
         if column:
             try:
                 response = response[column]
             except KeyError:
-                raise actions.APIError(
-                    "The column specified is not part of " "this table."
-                )
+                raise APIError("The column specified is not part of this table.")
         return JsonResponse(response)
 
     @api_exception
     @require_write_permission
-    def post(self, request, schema, table, column):
-        schema, table = actions.get_table_name(schema, table)
-        response = actions.column_alter(
-            request.data["query"], {}, schema, table, column
-        )
+    def post(self, request: Request, table: str, column: str) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+
+        request_data_dict = get_request_data_dict(request)
+        response = column_alter(request_data_dict["query"], table_obj, column)
         return JsonResponse(response)
 
     @api_exception
     @require_write_permission
-    def put(self, request, schema, table, column):
-        schema, table = actions.get_table_name(schema, table)
-        actions.column_add(schema, table, column, request.data["query"])
+    def put(self, request: Request, table: str, column: str) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+        request_data_dict = get_request_data_dict(request)
+        column_add(table_obj, column, request_data_dict["query"])
         return JsonResponse({}, status=201)
 
 
-class Fields(APIView):
-    @method_decorator(never_cache)
-    def get(self, request, schema, table, id, column=None):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
-        if (
-            not parser.is_pg_qual(table)
-            or not parser.is_pg_qual(schema)
-            or not parser.is_pg_qual(id)
-            or not parser.is_pg_qual(column)
-        ):
-            return ModHttpResponse({"error": "Bad Request", "http_status": 400})
-
-        returnValue = actions.getValue(schema, table, column, id)
-
-        return HttpResponse(
-            returnValue if returnValue is not None else "",
-            status=(404 if returnValue is None else 200),
-        )
-
-    def post(self, request):
-        pass
-
-    def put(self, request):
-        pass
-
-
-class MovePublish(APIView):
-    @require_admin_permission
+class TableMovePublishAPIView(APIView):
     @api_exception
-    def post(self, request, schema, table, to_schema):
+    @require_admin_permission
+    def post(self, request: Request, table: str, topic: str) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+
         # Make payload more friendly as users tend to use the query wrapper in payload
-        json_data = request.data.get("query", {})
-        embargo_period = request.data.get("embargo", {}).get(
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict.get("query", {})
+        embargo_period = request_data_dict.get("embargo", {}).get(
             "duration", None
-        ) or json_data.get("embargo", {}).get("duration", None)
-        actions.move_publish(schema, table, to_schema, embargo_period)
+        ) or payload_query.get("embargo", {}).get("duration", None)
+        move_publish(table_obj, topic, embargo_period)
 
-        # tables = Table.objects.all()
-        # context = {
-        #     "draft_tables": [table for table in tables if not table.is_publish],
-        #     "published_tables": [table for table in tables if table.is_publish],
-        #     "schema_whitelist": schema_whitelist,
-        # }
-        # html = render_to_string("login/user_tables.html", context)
-        # return HttpResponse(html)
-        return HttpResponse(status=status.HTTP_200_OK)
+        return JsonResponse({}, status=status.HTTP_200_OK)
 
 
-class Move(APIView):
-    @require_admin_permission
+class TableUnpublishAPIView(APIView):
     @api_exception
-    def post(self, request, schema, table, to_schema):
-        if schema not in schema_whitelist or to_schema not in schema_whitelist:
-            raise APIError("Invalid origin or target schema")
-        actions.move(schema, table, to_schema)
-        return HttpResponse(status=status.HTTP_200_OK)
+    @require_admin_permission
+    def post(self, request: HttpRequest, table: str) -> JsonLikeResponse:
+        """Set table to `not published`"""
+        table_obj = table_or_404(table=table)
+        table_obj.is_publish = False
+        table_obj.save()
+        return JsonResponse({}, status=status.HTTP_200_OK)
 
 
-def check_embargo(schema, table):
-    try:
-        table_obj = DBTable.objects.get(name=table)
-        embargo = Embargo.objects.filter(table=table_obj).first()
-        if embargo and embargo.date_ended > timezone.now():
-            return True
-        return False
-    except ObjectDoesNotExist:
-        return False
-
-
-class Rows(APIView):
+class TableRowsAPIView(APIView):
     @api_exception
     @method_decorator(never_cache)
-    def get(self, request, schema, table, row_id=None):
-        if check_embargo(schema, table):
+    def get(
+        self, request: Request, table: str, row_id: int | None = None
+    ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+
+        if check_embargo(table_obj):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
                 status=403,
             )
 
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         columns = request.GET.getlist("column")
 
         where = request.GET.getlist("where")
         if row_id and where:
-            raise actions.APIError(
-                "Where clauses and row id are not allowed in the same query"
-            )
+            raise APIError("Where clauses and row id are not allowed in the same query")
 
         orderby = request.GET.getlist("orderby")
         if row_id and orderby:
-            raise actions.APIError(
+            raise APIError(
                 "Order by clauses and row id are not allowed in the same query"
             )
 
         limit = request.GET.get("limit")
         if row_id and limit:
-            raise actions.APIError(
+            raise APIError(
                 "Limit by clauses and row id are not allowed in the same query"
             )
 
         offset = request.GET.get("offset")
         if row_id and offset:
-            raise actions.APIError(
+            raise APIError(
                 "Order by clauses and row id are not allowed in the same query"
             )
 
         format = request.GET.get("form")
 
         if offset is not None and not offset.isdigit():
-            raise actions.APIError("Offset must be integer")
+            raise APIError("Offset must be integer")
         if limit is not None and not limit.isdigit():
-            raise actions.APIError("Limit must be integer")
-        if not all(parser.is_pg_qual(c) for c in columns):
-            raise actions.APIError("Columns are no postgres qualifiers")
-        if not all(parser.is_pg_qual(c) for c in orderby):
-            raise actions.APIError(
-                "Columns in groupby-clause are no postgres qualifiers"
-            )
+            raise APIError("Limit must be integer")
+        if not all(is_pg_qual(c) for c in columns):
+            raise APIError("Columns are no postgres qualifiers")
+        if not all(is_pg_qual(c) for c in orderby):
+            raise APIError("Columns in groupby-clause are no postgres qualifiers")
 
         # OPERATORS could be EQUALS, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
         # CONNECTORS could be AND, OR
@@ -1154,13 +687,12 @@ class Rows(APIView):
                 "type": "operator",
             }
             if where_clauses:
-                where_clauses = conjunction(clause, where_clauses)
+                where_clauses = conjunction([clause, where_clauses])
             else:
                 where_clauses = clause
 
         # TODO: Validate where_clauses. Should not be vulnerable
         data = {
-            "schema": schema,
             "table": table,
             "columns": columns,
             "where": where_clauses,
@@ -1169,7 +701,7 @@ class Rows(APIView):
             "offset": offset,
         }
 
-        return_obj = self.__get_rows(request, data)
+        return_obj = self.__get_rows(request, table_obj, data)
         session = (
             sessions.load_session_from_context(return_obj.pop("context"))
             if "context" in return_obj
@@ -1186,7 +718,7 @@ class Rows(APIView):
             pseudo_buffer = Echo()
 
             # NOTE: the csv downloader for views (client side)
-            # in dataedit/static/dataedit/backend.js: parse_download()
+            # in dataedit/static/database/backend.js: parse_download()
             # uses JSON.stringify, so we use csv.QUOTE_NONNUMERIC
             # to get somewhat consistent results
 
@@ -1199,17 +731,15 @@ class Rows(APIView):
                 content_type="text/csv",
                 session=session,
             )
-            response[
-                "Content-Disposition"
-            ] = 'attachment; filename="{schema}__{table}.csv"'.format(
-                schema=schema, table=table
+            response["Content-Disposition"] = (
+                'attachment; filename="{table}.csv"'.format(table=table)
             )
             return response
         elif format == "datapackage":
             pseudo_buffer = Echo()
             writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
             zf = zipstream.ZipFile(mode="w", compression=zipstream.ZIP_DEFLATED)
-            csv_name = "{schema}__{table}.csv".format(schema=schema, table=table)
+            csv_name = "{table}.csv".format(table=table)
             zf.write_iter(
                 csv_name,
                 (
@@ -1217,7 +747,7 @@ class Rows(APIView):
                     for x in itertools.chain([cols], return_obj["data"])
                 ),
             )
-            django_table = DBTable.load(schema, table)
+            django_table = Table.load(name=table)
             if django_table and django_table.oemetadata:
                 zf.writestr(
                     "datapackage.json",
@@ -1233,10 +763,8 @@ class Rows(APIView):
                 content_type="application/zip",
                 session=session,
             )
-            response[
-                "Content-Disposition"
-            ] = 'attachment; filename="{schema}__{table}.zip"'.format(
-                schema=schema, table=table
+            response["Content-Disposition"] = (
+                'attachment; filename="{table}.zip"'.format(table=table)
             )
             return response
         else:
@@ -1255,33 +783,47 @@ class Rows(APIView):
 
     @api_exception
     @require_write_permission
-    def post(self, request, schema, table, row_id=None, action=None):
-        if check_embargo(schema, table):
+    def post(
+        self,
+        request: Request,
+        table: str,
+        row_id: int | None = None,
+        action: str | None = None,
+    ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+
+        if check_embargo(table_obj):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
                 status=403,
             )
 
-        schema, table = actions.get_table_name(schema, table)
-        column_data = request.data["query"]
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict["query"]
         status_code = status.HTTP_200_OK
         if row_id:
-            response = self.__update_rows(request, schema, table, column_data, row_id)
+            response = self.__update_rows(request, table_obj, payload_query, row_id)
         else:
             if action == "new":
-                response = self.__insert_row(
-                    request, schema, table, column_data, row_id
-                )
+                response = self.__insert_row(request, table_obj, payload_query, row_id)
                 status_code = status.HTTP_201_CREATED
             else:
-                response = self.__update_rows(request, schema, table, column_data, None)
-        actions.apply_changes(schema, table)
+                response = self.__update_rows(request, table_obj, payload_query, None)
+        apply_changes(table_obj)
         return stream(response, status_code=status_code)
 
     @api_exception
     @require_write_permission
-    def put(self, request, schema, table, row_id=None, action=None):
-        if check_embargo(schema, table):
+    def put(
+        self,
+        request: Request,
+        table: str,
+        row_id: int | None = None,
+        action: str | None = None,
+    ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+
+        if check_embargo(table_obj):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
                 status=403,
@@ -1292,70 +834,70 @@ class Rows(APIView):
                 "This request type (PUT) is not supported. The "
                 "'new' statement is only possible in POST requests."
             )
-        schema, table = actions.get_table_name(schema, table)
+
         if not row_id:
             return JsonResponse(
-                actions._response_error("This methods requires an id"),
+                response_error("This methods requires an id"),
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        column_data = request.data["query"]
+        row_id = int(row_id)
 
-        if row_id and column_data.get("id", int(row_id)) != int(row_id):
-            raise actions.APIError(
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict["query"]
+
+        if payload_query.get("id", row_id) != row_id:
+            raise APIError(
                 "Id in URL and query do not match. Ids may not change.",
                 status=status.HTTP_409_CONFLICT,
             )
 
-        engine = actions._get_engine()
-        # check whether id is already in use
-        exists = (
-            engine.execute(
-                "select count(*) "
-                "from {schema}.{table} "
-                "where id = {id};".format(schema=schema, table=table, id=row_id)
-            ).first()[0]
-            > 0
-            if row_id
-            else False
-        )
+        exists = table_has_row_with_id(table_obj, id=row_id) if row_id else False
         if exists:
-            response = self.__update_rows(request, schema, table, column_data, row_id)
-            actions.apply_changes(schema, table)
+            response = self.__update_rows(request, table_obj, payload_query, row_id)
+            apply_changes(table_obj)
             return JsonResponse(response)
         else:
-            result = self.__insert_row(request, schema, table, column_data, row_id)
-            actions.apply_changes(schema, table)
+            result = self.__insert_row(request, table_obj, payload_query, row_id)
+            apply_changes(table_obj)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
+    @api_exception
     @require_delete_permission
-    def delete(self, request, table, schema, row_id=None):
-        if check_embargo(schema, table):
+    def delete(
+        self, request: Request, table: str, row_id: int | None = None
+    ) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+
+        if check_embargo(table_obj):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
                 status=403,
             )
 
-        schema, table = actions.get_table_name(schema, table)
-        result = self.__delete_rows(request, schema, table, row_id)
-        actions.apply_changes(schema, table)
+        result = self.__delete_rows(request, table_obj, row_id)
+        apply_changes(table_obj)
         return JsonResponse(result)
 
     @load_cursor()
-    def __delete_rows(self, request, schema, table, row_id=None):
-        if check_embargo(schema, table):
+    def __delete_rows(
+        self, request: Request, table_obj: Table, row_id: int | None = None
+    ):
+        if check_embargo(table_obj):
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
                 status=403,
             )
 
         where = request.GET.getlist("where")
-        query = {"schema": schema, "table": table}
+        query: dict[str, str | list | dict] = {"table": table_obj.name}
         if where:
             query["where"] = self.__read_where_clause(where)
+
+        request_data_dict = get_request_data_dict(request)
         context = {
-            "connection_id": request.data["connection_id"],
-            "cursor_id": request.data["cursor_id"],
+            "connection_id": request_data_dict["connection_id"],
+            "cursor_id": request_data_dict["cursor_id"],
             "user": request.user,
         }
 
@@ -1373,9 +915,9 @@ class Rows(APIView):
                 clause = conjunction([clause, where])
             query["where"] = clause
 
-        return actions.data_delete(query, context)
+        return data_delete(query, context)
 
-    def __read_where_clause(self, wheres):
+    def __read_where_clause(self, wheres) -> list:
         where_clauses = []
         if wheres:
             for where in wheres:
@@ -1399,49 +941,62 @@ class Rows(APIView):
         return where_clauses
 
     @load_cursor()
-    def __insert_row(self, request, schema, table, row, row_id=None):
+    def __insert_row(
+        self,
+        request: Request,
+        table_obj: Table,
+        row,
+        row_id: int | None = None,
+    ):
         if row_id and row.get("id", int(row_id)) != int(row_id):
-            return actions._response_error(
-                "The id given in the query does not " "match the id given in the url"
+            return response_error(
+                "The id given in the query does not match the id given in the url"
             )
         if row_id:
             row["id"] = row_id
 
+        request_data_dict = get_request_data_dict(request)
         context = {
-            "connection_id": request.data["connection_id"],
-            "cursor_id": request.data["cursor_id"],
+            "connection_id": request_data_dict["connection_id"],
+            "cursor_id": request_data_dict["cursor_id"],
             "user": request.user,
         }
 
         query = {
-            "schema": schema,
-            "table": table,
+            "table": table_obj.name,
             "values": [row] if isinstance(row, dict) else row,
         }
 
         if not row_id:
             query["returning"] = [{"type": "column", "column": "id"}]
-        result = actions.data_insert(query, context)
+        result = data_insert(query, context)
 
         return result
 
     @load_cursor()
-    def __update_rows(self, request, schema, table, row, row_id=None):
-        if check_embargo(schema, table):
-            return JsonResponse(
-                {"error": "Access to this table is restricted due to embargo."},
+    def __update_rows(
+        self,
+        request: Request,
+        table_obj: Table,
+        row,
+        row_id: int | None = None,
+    ) -> dict:
+        if check_embargo(table_obj):
+            raise APIError(
+                "Access to this table is restricted due to embargo.",
                 status=403,
             )
 
+        request_data_dict = get_request_data_dict(request)
         context = {
-            "connection_id": request.data["connection_id"],
-            "cursor_id": request.data["cursor_id"],
+            "connection_id": request_data_dict["connection_id"],
+            "cursor_id": request_data_dict["cursor_id"],
             "user": request.user,
         }
 
         where = request.GET.getlist("where")
 
-        query = {"schema": schema, "table": table, "values": row}
+        query = {"table": table_obj.name, "values": row}
 
         if where:
             query["where"] = self.__read_where_clause(where)
@@ -1460,205 +1015,66 @@ class Rows(APIView):
                 clause = conjunction([clause, where])
             query["where"] = clause
 
-        return actions.data_update(query, context)
+        return data_update(query, context)
 
     @load_cursor(named=True)
-    def __get_rows(self, request, data):
-        table = actions._get_table(data["schema"], table=data["table"])
-        # params = {}
-        # params_count = 0
+    def __get_rows(self, request: Request, table_obj: Table, data):
+        sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
         columns = data.get("columns")
 
         if not columns:
-            query = table.select()
+            query = sa_table.select()
         else:
-            columns = [actions.get_column_obj(table, c) for c in columns]
-            query = sqla.select(columns=columns)
+            columns = [get_column_obj(sa_table, c) for c in columns]
+            query = get_columns_select(columns=columns)
 
         where_clauses = data.get("where")
 
         if where_clauses:
-            query = query.where(parser.parse_condition(where_clauses))
+            query = query.where(parse_condition(where_clauses))
+            query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
         orderby = data.get("orderby")
         if orderby:
             if isinstance(orderby, list):
-                query = query.order_by(*map(parser.parse_expression, orderby))
+                query = query.order_by(*map(parse_expression, orderby))
             elif isinstance(orderby, str):
                 query = query.order_by(orderby)
             else:
                 raise APIError("Unknown order_by clause: " + orderby)
+            query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
         limit = data.get("limit")
         if limit and limit.isdigit():
             query = query.limit(int(limit))
+            query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
         offset = data.get("offset")
         if offset and offset.isdigit():
             query = query.offset(int(offset))
+            query = query_typecast_select(query)  # TODO: fix type hints in a better way
 
-        cursor = sessions.load_cursor_from_context(request.data)
-        actions._execute_sqla(query, cursor)
-
-
-class Session(APIView):
-    def get(self, request, length=1):
-        return request.session["resonse"]
+        cursor = sessions.load_cursor_from_context(request_data_dict(request))
+        execute_sqla(query, cursor)
 
 
-def date_handler(obj):
-    """
-    Implements a handler to serialize dates in JSON-strings
-    :param obj: An object
-    :return: The str method is called (which is the default serializer for JSON)
-        unless the object has an attribute  *isoformat*
-    """
-    if isinstance(obj, Decimal):
-        return str(obj)
-    if hasattr(obj, "isoformat"):
-        return obj.isoformat()
-    else:
-        return str(obj)
-
-
-# Create your views here.
-
-
-def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
-    """
-    Implements a mapper from api pages to the corresponding functions in
-    api/actions.py
-    :param func: The name of the callable function
-    :return: A JSON-Response that contains a dictionary with
-      the corresponding response stored in *content*
-    """
-
-    class AJAX_View(APIView):
-        @cors(allow_cors)
-        @api_exception
-        def options(self, request, *args, **kwargs):
-            response = HttpResponse()
-
-            return response
-
-        @cors(allow_cors)
-        @api_exception
-        def post(self, request):
-            result = self.execute(request)
-            session = (
-                sessions.load_session_from_context(result.pop("context"))
-                if "context" in result
-                else None
-            )
-            return stream(
-                result,
-                allow_cors=allow_cors and request.user.is_anonymous,
-                session=session,
-            )
-
-        def execute(self, request):
-            if requires_cursor:
-                return load_cursor()(self._internal_execute)(self, request)
-            else:
-                return self._internal_execute(request, request)
-
-        def _internal_execute(self, *args):
-            request = args[1]
-            content = request.data
-            context = {"user": request.user}
-            if "cursor_id" in request.data:
-                context["cursor_id"] = request.data["cursor_id"]
-            if "connection_id" in request.data:
-                context["connection_id"] = request.data["connection_id"]
-            query = content.get("query", ["{}"])
-            try:
-                if isinstance(query, list):
-                    query = query[0]
-                if isinstance(query, str):
-                    query = json.loads(query)
-            except Exception:
-                raise APIError("Your query is not properly formated.")
-            data = func(query, context)
-
-            # This must be done in order to clean the structure of non-serializable
-            # objects (e.g. datetime)
-            if isinstance(data, dict) and "domains" in data:
-                data["domains"] = {
-                    (".".join(key) if isinstance(key, tuple) else key): val
-                    for key, val in data["domains"].items()
-                }
-            response_data = json.loads(json.dumps(data, default=date_handler))
-
-            result = {"content": response_data}
-
-            if "cursor_id" in context:
-                result["cursor_id"] = context["cursor_id"]
-
-            return result
-
-    return AJAX_View.as_view()
-
-
-class FetchView(APIView):
-    @api_exception
-    def post(self, request, fetchtype):
-        if fetchtype == "all":
-            return self.do_fetch(request, actions.fetchall)
-        elif fetchtype == "many":
-            return self.do_fetch(request, actions.fetchmany)
-        else:
-            raise APIError("Unknown fetchtype: %s" % fetchtype)
-
-    def do_fetch(self, request, fetch):
-        context = {
-            "connection_id": actions.get_or_403(request.data, "connection_id"),
-            "cursor_id": actions.get_or_403(request.data, "cursor_id"),
-            "user": request.user,
-        }
-        return OEPStream(
-            (
-                part
-                for row in fetch(context)
-                for part in (self.transform_row(row), "\n")
-            ),
-            content_type="application/json",
-        )
-
-    def transform_row(self, row):
-        return json.dumps(
-            [actions._translate_fetched_cell(cell) for cell in row],
-            default=date_handler,
-        )
-
-
-def stream(data, allow_cors=False, status_code=status.HTTP_200_OK, session=None):
-    encoder = GeneratorJSONEncoder()
-    response = OEPStream(
-        encoder.iterencode(data),
-        content_type="application/json",
-        status=status_code,
-        session=session,
+@api_exception
+@never_cache
+def table_approx_row_count_view(request: HttpRequest, table: str) -> JsonResponse:
+    table_obj = table_or_404(table=table)
+    precise_below = int(
+        request.GET.get("precise-below", APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW)
     )
-    if allow_cors:
-        response["Access-Control-Allow-Origin"] = "*"
-    return response
+    approx_row_count = table_get_approx_row_count(
+        table=table_obj, precise_below=precise_below
+    )
+    response = {"data": [[approx_row_count]]}
+    return JsonResponse(response)
 
 
-class CloseAll(LoginRequiredMixin, APIView):
-    def get(self, request):
-        sessions.close_all_for_user(request.user)
-        return HttpResponse("All connections closed")
-
-
-# def get_users(request):
-#     string = request.GET["name"]
-#     users = login_models.myuser.objects.filter(
-#         Q(name__trigram_similar=string) | Q(name__istartswith=string)
-#     )
-#     return JsonResponse([user.name for user in users], safe=False)
-
-
-def get_users(request):
+@api_exception
+@never_cache
+def usrprop_api_view(request: Request) -> JsonLikeResponse:
     query = request.GET.get("name", "")
 
     # Ensure query is not empty to proceed with filtering
@@ -1682,15 +1098,9 @@ def get_users(request):
     return JsonResponse(user_names, safe=False)
 
 
-# def get_groups(request):
-# string = request.GET["name"]
-# users = login_models.Group.objects.filter(
-#     Q(name__trigram_similar=string) | Q(name__istartswith=string)
-# )
-# return JsonResponse([user.name for user in users], safe=False)
-
-
-def get_groups(request):
+@never_cache
+@api_exception
+def grpprop_api_view(request: Request) -> JsonLikeResponse:
     """
     Return all Groups where this user is a member that match
     the current query. The query is input by the User.
@@ -1714,7 +1124,7 @@ def get_groups(request):
         )
         .filter(
             similarity__gt=0.2,  # Adjust the threshold as needed
-            id__in=[group.id for group in groups],
+            id__in=[group.pk for group in groups],
         )
         .order_by("-similarity")[:5]
     )
@@ -1724,56 +1134,39 @@ def get_groups(request):
     return JsonResponse(group_names, safe=False)
 
 
-def oeo_search(request):
+@never_cache
+@api_exception
+def oeo_search_api_view(request: Request) -> JsonLikeResponse:
     if USE_LOEP:
         # get query from user request # TODO validate input to prevent sneaky stuff
         query = request.GET["query"]
         # call local search service
         # "http://loep/lookup-application/api/search?query={query}"
-        url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL}{query}"
+
+        # NOTE: to pass snyk security review, user data (request.GET["query"])
+        # put into request.get() is dangerous and needs to be secured by
+        # clearly separating the base url
+        url = f"{DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL_WO_QUERY}?query={query}"
         res = requests.get(url).json()
-        # res: something like [{"label": "testlabel", "resource": "testresource"}]
+        # res: something like
+        # {"docs": [{"label": "testlabel", "resource": "testresource"}]}
         # send back to client
     else:
-        return HttpResponseServerError(
+        raise APIError(
             "The endpoint for LOEP is not setup. Please contact a server admin."
         )
     return JsonResponse(res, safe=False)
 
 
-class OekgSparqlAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        sparql_query = request.data.get("query", "")
-        response_format = request.data.get("format", "json")  # Default format
-
-        if not validate_public_sparql_query(sparql_query):
-            raise ValidationError(
-                "Invalid SPARQL query. Update/delete queries are not allowed."
-            )
-
-        try:
-            content, content_type = execute_sparql_query(sparql_query, response_format)
-        except ValueError as e:
-            raise ValidationError(str(e))
-
-        if content_type == "application/sparql-results+json":
-            return Response(content)
-        else:
-            return Response(content, content_type=content_type)
-
-
-def oevkg_search(request):
-    if USE_ONTOP:
+@never_cache
+@api_exception
+def oevkg_query_api_view(request: Request) -> JsonLikeResponse:
+    if USE_ONTOP and ONTOP_SPARQL_ENDPOINT_URL:
         # get query from user request # TODO validate input to prevent sneaky stuff
         try:
             query = request.body.decode("utf-8")
         except UnicodeDecodeError:
-            return HttpResponseBadRequest(
-                "Invalid request body encoding. Please use 'utf-8'."
-            )
+            raise APIError("Invalid request body encoding. Please use 'utf-8'.")
         headers = {
             "Accept": "application/sparql-results+json",
             "Content-Type": "application/sparql-query",
@@ -1785,22 +1178,46 @@ def oevkg_search(request):
             )
             response.raise_for_status()
         except requests.RequestException as e:
-            return HttpResponseServerError(
-                f"Error contacting SPARQL endpoint: {str(e)}"
-            )
+            raise APIError(f"Error contacting SPARQL endpoint: {str(e)}")
 
         # res: something like [{"label": "testlabel", "resource": "testresource"}]
         # Maybe validate using shacl or other data model descriptor file
         try:
             res = response.json()
         except json.JSONDecodeError:
-            return HttpResponseServerError("Error decoding SPARQL endpoint response.")
+            raise APIError("Error decoding SPARQL endpoint response.")
     else:
-        return HttpResponseServerError(
+        raise APIError(
             "The SPARQL endpoint for OEVKG is not setup. Please contact your server admin."  # noqa
         )
     # send back to client
     return JsonResponse(res, safe=False)
+
+
+class OekgSparqlAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @api_exception
+    def post(self, request: Request) -> JsonLikeResponse:
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict.get("query", "")
+        response_format = request_data_dict.get("format", "json")  # Default format
+
+        if not validate_public_sparql_query(payload_query):
+            raise ValidationError(
+                "Invalid SPARQL query. Update/delete queries are not allowed."
+            )
+
+        try:
+            content, content_type = execute_sparql_query(payload_query, response_format)
+        except ValueError as e:
+            raise ValidationError(str(e))
+
+        if content_type == "application/sparql-results+json":
+            return Response(content)
+        else:
+            return Response(content, content_type=content_type)
 
 
 # Energyframework, Energymodel
@@ -1832,15 +1249,17 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     Used for the scenario bundles react app to be able to populate
     form select options with existing datasets from scenario topic.
     """
-    queryset = DBTable.objects.filter(topics__name="scenario")
+
+    queryset = Table.objects.filter(topics__name=TOPIC_SCENARIO)
     serializer_class = ScenarioDataTablesSerializer
 
 
-class ManageOekgScenarioDatasets(APIView):
+class ManageOekgScenarioDatasetsAPIView(APIView):
     permission_classes = [IsAuthenticated]  # Require authentication
 
+    @api_exception
     @post_only_if_user_is_owner_of_scenario_bundle
-    def post(self, request):
+    def post(self, request: Request) -> JsonLikeResponse:
         serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1858,60 +1277,103 @@ class ManageOekgScenarioDatasets(APIView):
 
         return Response(response_data, status=status.HTTP_200_OK)
 
-    # @post_only_if_user_is_owner_of_scenario_bundle
-    # def delete(self, request):
-    #     serializer = ScenarioBundleScenarioDatasetSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         scenario_uuid = serializer.validated_data["scenario"]
-    #         datasets = serializer.validated_data["datasets"]
 
-    #         # Iterate over each dataset to process it properly
-    #         for dataset in datasets:
-    #             dataset_name = dataset["name"]
-    #             dataset_type = dataset["type"]
-
-    #             # Remove the dataset from the scenario in the bundle
-    #             success = remove_datasets_from_scenario(
-    #                 scenario_uuid, dataset_name, dataset_type
-    #             )
-
-    #             if not success:
-    #                 return Response(
-    #                     {"error": f"Failed to remove dataset {dataset_name}"},
-    #                     status=status.HTTP_400_BAD_REQUEST,
-    #                 )
-
-    #         return Response(
-    #             {"message": "Datasets removed successfully"},
-    #             status=status.HTTP_200_OK,
-    #         )
-
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class TableSize(APIView):
+class AllTableSizesAPIView(APIView):
     """
-    GET /api/v0/db/table-sizes/?schema=<schema>&table=<table>
-    - schema+table -> single relation (detailed)
-    - schema only  -> all tables in that schema (whitelisted)
-    - none         -> all tables in whitelist
+    GET /api/v0/db/table-sizes/?stopic=<stopic>&table=<table>
+    - table -> single relation (detailed)
+    - none  -> all tables
     """
 
     @api_exception
-    def get(self, request):
-        schema = request.query_params.get("schema")
+    @method_decorator(never_cache)
+    def get(self, request: Request) -> JsonLikeResponse:
         table = request.query_params.get("table")
 
-        allowed = schema_whitelist  # reuse existing whitelist
-
-        if schema and table:
-            if schema not in allowed:
-                raise APIError(f"Schema '{schema}' is not allowed.", status=403)
-            data = actions.get_single_table_size(schema, table, allowed)
+        if table:
+            table_obj = table_or_404(table=table)
+            data = get_single_table_size(table_obj=table_obj)
             if not data:
-                raise APIError(f"Relation {schema}.{table} not found.", status=404)
+                raise APIError(f"Relation {table} not found.", status=404)
             return Response(data)
 
-        # list mode (schema optional)
-        data = actions.list_table_sizes(allowed_schemas=allowed, schema=schema)
+        # list mode
+        data = list_table_sizes()
         return Response(data, status=status.HTTP_200_OK)
+
+
+class AdvancedFetchAPIView(APIView):
+    @api_exception
+    def post(self, request: Request, fetchtype) -> JsonLikeResponse:
+        if fetchtype == "all":
+            return self.do_fetch(request, fetchall)
+        elif fetchtype == "many":
+            return self.do_fetch(request, fetchmany)
+        else:
+            raise APIError("Unknown fetchtype: %s" % fetchtype)
+
+    def do_fetch(self, request: Request, fetch):
+        data = request_data_dict(request)
+        context = {
+            "connection_id": get_or_403(data, "connection_id"),
+            "cursor_id": get_or_403(data, "cursor_id"),
+            "user": request.user,
+        }
+        return OEPStream(
+            (
+                part
+                for row in fetch(context)
+                for part in (self.transform_row(row), "\n")
+            ),
+            content_type="application/json",
+        )
+
+    def transform_row(self, row):
+        return json.dumps(
+            [translate_fetched_cell(cell) for cell in row],
+            default=date_handler,
+        )
+
+
+class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
+    @api_exception
+    def get(self, request: Request) -> JsonLikeResponse:
+        sessions.close_all_for_user(request.user)
+        return JsonResponse({"message": "All connections closed"})
+
+
+AdvancedSearchAPIView = create_ajax_handler(
+    data_search, allow_cors=True, requires_cursor=True
+)
+AdvancedInsertAPIView = create_ajax_handler(data_insert, requires_cursor=True)
+AdvancedDeleteAPIView = create_ajax_handler(data_delete, requires_cursor=True)
+AdvancedUpdateAPIView = create_ajax_handler(data_update, requires_cursor=True)
+
+AdvancedHasSchemaAPIView = create_ajax_handler(has_schema)
+AdvancedHasTableAPIView = create_ajax_handler(has_table)
+AdvancedGetSchemaNamesAPIView = create_ajax_handler(get_schema_names)
+AdvancedGetTableNamesAPIView = create_ajax_handler(get_table_names)
+AdvancedGetViewNamesAPIView = create_ajax_handler(get_view_names)
+AdvancedGetViewDefinitionAPIView = create_ajax_handler(get_view_definition)
+AdvancedGetColumnsAPIView = create_ajax_handler(get_columns)
+AdvancedGetPkConstraintAPIView = create_ajax_handler(get_pk_constraint)
+AdvancedGetForeignKeysAPIView = create_ajax_handler(get_foreign_keys)
+AdvancedGetIndexesAPIView = create_ajax_handler(get_indexes)
+AdvancedGetUniqueConstraintsAPIView = create_ajax_handler(get_unique_constraints)
+
+AdvancedConnectionOpenAPIView = create_ajax_handler(open_raw_connection)
+AdvancedConnectionCloseAPIView = create_ajax_handler(close_raw_connection)
+AdvancedConnectionCommitAPIView = create_ajax_handler(commit_raw_connection)
+AdvancedConnectionRollbackAPIView = create_ajax_handler(rollback_raw_connection)
+
+AdvancedCursorOpenAPIView = create_ajax_handler(open_cursor)
+AdvancedCursorCloseAPIView = create_ajax_handler(close_cursor)
+AdvancedCursorFetchOneAPIView = create_ajax_handler(fetchone)
+
+AdvancedSetIsolationLevelAPIView = create_ajax_handler(set_isolation_level)
+AdvancedGetIsolationLevelAPIView = create_ajax_handler(get_isolation_level)
+AdvancedDoBeginTwophaseAPIView = create_ajax_handler(do_begin_twophase)
+AdvancedDoPrepareTwophaseAPIView = create_ajax_handler(do_prepare_twophase)
+AdvancedDoRollbackTwophaseAPIView = create_ajax_handler(do_rollback_twophase)
+AdvancedDoCommitTwophaseAPIView = create_ajax_handler(do_commit_twophase)
+AdvancedDoRecoverTwophaseAPIView = create_ajax_handler(do_recover_twophase)
