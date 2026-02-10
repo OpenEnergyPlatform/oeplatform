@@ -180,13 +180,15 @@ from api.utils import (
     table_or_404,
 )
 from api.validators.column import validate_column_names
-from api.validators.identifier import _assert_valid_identifier_name
+from api.validators.identifier import (
+    _assert_valid_identifier_name,
+    assert_valid_table_name,
+)
 from dataedit.models import Dataset, Embargo
+from dataedit.models import Table
 from dataedit.models import Table as DBTable
 from dataedit.models import Topic
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
-from api.validators.identifier import assert_valid_table_name
-from dataedit.models import Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -217,7 +219,7 @@ class MetadataAPIView(APIView):
     makes it easy to integrate as no further changes to validation are required for now.
     Datasets are handled in the model.Datasets & api views.
     """
-    
+
     @api_exception
     @method_decorator(never_cache)
     def get(self, request: Request, table: str) -> JsonLikeResponse:
