@@ -12,21 +12,7 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
-- Add a copy result URL button to OEOX plugin feature
-  [(#2227)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2227)
-
 ### Bugs
-
-- Fixed a problem with the OEO annotation feature which 1. leads to users cant
-  select a match found in the OEO using the autocomplete search 2. Search
-  results include unwanted artifacts which leads to false annotation results
-  [(#2227)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2227)
-
-- Fix several bugs in the the Scenario Bundle comparison feature. It now renders
-  study descriptors properly and comparison of scenarios linking to external
-  sources do not raise an error resulting in a blank page. Issues with the
-  experimental quantitative comparison persist.
-  [#2225 ](https://github.com/OpenEnergyPlatform/oeplatform/pull/2225)
 
 ## Documentation updates
 
