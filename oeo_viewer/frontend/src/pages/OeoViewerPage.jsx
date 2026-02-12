@@ -1,17 +1,17 @@
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   EuiPageTemplate,
   EuiPanel,
   EuiResizableContainer,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
-  useCurrentEuiBreakpoint,
   useGeneratedHtmlId,
   EuiButtonEmpty,
+  useCurrentEuiBreakpoint, // <--- Re-added for responsiveness
+  useEuiTheme,             // <--- Re-added for spacing
 } from "@elastic/eui";
 
 import TssAutocomplete from "../features/terminology/components/TssAutocomplete";
@@ -26,29 +26,21 @@ function getIriFromSelection(sel) {
   return item?.iri || "";
 }
 
-function AccordionShim({ id, title, initialIsOpen = false, isOpen, onToggle, children }) {
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(initialIsOpen);
-  const controlled = typeof isOpen === "boolean";
-  const open = controlled ? isOpen : uncontrolledOpen;
-
-  const setOpen = (next) => {
-    if (!controlled) setUncontrolledOpen(next);
-    onToggle?.(next);
-  };
-
+function AccordionShim({ id, title, initialIsOpen = false, children }) {
+  const [isOpen, setIsOpen] = useState(initialIsOpen);
   return (
     <EuiPanel color="transparent" hasShadow={false} paddingSize="s" style={{ paddingInline: 0 }}>
       <EuiButtonEmpty
-        onClick={() => setOpen(!open)}
+        onClick={() => setIsOpen(!isOpen)}
         aria-controls={id}
-        aria-expanded={open}
+        aria-expanded={isOpen}
         flush="left"
-        iconType={open ? "arrowDown" : "arrowRight"}
+        iconType={isOpen ? "arrowDown" : "arrowRight"}
         iconSide="left"
       >
         {title}
       </EuiButtonEmpty>
-      <div id={id} hidden={!open} style={{ marginTop: 8 }}>
+      <div id={id} hidden={!isOpen} style={{ marginTop: 8 }}>
         {children}
       </div>
     </EuiPanel>
@@ -57,24 +49,20 @@ function AccordionShim({ id, title, initialIsOpen = false, isOpen, onToggle, chi
 
 export default function OeoViewerPage() {
   const { euiTheme } = useEuiTheme();
+
+  // 1. Detect Screen Size
   const bp = useCurrentEuiBreakpoint();
   const isMobile = bp === "xs" || bp === "s";
 
-  const [autoSelection, setAutoSelection] = useState(null);
   const [selectedIri, setSelectedIri] = useState("");
-  const [pathOpen, setPathOpen] = useState(false);
 
   const mobileInfoId = useGeneratedHtmlId({ prefix: "oeoInfoMobile" });
   const mobileHierarchyId = useGeneratedHtmlId({ prefix: "oeoHierarchyMobile" });
-  const mobilePathId = useGeneratedHtmlId({ prefix: "oeoPathMobile" });
   const desktopInfoId = useGeneratedHtmlId({ prefix: "oeoInfoDesktop" });
-  const desktopPathId = useGeneratedHtmlId({ prefix: "oeoPathDesktop" });
 
   const handleAutocompleteChange = (sel) => {
-    setAutoSelection(sel);
     const iri = getIriFromSelection(sel);
     setSelectedIri(iri);
-    if (iri) setPathOpen(true);
   };
 
   const handleHierarchyClick = (...args) => {
@@ -84,43 +72,35 @@ export default function OeoViewerPage() {
       const a = args[0];
       iri = typeof a === "string" ? a : a?.entity?.iri || a?.iri || "";
     }
-    if (!iri) return;
-    setSelectedIri(iri);
+    if (iri) setSelectedIri(iri);
   };
 
   const handleNavigateToOntology = (...args) => {
-    let target = "";
-    if (args.length >= 3) target = args[2]?.iri || args[2]?.entity?.iri || "";
-    else if (args.length === 1) {
-      const a = args[0];
-      target = typeof a === "string" ? a : a?.entity?.iri || a?.iri || "";
+    let url = "";
+    if (args.length >= 3 && args[2]?.iri) {
+      url = args[2].iri;
+    } else if (args[0] && typeof args[0] === "object") {
+      url = args[0].url || args[0].iri || args[0].ontologyIri || "";
+    } else if (typeof args[0] === "string") {
+      url = args[0];
     }
-    try {
-      const u = new URL(target);
-      if (u.protocol === "http:" || u.protocol === "https:") {
-        window.open(target, "_blank", "noopener,noreferrer");
-      }
-    } catch { }
+
+    if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    } else {
+      console.warn("TSS: Could not extract valid IRI from navigation event", args);
+    }
   };
 
-  const fullHierarchy = (
+  // Reusable Hierarchy Component to ensure consistent props between Desktop/Mobile
+  const hierarchyComponent = (
     <TssHierarchy
-      iri=""
+      iri="" // Keep full tree visible
       keepExpansionStates={true}
       onNavigateToEntity={handleHierarchyClick}
       onNavigateToOntology={handleNavigateToOntology}
     />
   );
-
-  const pathHierarchy =
-    selectedIri ? (
-      <TssHierarchy
-        iri={selectedIri}
-        showSiblingsOnInit={true}
-        onNavigateToEntity={handleHierarchyClick}
-        onNavigateToOntology={handleNavigateToOntology}
-      />
-    ) : null;
 
   return (
     <EuiPageTemplate paddingSize="m" grow={false} restrictWidth={1400}>
@@ -129,87 +109,92 @@ export default function OeoViewerPage() {
         <EuiSpacer size="m" />
 
         {isMobile ? (
+          /* --- MOBILE LAYOUT (Stacked Accordions) --- */
           <EuiPanel hasShadow={false} color="transparent" paddingSize="s">
-            <AccordionShim id={mobileHierarchyId} title="Full hierarchy" initialIsOpen={true}>
-              <div style={{ padding: euiTheme.size.s }}>{fullHierarchy}</div>
+
+            {/* 1. Hierarchy in Accordion */}
+            <AccordionShim id={mobileHierarchyId} title="Full hierarchy" initialIsOpen={false}>
+              <div style={{ padding: euiTheme.size.s }}>
+                {hierarchyComponent}
+              </div>
             </AccordionShim>
 
             <EuiSpacer size="m" />
 
-            <AccordionShim id={mobilePathId} title="Path to selected entity" isOpen={pathOpen} onToggle={setPathOpen}>
-              <div style={{ padding: euiTheme.size.s }}>{pathHierarchy}</div>
-            </AccordionShim>
-
-            <EuiSpacer size="m" />
-
-            <AccordionShim id={mobileInfoId} title="Open Energy Ontology — Info" initialIsOpen={false}>
+            {/* 2. Info in Accordion */}
+            <AccordionShim id={mobileInfoId} title="About Open Energy Ontology" initialIsOpen={false}>
               <TssOeoInfo />
             </AccordionShim>
 
             <EuiSpacer size="m" />
 
+            {/* 3. Search */}
             <TssAutocomplete onChange={handleAutocompleteChange} />
 
             <EuiSpacer size="m" />
 
+            {/* 4. Metadata Panel */}
             <EuiPanel paddingSize="m">
               <EuiText>
-                <h3 style={{ marginTop: 0 }}>Metadata</h3>
+                <h3 style={{ marginTop: 0 }}>Entity Metadata</h3>
               </EuiText>
 
               {selectedIri ? (
-                <TssMetadata iri={selectedIri} tabs={{ crossRef: false, termDepiction: false, terminologyInfo: false }} />
+                <TssMetadata
+                  iri={selectedIri}
+                  tabs={{ crossRef: false, termDepiction: false, terminologyInfo: false }}
+                />
               ) : (
-                <EuiText size="s" color="subdued" aria-live="polite">
-                  <p>Use the autocomplete search to display the metadata here.</p>
+                <EuiText size="s" color="subdued">
+                  <p>Use the autocomplete search or hierarchy to view details.</p>
                 </EuiText>
               )}
             </EuiPanel>
           </EuiPanel>
         ) : (
-          <EuiResizableContainer style={{ minHeight: 520 }}>
+          /* --- DESKTOP LAYOUT (Split View) --- */
+          <EuiResizableContainer style={{ minHeight: 600 }}>
             {(EuiResizablePanel) => (
               <>
-                <EuiResizablePanel initialSize={30} minSize="22%" tabIndex={0} paddingSize="none">
+                {/* LEFT COLUMN: Fixed Full Hierarchy */}
+                <EuiResizablePanel initialSize={30} minSize="25%" paddingSize="none">
                   <div style={{ position: "sticky", top: 16, maxHeight: "calc(100vh - 160px)", overflow: "auto" }}>
                     <EuiPanel hasShadow={false} color="subdued" paddingSize="s">
                       <EuiText size="s">
-                        <h3 style={{ marginTop: 0 }}>Full hierarchy</h3>
+                        <h3 style={{ marginTop: 0 }}>Ontology Hierarchy</h3>
                       </EuiText>
-
-                      {fullHierarchy}
-
-                      <EuiSpacer size="m" />
-
-                      <AccordionShim id={desktopPathId} title="Path to selected entity" isOpen={pathOpen} onToggle={setPathOpen}>
-                        {pathHierarchy}
-                      </AccordionShim>
+                      {hierarchyComponent}
                     </EuiPanel>
                   </div>
                 </EuiResizablePanel>
 
+                {/* RIGHT COLUMN: Search and Details */}
                 <EuiResizablePanel initialSize={70} minSize="40%" paddingSize="none">
-                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m" style={{ position: "relative", zIndex: 1 }}>
-                    <AccordionShim id={desktopInfoId} title="Open Energy Ontology — Info" initialIsOpen={false}>
+                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+
+                    <AccordionShim id={desktopInfoId} title="About Open Energy Ontology" initialIsOpen={false}>
                       <TssOeoInfo />
                     </AccordionShim>
 
-                    <EuiSpacer size="m" />
+                    <EuiSpacer size="l" />
 
                     <TssAutocomplete onChange={handleAutocompleteChange} />
 
-                    <EuiSpacer size="m" />
+                    <EuiSpacer size="l" />
 
                     <EuiPanel paddingSize="m">
                       <EuiText>
-                        <h3 style={{ marginTop: 0 }}>Metadata</h3>
+                        <h3 style={{ marginTop: 0 }}>Entity Metadata</h3>
                       </EuiText>
 
                       {selectedIri ? (
-                        <TssMetadata iri={selectedIri} tabs={{ crossRef: false, termDepiction: false, terminologyInfo: false }} />
+                        <TssMetadata
+                          iri={selectedIri}
+                          tabs={{ crossRef: false, termDepiction: false, terminologyInfo: false }}
+                        />
                       ) : (
-                        <EuiText size="s" color="subdued" aria-live="polite">
-                          <p>Use the autocomplete search to display the metadata here.</p>
+                        <EuiText size="s" color="subdued">
+                          <p>Select a term from the hierarchy or use the search above to view details.</p>
                         </EuiText>
                       )}
                     </EuiPanel>
