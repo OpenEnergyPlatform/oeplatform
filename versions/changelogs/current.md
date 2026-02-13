@@ -48,7 +48,6 @@ SPDX-License-Identifier: CC0-1.0
 - Removed the legacy custom backend and frontend implementation of the OEO
   Viewer. [(#2222)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2222)
 
-
 ## Bugs
 
 - Fixed an issue related to the Bootstrap vs EUI which lead to strange styling
