@@ -22,7 +22,7 @@ class TestViewsOntology(TestViewsTestCase):
         self.get("ontology:index")
         self.get(
             "ontology:oeo-class-detail",
-            kwargs={"ontology": "oeo", "module_or_id": "BFO_0000001"},
+            kwargs={"ontology": "oeo", "term_id": "BFO_0000001"},
         )
         self.get("ontology:oeo-s-c")
         self.get("ontology:oeo-steering-committee")
