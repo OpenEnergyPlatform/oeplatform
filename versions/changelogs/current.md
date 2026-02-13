@@ -10,9 +10,29 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
-### Features
+- Reworked the OEO Viewer using React and the
+  [TSS Widgets library](https://ts4nfdi.github.io/terminology-service-suite/comp/latest/?path=/docs/overview--docs),
+  providing enhanced usability.
+  [(#2222)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2222)
+- Shifted OEO Viewer data retrieval to the
+  [TIB Terminology Service](https://terminology.tib.eu/ts) (OLSv4 backend),
+  significantly reducing future maintenance efforts by leveraging
+  NFDI-maintained widgets.
+  [(#2222)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2222)
+
+## Removed
+
+- Removed the legacy custom backend and frontend implementation of the OEO
+  Viewer. [(#2222)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2222)
+
+## Features
 
 ### Bugs
+
+- Fixed an issue related to the Bootstrap vs EUI which lead to strange styling
+  when using the autocomplete widget form
+  [TSS Widgets library](https://ts4nfdi.github.io/terminology-service-suite/comp/latest/?path=/docs/overview--docs)
+  [(#2222)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2222)
 
 ## Documentation updates
 
