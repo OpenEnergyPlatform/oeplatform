@@ -1,13 +1,57 @@
 <div id="success-message">
   {% if response_data.success %}
-    <h2>{{ response_data.message }}</h2>
-    <p>Your new unit has been created successfully.</p>
-    <p>
-      <strong>New Composed Unit URI:</strong>
-    </p>
-    <p>{{ response_data.newComposedUnitURI }}</p>
+    <div class="alert alert-success" role="alert">
+      <h4 class="alert-heading">{{ response_data.message }}</h4>
+      <p>Your new unit has been created successfully.</p>
+      <hr>
+      <p class="mb-0">
+        <strong>New Composed Unit URI:</strong>
+      </p>
+      <div class="input-group mt-2">
+        <input type="text"
+               class="form-control"
+               value="{{ response_data.newComposedUnitURI }}"
+               id="new-unit-uri"
+               readonly>
+        <button class="btn btn-outline-secondary"
+                type="button"
+                onclick="copyToClipboard(this)">
+          <i class="fa fa-copy"></i> Copy
+        </button>
+      </div>
+    </div>
   {% else %}
-    <h2>{{ response_data.message }}</h2>
-    <p>{{ response_data.errors.error }}</p>
+    <div class="alert alert-danger">
+      <h2>{{ response_data.message }}</h2>
+      <p>{{ response_data.errors.error }}</p>
+    </div>
   {% endif %}
 </div>
+<script>
+  function copyToClipboard(btnElement) {
+    // Get the text field
+    var copyText = document.getElementById("new-unit-uri");
+
+    // Select the text field (visual feedback for user)
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // For mobile devices
+
+    // Copy the text inside the text field
+    navigator.clipboard.writeText(copyText.value).then(() => {
+
+      // Visual Feedback: Change button text
+      const originalHtml = btnElement.innerHTML;
+      btnElement.innerHTML = '<i class="fa fa-check"></i> Copied!';
+      btnElement.classList.replace('btn-outline-secondary', 'btn-success');
+
+      // Revert back after 2 seconds
+      setTimeout(() => {
+        btnElement.innerHTML = originalHtml;
+        btnElement.classList.replace('btn-success', 'btn-outline-secondary');
+      }, 2000);
+
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+  }
+</script>
