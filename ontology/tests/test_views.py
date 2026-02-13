@@ -21,7 +21,7 @@ class TestViewsOntology(TestViewsTestCase):
 
         self.get("ontology:index")
         self.get(
-            "ontology:oeo-classes",
+            "ontology:oeo-class-detail",
             kwargs={"ontology": "oeo", "module_or_id": "BFO_0000001"},
         )
         self.get("ontology:oeo-s-c")
