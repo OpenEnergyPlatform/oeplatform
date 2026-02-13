@@ -416,13 +416,16 @@ window.MetaEdit = function (config) {
               jseditor_editor,
               result
             ) {
-              selected_value = String(result.label)
-                .replaceAll("<B>", "")
-                .replaceAll("</B>", "");
+             let selected_value = String(result.label)
+                  .replace(/<\/?b>/gi, ""); // Remove <b> tags if present
 
               let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
-              path_uri.setValue(String(result.resource));
+              
+              // Check if the editor exists before setting value to avoid other errors
+              if (path_uri) {
+                  path_uri.setValue(String(result.resource));
+              }
 
               return selected_value;
             },
@@ -430,8 +433,13 @@ window.MetaEdit = function (config) {
           button: {
             openModalAction: function openOeoExtPlugin(jseditor, e) {
               // Perform the HTMX request or any other desired action
+              var targetUrl = config.create_url; 
 
-              htmx.ajax("GET", createUrl, {
+              if (!targetUrl) {
+                  console.error("MetaEdit Error: config.create_url is missing!");
+                  return;
+              }
+              htmx.ajax("GET", targetUrl, {
                 target: ".modal-body",
                 swap: "innerHTML",
                 trigger: "click",
@@ -532,13 +540,16 @@ window.MetaEdit = function (config) {
               jseditor_editor,
               result
             ) {
-              selected_value = String(result.label)
-                .replaceAll("<B>", "")
-                .replaceAll("</B>", "");
+              let selected_value = String(result.label)
+                  .replace(/<\/?b>/gi, "");
 
               let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
-              path_uri.setValue(String(result.resource));
+              
+              // Check if the editor exists before setting value to avoid other errors
+              if (path_uri) {
+                  path_uri.setValue(String(result.resource));
+              }
 
               return selected_value;
             },
@@ -546,8 +557,14 @@ window.MetaEdit = function (config) {
           button: {
             openModalAction: function openOeoExtPlugin(jseditor, e) {
               // Perform the HTMX request or any other desired action
+              var targetUrl = config.create_url; 
 
-              htmx.ajax("GET", createUrl, {
+              if (!targetUrl) {
+                  console.error("MetaEdit Error: config.create_url is missing!");
+                  return;
+              }
+              
+              htmx.ajax("GET", targetUrl, {
                 target: ".modal-body",
                 swap: "innerHTML",
                 trigger: "click",
