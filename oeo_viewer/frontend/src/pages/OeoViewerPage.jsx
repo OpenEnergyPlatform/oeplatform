@@ -10,8 +10,8 @@ import {
   EuiText,
   useGeneratedHtmlId,
   EuiButtonEmpty,
-  useCurrentEuiBreakpoint, // <--- Re-added for responsiveness
-  useEuiTheme,             // <--- Re-added for spacing
+  useCurrentEuiBreakpoint,
+  useEuiTheme,
 } from "@elastic/eui";
 
 import TssAutocomplete from "../features/terminology/components/TssAutocomplete";
@@ -19,12 +19,6 @@ import TssMetadata from "../features/terminology/components/TssMetadata";
 import TssOeoInfo from "../features/terminology/components/TssOeoInfo";
 import TssHierarchy from "../features/terminology/components/TssHierarchy";
 import HowToUseViewer from "../features/terminology/components/HowToUseViewer";
-
-function getIriFromSelection(sel) {
-  if (!sel) return "";
-  const item = Array.isArray(sel) ? sel[0] : sel;
-  return item?.iri || "";
-}
 
 function AccordionShim({ id, title, initialIsOpen = false, children }) {
   const [isOpen, setIsOpen] = useState(initialIsOpen);
@@ -50,29 +44,45 @@ function AccordionShim({ id, title, initialIsOpen = false, children }) {
 export default function OeoViewerPage() {
   const { euiTheme } = useEuiTheme();
 
-  // 1. Detect Screen Size
+  // Detect Screen Size
   const bp = useCurrentEuiBreakpoint();
   const isMobile = bp === "xs" || bp === "s";
 
-  const [selectedIri, setSelectedIri] = useState("");
+  // Use an object to track both IRI and Type for the Metadata widget
+  const [selectedEntity, setSelectedEntity] = useState({ iri: "", type: "class" });
 
   const mobileInfoId = useGeneratedHtmlId({ prefix: "oeoInfoMobile" });
   const mobileHierarchyId = useGeneratedHtmlId({ prefix: "oeoHierarchyMobile" });
   const desktopInfoId = useGeneratedHtmlId({ prefix: "oeoInfoDesktop" });
 
   const handleAutocompleteChange = (sel) => {
-    const iri = getIriFromSelection(sel);
-    setSelectedIri(iri);
+    if (!sel) {
+      setSelectedEntity({ iri: "", type: "class" });
+      return;
+    }
+    const item = Array.isArray(sel) ? sel[0] : sel;
+    setSelectedEntity({
+      iri: item?.iri || "",
+      type: item?.type || "class",
+    });
   };
 
   const handleHierarchyClick = (...args) => {
     let iri = "";
-    if (args.length >= 3) iri = args[2]?.iri || args[2]?.entity?.iri || "";
-    else if (args.length === 1) {
+    let type = "class";
+
+    if (args.length >= 3) {
+      iri = args[2]?.iri || args[2]?.entity?.iri || "";
+      type = args[1] || "class"; // args[1] contains the entity type
+    } else if (args.length === 1) {
       const a = args[0];
       iri = typeof a === "string" ? a : a?.entity?.iri || a?.iri || "";
+      type = a?.type || "class";
     }
-    if (iri) setSelectedIri(iri);
+
+    if (iri) {
+      setSelectedEntity({ iri, type });
+    }
   };
 
   const handleNavigateToOntology = (...args) => {
@@ -92,10 +102,10 @@ export default function OeoViewerPage() {
     }
   };
 
-  // Reusable Hierarchy Component to ensure consistent props between Desktop/Mobile
+  // Reusable Hierarchy Component
   const hierarchyComponent = (
     <TssHierarchy
-      iri="" // Keep full tree visible
+      iri=""
       keepExpansionStates={true}
       onNavigateToEntity={handleHierarchyClick}
       onNavigateToOntology={handleNavigateToOntology}
@@ -103,16 +113,16 @@ export default function OeoViewerPage() {
   );
 
   return (
-    <EuiPageTemplate paddingSize="m" grow={false} restrictWidth={1400}>
+    // Set restrictWidth to false so it uses the full available screen width
+    <EuiPageTemplate paddingSize="m" grow={false} restrictWidth={false}>
       <EuiPageTemplate.Section grow={false}>
         <HowToUseViewer />
         <EuiSpacer size="m" />
 
         {isMobile ? (
-          /* --- MOBILE LAYOUT (Stacked Accordions) --- */
+          /* --- MOBILE LAYOUT --- */
           <EuiPanel hasShadow={false} color="transparent" paddingSize="s">
 
-            {/* 1. Hierarchy in Accordion */}
             <AccordionShim id={mobileHierarchyId} title="Full hierarchy" initialIsOpen={false}>
               <div style={{ padding: euiTheme.size.s }}>
                 {hierarchyComponent}
@@ -121,27 +131,25 @@ export default function OeoViewerPage() {
 
             <EuiSpacer size="m" />
 
-            {/* 2. Info in Accordion */}
             <AccordionShim id={mobileInfoId} title="About Open Energy Ontology" initialIsOpen={false}>
               <TssOeoInfo />
             </AccordionShim>
 
             <EuiSpacer size="m" />
 
-            {/* 3. Search */}
             <TssAutocomplete onChange={handleAutocompleteChange} />
 
             <EuiSpacer size="m" />
 
-            {/* 4. Metadata Panel */}
             <EuiPanel paddingSize="m">
               <EuiText>
                 <h3 style={{ marginTop: 0 }}>Entity Metadata</h3>
               </EuiText>
 
-              {selectedIri ? (
+              {selectedEntity.iri ? (
                 <TssMetadata
-                  iri={selectedIri}
+                  iri={selectedEntity.iri}
+                  entityType={selectedEntity.type}
                   tabs={{ crossRef: false, termDepiction: false, terminologyInfo: false }}
                 />
               ) : (
@@ -152,12 +160,12 @@ export default function OeoViewerPage() {
             </EuiPanel>
           </EuiPanel>
         ) : (
-          /* --- DESKTOP LAYOUT (Split View) --- */
+          /* --- DESKTOP LAYOUT --- */
           <EuiResizableContainer style={{ minHeight: 600 }}>
             {(EuiResizablePanel) => (
               <>
-                {/* LEFT COLUMN: Fixed Full Hierarchy */}
-                <EuiResizablePanel initialSize={30} minSize="25%" paddingSize="none">
+                {/* Increased initialSize from 30 to 35 for more hierarchy width */}
+                <EuiResizablePanel initialSize={35} minSize="25%" paddingSize="none">
                   <div style={{ position: "sticky", top: 16, maxHeight: "calc(100vh - 160px)", overflow: "auto" }}>
                     <EuiPanel hasShadow={false} color="subdued" paddingSize="s">
                       <EuiText size="s">
@@ -168,8 +176,8 @@ export default function OeoViewerPage() {
                   </div>
                 </EuiResizablePanel>
 
-                {/* RIGHT COLUMN: Search and Details */}
-                <EuiResizablePanel initialSize={70} minSize="40%" paddingSize="none">
+                {/* Decreased initialSize from 70 to 65 to balance the left side */}
+                <EuiResizablePanel initialSize={65} minSize="40%" paddingSize="none">
                   <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
 
                     <AccordionShim id={desktopInfoId} title="About Open Energy Ontology" initialIsOpen={false}>
@@ -187,9 +195,10 @@ export default function OeoViewerPage() {
                         <h3 style={{ marginTop: 0 }}>Entity Metadata</h3>
                       </EuiText>
 
-                      {selectedIri ? (
+                      {selectedEntity.iri ? (
                         <TssMetadata
-                          iri={selectedIri}
+                          iri={selectedEntity.iri}
+                          entityType={selectedEntity.type}
                           tabs={{ crossRef: false, termDepiction: false, terminologyInfo: false }}
                         />
                       ) : (
