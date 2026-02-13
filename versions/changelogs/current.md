@@ -29,6 +29,11 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Bugs
 
+- Fixed an issue related to the Bootstrap vs EUI which lead to strange styling
+  when using the autocomplete widget form
+  [TSS Widgets library](https://ts4nfdi.github.io/terminology-service-suite/comp/latest/?path=/docs/overview--docs)
+  [(#2222)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2222)
+
 ## Documentation updates
 
 ## Code Quality
