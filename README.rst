@@ -19,7 +19,7 @@ Open Energy Platform (OEP)
    * - License
      - |badge_license| |badge_reuse|
    * - Documentation
-     - |badge_documentation| |badge_mkdocs| | DeepWiki |
+     - |badge_documentation| |badge_mkdocs| |DeepWiki|
    * - Tests
      - |badge_tox| |badge_precommit|
    * - Publication
@@ -118,8 +118,10 @@ License and Citation
 
 .. |badge_repo_counts| image:: https://hits.sh/github.com/OpenEnergyPlatform/oeplatform.svg
     :target: https://hits.sh/github.com/OpenEnergyPlatform/oeplatform/
+    :alt: Hits
 
 .. |DeepWiki| image:: https://deepwiki.com/badge.svg
     :target: https://deepwiki.com/OpenEnergyPlatform/oeplatform
+    :alt: Devin DeepWiki
 
-    :alt: Hits
+
