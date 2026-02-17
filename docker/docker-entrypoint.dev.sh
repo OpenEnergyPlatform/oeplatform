@@ -4,6 +4,21 @@ set -euo pipefail
 # give Postgres a moment
 sleep 5
 
+# ================================================================
+# WINDOWS COMPATIBILITY CHECK (ohne tatsächliche chown-Ausführung)
+# ================================================================
+SKIP_PERMS=""
+
+# Method 1: Try a harmless chown on /tmp (always works on real Linux)
+if ! touch /tmp/chown-test && chown $(id -u):$(id -g) /tmp/chown-test 2>/dev/null; then
+  rm -f /tmp/chown-test 2>/dev/null
+  echo "🐧 Linux environment detected → Full permission management enabled"
+else
+  echo "🪟 Windows/Docker Desktop detected → Permission operations will be skipped"
+  SKIP_PERMS="1"
+  rm -f /tmp/chown-test 2>/dev/null
+fi
+
 # ----------------------------------------------------------------
 # Bootstrap permissions on bind-mounted dirs so appuser can write
 # ----------------------------------------------------------------
@@ -13,12 +28,13 @@ for d in ontologies media/oeo_ext static; do
   # ensure the directory exists
   mkdir -p "$TARGET"
 
-  # make appuser own it
-  chown -R appuser:appgroup "$TARGET"
-
-  # owner & group: read/write + conditional-exec (dirs executable,
-  # files only if already marked) ; others: read + conditional-exec
-  chmod -R u+rwX,g+rwX,o+rX "$TARGET"
+  # Only do chown/chmod if not on Windows
+  if [ -z "$SKIP_PERMS" ]; then
+    # make appuser own it
+    chown -R appuser:appgroup "$TARGET" 2>/dev/null || true
+    # owner & group: read/write + conditional-exec
+    chmod -R u+rwX,g+rwX,o+rX "$TARGET" 2>/dev/null || true
+  fi
 done
 
 # ————————————————————
@@ -32,11 +48,18 @@ if [ ! -d "$ONT_DIR/oeo" ]; then
   wget -qO /tmp/ont.zip \
     https://github.com/OpenEnergyPlatform/ontology/releases/latest/download/build-files.zip
 
-  unzip -q /tmp/ont.zip -d "$ONT_DIR"
+  # WINDOWS FIX: Use -X flag to suppress permission setting during unzip
+  if [ -n "$SKIP_PERMS" ]; then
+    # On Windows: Extract without trying to set permissions
+    unzip -qX /tmp/ont.zip -d "$ONT_DIR" 2>/dev/null || unzip -q /tmp/ont.zip -d "$ONT_DIR"
+  else
+    # On Linux: Normal extraction
+    unzip -q /tmp/ont.zip -d "$ONT_DIR"
+    chown -R appuser:appgroup "$ONT_DIR" 2>/dev/null || true
+    chmod -R u+rwX,g+rwX,o+rX "$ONT_DIR" 2>/dev/null || true
+  fi
+  
   rm /tmp/ont.zip
-
-  chown -R appuser:appgroup "$ONT_DIR"
-  chmod -R u+rwX,g+rwX,o+rX "$ONT_DIR"
 fi
 
 MEDIA_DIR=/home/appuser/app/media/oeo_ext
@@ -46,21 +69,42 @@ if [ ! -f "${MEDIA_DIR}/oeo_ext.owl" ]; then
   cp /home/appuser/app/oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl \
      "$MEDIA_DIR/oeo_ext.owl"
 
-  # fix perms on the new file
-  chown appuser:appgroup "$MEDIA_DIR/oeo_ext.owl"
-  chmod u+rw,g+rw,o+rX "$MEDIA_DIR"
+  # Only do chown/chmod if not on Windows
+  if [ -z "$SKIP_PERMS" ]; then
+    chown appuser:appgroup "$MEDIA_DIR/oeo_ext.owl" 2>/dev/null || true
+    chmod u+rw,g+rw,o+rX "$MEDIA_DIR" 2>/dev/null || true
+  fi
 fi
 
 # ————————————————————
-# 2) Default securitysettings
+# 2) Default securitysettings - FIX für fehlende CORS_ORIGIN_ALLOW_ALL
 # ————————————————————
 SEC=/home/appuser/app/oeplatform/securitysettings.py
 SEC_DEF=/home/appuser/app/oeplatform/securitysettings.py.default
 if [ ! -f "$SEC" ]; then
   echo "Copying default securitysettings…"
   cp "$SEC_DEF" "$SEC"
-  chown appuser:appgroup "$SEC"
-  chmod u+rw,g+rw,o+rX "$SEC"
+  
+  # WINDOWS FIX: Ensure CORS_ORIGIN_ALLOW_ALL is defined if missing
+  if ! grep -q "CORS_ORIGIN_ALLOW_ALL" "$SEC"; then
+    echo "" >> "$SEC"
+    echo "# Windows compatibility fix" >> "$SEC"
+    echo "CORS_ORIGIN_ALLOW_ALL = True" >> "$SEC"
+  fi
+  
+  # Only do chown/chmod if not on Windows
+  if [ -z "$SKIP_PERMS" ]; then
+    chown appuser:appgroup "$SEC" 2>/dev/null || true
+    chmod u+rw,g+rw,o+rX "$SEC" 2>/dev/null || true
+  fi
+else
+  # File exists, but check if CORS_ORIGIN_ALLOW_ALL is missing
+  if ! grep -q "CORS_ORIGIN_ALLOW_ALL" "$SEC"; then
+    echo "Adding missing CORS_ORIGIN_ALLOW_ALL to existing securitysettings.py…"
+    echo "" >> "$SEC"
+    echo "# Windows compatibility fix" >> "$SEC"
+    echo "CORS_ORIGIN_ALLOW_ALL = True" >> "$SEC"
+  fi
 fi
 
 # ————————————————————
@@ -73,13 +117,17 @@ echo "Applying Alembic migrations…"
 python manage.py alembic upgrade head
 
 # ————————————————————
-# 4) Static & compress
+# 4) Static & compress - SKIP IN DEV ON WINDOWS
 # ————————————————————
-echo "Collecting static files…"
-python manage.py collectstatic --no-input
+if [ -z "$SKIP_PERMS" ]; then
+  echo "Collecting static files…"
+  python manage.py collectstatic --no-input
 
-echo "Compressing assets…"
-python manage.py compress --force
+  echo "Compressing assets…"
+  python manage.py compress --force
+else
+  echo "⏭️  Skipping collectstatic/compress on Windows (Django will serve static files directly)"
+fi
 
 # ————————————————————
 # 5) Create dev user
