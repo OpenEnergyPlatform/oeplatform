@@ -30,7 +30,8 @@ export default function EntitySearchPage() {
         <EuiPageTemplate paddingSize="m">
             <EuiPageTemplate.Section>
                 <EuiTitle size="l">
-                    <h1>{ontology ? ontology.toUpperCase() : ""} Entity Search</h1>
+                    {/* <h1>{ontology ? ontology.toUpperCase() : ""} Entity Search</h1> */}
+                    <h1>Open Energy Ontology Search</h1>
                 </EuiTitle>
                 <EuiSpacer size="m" />
 
