@@ -21,7 +21,7 @@ export default function TssEntityRelations({
             ontologyId={activeOntology}
             iri={iri}
             entityType={entityType}
-            hasTitle={true}
+            hasTitle={false}
             showBadges={true}
             parameter=""
             onNavigateToDisambiguate={() => { }}
