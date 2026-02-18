@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
+  EuiButton,
 } from "@elastic/eui";
 
 import TssEntityInfo from "../features/terminology/components/TssEntityInfo";
@@ -37,7 +38,9 @@ export default function OeoIriPages() {
   const { ontology, short_form } = useParams();
   const navigate = useNavigate();
 
+  // The actual IRI used for fetching and external tools
   const fetchIri = resolveIri(ontology, short_form);
+  // The IRI displayed in the UI
   const displayIri = `https://openenergyplatform.org/ontology/${ontology}/${short_form}`;
 
   const [entityType, setEntityType] = useState("class");
@@ -67,19 +70,36 @@ export default function OeoIriPages() {
       <EuiPageTemplate.Section>
         <EuiSpacer size="m" />
 
-        {/* Quick Navigation Buttons */}
-        <TssEntityNavButtons
-          iri={fetchIri}
-          ontologyId={ontology}
-          onNavigate={handleNavigateToEntity}
-        />
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            {/* Quick Navigation Buttons (Parent/Child) */}
+            <TssEntityNavButtons
+              iri={fetchIri}
+              ontologyId={ontology}
+              onNavigate={handleNavigateToEntity}
+            />
+          </EuiFlexItem>
 
-        <EuiSpacer size="m" />
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              // Update the path to match your actual URL structure
+              href={`/viewer/oeo/?iri=${encodeURIComponent(fetchIri)}&type=${encodeURIComponent(entityType)}`}
+              iconType="visMapCoordinate"
+              size="s"
+              fill
+            >
+              Explore this term in OEO Viewer
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="l" />
+
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
-                {ontology ? ontology.toUpperCase() : "Ontology"} Entity: <span style={{ color: "#0071c1" }}>{short_form}</span>
+                {/* {ontology ? ontology.toUpperCase() : "Ontology"} Entity:*/} <span style={{ color: "#0071c1" }}>{short_form}</span>
               </h1>
             </EuiTitle>
             <EuiSpacer size="s" />
