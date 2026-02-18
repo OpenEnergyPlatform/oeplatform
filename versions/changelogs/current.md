@@ -1,11 +1,3 @@
-<!--
-SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-
-SPDX-License-Identifier: CC0-1.0
--->
-
 # Changes to the oeplatform code
 
 ## Features
@@ -15,6 +7,19 @@ SPDX-License-Identifier: CC0-1.0
 - Add interactive parent/child hierarchy navigation and IRI copy functionality
   to entity detail pages
   [(#2234)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2234)
+- **Implemented Cross-Navigation:** Users can now seamlessly switch from an
+  Entity Detail page to the OEO Viewer with the specific term and type
+  pre-selected via URL parameters.
+  [(#2234)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2234)
+- **OEO Viewer Enhancements
+  [(#2238)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2238):**
+  - Added a **"Share View"** button to copy a permanent link to the current
+    visualization configuration.
+  - Added a **"Copy Term IRI"** button to easily retrieve the stable OEP
+    identifier.
+  - Implemented Toast notifications for user feedback on copy actions.
+  - Added responsive layout logic to switch between Split View (Desktop) and
+    Accordion View (Mobile).
 
 ## Changes
 
@@ -39,6 +44,12 @@ SPDX-License-Identifier: CC0-1.0
   significantly reducing future maintenance efforts by leveraging
   NFDI-maintained widgets.
   [(#2222)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2222)
+- **UI/UX Polish
+  [(#2238)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2238):**
+  - Updated visual hierarchy in Metadata widgets (Bold Entity Names, styled
+    Ontology Badges) to improve readability.
+  - Added "How to Use" collapsible guide to the OEO Viewer.
+  - Added links to external resources (Technoportal, TIB TS) for advanced users.
 
 ## Removed
 
@@ -50,11 +61,16 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
-- Fixed an issue related to the Bootstrap vs EUI which lead to strange styling
-  when using the autocomplete widget form
-  [TSS Widgets library](https://ts4nfdi.github.io/terminology-service-suite/comp/latest/?path=/docs/overview--docs)
-  [(#2222)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2222)
+- Fixed an issue related to the Bootstrap vs EUI conflicts which led to strange
+  styling when using the autocomplete widget.
+  [(#2238)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2238)
+- Fixed Graph View responsiveness in the OEO Viewer by overriding hardcoded TSS
+  library dimensions.
+  [(#2238)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2238)
+- Fixed race conditions in URL state management to ensure deep links initialize
+  correctly on page reload.
+  [(#2238)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2238)
 
 ## Documentation updates
 
-## Code Quality
+## Dependencies
