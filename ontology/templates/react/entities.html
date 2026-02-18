@@ -26,7 +26,7 @@
         <a href="{% url 'ontology:ontology-entity-search' ontology_id %}">
           {{ ontology_id|upper }} Search
         </a>
-        / Entities - {{ term_id }}
+        / Entity: {{ term_id }}
       {% else %}
         {{ ontology_id|upper }} Search
       {% endif %}
@@ -40,7 +40,10 @@
 {% block main-right-sidebar-content %}
 {% endblock main-right-sidebar-content %}
 {% block main-content %}
-  <div id="main" style="width: 100%; min-height: 80vh;">
+  <div id="main"
+       class="eui-isolation-wrapper"
+       style="width: 100%;
+              min-height: 80vh">
     <div class="d-flex justify-content-center p-5">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading React App...</span>
