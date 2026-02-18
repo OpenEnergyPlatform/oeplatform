@@ -70,3 +70,86 @@ SPDX-License-Identifier: AGPL-3.0-or-later */
 .euiTabbedContent__panel svg {
   max-width: 100% !important;
 }
+
+
+/* 1. Make the Entity Name (the main title) bold and larger */
+.eui-isolation-wrapper .ts4nfdi-metadata-style-title .euiText {
+    font-weight: 400 !important;
+    font-size: 1.6rem !important; /* Adjust size as needed */
+    color: #001935 !important; /* OEP Dark Blue */
+    line-height: 1.2 !important;
+}
+
+/* 2. Target the specific auto-generated inner div if needed */
+.eui-isolation-wrapper .ts4nfdi-metadata-style-title .euiText > div {
+    font-weight: 400 !important;
+}
+
+/* 3. De-emphasize the "Entity Metadata" label above the title */
+/* This usually sits in a subdued text element nearby in the TSS widget */
+.eui-isolation-wrapper .tss-entity-info-widget .euiTextColor--subdued,
+.eui-isolation-wrapper .MetadataWidget-header .euiTextColor--subdued {
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05rem !important;
+    font-weight: 400 !important;
+}
+
+/* ====================================================================
+METADATA UI ENHANCEMENTS
+==================================================================== */
+
+/* 2. Transform the Ontology span into a Badge */
+.eui-isolation-wrapper .ontology-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    background-color: #EBF1F9 !important; /* Light blue background */
+    color: #0071C1 !important;           /* Blue text */
+    padding: 2px 8px !important;
+    border-radius: 12px !important;      /* Rounded pill look */
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border: 1px solid #D3DAE6 !important;
+    margin-right: 8px !important;
+    vertical-align: middle !important;
+    line-height: 1 !important;
+}
+
+/* 3. Handle the "Entity Metadata" label de-emphasis */
+.eui-isolation-wrapper .tss-entity-info-widget .euiTextColor--subdued {
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-weight: 400 !important;
+    margin-bottom: 4px !important;
+    display: block !important;
+}
+
+/* ====================================================================
+   RESPONSIVE GRAPH VIEW IN METADATA WIDGET
+   ==================================================================== */
+
+/* 1. Force the Panel to be responsive by removing fixed width/height */
+.eui-isolation-wrapper .ts4nfdi-metadata-style-title + .euiPanel,
+.eui-isolation-wrapper .euiPanel[style*="width: 900px"] {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 600px !important; /* Give it a base height for the graph */
+    max-width: 100% !important;
+}
+
+/* 2. Make the Graph Container fill the available width */
+.eui-isolation-wrapper .graph-container {
+    width: 100% !important;
+    height: 600px !important; /* Adjust height as needed for the graph view */
+    max-width: 100% !important;
+}
+
+/* 3. Ensure the Vis-Network canvas fills its parent */
+.eui-isolation-wrapper .vis-network,
+.eui-isolation-wrapper .vis-network canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
