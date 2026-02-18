@@ -7,7 +7,7 @@ import { useTssConfig } from "../hooks/useTssConfig";
 
 export default function TssSearchResultsList({
     ontologyId,
-    query = "d*",
+    query = "*",
     onNavigateToEntity,
     onNavigateToOntology,
 }) {
