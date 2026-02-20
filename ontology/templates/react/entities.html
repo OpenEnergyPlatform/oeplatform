@@ -6,9 +6,9 @@
 {% load static %}
 {% block title %}
   {% if term_id %}
-    {{ ontology_id|upper }} Entity: {{ term_id }}
+    {{ term_id }}
   {% else %}
-    {{ ontology_id|upper }} Search
+    Search
   {% endif %}
 {% endblock %}
 {% block site-header %}
@@ -26,7 +26,7 @@
         <a href="{% url 'ontology:ontology-entity-search' ontology_id %}">
           {{ ontology_id|upper }} Search
         </a>
-        / Entity: {{ term_id }}
+        / Entity
       {% else %}
         {{ ontology_id|upper }} Search
       {% endif %}
