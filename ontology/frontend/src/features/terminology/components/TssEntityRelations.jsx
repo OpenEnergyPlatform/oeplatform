@@ -1,8 +1,8 @@
+// ontology/frontend/src/features/terminology/components/TssEntityRelations.jsx
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// ontology/frontend/src/features/terminology/components/TssEntityRelations.jsx
-import React from "react";
+import React, { useMemo } from "react";
 import { EntityRelationsWidget } from "@ts4nfdi/terminology-service-suite";
 import { useTssConfig } from "../hooks/useTssConfig";
 
@@ -10,10 +10,20 @@ export default function TssEntityRelations({
     iri,
     ontologyId,
     entityType = "term", // "term" often works best for relations to show instances too
-    onNavigateToEntity
+    onNavigateToEntity,
+    onNavigateToOntology
 }) {
-    const { apiBase, ontology: configOntology } = useTssConfig();
+    const { apiBase, ontology: configOntology, lang } = useTssConfig();
     const activeOntology = ontologyId || configOntology;
+
+    const mergedParameter = useMemo(() => {
+        return lang ? `lang=${encodeURIComponent(lang)}` : "";
+    }, [lang]);
+
+    const callbackProps = {
+        ...(onNavigateToEntity ? { onNavigateToEntity } : {}),
+        ...(onNavigateToOntology ? { onNavigateToOntology } : {}),
+    };
 
     return (
         <EntityRelationsWidget
@@ -23,10 +33,11 @@ export default function TssEntityRelations({
             entityType={entityType}
             hasTitle={false}
             showBadges={true}
-            parameter=""
+            parameter={mergedParameter}
+            termLink=""
+
             onNavigateToDisambiguate={() => { }}
-            onNavigateToEntity={onNavigateToEntity || (() => { })}
-            onNavigateToOntology={() => { }}
+            {...callbackProps}
         />
     );
 }
