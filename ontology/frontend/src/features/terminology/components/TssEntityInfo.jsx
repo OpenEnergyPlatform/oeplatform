@@ -27,7 +27,7 @@ export default function TssEntityInfo({
             entityType={entityType}
             hasTitle={false} // We handle the title in the page layout
             showBadges={true}
-            useLegacy={true}
+            // useLegacy={true}
             parameter=""
             onNavigateToDisambiguate={() => { }}
             onNavigateToEntity={onNavigateToEntity || (() => { })}

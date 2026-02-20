@@ -123,5 +123,3 @@ License and Citation
 .. |DeepWiki| image:: https://deepwiki.com/badge.svg
     :target: https://deepwiki.com/OpenEnergyPlatform/oeplatform
     :alt: Devin DeepWiki
-
-

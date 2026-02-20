@@ -7,12 +7,11 @@ import { useTssConfig } from "../hooks/useTssConfig";
 
 export default function TssSearchResultsList({
     ontologyId,
-    query = "d*",
+    query = "*",
     onNavigateToEntity,
     onNavigateToOntology,
 }) {
     const { apiBase, ontology: configOntology } = useTssConfig();
-
     const activeOntology = ontologyId || configOntology;
 
     const parameter = useMemo(() => {
@@ -27,11 +26,9 @@ export default function TssSearchResultsList({
             query={query}
             initialItemsPerPage={10}
             itemsPerPageOptions={[10, 25, 50, 100]}
-            useLegacy={true}
+            // useLegacy={true}
             preselected={[]}
-            // Setting targetLink to an empty string disables the default <a> href behavior in the TSS widget,
-            // allowing our custom onNavigateToEntity handler to process the click and route locally.
-            targetLink=""
+            targetLink="" // Keep this empty to prevent the widget from making bad native URLs
             onNavigateToEntity={onNavigateToEntity}
             onNavigateToOntology={onNavigateToOntology || (() => { })}
         />

@@ -2,9 +2,36 @@
 {% load static %}
 {% load django_vite %}
 {% block after-head %}
-  <!-- The following must stay before the vite_asset tag -->
   {% vite_react_refresh nonce="{{ request.csp_nonce }}" %}
   {% vite_asset "oeo_viewer/frontend/src/index.jsx" %}
+  <style>
+    .oeo-viewer-intro {
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        max-width: 1000px;
+    }
+    .oeo-resource-section {
+        background-color: #f5f7fa;
+        padding: 1rem;
+        border-radius: 4px;
+        border-left: 4px solid #001935;
+        margin-top: 1rem;
+    }
+    .oeo-resource-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 8px;
+        font-size: 0.9rem;
+    }
+    .oeo-resource-links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+        text-decoration: underline;
+    }
+  </style>
 {% endblock after-head %}
 {% block main %}
   <div class="main-header">
@@ -16,19 +43,39 @@
       Open Energy Ontology Viewer
     </h1>
     <div class="main-header__wizard">
-      <a href="{% url 'ontology:index' %}">Open Energy Ontology</a> / OEO viewer
+      <a href="{% url 'ontology:index' %}">Open Energy Ontology</a> / OEO Viewer
     </div>
     <br />
-    <div>
-      The OEO Viewer is a research prototype tool to visually browse the Open
-      Energy Ontology. External tools like TIB's terminology service are more
-      sophisticated for browsing and searching ontologies; you can also find the
-      <a href="{{ tib_ts_oeo_link }}" target="_blank">OEO there</a>.
+    <div class="oeo-viewer-intro">
+      <p>
+        The <strong>OEO Viewer</strong> serves as an interactive map for the Open Energy Ontology.
+        While our <a href="{% url 'ontology:oeo-class-detail' 'oeo' 'BFO_0000001' %}">Entity Lookup</a> pages are used for quick lookups,
+        this Viewer is built for experts to explore the <strong>structural context</strong> of the OEO—allowing you
+        to visualize complex dependencies in the Graph View and navigate the full asserted hierarchy.
+      </p>
+      <div class="oeo-resource-section">
+        <p style="margin-bottom: 0;">
+          <strong>External resources:</strong> The OEO is integrated into the NFDI4Energy terminology ecosystems.
+          The following platforms provide advanced features and API's that complement this viewer:
+        </p>
+        <div class="oeo-resource-links">
+          <a href="{{ tib_ts_oeo_link }}" target="_blank" rel="noopener">
+            <i class="fa fa-external-link"></i> TIB Terminology Service (Advanced Search & API)
+          </a>
+          <a href="{{ technoportal_link }}" target="_blank" rel="noopener">
+            <i class="fa fa-external-link"></i> Technoportal
+          </a>
+        </div>
+      </div>
     </div>
   </div>
   {% block main-content-body %}
     <div id="main" class="eui-isolation-wrapper">
-      <!-- The app renders here -->
+      <div class="d-flex justify-content-center p-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading React App...</span>
+        </div>
+      </div>
     </div>
   {% endblock main-content-body %}
 {% endblock main %}

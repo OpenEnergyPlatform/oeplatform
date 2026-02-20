@@ -8,6 +8,9 @@ import App from "./App.jsx";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { EuiProvider } from "@elastic/eui";
 
+// 2. MUST come after EUI styles to override Bootstrap
+import "./eui-isolation.css";
+
 import { TssConfigProvider } from "./features/terminology/config/TssConfigProvider";
 
 

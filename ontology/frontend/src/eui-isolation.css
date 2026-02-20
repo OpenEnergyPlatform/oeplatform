@@ -1,47 +1,6 @@
 /* SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later */
 
-/* ====================================================================
-   AUTOCOMPLETE / COMBOBOX OVERRIDES
-   Fixing Bootstrap's paragraph margins spilling out of EUI list items
-   ==================================================================== */
-
-/* 1. Kill Bootstrap's massive default margins on text elements inside dropdowns */
-.euiPopover__panel p,
-.euiPopover__panel span,
-.euiPopover__panel div,
-.euiComboBoxOptionsList p,
-.euiSelectableList p {
-  margin-bottom: 0 !important;
-  margin-top: 0 !important;
-}
-
-/* 2. Force the list items to expand their height to fit the description text */
-.euiComboBoxOption,
-.euiSelectableListItem,
-.euiSelectableTemplateSitewide__listItem {
-  height: auto !important;
-  min-height: 44px !important; /* Maintain EUI's minimum touch target size */
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  align-items: flex-start !important; /* Align text to the top rather than centering */
-}
-
-/* 3. Ensure the text wrapper inside the option handles flexbox properly */
-.euiComboBoxOption__content,
-.euiSelectableListItem__content {
-  display: flex !important;
-  flex-direction: column !important; /* Stack label and description cleanly */
-  justify-content: center !important;
-  width: 100% !important;
-}
-
-/* 4. Fix Bootstrap's border/separator resets */
-.euiPopover__panel hr {
-  margin: 8px 0 !important;
-  border-top: 1px solid #D3DAE6 !important; /* Standard EUI border color */
-  opacity: 1 !important;
-}
 
 /* ====================================================================
    METADATA TABS & GRAPH VIEW FIX

@@ -1,3 +1,4 @@
+// ontology/frontend/src/pages/OeoIriPages.jsx
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -13,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
+  EuiButton,
 } from "@elastic/eui";
 
 import TssEntityInfo from "../features/terminology/components/TssEntityInfo";
@@ -37,7 +39,9 @@ export default function OeoIriPages() {
   const { ontology, short_form } = useParams();
   const navigate = useNavigate();
 
+  // The actual IRI used for fetching and external tools
   const fetchIri = resolveIri(ontology, short_form);
+  // The IRI displayed in the UI
   const displayIri = `https://openenergyplatform.org/ontology/${ontology}/${short_form}`;
 
   const [entityType, setEntityType] = useState("class");
@@ -48,17 +52,62 @@ export default function OeoIriPages() {
     { id: 'individual', name: 'Individual' },
   ];
 
-  const handleNavigateToEntity = (event) => {
-    let nextId = event.short_form;
+  // Robust handler adapting your Viewer logic for React Router navigation
+  const handleNavigateToEntity = (...args) => {
+    let iri = "";
+    let type = "class";
 
-    if (!nextId && event.iri) {
-      const parts = event.iri.split("/");
-      nextId = parts[parts.length - 1];
+    // 1. Extract IRI and Type exactly like in the Viewer
+    if (args.length >= 3) {
+      iri = args[2]?.iri || args[2]?.entity?.iri || "";
+      type = args[1] || "class";
+    } else if (args.length === 1) {
+      const a = args[0];
+      iri = typeof a === "string" ? a : a?.entity?.iri || a?.iri || "";
+      type = a?.type || "class";
+
+      // Edge case: if it's an object from the Search or Info widget with short_form
+      if (!iri && typeof a === "object") {
+        let extractedShortForm = Array.isArray(a.short_form) ? a.short_form[0] : a.short_form;
+        if (!extractedShortForm && a.obo_id) {
+          let oboId = Array.isArray(a.obo_id) ? a.obo_id[0] : a.obo_id;
+          extractedShortForm = oboId.replace(":", "_");
+        }
+        if (extractedShortForm) {
+          setEntityType(type);
+          navigate(`/${ontology || "oeo"}/${extractedShortForm}`);
+          window.scrollTo(0, 0);
+          return;
+        }
+      }
     }
 
-    if (nextId) {
-      navigate(`/${ontology}/${nextId}`);
-      window.scrollTo(0, 0);
+    // 2. We have the IRI, now parse the short_form to navigate
+    if (iri) {
+      const separator = iri.includes("#") ? "#" : "/";
+      const parts = iri.split(separator).filter(Boolean);
+      const shortForm = parts[parts.length - 1];
+
+      if (shortForm) {
+        setEntityType(type); // Automatically switch the tab (Class/Property/Individual)
+        navigate(`/${ontology || "oeo"}/${shortForm}`);
+        window.scrollTo(0, 0);
+      }
+    }
+  };
+
+  const handleNavigateToOntology = (...args) => {
+    let url = "";
+    if (args.length >= 3 && args[2]?.iri) {
+      url = args[2].iri;
+    } else if (args[0] && typeof args[0] === "object") {
+      url = args[0].url || args[0].iri || args[0].ontologyIri || "";
+    } else if (typeof args[0] === "string") {
+      url = args[0];
+    }
+
+    if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -67,19 +116,35 @@ export default function OeoIriPages() {
       <EuiPageTemplate.Section>
         <EuiSpacer size="m" />
 
-        {/* Quick Navigation Buttons */}
-        <TssEntityNavButtons
-          iri={fetchIri}
-          ontologyId={ontology}
-          onNavigate={handleNavigateToEntity}
-        />
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            {/* Quick Navigation Buttons (Parent/Child) */}
+            <TssEntityNavButtons
+              iri={fetchIri}
+              ontologyId={ontology}
+              onNavigate={handleNavigateToEntity}
+            />
+          </EuiFlexItem>
 
-        <EuiSpacer size="m" />
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              href={`/viewer/oeo/?iri=${encodeURIComponent(fetchIri)}&type=${encodeURIComponent(entityType)}`}
+              iconType="visMapCoordinate"
+              size="s"
+              fill
+            >
+              Explore this term in OEO Viewer
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="l" />
+
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
-                {ontology ? ontology.toUpperCase() : "Ontology"} Entity: <span style={{ color: "#0071c1" }}>{short_form}</span>
+                <span style={{ color: "#0071c1" }}>{short_form}</span>
               </h1>
             </EuiTitle>
             <EuiSpacer size="s" />
@@ -120,6 +185,7 @@ export default function OeoIriPages() {
             ontologyId={ontology}
             entityType={entityType}
             onNavigateToEntity={handleNavigateToEntity}
+            onNavigateToOntology={handleNavigateToOntology}
           />
 
           <EuiSpacer size="xl" />
@@ -131,6 +197,7 @@ export default function OeoIriPages() {
             ontologyId={ontology}
             entityType={entityType === "individual" ? "individual" : "term"}
             onNavigateToEntity={handleNavigateToEntity}
+            onNavigateToOntology={handleNavigateToOntology}
           />
         </EuiPanel>
       </EuiPageTemplate.Section>

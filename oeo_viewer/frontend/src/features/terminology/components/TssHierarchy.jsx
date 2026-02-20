@@ -47,8 +47,8 @@ export default function TssHierarchy({
       iri={iri || ""}
       ontologyId={resolvedOntologyId}
       parameter={mergedParameter}
-      keepExpansionStates={keepExpansionStates}
-      showSiblingsOnInit={showSiblingsOnInit}
+      keepExpansionStates={keepExpansionStates} // Check if hierarchy will show all
+      showSiblingsOnInit={showSiblingsOnInit} // Check if hierarchy will show all
       useLegacy={useLegacy}
       includeObsoleteEntities={includeObsoleteEntities}
       wrap={wrap}
