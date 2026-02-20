@@ -10,9 +10,9 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
-### Features
+## Features
 
-### Bugs
+## Bugs
 
 ## Documentation updates
 

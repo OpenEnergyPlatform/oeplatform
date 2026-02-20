@@ -1,4 +1,3 @@
-
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -41,25 +40,33 @@ export default function TopInfoBanner() {
                     <div
                         style={{
                             display: "grid",
-                            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-                            gap: 12,
+                            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                            gap: 24,
                         }}
                     >
                         <EuiText size="s">
-                            <p><strong>Browse the full hierarchy (left column)</strong></p>
+                            <p><strong>1. Browse & Navigate</strong></p>
                             <ul>
-                                <li>Expand nodes to explore classes in the ontology.</li>
-                                <li>Click a term to open a details flyout — this won’t change the right-side selection.</li>
-                                <li>Use badges to jump to the defining ontology in a new tab.</li>
+                                <li><strong>Full Hierarchy:</strong> Use the tree on the left to explore the asserted structure of the OEO.</li>
+                                <li><strong>Search:</strong> Use the autocomplete bar to find specific terms by label or IRI.</li>
+                                <li><strong>Selection:</strong> Clicking a result or a tree node loads the term details.</li>
                             </ul>
                         </EuiText>
 
                         <EuiText size="s">
-                            <p><strong>Search & inspect a specific term (right column)</strong></p>
+                            <p><strong>2. Inspect & Visualize</strong></p>
                             <ul>
-                                <li>Use <em>Autocomplete</em> to find a term by label or IRI snippet.</li>
-                                <li>Selected terms show <em>Metadata</em> and a local <em>Hierarchy</em> or <em>Graph View</em> for context.</li>
-                                <li>Hide/show metadata tabs to focus on what you need; copy the IRI for reuse.</li>
+                                <li><strong>Metadata:</strong> View full definitions, annotations, and cross-references.</li>
+                                <li><strong>Graph View:</strong> Switch to the <em>Graph View</em> tab to visualize complex relationships.</li>
+                                <li><strong>Local Hierarchy:</strong> See immediate parents and children in the <em>Hierarchy</em> tab.</li>
+                            </ul>
+                        </EuiText>
+
+                        <EuiText size="s">
+                            <p><strong>3. Share & Cite</strong></p>
+                            <ul>
+                                <li><EuiIcon type="link" size="s" /> <strong>Copy IRI:</strong> Click this button to copy the stable, permanent OEP identifier for the term.</li>
+                                <li><EuiIcon type="share" size="s" /> <strong>Share View:</strong> Click this button to copy a link to your current view configuration to share with others.</li>
                             </ul>
                         </EuiText>
                     </div>
