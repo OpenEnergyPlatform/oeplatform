@@ -5,6 +5,22 @@
 {% block main-content-body %}
   {% if profile_user == request.user %}
     {% include "login/user_nav.html" %}
+        <!-- ====== NEU: Suchfeld ====== -->
+    <div class="profile-category_search" style="margin-bottom: 0; max-width: 300px;">
+      <input type="text"
+             id="table-search"
+             name="search"
+             class="form-control"
+             placeholder="Search your tables..."
+             value="{{ search_query }}"
+             hx-get="{% url 'login:tables' user_id=profile_user.id %}"
+             hx-trigger="keyup changed delay:300ms"
+             hx-target="#tables-container"
+             hx-include="this"
+             hx-push-url="true"
+      />
+    </div>
+     <div id="tables-container">
     <!-- ###### Published ###### -->
     <section class="profile-category">
       <h2 class="profile-category__heading">Published tables</h2>
@@ -177,21 +193,21 @@
             {% if published_tables_page.has_previous %}
               <li class="page-item">
                 <a class="page-link"
-                   href="?published_page={{ published_tables_page.previous_page_number }}&draft_page={{ draft_page }}"
+                   href="?published_page={{ published_tables_page.previous_page_number }}&draft_page={{ draft_page }}&search={{ search_query }}"
                    tabindex="-1"
                    aria-disabled="true">Previous</a>
               </li>
             {% endif %}
             <li class="page-item active">
               <a class="page-link"
-                 href="?published_page={{ published_tables_page.number }}&draft_page={{ draft_page }}">
+                 href="?published_page={{ published_tables_page.number }}&draft_page={{ draft_page }}&search={{ search_query }}">
                 {{ published_tables_page.number }}
               </a>
             </li>
             {% if published_tables_page.has_next %}
               <li class="page-item">
                 <a class="page-link"
-                   href="?published_page={{ published_tables_page.next_page_number }}&draft_page={{ draft_page }}">Next</a>
+                   href="?published_page={{ published_tables_page.next_page_number }}&draft_page={{ draft_page }}&search={{ search_query }}">Next</a>
               </li>
             {% endif %}
           </ul>
@@ -356,21 +372,21 @@
             {% if draft_tables_page.has_previous %}
               <li class="page-item">
                 <a class="page-link"
-                   href="?draft_page={{ draft_tables_page.previous_page_number }}&published_page={{ published_page }}"
+                   href="?draft_page={{ draft_tables_page.previous_page_number }}&published_page={{ published_page }}&search={{ search_query }}"
                    tabindex="-1"
                    aria-disabled="true">Previous</a>
               </li>
             {% endif %}
             <li class="page-item active">
               <a class="page-link"
-                 href="?draft_page={{ draft_tables_page.number }}&published_page={{ published_page }}">
+                 href="?draft_page={{ draft_tables_page.number }}&published_page={{ published_page }}&search={{ search_query }}">
                 {{ draft_tables_page.number }}
               </a>
             </li>
             {% if draft_tables_page.has_next %}
               <li class="page-item">
                 <a class="page-link"
-                   href="?draft_page={{ draft_tables_page.next_page_number }}&published_page={{ published_page }}">Next</a>
+                   href="?draft_page={{ draft_tables_page.next_page_number }}&published_page={{ published_page }}&search={{ search_query }}">Next</a>
               </li>
             {% endif %}
           </ul>
@@ -399,6 +415,7 @@
             </button>
           </div>
         </section>
+        </div>
       {% endif %}
     </section>
   {% endif %}

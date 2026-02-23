@@ -36,6 +36,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.generic import RedirectView, View
 from django.views.generic.edit import DeleteView
+from django.db.models import F, Q
 from rest_framework.authtoken.models import Token
 
 import login.permissions
@@ -58,10 +59,11 @@ ITEMS_PER_PAGE = 8
 
 
 class TablesView(View):
-    @method_decorator(never_cache)
-    def get(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
+
+    def _get_filtered_tables(self, user, search_query=""):
+        """Return filtered querysets for draft and published tables."""
         tables_set = user.get_tables_queryset(min_permission_level=WRITE_PERM)
+
         draft_tables = tables_set.filter(is_publish=False).order_by(
             F("date_updated").desc(nulls_last=True), "human_readable_name"
         )
@@ -69,11 +71,28 @@ class TablesView(View):
             F("date_updated").desc(nulls_last=True), "human_readable_name"
         )
 
+        if search_query:
+            from django.db.models import Q
+
+            q_filter = Q(name__icontains=search_query) | Q(
+                human_readable_name__icontains=search_query
+            )
+            draft_tables = draft_tables.filter(q_filter)
+            published_tables = published_tables.filter(q_filter)
+
+        return draft_tables, published_tables
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        search_query = request.GET.get("search", "").strip()
+
+        draft_tables, published_tables = self._get_filtered_tables(user, search_query)
+
         # Paginate tables
         published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)
         draft_paginator = Paginator(draft_tables, ITEMS_PER_PAGE)
 
-        # Check if the request contains a page
         published_page = request.GET.get("published_page", 1)
         published_page_obj = published_paginator.get_page(published_page)
 
@@ -87,12 +106,15 @@ class TablesView(View):
             "topics": [t.name for t in Topic.objects.all()],
             "draft_page": draft_page,
             "published_page": published_page,
+            "search_query": search_query,
         }
 
-        # TODO: Fix this is_ajax as it is outdated according to django documentation ...
-        # provide better api endpoint for http requests via HTMX
         if "HX-Request" in request.headers:
-            return render(request, "login/partials/user_partial_tables.html", context)
+            return render(
+                request,
+                "login/partials/user_partial_tables.html",
+                context,
+            )
         else:
             return render(request, "login/user_tables.html", context)
 
