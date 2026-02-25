@@ -111,9 +111,15 @@ class TablesView(View):
         if "HX-Request" in request.headers and not has_search_param:
             return render(
                 request,
-                "login/partials/user_partial_tables.html",
+                "login/partials/tables_sections.html",
                 context,
             )
+        # elif "HX-Request" in request.headers:
+        #     return render(
+        #         request,
+        #         "login/partials/user_partial_tables.html",
+        #         context,
+        #     )
         else:
             return render(request, "login/user_tables.html", context)
 
