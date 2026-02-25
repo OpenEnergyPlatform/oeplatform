@@ -502,10 +502,6 @@ Files: login/templates/login/partials/group_component_form_edit.html
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
 
-Files: login/templates/login/partials/user_partial_tables.html
-Copyright: Jonas Huber <jonas.huber@rl-institut.de>
-License: MIT
-
 Files: login/templates/login/partials/group_component_invite_user.html
 Copyright: Jonas Huber <jonas.huber@rl-institut.de>
 License: MIT
