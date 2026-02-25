@@ -36,7 +36,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.generic import RedirectView, View
 from django.views.generic.edit import DeleteView
-from django.db.models import F, Q
+from django.db.models import Q
 from rest_framework.authtoken.models import Token
 
 import login.permissions
@@ -72,7 +72,6 @@ class TablesView(View):
         )
 
         if search_query:
-            from django.db.models import Q
 
             q_filter = Q(name__icontains=search_query) | Q(
                 human_readable_name__icontains=search_query
@@ -86,6 +85,7 @@ class TablesView(View):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
         search_query = request.GET.get("search", "").strip()
+        has_search_param = "search" in request.GET
 
         draft_tables, published_tables = self._get_filtered_tables(user, search_query)
 
@@ -109,7 +109,7 @@ class TablesView(View):
             "search_query": search_query,
         }
 
-        if "HX-Request" in request.headers:
+        if "HX-Request" in request.headers and not has_search_param:
             return render(
                 request,
                 "login/partials/user_partial_tables.html",
