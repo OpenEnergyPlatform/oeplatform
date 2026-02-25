@@ -22,7 +22,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import F
+from django.db.models import F, Q
 from django.http import (
     HttpResponse,
     HttpResponseForbidden,
@@ -36,7 +36,6 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.generic import RedirectView, View
 from django.views.generic.edit import DeleteView
-from django.db.models import Q
 from rest_framework.authtoken.models import Token
 
 import login.permissions
