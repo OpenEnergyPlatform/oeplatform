@@ -14,6 +14,7 @@ import "./eui-isolation.css";
 import { TssConfigProvider } from "./features/terminology/config/TssConfigProvider";
 
 
+
 // one client for the whole app
 const queryClient = new QueryClient({
   defaultOptions: {

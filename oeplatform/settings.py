@@ -287,6 +287,7 @@ EXTERNAL_URLS = {
     "tib_eu_de": "https://www.tib.eu/de/",
     "uni_flensburg_en": "https://www.uni-flensburg.de/en/",
     "cdn_github_cards_widget": "//cdn.jsdelivr.net/github-cards/latest/widget.js",
+    "technoportal": "https://technoportal.hevs.ch/ontologies/OEO",
 }
 
 # Kept this separate for now to avoid messing with the other list ...

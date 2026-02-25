@@ -75,9 +75,11 @@
          aria-expanded="false">Ontology</a>
       <div class="dropdown-menu" aria-labelledby="navbarDropdownOntology">
         <a class="dropdown-item" href="{% url 'ontology:index' %}">Overview</a>
-        <a class="dropdown-item"
-           href="{% url 'ontology:oeo-classes' 'oeo' 'BFO_0000001' %}">OEO Classes</a>
         <a class="dropdown-item" href="{% url 'oeo_viewer:index' %}">OEO Viewer</a>
+        <a class="dropdown-item"
+           href="{% url 'ontology:ontology-entity-search' 'oeo' %}">OEO Search</a>
+        <a class="dropdown-item"
+           href="{% url 'ontology:oeo-class-detail' 'oeo' 'BFO_0000001' %}">OEO Entities</a>
         <a class="dropdown-item" href="{% url 'ontology:oeo-s-c' %}">OEO Steering Committee</a>
         <a class="dropdown-item"
            href="{{ EXTERNAL_URLS.tib_terminology_service }}"
