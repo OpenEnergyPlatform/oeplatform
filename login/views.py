@@ -114,12 +114,6 @@ class TablesView(View):
                 "login/partials/tables_sections.html",
                 context,
             )
-        # elif "HX-Request" in request.headers:
-        #     return render(
-        #         request,
-        #         "login/partials/user_partial_tables.html",
-        #         context,
-        #     )
         else:
             return render(request, "login/user_tables.html", context)
 
