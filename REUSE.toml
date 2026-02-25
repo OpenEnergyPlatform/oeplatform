@@ -862,6 +862,14 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
+path = "login/templates/login/partials/tables_sections.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
 path = "login/templates/login/partials/badge_icon.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
