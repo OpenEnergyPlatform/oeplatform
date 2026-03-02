@@ -18,9 +18,12 @@ SPDX-License-Identifier: CC0-1.0
     simplify handling in case the user must add alot of datasets.
 
 - Delete /script/reuse/.reuse/dep5 and script/reuse/dep5_to_toml.py
-  [(#2253)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+  [(#2253)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2253)
 
 ## Features
+
+- Add the entity description text to the OEO Entity page
+  [(#2255)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2255)
 
 - Scenario Bundles overview: The OEO hierarchy is now displayed when viewing The
   Sector & Technology information

@@ -21,6 +21,7 @@ import TssEntityInfo from "../features/terminology/components/TssEntityInfo";
 import TssEntityRelations from "../features/terminology/components/TssEntityRelations";
 import TssIriWidget from "../features/terminology/components/TssIriWidget";
 import TssEntityNavButtons from "../features/terminology/components/TssEntityNavButtons";
+import TssDescription from "../features/terminology/components/TssDescription";
 
 function resolveIri(ontology, shortForm) {
   if (!shortForm) return "";
@@ -149,6 +150,13 @@ export default function OeoIriPages() {
             </EuiTitle>
             <EuiSpacer size="s" />
             <TssIriWidget iri={displayIri} />
+            <EuiSpacer size="s" />
+            <TssDescription
+              iri={fetchIri}
+              ontologyId={ontology}
+            />
+
+            <EuiSpacer size="s" />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false} style={{ minWidth: 280 }}>
