@@ -17,6 +17,9 @@ SPDX-License-Identifier: CC0-1.0
   - Selecting input and output datasets is now handled in a single select box,
     simplify handling in case the user must add alot of datasets.
 
+- Delete /script/reuse/.reuse/dep5 and script/reuse/dep5_to_toml.py
+  [(#2253)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+
 ## Features
 
 - Scenario Bundles overview: The OEO hierarchy is now displayed when viewing The
