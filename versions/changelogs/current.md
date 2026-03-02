@@ -10,6 +10,9 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- Delete /script/reuse/.reuse/dep5 and script/reuse/dep5_to_toml.py
+  [(#2253)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+
 ## Features
 
 ## Bugs
