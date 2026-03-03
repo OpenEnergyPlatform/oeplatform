@@ -41,7 +41,6 @@ import conf from "../conf.json";
 import { colors, Tooltip } from '@mui/material';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline.js';
-import styled from '@mui/material/styles/styled';
 
 import SaveIcon from '@mui/icons-material/Save.js';
 import uuid from "react-uuid";
@@ -58,7 +57,6 @@ import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.j
 import IconButton from '@mui/material/IconButton';
 // import Divider from '@mui/material/Divider';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.jsx';
-import { VerticalTab, AddTabWrapper } from '../styles/oep-theme/components/factsheetsStyles.tsx';
 import TableContainer from '@mui/material/TableContainer';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -83,7 +81,9 @@ import variables from '../styles/oep-theme/variables.js';
 
 import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx';
-import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
+
+import { getCheckedWithParents, filterTree } from './scenarioBundleUtilityComponents/treeUtils';
+import HierarchyViewer from './scenarioBundleUtilityComponents/HierarchyViewer';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -97,7 +97,7 @@ function TabPanel(props) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+          <Typography component="div">{children}</Typography>
         </Box>
       )}
     </div>
@@ -612,25 +612,8 @@ function Factsheet(props) {
     }
   };
 
-  const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }, { headers: { 'X-CSRFToken': CSRFToken() } }
-    ).then(response => setOpenRemovedDialog(true));
-  }
-
-  const handleCloseSavedDialog = () => {
-    setOpenSavedDialog(false);
-  };
-
   const handleCloseExistDialog = () => {
     setOpenExistDialog(false);
-  };
-
-  const handleCloseUpdatedDialog = () => {
-    setOpenUpdatedDialog(false);
-  };
-
-  const handleCloseRemovedDialog = () => {
-    setOpenRemovedDialog(false);
   };
 
   const handleAcronym = e => {
@@ -661,11 +644,6 @@ function Factsheet(props) {
     setPublications(updatePublications);
   };
 
-  const handleFactsheetName = e => {
-    setFactsheetName(e.target.value);
-    factsheetObjectHandler('name', e.target.value);
-  };
-
   // const handlePlaceOfPublication = e => {
   //   setPlaceOfPublication(e.target.value);
   //   factsheetObjectHandler('place_of_publication', e.target.value);
@@ -681,14 +659,6 @@ function Factsheet(props) {
   //   setDateOfPublication(e.target.value);
   //   factsheetObjectHandler('date_of_publication', e.target.value);
   // };
-
-  const handleClickOpenSavedDialog = () => {
-    openSavedDialog(true);
-  };
-
-  const handleClickOpenUpdatedDialog = () => {
-    openSavedDialog(true);
-  };
 
   const handleClickOpenRemovedDialog = () => {
     setOpenRemovedDialog(true);
@@ -797,16 +767,6 @@ function Factsheet(props) {
     let newFactsheetObject = factsheetObject;
     newFactsheetObject[key] = obj
     setFactsheetObject(newFactsheetObject);
-  }
-
-  const scenariosObjectHandler = (key, obj) => {
-    let newScenariosObject = scenariosObject;
-    newScenariosObject[key] = obj
-    setScenariosObject(newScenariosObject);
-  }
-
-  const renderFactsheet = () => {
-    return <div>'studyName'</div>
   }
 
   const getOrganization = async () => {
@@ -1330,19 +1290,6 @@ function Factsheet(props) {
     setExpandedSectors(zipped);
   };
 
-  const expandedTechnologiesHandler = (expandedTechnologiesList) => {
-    const zipped = []
-    expandedTechnologiesList.map((v) => zipped.push({ "value": v, "label": v }));
-    setExpandedTechnologies(zipped);
-  };
-
-
-  function a11yProps(index: number) {
-    return {
-      id: `vertical-tab-${index}`,
-      'aria-controls': `vertical-tabpanel-${index}`,
-    };
-  }
 
   const handleStudyKeywords = (event) => {
     if (event.target.checked) {
@@ -1848,7 +1795,17 @@ function Factsheet(props) {
             size="360px"
             checked={selectedTechnologies}
             expanded={getNodeIds(technologies['children'])}
-            handler={technologyHandler}
+            handler={(list, nodes) => {
+                // 1. Use 'technologies' (not descriptors) to find parents
+                const listWithParents = getCheckedWithParents(list, technologies);
+
+                // 2. Use the correct handler for this file (check if it is technologyHandler)
+                if (typeof technologyHandler === 'function') {
+                   technologyHandler(listWithParents, nodes);
+                } else {
+                   console.error("technologyHandler is missing");
+                }
+            }}
             expandedHandler={expandedTechnologyHandler}
             data={technologies}
             title={"What technologies are considered?"}
@@ -2398,9 +2355,24 @@ const renderScenariosOverview = () => (
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedTechnologies.map((v, i) => (
-                <span> <span> <Chip label={v.value} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-              ))}
+              {(() => {
+                // 1. Get IDs of selected items safely
+                const selectedIds = Array.isArray(selectedTechnologies)
+                  ? selectedTechnologies.map(t => t.value)
+                  : [];
+
+                // 2. Filter the main 'technologies' tree to get the hierarchy
+                // Note: 'technologies' here contains the full tree with JSX labels created in useEffect
+                const hierarchyData = filterTree(technologies, selectedIds);
+
+                // 3. Render
+                return (
+                  <HierarchyViewer
+                    nodes={hierarchyData}
+                    onLinkClick={handleOpenURL}
+                  />
+                );
+              })()}
               {/* <RichTreeView items={selectedTechnologiesTree} expandedItems={allNodeIds} /> */}
             </ContentTableCell>
           </TableRow>
