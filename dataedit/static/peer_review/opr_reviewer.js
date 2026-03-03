@@ -55,6 +55,23 @@ $('#rejected-button').bind('click', hideReviewerOptions);
  * Configurates peer review
  * @param {json} config Configuration JSON from Django backend.
  */
+function peerReview(config) {
+  /*
+    TODO: Show loading icon if peer review page is loaded
+    */
+
+  // (function init() {
+  //   $('#peer_review-loading').removeClass('d-none');
+  //   config.form = $('#peer_review-form');
+  // })();
+
+
+  selectNextField();
+  renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
+  if (state_dict) {
+    check_if_review_finished();
 
 function deletePeerReview() {
   // confirm
@@ -185,6 +202,69 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fieldKey && category !== undefined) {
       click_field(fieldKey, fieldValue, category);
     }
+  }
+  function generateTable(data) {
+    let table = document.createElement('table');
+    table.className = 'table review-summary';
+
+    let thead = document.createElement('thead');
+    let header = document.createElement('tr');
+    header.innerHTML = '<th scope="col">Status</th><th scope="col">Field Category</th><th scope="col">Field Name</th><th scope="col">Field Value</th>';
+    thead.appendChild(header);
+    table.appendChild(thead);
+
+    let tbody = document.createElement('tbody');
+
+    data.forEach((item) => {
+      let row = document.createElement('tr');
+
+      let th = document.createElement('th');
+      th.scope = "row";
+      th.className = "status";
+      if (item.fieldStatus === "Missing") {
+        th.className = "status missing";
+      }
+      th.textContent = item.fieldStatus;
+      row.appendChild(th);
+
+      let tdFieldCategory = document.createElement('td');
+      tdFieldCategory.textContent = item.fieldCategory;
+      row.appendChild(tdFieldCategory);
+
+      let tdFieldId = document.createElement('td');
+      tdFieldId.textContent = item.field_id;
+      row.appendChild(tdFieldId);
+
+      let tdFieldValue = document.createElement('td');
+      tdFieldValue.textContent = item.fieldValue;
+      row.appendChild(tdFieldValue);
+
+      tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+
+    return table;
+  }
+
+
+    function updateSummaryTable() {
+    clearSummaryTable();
+    let allData = [];
+    allData.push(...missingFields.map((item) => ({...item, fieldStatus: 'Missing'})));
+    allData.push(...acceptedFields.map((item) => ({...item, fieldStatus: 'Accepted'})));
+    allData.push(...suggestingFields.map((item) => ({...item, fieldStatus: 'Suggested'})));
+    allData.push(...rejectedFields.map((item) => ({...item, fieldStatus: 'Rejected'})));
+    allData.push(...emptyFields.map((item) => ({...item, fieldStatus: 'Empty'})));
+
+    let table = generateTable(allData);
+    summaryContainer.appendChild(table);
+  }
+
+  updateSummaryTable();
+  updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
+}
   });
 });
 window.click_field = click_field;
@@ -352,6 +432,20 @@ function saveEntrancesForReviewer() {
 initializeEventBindings(saveEntrancesForReviewer);
 
 
+  renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
+}
+
+function getFieldState(fieldKey) {
+  if (state_dict && state_dict[fieldKey] !== undefined) {
+    return state_dict[fieldKey];
+  } else {
+    // I dont like that this shows as a error in the console
+    // console.log(`Cannot get state for fieldKey "${fieldKey}" because it is not found in stateDict or stateDict itself is null.`);
+    return null;
+  }
+}
 
 /**
  * Checks if all fields are reviewed and activates submit button if ready
@@ -384,13 +478,96 @@ function hideReviewerCommentOptions() {
   $("#reviewer_comments").addClass('d-none');
 }
 
+/**
+ * Shows reviewer Comment and Suggestion Input options
+ */
+function showReviewerOptions() {
+  $("#reviewer_remarks").removeClass('d-none');
+}
+
+/**
+ * Hides reviewer Comment and Suggestion Input options
+ */
+function hideReviewerOptions() {
+  $("#reviewer_remarks").addClass('d-none');
+}
+
+/**
+ * Colors Field based on Reviewer input
+ */
+function updateFieldColor() {
+  // Color ok/suggestion/rejected
+  field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
+  // console.log(field_id)
+  $(field_id).removeClass('field-ok');
+  $(field_id).removeClass('field-suggestion');
+  $(field_id).removeClass('field-rejected');
+  $(field_id).addClass(`field-${selectedState}`);
+}
+
+/**
+ * Colors Field based on Reviewer input
+ */
+function updateSubmitButtonColor() {
+  // Color Save comment / new value
+  $(submitButton).removeClass('btn-warning');
+  $(submitButton).removeClass('btn-danger');
+  if (selectedState === "suggestion") {
+    $(submitButton).addClass('btn-warning');
+  } else {
+    $(submitButton).addClass('btn-danger');
+  }
+}
+
+/**
+ * Hide and show revier controles once the user clicks the summary tab
+ */
+const summaryTab = document.getElementById('summary-tab');
+const otherTabs = [
+  document.getElementById('general-tab'),
+  document.getElementById('spatiotemporal-tab'),
+  document.getElementById('source-tab'),
+  document.getElementById('license-tab'),
+];
+const reviewContent = document.querySelector(".review__content");
+function updateTabClasses() {
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
+  for (let i = 0; i < tabNames.length; i++) {
+    let tabName = tabNames[i];
+    let tab = document.getElementById(tabName + '-tab');
+    if (!tab) continue;
+
+    let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+
+    let allOkOrEmpty = fields.every(field => {
+      let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      let fieldState = getFieldState(field.id.replace('field_', ''));
+      return isEmptyValue(fieldValue) || fieldState === 'ok';
+    });
+
+    if (allOkOrEmpty) {
+      tab.classList.add('status');
+      tab.classList.add('status--done');
+    } else {
+      tab.classList.add('status');
+    }
+  }
+}
+
+
+window.addEventListener('DOMContentLoaded', function() {
+    updateTabClasses();
+    updatePercentageDisplay() ;
+    updateTabClasses();
+});
+
+
 
 
 function getTotalFieldCount() {
   var allFields = makeFieldList();
   return allFields.length;
 }
-
 
 function calculateOkPercentage(stateDict) {
   let totalCount = 0;

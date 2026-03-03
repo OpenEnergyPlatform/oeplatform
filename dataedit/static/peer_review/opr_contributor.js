@@ -73,6 +73,121 @@ function getReviewerState(fieldKey) {
   }
 }
 
+$('#ok-button').bind('click', saveEntrances);
+// Suggestion Field View Change
+$('#suggestion-button').bind('click', showReviewerOptions);
+$('#suggestion-button').bind('click', updateSubmitButtonColor);
+// Reject Field View Change
+$('#rejected-button').bind('click', showReviewerOptions);
+$('#rejected-button').bind('click', updateSubmitButtonColor);
+// Clear Input fields when new tab is selected
+// nav items are selected via their class
+$('.nav-link').click(clearInputFields);
+// field items selector
+
+/**
+ * Returns name from cookies
+ * @param {string} name Key to look up in cookie
+ * @returns {value} Cookie value
+ */
+function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    var cookies = document.cookie.split(";");
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = $.trim(cookies[i]);
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+/**
+ * Get CSRF Token
+ * @returns {string} CSRF Token
+ */
+function getCsrfToken() {
+  var token1 = getCookie("csrftoken");
+  return token1;
+}
+
+/**
+ * Sends JSON to backend url
+ * @param {string} method Get or post request
+ * @param {string} url URL to send JSON to
+ * @param {json} data Data to send to backend
+ * @param {function} success Success function
+ * @param {function} error Error function
+ * @returns {value} AJAX function return
+ */
+function sendJson(method, url, data, success, error) {
+  var token = getCsrfToken();
+  return $.ajax({
+    url: url,
+    headers: {"X-CSRFToken": token},
+    data_type: "json",
+    cache: false,
+    contentType: "application/json; charset=utf-8",
+    processData: false,
+    data: data,
+    type: method,
+    success: success,
+    error: error,
+  });
+}
+
+/**
+ * Reads error message from response
+ * @param {json} response Get or post request
+ * @returns {string} Response error message
+ */
+function getErrorMsg(response) {
+  try {
+    var response_msg = (
+      'Upload failed: ' + JSON.parse(response.responseJSON).error
+    );
+  } catch (e) {
+    var response_msg = response.responseText;
+  }
+  return response_msg;
+}
+
+/**
+ * Configurates peer review
+ * @param {json} config Configuration JSON from Django backend.
+ */
+function peerReview(config) {
+  /*
+    TODO: Show loading icon if peer review page is loaded
+    */
+
+  //   (function init() {
+  //     $('#peer_review-loading').removeClass('d-none');
+  //     config.form = $('#peer_review-form');
+  //   })();
+  selectNextField();
+  renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
+}
+
+/**
+ * Save peer review to backend
+ */
+function savePeerReview() {
+  $('#peer_review-save').removeClass('d-none');
+  json = JSON.stringify({reviewType: 'save', reviewData: current_review});
+  sendJson("POST", config.url_peer_review, json).then(function() {
+    window.location = config.url_table;
+  }).catch(function(err) {
+    // TODO evaluate error, show user message
+    $('#peer_review-save').addClass('d-none');
+    alert(getErrorMsg(err));
+  });
+}
 
 function click_field(fieldKey, fieldValue, category) {
   // Keep the original value (may be null/undefined if the template does not provide it)
@@ -165,6 +280,43 @@ document.addEventListener('DOMContentLoaded', function() {
       const categoryDom = field.closest('.tab-pane')?.id;
       const category = (categoryAttr ?? categoryDom ?? 'general').toString();
 
+      
+function clearInputFields() {
+  document.getElementById("valuearea").value = "";
+  document.getElementById("commentarea").value = "";
+}
+
+/**
+ * Switch to the category tab if needed
+ */
+function switchCategoryTab(category) {
+  const currentTab = document.querySelector('.tab-pane.active'); // Get the currently active tab
+  const tabIdForCategory = getCategoryToTabIdMapping()[category];
+  if (currentTab.getAttribute('id') !== tabIdForCategory) {
+    // The clicked field does not belong to the current tab, switch to the next tab
+    const targetTab = document.getElementById(tabIdForCategory);
+    if (targetTab) {
+      // The target tab exists, click the tab link to switch to it
+      targetTab.click();
+    }
+  }
+}
+
+/**
+ * Function to provide the mapping of category to the correct tab ID
+ */
+function getCategoryToTabIdMapping() {
+  // Define the mapping of category to tab ID
+  const mapping = {
+    'general': 'general-tab',
+    'spatial': 'spatiotemporal-tab',
+    'temporal': 'spatiotemporal-tab',
+    'source': 'source-tab',
+    'license': 'license-tab',
+  };
+  return mapping;
+}
+
       click_field(fieldKey, fieldValue, category);
     });
   });
@@ -239,387 +391,11 @@ export function getFieldStateForContributor(fieldKey) {
 }
 
 
-/**
- * Renders fields on the Summary page, sorted by review state
- */
-/**
- * Displays fields based on selected category
- */
-function renderSummaryPageFields() {
-  const acceptedFields = [];
-  const suggestingFields = [];
-  const rejectedFields = [];
-  const missingFields = [];
-  const emptyFields = [];
 
-  const processedFields = new Set();
 
-  if (window.state_dict && Object.keys(window.state_dict).length > 0) {
-    const fields = document.querySelectorAll('.field');
-    for (let field of fields) {
-      const field_id = field.id.slice(6);
-      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
-      const fieldState = getFieldState(field_id);
-      const fieldCategory = field.getAttribute('data-category');
-      const fieldSuggestion = field.querySelector('.suggestion.suggestion--highlight')?.textContent.trim() || "";
 
-      // remove the numbers and replace the dots with spaces
-      let fieldName = field_id.replace(/\./g, ' ');
 
-      if (fieldCategory !== "general") {
-        fieldName = fieldName.split(' ').slice(1).join(' '); // remove first word
-      }
 
-      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
-
-      if (isEmptyValue(fieldValue)) {
-        emptyFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
-      } else if (fieldState === 'ok') {
-        acceptedFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
-        processedFields.add(uniqueFieldIdentifier);
-      }
-    }
-  }
-
-  for (const review of current_review.reviews) {
-    const fieldDomId = `field_${review.key}`;
-    const fieldEl = document.getElementById(fieldDomId);
-    const fieldValue = fieldEl
-      ? $(fieldEl).find('.value').text().replace(/\s+/g, ' ').trim()
-      : '';
-    const fieldState = review.fieldReview.state;
-    const fieldCategory = review.category;
-    const fieldSuggestion = review.fieldReview.reviewerSuggestion || "";
-
-    let fieldName = review.key.replace(/\./g, ' ');
-
-    if (fieldCategory !== "general") {
-      fieldName = fieldName.split(' ').slice(1).join(' ');
-    }
-
-    const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
-
-    if (processedFields.has(uniqueFieldIdentifier)) {
-      continue;
-    }
-
-    if (isEmptyValue(fieldValue)) {
-      emptyFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
-    } else if (fieldState === 'ok') {
-      acceptedFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
-    } else if (fieldState === 'suggestion') {
-      suggestingFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
-    } else if (fieldState === 'rejected') {
-      rejectedFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
-    }
-
-    processedFields.add(uniqueFieldIdentifier);
-  }
-
-  const categories = document.querySelectorAll(".tab-pane");
-
-  for (const category of categories) {
-    const category_name = category.id;
-
-    if (category_name === "summary") {
-      continue;
-    }
-    const category_fields = category.querySelectorAll(".field");
-    for (let field of category_fields) {
-      const field_id = field.id.slice(6);
-      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
-      const found = current_review.reviews.some((review) => review.key === field_id);
-      const fieldState = getFieldState(field_id);
-      const fieldCategory = field.getAttribute('data-category');
-      const fieldSuggestion = field.querySelector('.suggestion.suggestion--highlight')?.textContent.trim() || "";
-
-      let fieldName = field_id.replace(/\./g, ' ');
-
-      if (fieldCategory !== "general") {
-        fieldName = fieldName.split(' ').slice(1).join(' ');
-      }
-
-      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
-
-      if (
-        !found &&
-        fieldState !== 'ok' &&
-        !isEmptyValue(fieldValue) &&
-        !processedFields.has(uniqueFieldIdentifier)
-      ) {
-        missingFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
-        processedFields.add(uniqueFieldIdentifier);
-      }
-    }
-  }
-
-  const allData = [];
-  allData.push(...missingFields.map((item) => ({ ...item, fieldStatus: 'Missing' })));
-  allData.push(...acceptedFields.map((item) => ({ ...item, fieldStatus: 'Accepted' })));
-  allData.push(...suggestingFields.map((item) => ({ ...item, fieldStatus: 'Suggested' })));
-  allData.push(...rejectedFields.map((item) => ({ ...item, fieldStatus: 'Rejected' })));
-  allData.push(...emptyFields.map((item) => ({ ...item, fieldStatus: 'Empty' })));
-
-  const categoriesMap = {};
-
-  function addFieldToCategory(category, field) {
-    if (!categoriesMap[category]) categoriesMap[category] = [];
-    categoriesMap[category].push(field);
-  }
-
-  allData.forEach(item => {
-    const category = item.fieldCategory || 'general';
-    addFieldToCategory(category, item);
-  });
-
-  const summaryContainer = document.getElementById("summary");
-  summaryContainer.innerHTML = '';
-
-  const tabsNav = document.createElement('ul');
-  tabsNav.className = 'nav nav-tabs';
-
-  const tabsContent = document.createElement('div');
-  tabsContent.className = 'tab-content';
-
-  let firstTab = true;
-
-  for (const category in categoriesMap) {
-    const tabId = `tab-${category}`;
-
-    const navItem = document.createElement('li');
-    navItem.className = 'nav-item';
-    navItem.innerHTML = `
-      <button class="nav-link${firstTab ? ' active' : ''}" data-bs-toggle="tab" data-bs-target="#${tabId}">
-        ${category}
-      </button>
-    `;
-    tabsNav.appendChild(navItem);
-
-    const tabPane = document.createElement('div');
-    tabPane.className = `tab-pane fade${firstTab ? ' show active' : ''}`;
-    tabPane.id = tabId;
-
-    const fieldsForCategory = categoriesMap[category];
-    const singleFields = [];
-    const groupedFields = {};
-
-    fieldsForCategory.forEach(field => {
-      const words = field.fieldName.split(' ');
-      if (words.length === 1) {
-        singleFields.push(field);
-      } else {
-        const prefix = words[0];
-        const rest = words.slice(1);
-        const indices = rest.filter(word => !isNaN(word));
-        const nameWithoutIndices = rest.filter(word => isNaN(word)).join(' ');
-
-        if (!groupedFields[prefix]) groupedFields[prefix] = { indexed: {}, noIndex: [] };
-
-        if (indices.length > 0) {
-          const indexKey = indices.map(num => (parseInt(num, 10) + 1)).join('.');
-          if (!groupedFields[prefix].indexed[indexKey]) groupedFields[prefix].indexed[indexKey] = [];
-          groupedFields[prefix].indexed[indexKey].push({ ...field, fieldName: nameWithoutIndices });
-        } else {
-          groupedFields[prefix].noIndex.push({ ...field, fieldName: nameWithoutIndices });
-        }
-      }
-    });
-
-    if (singleFields.length > 0) {
-      const table = document.createElement('table');
-      table.className = 'table review-summary';
-      table.innerHTML = `
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Field Name</th>
-            <th>Field Value</th>
-            <th>Field Suggestion</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${singleFields.map(f => `
-            <tr>
-              <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-              <td>${f.fieldName}</td>
-              <td>${f.fieldValue}</td>
-              <td>${f.fieldSuggestion || ''}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      `;
-      tabPane.appendChild(table);
-    }
-
-    if (Object.keys(groupedFields).length > 0) {
-      const accordionContainer = document.createElement('div');
-      accordionContainer.className = 'accordion';
-      accordionContainer.id = `accordion-${category}`;
-
-      let accordionIndex = 0;
-      for (const prefix in groupedFields) {
-        const accordionItem = document.createElement('div');
-        accordionItem.className = 'accordion-item';
-        const headingId = `heading-${category}-${accordionIndex}`;
-        const collapseId = `collapse-${category}-${accordionIndex}`;
-
-        const { noIndex, indexed } = groupedFields[prefix];
-
-        let innerHTML = '';
-
-        if (noIndex.length > 0) {
-          innerHTML += `
-            <table class="table table-sm table-bordered">
-              <thead>
-                <tr>
-                  <th>Status</th>
-                  <th>Field Name</th>
-                  <th>Field Value</th>
-                  <th>Field Suggestion</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${noIndex.map(f => `
-                  <tr>
-                    <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-                    <td>${f.fieldName}</td>
-                    <td>${f.fieldValue}</td>
-                    <td>${f.fieldSuggestion || ''}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          `;
-        }
-
-        if (Object.keys(indexed).length > 0) {
-          const subAccordionId = `subAccordion-${category}-${accordionIndex}`;
-          innerHTML += `<div class="accordion" id="${subAccordionId}">`;
-
-          Object.entries(indexed).forEach(([idx, idxFields], idxAccordionIndex) => {
-            const idxHeadingId = `idxHeading-${category}-${accordionIndex}-${idxAccordionIndex}`;
-            const idxCollapseId = `idxCollapse-${category}-${accordionIndex}-${idxAccordionIndex}`;
-
-            const tabLabel = ['source', 'license'].includes(category) ? 'fields' : `${prefix} ${idx}`;
-
-            innerHTML += `
-              <div class="accordion-item">
-                <h2 class="accordion-header" id="${idxHeadingId}">
-                  <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#${idxCollapseId}">
-                    ${tabLabel}
-                  </button>
-                </h2>
-                <div id="${idxCollapseId}" class="accordion-collapse collapse" data-bs-parent="#${subAccordionId}">
-                  <div class="accordion-body">
-                    <table class="table table-sm table-bordered">
-                      <thead>
-                        <tr>
-                          <th>Status</th>
-                          <th>Field Name</th>
-                          <th>Field Value</th>
-                          <th>Field Suggestion</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        ${idxFields.map(f => `
-                          <tr>
-                            <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-                            <td>${f.fieldName}</td>
-                            <td>${f.fieldValue}</td>
-                            <td>${f.fieldSuggestion || ''}</td>
-                          </tr>
-                        `).join('')}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            `;
-          });
-
-          innerHTML += `</div>`;
-        }
-
-        accordionItem.innerHTML = `
-          <h2 class="accordion-header" id="${headingId}">
-            <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
-              ${['source', 'license'].includes(category) ? 'fields name' : prefix}
-            </button>
-          </h2>
-          <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#accordion-${category}">
-            <div class="accordion-body">
-              ${innerHTML}
-            </div>
-          </div>
-        `;
-
-        accordionContainer.appendChild(accordionItem);
-        accordionIndex++;
-      }
-
-      tabPane.appendChild(accordionContainer);
-    }
-
-    tabsContent.appendChild(tabPane);
-    firstTab = false;
-  }
-
-  const viewsNavItem = document.createElement('li');
-  viewsNavItem.className = 'nav-item';
-  viewsNavItem.innerHTML = `
-    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-views">
-      views
-    </button>
-  `;
-  tabsNav.appendChild(viewsNavItem);
-
-  const viewsPane = document.createElement('div');
-  viewsPane.className = 'tab-pane fade';
-  viewsPane.id = 'tab-views';
-
-  viewsPane.innerHTML = `
-    <table class="table review-summary">
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th>Category</th>
-          <th>Field Name</th>
-          <th>Field Value</th>
-          <th>Field Suggestion</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${allData.map(f => `
-          <tr>
-            <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
-            <td>${f.fieldCategory}</td>
-            <td>${f.fieldName}</td>
-            <td>${f.fieldValue}</td>
-            <td>${f.fieldSuggestion || ''}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-
-  tabsContent.appendChild(viewsPane);
-  summaryContainer.appendChild(tabsNav);
-  summaryContainer.appendChild(tabsContent);
-
-  updateTabProgressIndicatorClasses();
-}
-/**
- * Creates an HTML list of fields with their categories
- * @param {Array} fields Array of field objects
- * @returns {string} HTML list of fields
- */
-function createFieldList(fields) {
-  return `
-    <ul>
-      ${fields.map((field) => `<li>${field.fieldCategory}: ${field.fieldValue}</li>`).join('')}
-    </ul>
-  `;
-}
 
 // // Function to show the error toast
 // function showErrorToast(liveToast) {
@@ -754,8 +530,64 @@ function saveEntrancesForContributor() {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay() ;
 }
 initializeEventBindings(saveEntrancesForContributor);
+
+
+
+/**
+ * Shows reviewer Comment and Suggestion Input options
+ */
+function showReviewerOptions() {
+  $("#reviewer_remarks").removeClass('d-none');
+}
+
+
+/**
+ * Colors Field based on Reviewer input
+ */
+function updateSubmitButtonColor() {
+  // Color Save comment / new value
+  $(submitButton).removeClass('btn-warning');
+  $(submitButton).removeClass('btn-danger');
+  if (selectedState == "suggestion") {
+    $(submitButton).addClass('btn-warning');
+  } else {
+    $(submitButton).addClass('btn-danger');
+  }
+}
+
+
+function updateTabClasses() {
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
+  for (let i = 0; i < tabNames.length; i++) {
+    let tabName = tabNames[i];
+    let tab = document.getElementById(tabName + '-tab');
+    if (!tab) continue;
+
+    let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+
+    let allOk = true;
+    for (let j = 0; j < fields.length; j++) {
+      let fieldState = getFieldState(fields[j].id.replace('field_', ''));
+      if (fieldState !== 'ok') {
+        allOk = false;
+        break;
+      }
+    }
+    if (allOk) {
+      tab.classList.add('status');
+      tab.classList.add('status--done');
+    } else {
+      tab.classList.add('status');
+    }
+  }
+}
+window.addEventListener('DOMContentLoaded', function() {
+    updateTabClasses();
+    updatePercentageDisplay() ;
+});
 
 function calculateOkPercentage(stateDict) {
   let totalCount = 0;

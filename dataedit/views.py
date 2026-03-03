@@ -721,7 +721,7 @@ class TableDataView(View):
         opr_context = {
             "contributor": PeerReviewManager.load_contributor(table=table),
             "reviewer": PeerReviewManager.load_reviewer(table=table),
-            "opr_enabled": False,
+            "opr_enabled": True,
             # oemetadata
             # is not None,  # check if the table has the metadata
         }
@@ -1385,7 +1385,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
 
         table_obj = table_or_404(table=table)
-        topic = table_obj.topics
+        topic = list(table_obj.topics.values_list("name", flat=True))
 
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
