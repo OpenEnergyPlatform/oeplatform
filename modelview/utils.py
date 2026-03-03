@@ -1,10 +1,15 @@
+"""
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 from django.urls import reverse
 
 from modelview.models import Energyframework, Energymodel
 
 
 def get_url(sheettype, obj_id):
-    kwargs = {"sheettype": sheettype, "model_name": obj_id}
+    kwargs = {"sheettype": sheettype, "pk": obj_id}
     detail_url = reverse(
         "modelview:show-factsheet",
         kwargs=kwargs,

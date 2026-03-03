@@ -1,8 +1,14 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # start-fuseki.sh
 
 # Path to your Fuseki directory
-FUSEKI_HOME="$HOME/oep-infrastructure/apache-jena-fuseki-4.2.0"
+FUSEKI_HOME="$HOME/oep-infrastructure/apache-jena-fuseki-4.9.0"
 
 cd $FUSEKI_HOME
 

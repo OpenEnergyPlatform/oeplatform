@@ -31,7 +31,7 @@
     @extend .me-3;
     @extend .fw-semibold;
     @extend .text-decoration-none;
-    
+
     &:focus {
       outline: none;
       box-shadow: none;
@@ -78,7 +78,7 @@
 
     textarea {
       @extend .fs-8;
-      white-space: nowrap;
+      white-space: pre;
       resize: none;
       overflow-y: hidden;
       font-family: 'Roboto Mono' ,monospace;

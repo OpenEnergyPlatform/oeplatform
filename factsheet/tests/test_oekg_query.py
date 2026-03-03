@@ -1,5 +1,9 @@
+"""
+SPDX-FileCopyrightText: 2025 Jonas Huber
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import unittest
-from unittest.mock import MagicMock
 
 from rdflib import RDF, Graph, Literal, URIRef
 
@@ -9,47 +13,93 @@ from factsheet.oekg.filters import OekgQuery
 
 class TestOekgQuery(unittest.TestCase):
     def setUp(self):
-        # Create a mock RDF graph for testing
-        self.oekg_mock = MagicMock(spec=Graph)
         self.oekg_query = OekgQuery()
-        self.oekg_query.oekg = self.oekg_mock
 
-    def test_get_related_scenarios_where_table_is_input_dataset(self):
-        # Set up mock triples for testing
-        triples = [
-            (URIRef("scenario1"), RDF.type, namespaces.OEO.OEO_00000365),
-            (URIRef("scenario1"), namespaces.OEO.RO_0002233, URIRef("input_ds_uid")),
-            (URIRef("input_ds_uid"), namespaces.OEO["has_iri"], Literal("test_table")),
-            (URIRef("scenario2"), RDF.type, namespaces.OEO.OEO_00000365),
-            (URIRef("scenario2"), namespaces.OEO.RO_0002233, URIRef("input_ds_uid")),
-            (URIRef("input_ds_uid"), namespaces.OEO["has_iri"], Literal("test_table")),
-        ]
+    def _make_graph_with_input(self, table_iri_literal: str):
+        g = Graph()
+        bundle = URIRef("https://oekg.test/bundle1")
+        scenario = URIRef("https://oekg.test/scenario/A")
+        input_ds = URIRef("https://oekg.test/dataset/in1")
 
-        self.oekg_mock.triples.return_value = triples
+        g.add((bundle, RDF.type, namespaces.OEO.OEO_00020227))
+        g.add((bundle, namespaces.OBO.BFO_0000051, scenario))
+        g.add((scenario, namespaces.OEO.OEO_00020437, input_ds))
+        g.add((input_ds, namespaces.OEO.OEO_00390094, Literal(table_iri_literal)))
+        return g, bundle, scenario
 
-        # Call the method being tested
-        result = self.oekg_query.get_related_scenarios_where_table_is_input_dataset(
-            "test_table"
-        )
+    def _make_graph_with_output(self, table_iri_literal: str):
+        g = Graph()
+        bundle = URIRef("https://oekg.test/bundle2")
+        scenario = URIRef("https://oekg.test/scenario/B")
+        output_ds = URIRef("https://oekg.test/dataset/out1")
 
-        # Assert the expected result
-        expected_result = {URIRef("scenario1"), URIRef("scenario2")}
-        self.assertEqual(result, expected_result)
+        g.add((bundle, RDF.type, namespaces.OEO.OEO_00020227))
+        g.add((bundle, namespaces.OBO.BFO_0000051, scenario))
+        g.add((scenario, namespaces.OEO.OEO_00020436, output_ds))
+        g.add((output_ds, namespaces.OEO.OEO_00390094, Literal(table_iri_literal)))
+        return g, bundle, scenario
+
+    # -------- input dataset tests --------
+
+    def test_input_basic_relative_path(self):
+        iri = "database/tables/test_table"
+        g, _, scenario = self._make_graph_with_input(iri)
+        self.oekg_query.oekg = g
+        got = self.oekg_query.get_related_scenarios_where_table_is_input_dataset(iri)
+        self.assertEqual(got, {scenario})
+
+    def test_input_full_url_matches_relative(self):
+        stored = "https://openenergyplatform.org/database/tables/test_table"
+        query = "database/tables/test_table"
+        g, _, scenario = self._make_graph_with_input(stored)
+        self.oekg_query.oekg = g
+        got = self.oekg_query.get_related_scenarios_where_table_is_input_dataset(query)
+        self.assertEqual(got, {scenario})
+
+    # -------- output dataset tests --------
+
+    def test_output_basic_relative_path(self):
+        iri = "database/tables/out_table"
+        g, _, scenario = self._make_graph_with_output(iri)
+        self.oekg_query.oekg = g
+        got = self.oekg_query.get_related_scenarios_where_table_is_output_dataset(iri)
+        self.assertEqual(got, {scenario})
+
+    def test_output_full_url_matches_relative(self):
+        stored = "https://openenergyplatform.org/database/tables/out_table"
+        query = "database/tables/out_table"
+        g, _, scenario = self._make_graph_with_output(stored)
+        self.oekg_query.oekg = g
+        got = self.oekg_query.get_related_scenarios_where_table_is_output_dataset(query)
+        self.assertEqual(got, {scenario})
+
+    # -------- bundle mapping helpers --------
+
+    def test_get_scenario_bundles_where_table_is_input(self):
+        iri = "database/tables/in_table"
+        g, bundle, scenario = self._make_graph_with_input(iri)
+        self.oekg_query.oekg = g
+        pairs = self.oekg_query.get_scenario_bundles_where_table_is_input(iri)
+        # Function returns tuples (bundle_uri, bundle_uri) by design; just assert
+        # bundle present
+        self.assertEqual(pairs, {(bundle, bundle)})
+
+    def test_get_scenario_bundles_where_table_is_output(self):
+        iri = "database/tables/out_table"
+        g, bundle, scenario = self._make_graph_with_output(iri)
+        self.oekg_query.oekg = g
+        pairs = self.oekg_query.get_scenario_bundles_where_table_is_output(iri)
+        self.assertEqual(pairs, {(bundle, bundle)})
+
+    # -------- simple acronym helper (kept from your original) --------
 
     def test_get_scenario_acronym(self):
-        # Set up mock triples for testing
-        triples = [
-            (URIRef("scenario_uri"), namespaces.RDFS.label, Literal("Scenario Acronym"))
-        ]
-
-        self.oekg_mock.triples.return_value = triples
-
-        # Call the method being tested
-        result = self.oekg_query.get_scenario_acronym("scenario_uri")
-
-        # Assert the expected result
-        expected_result = Literal("Scenario Acronym")
-        self.assertEqual(result, expected_result)
+        g = Graph()
+        scen = URIRef("https://oekg.test/scenario/C")
+        g.add((scen, namespaces.RDFS.label, Literal("Scenario Acronym")))
+        self.oekg_query.oekg = g
+        got = self.oekg_query.get_scenario_acronym(scen)
+        self.assertEqual(got, Literal("Scenario Acronym"))
 
 
 if __name__ == "__main__":

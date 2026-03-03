@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: 2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 User-agent: *
 Disallow: /dataedit
 Disallow: /api

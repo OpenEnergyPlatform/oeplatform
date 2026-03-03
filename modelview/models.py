@@ -1,4 +1,20 @@
-from django import forms
+"""
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Alexis Michaltsis <https://github.com/4lm> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Berit Müller <https://github.com/beritRLI>  © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 quentinpeyras <https://github.com/quentinpeyras>
+SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (
@@ -7,9 +23,10 @@ from django.db.models import (
     DateField,
     EmailField,
     ImageField,
-    IntegerField,
     TextField,
 )
+
+from dataedit.models import Tag
 
 
 class BasicFactsheet(models.Model):
@@ -212,7 +229,7 @@ class BasicFactsheet(models.Model):
         verbose_name="Collaborative programming",
         help_text="Is it possible to join the coding group?",
     )
-    number_of_devolopers = CharField(
+    number_of_developers = CharField(
         max_length=1000,
         verbose_name="Number of developers",
         help_text="How many people are involved in the model development?",
@@ -305,13 +322,11 @@ class BasicFactsheet(models.Model):
         null=True,
     )
 
-    tags = ArrayField(IntegerField(), default=list, null=True)
+    tags = models.ManyToManyField(Tag, related_name="factsheets")
 
 
 class Energymodel(BasicFactsheet):
-    energy_sectors_electricity = BooleanField(
-        default=False, verbose_name="electricity"
-    )  # noqa
+    energy_sectors_electricity = BooleanField(default=False, verbose_name="electricity")
     energy_sectors_heat = BooleanField(default=False, verbose_name="heat")
     energy_sectors_liquid_fuels = BooleanField(
         default=False, verbose_name="liquid fuels"
@@ -797,17 +812,6 @@ class Energymodel(BasicFactsheet):
         help_text="Which models are integrated in the model? Where are these models available?",  # noqa
         null=True,
     )
-
-    def formfield(self, **kwargs):
-        defaults = {
-            "form_class": forms.MultipleChoiceField,
-            "choices": self.base_field.choices,
-        }
-        defaults.update(kwargs)
-        # Skip our parent's formfield implementation completely as we don't
-        # care for it.
-        # pylint:disable=bad-super-call
-        return super(ArrayField, self).formfield(**defaults)
 
 
 class Energyframework(BasicFactsheet):

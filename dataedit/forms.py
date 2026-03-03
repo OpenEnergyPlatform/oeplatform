@@ -1,3 +1,13 @@
+"""
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 from django import forms
 from django.db import models
 from django.forms import ModelForm
@@ -30,7 +40,7 @@ class GraphViewForm(ModelForm):
     class Meta:
         model = View
         fields = "__all__"
-        exclude = ("table", "schema", "VIEW_TYPES", "options", "type")
+        exclude = ("table", "VIEW_TYPES", "options", "type")
 
     def __init__(self, *args, **kwargs):
         columns = kwargs.pop("columns", None)
@@ -42,6 +52,9 @@ class GraphViewForm(ModelForm):
 
 
 class MapViewForm(ModelForm):
+    table: str  # type hints: TODO: MapView not working currently
+    options: dict  # type hints: TODO: MapView not working currently
+
     def __init__(self, *args, **kwargs):
         self.columns = [c for (c, _) in kwargs.pop("columns", {})]
         super(MapViewForm, self).__init__(*args, **kwargs)
@@ -49,20 +62,19 @@ class MapViewForm(ModelForm):
     class Meta:
         model = View
         fields = "__all__"
-        exclude = ("table", "schema", "VIEW_TYPES", "options", "type")
+        exclude = ("table", "VIEW_TYPES", "options", "type")
 
     def save(self, commit=True):
         view = View.objects.create(
             name=self.data["name"],
             table=self.table,
-            schema=self.schema,
             type="map",
             options=self.options,
             is_default=self.data.get("is_default", "off") == "on",
         )
         if commit:
             view.save()
-            return view.id
+            return view.pk
         else:
             return None
 
@@ -109,7 +121,6 @@ class GeomViewForm(MapViewForm):
     def __init__(self, *args, **kwargs):
         super(GeomViewForm, self).__init__(*args, **kwargs)
         if self.columns is not None:
-            print(self.columns)
             self.fields["geom"] = forms.ChoiceField(
                 choices=[(c, c) for c in self.columns]
             )
