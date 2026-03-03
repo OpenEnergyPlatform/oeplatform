@@ -41,7 +41,7 @@ import conf from "../conf.json";
 import { colors, Tooltip } from '@mui/material';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline.js';
-import { styled } from '@mui/material/styles';
+
 import SaveIcon from '@mui/icons-material/Save.js';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
@@ -57,7 +57,6 @@ import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.j
 import IconButton from '@mui/material/IconButton';
 // import Divider from '@mui/material/Divider';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.jsx';
-import { VerticalTab, AddTabWrapper } from '../styles/oep-theme/components/factsheetsStyles.tsx';
 import TableContainer from '@mui/material/TableContainer';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -82,7 +81,9 @@ import variables from '../styles/oep-theme/variables.js';
 
 import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx';
-import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
+
+import { getCheckedWithParents, filterTree } from './scenarioBundleUtilityComponents/treeUtils';
+import HierarchyViewer from './scenarioBundleUtilityComponents/HierarchyViewer';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -96,11 +97,29 @@ function TabPanel(props) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+          <Typography component="div">{children}</Typography>
         </Box>
       )}
     </div>
   );
+}
+
+
+/**
+ *
+ * @param {integer|Date|string} input
+ * @returns {integer}
+ */
+function formatYear(input) {
+
+  if (typeof input === 'string'){
+    // create date object
+    input = new Date(input)
+  }
+  if (input instanceof Date) {
+    input = input.getFullYear();
+  }
+  return input;
 }
 
 function Factsheet(props) {
@@ -110,6 +129,9 @@ function Factsheet(props) {
 
 
   const { id, fsData } = props;
+
+  const [isOwner, setIsOwner] = useState(id === "new");
+  const [isOwnerLoading, setIsOwnerLoading] = useState(id !== "new");
 
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
@@ -141,6 +163,42 @@ function Factsheet(props) {
   const [sunburstData, setSunburstData] = useState([]);
 
   const [openBackDrop, setOpenBackDrop] = React.useState(false);
+
+  useEffect(() => {
+    if (!id || id === "new") {
+      setIsOwner(true);
+      setIsOwnerLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsOwnerLoading(true);
+
+    axios
+      .post(
+        conf.toep + `scenario-bundles/check-owner/${id}/`,
+        { uid: id },
+        { headers: { "X-CSRFToken": CSRFToken() } }
+      )
+      .then((res) => {
+        if (cancelled) return;
+        setIsOwner(Boolean(res.data?.isOwner));
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("Error checking ownership:", err);
+        setIsOwner(false);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setIsOwnerLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
 
 
   const scenarioYears = Array.from({ length: 101 }, (_, i) => ({
@@ -554,25 +612,8 @@ function Factsheet(props) {
     }
   };
 
-  const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }, { headers: { 'X-CSRFToken': CSRFToken() } }
-    ).then(response => setOpenRemovedDialog(true));
-  }
-
-  const handleCloseSavedDialog = () => {
-    setOpenSavedDialog(false);
-  };
-
   const handleCloseExistDialog = () => {
     setOpenExistDialog(false);
-  };
-
-  const handleCloseUpdatedDialog = () => {
-    setOpenUpdatedDialog(false);
-  };
-
-  const handleCloseRemovedDialog = () => {
-    setOpenRemovedDialog(false);
   };
 
   const handleAcronym = e => {
@@ -603,11 +644,6 @@ function Factsheet(props) {
     setPublications(updatePublications);
   };
 
-  const handleFactsheetName = e => {
-    setFactsheetName(e.target.value);
-    factsheetObjectHandler('name', e.target.value);
-  };
-
   // const handlePlaceOfPublication = e => {
   //   setPlaceOfPublication(e.target.value);
   //   factsheetObjectHandler('place_of_publication', e.target.value);
@@ -623,14 +659,6 @@ function Factsheet(props) {
   //   setDateOfPublication(e.target.value);
   //   factsheetObjectHandler('date_of_publication', e.target.value);
   // };
-
-  const handleClickOpenSavedDialog = () => {
-    openSavedDialog(true);
-  };
-
-  const handleClickOpenUpdatedDialog = () => {
-    openSavedDialog(true);
-  };
 
   const handleClickOpenRemovedDialog = () => {
     setOpenRemovedDialog(true);
@@ -741,18 +769,8 @@ function Factsheet(props) {
     setFactsheetObject(newFactsheetObject);
   }
 
-  const scenariosObjectHandler = (key, obj) => {
-    let newScenariosObject = scenariosObject;
-    newScenariosObject[key] = obj
-    setScenariosObject(newScenariosObject);
-  }
-
-  const renderFactsheet = () => {
-    return <div>'studyName'</div>
-  }
-
-  const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+  const getOrganization = async () => {
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00030022' } });
     return data;
   };
 
@@ -797,7 +815,7 @@ function Factsheet(props) {
   };
 
   useEffect(() => {
-    getInstitution().then((data) => {
+    getOrganization().then((data) => {
       const tmp = [];
       data.map((item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }));
       setInstitutions(tmp);
@@ -872,7 +890,7 @@ function Factsheet(props) {
   const HandleAddNewInstitution = (newElement) => {
     axios.post(conf.toep + 'scenario-bundles/add_entities/',
       {
-        entity_type: 'OEO.OEO_00000238',
+        entity_type: 'OEO.OEO_00030022',
         entity_label: newElement.name,
         entity_iri: newElement.iri
       },
@@ -882,8 +900,8 @@ function Factsheet(props) {
     ).then(response => {
       if (response.data === 'A new entity added!') {
         setOpenAddedDialog(true);
-        setAddedEntity(['Institution', newElement.name]);
-        getInstitution().then((data) => {
+        setAddedEntity(['Organization', newElement.name]);
+        getOrganization().then((data) => {
           const tmp = [];
           data.map((item) => tmp.push(item))
           setInstitutions(tmp);
@@ -896,7 +914,7 @@ function Factsheet(props) {
   const HandleEditInstitution = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
       {
-        entity_type: 'OEO.OEO_00000238',
+        entity_type: 'OEO.OEO_00030022',
         entity_label: oldElement,
         new_entity_label: newElement,
         entity_iri: editIRI
@@ -908,7 +926,7 @@ function Factsheet(props) {
       if (response.data === 'entity updated!') {
         setOpenEditDialog(true);
         setEditedEntity(['Institution', oldElement, newElement]);
-        getInstitution().then((data) => {
+        getOrganization().then((data) => {
           const tmp = [];
           data.map((item) => tmp.push(item))
           setInstitutions(tmp);
@@ -1152,147 +1170,6 @@ function Factsheet(props) {
     });
   }
 
-/*   const HandleAddNNewScenarioYears = (newElement) => {
-    axios.post(conf.toep + 'scenario-bundles/add_entities/',
-      {
-        entity_type: 'OBO.OEO_00020097',
-        entity_label: newElement.name,
-        entity_iri: newElement.iri
-      },
-      {
-        headers: { 'X-CSRFToken': CSRFToken() }
-      }
-    ).then(response => {
-      if (response.data === 'A new entity added!')
-        setOpenAddedDialog(true);
-      setAddedEntity(['Scenario year', newElement.name]);
-
-      getScenarioYears().then((data) => {
-        const tmp = [];
-        data.map((item) => tmp.push(item))
-        setScenarioYears(tmp);
-      });
-    });
-  } */
-
-/*   const HandleEditScenarioYears = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
-      {
-        entity_type: 'OBO.OEO_00020097',
-        entity_label: oldElement,
-        new_entity_label: newElement,
-        entity_iri: editIRI
-      },
-      {
-        headers: { 'X-CSRFToken': CSRFToken() }
-      }
-    ).then(response => {
-      if (response.data === 'entity updated!') {
-        setOpenEditDialog(true);
-        setEditedEntity(['Scenario year', oldElement, newElement]);
-        getScenarioYears().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setScenarioYears(tmp);
-        });
-      }
-    });
-  } */
-
-  const HandleAddNewModel = (newElement) => {
-    axios.post(conf.toep + 'scenario-bundles/add_entities/',
-      {
-        entity_type: 'OEO.OEO_00000274',
-        entity_label: newElement.name,
-        entity_iri: newElement.iri
-      },
-      {
-        headers: { 'X-CSRFToken': CSRFToken() }
-      }
-    ).then(response => {
-      if (response.data === 'A new entity added!')
-        setOpenAddedDialog(true);
-      setAddedEntity(['Model', newElement.name]);
-
-      getModels().then((data) => {
-        const tmp = [];
-        data.map((item) => tmp.push(item))
-        setModels(tmp);
-      });
-    });
-  }
-
-  const HandleEditModels = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
-      {
-        entity_type: 'OEO.OEO_00000274',
-        entity_label: oldElement,
-        new_entity_label: newElement,
-        entity_iri: editIRI
-      },
-      {
-        headers: { 'X-CSRFToken': CSRFToken() }
-      }
-    ).then(response => {
-      if (response.data === 'entity updated!') {
-        setOpenEditDialog(true);
-        setEditedEntity(['Model', oldElement, newElement]);
-        getModels().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setModels(tmp);
-        });
-      }
-    });
-  }
-
-  const HandleAddNewFramework = (newElement) => {
-    axios.post(conf.toep + 'scenario-bundles/add_entities/',
-      {
-        entity_type: 'OEO.OEO_00000172',
-        entity_label: newElement.name,
-        entity_iri: newElement.iri
-      },
-      {
-        headers: { 'X-CSRFToken': CSRFToken() }
-      }
-    ).then(response => {
-      if (response.data === 'A new entity added!')
-        setOpenAddedDialog(true);
-      setAddedEntity(['Framework', newElement.name]);
-
-      getFrameworks().then((data) => {
-        const tmp = [];
-        data.map((item) => tmp.push(item))
-        setFrameworks(tmp);
-      });
-    });
-  }
-
-  const HandleEditFramework = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'scenario-bundles/update_an_entity/',
-      {
-        entity_type: 'OEO.OEO_00000172',
-        entity_label: oldElement,
-        new_entity_label: newElement,
-        entity_iri: editIRI
-      },
-      {
-        headers: { 'X-CSRFToken': CSRFToken() }
-      }
-    ).then(response => {
-      if (response.data === 'entity updated!') {
-        setOpenEditDialog(true);
-        setEditedEntity(['Framework', oldElement, newElement]);
-        getFrameworks().then((data) => {
-          const tmp = [];
-          data.map((item) => tmp.push(item))
-          setFrameworks(tmp);
-        });
-      }
-    });
-  }
-
   const sectorDivisionsHandler = (sectorDivisionsList) => {
     setSelectedSectorDivisions(sectorDivisionsList);
     let sectorsBasedOnDivisions = sectors.filter(item => sectorDivisionsList.map(item => item.class).includes(item.sector_division));
@@ -1413,19 +1290,6 @@ function Factsheet(props) {
     setExpandedSectors(zipped);
   };
 
-  const expandedTechnologiesHandler = (expandedTechnologiesList) => {
-    const zipped = []
-    expandedTechnologiesList.map((v) => zipped.push({ "value": v, "label": v }));
-    setExpandedTechnologies(zipped);
-  };
-
-
-  function a11yProps(index: number) {
-    return {
-      id: `vertical-tab-${index}`,
-      'aria-controls': `vertical-tabpanel-${index}`,
-    };
-  }
 
   const handleStudyKeywords = (event) => {
     if (event.target.checked) {
@@ -1603,7 +1467,7 @@ function Factsheet(props) {
                 {...props}
                 spanValue="Authors"
                 tooltipText="An author is an agent that creates or has created written work."
-                hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000064"
+                hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000064"
                 renderField={() => (
                   <CustomAutocomplete
                     width="100%"
@@ -1623,7 +1487,7 @@ function Factsheet(props) {
                 {...props}
                 spanValue="DOI"
                 tooltipText="A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO)."
-                hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000133"
+                hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000133"
                 renderField={() => (
                   <TextField
                     size="small"
@@ -1641,7 +1505,7 @@ function Factsheet(props) {
                 showTooltip={false}
                 spanValue="Link to study report"
                 tooltipText="A funder is a sponsor that supports by giving money."
-                hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00090001"
+                hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00090001"
                 renderField={() => (
                   <TextField
                     size="small"
@@ -1659,7 +1523,7 @@ function Factsheet(props) {
                 showTooltip={false}
                 spanValue="Year of publication"
                 tooltipText="A funder is a sponsor that supports by giving money."
-                hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00090001"
+                hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00090001"
                 renderField={() => (
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <Stack spacing={3} style={{ width: '20rem' }}>
@@ -1696,7 +1560,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Study name"
         tooltipText="A study is a project with the goal to investigate something."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00020011"
+        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00020011"
         renderField={() => (
           <TextField
             size="small"
@@ -1713,7 +1577,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Acronym"
         tooltipText="An acronym is an abbreviation of the title by using the first letters of each part of the title."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000048"
+        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000048"
         renderField={() => (
           <TextField
             size="small"
@@ -1730,7 +1594,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Institutions"
         tooltipText="An institution is an organisation that serves a social purpose."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000238"
+        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00030022"
         renderField={() => (
           <CustomAutocomplete
             width="100%"
@@ -1750,7 +1614,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Contact person"
         tooltipText="A contact person is an agent that can be contacted for help or information about a specific service or good."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000107"
+        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000107"
         renderField={() => (
           <CustomAutocomplete
             width="100%"
@@ -1778,7 +1642,7 @@ function Factsheet(props) {
         showTooltip={false}
         spanValue="Funding sources"
         tooltipText="A funder is a sponsor that supports by giving money."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00090001"
         renderField={() => (
           <CustomAutocomplete
             width="100%"
@@ -1819,8 +1683,8 @@ function Factsheet(props) {
         {...props}
         showTooltip={false}
         spanValue="Study descriptors"
-        tooltipText="A funder is a sponsor that supports by giving money.."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        tooltipText="A Study descriptors describes keywords for a study.."
+        hrefLink=""
         renderField={() => (
           <FormGroup>
             <div >
@@ -1842,7 +1706,7 @@ function Factsheet(props) {
                     >
                       <FormControlLabel control={
                         <Checkbox size="small" color="default" />
-                      } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]}
+                      } checked={selectedStudyKewords.includes(item[1])} onChange={handleStudyKeywords} label={item[0]} name={item[1]}
                       />
                     </HtmlTooltip>
                       :
@@ -1861,7 +1725,7 @@ function Factsheet(props) {
                       >
                         <FormControlLabel control={
                           <Checkbox size="small" color="default" />
-                        } checked={selectedStudyKewords.includes(item[0])} onChange={handleStudyKeywords} label={item[0]} name={item[0]}
+                        } checked={selectedStudyKewords.includes(item[1])} onChange={handleStudyKeywords} label={item[1]} name={item[0]}
                         />
                       </HtmlTooltip>
                     }
@@ -1887,7 +1751,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Sector divisions"
         tooltipText="A sector division is a specific way to subdivide a system."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000368"
+        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000368"
         renderField={() => (
           <CustomAutocompleteWithoutAddNew
             showSelectedElements={true}
@@ -1903,7 +1767,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Sectors"
         tooltipText="A sector is generically dependent continuant that is a subdivision of a system."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000367"
+        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000367"
         renderField={() => (
           <CustomTreeViewWithCheckBox
             flat={true}
@@ -1915,7 +1779,7 @@ function Factsheet(props) {
             expandedHandler={expandedSectorsHandler}
             data={filteredSectors}
             title={"Which sectors are considered in the study?"}
-            toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'https://openenergy-platform.org/ontology/oeo/OEO_00000367']}
+            toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'https://openenergyplatform.org/ontology/oeo/OEO_00000367']}
           />
         )}
         TooltipComponent={HtmlTooltip}
@@ -1924,18 +1788,28 @@ function Factsheet(props) {
         {...props}
         spanValue="Technologies"
         tooltipText="A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000407"
+        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000407"
         renderField={() => (
           <CustomTreeViewWithCheckBox
             showFilter={false}
             size="360px"
             checked={selectedTechnologies}
             expanded={getNodeIds(technologies['children'])}
-            handler={technologyHandler}
+            handler={(list, nodes) => {
+                // 1. Use 'technologies' (not descriptors) to find parents
+                const listWithParents = getCheckedWithParents(list, technologies);
+
+                // 2. Use the correct handler for this file (check if it is technologyHandler)
+                if (typeof technologyHandler === 'function') {
+                   technologyHandler(listWithParents, nodes);
+                } else {
+                   console.error("technologyHandler is missing");
+                }
+            }}
             expandedHandler={expandedTechnologyHandler}
             data={technologies}
             title={"What technologies are considered?"}
-            toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'https://openenergy-platform.org/ontology/oeo/OEO_00000407']}
+            toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'https://openenergyplatform.org/ontology/oeo/OEO_00000407']}
           />
         )}
         TooltipComponent={HtmlTooltip}
@@ -1951,7 +1825,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Models"
         tooltipText="A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000274"
+        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000274"
         renderField={() => (
           <CustomAutocompleteWithoutEdit
             type="Model"
@@ -1969,7 +1843,7 @@ function Factsheet(props) {
         {...props}
         spanValue="Frameworks"
         tooltipText="A software framework is a Software that is generic and can be adapted to a specific application."
-        hrefLink="https://openenergy-platform.org/ontology/oeo/OEO_00000382"
+        hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000382"
         renderField={() => (
           <CustomAutocompleteWithoutEdit
             type="Frameworks"
@@ -2036,7 +1910,7 @@ const renderScenariosOverview = () => (
                             <Typography color="inherit" variant="subtitle1">
                               {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
                               <br />
-                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2059,7 +1933,7 @@ const renderScenariosOverview = () => (
                             <Typography color="inherit" variant="subtitle1">
                               {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
                               <br />
-                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000048">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2105,7 +1979,7 @@ const renderScenariosOverview = () => (
                             <Typography color="inherit" variant="subtitle1">
                               {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
                               <br />
-                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)....</a>
+                              <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000364">More info from Open Energy Ontology (OEO)....</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2128,7 +2002,7 @@ const renderScenariosOverview = () => (
                             <Typography color="inherit" variant="subtitle1">
                               {'A scenario year is a time step that has a duration of one year and is part of a scenario horizon.'}
                               <br />
-                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020097">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020097">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2138,7 +2012,7 @@ const renderScenariosOverview = () => (
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    {v.scenario_years.sort((a, b) => a.id - b.id).map((e) => <span> <span> {e.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
+                    {v.scenario_years.sort((a, b) => a.id - b.id).map((e) => <span> <span> {formatYear(e.name)} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
                   </ContentTableCell>
                 </TableRow>
                 <TableRow>
@@ -2151,7 +2025,7 @@ const renderScenariosOverview = () => (
                             <Typography color="inherit" variant="subtitle1">
                               {'A study region is a spatial region that is under investigation and consists entirely of one or more subregions.'}
                               <br />
-                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020032">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020032">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2174,7 +2048,7 @@ const renderScenariosOverview = () => (
                             <Typography color="inherit" variant="subtitle1">
                               {'An interacting region is a spatial region that interacts with a study region. It is part of a considered region, but not a study region.'}
                               <br />
-                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020036">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020036">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2197,7 +2071,7 @@ const renderScenariosOverview = () => (
                             <Typography color="inherit" variant="subtitle1">
                               {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
                               <br />
-                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergyplatform.org/ontology/oeo/OEO_00030029">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2220,7 +2094,7 @@ const renderScenariosOverview = () => (
                             <Typography color="inherit" variant="subtitle1">
                               {'Output data is endogenous data that is determined by a model calculation and presented as a result.'}
                               <br />
-                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020013">More info from Open Energy Ontology (OEO)...</a>
+                              <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020013">More info from Open Energy Ontology (OEO)...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2284,7 +2158,7 @@ const renderScenariosOverview = () => (
                             <Typography color="inherit" variant="subtitle1">
                               {'An author is an agent that creates or has created written work.'}
                               <br />
-                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000064">More info...</a>
+                              <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000064">More info...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2310,7 +2184,7 @@ const renderScenariosOverview = () => (
                             <Typography color="inherit" variant="subtitle1">
                               {'A DOI (digital object identifier) is a persistent identifier or handle used to uniquely identify objects, standardized by the International Organization for Standardization (ISO).'}
                               <br />
-                              <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000133">More info...</a>
+                              <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000133">More info...</a>
                             </Typography>
                           </React.Fragment>
                         }
@@ -2344,7 +2218,7 @@ const renderScenariosOverview = () => (
                     </div>
                   </FirstRowTableCell>
                   <ContentTableCell>
-                    <span> <span> {v.date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
+                    <span> <span> {formatYear(v.date_of_publication)} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
                   </ContentTableCell>
                 </TableRow>
 
@@ -2358,7 +2232,7 @@ const renderScenariosOverview = () => (
                           <Typography color="inherit" variant="subtitle1">
                             {'A study is a project with the goal to investigate something.'}
                             <br />
-                            <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                            <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                           </Typography>
                         </React.Fragment>
                       }
@@ -2386,7 +2260,7 @@ const renderScenariosOverview = () => (
                         <Typography color="inherit" variant="subtitle1">
                         {'A citation reference is a reference stating where a citation was taken from.'}
                         <br />
-                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000085">More info...</a>
+                        <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000085">More info...</a>
                       </Typography>
                     </React.Fragment>
                     }
@@ -2421,7 +2295,7 @@ const renderScenariosOverview = () => (
                       <Typography color="inherit" variant="subtitle1">
                         {'A sector division is a specific way to subdivide a system.'}
                         <br />
-                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000368">More info...</a>
+                        <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000368">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
@@ -2446,7 +2320,7 @@ const renderScenariosOverview = () => (
                       <Typography color="inherit" variant="subtitle1">
                         {'A sector is generically dependent continuant that is a subdivision of a system.'}
                         <br />
-                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000367">More info...</a>
+                        <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000367">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
@@ -2471,7 +2345,7 @@ const renderScenariosOverview = () => (
                       <Typography color="inherit" variant="subtitle1">
                         {'A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.'}
                         <br />
-                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000407">More info...</a>
+                        <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000407">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
@@ -2481,9 +2355,24 @@ const renderScenariosOverview = () => (
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedTechnologies.map((v, i) => (
-                <span> <span> <Chip label={v.value} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-              ))}
+              {(() => {
+                // 1. Get IDs of selected items safely
+                const selectedIds = Array.isArray(selectedTechnologies)
+                  ? selectedTechnologies.map(t => t.value)
+                  : [];
+
+                // 2. Filter the main 'technologies' tree to get the hierarchy
+                // Note: 'technologies' here contains the full tree with JSX labels created in useEffect
+                const hierarchyData = filterTree(technologies, selectedIds);
+
+                // 3. Render
+                return (
+                  <HierarchyViewer
+                    nodes={hierarchyData}
+                    onLinkClick={handleOpenURL}
+                  />
+                );
+              })()}
               {/* <RichTreeView items={selectedTechnologiesTree} expandedItems={allNodeIds} /> */}
             </ContentTableCell>
           </TableRow>
@@ -2506,7 +2395,7 @@ const renderScenariosOverview = () => (
                       <Typography color="inherit" variant="subtitle1">
                         {'A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours.'}
                         <br />
-                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
+                        <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000274">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
@@ -2538,7 +2427,7 @@ const renderScenariosOverview = () => (
                       <Typography color="inherit" variant="subtitle1">
                         {'A software framework is a Software that is generic and can be adapted to a specific application.'}
                         <br />
-                        <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
+                        <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000382">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
@@ -2620,7 +2509,11 @@ const renderScenariosOverview = () => (
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <ColorToggleButton handleSwap={handleSwap} />
+                <ColorToggleButton
+                  handleSwap={handleSwap}
+                  isOwner={isOwner}
+                  isOwnerLoading={isOwnerLoading}
+                />
                 <div style={{ 'textAlign': 'center' }}>
                   {/* <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                     <CircularProgress variant="determinate" value={60} size={60} />
@@ -2651,11 +2544,22 @@ const renderScenariosOverview = () => (
                       <Button disableElevation={true} size="small" sx={{ mr: 1 }} variant="outlined" color="primary" startIcon={<ShareIcon />} disabled> Share </Button>
                     </span>
                   </Tooltip>
-                  <Tooltip title="Delete factsheet">
-                  <span>
-                    <Button disableElevation={true} size="small" variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon />}> Delete </Button>
-                  </span>
-                  </Tooltip>
+                  {isOwner && id !== "new" && (
+                    <Tooltip title="Delete factsheet">
+                      <span>
+                        <Button
+                          disableElevation
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                          onClick={handleClickOpenRemovedDialog}
+                          startIcon={<DeleteOutlineIcon />}
+                        >
+                          Delete
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  )}
                 </div >
               </Grid>
             </Grid>
@@ -2809,7 +2713,12 @@ const renderScenariosOverview = () => (
                 </Grid>
               </div>
             }
-
+{/* #########################################################################################################################################################################################
+#########################################################################################################################################################################################
+#########################################################################################################################################################################################
+#########################################################################################################################################################################################
+ #########################################################################################################################################################################################
+  ######################################################################################################################################################################################### */}
             {mode === "overview" &&
               <>
                 <Grid container justifyContent="space-between"
@@ -2831,7 +2740,7 @@ const renderScenariosOverview = () => (
                                 <Typography color="inherit" variant="subtitle1">
                                   {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
                                   <br />
-                                  <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
+                                  <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000048">More info...</a>
                                 </Typography>
                               </React.Fragment>
                             }
@@ -2854,7 +2763,7 @@ const renderScenariosOverview = () => (
                                 <Typography color="inherit" variant="subtitle1">
                                   {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
                                   <br />
-                                  <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000107">More info...</a>
+                                  <a href="https://openenergyplatform.org/ontology/oeo/OEO_00000107">More info...</a>
                                 </Typography>
                               </React.Fragment>
                             }
@@ -2879,7 +2788,7 @@ const renderScenariosOverview = () => (
                                 <Typography color="inherit" variant="subtitle1">
                                   {'An institution is an organisation that serves a social purpose.'}
                                   <br />
-                                  <a href="https://openenergy-platform.org/ontology/oeo/OEO_00000238">More info...</a>
+                                  <a href="https://openenergyplatform.org/ontology/oeo/OEO_00030022">More info...</a>
                                 </Typography>
                               </React.Fragment>
                             }
@@ -2904,7 +2813,7 @@ const renderScenariosOverview = () => (
                           <Typography color="inherit" variant="subtitle1">
                             {'A study is a project with the goal to investigate something.'}
                             <br />
-                            <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                            <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                           </Typography>
                         </React.Fragment>
                       }
@@ -2923,25 +2832,41 @@ const renderScenariosOverview = () => (
                       <Grid item xs={3} >
                         <span>Descriptors</span>
                         <span >
-                          {/* <HtmlTooltip
+                          <HtmlTooltip
                         title={
                         <React.Fragment>
                           <Typography color="inherit" variant="subtitle1">
                             {'A study is a project with the goal to investigate something.'}
                             <br />
-                            <a href="https://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                            <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                           </Typography>
                         </React.Fragment>
                       }
                       >
                       <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                      </HtmlTooltip> */}
+                      </HtmlTooltip>
                         </span>
                       </Grid>
                       <Grid item xs={9} style={{ paddingTop: '10px' }}>
-                        {selectedStudyKewords.map((v, i) => (
-                          <span> <span> <Chip label={v} size="small" variant={StudyKeywords.filter((i) => i[0] == v)[0][1] === "" ? "" : "outlined"} onClick={() => handleOpenURL(StudyKeywords.filter((i) => i[0] == v)[0][1])} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-                        ))}
+                        {selectedStudyKewords.map((v, i) => {
+                          const match = StudyKeywords.find((it) => it[1] === v) || [v, ""];
+                          const [label, url] = match;
+                          const variant = url ? "outlined" : "filled";
+
+                          return (
+                            <span key={`${v}-${i}`}>
+                              <span>
+                                <Chip
+                                  label={label}
+                                  size="small"
+                                  variant={variant}
+                                  onClick={url ? () => handleOpenURL(url) : undefined}
+                                />
+                              </span>
+                              <span><b className="separator-dot"> </b></span>
+                            </span>
+                          );
+                        })}
                       </Grid>
                     </InfoListItem>
                     <InfoListItem>

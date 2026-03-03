@@ -19,9 +19,9 @@ Open Energy Platform (OEP)
    * - License
      - |badge_license| |badge_reuse|
    * - Documentation
-     - |badge_documentation| |badge_mkdocs|
+     - |badge_documentation| |badge_mkdocs| |DeepWiki|
    * - Tests
-     - |badge_tox|
+     - |badge_tox| |badge_precommit|
    * - Publication
      -
    * - Development
@@ -88,6 +88,10 @@ License and Citation
     :target: https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/automated-testing.yaml
     :alt: Tox Tests
 
+.. |badge_precommit| image:: https://results.pre-commit.ci/badge/github/OpenEnergyPlatform/oeplatform/develop.svg
+   :target: https://results.pre-commit.ci/latest/github/OpenEnergyPlatform/oeplatform/develop
+   :alt: pre-commit.ci status
+
 .. |badge_issue_open| image:: https://img.shields.io/github/issues-raw/OpenEnergyPlatform/oeplatform
     :target: https://github.com/OpenEnergyPlatform/oeplatform/issues
     :alt: Open Issues
@@ -115,3 +119,7 @@ License and Citation
 .. |badge_repo_counts| image:: https://hits.sh/github.com/OpenEnergyPlatform/oeplatform.svg
     :target: https://hits.sh/github.com/OpenEnergyPlatform/oeplatform/
     :alt: Hits
+
+.. |DeepWiki| image:: https://deepwiki.com/badge.svg
+    :target: https://deepwiki.com/OpenEnergyPlatform/oeplatform
+    :alt: Devin DeepWiki

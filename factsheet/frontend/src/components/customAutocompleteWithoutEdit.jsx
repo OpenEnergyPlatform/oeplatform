@@ -17,16 +17,16 @@ import {
   createFilterOptions
 } from '@mui/material/Autocomplete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon           from '@mui/icons-material/CheckBox';
-import HelpOutlineIcon        from '@mui/icons-material/HelpOutline';
-import HtmlTooltip            from '../styles/oep-theme/components/tooltipStyles';
-import uuid                   from 'react-uuid';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles';
+import uuid from 'react-uuid';
 
-import FactsheetMetadataList  from './scenarioBundleUtilityComponents/factsheetMetadataList.jsx';
-import handleOpenURL          from './scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx';
+import FactsheetMetadataList from './scenarioBundleUtilityComponents/factsheetMetadataList.jsx';
+import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx';
 
-const filter      = createFilterOptions();
-const icon        = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const filter = createFilterOptions();
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 // Optional: if you had a lot of Input styles, you can extract them here.
@@ -66,12 +66,12 @@ export default function CustomAutocompleteWithoutEdit(props) {
     kind
   } = props;
 
-  const [value, setValue]     = useState(selectedElements ?? []);
-  const [open, toggleOpen]    = useState(false);
+  const [value, setValue] = useState(selectedElements ?? []);
+  const [open, toggleOpen] = useState(false);
   const [openEdit, toggleOpenEdit] = useState(false);
   const [dialogValue, setDialogValue] = useState({ id: '', name: '' });
-  const [editLabel, setEditLabel]     = useState('');
-  const [editIRI, setEditIRI]         = useState('');
+  const [editLabel, setEditLabel] = useState('');
+  const [editIRI, setEditIRI] = useState('');
   const [updatedLabel, setUpdatedLabel] = useState('');
 
   const theme = useTheme();

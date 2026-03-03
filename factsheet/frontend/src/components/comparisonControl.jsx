@@ -28,22 +28,22 @@ const ComparisonControl = (props) => {
       borderRadius: '4px',
       display: 'block',
 
-     }}>
-        <FormControl>
-            <FormLabel id="demo-row-radio-buttons-group-label">Please select the aspect for the comaprison</FormLabel>
-            <RadioGroup
-                row
-                aria-labelledby="demo-row-radio-buttons-group-label"
-                name="row-radio-buttons-group"
-            >
-                <FormControlLabel value="2" control={<Radio />} label="Cost-effectiveness" />
-                <FormControlLabel value="3" control={<Radio />} label="Environmental friendiness" />
-                <FormControlLabel value="1" control={<Radio />} label="Renewability" />
-                <FormControlLabel value="4" control={<Radio />} label="Storage efficiency" />
-                <FormControlLabel value="5" control={<Radio />} label="Intensivity of emission" />
-                <FormControlLabel value="6" control={<Radio />} label="Conversion Efficiency" />
-            </RadioGroup>
-        </FormControl>
+    }}>
+      <FormControl>
+        <FormLabel id="demo-row-radio-buttons-group-label">Please select the aspect for the comaprison</FormLabel>
+        <RadioGroup
+          row
+          aria-labelledby="demo-row-radio-buttons-group-label"
+          name="row-radio-buttons-group"
+        >
+          <FormControlLabel value="2" control={<Radio />} label="Cost-effectiveness" />
+          <FormControlLabel value="3" control={<Radio />} label="Environmental friendiness" />
+          <FormControlLabel value="1" control={<Radio />} label="Renewability" />
+          <FormControlLabel value="4" control={<Radio />} label="Storage efficiency" />
+          <FormControlLabel value="5" control={<Radio />} label="Intensivity of emission" />
+          <FormControlLabel value="6" control={<Radio />} label="Conversion Efficiency" />
+        </RadioGroup>
+      </FormControl>
     </Box>
   );
 };

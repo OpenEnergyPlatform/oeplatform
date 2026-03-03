@@ -6,14 +6,27 @@ SPDX-License-Identifier: CC0-1.0
 
 # Installation
 
-This section provides detailed information on how to install for development purposes. We will also provide a more detailed guide on how to operate the oeplatform for production use cases in the future. The guide covers the full oeplatform software and its infrastructure which is composed of the website, various databases, a lookup service and the ontop-vkg service (see [Infrastructure](../oeplatform-code/architecture/infrastructure.md)). You will find two main options to install everything:
+This section provides detailed information on how to install for development
+purposes. We will also provide a more detailed guide on how to operate the
+oeplatform for production use cases in the future. The guide covers the full
+oeplatform software and its infrastructure which is composed of the website,
+various databases, a lookup service and the ontop-vkg service (see
+[Infrastructure](../oeplatform-code/architecture/infrastructure.md)). You will
+find two main options to install everything:
 
-1. A docker based deployment setup for local deployment (and soon for production deployment setups)
-2. A "manual" step by step installation guide for the oeplatform-website and its main features. The guide is mainly for development and documents the details of the installation.
+1. A docker based deployment setup for local deployment (and soon for production
+   deployment setups)
+2. A "manual" step by step installation guide for the oeplatform-website and its
+   main features. The guide is mainly for development and documents the details
+   of the installation.
 
-Production deployments without containerization solutions like docker tend to be very specific and depend on your infrastructure.
+Production deployments without containerization solutions like docker tend to be
+very specific and depend on your infrastructure.
 
-You will also find information on which further setup steps which should which either help with some common issues and help with writing well formatted and quality checked code to get started with contributing to developments on the oeplatform.
+You will also find information on which further setup steps which should which
+either help with some common issues and help with writing well formatted and
+quality checked code to get started with contributing to developments on the
+oeplatform.
 
 ## Guides
 

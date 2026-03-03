@@ -1,30 +1,24 @@
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 # TODO: This might have t be removed fully
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
+from omi.validation import validate_metadata
 
-# from dataedit.metadata.v1_3 import TEMPLATE_v1_3
-# from dataedit.metadata.v1_4 import TEMPLATE_V1_4
 from dataedit.metadata.v1_5 import TEMPLATE_V1_5
-
-# import omi
-# import omi.validation
-# from dataedit.metadata import v1_5 as __LATEST
-
-
-# from .error import MetadataException
+from dataedit.models import Table
 
 METADATA_TEMPLATE = {
     5: TEMPLATE_V1_5,
@@ -42,13 +36,12 @@ METADATA_HIDDEN_FIELDS = [
 ]
 
 
-def save_metadata_to_db(schema, table, updated_metadata):
+def save_metadata_to_db(table: str, updated_metadata):
     """
     Save updated metadata for a specific table in the OEP database.
 
     Args:
-        schema (str): The name of the OEP schema.
-        table (str): The name of the table in the OEP schema.
+        table (str): The name of the table in the OEP.
         updated_metadata (dict): The updated metadata dictionary.
 
     Note:
@@ -57,10 +50,8 @@ def save_metadata_to_db(schema, table, updated_metadata):
         table object back to the database.
     """
 
-    from dataedit.models import Table
-
     # Load the table object
-    table_obj = Table.load(schema=schema, table=table)
+    table_obj = Table.load(name=table)
 
     # Update the oemetadata field
     table_obj.oemetadata = updated_metadata
@@ -69,13 +60,12 @@ def save_metadata_to_db(schema, table, updated_metadata):
     table_obj.save()
 
 
-def load_metadata_from_db(schema, table):
+def load_metadata_from_db(table: str) -> dict:
     """
     Load metadata for a specific table from the OEP database.
 
     Args:
-        schema (str): The name of the OEP schema.
-        table (str): The name of the table in the OEP schema.
+        table (str): The name of the table in the OEP.
 
     Returns:
         dict: The loaded metadata dictionary.
@@ -86,9 +76,22 @@ def load_metadata_from_db(schema, table):
         or keep the old functionality (TODO).
     """
 
-    from dataedit.models import Table
-
-    metadata = Table.load(schema=schema, table=table).oemetadata
+    table_obj = Table.load(name=table)
+    metadata = table_obj.oemetadata
     if not metadata:
-        metadata = OEMETADATA_V20_TEMPLATE
+        # empty / new metadata
+
+        # TODO: the template is full of empty strings, which are not valid metadata
+        # so we use only parts of it
+
+        metaMetadata = OEMETADATA_V20_TEMPLATE["metaMetadata"]
+        name = table_obj.name
+
+        metadata = {
+            "name": name,
+            "resources": [{"name": name}],
+            "metaMetadata": metaMetadata,
+        }
+        validate_metadata(metadata, check_license=False)
+
     return metadata

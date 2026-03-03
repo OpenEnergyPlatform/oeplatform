@@ -1,13 +1,25 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 """
 Collection of utility functions for the API used to define various action
 like processing steps.
 """
 
+__license__ = """
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
+from typing import TYPE_CHECKING, Mapping, Union, cast
+from urllib.parse import urlsplit, urlunsplit
+
+from rest_framework.request import Request
+
+from api.error import APIError, APIKeyError
+from dataedit import models as dataedit_models
 from oekg.sparqlModels import DatasetConfig
+
+if TYPE_CHECKING:
+    from dataedit.models import Table
 
 
 def get_dataset_configs(validated_data) -> list[DatasetConfig]:
@@ -18,7 +30,7 @@ def get_dataset_configs(validated_data) -> list[DatasetConfig]:
     ]
 
 
-def check_if_oem_license_exists(metadata: dict):
+def check_if_oem_license_exists(metadata: dict) -> tuple[dict | None, str | None]:
     # already parsed but need to check if metaMetadata version exists
 
     if "metaMetadata" not in metadata:
@@ -32,3 +44,38 @@ def check_if_oem_license_exists(metadata: dict):
         return None, "The version info in metaMetadata is empty."
 
     return metadata["metaMetadata"]["metadataVersion"], None
+
+
+def request_data_dict(request: Request) -> dict:
+    if request.data:
+        return cast(dict, request.data)
+    else:
+        return {}
+
+
+def get_or_403(dictionary: Mapping | None, key):
+    dictionary = dictionary or {}
+    try:
+        return dictionary[key]
+    except KeyError:
+        raise APIKeyError(dictionary, key)
+
+
+def table_or_none(table: str) -> Union["Table", None]:
+    return dataedit_models.Table.objects.filter(name=table).first()
+
+
+def table_or_404(table: str) -> "Table":
+    table_obj = table_or_none(table=table)
+    if table_obj is None:
+        raise APIError("Table does not exist", 404)
+    return table_obj
+
+
+def table_or_404_from_dict(dct: Mapping) -> "Table":
+    return table_or_404(get_or_403(dct, "table"))
+
+
+def strip_query(url):
+    parts = urlsplit(url)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, "", "")).rstrip("/")

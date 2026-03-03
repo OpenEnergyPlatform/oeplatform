@@ -1,19 +1,19 @@
 :root > * {
-  --md-primary-color: #2972A6;
+  --md-primary-color: #2972a6;
   --md-main-text-color: #294456;
-  --md-secondary-text-color: #5F7484;
-  --md-invert-text-color: #FFFFFF;
-  --md-info-text-color: #0D547C;
-  --md-success-text-color: #09684A;
-  --md-warning-text-color: #5F4F03;
-  --md-danger-text-color: #AB2134;
+  --md-secondary-text-color: #5f7484;
+  --md-invert-text-color: #ffffff;
+  --md-info-text-color: #0d547c;
+  --md-success-text-color: #09684a;
+  --md-warning-text-color: #5f4f03;
+  --md-danger-text-color: #ab2134;
   --md-dark-text-color: #000000;
-  --md-info-bg-color: #2972A6;
-  --md-success-bg-color: #21A179;
-  --md-warning-bg-color: #F0C808;
-  --md-danger-bg-color: #CD4759;
+  --md-info-bg-color: #2972a6;
+  --md-success-bg-color: #21a179;
+  --md-warning-bg-color: #f0c808;
+  --md-danger-bg-color: #cd4759;
   --md-neutral-bg-color: #708696;
-  --md-primary-fg-color: #1F567D;
+  --md-primary-fg-color: #1f567d;
   --md-primary-fg-color--dark: var(--md-info-text-color);
   --md-typeset-a-color: var(--md-primary-color);
   /* --md-text-font-color:         #ffffff;  */
@@ -24,7 +24,13 @@ body {
   color: var(--md-main-text-color);
 }
 
-p, h1, h2, h3, h4, h5, h6 {
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--md-main-text-color);
 }
 

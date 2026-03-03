@@ -1,7 +1,8 @@
 // CustomTabs.tsx
 import React, { useState } from 'react';
 import { Box, Tabs, Tab, Typography } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import styled from '@mui/material/styles/styled';
+
 import palette from '../styles/oep-theme/palette';
 import variables from '../styles/oep-theme/variables';
 

@@ -1,10 +1,12 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 from django.urls import path
 
-from .views import viewer_index
+from oeo_viewer.views import viewer_index_view
 
-urlpatterns = [path(r"", viewer_index)]
+app_name = "oeo_viewer"
+urlpatterns = [path(r"", viewer_index_view, name="index")]

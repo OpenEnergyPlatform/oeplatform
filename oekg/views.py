@@ -1,8 +1,10 @@
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import json
 
@@ -25,7 +27,7 @@ def main_view(request):
 
 
 @require_POST
-def sparql_endpoint(request):
+def sparql_endpoint_view(request):
     """
     Internal SPARQL endpoint. Must only allow read queries. Intended to be use
     with a djago app frontend as it requires an CSRF token.
@@ -51,7 +53,7 @@ def sparql_endpoint(request):
 
 
 @require_GET
-def sparql_metadata(request):
+def sparql_metadata_view(request):
     supported_formats = {
         "json": "application/sparql-results+json",
         "json-ld": "application/ld+json",
@@ -68,7 +70,8 @@ def sparql_metadata(request):
 
 
 # @login_required
-def filter_oekg_by_scenario_bundles_attributes(request):
+@require_POST
+def filter_oekg_by_scenario_bundles_attributes_view(request):
     """
     This function takes filter objects provided by the user and utilises
     them to construct a SPARQL query.

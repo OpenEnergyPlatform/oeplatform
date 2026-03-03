@@ -1,13 +1,15 @@
-# SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-# SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
+from django.urls import reverse
 from shapely import wkb, wkt
 
-from . import APITestCaseWithTable
+from api.tests import APITestCaseWithTable
 
 
 class TestPut(APITestCaseWithTable):
@@ -187,6 +189,19 @@ class TestGet(APITestCaseWithTable):
             exp_code=200,
             exp_res=sorted([row for row in self.test_data], key=lambda x: x["id"]),
         )
+
+    def test_table_approx_row_count(self):
+        resp = self.api_req(
+            "get",
+            url=reverse(
+                "api:approx-row-count",
+                kwargs={"table": self.test_table},
+            )
+            + "?precise-below=1000",
+            exp_code=200,
+        )
+        approx_row_count = resp["data"][0][0]
+        self.assertEqual(approx_row_count, len(self.test_data))
 
 
 class TestDelete(APITestCaseWithTable):

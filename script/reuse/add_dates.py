@@ -1,19 +1,26 @@
-# SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
-# SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
-import subprocess
 import re
+import subprocess
 from pathlib import Path
 
 REUSE_FILE = "REUSE.toml"
 
+
 def get_author_years(file_path):
     """Ermittelt für jede*n Autor*in das erste Jahr der Bearbeitung einer Datei."""
     git_command = [
-        "git", "log", "--reverse",
-        "--format=%an <%ae> %ad", "--date=short", "--", file_path
+        "git",
+        "log",
+        "--reverse",
+        "--format=%an <%ae> %ad",
+        "--date=short",
+        "--",
+        file_path,
     ]
     result = subprocess.run(git_command, capture_output=True, text=True)
     lines = result.stdout.strip().split("\n")
@@ -37,7 +44,10 @@ def update_reuse_file():
     content = Path(REUSE_FILE).read_text(encoding="utf-8")
 
     updated_blocks = []
-    file_blocks = re.findall(r'(?s)(\[\[File\]\]\s*Path = "[^"]+"\s*Licenses = \[[^\]]*\]\s*Copyright = \[[^\]]*\])', content)
+    file_blocks = re.findall(
+        r'(?s)(\[\[File\]\]\s*Path = "[^"]+"\s*Licenses = \[[^\]]*\]\s*Copyright = \[[^\]]*\])',  # noqa: 501
+        content,
+    )
 
     for block in file_blocks:
         path_match = re.search(r'Path = "([^"]+)"', block)
@@ -60,9 +70,9 @@ def update_reuse_file():
                 new_lines.append(f'  "{entry}",')
 
         new_block = re.sub(
-            r'Copyright = \[[^\]]*\]',
-            'Copyright = [\n' + "\n".join(new_lines) + '\n]',
-            block
+            r"Copyright = \[[^\]]*\]",
+            "Copyright = [\n" + "\n".join(new_lines) + "\n]",
+            block,
         )
         updated_blocks.append(new_block)
 
@@ -72,6 +82,7 @@ def update_reuse_file():
 
     Path(REUSE_FILE).write_text(content, encoding="utf-8")
     print("REUSE.toml wurde erfolgreich aktualisiert.")
+
 
 if __name__ == "__main__":
     update_reuse_file()

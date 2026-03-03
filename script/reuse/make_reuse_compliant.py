@@ -1,6 +1,7 @@
-# SPDX-FileCopyrightText: 2025 vismayajochem <vismayajochem>
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 vismayajochem <vismayajochem>
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import os
 import subprocess
@@ -13,9 +14,32 @@ LICENSE_MAP = {
 }
 
 # File groups
-COMMENTABLE_CODE = {".py", ".js", ".ts", ".java", ".c", ".cpp", ".h", ".cs", ".sh", ".go", ".rs"}
+COMMENTABLE_CODE = {
+    ".py",
+    ".js",
+    ".ts",
+    ".java",
+    ".c",
+    ".cpp",
+    ".h",
+    ".cs",
+    ".sh",
+    ".go",
+    ".rs",
+}
 COMMENTABLE_DOCS = {".md", ".txt", ".rst"}
-UNCOMMENTABLE_MEDIA = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".bmp", ".tiff"}
+UNCOMMENTABLE_MEDIA = {
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".svg",
+    ".ico",
+    ".webp",
+    ".bmp",
+    ".tiff",
+}
+
 
 def get_license_type(filename):
     ext = os.path.splitext(filename)[1].lower()
@@ -28,6 +52,7 @@ def get_license_type(filename):
     else:
         return LICENSE_MAP["code"], False
 
+
 def get_git_authors(filepath):
     try:
         result = subprocess.run(
@@ -35,7 +60,7 @@ def get_git_authors(filepath):
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             text=True,
-            check=True
+            check=True,
         )
         authors_raw = result.stdout.strip().split("\n")
         seen = set()
@@ -48,14 +73,16 @@ def get_git_authors(filepath):
     except subprocess.CalledProcessError:
         return []
 
+
 def add_to_dep5(filepath, authors, license_id):
     dep5_block = f"\nFiles: {filepath}\n"
     for author in authors:
         dep5_block += f"Copyright: {author}\n"
     dep5_block += f"License: {license_id}\n"
-    
+
     with open(".reuse/dep5", "a", encoding="utf-8") as f:
         f.write(dep5_block)
+
 
 def main():
     for root, _, files in os.walk("."):
@@ -79,18 +106,23 @@ def main():
 
             if commentable:
                 try:
-                    subprocess.run([
-                        "reuse", "addheader",
-                        *(f"--copyright={a}" for a in authors),
-                        f"--license={license_id}",
-                        rel_path
-                    ], check=True)
+                    subprocess.run(
+                        [
+                            "reuse",
+                            "addheader",
+                            *(f"--copyright={a}" for a in authors),
+                            f"--license={license_id}",
+                            rel_path,
+                        ],
+                        check=True,
+                    )
                     print(f"✅ Header added to {rel_path} with {license_id}")
                 except subprocess.CalledProcessError as e:
                     print(f"❌ Failed to add header to {rel_path}: {e}")
             else:
                 add_to_dep5(rel_path, authors, license_id)
                 print(f"📄 Added {rel_path} to .reuse/dep5 with {license_id}")
+
 
 if __name__ == "__main__":
     main()

@@ -2,118 +2,167 @@
 {% load static %}
 {% load django_bootstrap5 %}
 {% load compress %}
-
 {% block after-head %}
-<!-- <link href="/static/peer_review/peer_review.css" rel="stylesheet"> -->
 {% endblock after-head %}
-
-
 {% block site-header %}
 {% endblock site-header %}
-
 {% block main %}
-<main class="main">
-  <!-- Page marker used by peer_review/main.js to load the correct role-specific bundle -->
-  <div id="opr-page-marker" data-opr-page="contributor" style="display:none"></div>
-  <div class="main-header">
-    <h1 class="main-header__title">
-      <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path fill-rule="evenodd" clip-rule="evenodd" d="M4.31781 2.68742C3.35608 3.12457 3 3.62628 3 4C3 4.37372 3.35608 4.87543 4.31781 5.31258C5.23441 5.72922 6.53579 6 8 6C9.46421 6 10.7656 5.72922 11.6822 5.31258C12.6439 4.87543 13 4.37372 13 4C13 3.62628 12.6439 3.12457 11.6822 2.68742C10.7656 2.27078 9.46421 2 8 2C6.53579 2 5.23441 2.27078 4.31781 2.68742ZM13 5.69813C12.729 5.90046 12.4201 6.07563 12.096 6.22295C11.022 6.71114 9.57336 7 8 7C6.42664 7 4.97802 6.71114 3.90401 6.22295C3.5799 6.07563 3.27105 5.90046 3 5.69813V7C3 7.37372 3.35608 7.87543 4.31781 8.31258C5.23441 8.72922 6.53579 9 8 9C9.46421 9 10.7656 8.72922 11.6822 8.31258C12.6439 7.87543 13 7.37372 13 7V5.69813ZM14 4C14 2.993 13.1249 2.24472 12.096 1.77705C11.022 1.28886 9.57336 1 8 1C6.42664 1 4.97802 1.28886 3.90401 1.77705C2.87513 2.24472 2 2.993 2 4V13C2 14.007 2.87513 14.7553 3.90401 15.2229C4.97802 15.7111 6.42664 16 8 16C9.57336 16 11.022 15.7111 12.096 15.2229C13.1249 14.7553 14 14.007 14 13V4ZM13 8.69813C12.729 8.90046 12.4201 9.07563 12.096 9.22295C11.022 9.71114 9.57336 10 8 10C6.42664 10 4.97802 9.71114 3.90401 9.22295C3.5799 9.07563 3.27105 8.90046 3 8.69813V10C3 10.3737 3.35608 10.8754 4.31781 11.3126C5.23441 11.7292 6.53579 12 8 12C9.46421 12 10.7656 11.7292 11.6822 11.3126C12.6439 10.8754 13 10.3737 13 10V8.69813ZM13 11.6981C12.729 11.9005 12.4201 12.0756 12.096 12.2229C11.022 12.7111 9.57336 13 8 13C6.42664 13 4.97802 12.7111 3.90401 12.2229C3.5799 12.0756 3.27105 11.9005 3 11.6981V13C3 13.3737 3.35608 13.8754 4.31781 14.3126C5.23441 14.7292 6.53579 15 8 15C9.46421 15 10.7656 14.7292 11.6822 14.3126C12.6439 13.8754 13 13.3737 13 13V11.6981Z" fill="#293B46"/>
-      </svg>
-      Database
-    </h1>
-    <div class="main-header__wizard">
-      <span class="main-header__wizard-process">Review :</span>
-      <span class="main-header__wizard-path"><a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/{{topic}}">{{topic}}</a> / {{ table }}</span>
+  <main class="main">
+    <div class="main-header">
+      <h1 class="main-header__title">
+        <svg width="20"
+             height="20"
+             viewBox="0 0 16 16"
+             fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.31781 2.68742C3.35608 3.12457 3 3.62628 3 4C3 4.37372 3.35608 4.87543 4.31781 5.31258C5.23441 5.72922 6.53579 6 8 6C9.46421 6 10.7656 5.72922 11.6822 5.31258C12.6439 4.87543 13 4.37372 13 4C13 3.62628 12.6439 3.12457 11.6822 2.68742C10.7656 2.27078 9.46421 2 8 2C6.53579 2 5.23441 2.27078 4.31781 2.68742ZM13 5.69813C12.729 5.90046 12.4201 6.07563 12.096 6.22295C11.022 6.71114 9.57336 7 8 7C6.42664 7 4.97802 6.71114 3.90401 6.22295C3.5799 6.07563 3.27105 5.90046 3 5.69813V7C3 7.37372 3.35608 7.87543 4.31781 8.31258C5.23441 8.72922 6.53579 9 8 9C9.46421 9 10.7656 8.72922 11.6822 8.31258C12.6439 7.87543 13 7.37372 13 7V5.69813ZM14 4C14 2.993 13.1249 2.24472 12.096 1.77705C11.022 1.28886 9.57336 1 8 1C6.42664 1 4.97802 1.28886 3.90401 1.77705C2.87513 2.24472 2 2.993 2 4V13C2 14.007 2.87513 14.7553 3.90401 15.2229C4.97802 15.7111 6.42664 16 8 16C9.57336 16 11.022 15.7111 12.096 15.2229C13.1249 14.7553 14 14.007 14 13V4ZM13 8.69813C12.729 8.90046 12.4201 9.07563 12.096 9.22295C11.022 9.71114 9.57336 10 8 10C6.42664 10 4.97802 9.71114 3.90401 9.22295C3.5799 9.07563 3.27105 8.90046 3 8.69813V10C3 10.3737 3.35608 10.8754 4.31781 11.3126C5.23441 11.7292 6.53579 12 8 12C9.46421 12 10.7656 11.7292 11.6822 11.3126C12.6439 10.8754 13 10.3737 13 10V8.69813ZM13 11.6981C12.729 11.9005 12.4201 12.0756 12.096 12.2229C11.022 12.7111 9.57336 13 8 13C6.42664 13 4.97802 12.7111 3.90401 12.2229C3.5799 12.0756 3.27105 11.9005 3 11.6981V13C3 13.3737 3.35608 13.8754 4.31781 14.3126C5.23441 14.7292 6.53579 15 8 15C9.46421 15 10.7656 14.7292 11.6822 14.3126C12.6439 13.8754 13 13.3737 13 13V11.6981Z" fill="#293B46" />
+        </svg>
+        Database
+      </h1>
+      <div class="main-header__wizard">
+        <span class="main-header__wizard-process">Review :</span>
+        <span class="main-header__wizard-path"><a href="{% url 'dataedit:topic-list' %}">Tables</a>/{{ table }}</span>
+      </div>
     </div>
-  </div>
-
-  <div class="content">
-    <div class="content__container">
-
-      <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-        <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="toast-header">
-            <strong class="me-auto" id="toastTitle"></strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-          <div class="toast-body" id="toastBody">
+    <div class="content">
+      <div class="content__container">
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast"
+               class="toast hide"
+               role="alert"
+               aria-live="assertive"
+               aria-atomic="true">
+            <div class="toast-header">
+              <strong class="me-auto" id="toastTitle"></strong>
+              <button type="button"
+                      class="btn-close"
+                      data-bs-dismiss="toast"
+                      aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastBody"></div>
           </div>
         </div>
-      </div>
-
-      <div class="alert alert-warning" style="width:100%" role="alert">
-        This feature is now in its second phase of implementation. Errors are still expected to occur. In general, the feature is much more stable now. Please share your experience in this <a href="https://github.com/OpenEnergyPlatform/oeplatform/discussions/1268">discussion on GitHub</a> (login required).
-      </div>
-    </div>
-  </div>
-
-  <div class="content content-finish-review">
-      <div class="ok-progress-wrapper">
-  <div class="ok-progress-circle">
-    <svg>
-      <circle class="bg"></circle>
-      <circle class="progress" id="okProgressCircle"></circle>
-    </svg>
-    <div class="percentage-text" id="okPercentageText">0%</div>
-  </div>
-</div>
-    <!-- Modal -->
-    <div class="modal fade modal-xl" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">The Open Peer Review process</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <img src="{% static 'peer_review/img/opr-process-bpmn.png' %}" alt="Bild" class="img-fluid">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-          </div>
+        <div class="alert alert-warning" style="width:100%" role="alert">
+          This feature is now in its second phase of implementation. Errors are
+          still expected to occur. In general, the feature is much more stable
+          now. Please share your experience in this
+          <a href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform_discussions_1268 }}">discussion on GitHub</a>
+          (login required).
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="fullwidth-tabs">
-    <div class="fullwidth-tabs__container">
-      <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
-        <li class="nav-item show active" role="presentation">
-          <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="spatiotemporal-tab" data-bs-toggle="tab" data-bs-target="#spatiotemporal" type="button" role="tab" aria-controls="spatiotemporal" aria-selected="false"> Spatiotemporal</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="source-tab" data-bs-toggle="tab" data-bs-target="#source" type="button" role="tab" aria-controls="source" aria-selected="false">Source</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License</button>
-        </li>
-        
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Summary</button>
-        </li>
-      </ul>
-      <div class="fullwidth-tabs__save-btns" id="peer_review-controls">
-        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--summary">
-          <button id="submit_summary" class="disabled">
-            <span class="btn__icon">
-              <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="m11.19,16.2v-5.04l-2.71,2.71-1.15-1.15,2.32-2.32c1.53-1.54,2.34-2.32,2.37-2.32s.84.79,2.37,2.32l2.32,2.32-1.15,1.15-2.73-2.73v10.09h-1.65v-5.04h0ZM.12,8.7V2.77h23.75v11.86h-1.65V4.42H1.77v10.21H.12v-5.93Z"/>
-              </svg>
-            </span>
-            <span>Submit</span>
-          </button>
-          <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="After submitting your work, please note that it may take some time for the reviewer to respond and for the peer review process to continue. Please be patient while waiting for their feedback."></i>
+    <div class="content content-finish-review">
+      <!-- Modal -->
+      <div class="modal fade modal-xl"
+           id="myModal"
+           tabindex="-1"
+           aria-labelledby="exampleModalLabel"
+           aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">
+                The Open Peer Review process
+              </h5>
+              <button type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <img src="{% static 'peer_review/img/opr-process-bpmn.png' %}"
+                   alt="Bild"
+                   class="img-fluid" />
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                Close
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--save">
-          <button id="peer_review-save">Save Progress</button>
-        </div>
-        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--quit">
-          <button id="peer_review-cancel">Quit</button>
+      </div>
+    </div>
+    <div class="fullwidth-tabs">
+      <div class="fullwidth-tabs__container">
+        <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
+          <li class="nav-item show active" role="presentation">
+            <button class="nav-link active"
+                    id="general-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#general"
+                    type="button"
+                    role="tab"
+                    aria-controls="general"
+                    aria-selected="true">General</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link"
+                    id="spatiotemporal-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#spatiotemporal"
+                    type="button"
+                    role="tab"
+                    aria-controls="spatiotemporal"
+                    aria-selected="false">Spatiotemporal</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link"
+                    id="source-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#source"
+                    type="button"
+                    role="tab"
+                    aria-controls="source"
+                    aria-selected="false">Source</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link"
+                    id="license-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#license"
+                    type="button"
+                    role="tab"
+                    aria-controls="license"
+                    aria-selected="false">License</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link"
+                    id="summary-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#summary"
+                    type="button"
+                    role="tab"
+                    aria-controls="summary"
+                    aria-selected="false">Summary</button>
+          </li>
+        </ul>
+        <div class="fullwidth-tabs__save-btns" id="peer_review-controls">
+          <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--summary">
+            <button id="submit_summary" class="disabled">
+              <span class="btn__icon">
+                <svg width="16"
+                     height="16"
+                     version="1.1"
+                     fill="currentColor"
+                     viewBox="0 0 24 24"
+                     xmlns="http://www.w3.org/2000/svg">
+                  <path d="m11.19,16.2v-5.04l-2.71,2.71-1.15-1.15,2.32-2.32c1.53-1.54,2.34-2.32,2.37-2.32s.84.79,2.37,2.32l2.32,2.32-1.15,1.15-2.73-2.73v10.09h-1.65v-5.04h0ZM.12,8.7V2.77h23.75v11.86h-1.65V4.42H1.77v10.21H.12v-5.93Z" />
+                </svg>
+              </span>
+              <span>Submit</span>
+            </button>
+            <i class="fas fa-info-circle"
+               data-toggle="tooltip"
+               data-placement="top"
+               title="After submitting your work, please note that it may take some time for the reviewer to respond and for the peer review process to continue. Please be patient while waiting for their feedback."></i>
+          </div>
+          <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--save">
+            <button id="peer_review-save">Save Progress</button>
+          </div>
+          <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--quit">
+            <button id="peer_review-cancel">Quit</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1170,11 +1219,11 @@
 
 
 {% endblock main %}
-
-
 {% block after-body-bottom-js %}
   <script>
-    const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
+    const fieldDescriptionsData = JSON.parse(
+      document.getElementById("field-descriptions-json").textContent
+    );
     var config = JSON.parse("{{ config|escapejs }}");
     const stateDict = JSON.parse('{{ state_dict|escapejs }}');
     for (const [key, value] of Object.entries(stateDict)) {
@@ -1184,30 +1233,23 @@
       }
     }
   </script>
-    <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function() {
-        let keys = document.querySelectorAll(".key");
-        keys.forEach(key => {
-            let words = key.textContent.split(".");
-            let formattedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
-            key.textContent = formattedWords.join(" ");
-        });
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      let keys = document.querySelectorAll(".key");
+      keys.forEach((key) => {
+        let words = key.textContent.split(".");
+        let formattedWords = words.map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1)
+        );
+        key.textContent = formattedWords.join(" ");
+      });
     });
-</script>
-    <script>
-var initialReviewerSuggestions = {};
+  </script>
+  <script>
+    var initialReviewerSuggestions = {};
 
-window.onload = function() {
-  var suggestions = document.querySelectorAll('.suggestion--highlight');
-  
-
-  suggestions.forEach(function(suggestion) {
-    var field = suggestion.id.split('_')[1];
-    initialReviewerSuggestions[field] = suggestion.innerText;
-  });
-
-}
-</script>
+    window.onload = function () {
+      var suggestions = document.querySelectorAll(".suggestion--highlight");
 
 {% compress js %}
     <script type="module" src="{% static 'peer_review/opr_contributor.js' %}"></script>

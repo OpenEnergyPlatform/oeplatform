@@ -1,14 +1,15 @@
-# SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Hannah Spinde <hannah.spinde@st.ovgu.de> © Otto-von-Guericke-Universität Magdeburg
-# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Hannah Spinde <hannah.spinde@st.ovgu.de> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import render  # noqa:F401
+from django.shortcuts import render
 from django.views.generic import View
 
 from oeo_ext.forms import ComposedUnitFormWrapper, UnitEntryForm
@@ -95,7 +96,7 @@ class OeoExtPluginView(View, LoginRequiredMixin):
             return JsonResponse(response_data, status=400)
 
 
-def add_unit_element(request):
+def add_unit_element_view(request):
     unit_id = None
     unit_id = request.session.get("unit_id_counter", 0)
     # Increment the counter
@@ -106,14 +107,3 @@ def add_unit_element(request):
     return render(
         request, "oeo_ext/partials/unit_element.html", context={"unit_id": str(unit_id)}
     )
-
-
-# def search_units(request):
-# can only be implemented if there is a way to get all classes form the oeo
-# that are a unit
-#     query = request.GET.get("query", "")
-#     results = []
-#     if query:
-#         results = ["search_ontology(query)"]
-
-#     return JsonResponse({"data": results})

@@ -8,15 +8,16 @@ import {
   Chip,
   Typography
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import styled from '@mui/material/styles/styled';
+
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon           from '@mui/icons-material/CheckBox';
-import HelpOutlineIcon        from '@mui/icons-material/HelpOutline';
-import HtmlTooltip            from '../styles/oep-theme/components/tooltipStyles.jsx';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles.jsx';
 
-const filter      = createFilterOptions();
-const icon        = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const filter = createFilterOptions();
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 // If you had any custom classes on the TextField input, port them here
@@ -73,15 +74,17 @@ export default function CustomAutocompleteWithoutAddNew({
                   placement="top"
                   title={
                     <Typography variant="caption" color="inherit">
-                      Description of <b>{option.name}</b>: TDB…
+                      Description of <b>{option.name}</b>:
                       <br />
-                      <a href="#">More info from OEKG…</a>
+                      {option.sector_division_definition}
+                      {/* <a href={options.class}>More info from OEKG…</a> */}
                     </Typography>
                   }
                 >
                   <HelpOutlineIcon sx={{ color: 'text.secondary', mr: 1 }} />
                 </HtmlTooltip>
               )}
+
               {option.name}
             </li>
           );
