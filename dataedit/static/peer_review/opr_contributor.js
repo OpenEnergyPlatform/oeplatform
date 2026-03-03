@@ -36,6 +36,121 @@ var selectedField;
 // OK Field View Change
 $('#button').bind('click', hideReviewerOptions);
 
+$('#ok-button').bind('click', saveEntrances);
+// Suggestion Field View Change
+$('#suggestion-button').bind('click', showReviewerOptions);
+$('#suggestion-button').bind('click', updateSubmitButtonColor);
+// Reject Field View Change
+$('#rejected-button').bind('click', showReviewerOptions);
+$('#rejected-button').bind('click', updateSubmitButtonColor);
+// Clear Input fields when new tab is selected
+// nav items are selected via their class
+$('.nav-link').click(clearInputFields);
+// field items selector
+
+/**
+ * Returns name from cookies
+ * @param {string} name Key to look up in cookie
+ * @returns {value} Cookie value
+ */
+function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    var cookies = document.cookie.split(";");
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = $.trim(cookies[i]);
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+/**
+ * Get CSRF Token
+ * @returns {string} CSRF Token
+ */
+function getCsrfToken() {
+  var token1 = getCookie("csrftoken");
+  return token1;
+}
+
+/**
+ * Sends JSON to backend url
+ * @param {string} method Get or post request
+ * @param {string} url URL to send JSON to
+ * @param {json} data Data to send to backend
+ * @param {function} success Success function
+ * @param {function} error Error function
+ * @returns {value} AJAX function return
+ */
+function sendJson(method, url, data, success, error) {
+  var token = getCsrfToken();
+  return $.ajax({
+    url: url,
+    headers: {"X-CSRFToken": token},
+    data_type: "json",
+    cache: false,
+    contentType: "application/json; charset=utf-8",
+    processData: false,
+    data: data,
+    type: method,
+    success: success,
+    error: error,
+  });
+}
+
+/**
+ * Reads error message from response
+ * @param {json} response Get or post request
+ * @returns {string} Response error message
+ */
+function getErrorMsg(response) {
+  try {
+    var response_msg = (
+      'Upload failed: ' + JSON.parse(response.responseJSON).error
+    );
+  } catch (e) {
+    var response_msg = response.responseText;
+  }
+  return response_msg;
+}
+
+/**
+ * Configurates peer review
+ * @param {json} config Configuration JSON from Django backend.
+ */
+function peerReview(config) {
+  /*
+    TODO: Show loading icon if peer review page is loaded
+    */
+
+  //   (function init() {
+  //     $('#peer_review-loading').removeClass('d-none');
+  //     config.form = $('#peer_review-form');
+  //   })();
+  selectNextField();
+  renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
+}
+
+/**
+ * Save peer review to backend
+ */
+function savePeerReview() {
+  $('#peer_review-save').removeClass('d-none');
+  json = JSON.stringify({reviewType: 'save', reviewData: current_review});
+  sendJson("POST", config.url_peer_review, json).then(function() {
+    window.location = config.url_table;
+  }).catch(function(err) {
+    // TODO evaluate error, show user message
+    $('#peer_review-save').addClass('d-none');
+    alert(getErrorMsg(err));
+  });
+}
 
 function click_field(fieldKey, fieldValue, category) {
 
@@ -71,12 +186,41 @@ function click_field(fieldKey, fieldValue, category) {
   hideReviewerOptions();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.field').forEach((field) => {
-    field.addEventListener('click', () => {
-      const fieldKey = field.getAttribute('data-fieldkey');
-      const fieldValue = field.getAttribute('data-fieldvalue');
-      const category = field.getAttribute('data-category');
+function clearInputFields() {
+  document.getElementById("valuearea").value = "";
+  document.getElementById("commentarea").value = "";
+}
+
+/**
+ * Switch to the category tab if needed
+ */
+function switchCategoryTab(category) {
+  const currentTab = document.querySelector('.tab-pane.active'); // Get the currently active tab
+  const tabIdForCategory = getCategoryToTabIdMapping()[category];
+  if (currentTab.getAttribute('id') !== tabIdForCategory) {
+    // The clicked field does not belong to the current tab, switch to the next tab
+    const targetTab = document.getElementById(tabIdForCategory);
+    if (targetTab) {
+      // The target tab exists, click the tab link to switch to it
+      targetTab.click();
+    }
+  }
+}
+
+/**
+ * Function to provide the mapping of category to the correct tab ID
+ */
+function getCategoryToTabIdMapping() {
+  // Define the mapping of category to tab ID
+  const mapping = {
+    'general': 'general-tab',
+    'spatial': 'spatiotemporal-tab',
+    'temporal': 'spatiotemporal-tab',
+    'source': 'source-tab',
+    'license': 'license-tab',
+  };
+  return mapping;
+}
 
       click_field(fieldKey, fieldValue, category);
     });
@@ -93,7 +237,24 @@ export function getFieldStateForContributor(fieldKey) {
 
   function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
+  updateClientStateDict(fieldKey = selectedField, state = state);
 }
+
+function updateClientStateDict(fieldKey, state) {
+  state_dict = state_dict ?? {};
+  if (fieldKey in state_dict) {
+    // console.log(`Der Schlüssel '${fieldKey}' ist vorhanden.`);
+    state_dict[fieldKey] = state;
+  } else {
+    // console.log(`Der Schlüssel '${fieldKey}' ist nicht vorhanden.`);
+    state_dict[fieldKey] = state;
+  }
+}
+
+
+
+
+
 
 /**
  * Renders fields on the Summary page, sorted by review state
@@ -474,7 +635,201 @@ function saveEntrancesForContributor() {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay() ;
 }
 initializeEventBindings(saveEntrancesForContributor);
 }}}
 
+/**
+ *
+ * Checks if all fields are reviewed and activates submit button if ready
+ */
+function checkReviewComplete() {
+  const fields = document.querySelectorAll('.field');
+  for (let field of fields) {
+    let fieldName = field.id.slice(6);
+    const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+    const fieldState = getFieldState(fieldName);
+    let reviewed = current_review["reviews"].find((review) => review.key === fieldName);
+
+    if (!reviewed && fieldState !== 'ok' && !isEmptyValue(fieldValue)) {
+      $('#submit_summary').addClass('disabled');
+      return;
+    }
+  }
+  $('#submit_summary').removeClass('disabled');
+  showToast("Success", "You have reviewed all fields and can submit the review to get feedback!", 'success');
+}
+
+
+
+
+/**
+ * Shows reviewer Comment and Suggestion Input options
+ */
+function showReviewerOptions() {
+  $("#reviewer_remarks").removeClass('d-none');
+}
+
+/**
+ * Hides reviewer Comment and Suggestion Input options
+ */
+function hideReviewerOptions() {
+  $("#reviewer_remarks").addClass('d-none');
+}
+
+/**
+ * Colors Field based on Reviewer input
+ */
+function updateFieldColor() {
+  // Color ok/suggestion/rejected
+  field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
+  $(field_id).removeClass('field-ok');
+  $(field_id).removeClass('field-suggestion');
+  $(field_id).removeClass('field-rejected');
+  $(field_id).addClass(`field-${selectedState}`);
+}
+
+/**
+ * Colors Field based on Reviewer input
+ */
+function updateSubmitButtonColor() {
+  // Color Save comment / new value
+  $(submitButton).removeClass('btn-warning');
+  $(submitButton).removeClass('btn-danger');
+  if (selectedState == "suggestion") {
+    $(submitButton).addClass('btn-warning');
+  } else {
+    $(submitButton).addClass('btn-danger');
+  }
+}
+
+
+function updateTabProgressIndicatorClasses() {
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
+
+  for (let i = 0; i < tabNames.length; i++) {
+    let tabName = tabNames[i];
+    let tab = document.getElementById(tabName + '-tab');
+    if (!tab) continue;
+
+    let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+
+    let allOk = fieldsInTab.every((field) => {
+      const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+      return isEmptyValue(fieldValue) || field.classList.contains('field-ok');
+    });
+
+    if (allOk) {
+      tab.classList.add('status--done');
+    } else {
+      tab.classList.add('status');
+    }
+  }
+}
+
+function updateTabClasses() {
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
+  for (let i = 0; i < tabNames.length; i++) {
+    let tabName = tabNames[i];
+    let tab = document.getElementById(tabName + '-tab');
+    if (!tab) continue;
+
+    let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+
+    let allOk = true;
+    for (let j = 0; j < fields.length; j++) {
+      let fieldState = getFieldState(fields[j].id.replace('field_', ''));
+      if (fieldState !== 'ok') {
+        allOk = false;
+        break;
+      }
+    }
+    if (allOk) {
+      tab.classList.add('status');
+      tab.classList.add('status--done');
+    } else {
+      tab.classList.add('status');
+    }
+  }
+}
+window.addEventListener('DOMContentLoaded', function() {
+    updateTabClasses();
+    updatePercentageDisplay() ;
+});
+
+function calculateOkPercentage(stateDict) {
+  let totalCount = 0;
+  let okCount = 0;
+
+  for (let key in stateDict) {
+    let fieldValue = $(document.getElementById(`field_${key}`)).find('.value').text().replace(/\s+/g, ' ').trim();
+    if (!isEmptyValue(fieldValue)) {
+      totalCount++;
+      if (stateDict[key] === "ok") {
+        okCount++;
+      }
+    }
+  }
+
+  return totalCount === 0 ? 0 : (okCount / totalCount) * 100;
+}
+
+function updatePercentageDisplay() {
+  const percentage = calculateOkPercentage(state_dict);
+  document.getElementById("percentageDisplay").textContent = percentage.toFixed(2);
+}
+
+
+/**
+ * Hide and show revier controles once the user clicks the summary tab
+ */
+console.log('Script is running...');
+
+document.addEventListener('DOMContentLoaded', function() {
+  // console.log('DOM fully loaded and parsed');
+
+  const summaryTab = document.getElementById('summary-tab');
+  const otherTabs = [
+    document.getElementById('general-tab'),
+    document.getElementById('spatiotemporal-tab'),
+    document.getElementById('source-tab'),
+    document.getElementById('license-tab'),
+  ];
+  const reviewContent = document.querySelector(".review__content");
+
+  console.log('Summary Tab:', summaryTab);
+  console.log('Other Tabs:', otherTabs);
+  console.log('Review Content:', reviewContent);
+
+  if (summaryTab && reviewContent) {
+    summaryTab.addEventListener('click', function() {
+      toggleReviewControls(false);
+      reviewContent.classList.toggle("tab-pane--100");
+    });
+  } else {
+    console.error('Summary tab or review content not found');
+  }
+
+  otherTabs.forEach(function(tab, index) {
+    if (tab) {
+      tab.addEventListener('click', function() {
+        toggleReviewControls(true);
+        reviewContent.classList.remove("tab-pane--100");
+      });
+    } else {
+      console.error('Tab at index ' + index + ' not found');
+    }
+  });
+
+  function toggleReviewControls(show) {
+    const reviewControls = document.querySelector('.review__controls');
+    console.log('Review Controls:', reviewControls);
+    if (reviewControls) {
+      reviewControls.style.display = show ? '' : 'none';
+    }
+  }
+});
+
+
+peerReview(config);
