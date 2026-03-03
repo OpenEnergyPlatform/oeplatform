@@ -1,192 +1,300 @@
-from django.conf.urls import url
-from django.urls import path
+__license__ = """
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
 
-from api import actions, views
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
+from django.urls import include, path, re_path
+
+from api.views import (
+    AdvancedCloseAllAPIView,
+    AdvancedConnectionCloseAPIView,
+    AdvancedConnectionCommitAPIView,
+    AdvancedConnectionOpenAPIView,
+    AdvancedConnectionRollbackAPIView,
+    AdvancedCursorCloseAPIView,
+    AdvancedCursorFetchOneAPIView,
+    AdvancedCursorOpenAPIView,
+    AdvancedDeleteAPIView,
+    AdvancedDoBeginTwophaseAPIView,
+    AdvancedDoCommitTwophaseAPIView,
+    AdvancedDoPrepareTwophaseAPIView,
+    AdvancedDoRecoverTwophaseAPIView,
+    AdvancedDoRollbackTwophaseAPIView,
+    AdvancedFetchAPIView,
+    AdvancedGetColumnsAPIView,
+    AdvancedGetForeignKeysAPIView,
+    AdvancedGetIndexesAPIView,
+    AdvancedGetIsolationLevelAPIView,
+    AdvancedGetPkConstraintAPIView,
+    AdvancedGetSchemaNamesAPIView,
+    AdvancedGetTableNamesAPIView,
+    AdvancedGetUniqueConstraintsAPIView,
+    AdvancedGetViewDefinitionAPIView,
+    AdvancedGetViewNamesAPIView,
+    AdvancedHasSchemaAPIView,
+    AdvancedHasTableAPIView,
+    AdvancedInsertAPIView,
+    AdvancedSearchAPIView,
+    AdvancedSetIsolationLevelAPIView,
+    AdvancedUpdateAPIView,
+    AllTableSizesAPIView,
+    EnergyframeworkFactsheetListAPIView,
+    EnergymodelFactsheetListAPIView,
+    ManageOekgScenarioDatasetsAPIView,
+    OekgSparqlAPIView,
+    ScenarioDataTablesListAPIView,
+    TableAPIView,
+    TableColumnAPIView,
+    TableMetadataAPIView,
+    TableMovePublishAPIView,
+    TableRowsAPIView,
+    TableUnpublishAPIView,
+    grpprop_api_view,
+    oeo_search_api_view,
+    oevkg_query_api_view,
+    table_approx_row_count_view,
+    usrprop_api_view,
+)
+
+app_name = "api"
 
 pgsql_qualifier = r"[\w\d_]+"
 equal_qualifier = r"[\w\d\s\'\=]"
-structures = r"table|sequence"
-urlpatterns = [
-    url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/$",
-        views.Table.as_view(),
+structures = r"table"
+
+
+# all endpoints referring to table
+urlpatterns_v0_schema_table = [
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/$",
+        TableAPIView.as_view(),
         name="api_table",
     ),
-    url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/sequences/(?P<sequence>[\w\d_\s]+)/$", # noqa
-        views.Sequence.as_view(),
-    ),
-    url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/meta/$", # noqa
-        views.Metadata.as_view(),
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/meta/$",
+        TableMetadataAPIView.as_view(),
         name="api_table_meta",
     ),
-    # TODO: Remove this endpoint later on - MovePublish includes optional
-    # embargo time and marks table as published
-    path(
-        "v0/schema/<str:schema>/tables/<str:table>/move/<str:to_schema>/",
-        views.Move.as_view(),
-        name="move",
-    ),
-    path(
-        "v0/schema/<str:schema>/tables/<str:table>/move_publish/<str:to_schema>/", # noqa
-        views.MovePublish.as_view(),
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/move_publish/(?P<topic>[\w\d_\s]+)/",  # noqa
+        TableMovePublishAPIView.as_view(),
         name="move_publish",
     ),
-    url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa
-        views.Column.as_view(),
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/unpublish$",
+        TableUnpublishAPIView.as_view(),
+        name="table-unpublish",
     ),
-    url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/id/(?P<id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$",  # noqa
-        views.Fields.as_view(),
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",  # noqa
+        TableColumnAPIView.as_view(),
+        name="table-columns",
     ),
-    url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/indexes/(?P<index>[\w\d_\s]+)$",  # noqa
-        views.Index.as_view(),
-    ),
-    url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",  # noqa
-        views.Rows.as_view(),
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",  # noqa
+        TableRowsAPIView.as_view(),
         name="api_rows",
     ),
-    url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$", # noqa
-        views.Rows.as_view(),
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/rows/new?$",
+        TableRowsAPIView.as_view(),
         {"action": "new"},
         name="api_rows_new",
     ),
-    url(
-        r"^v0/advanced/search",
-        views.create_ajax_handler(
-            actions.data_search, allow_cors=True, requires_cursor=True
-        ),
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/rowcount$",
+        table_approx_row_count_view,
+        name="approx-row-count",
     ),
-    url(
-        r"^v0/advanced/insert",
-        views.create_ajax_handler(actions.data_insert, requires_cursor=True),
-        name="api_insert",
+]
+
+
+urlpatterns_v0_advanced = [
+    re_path(r"^search", AdvancedSearchAPIView, name="advanced-search"),
+    re_path(
+        r"^insert",
+        AdvancedInsertAPIView,
+        name="advanced-insert",
     ),
-    url(
-        r"^v0/advanced/delete",
-        views.create_ajax_handler(actions.data_delete, requires_cursor=True),
+    re_path(r"^delete", AdvancedDeleteAPIView, name="advanced-delete"),
+    re_path(r"^update", AdvancedUpdateAPIView, name="advanced-update"),
+    re_path(r"^has_schema", AdvancedHasSchemaAPIView, name="advanced-has-schema"),
+    re_path(r"^has_table", AdvancedHasTableAPIView, name="advanced-has-table"),
+    re_path(
+        r"^get_schema_names",
+        AdvancedGetSchemaNamesAPIView,
+        name="advanced-schema-names",
     ),
-    url(
-        r"^v0/advanced/update",
-        views.create_ajax_handler(actions.data_update, requires_cursor=True),
+    re_path(
+        r"^get_table_names", AdvancedGetTableNamesAPIView, name="advanced-table-names"
     ),
-    url(r"^v0/advanced/info", views.create_ajax_handler(actions.data_info)),
-    url(r"^v0/advanced/has_schema", views.create_ajax_handler(actions.has_schema)), # noqa
-    url(r"^v0/advanced/has_table", views.create_ajax_handler(actions.has_table)),
-    url(r"^v0/advanced/has_sequence", views.create_ajax_handler(actions.has_sequence)), # noqa
-    url(r"^v0/advanced/has_type", views.create_ajax_handler(actions.has_type)),
-    url(
-        r"^v0/advanced/get_schema_names",
-        views.create_ajax_handler(actions.get_schema_names),
+    re_path(
+        r"^get_view_names", AdvancedGetViewNamesAPIView, name="advanced-view-names"
     ),
-    url(
-        r"^v0/advanced/get_table_names",
-        views.create_ajax_handler(actions.get_table_names),
+    re_path(
+        r"^get_view_definition",
+        AdvancedGetViewDefinitionAPIView,
+        name="advanced-view-definitions",
     ),
-    url(
-        r"^v0/advanced/get_view_names",
-        views.create_ajax_handler(actions.get_view_names),
+    re_path(
+        r"^get_columns",
+        AdvancedGetColumnsAPIView,
+        name="advanced-columns",
     ),
-    url(
-        r"^v0/advanced/get_view_definition",
-        views.create_ajax_handler(actions.get_view_definition),
+    re_path(
+        r"^get_pk_constraint",
+        AdvancedGetPkConstraintAPIView,
+        name="advanced-pk-constraint",
     ),
-    url(r"^v0/advanced/get_columns", views.create_ajax_handler(actions.get_columns)), # noqa
-    url(
-        r"^v0/advanced/get_pk_constraint",
-        views.create_ajax_handler(actions.get_pk_constraint),
+    re_path(
+        r"^get_foreign_keys",
+        AdvancedGetForeignKeysAPIView,
+        name="advanced-foreign-keys",
     ),
-    url(
-        r"^v0/advanced/get_foreign_keys",
-        views.create_ajax_handler(actions.get_foreign_keys),
+    re_path(
+        r"^get_indexes",
+        AdvancedGetIndexesAPIView,
+        name="advanced-indexes",
     ),
-    url(r"^v0/advanced/get_indexes", views.create_ajax_handler(actions.get_indexes)), # noqa
-    url(
-        r"^v0/advanced/get_unique_constraints",
-        views.create_ajax_handler(actions.get_unique_constraints),
+    re_path(
+        r"^get_unique_constraints",
+        AdvancedGetUniqueConstraintsAPIView,
+        name="advanced-unique-constraints",
     ),
-    url(
-        r"^v0/advanced/connection/open",
-        views.create_ajax_handler(actions.open_raw_connection),
-        name="api_con_open",
+    re_path(
+        r"^connection/open",
+        AdvancedConnectionOpenAPIView,
+        name="advanced-connection-open",
     ),
-    url(
-        r"^v0/advanced/connection/close$",
-        views.create_ajax_handler(actions.close_raw_connection),
-        name="api_con_close",
+    re_path(
+        r"^connection/close$",
+        AdvancedConnectionCloseAPIView,
+        name="advanced-connection-close",
     ),
-    url(
-        r"^v0/advanced/connection/commit",
-        views.create_ajax_handler(actions.commit_raw_connection),
-        name="api_con_commit",
+    re_path(
+        r"^connection/commit",
+        AdvancedConnectionCommitAPIView,
+        name="advanced-connection-commit",
     ),
-    url(
-        r"^v0/advanced/connection/rollback",
-        views.create_ajax_handler(actions.rollback_raw_connection),
+    re_path(
+        r"^connection/rollback",
+        AdvancedConnectionRollbackAPIView,
+        name="advanced-connection-rollback",
     ),
-    url(r"^v0/advanced/connection/close_all", views.CloseAll.as_view()),
-    url(r"^v0/advanced/cursor/open", views.create_ajax_handler(actions.open_cursor)), # noqa
-    url(r"^v0/advanced/cursor/close", views.create_ajax_handler(actions.close_cursor)), # noqa
-    url(r"^v0/advanced/cursor/fetch_one", views.create_ajax_handler(actions.fetchone)), # noqa
-    url(
-        r"^v0/advanced/cursor/fetch_many",
-        views.FetchView.as_view(),
+    re_path(r"^cursor/open", AdvancedCursorOpenAPIView, name="advanced-cursor-open"),
+    re_path(r"^cursor/close", AdvancedCursorCloseAPIView, name="advanced-cursor-close"),
+    re_path(
+        r"^cursor/fetch_one",
+        AdvancedCursorFetchOneAPIView,
+        name="advanced-cursor-fetch-one",
+    ),
+    re_path(
+        r"^set_isolation_level",
+        AdvancedSetIsolationLevelAPIView,
+        name="advanced-set-isolation-level",
+    ),
+    re_path(
+        r"^get_isolation_level",
+        AdvancedGetIsolationLevelAPIView,
+        name="advanced-get-isolation-level",
+    ),
+    re_path(
+        r"^do_begin_twophase",
+        AdvancedDoBeginTwophaseAPIView,
+        name="advanced-do-begin-twophase",
+    ),
+    re_path(
+        r"^do_prepare_twophase",
+        AdvancedDoPrepareTwophaseAPIView,
+        name="advanced-doprepare-twophase",
+    ),
+    re_path(
+        r"^do_rollback_twophase",
+        AdvancedDoRollbackTwophaseAPIView,
+        name="advanced-do-rollback-twophase",
+    ),
+    re_path(
+        r"^do_commit_twophase",
+        AdvancedDoCommitTwophaseAPIView,
+        name="advanced-do-commit-twophase",
+    ),
+    re_path(
+        r"^do_recover_twophase",
+        AdvancedDoRecoverTwophaseAPIView,
+        name="advanced-do-recover-twophase",
+    ),
+    re_path(
+        r"^connection/close_all",
+        AdvancedCloseAllAPIView.as_view(),
+        name="advanced-connection-close-all",
+    ),
+    re_path(
+        r"^cursor/fetch_many",
+        AdvancedFetchAPIView.as_view(),
+        dict(fetchtype="many"),
+        name="advanced-cursor-fetch-many",
+    ),
+    re_path(
+        r"^cursor/fetch_all",
+        AdvancedFetchAPIView.as_view(),
         dict(fetchtype="all"),
+        name="advanced-cursor-fetch-all",
     ),
-    url(
-        r"^v0/advanced/cursor/fetch_all",
-        views.FetchView.as_view(),
-        dict(fetchtype="all"),
+]
+
+urlpatterns_v0 = [
+    # PROBLEM: redirect does not work with POST/PUT/..., only GET
+    # so we cannot redirect
+    re_path(  # legacy API url for tables
+        r"^schema/{qual}/tables/".format(qual=pgsql_qualifier),
+        include(urlpatterns_v0_schema_table),
     ),
-    url(
-        r"^v0/advanced/set_isolation_level",
-        views.create_ajax_handler(actions.set_isolation_level),
+    path("tables/", include(urlpatterns_v0_schema_table)),
+    path("advanced/", include(urlpatterns_v0_advanced)),
+    re_path(
+        r"^oekg/sparql/?$",
+        OekgSparqlAPIView.as_view(),
+        name="oekg-sparql-http-api",
     ),
-    url(
-        r"^v0/advanced/get_isolation_level",
-        views.create_ajax_handler(actions.get_isolation_level),
-    ),
-    url(
-        r"^v0/advanced/do_begin_twophase",
-        views.create_ajax_handler(actions.do_begin_twophase),
-    ),
-    url(
-        r"^v0/advanced/do_prepare_twophase",
-        views.create_ajax_handler(actions.do_prepare_twophase),
-    ),
-    url(
-        r"^v0/advanced/do_rollback_twophase",
-        views.create_ajax_handler(actions.do_rollback_twophase),
-    ),
-    url(
-        r"^v0/advanced/do_commit_twophase",
-        views.create_ajax_handler(actions.do_commit_twophase),
-    ),
-    url(
-        r"^v0/advanced/do_recover_twophase",
-        views.create_ajax_handler(actions.do_recover_twophase),
-    ),
-    url(r"usrprop/", views.get_users),
-    url(r"grpprop/", views.get_groups),
-    url("oeo-search", views.oeo_search),
-    url(
-        r"^v0/factsheet/frameworks/?$",
-        views.EnergyframeworkFactsheetListAPIView.as_view(),
+    re_path(
+        r"^factsheet/frameworks/?$",
+        EnergyframeworkFactsheetListAPIView.as_view(),
         name="list-framework-factsheets",
     ),
-    url(
-        r"^v0/factsheet/models/?$",
-        views.EnergymodelFactsheetListAPIView.as_view(),
+    re_path(
+        r"^factsheet/models/?$",
+        EnergymodelFactsheetListAPIView.as_view(),
         name="list-model-factsheets",
     ),
-    url(
-        r"^v0/datasets/list_all/scenario/?$",
-        views.ScenarioDataTablesListAPIView.as_view(),
+    re_path(
+        r"^datasets/list_all/scenario/?$",
+        ScenarioDataTablesListAPIView.as_view(),
         name="list-scenario-datasets",
     ),
+    re_path(
+        r"^scenario-bundle/scenario/manage-datasets/?$",
+        ManageOekgScenarioDatasetsAPIView.as_view(),
+        name="add-scenario-datasets",
+    ),
+    path("db/table-sizes/", AllTableSizesAPIView.as_view(), name="table-sizes"),
+]
+
+
+urlpatterns = [
+    path("v0/", include(urlpatterns_v0)),
+    path("usrprop/", usrprop_api_view, name="usrprop"),
+    path("grpprop/", grpprop_api_view, name="grpprop"),
+    path("oeo-search", oeo_search_api_view, name="oeo-search"),
+    path("oevkg-query", oevkg_query_api_view, name="oevkg-query"),
 ]

@@ -1,12 +1,19 @@
+"""
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import os
 import re
 from collections import defaultdict
 from pathlib import Path
+from typing import Iterable
 
 from django.http import Http404
 from rdflib import Graph
+from rdflib.query import ResultRow
 
-from oeplatform.settings import ONTOLOGY_ROOT
+from oeplatform.settings import OEO_EXT_NAME, ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME
 
 
 def get_ontology_version(path, version=None):
@@ -14,7 +21,6 @@ def get_ontology_version(path, version=None):
         raise Http404
 
     versions = os.listdir(path)
-
     if not version:
         version = max(
             (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
@@ -29,6 +35,8 @@ def collect_modules(path):
     for file in os.listdir(path):
         if not os.path.isdir(os.path.join(path, file)):
             match = re.match(r"^(?P<filename>.*)\.(?P<extension>\w+)$", file)
+            if not match:
+                raise ValueError(file)
             filename, extension = match.groups()
             if filename not in modules:
                 modules[filename] = dict(extensions=[], comment="No description found")
@@ -49,7 +57,9 @@ def collect_modules(path):
                     }}
                 """  # noqa
                 # Execute the SPARQL query for comment
-                comment_results = g.query(comment_query)
+                comment_results: Iterable[ResultRow] = g.query(
+                    comment_query
+                )  # type:ignore
 
                 # Update the comment in the modules dictionary if found
                 for row in comment_results:
@@ -66,7 +76,9 @@ def collect_modules(path):
                         }}
                     """  # noqa
                     # Execute the SPARQL query for description
-                    description_results = g.query(description_query)
+                    description_results: Iterable[ResultRow] = g.query(
+                        description_query
+                    )  # type:ignore
 
                     # Update the comment in the modules dictionary if found
                     for row in description_results:
@@ -76,7 +88,7 @@ def collect_modules(path):
     return modules
 
 
-def read_oeo_context_information(path, file):
+def read_oeo_context_information(path, file, ontology=None):
     Ontology_URI = path / file
     g = Graph()
     g.parse(Ontology_URI.as_posix())
@@ -90,53 +102,58 @@ def read_oeo_context_information(path, file):
         """
     )
 
-    q_label = g.query(
+    q_label: Iterable[ResultRow] = g.query(
         """
         SELECT DISTINCT ?s ?o
         WHERE { ?s rdfs:label ?o }
         """
-    )
+    )  # type:ignore
 
-    q_definition = g.query(
-        """
-        SELECT DISTINCT ?s ?o
-        WHERE { ?s obo:IAO_0000115 ?o }
-        """
-    )
-
-    q_note = g.query(
-        """
-        SELECT DISTINCT ?s ?o
-        WHERE { ?s obo:IAO_0000116 ?o }
-        """
-    )
-
-    q_main_description = g.query(
+    q_main_description: Iterable[ResultRow] = g.query(
         """
         SELECT ?s ?o
         WHERE { ?s dc:description ?o }
         """
-    )
+    )  # type:ignore
 
     classes_name = {}
     for row in q_label:
         class_name = row.s.split("/")[-1]
         classes_name[class_name] = row.o
 
-    classes_definitions = defaultdict(list)
-    for row in q_definition:
-        class_name = row.s.split("/")[-1]
-        classes_definitions[class_name].append(row.o)
-
-    classes_notes = defaultdict(list)
-    for row in q_note:
-        class_name = row.s.split("/")[-1]
-        classes_notes[class_name].append(row.o)
-
     ontology_description = ""
     for row in q_main_description:
         if row.s.split("/")[-1] == "":
             ontology_description = row.o
+
+    if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
+        q_definition: Iterable[ResultRow] = g.query(
+            """
+            SELECT DISTINCT ?s ?o
+            WHERE { ?s obo:IAO_0000115 ?o }
+            """
+        )  # type:ignore
+
+        q_note: Iterable[ResultRow] = g.query(
+            """
+            SELECT DISTINCT ?s ?o
+            WHERE { ?s obo:IAO_0000116 ?o }
+            """
+        )  # type:ignore
+
+        classes_definitions = defaultdict(list)
+        for row in q_definition:
+            class_name = row.s.split("/")[-1]
+            classes_definitions[class_name].append(row.o)
+
+        classes_notes = defaultdict(list)
+        for row in q_note:
+            class_name = row.s.split("/")[-1]
+            classes_notes[class_name].append(row.o)
+
+    else:
+        classes_definitions = defaultdict(list)
+        classes_notes = defaultdict(list)
 
     result = {
         "q_global": q_global,
@@ -149,14 +166,19 @@ def read_oeo_context_information(path, file):
     return result
 
 
-def get_common_data(ontology, version=None, path=None):
-    onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+def get_common_data(ontology, file="oeo-full.owl", version=None, path=None):
+    if ontology in [OEO_EXT_NAME]:
+        version = "1.0.0"  # TODO remove this
+    else:
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+        version = get_ontology_version(onto_base_path, version=version)
 
-    version = get_ontology_version(onto_base_path, version=version)
-    file = "oeo-full.owl"
-
-    path = onto_base_path / version
-    oeo_context_data = read_oeo_context_information(path=path, file=file)
+    if not path:
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+        path = onto_base_path / version
+    oeo_context_data = read_oeo_context_information(
+        path=path, file=file, ontology=ontology
+    )
 
     return {
         "ontology": ontology,

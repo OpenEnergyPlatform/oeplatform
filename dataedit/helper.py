@@ -1,58 +1,33 @@
 """
 Provide helper functionality for views to reduce code lines in views.py
 make the codebase more modular.
-"""
 
-from dataedit.models import Table
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
-##############################################
-#          Table view related                #
-##############################################
+import re
 
+from django.contrib.postgres.search import SearchQuery
+from django.db.models import Q, QuerySet
+from django.http import HttpRequest, JsonResponse
 
-# TODO: Add py 3.10 feature to annotate the return type as str | None
-# Dev´s need to update python version first ...
-def read_label(table, oemetadata) -> str:
-    """
-    Extracts the readable name from @comment and appends the real name in parens.
-    If comment is not a JSON-dictionary or does not contain a field 'Name' None
-    is returned.
-
-    :param table: Name to append
-
-    :param comment: String containing a JSON-dictionary according to @Metadata
-
-    :return: Readable name appended by the true table name as string or None
-    """
-    try:
-        if oemetadata.get("title"):
-            return oemetadata["title"].strip() + " (" + table + ")"
-        elif oemetadata.get("Title"):
-            return oemetadata["Title"].strip() + " (" + table + ")"
-
-        else:
-            return None
-
-    except Exception:
-        return None
-
-
-def get_readable_table_name(table_obj: Table) -> str:
-    """get readable table name from metadata
-
-    Args:
-        table_obj (object): django orm
-
-    Returns:
-        str
-    """
-
-    try:
-        label = read_label(table_obj.name, table_obj.oemetadata)
-    except Exception as e:
-        raise e
-    return label
-
+import api.parser
+from api.actions import (
+    describe_columns,
+    describe_constraints,
+    get_column_changes,
+    get_constraints_changes,
+    set_table_metadata,
+)
+from dataedit.metadata import load_metadata_from_db
+from dataedit.models import PeerReview, Table, Tag
+from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 ##############################################
 #       Open Peer Review related             #
@@ -134,30 +109,83 @@ def get_review_for_key(key, review_data):
 
 def recursive_update(metadata, review_data):
     """
-    Recursively update the metadata with new values from the review data.
+    Recursively updates metadata with new values from review_data,
+    skipping or removing fields with status 'rejected'.
 
     Args:
-        metadata (dict): The original metadata dictionary to be updated.
-        review_data (dict): The review data containing new values for various keys.
+    metadata (dict): The original metadata dictionary to update.
+    review_data (dict): The review data containing the new values
+    for various keys.
 
     Note:
-        The function traverses the review data, and for each key, it updates the
-        corresponding value in the metadata if a new value is present and is not
-        an empty string.
+    The function iterates through the review data and for each key
+    updates the corresponding value in metadata if the new value is
+    present and is not an empty string, and if the field status is
+    not 'rejected'.
     """
+
+    def delete_nested_field(data: list | dict | None, keys: list[str]):
+        """
+        Removes a nested field from a dictionary based on a list of keys.
+
+        Args:
+            data (dict or list): The dictionary or list from which
+            to remove the field.
+            keys (list): A list of keys pointing to the field to remove.
+        """
+
+        for key in keys[:-1]:
+            if isinstance(data, list):
+                key = int(key)
+                data = data[key]
+            elif isinstance(data, dict):
+                data = data.get(key)
+            else:
+                raise NotImplementedError()
+
+        last_key = keys[-1]
+        if isinstance(data, list) and last_key.isdigit():
+            index = int(last_key)
+            if 0 <= index < len(data):
+                data.pop(index)
+        elif isinstance(data, dict):
+            data.pop(last_key, None)
 
     for review_key in review_data["reviewData"]["reviews"]:
         keys = review_key["key"].split(".")
 
-        if isinstance(review_key["fieldReview"], list):
-            for field_review in review_key["fieldReview"]:
-                new_value = field_review.get("newValue", None)
+        field_review = review_key.get("fieldReview")
+        if isinstance(field_review, list):
+            field_rejected = False
+            for fr in field_review:
+                state = fr.get("state")
+                if state == "rejected":
+                    # If a field is rejected, delete it and move on to the next one.
+                    delete_nested_field(metadata, keys)
+                    field_rejected = True
+                    break
+            if field_rejected:
+                continue
+
+            # If the field is not rejected, apply the new value
+            for fr in field_review:
+                new_value = fr.get("newValue", None)
                 if new_value is not None and new_value != "":
                     set_nested_value(metadata, keys, new_value)
-        else:
-            new_value = review_key["fieldReview"].get("newValue", None)
+
+        elif isinstance(field_review, dict):
+            state = field_review.get("state")
+            if state == "rejected":
+                # If a field is rejected, delete it and move on to the next one.
+                delete_nested_field(metadata, keys)
+                continue
+
+            # If the field is not rejected, apply the new value
+            new_value = field_review.get("newValue", None)
             if new_value is not None and new_value != "":
                 set_nested_value(metadata, keys, new_value)
+
+    return metadata
 
 
 def set_nested_value(metadata, keys, value):
@@ -170,8 +198,8 @@ def set_nested_value(metadata, keys, value):
         value (Any): The value to set.
 
     Note:
-        The function navigates through the dictionary using the keys and sets the value
-        at the position indicated by the last key in the list.
+        The function navigates through the dictionary using the keys
+        and sets the value at the position indicated by the last key in the list.
     """
 
     for key in keys[:-1]:
@@ -185,34 +213,23 @@ def set_nested_value(metadata, keys, value):
 
 
 def process_review_data(review_data, metadata, categories):
-    """
-    Process the review data and update the metadata with the latest reviews
-    and suggestions.
-
-    Args:
-        review_data (list): A list of dictionaries containing review data for
-                            each field.
-        metadata (dict): The original metadata object that needs to be updated.
-        categories (list): A list of categories in the metadata.
-
-    Returns:
-        dict: A state dictionary containing the state of each field
-            after processing the review data.
-
-    Note:
-        The function sorts the fieldReview entries by timestamp (newest first)
-        and updates the metadata with the latest reviewer suggestions,
-        comments, and new values. The resulting state dictionary indicates
-        the state of each field after processing.
-    """
     state_dict = {}
+
+    # Initialize fields
+    for category in categories:
+        for item in metadata[category]:
+            item["reviewer_suggestion"] = ""
+            item["suggestion_comment"] = ""
+            item["additional_comment"] = ""
+            item["newValue"] = ""
 
     for review in review_data:
         field_key = review.get("key")
         field_review = review.get("fieldReview")
+        category = review.get("category")  # Get the category from the review
 
         if isinstance(field_review, list):
-            # Sortiere die fieldReview-Einträge nach dem timestamp (neueste zuerst)
+            # Sort and get the latest field review
             sorted_field_review = sorted(
                 field_review, key=lambda x: x.get("timestamp"), reverse=True
             )
@@ -225,32 +242,375 @@ def process_review_data(review_data, metadata, categories):
                 reviewer_suggestion = latest_field_review.get("reviewerSuggestion")
                 reviewer_suggestion_comment = latest_field_review.get("comment")
                 newValue = latest_field_review.get("newValue")
+                additional_comment = latest_field_review.get("additionalComment")
             else:
                 state = None
-                reviewer_suggestion = None
-                reviewer_suggestion_comment = None
-                newValue = None
+                reviewer_suggestion = ""
+                reviewer_suggestion_comment = ""
+                newValue = ""
+                additional_comment = ""
         else:
             state = field_review.get("state")
             reviewer_suggestion = field_review.get("reviewerSuggestion")
             reviewer_suggestion_comment = field_review.get("comment")
             newValue = field_review.get("newValue")
+            additional_comment = field_review.get("additionalComment")
 
-        if reviewer_suggestion is not None and reviewer_suggestion_comment is not None:
-            for category in categories:
-                for item in metadata[category]:
-                    if item["field"] == field_key:
-                        item["reviewer_suggestion"] = reviewer_suggestion
-                        item["suggestion_comment"] = reviewer_suggestion_comment
-                        break
-
-        if newValue is not None:
-            for category in categories:
-                for item in metadata[category]:
-                    if item["field"] == field_key:
-                        item["newValue"] = newValue
-                        break
+        # Update the item in the correct category
+        if category in metadata:
+            for item in metadata[category]:
+                if item["field"] == field_key:
+                    item["reviewer_suggestion"] = reviewer_suggestion or ""
+                    item["suggestion_comment"] = reviewer_suggestion_comment or ""
+                    item["additional_comment"] = additional_comment or ""
+                    item["newValue"] = newValue or ""
+                    break
 
         state_dict[field_key] = state
 
     return state_dict
+
+
+def delete_peer_review(review_id):
+    """
+    Remove Peer Review by review_id.
+    Args:
+        review_id (int): ID review.
+
+    Returns:
+        JsonResponse: JSON response about successful deletion or error.
+    """
+    if review_id:
+        peer_review = PeerReview.objects.filter(id=review_id).first()
+        if peer_review:
+            peer_review.delete()
+            return JsonResponse({"message": "PeerReview successfully deleted."})
+        else:
+            return JsonResponse({"error": "PeerReview not found."}, status=404)
+    else:
+        return JsonResponse({"error": "Review ID is required."}, status=400)
+
+
+##############################################
+#          Views related                     #
+##############################################
+
+
+def get_popular_tags(table_name: str | None = None, limit=10):
+    tags = get_all_tags(table_name=table_name)
+    sort_tags_by_popularity(tags)
+
+    return tags[:limit]
+
+
+def get_all_tags(table_name: str | None = None) -> QuerySet[Tag]:
+    """
+    Load all tags of a specific table
+    :param table: Name of a table
+    :return:
+    """
+    if table_name:
+        tags = Table.objects.get(name=table_name).tags.all()
+    else:
+        tags = Tag.objects.all()
+
+    return tags
+
+
+def sort_tags_by_popularity(tags: QuerySet[Tag]) -> QuerySet[Tag]:
+    return tags.order_by("-usage_count")
+
+
+def change_requests(table_obj: Table):
+    """
+    Loads the dataedit admin interface
+    :param request:
+    :return:
+    """
+    # I want to display old and new data, if different.
+
+    display_message = None
+    api_columns = get_column_changes(reviewed=False, table_obj=table_obj)
+    api_constraints = get_constraints_changes(reviewed=False, table_obj=table_obj)
+
+    data = dict()
+
+    data["api_columns"] = {}
+    data["api_constraints"] = {}
+
+    keyword_whitelist = [
+        "column_name",
+        "c_table",
+        "c_schema",
+        "reviewed",
+        "changed",
+        "id",
+    ]
+
+    old_description = describe_columns(table_obj)
+
+    for change in api_columns:
+        name = change["column_name"]
+        id = change["id"]
+
+        # Identifing over 'new'.
+        if change.get("new_name") is not None:
+            change["column_name"] = change["new_name"]
+
+        old_cd = old_description.get(name)
+
+        data["api_columns"][id] = {}
+        data["api_columns"][id]["old"] = {}
+
+        if old_cd is not None:
+            old = api.parser.parse_scolumnd_from_columnd(
+                table_obj, name, old_description.get(name)
+            )
+
+            for key in list(change):
+                value = change[key]
+                if key not in keyword_whitelist and (
+                    value is None or value == old[key]
+                ):
+                    old.pop(key)
+                    change.pop(key)
+            data["api_columns"][id]["old"] = old
+        else:
+            data["api_columns"][id]["old"]["c_schema"] = table_obj.oedb_schema
+            data["api_columns"][id]["old"]["c_table"] = table_obj.name
+            data["api_columns"][id]["old"]["column_name"] = name
+
+        data["api_columns"][id]["new"] = change
+
+    for i in range(len(api_constraints)):
+        value = api_constraints[i]
+        id = value.get("id")
+        if (
+            value.get("reference_table") is None
+            or value.get("reference_column") is None
+        ):
+            value.pop("reference_table")
+            value.pop("reference_column")
+
+        data["api_constraints"][id] = value
+
+    display_style = [
+        "c_schema",
+        "c_table",
+        "column_name",
+        "not_null",
+        "data_type",
+        "reference_table",
+        "constraint_parameter",
+        "reference_column",
+        "action",
+        "constraint_type",
+        "constraint_name",
+    ]
+
+    return {
+        "data": data,
+        "display_items": display_style,
+        "display_message": display_message,
+    }
+
+
+def find_tables(
+    topic_name: str | None = None,
+    query_string: str | None = None,
+    tag_ids: list[str] | None = None,
+) -> QuerySet[Table]:
+    """find tables given search criteria
+
+    Args:
+        topic_name (str, optional): only tables in this topic
+        query_string (str, optional): user search term
+        tag_ids (list, optional): list of tag ids
+
+    Returns:
+        QuerySet of Table objetcs
+    """
+
+    tables = Table.objects
+
+    tables = tables.filter(is_sandbox=False)
+
+    if topic_name:
+        if topic_name == PSEUDO_TOPIC_DRAFT:
+            tables = tables.filter(is_publish=False)
+        else:
+            tables = tables.filter(topics__pk=topic_name)
+
+    if query_string:  # filter by search terms
+        tables = tables.filter(
+            Q(
+                search=SearchQuery(
+                    " & ".join(p + ":*" for p in re.findall(r"[\w]+", query_string)),
+                    search_type="raw",
+                )
+            )
+        )
+
+    if tag_ids:  # filter by tags:
+        # find tables that use all of the tags
+        # by adding a filter for each tag
+        # (instead of all at once, which would be OR)
+        for tag_id in tag_ids:
+            tables = tables.filter(tags__pk=tag_id)
+
+    return tables
+
+
+def _type_json(json_obj):
+    """
+    Recursively labels JSON-objects by their types. Singleton lists are handled
+    as elementary objects.
+
+    :param json_obj: An JSON-object - possibly a dictionary, a list
+        or an elementary JSON-object (e.g a string)
+
+    :return: An annotated JSON-object (type, object)
+
+    """
+    if isinstance(json_obj, dict):
+        return "dict", [(k, _type_json(json_obj[k])) for k in json_obj]
+    elif isinstance(json_obj, list):
+        if len(json_obj) == 1:
+            return _type_json(json_obj[0])
+        return "list", [_type_json(e) for e in json_obj]
+    else:
+        return str(type(json_obj)), json_obj
+
+
+def edit_tag(id: str, name: str, color: str) -> None:
+    """
+    Args:
+        id(int): tag id
+        name(str): max 40 character tag text
+        color(str): hexadecimal color code, eg #aaf0f0
+
+    """
+    tag = Tag.objects.get(pk=id)
+    tag.name = name
+    tag.color = Tag.color_from_hex(color)
+    tag.save()
+
+
+def delete_tag(id: str) -> None:
+    Tag.objects.get(pk=id).delete()
+
+
+def add_tag(name: str, color: str) -> None:
+    """
+    Args:
+        name(str): max 40 character tag text
+        color(str): hexadecimal color code, eg #aaf0f0
+    """
+    Tag(name=name, color=Tag.color_from_hex(color)).save()
+
+
+def update_keywords_from_tags(table: Table) -> None:
+    """synchronize keywords in metadata with tags"""
+
+    metadata = load_metadata_from_db(table=table.name)
+
+    keywords = [tag.name_normalized for tag in table.tags.all()]
+    metadata["resources"][0]["keywords"] = keywords
+
+    set_table_metadata(table=table.name, metadata=metadata)
+
+
+def get_column_description(table_obj: Table):
+    """Return list of column descriptions:
+    [{
+       "name": str,
+       "data_type": str,
+       "is_nullable': bool,
+       "is_pk": bool
+    }]
+
+    """
+
+    def get_datatype_str(column_def):
+        """get single string sql type definition.
+
+        We want the data type definition to be a simple string, e.g. decimal(10, 6)
+        or varchar(128), so we need to combine the various fields
+        (type, numeric_precision, numeric_scale, ...)
+        """
+        # for reverse validation, see also api.parser.parse_type(dt_string)
+        dt = column_def["data_type"].lower()
+        precisions = None
+        if dt.startswith("character"):
+            if dt == "character varying":
+                dt = "varchar"
+            else:
+                dt = "char"
+            precisions = [column_def["character_maximum_length"]]
+        elif dt.endswith(" without time zone"):  # this is the default
+            dt = dt.replace(" without time zone", "")
+        elif re.match("(numeric|decimal)", dt):
+            precisions = [column_def["numeric_precision"], column_def["numeric_scale"]]
+        elif dt == "interval":
+            precisions = [column_def["interval_precision"]]
+        elif re.match(".*int", dt) and re.match(
+            "nextval", column_def.get("column_default") or ""
+        ):
+            # dt = dt.replace('int', 'serial')
+            pass
+        elif dt.startswith("double"):
+            dt = "float"
+        if precisions:  # remove None
+            precisions = [x for x in precisions if x is not None]
+        if precisions:
+            dt += "(%s)" % ", ".join(str(x) for x in precisions)
+        return dt
+
+    def get_pk_fields(constraints):
+        """Get the column names that make up the primary key
+        from the constraints definitions.
+
+        NOTE: Currently, the wizard to create tables only supports
+            single fields primary keys (which is advisable anyways)
+        """
+        pk_fields = []
+        for _name, constraint in constraints.items():
+            if constraint.get("constraint_type") == "PRIMARY KEY":
+                m = re.match(
+                    r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition") or ""
+                )
+                if m:
+                    # "f1, f2" -> ["f1", "f2"]
+                    pk_fields = [x.strip() for x in m.groups()[0].split(",")]
+        return pk_fields
+
+    _columns = describe_columns(table_obj)
+    _constraints = describe_constraints(table_obj)
+    pk_fields = get_pk_fields(_constraints)
+    # order by ordinal_position
+    columns = []
+    for name, col in sorted(
+        _columns.items(), key=lambda kv: int(kv[1]["ordinal_position"])
+    ):
+        columns.append(
+            {
+                "name": name,
+                "data_type": get_datatype_str(col),
+                "is_nullable": col["is_nullable"],
+                "is_pk": name in pk_fields,
+                "unit": None,
+                "description": None,
+            }
+        )
+    return columns
+
+
+def get_cancle_state(request):
+    return request.META.get("HTTP_REFERER")
+
+
+def get_page(request: HttpRequest) -> int:
+    try:
+        return int(request.GET.get("page", "1"))
+    except Exception:
+        return 1

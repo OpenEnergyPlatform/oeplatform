@@ -1,0 +1,93 @@
+// vite.config.js
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import eslint from "vite-plugin-eslint";
+import { resolve } from "path";
+
+export default defineConfig({
+  base: "/static/",
+  plugins: [
+    react({
+      // Emotion JSX factory & css prop
+      jsxImportSource: "@emotion/react",
+      babel: {
+        plugins: ["@emotion/babel-plugin"],
+      },
+    }),
+    eslint({
+      include: [
+        "src/**/*.js",
+        "src/**/*.jsx",
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        // '**/frontend/src/**/*.{js,jsx,ts,tsx}',
+      ],
+      failOnWarning: false,
+      failOnError: true,
+    }),
+  ],
+  resolve: {
+    alias: {
+      "@emotion/react": resolve("./node_modules/@emotion/react"),
+      "@emotion/styled": resolve("./node_modules/@emotion/styled"),
+      "@emotion/cache": resolve("./node_modules/@emotion/cache"),
+      "@emotion/utils": resolve("./node_modules/@emotion/utils"),
+      "@emotion/serialize": resolve("./node_modules/@emotion/serialize"),
+      "@emotion/css": resolve("./node_modules/@emotion/css"),
+    },
+  },
+  optimizeDeps: {
+    exclude: [
+      // '@elastic/eui',
+      // '@elastic/datemath',
+      // '@ts4nfdi/terminology-service-suite',
+    ],
+    include: [
+      "@emotion/react",
+      "@emotion/styled",
+      "@emotion/cache",
+      "@mui/material",
+      "@mui/material/styles",
+      "@mui/system",
+      "@mui/utils",
+      // '@ts4nfdi/terminology-service-suite',
+    ],
+  },
+  build: {
+    outDir: "./assets/",
+    assetsDir: "django-vite/",
+    emptyOutDir: true,
+    dynamicImportVarsOptions: {
+      exclude: [],
+    },
+    manifest: "manifest.json",
+    rollupOptions: {
+      input: {
+        factsheet: resolve("./factsheet/frontend/src/index.jsx"),
+        opr_review: resolve("./dataedit/static/peer_review/main.js"),
+        oeo_viewer: resolve("./oeo_viewer/frontend/src/index.jsx"),
+        ontology: resolve("./ontology/frontend/src/index.jsx"),
+        wizard: resolve("./dataedit/static/wizard/wizard.js"),
+        metaedit: resolve("./dataedit/static/metaedit/metaedit.js"),
+      },
+    },
+  },
+  server: {
+    host: "0.0.0.0",
+    port: 5173,
+    hmr: { host: "localhost" },
+  },
+  watch: {
+    // don’t poll at all, lean on inotify if possible
+    usePolling: false,
+    // ignore everything except your source folders
+    ignored: [
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/.venv/**",
+      "**/venv/**",
+      "**/env/**",
+      "**/.env*/**",
+    ],
+  },
+});

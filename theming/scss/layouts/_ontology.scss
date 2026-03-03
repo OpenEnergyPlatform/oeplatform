@@ -1,0 +1,193 @@
+@use '../base/' as *;
+
+.main .content .content__container:has(.ontology) {
+  max-width: $C--container-width;
+  @extend .justify-content-center;
+}
+
+.main .content .ontology {
+  width: 100%;
+  max-width: 53.75rem;
+  @extend .pb-5;
+
+  &__heading {
+    @extend .fs-1;
+    @extend .fw-semibold;
+
+    @include media-breakpoint-down(md) {
+      padding-top: 1rem !important;
+    }
+  }
+
+  &__intro {
+    @extend .fs-4;
+
+    &--secondary {
+      @extend .fs-7;
+      @extend .pb-4;
+    }
+  }
+
+  &__subheading {
+    @extend .fs-6;
+    @extend .text-dark;
+
+    &--secondary {
+      @extend .fs-6;
+      @extend .text-center;
+      @extend .text-muted;
+    }
+  }
+
+  &__paragraph {
+    @extend .fs-6;
+    @extend .pb-4;
+  }
+
+  .ontology__paragraph--secondary {
+    @extend .pb-2;
+  }
+
+  &__features {
+    @extend .container;
+    @extend .px-4;
+    @extend .pt-4;
+    @extend .mb-5;
+    @extend .bg-light;
+
+    &-row {
+      @extend .row;
+    }
+  }
+
+  &__feature {
+    @extend .col-lg-4;
+    @extend .pb-4;
+
+    &-title {
+      @extend .fs-6;
+      @extend .fw-semibold;
+    }
+
+    span {
+      @extend .fs-7;
+    }
+  }
+
+  &__box {
+    @extend .border;
+    @extend .p-3;
+
+    p {
+      @extend .fs-7;
+      @extend .text-muted;
+    }
+  }
+
+  &__links {
+    @extend .d-flex;
+    @extend .flex-column;
+    @extend .justify-content-center;
+    @extend .mb-5;
+
+    @include media-breakpoint-up(md) {
+      flex-direction: row !important;
+    }
+
+    a {
+      @extend .btn;
+      @extend .btn-link;
+    }
+  }
+
+  i {
+    @extend .me-1;
+  }
+
+  // Target HTMX elemtents
+  #oeo-modules + div,
+  #usage-beyond-the-open-energy-family-tools + p {
+    @extend .fs-6;
+    @extend .pb-4;
+  }
+}
+
+.main .content .ontology-side {
+  @extend .p-3;
+  @extend .mb-5;
+  @extend .border;
+  @extend .rounded;
+  margin-top: 6rem !important;
+  background-color: #FFF;
+
+  @include media-breakpoint-down(md) {
+    margin-top: 2rem !important;
+  }
+
+  &__section {
+    @extend .pt-2;
+    @extend .pb-3;
+    @extend .border-bottom;
+    @extend .mb-3;
+
+    &:last-of-type {
+      @extend .pb-0;
+      @extend .border-0;
+      @extend .mb-0;
+    }
+  }
+
+  &__title {
+    @extend .fs-4;
+    @extend .text-dark;
+    @extend .mb-3;
+  }
+
+  &__versions {
+    &-header {
+      @extend .d-flex;
+      @extend .justify-content-between;
+      @extend .pb-2;
+      @extend .border-bottom;
+      @extend .mb-2;
+      @extend .text-muted;
+
+      span:last-of-type {
+        width: 20%;
+      }
+    }
+
+    &-row {
+      @extend .d-flex;
+      @extend .justify-content-between;
+      @extend .pb-2;
+
+      span:first-of-type {
+        flex: 1;
+        @extend .pe-2;
+      }
+
+      span:last-of-type {
+        width: 20%;
+      }
+    }
+  }
+
+  &__btn-popover {
+    @extend .btn;
+    @extend .btn-link;
+    @extend .py-0;
+    @extend .mb-0;
+  }
+
+  &__btn-link {
+    @extend .d-inline-block;
+    @extend .my-2;
+  }
+
+  &__btn-main {
+    @extend .btn;
+    @extend .btn-outline-primary;
+    @extend .mb-3;
+  }
+}

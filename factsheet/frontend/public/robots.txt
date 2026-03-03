@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2022 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+# SPDX-FileCopyrightText: oeplatform <https://github.com/OpenEnergyPlatform/oeplatform/>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Disallow:

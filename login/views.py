@@ -1,11 +1,28 @@
+__license__ = """
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Marco Finkendei <https://github.com/MFinkendei>
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
+import json
 from itertools import groupby
 
-from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db.models import F
 from django.http import (
     HttpResponse,
     HttpResponseForbidden,
@@ -13,35 +30,27 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
-from django.views.generic import FormView, View
-from django.views.generic.edit import DeleteView, UpdateView
+from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
+from django.views.generic import RedirectView, View
+from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
-import login.models as models
-from dataedit.models import PeerReviewManager
-from dataedit.views import schema_whitelist
-from login.utils import (
-    get_badge_icon_path,
-    get_review_badge_from_table_metadata,
-    get_tables_if_group_assigned,
-    get_user_tables,
-    validate_open_data_license,
-)
-from oeplatform.settings import UNVERSIONED_SCHEMAS
+import login.permissions
+from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
+from login.forms import EditUserForm, GroupForm
+from login.models import GroupMembership, UserGroup
+from login.models import myuser as OepUser
+from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
+from login.utils import get_tables_if_group_assigned
 
-from .forms import (
-    ChangeEmailForm,
-    CreateUserForm,
-    DetachForm,
-    EditUserForm,
-    GroupForm,
-    OEPPasswordChangeForm,
-)
+# Pagination
+ITEMS_PER_PAGE = 8
+
 
 # NO_PERM = 0/None WRITE_PERM = 4 DELETE_PERM = 8 ADMIN_PERM = 12
-from .models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, GroupMembership, UserGroup
-from .models import myuser as OepUser
 
 ###########################################################################
 #            User Tables related views & partial views for htmx           #
@@ -49,80 +58,35 @@ from .models import myuser as OepUser
 
 
 class TablesView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-        tables = get_user_tables(user_id)
-        draft_tables = []
-        published_tables = []
-
-        for table in tables:
-            permission_level = user.get_table_permission_level(table)
-            license_status = validate_open_data_license(django_table_obj=table)
-
-            review_badge = None
-            badge_icon = None
-            badge_msg = None
-            # oemetadata is None by default
-            if table.oemetadata:
-                review_badge = get_review_badge_from_table_metadata(table)
-
-            if review_badge and review_badge[0]:
-                badge_icon = get_badge_icon_path(review_badge[1])
-
-            if review_badge and review_badge[0]:
-                badge_msg = review_badge[1]
-
-            # Use attributes in the templates
-            table_data = {
-                "name": table.name,
-                "schema": table.schema.name,
-                "table_label": table.human_readable_name,
-                "is_publish": table.is_publish,
-                "is_reviewed": table.is_reviewed,
-                "review_badge_context": {
-                    "error_msg": badge_msg,
-                    "badge": review_badge,
-                    "icon": badge_icon,
-                },
-                "icon_path": badge_icon,
-                "license_status": {
-                    "status": license_status[0],
-                    "error": license_status[1],
-                },
-            }
-
-            if permission_level >= models.WRITE_PERM:
-                if table.is_publish and table.schema.name not in UNVERSIONED_SCHEMAS:
-                    published_tables.append(table_data)
-                else:
-                    draft_tables.append(table_data)
-
-        # Pagination
-        ITEMS_PER_PAGE = 8
+        tables_set = user.get_tables_queryset(min_permission_level=WRITE_PERM)
+        draft_tables = tables_set.filter(is_publish=False).order_by(
+            F("date_updated").desc(nulls_last=True), "human_readable_name"
+        )
+        published_tables = tables_set.filter(is_publish=True).order_by(
+            F("date_updated").desc(nulls_last=True), "human_readable_name"
+        )
 
         # Paginate tables
         published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)
         draft_paginator = Paginator(draft_tables, ITEMS_PER_PAGE)
 
         # Check if the request contains a page
-        if request.GET.get("published_page"):
-            page_number = request.GET.get("published_page")
-            published_page_obj = published_paginator.get_page(page_number)
-        # Always return page 1 if not requested otherwise
-        else:
-            published_page_obj = published_paginator.get_page(1)
+        published_page = request.GET.get("published_page", 1)
+        published_page_obj = published_paginator.get_page(published_page)
 
-        if request.GET.get("draft_page"):
-            page_number = request.GET.get("draft_page")
-            draft_page_obj = draft_paginator.get_page(page_number)
-        else:
-            draft_page_obj = draft_paginator.get_page(1)
+        draft_page = request.GET.get("draft_page", 1)
+        draft_page_obj = draft_paginator.get_page(draft_page)
 
         context = {
             "profile_user": user,
             "draft_tables_page": draft_page_obj,
             "published_tables_page": published_page_obj,
-            "schema_whitelist": schema_whitelist,
+            "topics": [t.name for t in Topic.objects.all()],
+            "draft_page": draft_page,
+            "published_page": published_page,
         }
 
         # TODO: Fix this is_ajax as it is outdated according to django documentation ...
@@ -139,6 +103,7 @@ class TablesView(View):
 
 
 class ReviewsView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id):
         """
         Load the reviews the user identifyes as reviewer and contributor for.
@@ -302,6 +267,7 @@ class ReviewsView(View):
         grouped_contributions = {
             k: list(v) for k, v in groupby(sorted_contributions, key=lambda x: x.table)
         }
+        latest_review_id = latest_review.pk if latest_review is not None else None
 
         return render(
             request,
@@ -312,11 +278,33 @@ class ReviewsView(View):
                 "reviewer_reviewed_grouped": grouped_reviews,
                 "contributor_reviewed": reviewed_contributions_context,
                 "contributor_reviewed_grouped": grouped_contributions,
+                "latest_review_id": latest_review_id,
             },
         )
 
 
+@require_POST
+def delete_peer_review_simple_view(request):
+    """
+    Удаление Peer Review по review_id (упрощённый вариант),
+    считывая review_id из тела запроса (JSON).
+    """
+    data = json.loads(request.body)
+    review_id = data.get("review_id")  # берем из POST
+
+    if not review_id:
+        return JsonResponse({"error": "No review_id in request."}, status=400)
+
+    peer_review = PeerReview.objects.filter(id=review_id).first()
+    if peer_review:
+        peer_review.delete()
+        return JsonResponse({"message": "PeerReview successfully deleted."})
+    else:
+        return JsonResponse({"error": "PeerReview not found."}, status=404)
+
+
 class SettingsView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id):
         """
         Load the user identified by user_id and is OAuth-token.
@@ -349,6 +337,7 @@ class SettingsView(View):
 
 
 class GroupsView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
         Get all groups where the current user is listed as member. Also
@@ -376,7 +365,8 @@ class GroupsView(View):
         )
 
 
-def group_member_count(request, group_id: int):
+@never_cache
+def group_member_count_view(request, group_id: int):
     """
     Return the member count for the current group.
 
@@ -392,8 +382,9 @@ def group_member_count(request, group_id: int):
     return HttpResponse(f"{member_count} member")
 
 
+# TODO: should be require_POST?
 @login_required
-def group_leave(request, group_id: int):
+def group_leave_view(request, group_id: int):
     """ """
     user: OepUser = request.user
     user_id: int = request.user.id
@@ -401,17 +392,17 @@ def group_leave(request, group_id: int):
     membership = get_object_or_404(GroupMembership, group=group, user=request.user)
 
     errors: dict = {}
-    members = GroupMembership.objects.filter(group=group).exclude(user=user.id).count()
+    members = GroupMembership.objects.filter(group=group).exclude(user=user.pk).count()
     if members == 0:
-        errors[
-            "err_leave"
-        ] = "Please delete the group instead (you are the only member)."
+        errors["err_leave"] = (
+            "Please delete the group instead (you are the only member)."
+        )
         return JsonResponse(errors, status=400)
 
     if membership.level >= ADMIN_PERM:
         admins = (
             GroupMembership.objects.filter(group=group, level=ADMIN_PERM)
-            .exclude(user=user.id)
+            .exclude(user=user.pk)
             .count()
         )
         if admins == 0:
@@ -425,6 +416,7 @@ def group_leave(request, group_id: int):
 
 
 class PartialGroupsView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
         TBD
@@ -444,9 +436,10 @@ class PartialGroupsView(View):
         )
 
 
-class GroupManagement(View, LoginRequiredMixin):
+class GroupManagementView(View, LoginRequiredMixin):
     form_is_valid = False
 
+    @method_decorator(never_cache)
     def get(self, request, group_id=None):
         """
         Load the chosen action(create or edit) for a group.
@@ -490,7 +483,7 @@ class GroupManagement(View, LoginRequiredMixin):
 
         # Redirect if the request is not triggered using htmx methods
         if "HX-Request" not in request.headers:
-            return redirect("groups", user_id=request.user.id)
+            return redirect("login:groups", user_id=request.user.id)
 
         return render(
             request,
@@ -554,13 +547,14 @@ class GroupManagement(View, LoginRequiredMixin):
                 membership.save()
                 response = HttpResponse()
                 # response["profile_user"] = user
-                response[
-                    "HX-Redirect"
-                ] = f"/user/profile/1/groups?create_msg=True&profile_user={user}"
+                response["HX-Redirect"] = (
+                    f"/user/profile/1/groups?create_msg=True&profile_user={user}"
+                )
                 return response
 
 
-class PartialGroupMemberManagement(View, LoginRequiredMixin):
+class PartialGroupMemberManagementView(View, LoginRequiredMixin):
+    @method_decorator(never_cache)
     def get(self, request, group_id: int):
         """
         Renders the group detail page component for user invites and
@@ -604,7 +598,7 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
 
         errors = {}
         if mode == "remove_user":
-            if membership.level < models.DELETE_PERM:
+            if membership.level < login.permissions.DELETE_PERM:
                 raise PermissionDenied
 
             user_to_remove: OepUser = OepUser.objects.get(id=request.POST["user_id"])
@@ -612,7 +606,7 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
                 group=group, user=user_to_remove
             )
 
-            if request.user.id == user_to_remove.id:
+            if request.user.id == user_to_remove.pk:
                 errors["name"] = "Please leave the group to remove your own membership."
                 return JsonResponse(errors, status=400)
 
@@ -626,9 +620,9 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
                     errors["name"] = "A group needs at least one admin"
                     return JsonResponse(errors, status=405)
             elif membership.level < target_membership.level:
-                errors[
-                    "name"
-                ] = "You cant remove memberships with higher permission level."
+                errors["name"] = (
+                    "You cant remove memberships with higher permission level."
+                )
                 return JsonResponse(errors, status=400)
 
             target_membership.delete()
@@ -636,7 +630,7 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
             return response
 
         elif mode == "alter_user":
-            if membership.level < models.ADMIN_PERM:
+            if membership.level < login.permissions.ADMIN_PERM:
                 raise PermissionDenied
             user = OepUser.objects.get(id=request.POST["user_id"])
             if user == request.user:
@@ -649,15 +643,15 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
                 membership.save()
 
         elif mode == "delete_group":
-            if membership.level < models.ADMIN_PERM:
+            if membership.level < login.permissions.ADMIN_PERM:
                 raise PermissionDenied
             group.delete()
             response = HttpResponse()
             user_id = request.user.id
             response["profile_user"] = user_id
-            response[
-                "HX-Redirect"
-            ] = f"/user/profile/1/groups?delete_msg=True&profile_user={user_id}"
+            response["HX-Redirect"] = (
+                f"/user/profile/1/groups?delete_msg=True&profile_user={user_id}"
+            )
             return response
         else:
             raise PermissionDenied
@@ -671,7 +665,8 @@ class PartialGroupMemberManagement(View, LoginRequiredMixin):
 
 
 # TODO: Post should not return render ... Get might never be used
-class PartialGroupEditForm(View, LoginRequiredMixin):
+class PartialGroupEditFormView(View, LoginRequiredMixin):
+    @method_decorator(never_cache)
     def get(self, request, group_id):
         """
         Returns a edit form component for a group.
@@ -724,7 +719,8 @@ class PartialGroupEditForm(View, LoginRequiredMixin):
                 )
 
 
-class PartialGroupInvite(View, LoginRequiredMixin):
+class PartialGroupInviteView(View, LoginRequiredMixin):
+    @method_decorator(never_cache)
     def get(self, request, group_id):
         group = get_object_or_404(UserGroup, pk=group_id)
         is_admin = False
@@ -764,7 +760,7 @@ class PartialGroupInvite(View, LoginRequiredMixin):
 
         context = {}
         if mode == "add_user":
-            if membership.level < models.WRITE_PERM:
+            if membership.level < login.permissions.WRITE_PERM:
                 raise PermissionDenied
             try:
                 user = OepUser.objects.get(name=request.POST["name"])
@@ -772,7 +768,7 @@ class PartialGroupInvite(View, LoginRequiredMixin):
                     group=group, user=user
                 )
                 membership.save()
-                context["added_user"] = user.id
+                context["added_user"] = user.pk
                 return JsonResponse(context, status=201)
             except OepUser.DoesNotExist:
                 context["error"] = "User does not exist"
@@ -787,17 +783,8 @@ class PartialGroupInvite(View, LoginRequiredMixin):
 ##############################################################################
 
 
-class ProfileUpdateView(UpdateView, LoginRequiredMixin):
-    """
-    Autogenerate a update form for users.
-    """
-
-    model = OepUser
-    fields = ["name", "affiliation", "email"]
-    template_name_suffix = "_update_form"
-
-
 class EditUserView(View):
+    @method_decorator(never_cache)
     def get(self, request, user_id):
         if not request.user.id == int(user_id):
             raise PermissionDenied
@@ -814,51 +801,22 @@ class EditUserView(View):
         )
         if form.is_valid():
             form.save()
-            return redirect("/user/profile/{id}".format(id=request.user.id))
+            return redirect("login:profile", request.user.id)
         else:
             return render(request, "login/oepuser_edit_form.html", {"form": form})
 
 
-class CreateUserView(View):
-    def get(self, request):
-        form = CreateUserForm()
-        return render(request, "login/oepuser_create_form.html", {"form": form})
+class UserRedirectView(LoginRequiredMixin, RedirectView):
+    permanent = False
 
-    def post(self, request):
-        form = CreateUserForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("activate")
-        else:
-            return render(request, "login/oepuser_create_form.html", {"form": form})
+    def get_redirect_url(self):
+        return reverse("login:settings", kwargs={"user_id": self.request.user.pk})
 
 
-class DetachView(LoginRequiredMixin, View):
-    def get(self, request):
-        if request.user.is_native:
-            raise PermissionDenied
-        form = DetachForm(request.user)
-        return render(request, "login/detach.html", {"form": form})
-
-    def post(self, request):
-        if request.user.is_native:
-            raise PermissionDenied
-        form = DetachForm(request.user, request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("/")
-        else:
-            print(form.errors)
-            return render(request, "login/detach.html", {"form": form})
+user_redirect_view = UserRedirectView.as_view()
 
 
-class OEPPasswordChangeView(PasswordChangeView):
-    template_name = "login/generic_form.html"
-    success_url = "/"
-    form_class = OEPPasswordChangeForm
-
-
-class AccountDeleteView(LoginRequiredMixin, DeleteView):
+class AccountDeleteView_TODO_UNUSED(LoginRequiredMixin, DeleteView):
     """
     TODO: implement tests before we allow user deletion
     see: https://github.com/OpenEnergyPlatform/oeplatform/pull/1181
@@ -873,36 +831,8 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
         return render(request, "login/delete_account.html", {"profile_user": user})
 
 
-class ActivationNoteView(FormView):
-    template_name = "login/activate.html"
-    form_class = ChangeEmailForm
-    success_url = "user/activate"
-
-    def form_valid(self, form):
-        if self.request.user.is_anonymous or self.request.user.is_mail_verified:
-            raise PermissionDenied
-        form.save(self.request.user)
-        return super(ActivationNoteView, self).form_valid(form)
-
-
-def activate(request, token):
-    token_obj = models.ActivationToken.objects.filter(value=token).first()
-    if not token_obj:
-        form = ChangeEmailForm()
-        form._errors = {
-            forms.forms.NON_FIELD_ERRORS: form.error_class(
-                ["Your token was invalid or expired"]
-            )
-        }
-        return render(request, "login/activate.html", {"form": form})
-    else:
-        token_obj.user.is_mail_verified = True
-        token_obj.user.save()
-        token_obj.delete()
-    return redirect("/user/profile/{id}".format(id=token_obj.user.id))
-
-
-def token_reset(request):
+# TODO: should be require_POST?
+def token_reset_view(request):
     if request.user.is_authenticated:
         user_token = get_object_or_404(
             Token, user=request.user.id
@@ -914,3 +844,16 @@ def token_reset(request):
         return HttpResponse(new_token)
     else:
         return HttpResponseForbidden("You are not authorized to reset the token.")
+
+
+@never_cache
+def metadata_review_badge_indicator_icon_file_view(request, user_id, table_name):
+    # is_badge : bool , msg : string -> either error msg or badge name
+    table = get_object_or_404(Table, name=table_name)
+    context = table.get_review_badge_from_table_metadata()
+
+    return render(
+        request,
+        "login/partials/badge_icon.html",
+        context=context,  # type:ignore (we have Literals in type signature)
+    )

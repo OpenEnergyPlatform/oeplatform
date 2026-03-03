@@ -1,7 +1,12 @@
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 from functools import partial
 
-from api.actions import MAX_IDENTIFIER_LENGTH
 from api.tests import APITestCase
+from oedb.utils import MAX_NAME_LENGTH
 
 
 class TestTableNameLength(APITestCase):
@@ -13,8 +18,8 @@ class TestTableNameLength(APITestCase):
                 {"name": "BadName", "data_type": "bigint"},
             ]
         }
-        table_ok = "t" + "_" * (MAX_IDENTIFIER_LENGTH - 1)
-        table_too_long = "t" + "_" * (MAX_IDENTIFIER_LENGTH)
+        table_ok = "t" + "_" * (MAX_NAME_LENGTH - 1)
+        table_too_long = "t" + "_" * (MAX_NAME_LENGTH)
         table_bad_name = "table_Bad"
 
         # this should fail (too long table name)
