@@ -3,6 +3,7 @@
 import {current_review, selectedState} from "./peer_review.js";
 import {getFieldState} from "./state_current_review.js";
 import {isEmptyValue} from "./utilities.js";
+import {updatePercentageDisplay} from "./navigation.js";
 
 export function renderSummaryPageFields() {
   const acceptedFields = [];
