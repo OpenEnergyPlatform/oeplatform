@@ -1,16 +1,5 @@
 // SPDX-FileCopyrightText: 2025 Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import {getCsrfToken, selectedState} from "./peer_review.js";
-
-export function updateFieldColor() {
-  // Color ok/suggestion/rejected
-  let field_id = `field_${selectedField}`;
-  let safe_selector = `#${CSS.escape(field_id)}`;
-  $(safe_selector).removeClass('field-ok');
-  $(safe_selector).removeClass('field-suggestion');
-  $(safe_selector).removeClass('field-rejected');
-  $(safe_selector).addClass(`field-${selectedState}`);
-}
 
 export function getCookie(name) {
   var cookieValue = null;
@@ -27,23 +16,39 @@ export function getCookie(name) {
   return cookieValue;
 }
 
+export function getCsrfToken() {
+  return getCookie("csrftoken");
+}
 
 export function sendJson(method, url, data, success, error) {
   var token = getCsrfToken();
   return $.ajax({
     url: url,
+    type: method, 
     headers: {"X-CSRFToken": token},
-    data_type: "json",
+    dataType: "json",
     cache: false,
     contentType: "application/json; charset=utf-8",
     processData: false,
     data: data,
-    type: method,
     success: success,
-    error: error,
+    error: error
   });
 }
 
 export function isEmptyValue(value) {
-    return value === "" || value === "None" || value === "[]";
+    return !value || value === '' || value === 'None' || value === 'null';
+}
+
+export function getErrorMsg(response) {
+  try {
+    if (response.responseJSON && response.responseJSON.error) {
+        return 'Upload failed: ' + response.responseJSON.error;
+    }
+    var response_msg = 'Upload failed: ' + JSON.parse(response.responseText).error;
+  } catch (e) {
+    console.log(response);
+    var response_msg = response.responseText || "Unknown error";
+  }
+  return response_msg;
 }
