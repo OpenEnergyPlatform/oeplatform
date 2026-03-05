@@ -10,6 +10,8 @@
 {% endblock site-header %}
 {% block main %}
   <main class="main">
+    <div id="opr-page-marker" data-opr-page="reviewer" style="display: none;">
+    </div>
     <div class="main-header">
       <h1 class="main-header__title">
         <svg width="20"
@@ -17,7 +19,7 @@
              viewBox="0 0 16 16"
              fill="none"
              xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.31781 2.68742C3.35608 3.12457 3 3.62628 3 4C3 4.37372 3.35608 4.87543 4.31781 5.31258C5.23441 5.72922 6.53579 6 8 6C9.46421 6 10.7656 5.72922 11.6822 5.31258C12.6439 4.87543 13 4.37372 13 4C13 3.62628 12.6439 3.12457 11.6822 2.68742C10.7656 2.27078 9.46421 2 8 2C6.53579 2 5.23441 2.27078 4.31781 2.68742ZM13 5.69813C12.729 5.90046 12.4201 6.07563 12.096 6.22295C11.022 6.71114 9.57336 7 8 7C6.42664 7 4.97802 6.71114 3.90401 6.22295C3.5799 6.07563 3.27105 5.90046 3 5.69813V7C3 7.37372 3.35608 7.87543 4.31781 8.31258C5.23441 8.72922 6.53579 9 8 9C9.46421 9 10.7656 8.72922 11.6822 8.31258C12.6439 7.87543 13 7.37372 13 7V5.69813ZM14 4C14 2.993 13.1249 2.24472 12.096 1.77705C11.022 1.28886 9.57336 1 8 1C6.42664 1 4.97802 1.28886 3.90401 1.77705C2.87513 2.24472 2 2.993 2 4V13C2 14.007 2.87513 14.7553 3.90401 15.2229C4.97802 15.7111 6.42664 16 8 16C9.57336 16 11.022 15.7111 12.096 15.2229C13.1249 14.7553 14 14.007 14 13V4ZM13 8.69813C12.729 8.90046 12.4201 9.07563 12.096 9.2229C11.022 9.71114 9.57336 10 8 10C6.42664 10 4.97802 9.71114 3.90401 9.22295C3.5799 9.07563 3.27105 8.90046 3 8.69813V10C3 10.3737 3.35608 10.8754 4.31781 11.3126C5.23441 11.7292 6.53579 12 8 12C9.46421 12 10.7656 11.7292 11.6822 11.3126C12.6439 10.8754 13 10.3737 13 10V8.69813ZM13 11.6981C12.729 11.9005 12.4201 12.0756 12.096 12.2229C11.022 12.7111 9.57336 13 8 13C6.42664 13 4.97802 12.7111 3.90401 12.2229C3.5799 12.0756 3.27105 11.9005 3 11.6981V13C3 13.3737 3.35608 13.8754 4.31781 14.3126C5.23441 14.7292 6.53579 15 8 15C9.46421 15 10.7656 14.7292 11.6822 14.3126C12.6439 13.8754 13 13.3737 13 13V11.6981Z" fill="#293B46" />
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.31781 2.68742C3.35608 3.12457 3 3.62628 3 4C3 4.37372 3.35608 4.87543 4.31781 5.31258C5.23441 5.72922 6.53579 6 8 6C9.46421 6 10.7656 5.72922 11.6822 5.31258C12.6439 4.87543 13 4.37372 13 4C13 3.62628 12.6439 3.12457 11.6822 2.68742C10.7656 2.27078 9.46421 2 8 2C6.53579 2 5.23441 2.27078 4.31781 2.68742ZM13 5.69813C12.729 5.90046 12.4201 6.07563 12.096 6.22295C11.022 6.71114 9.57336 7 8 7C6.42664 7 4.97802 6.71114 3.90401 6.22295C3.5799 6.07563 3.27105 5.90046 3 5.69813V7C3 7.37372 3.35608 7.87543 4.31781 8.31258C5.23441 8.72922 6.53579 9 8 9C9.46421 9 10.7656 8.72922 11.6822 8.31258C12.6439 7.87543 13 7.37372 13 7V5.69813ZM14 4C14 2.993 13.1249 2.24472 12.096 1.77705C11.022 1.28886 9.57336 1 8 1C6.42664 1 4.97802 1.28886 3.90401 1.77705C2.87513 2.24472 2 2.993 2 4V13C2 14.007 2.87513 14.7553 3.90401 15.2229C4.97802 15.7111 6.42664 16 8 16C9.57336 16 11.022 15.7111 12.096 15.2229C13.1249 14.7553 14 14.007 14 13V4ZM13 8.69813C12.729 8.90046 12.4201 9.07563 12.096 9.22295C11.022 9.71114 9.57336 10 8 10C6.42664 10 4.97802 9.71114 3.90401 9.22295C3.5799 9.07563 3.27105 8.90046 3 8.69813V10C3 10.3737 3.35608 10.8754 4.31781 11.3126C5.23441 11.7292 6.53579 12 8 12C9.46421 12 10.7656 11.7292 11.6822 11.3126C12.6439 10.8754 13 10.3737 13 10V8.69813ZM13 11.6981C12.729 11.9005 12.4201 12.0756 12.096 12.2229C11.022 12.7111 9.57336 13 8 13C6.42664 13 4.97802 12.7111 3.90401 12.2229C3.5799 12.0756 3.27105 11.9005 3 11.6981V13C3 13.3737 3.35608 13.8754 4.31781 14.3126C5.23441 14.7292 6.53579 15 8 15C9.46421 15 10.7656 14.7292 11.6822 14.3126C12.6439 13.8754 13 13.3737 13 13V11.6981Z" fill="#293B46" />
         </svg>
         Database
       </h1>
@@ -199,25 +201,11 @@
                    aria-labelledby="general-tab">
                 <div class="review__items">
                   {% if meta.grouped_meta %}
-                    {# flat general #}
+                    {# Flat general #}
                     {% for item in meta.grouped_meta.general.flat %}
-                      <div id="field_{{ item.field|default:'undefined' }}"
-                           class="field review__item"
-                           data-fieldkey="{{ item.field|default:'' }}"
-                           data-fieldvalue="{{ item.value|default:'' }}"
-                           data-category="general">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                          <span class="value">{{ item.newValue|default:item.value }}</span>
-                          <span id="reviewerSuggestion_{{ item.field }}"
-                                class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                          <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                          <br>
-                          <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                        </p>
-                      </div>
+                      {% include "dataedit/templates/partials/review_item_snippet.html" with item=item category="general" only %}
                     {% endfor %}
-                    {# grouped general #}
+                    {# Grouped general #}
                     <div class="accordion" id="generalAccordion">
                       {% for group_key, group in meta.grouped_meta.general.grouped.items %}
                         <div class="accordion-item">
@@ -302,7 +290,7 @@
                       {% endfor %}
                     </div>
                   {% else %}
-                    {# Fallback for legacy structure #}
+                    {# Fallback for legacy structure - SAFE VERSION #}
                     {% if meta.general.flat %}
                       {% for item in meta.general.flat %}
                         <div id="field_{{ item.field|default:'undefined' }}"
@@ -323,6 +311,7 @@
                       {% endfor %}
                     {% else %}
                       {% for item in meta.general %}
+                        {# Direct loop over list #}
                         <div id="field_{{ item.field|default:'undefined' }}"
                              class="field review__item"
                              data-fieldkey="{{ item.field|default:'' }}"
@@ -351,86 +340,113 @@
                   <p class="review__items-cat">Spatial</p>
                   {% if meta.grouped_meta %}
                     <div class="accordion" id="spatialAccordion">
-                      {% with spatial_grouped=meta.grouped_meta.spatial.grouped %}
-                        {% if spatial_grouped %}
-                          {% for group_key, group in spatial_grouped.items %}
-                            <div class="accordion-item">
-                              <h2 class="accordion-header" id="heading-spatial-{{ forloop.counter }}">
-                                <button class="accordion-button collapsed"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#collapse-spatial-{{ forloop.counter }}">
-                                  {{ group_key }}
-                                </button>
-                              </h2>
-                              <div id="collapse-spatial-{{ forloop.counter }}"
-                                   class="accordion-collapse collapse"
-                                   data-bs-parent="#spatialAccordion">
-                                <div class="accordion-body">
-                                  {% if group.flat %}
-                                    {% for item in group.flat %}
-                                      <div id="field_{{ item.field|default:'undefined' }}"
-                                           class="field review__item"
-                                           data-fieldkey="{{ item.field|default:'' }}"
-                                           data-fieldvalue="{{ item.value|default:'' }}"
-                                           data-category="spatial">
-                                        <p class="review__item-content">
-                                          <span class="key">{{ item.display_field|default:item.field }}</span>
-                                          <span class="value">{{ item.newValue|default:item.value }}</span>
-                                          <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                          <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                          <br>
-                                          <b><span class="additional-comment">{{ item.additional_comment }}</span></b>
-                                        </p>
-                                      </div>
-                                    {% endfor %}
-                                  {% endif %}
-                                  {% if group.grouped %}
-                                    {% for sub_key, sub_items in group.grouped.items %}
-                                      <div class="accordion-item">
-                                        <h2 class="accordion-header"
-                                            id="heading-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                          <button class="accordion-button collapsed"
-                                                  type="button"
-                                                  data-bs-toggle="collapse"
-                                                  data-bs-target="#collapse-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                            {{ sub_key }}
-                                          </button>
-                                        </h2>
-                                        <div id="collapse-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                             class="accordion-collapse collapse">
-                                          <div class="accordion-body">
-                                            {% for item in sub_items %}
-                                              <div class="field review__item" data-category="spatial">
-                                                <p class="review__item-content">
-                                                  <span class="key">{{ item.display_field|default:item.field }}</span>
-                                                  <span class="value">{{ item.newValue|default:item.value }}</span>
-                                                  <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                                  <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                                </p>
-                                              </div>
-                                            {% endfor %}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    {% endfor %}
-                                  {% endif %}
+                      {% for group_key, group in meta.grouped_meta.spatial.grouped.items %}
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="heading-spatial-{{ forloop.counter }}">
+                            <button class="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse-spatial-{{ forloop.counter }}"
+                                    aria-expanded="false">
+                              {{ group_key }}
+                            </button>
+                          </h2>
+                          <div id="collapse-spatial-{{ forloop.counter }}"
+                               class="accordion-collapse collapse"
+                               data-bs-parent="#spatialAccordion">
+                            <div class="accordion-body">
+                              {% for item in group.flat %}
+                                <div id="field_{{ item.field|default:'undefined' }}"
+                                     class="field review__item"
+                                     data-fieldkey="{{ item.field|default:'' }}"
+                                     data-fieldvalue="{{ item.value|default:'' }}"
+                                     data-category="spatial">
+                                  <p class="review__item-content">
+                                    <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
+                                    <span class="value">{{ item.newValue|default:item.value }}</span>
+                                    <span id="reviewerSuggestion_{{ item.field }}"
+                                          class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                                    <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
+                                    <br>
+                                    <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                  </p>
                                 </div>
-                              </div>
+                              {% endfor %}
+                              {% if group.grouped %}
+                                {% for sub_key, sub_items in group.grouped.items %}
+                                  <div class="accordion-item">
+                                    <h2 class="accordion-header"
+                                        id="heading-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
+                                      <button class="accordion-button collapsed"
+                                              type="button"
+                                              data-bs-toggle="collapse"
+                                              data-bs-target="#collapse-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
+                                        {{ sub_key }}
+                                      </button>
+                                    </h2>
+                                    <div id="collapse-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
+                                         class="accordion-collapse collapse">
+                                      <div class="accordion-body">
+                                        {% for item in sub_items %}
+                                          <div id="field_{{ item.field|default:'undefined' }}"
+                                               class="field review__item"
+                                               data-fieldkey="{{ item.field|default:'' }}"
+                                               data-fieldvalue="{{ item.value|default:'' }}"
+                                               data-category="spatial">
+                                            <p class="review__item-content">
+                                              <span class="key">{{ item.display_field|default:item.field }}</span>
+                                              <span class="value">{{ item.newValue|default:item.value }}</span>
+                                              <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                                              <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
+                                            </p>
+                                          </div>
+                                        {% endfor %}
+                                      </div>
+                                    </div>
+                                  </div>
+                                {% endfor %}
+                              {% endif %}
                             </div>
-                          {% endfor %}
-                        {% endif %}
-                      {% endwith %}
+                          </div>
+                        </div>
+                      {% endfor %}
                     </div>
                   {% else %}
-                    {% for item in meta.spatial %}
-                      <div class="field review__item" data-category="spatial">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.field }}</span>
-                          <span class="value">{{ item.value }}</span>
-                        </p>
+                    {# Legacy fallback for spatial - Removed the crash-prone 'else' block #}
+                    {% if meta.spatial.grouped %}
+                      <div class="accordion" id="spatialAccordionLegacy">
+                        {% for group_key, group in meta.spatial.grouped.items %}
+                          <div class="accordion-item">
+                            <h2 class="accordion-header"
+                                id="heading-spatial-legacy-{{ forloop.counter }}">
+                              <button class="accordion-button collapsed"
+                                      type="button"
+                                      data-bs-toggle="collapse"
+                                      data-bs-target="#collapse-spatial-legacy-{{ forloop.counter }}">
+                                {{ group_key }}
+                              </button>
+                            </h2>
+                            <div id="collapse-spatial-legacy-{{ forloop.counter }}"
+                                 class="accordion-collapse collapse"
+                                 data-bs-parent="#spatialAccordionLegacy">
+                              <div class="accordion-body">
+                                {% if group.flat %}
+                                  {% for item in group.flat %}
+                                    <div class="field review__item" data-category="spatial">
+                                      <p class="review__item-content">
+                                        <span class="key">{{ item.display_field|default:item.field }}</span>
+                                        <span class="value">{{ item.newValue|default:item.value }}</span>
+                                      </p>
+                                    </div>
+                                  {% endfor %}
+                                {% endif %}
+                                {# REMOVED THE FAILING ELSE BLOCK HERE #}
+                              </div>
+                            </div>
+                          </div>
+                        {% endfor %}
                       </div>
-                    {% endfor %}
+                    {% endif %}
                   {% endif %}
                   <p class="review__items-cat">Temporal</p>
                   {% if meta.grouped_meta %}
@@ -450,7 +466,11 @@
                                data-bs-parent="#temporalAccordion">
                             <div class="accordion-body">
                               {% for item in group.flat %}
-                                <div class="field review__item" data-category="temporal">
+                                <div id="field_{{ item.field|default:'undefined' }}"
+                                     class="field review__item"
+                                     data-fieldkey="{{ item.field|default:'' }}"
+                                     data-fieldvalue="{{ item.value|default:'' }}"
+                                     data-category="temporal">
                                   <p class="review__item-content">
                                     <span class="key">{{ item.display_field|default:item.field }}</span>
                                     <span class="value">{{ item.newValue|default:item.value }}</span>
@@ -480,12 +500,14 @@
                 <div class="review__items">
                   {% if meta.grouped_meta %}
                     {% for item in meta.grouped_meta.source.flat %}
-                      <div class="field review__item" data-category="source">
+                      <div id="field_{{ item.field|default:'undefined' }}"
+                           class="field review__item"
+                           data-fieldkey="{{ item.field|default:'' }}"
+                           data-fieldvalue="{{ item.value|default:'' }}"
+                           data-category="source">
                         <p class="review__item-content">
                           <span class="key">{{ item.display_field|default:item.field }}</span>
                           <span class="value">{{ item.newValue|default:item.value }}</span>
-                          <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                          <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
                         </p>
                       </div>
                     {% endfor %}
@@ -507,12 +529,14 @@
                 <div class="review__items">
                   {% if meta.grouped_meta %}
                     {% for item in meta.grouped_meta.license.flat %}
-                      <div class="field review__item" data-category="license">
+                      <div id="field_{{ item.field|default:'undefined' }}"
+                           class="field review__item"
+                           data-fieldkey="{{ item.field|default:'' }}"
+                           data-fieldvalue="{{ item.value|default:'' }}"
+                           data-category="license">
                         <p class="review__item-content">
                           <span class="key">{{ item.display_field|default:item.field }}</span>
                           <span class="value">{{ item.newValue|default:item.value }}</span>
-                          <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                          <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
                         </p>
                       </div>
                     {% endfor %}
@@ -636,7 +660,7 @@
                 Dataset uploaded by <a href="#">bmlancien</a> on <span class="review__infos--date">2022-09-19</span>
               </div>
               <div>
-                <span class="review__infos--review-number">0</span> reviews
+                <span class="review__infos--review-number">0</span> review
               </div>
             </div>
           </div>
@@ -684,7 +708,7 @@
 
       suggestions.forEach(function (suggestion) {
         var field = suggestion.id.split("_")[1];
-        initialReviewerSuggestions[field] = suggestion.innerText;
+        if (field) initialReviewerSuggestions[field] = suggestion.innerText;
       });
     };
   </script>

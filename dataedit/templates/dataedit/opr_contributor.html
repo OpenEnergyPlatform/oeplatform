@@ -4,7 +4,6 @@
 {% load django_bootstrap5 %}
 {% load compress %}
 {% block after-head %}
-  {# Load the main entry point. This file will look for the marker below to load specific logic. #}
   {% vite_asset "dataedit/static/peer_review/main.js" %}
 {% endblock after-head %}
 {% block site-header %}
@@ -65,6 +64,14 @@
       .ok-progress-circle circle.progress { stroke: #4caf50; stroke-linecap: round; stroke-dasharray: 326.72; stroke-dashoffset: 326.72; transition: stroke-dashoffset 0.4s ease; }
       .percentage-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; }
       </style>
+      <div class="ok-progress-wrapper">
+        <div class="ok-progress-circle">
+          <svg>
+            <circle class="bg"></circle><circle class="progress" id="okProgressCircle"></circle>
+          </svg>
+          <div class="percentage-text" id="okPercentageText">0%</div>
+        </div>
+      </div>
       <div class="modal fade modal-xl"
            id="myModal"
            tabindex="-1"
@@ -92,15 +99,6 @@
               </button>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="ok-progress-wrapper">
-        <div class="ok-progress-circle">
-          <svg>
-            <circle class="bg"></circle>
-            <circle class="progress" id="okProgressCircle"></circle>
-          </svg>
-          <div class="percentage-text" id="okPercentageText">0%</div>
         </div>
       </div>
       <div class="fullwidth-tabs">
@@ -161,12 +159,7 @@
             <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--summary">
               <button id="submit_summary" class="disabled">
                 <span class="btn__icon">
-                  <svg width="16"
-                       height="16"
-                       version="1.1"
-                       fill="currentColor"
-                       viewBox="0 0 24 24"
-                       xmlns="http://www.w3.org/2000/svg">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                     <path d="m11.19,16.2v-5.04l-2.71,2.71-1.15-1.15,2.32-2.32c1.53-1.54,2.34-2.32,2.37-2.32s.84.79,2.37,2.32l2.32,2.32-1.15,1.15-2.73-2.73v10.09h-1.65v-5.04h0ZM.12,8.7V2.77h23.75v11.86h-1.65V4.42H1.77v10.21H.12v-5.93Z" />
                   </svg>
                 </span>
@@ -198,23 +191,11 @@
                    aria-labelledby="general-tab">
                 <div class="review__items">
                   {% if meta.grouped_meta %}
+                    {# Flat items #}
                     {% for item in meta.grouped_meta.general.flat %}
-                      <div id="field_{{ item.field|default:'undefined' }}"
-                           class="field review__item"
-                           data-fieldkey="{{ item.field|default:'' }}"
-                           data-fieldvalue="{{ item.value|default:'' }}"
-                           data-category="general">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                          <span class="value">{{ item.newValue|default:item.value }}</span>
-                          <span id="reviewerSuggestion_{{ item.field }}"
-                                class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                          <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                          <br>
-                          <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                        </p>
-                      </div>
+                      {% include "dataedit/templates/partials/review_item_snippet.html" with item=item category="general" only %}
                     {% endfor %}
+                    {# Grouped items #}
                     <div class="accordion" id="generalAccordion">
                       {% for group_key, group in meta.grouped_meta.general.grouped.items %}
                         <div class="accordion-item">
@@ -222,33 +203,16 @@
                             <button class="accordion-button collapsed"
                                     type="button"
                                     data-bs-toggle="collapse"
-                                    data-bs-target="#collapse-general-{{ forloop.counter }}"
-                                    aria-expanded="false"
-                                    aria-controls="collapse-general-{{ forloop.counter }}">
+                                    data-bs-target="#collapse-general-{{ forloop.counter }}">
                               {{ group_key }}
                             </button>
                           </h2>
                           <div id="collapse-general-{{ forloop.counter }}"
                                class="accordion-collapse collapse"
-                               aria-labelledby="heading-general-{{ forloop.counter }}"
                                data-bs-parent="#generalAccordion">
                             <div class="accordion-body">
                               {% for item in group.flat %}
-                                <div id="field_{{ item.field|default:'undefined' }}"
-                                     class="field review__item"
-                                     data-fieldkey="{{ item.field|default:'' }}"
-                                     data-fieldvalue="{{ item.value|default:'' }}"
-                                     data-category="general">
-                                  <p class="review__item-content">
-                                    <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                    <span class="value">{{ item.newValue|default:item.value }}</span>
-                                    <span id="reviewerSuggestion_{{ item.field }}"
-                                          class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                    <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                    <br>
-                                    <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                  </p>
-                                </div>
+                                {% include "dataedit/templates/partials/review_item_snippet.html" with item=item category="general" only %}
                               {% endfor %}
                               {% if group.grouped %}
                                 <div class="accordion" id="generalInnerAccordion_{{ group_key|slugify }}">
@@ -259,33 +223,15 @@
                                         <button class="accordion-button collapsed"
                                                 type="button"
                                                 data-bs-toggle="collapse"
-                                                data-bs-target="#collapse-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                                aria-expanded="false"
-                                                aria-controls="collapse-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
+                                                data-bs-target="#collapse-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
                                           {{ sub_key }}
                                         </button>
                                       </h2>
                                       <div id="collapse-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                           class="accordion-collapse collapse"
-                                           aria-labelledby="heading-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                           data-bs-parent="#generalInnerAccordion_{{ group_key|slugify }}">
+                                           class="accordion-collapse collapse">
                                         <div class="accordion-body">
                                           {% for item in sub_items %}
-                                            <div id="field_{{ item.field|default:'undefined' }}"
-                                                 class="field review__item"
-                                                 data-fieldkey="{{ item.field|default:'' }}"
-                                                 data-fieldvalue="{{ item.value|default:'' }}"
-                                                 data-category="general">
-                                              <p class="review__item-content">
-                                                <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                                <span class="value">{{ item.newValue|default:item.value }}</span>
-                                                <span id="reviewerSuggestion_{{ item.field }}"
-                                                      class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                                <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                                <br>
-                                                <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                              </p>
-                                            </div>
+                                            {% include "dataedit/templates/partials/review_item_snippet.html" with item=item category="general" only %}
                                           {% endfor %}
                                         </div>
                                       </div>
@@ -299,7 +245,7 @@
                       {% endfor %}
                     </div>
                   {% else %}
-                    {# Fallback #}
+                    {# Legacy #}
                     {% for item in meta.general %}
                       <div id="field_{{ item.field|default:'undefined' }}"
                            class="field review__item"
@@ -307,13 +253,10 @@
                            data-fieldvalue="{{ item.value|default:'' }}"
                            data-category="general">
                         <p class="review__item-content">
-                          <span class="key">{{ item.label|default:item.field }}</span>
+                          <span class="key">{{ item.display_field|default:item.field }}</span>
                           <span class="value">{{ item.newValue|default:item.value }}</span>
-                          <span id="reviewerSuggestion_{{ item.field }}"
-                                class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                          <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                          <br>
-                          <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                          <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                          <span class="comment">{{ item.suggestion_comment }}</span>
                         </p>
                       </div>
                     {% endfor %}
@@ -323,205 +266,15 @@
               <div class="tab-pane fade"
                    id="spatiotemporal"
                    role="tabpanel"
-                   aria-labelledby="spatiotemporal-tab">
-                <div class="review__items">
-                  <p class="review__items-cat">Spatial</p>
-                  {% if meta.grouped_meta %}
-                    {# Insert Grouped Spatial logic (copied from review template or logic) #}
-                    {% with spatial_grouped=meta.grouped_meta.spatial.grouped %}
-                      {% if spatial_grouped %}
-                        <div class="accordion" id="spatialAccordion">
-                          {% for group_key, group in spatial_grouped.items %}
-                            <div class="accordion-item">
-                              <h2 class="accordion-header" id="heading-spatial-{{ forloop.counter }}">
-                                <button class="accordion-button collapsed"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#collapse-spatial-{{ forloop.counter }}">
-                                  {{ group_key }}
-                                </button>
-                              </h2>
-                              <div id="collapse-spatial-{{ forloop.counter }}"
-                                   class="accordion-collapse collapse"
-                                   data-bs-parent="#spatialAccordion">
-                                <div class="accordion-body">
-                                  {% if group.flat %}
-                                    {% for item in group.flat %}
-                                      <div id="field_{{ item.field|default:'undefined' }}"
-                                           class="field review__item"
-                                           data-fieldkey="{{ item.field|default:'' }}"
-                                           data-fieldvalue="{{ item.value|default:'' }}"
-                                           data-category="spatial">
-                                        <p class="review__item-content">
-                                          <span class="key">{{ item.display_field|default:item.field }}</span>
-                                          <span class="value">{{ item.newValue|default:item.value }}</span>
-                                          <span id="reviewerSuggestion_{{ item.field }}"
-                                                class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                          <span class="comment">{{ item.suggestion_comment }}</span>
-                                        </p>
-                                      </div>
-                                    {% endfor %}
-                                  {% endif %}
-                                  {% if group.grouped %}
-                                    {% for sub_key, sub_items in group.grouped.items %}
-                                      <div class="accordion-item">
-                                        <h2 class="accordion-header"
-                                            id="heading-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                          <button class="accordion-button collapsed"
-                                                  type="button"
-                                                  data-bs-toggle="collapse"
-                                                  data-bs-target="#collapse-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                            {{ sub_key }}
-                                          </button>
-                                        </h2>
-                                        <div id="collapse-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                             class="accordion-collapse collapse">
-                                          <div class="accordion-body">
-                                            {% for item in sub_items %}
-                                              <div id="field_{{ item.field|default:'undefined' }}"
-                                                   class="field review__item"
-                                                   data-fieldkey="{{ item.field|default:'' }}"
-                                                   data-fieldvalue="{{ item.value|default:'' }}"
-                                                   data-category="spatial">
-                                                <p class="review__item-content">
-                                                  <span class="key">{{ item.display_field|default:item.field }}</span>
-                                                  <span class="value">{{ item.newValue|default:item.value }}</span>
-                                                  <span id="reviewerSuggestion_{{ item.field }}"
-                                                        class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                                </p>
-                                              </div>
-                                            {% endfor %}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    {% endfor %}
-                                  {% endif %}
-                                </div>
-                              </div>
-                            </div>
-                          {% endfor %}
-                        </div>
-                      {% endif %}
-                    {% endwith %}
-                  {% else %}
-                    {% for item in meta.spatial %}
-                      <div class="field review__item" data-category="spatial">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.field }}</span> <span class="value">{{ item.value }}</span>
-                        </p>
-                      </div>
-                    {% endfor %}
-                  {% endif %}
-                  <p class="review__items-cat">Temporal</p>
-                  {% if meta.grouped_meta %}
-                    {# Grouped Temporal Logic #}
-                    <div class="accordion" id="temporalAccordion">
-                      {% for group_key, group in meta.grouped_meta.temporal.grouped.items %}
-                        <div class="accordion-item">
-                          <h2 class="accordion-header" id="heading-temporal-{{ forloop.counter }}">
-                            <button class="accordion-button collapsed"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collapse-temporal-{{ forloop.counter }}">
-                              {{ group_key }}
-                            </button>
-                          </h2>
-                          <div id="collapse-temporal-{{ forloop.counter }}"
-                               class="accordion-collapse collapse"
-                               data-bs-parent="#temporalAccordion">
-                            <div class="accordion-body">
-                              {% for item in group.flat %}
-                                <div id="field_{{ item.field|default:'undefined' }}"
-                                     class="field review__item"
-                                     data-fieldkey="{{ item.field|default:'' }}"
-                                     data-fieldvalue="{{ item.value|default:'' }}"
-                                     data-category="temporal">
-                                  <p class="review__item-content">
-                                    <span class="key">{{ item.display_field|default:item.field }}</span>
-                                    <span class="value">{{ item.newValue|default:item.value }}</span>
-                                    <span id="reviewerSuggestion_{{ item.field }}"
-                                          class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                  </p>
-                                </div>
-                              {% endfor %}
-                            </div>
-                          </div>
-                        </div>
-                      {% endfor %}
-                    </div>
-                  {% else %}
-                    {% for item in meta.temporal %}
-                      <div class="field review__item" data-category="temporal">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.field }}</span> <span class="value">{{ item.value }}</span>
-                        </p>
-                      </div>
-                    {% endfor %}
-                  {% endif %}
-                </div>
-              </div>
+                   aria-labelledby="spatiotemporal-tab"></div>
               <div class="tab-pane fade"
                    id="source"
                    role="tabpanel"
-                   aria-labelledby="source-tab">
-                <div class="review__items">
-                  {% if meta.grouped_meta %}
-                    {% for item in meta.grouped_meta.source.flat %}
-                      <div id="field_{{ item.field|default:'undefined' }}"
-                           class="field review__item"
-                           data-fieldkey="{{ item.field|default:'' }}"
-                           data-fieldvalue="{{ item.value|default:'' }}"
-                           data-category="source">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.display_field|default:item.field }}</span>
-                          <span class="value">{{ item.newValue|default:item.value }}</span>
-                          <span id="reviewerSuggestion_{{ item.field }}"
-                                class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                        </p>
-                      </div>
-                    {% endfor %}
-                  {% else %}
-                    {% for item in meta.source %}
-                      <div class="field review__item" data-category="source">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.field }}</span> <span class="value">{{ item.value }}</span>
-                        </p>
-                      </div>
-                    {% endfor %}
-                  {% endif %}
-                </div>
-              </div>
+                   aria-labelledby="source-tab"></div>
               <div class="tab-pane fade"
                    id="license"
                    role="tabpanel"
-                   aria-labelledby="license-tab">
-                <div class="review__items">
-                  {% if meta.grouped_meta %}
-                    {% for item in meta.grouped_meta.license.flat %}
-                      <div id="field_{{ item.field|default:'undefined' }}"
-                           class="field review__item"
-                           data-fieldkey="{{ item.field|default:'' }}"
-                           data-fieldvalue="{{ item.value|default:'' }}"
-                           data-category="license">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.display_field|default:item.field }}</span>
-                          <span class="value">{{ item.newValue|default:item.value }}</span>
-                          <span id="reviewerSuggestion_{{ item.field }}"
-                                class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                        </p>
-                      </div>
-                    {% endfor %}
-                  {% else %}
-                    {% for item in meta.license %}
-                      <div class="field review__item" data-category="license">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.field }}</span> <span class="value">{{ item.value }}</span>
-                        </p>
-                      </div>
-                    {% endfor %}
-                  {% endif %}
-                </div>
-              </div>
+                   aria-labelledby="license-tab"></div>
               <div class="tab-pane fade"
                    id="summary"
                    role="tabpanel"
@@ -535,20 +288,20 @@
               </div>
               <div class="review__description" id="review-info">
                 <button type="button" data-bs-toggle="modal" data-bs-target="#myModal">
-                  Open Peer Review process <i class="fas fa-info-circle" style="color: #2972A6;"></i>
+                  Open Peer Review process <i class="fas fa-info-circle"></i>
                 </button>
               </div>
               <div class="review__btn-nav">
                 <button type="button" onclick="selectPreviousField()">
                   <span class="btn__icon">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <svg width="16" height="16" fill="currentColor">
                       <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
                     </svg>
                   </span>
                 </button>
                 <button type="button" onclick="selectNextField()">
                   <span class="btn__icon">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <svg width="16" height="16" fill="currentColor">
                       <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
                     </svg>
                   </span>
@@ -559,79 +312,49 @@
                 <h2 id="review-field-name" style="display:none"></h2>
                 <div class="review__btns" role="group">
                   <div class="review__btn review__btn--success">
-                    <button type="button" id="ok-button" value="ok" onclick="selectState('ok');">
-                      <span class="btn__icon">
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="m22.28,3.75c-.31,0-.6.14-.81.36l-13.4,13.4-5.66-4.37h0c-.25-.19-.56-.28-.87-.24-.31.04-.59.2-.79.45s-.28.56-.23.88c.04.31.21.59.46.78l6.48,5.01c.47.36,1.14.32,1.55-.1l14.14-14.14c.35-.34.46-.86.26-1.31-.19-.45-.64-.73-1.13-.71h0Z" />
-                        </svg>
-                      </span>
-                      <span>Accept</span>
+                    <button type="button" id="ok-button" onclick="selectState('ok');">
+                      Accept
                     </button>
                   </div>
                   <div class="review__btn review__btn--suggested">
                     <button type="button"
                             id="suggestion-button"
-                            value="suggestion"
                             onclick="selectState('suggestion');">
-                      <span class="btn__icon">
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="m10.6,17.92c-.01-.37-.02-.65-.02-.83,0-1.09.15-2.03.46-2.82.23-.59.59-1.19,1.09-1.8.37-.44,1.04-1.08,1.99-1.93.96-.85,1.58-1.52,1.87-2.03.29-.5.43-1.05.43-1.65,0-1.08-.42-2.02-1.26-2.84-.84-.81-1.88-1.22-3.1-1.22s-2.17.37-2.95,1.11c-.79.74-1.31,1.9-1.56,3.47l-2.85-.34c.26-2.1,1.02-3.72,2.29-4.84,1.27-1.12,2.94-1.68,5.03-1.68,2.21,0,3.97.6,5.28,1.8,1.31,1.2,1.97,2.65,1.97,4.36,0,.98-.23,1.89-.69,2.72-.46.83-1.36,1.85-2.71,3.03-.9.8-1.49,1.39-1.77,1.77-.28.38-.48.82-.61,1.31-.14.49-.21,1.29-.23,2.4h-2.67Zm-.17,5.56v-3.16h3.15v3.16h-3.15Z" />
-                        </svg>
-                      </span>
-                      <span>Suggest</span>
+                      Suggest
                     </button>
                   </div>
                   <div class="review__btn review__btn--denied">
-                    <button type="button"
-                            id="rejected-button"
-                            value="rejected"
-                            onclick="selectState('rejected');">
-                      <span class="btn__icon">
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="m13.46,12.41L22.94,2.92c.4-.4.4-1.06,0-1.46s-1.06-.4-1.46,0l-9.49,9.48L2.52,1.46c-.4-.4-1.06-.4-1.46,0-.4.4-.4,1.06,0,1.46l9.47,9.48L1.06,21.87c-.4.4-.4,1.06,0,1.46.2.2.47.3.73.3s.53-.1.73-.3l9.47-9.47,9.47,9.48c.2.2.47.3.73.3s.53-.1.73-.3c.4-.4.4-1.06,0-1.46l-9.47-9.48Z" />
-                        </svg>
-                      </span>
-                      <span>Deny</span>
+                    <button type="button" id="rejected-button" onclick="selectState('rejected');">
+                      Deny
                     </button>
                   </div>
                 </div>
-                <div id="explanation-container" class="review__explanation"></div>
+                <div id="explanation-container"></div>
                 <div class="d-none review__remarks" id="reviewer_remarks">
-                  <div class="review__field" id="field-value">
-                    <label for="valuearea" class="form-label">Your value suggestion*</label>
-                    <textarea class="form-control" id="valuearea" rows="2"></textarea>
+                  <div class="review__field">
+                    <textarea class="form-control" id="valuearea"></textarea>
                   </div>
-                  <div class="review__field review__field--nolabel" id="field-comment">
-                    <label for="commentarea" class="form-label"></label>
-                    <textarea class="form-control"
-                              id="commentarea"
-                              rows="2"
-                              placeholder="Comment here if you want to explain your suggestion"></textarea>
+                  <div class="review__field">
+                    <textarea class="form-control" id="commentarea"></textarea>
                   </div>
-                  <button type="button"
-                          class="btn btn-warning review__field-save"
-                          id="submitButton">Save comment/new value</button>
+                  <button type="button" class="btn btn-warning" id="submitButton">Save</button>
                 </div>
                 <div class="d-none review__comments" id="reviewer_comments">
-                  <div class="review__field review__field--nolabel" id="field-comment">
-                    <label for="comments" class="form-label"></label>
-                    <textarea class="form-control"
-                              id="comments"
-                              rows="2"
-                              placeholder="Comment here if you want to explain your suggestion"></textarea>
+                  <div class="review__field">
+                    <textarea class="form-control" id="comments"></textarea>
                   </div>
-                  <button type="button"
-                          class="btn btn-warning review__field-save"
-                          id="submitCommentButton">Save comment</button>
+                  <button type="button" class="btn btn-warning" id="submitCommentButton">
+                    Save
+                  </button>
                 </div>
               </div>
             </div>
             <div class="review__infos">
               <div>
-                Dataset uploaded by <a href="#">bmlancien</a> on <span class="review__infos--date">2022-09-19</span>
+                Dataset uploaded by <a href="#">bmlancien</a> on <span>2022-09-19</span>
               </div>
               <div>
-                <span class="review__infos--review-number">0</span> review
+                <span>0</span> review
               </div>
             </div>
           </div>
@@ -641,35 +364,34 @@
   </main>
 {% endblock main %}
 {% block after-body-bottom-js %}
-  <script>
+  <script type="text/javascript">
     const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
     var config = JSON.parse("{{ config|escapejs }}");
-    const stateDict = JSON.parse('{{ state_dict|escapejs }}');
-    for (const [key, value] of Object.entries(stateDict)) {
-      const el = document.getElementById(`field_${key}`);
-      if (el && value) {
-        el.classList.add(`field-${value}`);
+    window.state_dict = JSON.parse("{{ state_dict | escapejs }}");
+    if (window.state_dict) {
+      for (let [key, value] of Object.entries(window.state_dict)) {
+        let field_id = `#field_${key}`.replace(/\./g, "\\.");
+        $(field_id).addClass(`field-${value}`);
       }
     }
-  </script>
-  <script type="text/javascript">
+
     document.addEventListener("DOMContentLoaded", function () {
-      let keys = document.querySelectorAll(".key");
+      const keys = document.querySelectorAll(".key");
       keys.forEach((key) => {
-        let words = key.textContent.split(".");
-        let formattedWords = words.map((word) => word.charAt(0).toUpperCase() + word.slice(1));
-        key.textContent = formattedWords.join(" ");
+        let txt = key.textContent.trim();
+        if (/^resources\./.test(txt)) {
+          txt = txt.replace(/^resources\.[0-9]+\./, "").replace(/_/g, " ");
+          key.textContent = txt.split(".").map((w, i) => w.length ? (i === 0 ? w[0].toUpperCase() + w.slice(1) : w) : w).join(" ");
+        }
       });
     });
-  </script>
-  <script>
+
     var initialReviewerSuggestions = {};
     window.onload = function () {
-      var suggestions = document.querySelectorAll(".suggestion--highlight");
-      suggestions.forEach(function (suggestion) {
+      document.querySelectorAll(".suggestion--highlight").forEach(function (suggestion) {
         var field = suggestion.id.split("_")[1];
-        initialReviewerSuggestions[field] = suggestion.innerText;
+        if(field) initialReviewerSuggestions[field] = suggestion.innerText;
       });
     };
   </script>
-{% endblock after-body-bottom-js %}
+{% endblock %}
