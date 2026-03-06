@@ -18,6 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import json
 from itertools import groupby
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
@@ -350,12 +351,6 @@ class OrganizationsView(View):
         :return: Profile renderer
         """
 
-        # Retrieve the profile owner after a htmx redirect:
-        # In case a new Group is created or deleted,
-        # check lookup query parameters for user id.
-        if request.GET.get("profile_user"):
-            user_id = request.GET.get("profile_user")
-
         user = get_object_or_404(OepUser, pk=user_id)
 
         return render(
@@ -556,11 +551,18 @@ class OrganizationManagementView(View, LoginRequiredMixin):
                     user=request.user, organization=organization, level=ADMIN_PERM
                 )
                 membership.save()
+                messages.add_message(
+                    request,
+                    level=messages.INFO,
+                    message=(
+                        "Organization created! "
+                        "Edit the organization to invite members."
+                    ),
+                    extra_tags="primary",
+                )
                 response = HttpResponse()
                 # response["profile_user"] = user
-                response["HX-Redirect"] = (
-                    f"/user/profile/1/organizations?create_msg=True&profile_user={user}"
-                )
+                response["HX-Redirect"] = f"/user/profile/{user}/organizations"
                 return response
 
 
@@ -670,12 +672,14 @@ class PartialOrganizationMemberManagementView(View, LoginRequiredMixin):
             if membership.level < login.permissions.ADMIN_PERM:
                 raise PermissionDenied
             organization.delete()
-            response = HttpResponse()
-            user_id = request.user.id
-            response["profile_user"] = user_id
-            response["HX-Redirect"] = (
-                f"/user/profile/1/organizations?delete_msg=True&profile_user={user_id}"
+            messages.add_message(
+                request,
+                level=messages.INFO,
+                message="Organization deleted!",
+                extra_tags="primary",
             )
+            response = HttpResponse()
+            response["HX-Redirect"] = f"/user/profile/{request.user.id}/organizations"
             return response
         else:
             raise PermissionDenied

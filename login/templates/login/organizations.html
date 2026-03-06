@@ -7,46 +7,6 @@
   {% if request.user.is_authenticated and request.user == user %}
     {% include "login/partials/organizations.html" %}
   {% endif %}
-  {% if request.GET.create_msg == 'True' %}
-    <!-- Bootstrap Toast Message -->
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-      <div id="liveToast"
-           class="toast text-white bg-primary toast-create"
-           role="alert"
-           aria-live="assertive"
-           aria-atomic="true">
-        <div class="toast-header">
-          <strong class="me-auto" id="toastTitle">Message</strong>
-          <button type="button"
-                  class="btn-close"
-                  data-bs-dismiss="toast"
-                  aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="toastBody">
-          Organization created! Edit the organization to invite members.
-        </div>
-      </div>
-    </div>
-  {% endif %}
-  {% if request.GET.delete_msg == 'True' %}
-    <!-- Bootstrap Toast Message -->
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-      <div id="liveToast"
-           class="toast text-white bg-danger toast-delete"
-           role="alert"
-           aria-live="assertive"
-           aria-atomic="true">
-        <div class="toast-header">
-          <strong class="me-auto" id="toastTitle">Message</strong>
-          <button type="button"
-                  class="btn-close"
-                  data-bs-dismiss="toast"
-                  aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="toastBody">Organization deleted!</div>
-      </div>
-    </div>
-  {% endif %}
 {% endblock %}
 {% block main-right-sidebar-content %}
   {% include "login/sidebar_user.html" %}
@@ -78,18 +38,4 @@
       }
     });
   </script>
-  {% if request.GET.create_msg == 'True' %}
-    <!-- Initialize the Bootstrap Toast -->
-    <script>
-      var toast = new bootstrap.Toast(document.querySelector(".toast-create"));
-      toast.show();
-    </script>
-  {% endif %}
-  {% if request.GET.delete_msg == 'True' %}
-    <!-- Initialize the Bootstrap Toast -->
-    <script>
-      var toast = new bootstrap.Toast(document.querySelector(".toast-delete"));
-      toast.show();
-    </script>
-  {% endif %}
 {% endblock after-body-bottom-js %}
