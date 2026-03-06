@@ -49,7 +49,7 @@ from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
 
 if TYPE_CHECKING:
     # only import for static typechecking
-    from login.models import GroupPermission, UserPermission, myuser
+    from login.models import OrganizationPermission, UserPermission, myuser
     from modelview.models import BasicFactsheet
 
 logger = logging.getLogger("oeplatform")
@@ -192,8 +192,8 @@ class Table(Tagable):
     userpermission_set: QuerySet[
         "UserPermission"  # TODO: import
     ]  # related_name, for static type checking
-    grouppermission_set: QuerySet[
-        "GroupPermission"  # TODO: import
+    organizationpermission_set: QuerySet[
+        "OrganizationPermission"  # TODO: import
     ]  # related_name, for static type checking
 
     class Meta:

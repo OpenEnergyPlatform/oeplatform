@@ -150,13 +150,15 @@ class PermissionHolder:
             return NO_PERM
 
 
-class UserGroup(Group, PermissionHolder):
+class Organization(Group, PermissionHolder):
     description = models.TextField(null=False, default="")
     is_admin = models.BooleanField(null=False, default=False)
 
-    memberships: QuerySet["GroupMembership"]  # related_name, for static type checking
+    memberships: QuerySet[
+        "OrganizationMembership"
+    ]  # related_name, for static type checking
     table_permissions: QuerySet[
-        "GroupPermission"
+        "OrganizationPermission"
     ]  # related_name, for static type checking
 
     def get_table_permission_level(self, table: "Table") -> int:
@@ -168,10 +170,6 @@ class UserGroup(Group, PermissionHolder):
                 (perm.level for perm in self.table_permissions.filter(table=table)),
             )
         )
-
-    # TODO @Jonas Huber: Check later - keep for now
-    # def get_table_group_memberships(self):
-    #     return GroupPermission.objects.filter(holder__in=self).prefetch_related('table') # noqa
 
 
 class TablePermission(models.Model):
@@ -230,7 +228,9 @@ class myuser(AbstractBaseUser, PermissionHolder):
     scenario_bundle_creator: QuerySet[
         "ScenarioBundleAccessControl"
     ]  # related_name, for static type checking
-    memberships: QuerySet["GroupMembership"]  # related_name, for static type checking
+    memberships: QuerySet[
+        "OrganizationMembership"
+    ]  # related_name, for static type checking
     table_permissions: QuerySet[
         "UserPermission"
     ]  # related_name, for static type checking
@@ -257,8 +257,8 @@ class myuser(AbstractBaseUser, PermissionHolder):
         direct_memberships = self.table_permissions.all().prefetch_related("table")
         return direct_memberships
 
-    def get_groups_queryset(self) -> QuerySet["UserGroup"]:
-        return UserGroup.objects.filter(memberships__user=self)
+    def get_organizations_queryset(self) -> QuerySet["Organization"]:
+        return Organization.objects.filter(memberships__user=self)
 
     def get_tables_queryset(
         self, min_permission_level: int = NO_PERM
@@ -267,7 +267,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
         combine filter (OR) of table with direct permissions
         and with group permissions
         """
-        groups = self.get_groups_queryset()
+        organizations = self.get_organizations_queryset()
 
         return (
             dataedit_models.Table.objects.filter(
@@ -277,8 +277,8 @@ class myuser(AbstractBaseUser, PermissionHolder):
             )
             | dataedit_models.Table.objects.filter(
                 # tables where user isin a group that has GroupPermission
-                grouppermission_set__holder__in=groups,
-                grouppermission_set__level__gte=min_permission_level,
+                organizationpermission_set__holder__in=organizations,
+                organization_set__level__gte=min_permission_level,
             )
         ).distinct()
 
@@ -318,13 +318,13 @@ class UserPermission(TablePermission):
     )
 
 
-class GroupPermission(TablePermission):
+class OrganizationPermission(TablePermission):
     holder = models.ForeignKey(
-        UserGroup, related_name="table_permissions", on_delete=models.CASCADE
+        Organization, related_name="table_permissions", on_delete=models.CASCADE
     )
 
 
-class GroupMembership(models.Model):
+class OrganizationMembership(models.Model):
     choices = (
         (NO_PERM, "None"),
         (WRITE_PERM, "Invite"),
@@ -334,13 +334,13 @@ class GroupMembership(models.Model):
     user = models.ForeignKey(
         myuser, related_name="memberships", on_delete=models.CASCADE
     )
-    group = models.ForeignKey(
-        UserGroup, related_name="memberships", on_delete=models.CASCADE
+    organization = models.ForeignKey(
+        Organization, related_name="memberships", on_delete=models.CASCADE
     )
     level = models.IntegerField(choices=choices, default=WRITE_PERM)
 
     class Meta:
-        unique_together = (("user", "group"),)
+        unique_together = (("user", "organization"),)
 
 
 class UserBackend(object):

@@ -5,7 +5,7 @@
 {% block main-content-body %}
   {% include "login/user_nav.html" %}
   {% if request.user.is_authenticated and request.user == user %}
-    {% include "login/partials/groups.html" %}
+    {% include "login/partials/organizations.html" %}
   {% endif %}
   {% if request.GET.create_msg == 'True' %}
     <!-- Bootstrap Toast Message -->
@@ -23,7 +23,7 @@
                   aria-label="Close"></button>
         </div>
         <div class="toast-body" id="toastBody">
-          Group Created! Edit the group to invite members.
+          Organization created! Edit the organization to invite members.
         </div>
       </div>
     </div>
@@ -43,7 +43,7 @@
                   data-bs-dismiss="toast"
                   aria-label="Close"></button>
         </div>
-        <div class="toast-body" id="toastBody">Group Deleted!</div>
+        <div class="toast-body" id="toastBody">Organization deleted!</div>
       </div>
     </div>
   {% endif %}

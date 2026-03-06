@@ -1,7 +1,7 @@
 <div class="htmxComponentGroupMembership">
   <div class="profile-category__member-invite">
     <form id="invite-form"
-          hx-post="{% url 'login:partial-group-invite' group_id=group.id %}"
+          hx-post="{% url 'login:partial-organization-invite' organization_id=organization.id %}"
           hx-target="#error-message"
           hx-encType="multipart/form-data"
           data-error-display="error-message">

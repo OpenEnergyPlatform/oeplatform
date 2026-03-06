@@ -20,23 +20,32 @@ class TestViewsLogin(TestViewsTestCase):
         # "login:delete_peer_review_simple",
         # "login:group-leave",  # cannot leave beacuase only member
         # "login:metadata-review-badge-icon",  # we have no table in this testyet
-        group_id = int(self.group.pk)
+        organization_id = int(self.organization.pk)
         user_id = int(self.user.pk)
 
-        self.get("login:count-group-memberships", kwargs={"group_id": group_id})
-        self.get("login:edit", kwargs={"user_id": user_id}, logged_in=True)
-        self.get("login:group-create", logged_in=True)
-        self.get("login:group-edit", kwargs={"group_id": group_id}, logged_in=True)
-        self.get("login:groups", kwargs={"user_id": user_id})
         self.get(
-            "login:partial-group-invite", kwargs={"group_id": group_id}, logged_in=True
+            "login:count-organization-memberships",
+            kwargs={"organization_id": organization_id},
         )
+        self.get("login:edit", kwargs={"user_id": user_id}, logged_in=True)
+        self.get("login:organization-create", logged_in=True)
         self.get(
-            "login:partial-group-membership",
-            kwargs={"group_id": group_id},
+            "login:organization-edit",
+            kwargs={"organization_id": organization_id},
             logged_in=True,
         )
-        self.get("login:partial-groups", kwargs={"user_id": user_id})
+        self.get("login:organizations", kwargs={"user_id": user_id})
+        self.get(
+            "login:partial-organization-invite",
+            kwargs={"organization_id": organization_id},
+            logged_in=True,
+        )
+        self.get(
+            "login:partial-organization-membership",
+            kwargs={"organization_id": organization_id},
+            logged_in=True,
+        )
+        self.get("login:partial-organizations", kwargs={"user_id": user_id})
         self.get("login:password_reset")
         self.get("login:password_reset_complete")
         self.get("login:password_reset_done")
