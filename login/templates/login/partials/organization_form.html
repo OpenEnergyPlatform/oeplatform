@@ -10,14 +10,10 @@
   </h2>
   {% if organization %}
     <form id="organization-form"
-          hx-post="{% url 'login:organization-partial-edit-form' organization_id=organization.id %}"
+          hx-post="{% url 'login:organization-edit' organization_id=organization.id %}"
           hx-target=".htmxFormComponent">
       {% csrf_token %}
       {% bootstrap_form form %}
-      <!-- <input form="organization-form"
-        class="btn btn-success"
-        type="submit"
-        value="Submit"> -->
     </form>
   {% else %}
     <form id="organization-form"

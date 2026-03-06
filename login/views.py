@@ -526,7 +526,7 @@ class OrganizationManagementView(View, LoginRequiredMixin):
         if not self.form_is_valid:
             return render(
                 request,
-                "login/partials/organization_component_form_edit.html",
+                "login/partials/organization_form.html",
                 {"form": form},
             )
 
@@ -541,7 +541,7 @@ class OrganizationManagementView(View, LoginRequiredMixin):
                     raise PermissionDenied
                 return render(
                     request,
-                    "login/partials/organization_component_form_edit.html",
+                    "login/partials/organization_form.html",
                     {"form": form, "organization": organization},
                     status=status,
                 )
@@ -684,67 +684,6 @@ class PartialOrganizationMemberManagementView(View, LoginRequiredMixin):
         else:
             raise PermissionDenied
         return JsonResponse({"success": True})
-
-
-# TODO: Post should not return render ... Get might never be used
-class PartialOrganizationEditFormView(View, LoginRequiredMixin):
-    @method_decorator(never_cache)
-    def get(self, request, organization_id):
-        """
-        Returns a edit form component for a organization.
-
-        :param request: A HTTP-request object sent by the Django framework.
-        :param organization_id: An organization id
-        :return: Profile renderer
-        """
-        organization = get_object_or_404(Organization, pk=organization_id)
-        is_admin = False
-        membership = OrganizationMembership.objects.filter(
-            organization=organization, user=request.user
-        ).first()
-        if membership:
-            is_admin = membership.level >= ADMIN_PERM
-        return render(
-            request,
-            "login/partials/organization_component_form_edit.html",
-            {
-                "organization": organization,
-                "choices": OrganizationMembership.choices,
-                "is_admin": is_admin,
-            },
-        )
-
-    def post(self, request, organization_id):
-        """
-        Returns a validated edit form component the current organization.
-
-        NOTE: This breaks some htmx usage suggestions but currently
-        it seems to be very convenient and helps to make the implementation
-        quite efficient.
-
-        :param request: A HTTP-request object sent by the Django framework.
-        :param organization_id: An organization id
-        :return: Profile renderer
-        """
-
-        organization = (
-            Organization.objects.get(id=organization_id) if organization_id else None
-        )
-        form = OrganizationForm(request.POST, instance=organization)
-        if form.is_valid():
-            if organization_id:
-                organization = form.save()
-                membership = get_object_or_404(
-                    OrganizationMembership, organization=organization, user=request.user
-                )
-                if membership.level < WRITE_PERM:
-                    raise PermissionDenied
-                return render(
-                    request,
-                    "login/partials/organization_component_form_edit.html",
-                    {"form": form, "organization": organization},
-                    status=201,
-                )
 
 
 class PartialOrganizationInviteView(View, LoginRequiredMixin):
