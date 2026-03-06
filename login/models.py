@@ -278,7 +278,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
             | dataedit_models.Table.objects.filter(
                 # tables where user isin a group that has GroupPermission
                 organizationpermission_set__holder__in=organizations,
-                organization_set__level__gte=min_permission_level,
+                organizationpermission_set__level__gte=min_permission_level,
             )
         ).distinct()
 
