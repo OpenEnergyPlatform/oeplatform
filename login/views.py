@@ -611,7 +611,20 @@ class PartialOrganizationMemberManagementView(TemplateView, LoginRequiredMixin):
             OrganizationMembership, organization=organization, user=request.user
         )
 
-        if mode == "remove_user":
+        error_message = None
+        if mode == "add_user":
+            if membership.level < login.permissions.WRITE_PERM:
+                raise PermissionDenied
+            try:
+                user = OepUser.objects.get(name=request.POST["name"])
+                membership, _ = OrganizationMembership.objects.get_or_create(
+                    organization=organization, user=user
+                )
+                membership.save()
+            except OepUser.DoesNotExist:
+                error_message = "User does not exist"
+
+        elif mode == "remove_user":
             if membership.level < login.permissions.DELETE_PERM:
                 raise PermissionDenied
 
@@ -621,11 +634,9 @@ class PartialOrganizationMemberManagementView(TemplateView, LoginRequiredMixin):
             )
 
             if request.user.id == user_to_remove.pk:
-                context = self.get_context_data()
-                context["error_message"] = (
+                error_message = (
                     "Please leave the organization to remove your own membership."
                 )
-                return self.render_to_response(context)
 
             elif target_membership.level >= ADMIN_PERM:
                 admins = (
@@ -636,28 +647,20 @@ class PartialOrganizationMemberManagementView(TemplateView, LoginRequiredMixin):
                     .count()
                 )
                 if admins == 0:
-                    context = self.get_context_data()
-                    context["error_message"] = "A organization needs at least one admin"
-                    return self.render_to_response(context)
+                    error_message = "A organization needs at least one admin"
             elif membership.level < target_membership.level:
-                context = self.get_context_data()
-                context["error_message"] = (
+                error_message = (
                     "You cant remove memberships with higher permission level."
                 )
-                return self.render_to_response(context)
 
             target_membership.delete()
-            response = HttpResponse(status=204)
-            return response
 
         elif mode == "alter_user":
             if membership.level < login.permissions.ADMIN_PERM:
                 raise PermissionDenied
             user = OepUser.objects.get(id=request.POST["user_id"])
             if user == request.user:
-                context = self.get_context_data()
-                context["error_message"] = "You can not change your own permissions"
-                return self.render_to_response(context)
+                error_message = "You can not change your own permissions"
             else:
                 membership = OrganizationMembership.objects.get(
                     organization=organization, user=user
@@ -681,68 +684,8 @@ class PartialOrganizationMemberManagementView(TemplateView, LoginRequiredMixin):
         else:
             raise PermissionDenied
         context = self.get_context_data()
+        context["error_message"] = error_message
         return self.render_to_response(context)
-
-
-class PartialOrganizationInviteView(View, LoginRequiredMixin):
-    @method_decorator(never_cache)
-    def get(self, request, organization_id):
-        organization = get_object_or_404(Organization, pk=organization_id)
-        is_admin = False
-        membership = OrganizationMembership.objects.filter(
-            organization=organization, user=request.user
-        ).first()
-        if membership:
-            is_admin = membership.level >= ADMIN_PERM
-
-        return render(
-            request,
-            "login/partials/organization_component_invite_user.html",
-            {
-                "is_admin": is_admin,
-                "organization": organization,
-                "membership": membership,
-            },
-        )
-
-    def post(self, request, organization_id):
-        """
-        Performs selected action(save or delete) for a organization.
-        If a organization name already exists, then a error will be output.
-        The selected users become members of this organization.
-
-        :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An organization id
-        :return: Profile renderer
-        """
-        mode = request.POST.get("mode")
-        if mode is None:
-            return HttpResponseNotAllowed("Mode not specified")
-
-        organization = get_object_or_404(Organization, id=organization_id)
-        # organization_member_count = organization.memberships.all
-        membership = get_object_or_404(
-            OrganizationMembership, organization=organization, user=request.user
-        )
-
-        context = {}
-        if mode == "add_user":
-            if membership.level < login.permissions.WRITE_PERM:
-                raise PermissionDenied
-            try:
-                user = OepUser.objects.get(name=request.POST["name"])
-                membership, _ = OrganizationMembership.objects.get_or_create(
-                    organization=organization, user=user
-                )
-                membership.save()
-                context["added_user"] = user.pk
-                return JsonResponse(context, status=201)
-            except OepUser.DoesNotExist:
-                context["error"] = "User does not exist"
-                return JsonResponse(context, status=404)
-        else:
-            raise PermissionDenied
-        # return HttpResponse(context, status=201)
 
 
 ##############################################################################

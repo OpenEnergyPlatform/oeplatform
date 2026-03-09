@@ -23,7 +23,6 @@ from login.views import (
     EditUserView,
     OrganizationManagementView,
     OrganizationsView,
-    PartialOrganizationInviteView,
     PartialOrganizationMemberManagementView,
     PartialOrganizationsView,
     ReviewsView,
@@ -126,11 +125,6 @@ urlpatterns = [
         r"^organizations/(?P<organization_id>[\w\d_\s]+)/members$",
         PartialOrganizationMemberManagementView.as_view(),
         name="partial-organization-membership",
-    ),
-    re_path(
-        r"^organizations/(?P<organization_id>[\w\d_\s]+)/member/invite$",
-        PartialOrganizationInviteView.as_view(),
-        name="partial-organization-invite",
     ),
     re_path(
         r"^organizations/(?P<organization_id>[\w\d_\s]+)/members/count$",
