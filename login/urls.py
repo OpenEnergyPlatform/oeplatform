@@ -21,10 +21,10 @@ from django.urls import path, re_path
 from base.views import handler404
 from login.views import (
     EditUserView,
+    OrganizationListView,
     OrganizationManagementView,
+    OrganizationMembersView,
     OrganizationsView,
-    PartialOrganizationMemberManagementView,
-    PartialOrganizationsView,
     ReviewsView,
     SettingsView,
     TablesView,
@@ -107,7 +107,7 @@ urlpatterns = [
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/partial_organizations$",
-        PartialOrganizationsView.as_view(),
+        OrganizationListView.as_view(),
         name="partial-organizations",
     ),
     re_path(
@@ -123,7 +123,7 @@ urlpatterns = [
     ),
     re_path(
         r"^organizations/(?P<organization_id>[\w\d_\s]+)/members$",
-        PartialOrganizationMemberManagementView.as_view(),
+        OrganizationMembersView.as_view(),
         name="partial-organization-membership",
     ),
     re_path(

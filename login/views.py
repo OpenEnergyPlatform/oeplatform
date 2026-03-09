@@ -419,7 +419,7 @@ def organization_delete_view(request, organization_id: int):
     return response
 
 
-class PartialOrganizationsView(View):
+class OrganizationListView(View):
     @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
@@ -567,14 +567,12 @@ class OrganizationManagementView(View, LoginRequiredMixin):
                 return response
 
 
-class PartialOrganizationMemberManagementView(TemplateView, LoginRequiredMixin):
-    template_name = "login/partials/organization_component_membership.html"
+class OrganizationMembersView(TemplateView, LoginRequiredMixin):
+    template_name = "login/partials/organization_members.html"
 
     def get_context_data(self, **kwargs):
         """Render context."""
-        context = super(PartialOrganizationMemberManagementView, self).get_context_data(
-            **kwargs
-        )
+        context = super(OrganizationMembersView, self).get_context_data(**kwargs)
 
         organization = get_object_or_404(
             Organization, pk=self.kwargs["organization_id"]
