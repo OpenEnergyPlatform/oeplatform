@@ -33,6 +33,36 @@ def copy_groups_to_organizations(apps, schema_editor):
             )
 
 
+def copy_organizations_to_groups(apps, schema_editor):
+    UserGroup = apps.get_model("login", "UserGroup")
+    Organization = apps.get_model("login", "Organization")
+    GroupPermission = apps.get_model("login", "GroupPermission")
+    OrganizationPermission = apps.get_model("login", "OrganizationPermission")
+    GroupMembership = apps.get_model("login", "GroupMembership")
+    OrganizationMembership = apps.get_model("login", "OrganizationMembership")
+
+    for org in Organization.objects.all():
+        ug, _ = UserGroup.objects.get_or_create(
+            description=org.description,
+            is_admin=org.is_admin,
+        )
+        # Copy permissions
+        for p in OrganizationPermission.objects.filter(holder=org):
+            GroupPermission.objects.get_or_create(
+                holder=ug,
+                table=p.table,
+                level=p.level,
+            )
+
+        # Copy memberships
+        for m in OrganizationMembership.objects.filter(organization=org):
+            GroupMembership.objects.get_or_create(
+                user=m.user,
+                group=org,
+                level=m.level,
+            )
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -40,5 +70,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(copy_groups_to_organizations, migrations.RunPython.noop),
+        migrations.RunPython(
+            copy_groups_to_organizations, copy_organizations_to_groups
+        ),
     ]
