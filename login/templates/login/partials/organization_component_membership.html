@@ -6,7 +6,6 @@
            hx-trigger="load"></div>
     </span>
   </h2>
-  <div id="alter-user-result"></div>
   <div class="profile-category__members">
     {% for membership in organization.memberships.all %}
       {% if is_admin %}
@@ -15,8 +14,8 @@
           <div class="profile-category__member-status">
             <form hx-post="{% url 'login:partial-organization-membership' organization_id=organization.id %}"
                   hx-trigger="change"
-                  hx-target="#alter-user-result"
-                  data-error-display="alter-user-result">
+                  hx-target=".htmxComponentGroupMembership"
+                  hx-swap="outerHTML">
               <input type="hidden" name="mode" value="alter_user" />
               <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
               <select aria-label="Group member's status" name="selected_value">
@@ -44,71 +43,18 @@
       {% endif %}
       {% if can_delete or is_admin %}
         <form hx-post="{% url 'login:partial-organization-membership' organization_id=organization.id %}"
-              hx-target="#alter-user-result"
+              hx-target=".htmxComponentGroupMembership"
               hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ organization.name }} and retract all permissions?"
-              hx-swap="outerHTML"
-              data-error-display="alter-user-result">
+              hx-swap="outerHTML">
           <input type="hidden" name="mode" value="remove_user" />
           <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
           <input type="submit" class="btn btn-danger" value="Remove user" />
         </form>
       {% endif %}
     {% endfor %}
+    {% if error_message %}
+      <div style="display: block; color: red;">{{ error_message }}</div>
+    {% endif %}
     {% include 'login/partials/organization_component_invite_user.html' %}
   </div>
 </section>
-<script>
-  document.body.addEventListener("htmx:responseError", function (event) {
-    // Identify the form that triggered the error
-    var form = event.target;
-
-    // Use the form's data attribute to find where to display the error message
-    var errorDisplayId = form.getAttribute("data-error-display");
-    var errorMessageDiv = document.getElementById(errorDisplayId);
-
-    // Parse the error message from the response
-    var response = JSON.parse(event.detail.xhr.responseText);
-
-    // Handle different error keys appropriately
-    if (response.error) {
-      // For the invite form error
-      errorMessageDiv.innerText = response.error;
-    } else if (response.name) {
-      // For the alter user permissions error
-      errorMessageDiv.innerText = response.name;
-    }
-
-    errorMessageDiv.style.display = "block"; // Make the error message visible
-    errorMessageDiv.style.color = "red"; // Optional styling
-  });
-
-  // Before request, clear any previous error messages
-  document.body.addEventListener("htmx:beforeRequest", function (event) {
-    var form = event.target;
-    var errorDisplayId = form.getAttribute("data-error-display");
-    if (errorDisplayId) {
-      var errorMessageDiv = document.getElementById(errorDisplayId);
-      errorMessageDiv.innerText = ""; // Clear previous error message
-      errorMessageDiv.style.display = "none"; // Hide the error message area
-    }
-  });
-
-  document.body.addEventListener("htmx:afterOnLoad", function (event) {
-    var xhr = event.detail.xhr;
-
-    // create user response
-    if (xhr.status === 201) {
-      // update rendered membership component after user invite
-      htmx.ajax("GET", "{% url 'login:partial-organization-membership' organization.id %}", {
-        target: ".htmxComponentGroupMembership",
-      });
-    }
-
-    // remove user response
-    if (xhr.status === 204) {
-      htmx.ajax("GET", "{% url 'login:partial-organization-membership' organization.id %}", {
-        target: ".htmxComponentGroupMembership",
-      });
-    }
-  });
-</script>

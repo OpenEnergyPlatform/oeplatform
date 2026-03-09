@@ -35,7 +35,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
-from django.views.generic import RedirectView, View
+from django.views.generic import RedirectView, TemplateView, View
 from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
@@ -566,34 +566,29 @@ class OrganizationManagementView(View, LoginRequiredMixin):
                 return response
 
 
-class PartialOrganizationMemberManagementView(View, LoginRequiredMixin):
-    @method_decorator(never_cache)
-    def get(self, request, organization_id: int):
-        """
-        Renders the organization detail page component for user invites and
-        permissions.
+class PartialOrganizationMemberManagementView(TemplateView, LoginRequiredMixin):
+    template_name = "login/partials/organization_component_membership.html"
 
-        :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An user id
-        :param organization_id: An organization id
-        :return: Profile renderer
-        """
-        organization = get_object_or_404(Organization, pk=organization_id)
+    def get_context_data(self, **kwargs):
+        """Render context."""
+        context = super(PartialOrganizationMemberManagementView, self).get_context_data(
+            **kwargs
+        )
+
+        organization = get_object_or_404(
+            Organization, pk=self.kwargs["organization_id"]
+        )
         is_admin = False
         membership = OrganizationMembership.objects.filter(
-            organization=organization, user=request.user
+            organization=organization, user=self.request.user
         ).first()
         if membership:
             is_admin = membership.level >= ADMIN_PERM
-        return render(
-            request,
-            "login/partials/organization_component_membership.html",
-            {
-                "organization": organization,
-                "choices": OrganizationMembership.choices,
-                "is_admin": is_admin,
-            },
-        )
+
+        context["organization"] = organization
+        context["choices"] = OrganizationMembership.choices
+        context["is_admin"] = is_admin
+        return context
 
     def post(self, request, organization_id: int):
         """
@@ -616,7 +611,6 @@ class PartialOrganizationMemberManagementView(View, LoginRequiredMixin):
             OrganizationMembership, organization=organization, user=request.user
         )
 
-        errors = {}
         if mode == "remove_user":
             if membership.level < login.permissions.DELETE_PERM:
                 raise PermissionDenied
@@ -627,10 +621,11 @@ class PartialOrganizationMemberManagementView(View, LoginRequiredMixin):
             )
 
             if request.user.id == user_to_remove.pk:
-                errors["name"] = (
+                context = self.get_context_data()
+                context["error_message"] = (
                     "Please leave the organization to remove your own membership."
                 )
-                return JsonResponse(errors, status=400)
+                return self.render_to_response(context)
 
             elif target_membership.level >= ADMIN_PERM:
                 admins = (
@@ -641,13 +636,15 @@ class PartialOrganizationMemberManagementView(View, LoginRequiredMixin):
                     .count()
                 )
                 if admins == 0:
-                    errors["name"] = "A organization needs at least one admin"
-                    return JsonResponse(errors, status=405)
+                    context = self.get_context_data()
+                    context["error_message"] = "A organization needs at least one admin"
+                    return self.render_to_response(context)
             elif membership.level < target_membership.level:
-                errors["name"] = (
+                context = self.get_context_data()
+                context["error_message"] = (
                     "You cant remove memberships with higher permission level."
                 )
-                return JsonResponse(errors, status=400)
+                return self.render_to_response(context)
 
             target_membership.delete()
             response = HttpResponse(status=204)
@@ -658,9 +655,9 @@ class PartialOrganizationMemberManagementView(View, LoginRequiredMixin):
                 raise PermissionDenied
             user = OepUser.objects.get(id=request.POST["user_id"])
             if user == request.user:
-                errors["name"] = "You can not change your own permissions"
-                # errors['HX-Trigger'] = 'own-permissions-error'
-                return JsonResponse(errors, status=405)
+                context = self.get_context_data()
+                context["error_message"] = "You can not change your own permissions"
+                return self.render_to_response(context)
             else:
                 membership = OrganizationMembership.objects.get(
                     organization=organization, user=user
@@ -683,7 +680,8 @@ class PartialOrganizationMemberManagementView(View, LoginRequiredMixin):
             return response
         else:
             raise PermissionDenied
-        return JsonResponse({"success": True})
+        context = self.get_context_data()
+        return self.render_to_response(context)
 
 
 class PartialOrganizationInviteView(View, LoginRequiredMixin):
