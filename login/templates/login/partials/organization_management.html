@@ -37,8 +37,7 @@
         {% if is_admin %}
           <form id="delete-organization-form"
                 hx-confirm="Are you sure you want to delete this organization: {{ organization.name }}?"
-                hx-post="{% url 'login:partial-organization-membership' organization_id=organization.id %}"
-                hx-swap="outerHTML">
+                hx-post="{% url 'login:organization-delete' organization_id=organization.id %}">
             {% csrf_token %}
             <input type="hidden" name="mode" value="delete_organization" />
             <button class="profile-category__btn profile-category__btn--delete">

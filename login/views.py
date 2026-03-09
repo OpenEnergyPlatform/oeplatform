@@ -398,6 +398,27 @@ def organization_leave_view(request, organization_id: int):
     return response
 
 
+@login_required
+def organization_delete_view(request, organization_id: int):
+    """View to delete an organization."""
+    organization = get_object_or_404(Organization, id=organization_id)
+    membership = get_object_or_404(
+        OrganizationMembership, organization=organization, user=request.user
+    )
+    if membership.level < login.permissions.ADMIN_PERM:
+        raise PermissionDenied
+    organization.delete()
+    messages.add_message(
+        request,
+        level=messages.INFO,
+        message="Organization deleted!",
+        extra_tags="primary",
+    )
+    response = HttpResponse()
+    response["HX-Redirect"] = f"/user/profile/{request.user.id}/organizations"
+    return response
+
+
 class PartialOrganizationsView(View):
     @method_decorator(never_cache)
     def get(self, request, user_id: int):
@@ -647,20 +668,6 @@ class PartialOrganizationMemberManagementView(TemplateView, LoginRequiredMixin):
                 )
                 membership.level = request.POST["selected_value"]
                 membership.save()
-
-        elif mode == "delete_organization":
-            if membership.level < login.permissions.ADMIN_PERM:
-                raise PermissionDenied
-            organization.delete()
-            messages.add_message(
-                request,
-                level=messages.INFO,
-                message="Organization deleted!",
-                extra_tags="primary",
-            )
-            response = HttpResponse()
-            response["HX-Redirect"] = f"/user/profile/{request.user.id}/organizations"
-            return response
         else:
             raise PermissionDenied
         context = self.get_context_data()
