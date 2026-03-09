@@ -30,10 +30,9 @@
         </h2>
         <div>
           <button class="profile-category__btn profile-category__btn--leave"
-                  hx-post="{% url 'login:organization-leave' organization.id %}">
-            Leave organization
-          </button>
-          <div id="error-display"></div>
+                  hx-post="{% url 'login:organization-leave' organization.id %}"
+                  hx-target="#error-display">Leave organization</button>
+          <div id="error-display" style="display: block; color: red"></div>
         </div>
         {% if is_admin %}
           <form id="delete-organization-form"
@@ -60,25 +59,3 @@
     </section>
   {% endif %}
 </div>
-<script>
-  document.body.addEventListener("htmx:responseError", function (event) {
-    // Identify the form that triggered the error
-    var button = event.target;
-
-    // Use the button's data attribute to find where to display the error message
-    // var errorDisplayId = button.getAttribute('error-display');
-    var errorMessageDiv = document.getElementById("error-display");
-
-    // Parse the error message from the response
-    var response = JSON.parse(event.detail.xhr.responseText);
-
-    // Handle different error keys appropriately
-    if (response.err_leave) {
-      // For the alter user permissions error
-      errorMessageDiv.innerText = response.err_leave;
-    }
-
-    errorMessageDiv.style.display = "block"; // Make the error message visible
-    errorMessageDiv.style.color = "red"; // Optional styling
-  });
-</script>

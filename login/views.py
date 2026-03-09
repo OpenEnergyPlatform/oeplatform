@@ -371,17 +371,15 @@ def organization_leave_view(request, organization_id: int):
         OrganizationMembership, organization=organization, user=request.user
     )
 
-    errors: dict = {}
     members = (
         OrganizationMembership.objects.filter(organization=organization)
         .exclude(user=user.pk)
         .count()
     )
     if members == 0:
-        errors["err_leave"] = (
+        return HttpResponse(
             "Please delete the organization instead (you are the only member)."
         )
-        return JsonResponse(errors, status=400)
 
     if membership.level >= ADMIN_PERM:
         admins = (
@@ -392,12 +390,11 @@ def organization_leave_view(request, organization_id: int):
             .count()
         )
         if admins == 0:
-            errors["err_leave"] = "An organization needs at least one admin!"
-            return JsonResponse(errors, status=400)
+            return HttpResponse("An organization needs at least one admin!")
 
     membership.delete()
     response = HttpResponse()
-    response["HX-Redirect"] = f"/user/profile/1/organizations?profile_user={user_id}"
+    response["HX-Redirect"] = f"/user/profile/{user_id}/organizations"
     return response
 
 
