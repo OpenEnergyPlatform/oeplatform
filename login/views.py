@@ -333,7 +333,7 @@ class SettingsView(View):
 
 
 ###########################################################################
-#            User Group related views & partial views for htmx            #
+#            Organization related views & partial views for htmx          #
 ###########################################################################
 
 

@@ -676,16 +676,6 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "login/templates/login/list_memberships.html"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
-]
-
-[[annotations]]
 path = "login/templates/login/detach.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
