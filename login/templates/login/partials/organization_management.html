@@ -31,7 +31,10 @@
         <div>
           <button class="profile-category__btn profile-category__btn--leave"
                   hx-post="{% url 'login:organization-leave' organization.id %}"
-                  hx-target="#error-display">Leave organization</button>
+                  hx-target="#error-display"
+                  hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+            Leave organization
+          </button>
           <div id="error-display" style="display: block; color: red"></div>
         </div>
         {% if is_admin %}

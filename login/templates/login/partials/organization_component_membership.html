@@ -14,6 +14,7 @@
                   hx-trigger="change"
                   hx-target=".htmxComponentGroupMembership"
                   hx-swap="outerHTML">
+              {% csrf_token %}
               <input type="hidden" name="mode" value="alter_user" />
               <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
               <select aria-label="Group member's status" name="selected_value">
@@ -44,6 +45,7 @@
               hx-target=".htmxComponentGroupMembership"
               hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ organization.name }} and retract all permissions?"
               hx-swap="outerHTML">
+          {% csrf_token %}
           <input type="hidden" name="mode" value="remove_user" />
           <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
           <input type="submit" class="btn btn-danger" value="Remove user" />

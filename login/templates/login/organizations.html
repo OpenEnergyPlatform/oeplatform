@@ -15,27 +15,4 @@
   {% compress js %}
     <script src="{% static 'ontology/htmx.js' %}"></script>
   {% endcompress %}
-  <script>
-    document.body.addEventListener("htmx:configRequest", (event) => {
-      event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
-    });
-
-    document.addEventListener("htmx:afterRequest", function (event) {
-      var target = event.detail.target; // Get the target element where the response was inserted
-      var xhr = event.detail.xhr; // Get the XMLHttpRequest object containing the response
-      var response = xhr.response; // Get the JSON response
-
-      if (response && response.detail_html) {
-        // Replace the content of the target element with the HTML content for the detail page
-        target.innerHTML = response.detail_html;
-      }
-    });
-
-    document.addEventListener("htmx:beforeSwap", function (event) {
-      if (window.location.search.includes("?")) {
-        var newUrl = window.location.href.split("?")[0];
-        window.history.replaceState({}, document.title, newUrl);
-      }
-    });
-  </script>
 {% endblock after-body-bottom-js %}
