@@ -1,9 +1,7 @@
 <section class="profile-category htmxComponentGroupMembership">
   <h2 class="profile-category__heading profile-category__heading--border-btm">
     <span class="profile-category__heading--sm">
-      <div class="member-count"
-           hx-get="{% url 'login:count-organization-memberships' organization.id %}"
-           hx-trigger="load"></div>
+      <div class="member-count">{{ organization.member_count }} member</div>
     </span>
   </h2>
   <div class="profile-category__members">

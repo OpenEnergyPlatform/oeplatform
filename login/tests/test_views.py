@@ -23,10 +23,6 @@ class TestViewsLogin(TestViewsTestCase):
         organization_id = int(self.organization.pk)
         user_id = int(self.user.pk)
 
-        self.get(
-            "login:count-organization-memberships",
-            kwargs={"organization_id": organization_id},
-        )
         self.get("login:edit", kwargs={"user_id": user_id}, logged_in=True)
         self.get("login:organization-create", logged_in=True)
         self.get(

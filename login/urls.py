@@ -31,7 +31,6 @@ from login.views import (
     delete_peer_review_simple_view,
     metadata_review_badge_indicator_icon_file_view,
     organization_leave_view,
-    organization_member_count_view,
     token_reset_view,
     user_redirect_view,
 )
@@ -125,11 +124,6 @@ urlpatterns = [
         r"^organizations/(?P<organization_id>[\w\d_\s]+)/members$",
         PartialOrganizationMemberManagementView.as_view(),
         name="partial-organization-membership",
-    ),
-    re_path(
-        r"^organizations/(?P<organization_id>[\w\d_\s]+)/members/count$",
-        organization_member_count_view,
-        name="count-organization-memberships",
     ),
     re_path(
         r"^organizations/(?P<organization_id>[\w\d_\s]+)/leave$",

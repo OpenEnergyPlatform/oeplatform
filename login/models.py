@@ -171,6 +171,10 @@ class Organization(Group, PermissionHolder):
             )
         )
 
+    def member_count(self):
+        """Return the number of members of the organization."""
+        return self.memberships.count()
+
 
 class TablePermission(models.Model):
     choices = (

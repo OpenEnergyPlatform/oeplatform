@@ -360,23 +360,6 @@ class OrganizationsView(View):
         )
 
 
-@never_cache
-def organization_member_count_view(request, organization_id: int):
-    """
-    Return the member count for the current organization.
-
-    :param request: A HTTP-request object sent by the Django framework.
-    :params organization_id: Organization id
-
-    :returns: Django HttpResponse with member count
-    """
-    organization = get_object_or_404(Organization, id=organization_id)
-    mem = organization.memberships.all()
-    member_count = len(mem)
-
-    return HttpResponse(f"{member_count} member")
-
-
 # TODO: should be require_POST?
 @login_required
 def organization_leave_view(request, organization_id: int):
