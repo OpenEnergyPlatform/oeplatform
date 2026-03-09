@@ -942,8 +942,8 @@ def grpprop_api_view(request: Request) -> JsonLikeResponse:
     if not query:
         return JsonResponse([], safe=False)
 
-    user_groups = user.memberships.all().prefetch_related("group")
-    groups = [g.group for g in user_groups]
+    user_groups = user.memberships.all().prefetch_related("organization")
+    groups = [g.organization for g in user_groups]
 
     # Assuming 'name' is the field you want to search against
     similar_groups = (
