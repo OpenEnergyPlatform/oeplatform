@@ -151,7 +151,12 @@ class PermissionHolder:
 
 
 class Organization(Group, PermissionHolder):
+    acronym = models.CharField(max_length=50, blank=True, null=True)
     description = models.TextField(null=False, default="")
+    image = models.CharField(
+        max_length=1000, blank=True, null=True, verbose_name="Link to an image"
+    )
+    homepage = models.CharField(max_length=1000, blank=True, null=True)
     is_admin = models.BooleanField(null=False, default=False)
 
     memberships: QuerySet[

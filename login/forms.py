@@ -89,7 +89,7 @@ class ChangeEmailForm(forms.Form):
 class OrganizationForm(forms.ModelForm):
     class Meta:
         model = Organization
-        fields = ("name", "description")
+        fields = ("name", "acronym", "description", "image", "homepage")
 
 
 class OrganizationUserForm(forms.ModelForm):
