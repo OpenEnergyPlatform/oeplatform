@@ -9,6 +9,11 @@
     Details
   </h2>
   {% if organization %}
+    {% if organization.image %}
+      <div class="profile-category__image">
+        <img src="{{ organization.image }}" alt="Image of organization">
+      </div>
+    {% endif %}
     <form id="organization-form"
           hx-post="{% url 'login:organization-edit' organization_id=organization.id %}"
           hx-target=".htmxFormComponent">

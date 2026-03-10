@@ -247,6 +247,11 @@ main.main .content .content__container.content__container--profile {
         }
     }
 
+    &__image {
+        width: 200px;
+        margin-left: auto;
+    }
+
     &__btns {
         @extend .d-flex;
         @extend .flex-row;
