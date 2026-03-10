@@ -60,9 +60,9 @@ from api.views import (
     TableMovePublishAPIView,
     TableRowsAPIView,
     TableUnpublishAPIView,
+    groupprop_api_view,
     oeo_search_api_view,
     oevkg_query_api_view,
-    orgprop_api_view,
     table_approx_row_count_view,
     usrprop_api_view,
 )
@@ -294,7 +294,7 @@ urlpatterns_v0 = [
 urlpatterns = [
     path("v0/", include(urlpatterns_v0)),
     path("usrprop/", usrprop_api_view, name="usrprop"),
-    path("orgprop/", orgprop_api_view, name="orgprop"),
+    path("groupprop/", groupprop_api_view, name="groupprop"),
     path("oeo-search", oeo_search_api_view, name="oeo-search"),
     path("oevkg-query", oevkg_query_api_view, name="oevkg-query"),
 ]

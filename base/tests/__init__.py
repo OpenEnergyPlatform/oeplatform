@@ -13,7 +13,7 @@ from django.test import TestCase
 from django.urls import URLPattern, URLResolver, get_resolver, reverse
 from django.urls.resolvers import RegexPattern, RoutePattern
 
-from login.models import Organization, OrganizationMembership
+from login.models import Membership, Organization
 from login.models import myuser as User
 from oeplatform.settings import IS_TEST
 
@@ -79,9 +79,7 @@ class TestViewsTestCase(TestCase):
             name="test", email="test@test.test", affiliation="test"
         )
         cls.organization = Organization.objects.create()
-        OrganizationMembership.objects.create(
-            user=cls.user, organization=cls.organization
-        )
+        Membership.objects.create(user=cls.user, group=cls.organization)
 
     @classmethod
     def tearDownClass(cls):

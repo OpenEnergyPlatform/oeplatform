@@ -9,9 +9,9 @@ from dataedit.models import Table
 from login.models import (
     NO_PERM,
     WRITE_PERM,
+    GroupPermission,
+    Membership,
     Organization,
-    OrganizationMembership,
-    OrganizationPermission,
     UserPermission,
 )
 from login.models import myuser as User
@@ -29,9 +29,9 @@ class TestUtils(TestCase):
         organization_1 = Organization.objects.create(name="G1")
         organization_2 = Organization.objects.create(name="G2")
 
-        OrganizationMembership.objects.create(user=user_a, organization=organization_1)
-        OrganizationMembership.objects.create(user=user_a, organization=organization_2)
-        OrganizationMembership.objects.create(user=user_b, organization=organization_2)
+        Membership.objects.create(user=user_a, group=organization_1)
+        Membership.objects.create(user=user_a, group=organization_2)
+        Membership.objects.create(user=user_b, group=organization_2)
 
         table_a = Table.objects.create(name="ta")
         table_b = Table.objects.create(name="tb")
@@ -41,10 +41,10 @@ class TestUtils(TestCase):
         UserPermission.objects.create(holder=user_a, table=table_a, level=WRITE_PERM)
         UserPermission.objects.create(holder=user_b, table=table_b, level=WRITE_PERM)
         UserPermission.objects.create(holder=user_a, table=table_1a, level=WRITE_PERM)
-        OrganizationPermission.objects.create(
+        GroupPermission.objects.create(
             holder=organization_1, table=table_1a, level=WRITE_PERM
         )
-        OrganizationPermission.objects.create(
+        GroupPermission.objects.create(
             holder=organization_2, table=table_2, level=NO_PERM
         )
 

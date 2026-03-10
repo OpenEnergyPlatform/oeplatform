@@ -42,7 +42,7 @@ from rest_framework.authtoken.models import Token
 import login.permissions
 from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
 from login.forms import EditUserForm, OrganizationForm
-from login.models import Organization, OrganizationMembership
+from login.models import Membership, Organization
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
 from login.utils import get_tables_for_organization
@@ -367,14 +367,10 @@ def organization_leave_view(request, organization_id: int):
     user: OepUser = request.user
     user_id: int = request.user.id
     organization = get_object_or_404(Organization, id=organization_id)
-    membership = get_object_or_404(
-        OrganizationMembership, organization=organization, user=request.user
-    )
+    membership = get_object_or_404(Membership, group=organization, user=request.user)
 
     members = (
-        OrganizationMembership.objects.filter(organization=organization)
-        .exclude(user=user.pk)
-        .count()
+        Membership.objects.filter(group=organization).exclude(user=user.pk).count()
     )
     if members == 0:
         return HttpResponse(
@@ -383,9 +379,7 @@ def organization_leave_view(request, organization_id: int):
 
     if membership.level >= ADMIN_PERM:
         admins = (
-            OrganizationMembership.objects.filter(
-                organization=organization, level=ADMIN_PERM
-            )
+            Membership.objects.filter(group=organization, level=ADMIN_PERM)
             .exclude(user=user.pk)
             .count()
         )
@@ -402,9 +396,7 @@ def organization_leave_view(request, organization_id: int):
 def organization_delete_view(request, organization_id: int):
     """View to delete an organization."""
     organization = get_object_or_404(Organization, id=organization_id)
-    membership = get_object_or_404(
-        OrganizationMembership, organization=organization, user=request.user
-    )
+    membership = get_object_or_404(Membership, group=organization, user=request.user)
     if membership.level < login.permissions.ADMIN_PERM:
         raise PermissionDenied
     organization.delete()
@@ -429,14 +421,11 @@ class OrganizationListView(View):
         :return: Profile renderer
         """
         user = get_object_or_404(OepUser, pk=user_id)
-        user_organizations = None
-        if request.user.is_authenticated:
-            user_organizations = request.user.memberships
 
         return render(
             request,
             "login/partials/organizations.html",
-            {"profile_user": user, "organizations": user_organizations},
+            {"profile_user": user},
         )
 
 
@@ -459,7 +448,7 @@ class OrganizationManagementView(View, LoginRequiredMixin):
         if organization_id:
             organization = Organization.objects.get(id=organization_id)
             membership = get_object_or_404(
-                OrganizationMembership, organization=organization, user=request.user
+                Membership, group=organization, user=request.user
             )
 
             # In case the organization is down to one member make sure
@@ -495,7 +484,7 @@ class OrganizationManagementView(View, LoginRequiredMixin):
             {
                 "form": form,
                 "organization": organization,
-                "choices": OrganizationMembership.choices,
+                "choices": Membership.choices,
                 "organization_tables": organization_tables,
                 "is_admin": is_admin,
                 "can_delete": can_delete,
@@ -536,7 +525,7 @@ class OrganizationManagementView(View, LoginRequiredMixin):
             if organization_id:
                 organization = form.save()
                 membership = get_object_or_404(
-                    OrganizationMembership, organization=organization, user=request.user
+                    Membership, group=organization, user=request.user
                 )
                 if membership.level < ADMIN_PERM:
                     raise PermissionDenied
@@ -548,8 +537,8 @@ class OrganizationManagementView(View, LoginRequiredMixin):
                 )
             else:
                 organization = form.save()
-                membership = OrganizationMembership.objects.create(
-                    user=request.user, organization=organization, level=ADMIN_PERM
+                membership = Membership.objects.create(
+                    user=request.user, group=organization, level=ADMIN_PERM
                 )
                 membership.save()
                 messages.add_message(
@@ -578,14 +567,14 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
             Organization, pk=self.kwargs["organization_id"]
         )
         is_admin = False
-        membership = OrganizationMembership.objects.filter(
-            organization=organization, user=self.request.user
+        membership = Membership.objects.filter(
+            group=organization, user=self.request.user
         ).first()
         if membership:
             is_admin = membership.level >= ADMIN_PERM
 
         context["organization"] = organization
-        context["choices"] = OrganizationMembership.choices
+        context["choices"] = Membership.choices
         context["is_admin"] = is_admin
         return context
 
@@ -607,7 +596,7 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
 
         organization = get_object_or_404(Organization, id=organization_id)
         membership = get_object_or_404(
-            OrganizationMembership, organization=organization, user=request.user
+            Membership, group=organization, user=request.user
         )
 
         error_message = None
@@ -616,8 +605,8 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 raise PermissionDenied
             try:
                 user = OepUser.objects.get(name=request.POST["name"])
-                membership, _ = OrganizationMembership.objects.get_or_create(
-                    organization=organization, user=user
+                membership, _ = Membership.objects.get_or_create(
+                    group=organization, user=user
                 )
                 membership.save()
             except OepUser.DoesNotExist:
@@ -628,8 +617,8 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 raise PermissionDenied
 
             user_to_remove: OepUser = OepUser.objects.get(id=request.POST["user_id"])
-            target_membership = OrganizationMembership.objects.get(
-                organization=organization, user=user_to_remove
+            target_membership = Membership.objects.get(
+                group=organization.group_ptr, user=user_to_remove
             )
 
             if request.user.id == user_to_remove.pk:
@@ -639,9 +628,7 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
 
             elif target_membership.level >= ADMIN_PERM:
                 admins = (
-                    OrganizationMembership.objects.filter(
-                        organization=organization, level=ADMIN_PERM
-                    )
+                    Membership.objects.filter(group=organization, level=ADMIN_PERM)
                     .exclude(user=user_to_remove)
                     .count()
                 )
@@ -661,9 +648,7 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
             if user == request.user:
                 error_message = "You can not change your own permissions"
             else:
-                membership = OrganizationMembership.objects.get(
-                    organization=organization, user=user
-                )
+                membership = Membership.objects.get(group=organization, user=user)
                 membership.level = request.POST["selected_value"]
                 membership.save()
         else:

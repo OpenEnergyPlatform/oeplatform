@@ -159,11 +159,9 @@ class Organization(Group, PermissionHolder):
     homepage = models.CharField(max_length=1000, blank=True, null=True)
     is_admin = models.BooleanField(null=False, default=False)
 
-    memberships: QuerySet[
-        "OrganizationMembership"
-    ]  # related_name, for static type checking
+    memberships: QuerySet["Membership"]  # related_name, for static type checking
     table_permissions: QuerySet[
-        "OrganizationPermission"
+        "GroupPermission"
     ]  # related_name, for static type checking
 
     def get_table_permission_level(self, table: "Table") -> int:
@@ -237,9 +235,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
     scenario_bundle_creator: QuerySet[
         "ScenarioBundleAccessControl"
     ]  # related_name, for static type checking
-    memberships: QuerySet[
-        "OrganizationMembership"
-    ]  # related_name, for static type checking
+    memberships: QuerySet["Membership"]  # related_name, for static type checking
     table_permissions: QuerySet[
         "UserPermission"
     ]  # related_name, for static type checking
@@ -286,8 +282,8 @@ class myuser(AbstractBaseUser, PermissionHolder):
             )
             | dataedit_models.Table.objects.filter(
                 # tables where user isin a group that has GroupPermission
-                organizationpermission_set__holder__in=organizations,
-                organizationpermission_set__level__gte=min_permission_level,
+                grouppermission_set__holder__in=organizations,
+                grouppermission_set__level__gte=min_permission_level,
             )
         ).distinct()
 
@@ -304,7 +300,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
         # Check permissions of all groups and choose least restrictive one
         group_perm_levels = (
-            membership.organization.get_table_permission_level(table)
+            membership.group.get_table_permission_level(table)
             for membership in self.memberships.all()
         )
 
@@ -327,13 +323,13 @@ class UserPermission(TablePermission):
     )
 
 
-class OrganizationPermission(TablePermission):
+class GroupPermission(TablePermission):
     holder = models.ForeignKey(
-        Organization, related_name="table_permissions", on_delete=models.CASCADE
+        Group, related_name="table_permissions", on_delete=models.CASCADE
     )
 
 
-class OrganizationMembership(models.Model):
+class Membership(models.Model):
     choices = (
         (NO_PERM, "None"),
         (WRITE_PERM, "Invite"),
@@ -343,13 +339,13 @@ class OrganizationMembership(models.Model):
     user = models.ForeignKey(
         myuser, related_name="memberships", on_delete=models.CASCADE
     )
-    organization = models.ForeignKey(
-        Organization, related_name="memberships", on_delete=models.CASCADE
+    group = models.ForeignKey(
+        Group, related_name="memberships", on_delete=models.CASCADE
     )
     level = models.IntegerField(choices=choices, default=WRITE_PERM)
 
     class Meta:
-        unique_together = (("user", "organization"),)
+        unique_together = (("user", "group"),)
 
 
 class UserBackend(object):

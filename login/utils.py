@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from typing import TYPE_CHECKING, List
 
-from login.models import Organization, OrganizationPermission, UserPermission
+from login.models import GroupPermission, Organization, UserPermission
 from login.models import myuser as User
 from login.permissions import ADMIN_PERM
 
@@ -24,7 +24,7 @@ def get_tables_for_organization(organization: Organization) -> List["Table"]:
     Get all tables assigned to a organization
     """
 
-    organization_table_relation = OrganizationPermission.objects.filter(
+    organization_table_relation = GroupPermission.objects.filter(
         holder_id=organization.pk
     ).prefetch_related("table")
 

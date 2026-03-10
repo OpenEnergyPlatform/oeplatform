@@ -826,9 +826,7 @@ class TablePermissionView(View):
         table_obj = table_or_404(table=table)
 
         user_perms = login_models.UserPermission.objects.filter(table=table_obj)
-        organization_perms = login_models.OrganizationPermission.objects.filter(
-            table=table_obj
-        )
+        group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
         is_admin = False
         can_add = False
         can_remove = False
@@ -845,7 +843,7 @@ class TablePermissionView(View):
             {
                 "table": table,
                 "user_perms": user_perms,
-                "organization_perms": organization_perms,
+                "group_perms": group_perms,
                 "choices": login_models.TablePermission.choices,
                 "can_add": can_add,
                 "can_remove": can_remove,
@@ -869,12 +867,12 @@ class TablePermissionView(View):
             return self.__change_user(request, table_obj)
         if request.POST["mode"] == "remove_user":
             return self.__remove_user(request, table_obj)
-        if request.POST["mode"] == "add_organization":
-            return self.__add_organization(request, table_obj)
-        if request.POST["mode"] == "alter_organization":
-            return self.__change_organization(request, table_obj)
-        if request.POST["mode"] == "remove_organization":
-            return self.__remove_organization(request, table_obj)
+        if request.POST["mode"] == "add_group":
+            return self.__add_group(request, table_obj)
+        if request.POST["mode"] == "alter_group":
+            return self.__change_group(request, table_obj)
+        if request.POST["mode"] == "remove_group":
+            return self.__remove_group(request, table_obj)
         else:
             raise NotImplementedError()
 
@@ -920,48 +918,46 @@ class TablePermissionView(View):
         p.delete()
         return self.get(request, table=table_obj.name)
 
-    def __add_organization(self, request: HttpRequest, table_obj: Table):
-        organization_name = request.POST.get("name")
-        # Check if the organization name is empty
-        if not organization_name:
+    def __add_group(self, request: HttpRequest, table_obj: Table):
+        group_name = request.POST.get("name")
+        # Check if the group name is empty
+        if not group_name:
             # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Organization name is required.")
+            return HttpResponseBadRequest("Group name is required.")
 
-        organization = get_object_or_404(
-            login_models.Organization, name=organization_name
-        )
+        group = get_object_or_404(login_models.Group, name=group_name)
 
-        p, _ = login_models.OrganizationPermission.objects.get_or_create(
-            holder=organization, table=table_obj
+        p, _ = login_models.GroupPermission.objects.get_or_create(
+            holder=group, table=table_obj
         )
         p.save()
         return self.get(request, table=table_obj.name)
 
-    def __change_organization(self, request: HttpRequest, table_obj: Table):
-        organization_id = request.POST.get("organization_id")
-        if not organization_id:
+    def __change_group(self, request: HttpRequest, table_obj: Table):
+        group_id = request.POST.get("group_id")
+        if not group_id:
             # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Organization id is required.")
+            return HttpResponseBadRequest("Group id is required.")
 
-        organization = get_object_or_404(login_models.Organization, id=organization_id)
+        group = get_object_or_404(login_models.Group, id=group_id)
 
         p = get_object_or_404(
-            login_models.OrganizationPermission, holder=organization, table=table_obj
+            login_models.GroupPermission, holder=group, table=table_obj
         )
         p.level = int(request.POST["level"])
         p.save()
         return self.get(request, table=table_obj.name)
 
-    def __remove_organization(self, request: HttpRequest, table_obj: Table):
-        organization_id = request.POST.get("organization_id")
-        if not organization_id:
+    def __remove_group(self, request: HttpRequest, table_obj: Table):
+        group_id = request.POST.get("group_id")
+        if not group_id:
             # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Organization id is required.")
+            return HttpResponseBadRequest("Group id is required.")
 
-        organization = get_object_or_404(login_models.Organization, id=organization_id)
+        group = get_object_or_404(login_models.Group, id=group_id)
 
         p = get_object_or_404(
-            login_models.OrganizationPermission, holder=organization, table=table_obj
+            login_models.GroupPermission, holder=group, table=table_obj
         )
         p.delete()
         return self.get(request, table=table_obj.name)
