@@ -23,7 +23,7 @@
 {% endblock site-header %}
 {% block main-right-sidebar-content-additional %}
   <h3>Permissions</h3>
-  This page shows the users and user groups that have permissions to alter the
+  This page shows the users and user organizations that have permissions to alter the
   contents of this table. Only admins of this dataset can alter these
   settings.
   <br />
@@ -43,37 +43,44 @@
     <div class="card-header">
       {% if is_admin %}
         <div style="position:relative;">
-          <form id="addGroupForm"
+          <form id="addOrganizationForm"
                 style="position:absolute;
                        right: 0%"
                 action="{% url 'dataedit:table-permission' table=table %}"
                 method="post">
             {% csrf_token %}
-            <input type="hidden" name="mode" value="add_group" />
-            <input name="name" type="text" placeholder="Add a group" id="group_field" />
+            <input type="hidden" name="mode" value="add_organization" />
+            <input name="name"
+                   type="text"
+                   placeholder="Add a organization"
+                   id="organization_field" />
             <input type="submit" value="Add" />
           </form>
         </div>
       {% endif %}
       <div>
-        <h4>Group Permissions</h4>
+        <h4>Organization Permissions</h4>
       </div>
     </div>
-    {% if not group_perms %}No permissions for groups set, yet.{% endif %}
-    {% for perm in group_perms %}
+    {% if not organization_perms %}
+      No permissions for organizations set, yet.
+    {% endif %}
+    {% for perm in organization_perms %}
       <div class="card-body">
         <div>
           {% if is_admin %}
-            <label class="form-label" for="group_level">{{ perm.holder.name }}</label>
+            <label class="form-label" for="organization_level">
+              {{ perm.holder.name }}
+            </label>
             <form class="form-inline"
                   action="{% url 'dataedit:table-permission' table=table %}"
                   method="post"
                   style="display:inline-block">
               {% csrf_token %}
-              <input type="hidden" name="mode" value="alter_group" />
-              <input type="hidden" name="group_id" value="{{ perm.holder.id }}" />
+              <input type="hidden" name="mode" value="alter_organization" />
+              <input type="hidden" name="organization_id" value="{{ perm.holder.id }}" />
               <select class="form-control"
-                      id="group_level"
+                      id="organization_level"
                       name="level"
                       onchange="this.form.submit()">
                 {% for value, choice in choices %}
@@ -90,9 +97,9 @@
                          float:right"
                   onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ table }} and retract all permissions?')">
               {% csrf_token %}
-              <input type="hidden" name="mode" value="remove_group" />
-              <input type="hidden" name="group_id" value="{{ perm.holder.id }}" />
-              <input type="submit" class="btn btn-danger" value="Remove group" />
+              <input type="hidden" name="mode" value="remove_organization" />
+              <input type="hidden" name="organization_id" value="{{ perm.holder.id }}" />
+              <input type="submit" class="btn btn-danger" value="Remove organization" />
             </form>
           {% else %}
             {{ perm.holder.name }}:
@@ -177,13 +184,13 @@
   {% if is_admin %}
     <script>
       /*
-       * Handle group autocomplete and add client side form validation.
+       * Handle organization autocomplete and add client side form validation.
        */
       $(function () {
         let validSelection = false;
         let autocompleteSource = []; // This will be filled with your autocomplete data
 
-        $("#group_field").autocomplete({
+        $("#organization_field").autocomplete({
           source: function (request, response) {
             $.ajax({
               url: "{% url 'api:grpprop' %}",
@@ -200,12 +207,12 @@
           },
         });
 
-        $("#addGroupForm").on("submit", function (e) {
-          var inputValue = $("#group_field").val();
+        $("#addOrganizationForm").on("submit", function (e) {
+          var inputValue = $("#organization_field").val();
           if (!validSelection || !autocompleteSource.includes(inputValue)) {
             e.preventDefault(); // Prevent form submission
             alert(
-              "Please select a valid group name from the list that appears after you start typing."
+              "Please select a valid organization name from the list that appears after you start typing."
             );
           }
         });
