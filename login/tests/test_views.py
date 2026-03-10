@@ -32,11 +32,6 @@ class TestViewsLogin(TestViewsTestCase):
         )
         self.get("login:organizations", kwargs={"user_id": user_id})
         self.get(
-            "login:partial-organization-invite",
-            kwargs={"organization_id": organization_id},
-            logged_in=True,
-        )
-        self.get(
             "login:partial-organization-membership",
             kwargs={"organization_id": organization_id},
             logged_in=True,
