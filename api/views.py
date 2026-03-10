@@ -928,9 +928,9 @@ def usrprop_api_view(request: Request) -> JsonLikeResponse:
 
 @never_cache
 @api_exception
-def grpprop_api_view(request: Request) -> JsonLikeResponse:
+def orgprop_api_view(request: Request) -> JsonLikeResponse:
     """
-    Return all Groups where this user is a member that match
+    Return all Organizations where this user is a member that match
     the current query. The query is input by the User.
     """
     try:
@@ -942,24 +942,24 @@ def grpprop_api_view(request: Request) -> JsonLikeResponse:
     if not query:
         return JsonResponse([], safe=False)
 
-    user_groups = user.memberships.all().prefetch_related("organization")
-    groups = [g.organization for g in user_groups]
+    user_organizations = user.memberships.all().prefetch_related("organization")
+    organizations = [g.organization for g in user_organizations]
 
     # Assuming 'name' is the field you want to search against
-    similar_groups = (
-        login_models.Group.objects.annotate(
+    similar_organizations = (
+        login_models.Organization.objects.annotate(
             similarity=TrigramSimilarity("name", query),
         )
         .filter(
             similarity__gt=0.2,  # Adjust the threshold as needed
-            id__in=[group.pk for group in groups],
+            id__in=[organization.pk for organization in organizations],
         )
         .order_by("-similarity")[:5]
     )
 
-    group_names = [group.name for group in similar_groups]
+    organization_names = [organization.name for organization in similar_organizations]
 
-    return JsonResponse(group_names, safe=False)
+    return JsonResponse(organization_names, safe=False)
 
 
 @never_cache

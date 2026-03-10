@@ -30,7 +30,7 @@ class TestViewsApi(TestViewsTestCase):
         # "api:oeo-search",  # only when USE_LOEP
         # "api:oevkg-query",  # only when USE_ONTOP
 
-        self.get("api:grpprop", logged_in=True)
+        self.get("api:orgprop", logged_in=True)
         self.get("api:usrprop", logged_in=True)
         self.get("api:list-framework-factsheets")
         self.get("api:list-model-factsheets")
