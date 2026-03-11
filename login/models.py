@@ -300,7 +300,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
         # Check permissions of all groups and choose least restrictive one
         group_perm_levels = (
-            membership.group.get_table_permission_level(table)
+            membership.group.organization.get_table_permission_level(table)
             for membership in self.memberships.all()
         )
 
