@@ -32,16 +32,15 @@ class TestViewsLogin(TestViewsTestCase):
             kwargs={"group_id": group_id, "group_type": "organization"},
             logged_in=True,
         )
-        self.get("login:organizations", kwargs={"user_id": user_id})
-        self.get("login:projects", kwargs={"user_id": user_id})
+        self.get("login:organizations", kwargs={"user_id": user_id}, logged_in=True)
+        self.get("login:projects", kwargs={"user_id": user_id}, logged_in=True)
         self.get(
             "login:group-membership",
             kwargs={"group_id": group_id, "group_type": "organization"},
             logged_in=True,
         )
         self.get(
-            "login:group-list",
-            kwargs={"user_id": user_id, "group_type": "organization"},
+            "login:group-list", kwargs={"group_type": "organization"}, logged_in=True
         )
         self.get("login:password_reset")
         self.get("login:password_reset_complete")
