@@ -14,9 +14,9 @@ from ontology.views import (
     OeoExtendedFileServeView,
     OntologyAboutView,
     OntologyStaticsView,
-    OntologyViewClassesView,
     PartialOntologyAboutContentView,
     PartialOntologyAboutSidebarContentView,
+    ontology_react_view,
 )
 
 app_name = "ontology"
@@ -78,9 +78,25 @@ urlpatterns = [
         OntologyStaticsView.as_view(),
         name="oeo-initializer",
     ),
+    # ------------------------------------------------------------------
+    # 1. Search Page Listing
+    # Pattern: /ontology/<ontology_name>/entities/
+    # Matches: /ontology/oeo/entities/ OR /ontology/xyz/entities/
+    # ------------------------------------------------------------------
     re_path(
-        r"^(?P<ontology>[\w_-]+)?/(?P<module_or_id>[\w\d_-]+)?/$",
-        OntologyViewClassesView.as_view(),
-        name="oeo-classes",
+        r"^(?P<ontology>[\w-]+)/entities/$",
+        ontology_react_view,
+        name="ontology-entity-search",
+    ),
+    # ------------------------------------------------------------------
+    # 2. Specific Entity Page (The Catch-All)
+    # Pattern: /ontology/<ontology_name>/<short_form>/
+    # Matches: /ontology/oeo/OEO_00000040/
+    # NOTE: This must come AFTER 'entities' so 'entities' isn't mistaken for an ID.
+    # ------------------------------------------------------------------
+    re_path(
+        r"^(?P<ontology>[\w-]+)/(?P<term_id>[\w\d:_-]+)/$",
+        ontology_react_view,
+        name="oeo-class-detail",
     ),
 ]
