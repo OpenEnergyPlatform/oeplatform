@@ -860,7 +860,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "login/templates/login/partials/groups.html"
+path = "login/templates/login/partials/group_list.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [

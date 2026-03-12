@@ -355,19 +355,12 @@ class GroupsView(View):
         :return: Profile renderer
         """
 
-        if self.group_type == "organization":
-            groups = Organization.objects.filter(memberships__user=request.user)
-        else:
-            groups = Project.objects.filter(memberships__user=request.user)
-        memberships = Membership.objects.filter(group__in=groups, user_id=request.user)
-
         return render(
             request,
             "login/groups.html",
             {
                 "profile_user": request.user,
                 "group_type": self.group_type,
-                "memberships": memberships,
             },
         )
 
@@ -388,7 +381,7 @@ class GroupListView(View):
 
         return render(
             request,
-            "login/partials/groups.html",
+            "login/partials/group_list.html",
             {
                 "profile_user": request.user,
                 "group_type": group_type,
