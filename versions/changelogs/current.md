@@ -23,6 +23,7 @@ SPDX-License-Identifier: CC0-1.0
   - Rest api implementation
 
 ## Bugs
+
 - Reviewer&Contributor page: calculation of percentage of progress of reviewed
   fields takes into account empty fields
   [(#1386)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1386)
