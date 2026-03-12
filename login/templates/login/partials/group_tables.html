@@ -8,17 +8,15 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 {% load django_bootstrap5 %}
 <section class="profile-category htmxFormComponent">
   <h2 class="profile-category__heading profile-category__heading--border-btm">
-    Organization Tables
+    Related Tables
   </h2>
-  {% if organization_tables %}
-    <div class="profile-category__organization_table">
-      {% for table in organization_tables %}
-        <div>- {{ table.name }}</div>
-      {% endfor %}
+  {% if group_tables %}
+    <div class="profile-category__group_table">
+      {% for table in group_tables %}<div>- {{ table.name }}</div>{% endfor %}
     </div>
   {% else %}
-    <div class="profile-category__no_organization_table">
-      No tables are assigned to this organization.
+    <div class="profile-category__no_group_table">
+      No tables are assigned to this {{ group_type }}.
     </div>
   {% endif %}
 </section>

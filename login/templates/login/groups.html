@@ -12,7 +12,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 {% block main-content-body %}
   {% include "login/user_nav.html" %}
   {% if request.user.is_authenticated and request.user == user %}
-    {% include "login/partials/organizations.html" %}
+    {% include "login/partials/groups.html" %}
   {% endif %}
 {% endblock %}
 {% block main-right-sidebar-content %}

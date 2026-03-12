@@ -339,7 +339,7 @@ main.main .content .content__container.content__container--profile {
     }
 }
 
-.organization-management {
+.group-management {
     @extend .mb-4;
 
     @include cards-layout {
@@ -348,7 +348,7 @@ main.main .content .content__container.content__container--profile {
         }
     }
 
-    .organization-card {
+    .group-card {
         @include card-container {
             &__header-top {
                 @extend .align-items-center;

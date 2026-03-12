@@ -20,23 +20,29 @@ class TestViewsLogin(TestViewsTestCase):
         # "login:delete_peer_review_simple",
         # "login:group-leave",  # cannot leave beacuase only member
         # "login:metadata-review-badge-icon",  # we have no table in this testyet
-        organization_id = int(self.organization.pk)
+        group_id = int(self.organization.pk)
         user_id = int(self.user.pk)
 
         self.get("login:edit", kwargs={"user_id": user_id}, logged_in=True)
-        self.get("login:organization-create", logged_in=True)
         self.get(
-            "login:organization-edit",
-            kwargs={"organization_id": organization_id},
+            "login:group-create", kwargs={"group_type": "organization"}, logged_in=True
+        )
+        self.get(
+            "login:group-edit",
+            kwargs={"group_id": group_id, "group_type": "organization"},
             logged_in=True,
         )
         self.get("login:organizations", kwargs={"user_id": user_id})
+        self.get("login:projects", kwargs={"user_id": user_id})
         self.get(
-            "login:partial-organization-membership",
-            kwargs={"organization_id": organization_id},
+            "login:group-membership",
+            kwargs={"group_id": group_id, "group_type": "organization"},
             logged_in=True,
         )
-        self.get("login:partial-organizations", kwargs={"user_id": user_id})
+        self.get(
+            "login:group-list",
+            kwargs={"user_id": user_id, "group_type": "organization"},
+        )
         self.get("login:password_reset")
         self.get("login:password_reset_complete")
         self.get("login:password_reset_done")

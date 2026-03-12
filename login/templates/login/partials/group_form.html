@@ -7,29 +7,29 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 {% load django_bootstrap5 %}
 <section class="profile-category htmxFormComponent">
-  {% if organization %}
-    <h2 class="header">Edit {{ organization }}</h2>
+  {% if group %}
+    <h2 class="header">Edit {{ group }}</h2>
   {% else %}
-    <h2 class="header">Create Group</h2>
+    <h2 class="header">Create {{ group_type }}</h2>
   {% endif %}
   <h2 class="profile-category__heading profile-category__heading--border-btm">
     Details
   </h2>
-  {% if organization %}
-    {% if organization.image %}
+  {% if group %}
+    {% if group.image %}
       <div class="profile-category__image">
-        <img src="{{ organization.image }}" alt="Image of organization">
+        <img src="{{ group.image }}" alt="Image of group">
       </div>
     {% endif %}
-    <form id="organization-form"
-          hx-post="{% url 'login:organization-edit' organization_id=organization.id %}"
+    <form id="group-form"
+          hx-post="{% url 'login:group-edit' group_id=group.id group_type=group_type %}"
           hx-target=".htmxFormComponent">
       {% csrf_token %}
       {% bootstrap_form form %}
     </form>
   {% else %}
-    <form id="organization-form"
-          hx-post="{% url 'login:organization-create' %}"
+    <form id="group-form"
+          hx-post="{% url 'login:group-create' group_type=group_type %}"
           hx-trigger="submit"
           hx-target=".htmxFormComponent">
       {% csrf_token %}
@@ -37,7 +37,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     </form>
   {% endif %}
   <div class="profile-category__btns">
-    <button form="organization-form"
+    <button form="group-form"
             type="submit"
             value="Submit"
             class="profile-category__btn  profile-category__btn--save">

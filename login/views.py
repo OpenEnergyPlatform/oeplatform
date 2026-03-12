@@ -21,6 +21,7 @@ from itertools import groupby
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import F
@@ -41,11 +42,11 @@ from rest_framework.authtoken.models import Token
 
 import login.permissions
 from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
-from login.forms import EditUserForm, OrganizationForm
-from login.models import Membership, Organization
+from login.forms import EditUserForm, OrganizationForm, ProjectForm
+from login.models import Membership, Organization, Project
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
-from login.utils import get_tables_for_organization
+from login.utils import get_tables_for_group
 
 # Pagination
 ITEMS_PER_PAGE = 8
@@ -190,7 +191,7 @@ class ReviewsView(View):
         # Sort the reviews by table name
         sorted_reviews = sorted(peer_review_reviews, key=lambda x: x.table)
         # Group the reviews by table name
-        organizationed_reviews = {
+        grouped_reviews = {
             k: list(v) for k, v in groupby(sorted_reviews, key=lambda x: x.table)
         }
 
@@ -265,7 +266,7 @@ class ReviewsView(View):
         # Sort the reviews by table name
         sorted_contributions = sorted(peer_review_contributions, key=lambda x: x.table)
         # Group the reviews by table name
-        organizationed_contributions = {
+        grouped_contributions = {
             k: list(v) for k, v in groupby(sorted_contributions, key=lambda x: x.table)
         }
         latest_review_id = latest_review.pk if latest_review is not None else None
@@ -276,9 +277,9 @@ class ReviewsView(View):
             {
                 "profile_user": user,
                 "reviewer_reviewed": reviewed_context,
-                "reviewer_reviewed_organizationed": organizationed_reviews,
+                "reviewer_reviewed_grouped": grouped_reviews,
                 "contributor_reviewed": reviewed_contributions_context,
-                "contributor_reviewed_organizationed": organizationed_contributions,
+                "contributor_reviewed_grouped": grouped_contributions,
                 "latest_review_id": latest_review_id,
             },
         )
@@ -321,139 +322,110 @@ class SettingsView(View):
             Token.objects.get_or_create(user=user)
         user = get_object_or_404(OepUser, pk=user_id)
         token = None
-        user_organizations = None
+        user_groups = None
         if request.user.is_authenticated:
             token = Token.objects.get(user=request.user)
-            user_organizations = request.user.memberships
+            user_groups = request.user.memberships
         return render(
             request,
             "login/user_settings.html",
-            {"profile_user": user, "token": token, "organizations": user_organizations},
+            {"profile_user": user, "token": token, "groups": user_groups},
         )
 
 
 ###########################################################################
-#            Organization related views & partial views for htmx          #
+#            Group related views & partial views for htmx          #
 ###########################################################################
 
 
-class OrganizationsView(View):
+class GroupsView(View):
+    group_type: str = None
+
     @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
-        Get all organizations where the current user is listed as member. Also
-        indicate weather the user is the organization Admin or Member.
+        Get all groups of current group type where the current user is listed
+        as member. Also indicate weather the user is the group Admin or Member.
         Additionally provide context information like member count or
         Group description.
 
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
+        :param group_type: Type of the group (currently organization or project)
         :return: Profile renderer
         """
 
-        user = get_object_or_404(OepUser, pk=user_id)
+        if self.group_type == "organization":
+            groups = Organization.objects.filter(memberships__user=request.user)
+        else:
+            groups = Project.objects.filter(memberships__user=request.user)
+        memberships = Membership.objects.filter(group__in=groups, user_id=request.user)
 
         return render(
             request,
-            "login/organizations.html",
-            {"profile_user": user},
+            "login/groups.html",
+            {
+                "profile_user": request.user,
+                "group_type": self.group_type,
+                "memberships": memberships,
+            },
         )
 
 
-# TODO: should be require_POST?
-@login_required
-def organization_leave_view(request, organization_id: int):
-    """ """
-    user: OepUser = request.user
-    user_id: int = request.user.id
-    organization = get_object_or_404(Organization, id=organization_id)
-    membership = get_object_or_404(Membership, group=organization, user=request.user)
-
-    members = (
-        Membership.objects.filter(group=organization).exclude(user=user.pk).count()
-    )
-    if members == 0:
-        return HttpResponse(
-            "Please delete the organization instead (you are the only member)."
-        )
-
-    if membership.level >= ADMIN_PERM:
-        admins = (
-            Membership.objects.filter(group=organization, level=ADMIN_PERM)
-            .exclude(user=user.pk)
-            .count()
-        )
-        if admins == 0:
-            return HttpResponse("An organization needs at least one admin!")
-
-    membership.delete()
-    response = HttpResponse()
-    response["HX-Redirect"] = f"/user/profile/{user_id}/organizations"
-    return response
-
-
-@login_required
-def organization_delete_view(request, organization_id: int):
-    """View to delete an organization."""
-    organization = get_object_or_404(Organization, id=organization_id)
-    membership = get_object_or_404(Membership, group=organization, user=request.user)
-    if membership.level < login.permissions.ADMIN_PERM:
-        raise PermissionDenied
-    organization.delete()
-    messages.add_message(
-        request,
-        level=messages.INFO,
-        message="Organization deleted!",
-        extra_tags="primary",
-    )
-    response = HttpResponse()
-    response["HX-Redirect"] = f"/user/profile/{request.user.id}/organizations"
-    return response
-
-
-class OrganizationListView(View):
+class GroupListView(View):
     @method_decorator(never_cache)
-    def get(self, request, user_id: int):
+    def get(self, request, group_type=None):
         """
         TBD
         :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An user id
         :return: Profile renderer
         """
-        user = get_object_or_404(OepUser, pk=user_id)
+        if group_type == "organization":
+            groups = Organization.objects.filter(memberships__user=request.user)
+        else:
+            groups = Project.objects.filter(memberships__user=request.user)
+        memberships = Membership.objects.filter(group__in=groups, user_id=request.user)
 
         return render(
             request,
-            "login/partials/organizations.html",
-            {"profile_user": user},
+            "login/partials/groups.html",
+            {
+                "profile_user": request.user,
+                "group_type": group_type,
+                "memberships": memberships,
+            },
         )
 
 
-class OrganizationManagementView(View, LoginRequiredMixin):
-    form_is_valid = False
-
+class GroupManagementView(View, LoginRequiredMixin):
     @method_decorator(never_cache)
-    def get(self, request, organization_id=None):
+    def get(self, request, group_id=None, group_type=None):
         """
-        Load the chosen action(create or edit) for an organization.
+        Load the chosen action(create or edit) for an group.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
-        :param organization_id: An organization id
+        :param group_id: An group id
         :return: Profile renderer
         """
+        if group_type == "organization":
+            form_class = OrganizationForm
+            model = Organization
+        else:
+            form_class = ProjectForm
+            model = Project
         is_admin = False
         can_delete = False
         can_edit = False
-        organization = None
-        if organization_id:
-            organization = Organization.objects.get(id=organization_id)
-            membership = get_object_or_404(
-                Membership, group=organization, user=request.user
-            )
+        group = None
+        memberships = None
+        if group_id:
+            group = model.objects.get(id=group_id)
+            membership = get_object_or_404(Membership, group=group, user=request.user)
+            memberships = Membership.objects.filter(group=group)
 
-            # In case the organization is down to one member make sure
+            # In case the group is down to one member make sure
             # the remaining user gets admin permissions
-            if len(organization.memberships.all()) == 1:
+            if len(group.memberships.all()) == 1:
                 membership.level = ADMIN_PERM
                 membership.save()
 
@@ -466,126 +438,135 @@ class OrganizationManagementView(View, LoginRequiredMixin):
             elif membership.level == WRITE_PERM:
                 can_edit = WRITE_PERM
 
-            form = OrganizationForm(instance=organization)
+            form = form_class(instance=group)
         else:
-            form = OrganizationForm()
+            form = form_class()
 
-        organization_tables = None
-        if organization:
-            organization_tables = get_tables_for_organization(organization=organization)
+        group_tables = None
+        if group:
+            group_tables = get_tables_for_group(group=group)
 
         # Redirect if the request is not triggered using htmx methods
         if "HX-Request" not in request.headers:
-            return redirect("login:organizations", user_id=request.user.id)
+            if group_type == "organization":
+                return redirect("login:organizations", user_id=request.user.id)
+            return redirect("login:projects", user_id=request.user.id)
 
         return render(
             request,
-            "login/partials/organization_management.html",
+            "login/partials/group_management.html",
             {
                 "form": form,
-                "organization": organization,
+                "group": group,
+                "group_type": group_type,
+                "memberships": memberships,
                 "choices": Membership.choices,
-                "organization_tables": organization_tables,
+                "group_tables": group_tables,
                 "is_admin": is_admin,
                 "can_delete": can_delete,
                 "can_edit": can_edit,
             },
         )
 
-    def post(self, request, organization_id=None):
+    def post(self, request, group_id=None, group_type=None):
         """
-        Performs selected action(save or delete) for an organization.
-        If an organization name already exists, then a error will be output.
-        The selected users become members of this organization.
-        The organization admin is already set.
+        Performs selected action(save or delete) for a group.
+        If an group name already exists, then a error will be output.
+        The selected users become members of this group.
+        The group admin is already set.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
-        :param organization_id: An organization id
+        :param group_id: An group id
         :return: Profile renderer
         """
         self.form_is_valid = False
         user = request.user.id
-        organization = (
-            Organization.objects.get(id=organization_id) if organization_id else None
-        )
-        form = OrganizationForm(request.POST, instance=organization)
-        status = None
-        if form.is_valid():
-            self.form_is_valid = True
+        if group_type == "organization":
+            form_class = OrganizationForm
+            model = Organization
+        else:
+            form_class = ProjectForm
+            model = Project
+        group = model.objects.get(id=group_id) if group_id else None
 
-        if not self.form_is_valid:
+        form = form_class(request.POST, instance=group)
+
+        if not form.is_valid():
             return render(
                 request,
-                "login/partials/organization_form.html",
-                {"form": form},
+                "login/partials/group_form.html",
+                {
+                    "form": form,
+                    "group_type": group_type,
+                },
             )
 
-        if self.form_is_valid:
-            # status = 201
-            if organization_id:
-                organization = form.save()
-                membership = get_object_or_404(
-                    Membership, group=organization, user=request.user
-                )
-                if membership.level < ADMIN_PERM:
-                    raise PermissionDenied
-                return render(
-                    request,
-                    "login/partials/organization_form.html",
-                    {"form": form, "organization": organization},
-                    status=status,
-                )
-            else:
-                organization = form.save()
-                membership = Membership.objects.create(
-                    user=request.user, group=organization, level=ADMIN_PERM
-                )
-                membership.save()
-                messages.add_message(
-                    request,
-                    level=messages.INFO,
-                    message=(
-                        "Organization created! "
-                        "Edit the organization to invite members."
-                    ),
-                    extra_tags="primary",
-                )
-                response = HttpResponse()
-                # response["profile_user"] = user
+        # status = 201
+        if group_id:
+            membership = get_object_or_404(Membership, group=group, user=request.user)
+            if membership.level < ADMIN_PERM:
+                raise PermissionDenied
+            group = form.save()
+            return render(
+                request,
+                "login/partials/group_form.html",
+                {
+                    "form": form,
+                    "group": group,
+                    "group_type": group_type,
+                },
+            )
+        else:
+            group = form.save()
+            membership = Membership.objects.create(
+                user=request.user, group=group, level=ADMIN_PERM
+            )
+            membership.save()
+            messages.add_message(
+                request,
+                level=messages.INFO,
+                message=("Group created! " "Edit the group to invite members."),
+                extra_tags="primary",
+            )
+            response = HttpResponse()
+            # response["profile_user"] = user
+            if group_type == "organization":
                 response["HX-Redirect"] = f"/user/profile/{user}/organizations"
-                return response
+            else:
+                response["HX-Redirect"] = f"/user/profile/{user}/projects"
+            return response
 
 
-class OrganizationMembersView(TemplateView, LoginRequiredMixin):
-    template_name = "login/partials/organization_members.html"
+class GroupMembersView(TemplateView, LoginRequiredMixin):
+    template_name = "login/partials/group_members.html"
 
     def get_context_data(self, **kwargs):
         """Render context."""
-        context = super(OrganizationMembersView, self).get_context_data(**kwargs)
+        context = super(GroupMembersView, self).get_context_data(**kwargs)
 
-        organization = get_object_or_404(
-            Organization, pk=self.kwargs["organization_id"]
-        )
+        group = get_object_or_404(Group, pk=self.kwargs["group_id"])
         is_admin = False
         membership = Membership.objects.filter(
-            group=organization, user=self.request.user
+            group=group, user=self.request.user
         ).first()
         if membership:
             is_admin = membership.level >= ADMIN_PERM
 
-        context["organization"] = organization
+        context["group"] = group
+        context["group_type"] = self.kwargs["group_type"]
+        context["memberships"] = Membership.objects.filter(group=group)
         context["choices"] = Membership.choices
         context["is_admin"] = is_admin
         return context
 
-    def post(self, request, organization_id: int):
+    def post(self, request, group_id: int, group_type: str):
         """
-        Performs selected action(save or delete) for an organization.
-        If a organization name already exists, then a error will be output.
-        The selected users become members of this organization.
-        The organization admin is already set.
+        Performs selected action(save or delete) for an group.
+        If a group name already exists, then a error will be output.
+        The selected users become members of this group.
+        The group admin is already set.
         :param request: A HTTP-request object sent by the Django framework.
-        :param organization_id: An organization id
+        :param group_id: An group id
         :return: get-request -> Profile renderer, post-request ->
         """
         mode = request.POST["mode"]
@@ -594,10 +575,9 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 "Post request required field 'mode' not specified!"
             )
 
-        organization = get_object_or_404(Organization, id=organization_id)
-        membership = get_object_or_404(
-            Membership, group=organization, user=request.user
-        )
+        model = Organization if group_type == "organization" else Project
+        group = get_object_or_404(model, id=group_id)
+        membership = get_object_or_404(Membership, group=group, user=request.user)
 
         error_message = None
         if mode == "add_user":
@@ -605,9 +585,7 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 raise PermissionDenied
             try:
                 user = OepUser.objects.get(name=request.POST["name"])
-                membership, _ = Membership.objects.get_or_create(
-                    group=organization, user=user
-                )
+                membership, _ = Membership.objects.get_or_create(group=group, user=user)
                 membership.save()
             except OepUser.DoesNotExist:
                 error_message = "User does not exist"
@@ -617,23 +595,19 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 raise PermissionDenied
 
             user_to_remove: OepUser = OepUser.objects.get(id=request.POST["user_id"])
-            target_membership = Membership.objects.get(
-                group=organization.group_ptr, user=user_to_remove
-            )
+            target_membership = Membership.objects.get(group=group, user=user_to_remove)
 
             if request.user.id == user_to_remove.pk:
-                error_message = (
-                    "Please leave the organization to remove your own membership."
-                )
+                error_message = "Please leave the group to remove your own membership."
 
             elif target_membership.level >= ADMIN_PERM:
                 admins = (
-                    Membership.objects.filter(group=organization, level=ADMIN_PERM)
+                    Membership.objects.filter(group=group, level=ADMIN_PERM)
                     .exclude(user=user_to_remove)
                     .count()
                 )
                 if admins == 0:
-                    error_message = "A organization needs at least one admin"
+                    error_message = "A group needs at least one admin"
             elif membership.level < target_membership.level:
                 error_message = (
                     "You cant remove memberships with higher permission level."
@@ -648,7 +622,7 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
             if user == request.user:
                 error_message = "You can not change your own permissions"
             else:
-                membership = Membership.objects.get(group=organization, user=user)
+                membership = Membership.objects.get(group=group, user=user)
                 membership.level = request.POST["selected_value"]
                 membership.save()
         else:
@@ -656,6 +630,56 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
         context = self.get_context_data()
         context["error_message"] = error_message
         return self.render_to_response(context)
+
+
+@login_required
+def group_leave_view(request, group_id: int):
+    """ """
+    user: OepUser = request.user
+    user_id: int = request.user.id
+    group = get_object_or_404(Group, id=group_id)
+    group_type = "organization" if hasattr(group, "organization") else "project"
+    membership = get_object_or_404(Membership, group=group, user=request.user)
+
+    members = Membership.objects.filter(group=group).exclude(user=user.pk).count()
+    if members == 0:
+        return HttpResponse(
+            "Please delete the group instead (you are the only member)."
+        )
+
+    if membership.level >= ADMIN_PERM:
+        admins = (
+            Membership.objects.filter(group=group, level=ADMIN_PERM)
+            .exclude(user=user.pk)
+            .count()
+        )
+        if admins == 0:
+            return HttpResponse("An group needs at least one admin!")
+
+    membership.delete()
+    response = HttpResponse()
+    response["HX-Redirect"] = f"/user/profile/{user_id}/{group_type}s"
+    return response
+
+
+@login_required
+def group_delete_view(request, group_id: int):
+    """View to delete an group."""
+    group = get_object_or_404(Group, id=group_id)
+    membership = get_object_or_404(Membership, group=group, user=request.user)
+    if membership.level < login.permissions.ADMIN_PERM:
+        raise PermissionDenied
+    group_type = "organization" if hasattr(group, "organization") else "project"
+    group.delete()
+    messages.add_message(
+        request,
+        level=messages.INFO,
+        message="Group deleted!",
+        extra_tags="primary",
+    )
+    response = HttpResponse()
+    response["HX-Redirect"] = f"/user/profile/{request.user.id}/{group_type}s"
+    return response
 
 
 ##############################################################################

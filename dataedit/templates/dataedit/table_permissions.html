@@ -50,16 +50,21 @@
                 method="post">
             {% csrf_token %}
             <input type="hidden" name="mode" value="add_group" />
-            <input name="name" type="text" placeholder="Add a group" id="group_field" />
+            <input name="name"
+                   type="text"
+                   placeholder="Add an organization/project"
+                   id="group_field" />
             <input type="submit" value="Add" />
           </form>
         </div>
       {% endif %}
       <div>
-        <h4>Group Permissions</h4>
+        <h4>Orgnaization/Project Permissions</h4>
       </div>
     </div>
-    {% if not group_perms %}No permissions for groups set, yet.{% endif %}
+    {% if not group_perms %}
+      No permissions for organizations/projects set, yet.
+    {% endif %}
     {% for perm in group_perms %}
       <div class="card-body">
         <div>
@@ -205,7 +210,7 @@
           if (!validSelection || !autocompleteSource.includes(inputValue)) {
             e.preventDefault(); // Prevent form submission
             alert(
-              "Please select a valid group name from the list that appears after you start typing."
+              "Please select a valid organization/project name from the list that appears after you start typing."
             );
           }
         });

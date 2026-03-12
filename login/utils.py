@@ -6,7 +6,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from typing import TYPE_CHECKING, List
 
-from login.models import GroupPermission, Organization, UserPermission
+from django.contrib.auth.models import Group
+
+from login.models import GroupPermission, UserPermission
 from login.models import myuser as User
 from login.permissions import ADMIN_PERM
 
@@ -19,20 +21,20 @@ if TYPE_CHECKING:
 ###############################################################
 
 
-def get_tables_for_organization(organization: Organization) -> List["Table"]:
+def get_tables_for_group(group: Group) -> List["Table"]:
     """
-    Get all tables assigned to a organization
+    Get all tables assigned to a group
     """
 
-    organization_table_relation = GroupPermission.objects.filter(
-        holder_id=organization.pk
+    group_table_relation = GroupPermission.objects.filter(
+        holder_id=group.pk
     ).prefetch_related("table")
 
-    organization_tables = []
+    group_tables = []
 
-    for rel in organization_table_relation:
-        organization_tables.append(rel.table)
-    return organization_tables
+    for rel in group_table_relation:
+        group_tables.append(rel.table)
+    return group_tables
 
 
 def assign_table_holder(user: User, table: "Table") -> None:

@@ -8,16 +8,18 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 <section class="profile-category htmxComponentGroupMembership">
   <h2 class="profile-category__heading profile-category__heading--border-btm">
     <span class="profile-category__heading--sm">
-      <div class="member-count">{{ organization.member_count }} member</div>
+      <div class="member-count">
+        {{ group.member_count }} member{{ group.member_count | pluralize }}
+      </div>
     </span>
   </h2>
   <div class="profile-category__members">
-    {% for membership in organization.memberships.all %}
+    {% for membership in memberships %}
       {% if is_admin %}
         <div class="profile-category__member">
           <div class="profile-category__profile-name">{{ membership.user.name }}</div>
           <div class="profile-category__member-status">
-            <form hx-post="{% url 'login:partial-organization-membership' organization_id=organization.id %}"
+            <form hx-post="{% url 'login:group-membership' group_id=group.id group_type=group_type %}"
                   hx-trigger="change"
                   hx-target=".htmxComponentGroupMembership"
                   hx-swap="outerHTML">
@@ -48,9 +50,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         </div>
       {% endif %}
       {% if can_delete or is_admin %}
-        <form hx-post="{% url 'login:partial-organization-membership' organization_id=organization.id %}"
+        <form hx-post="{% url 'login:group-membership' group_id=group.id group_type=group_type %}"
               hx-target=".htmxComponentGroupMembership"
-              hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ organization.name }} and retract all permissions?"
+              hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ group.name }} and retract all permissions?"
               hx-swap="outerHTML">
           {% csrf_token %}
           <input type="hidden" name="mode" value="remove_user" />
@@ -65,7 +67,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     <div class="htmxComponentGroupMembership">
       <div class="profile-category__member-invite">
         <form id="invite-form"
-              hx-post="{% url 'login:partial-organization-membership' organization_id=organization.id %}"
+              hx-post="{% url 'login:group-membership' group_id=group.id group_type=group_type %}"
               hx-target=".htmxComponentGroupMembership"
               hx-swap="outerHTML">
           {% csrf_token %}

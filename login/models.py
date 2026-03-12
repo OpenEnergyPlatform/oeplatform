@@ -179,6 +179,40 @@ class Organization(Group, PermissionHolder):
         return self.memberships.count()
 
 
+class Project(Group, PermissionHolder):
+    acronym = models.CharField(max_length=50, blank=True, null=True)
+    description = models.TextField(null=False, default="")
+    image = models.CharField(
+        max_length=1000, blank=True, null=True, verbose_name="Link to an image"
+    )
+    homepage = models.CharField(max_length=1000, blank=True, null=True)
+    grant_number = models.CharField(max_length=50, blank=True, null=True)
+    funding_agency = models.CharField(max_length=50, blank=True, null=True)
+    contact = models.CharField(max_length=100, blank=True, null=True)
+    keywords = models.CharField(max_length=250, blank=True, null=True)
+
+    is_admin = models.BooleanField(null=False, default=False)
+
+    memberships: QuerySet["Membership"]  # related_name, for static type checking
+    table_permissions: QuerySet[
+        "GroupPermission"
+    ]  # related_name, for static type checking
+
+    def get_table_permission_level(self, table: "Table") -> int:
+        if self.is_admin:
+            return ADMIN_PERM
+        return max(
+            itertools.chain(
+                [NO_PERM],
+                (perm.level for perm in self.table_permissions.filter(table=table)),
+            )
+        )
+
+    def member_count(self):
+        """Return the number of members of the organization."""
+        return self.memberships.count()
+
+
 class TablePermission(models.Model):
     choices = (
         (NO_PERM, "None"),

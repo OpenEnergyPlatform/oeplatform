@@ -16,7 +16,7 @@ from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import PasswordChangeForm, UserChangeForm
 
-from login.models import Organization
+from login.models import Organization, Project
 from login.models import myuser as OepUser
 
 
@@ -90,6 +90,22 @@ class OrganizationForm(forms.ModelForm):
     class Meta:
         model = Organization
         fields = ("name", "acronym", "description", "image", "homepage")
+
+
+class ProjectForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = (
+            "name",
+            "acronym",
+            "description",
+            "image",
+            "homepage",
+            "grant_number",
+            "funding_agency",
+            "contact",
+            "keywords",
+        )
 
 
 class OrganizationUserForm(forms.ModelForm):

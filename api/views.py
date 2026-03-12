@@ -44,6 +44,7 @@ import geoalchemy2  # noqa:F401 Although this import seems unused is has to be h
 import requests
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Q
 from django.http import Http404, HttpRequest, JsonResponse
@@ -947,7 +948,7 @@ def groupprop_api_view(request: Request) -> JsonLikeResponse:
 
     # Assuming 'name' is the field you want to search against
     similar_organizations = (
-        login_models.Organization.objects.annotate(
+        Group.objects.annotate(
             similarity=TrigramSimilarity("name", query),
         )
         .filter(
