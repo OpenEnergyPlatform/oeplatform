@@ -338,7 +338,8 @@ class SettingsView(View):
 ###########################################################################
 
 
-class GroupsView(View):
+class GroupsView(TemplateView):
+    template_name = "login/user_groups.html"
     group_type: str = None
 
     @method_decorator(never_cache)
@@ -354,18 +355,16 @@ class GroupsView(View):
         :param group_type: Type of the group (currently organization or project)
         :return: Profile renderer
         """
-
-        return render(
-            request,
-            "login/groups.html",
-            {
-                "profile_user": request.user,
-                "group_type": self.group_type,
-            },
-        )
+        context = {
+            "profile_user": request.user,
+            "group_type": self.group_type,
+        }
+        return self.render_to_response(context)
 
 
-class GroupListView(View):
+class GroupListView(LoginRequiredMixin, TemplateView):
+    template_name = "login/partials/user_group_list.html"
+
     @method_decorator(never_cache)
     def get(self, request, group_type=None):
         """
@@ -379,18 +378,17 @@ class GroupListView(View):
             groups = Project.objects.filter(memberships__user=request.user)
         memberships = Membership.objects.filter(group__in=groups, user_id=request.user)
 
-        return render(
-            request,
-            "login/partials/group_list.html",
-            {
-                "profile_user": request.user,
-                "group_type": group_type,
-                "memberships": memberships,
-            },
-        )
+        context = {
+            "profile_user": request.user,
+            "group_type": group_type,
+            "memberships": memberships,
+        }
+        return self.render_to_response(context)
 
 
-class GroupManagementView(View, LoginRequiredMixin):
+class GroupManagementView(TemplateView, LoginRequiredMixin):
+    template_name = "login/partials/user_group_management.html"
+
     @method_decorator(never_cache)
     def get(self, request, group_id=None, group_type=None):
         """
@@ -407,19 +405,16 @@ class GroupManagementView(View, LoginRequiredMixin):
             raise PermissionDenied
         is_admin = membership.level == ADMIN_PERM
 
-        return render(
-            request,
-            "login/partials/group_management.html",
-            {
-                "group": group,
-                "group_type": group_type,
-                "is_admin": is_admin,
-            },
-        )
+        context = {
+            "group": group,
+            "group_type": group_type,
+            "is_admin": is_admin,
+        }
+        return self.render_to_response(context)
 
 
 class GroupFormView(LoginRequiredMixin, TemplateView):
-    template_name = "login/partials/group_form.html"
+    template_name = "login/partials/user_group_form.html"
 
     def get(self, request, group_type: str, group_id: int | None = None):
         if group_type == "organization":
@@ -432,15 +427,12 @@ class GroupFormView(LoginRequiredMixin, TemplateView):
         group = model.objects.get(id=group_id) if group_id else None
         form = form_class(instance=group)
 
-        return render(
-            request,
-            "login/partials/group_form.html",
-            {
-                "group": group,
-                "group_type": group_type,
-                "form": form,
-            },
-        )
+        context = {
+            "group": group,
+            "group_type": group_type,
+            "form": form,
+        }
+        return self.render_to_response(context)
 
     def post(self, request, group_id=None, group_type=None):
         """
@@ -463,32 +455,21 @@ class GroupFormView(LoginRequiredMixin, TemplateView):
         group = model.objects.get(id=group_id) if group_id else None
 
         form = form_class(request.POST, instance=group)
+        context = {
+            "form": form,
+            "group_type": group_type,
+        }
 
         if not form.is_valid():
-            return render(
-                request,
-                "login/partials/group_form.html",
-                {
-                    "form": form,
-                    "group_type": group_type,
-                },
-            )
+            return self.render_to_response(context)
 
         # status = 201
         if group_id:
             membership = get_object_or_404(Membership, group=group, user=request.user)
             if membership.level < ADMIN_PERM:
                 raise PermissionDenied
-            group = form.save()
-            return render(
-                request,
-                "login/partials/group_form.html",
-                {
-                    "form": form,
-                    "group": group,
-                    "group_type": group_type,
-                },
-            )
+            context["group"] = form.save()
+            return self.render_to_response(context)
         else:
             group = form.save()
             membership = Membership.objects.create(
@@ -513,7 +494,7 @@ class GroupFormView(LoginRequiredMixin, TemplateView):
 
 
 class GroupTablesView(TemplateView, LoginRequiredMixin):
-    template_name = "login/partials/group_tables.html"
+    template_name = "login/partials/user_group_tables.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -523,7 +504,7 @@ class GroupTablesView(TemplateView, LoginRequiredMixin):
 
 
 class GroupMembersView(TemplateView, LoginRequiredMixin):
-    template_name = "login/partials/group_members.html"
+    template_name = "login/partials/user_group_members.html"
 
     def get_context_data(self, **kwargs):
         """Render context."""
