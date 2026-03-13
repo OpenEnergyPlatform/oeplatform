@@ -21,10 +21,12 @@ from django.urls import path, re_path
 from base.views import handler404
 from login.views import (
     EditUserView,
+    GroupFormView,
     GroupListView,
     GroupManagementView,
     GroupMembersView,
     GroupsView,
+    GroupTablesView,
     ReviewsView,
     SettingsView,
     TablesView,
@@ -118,13 +120,23 @@ urlpatterns = [
     ),
     re_path(
         r"^(?P<group_type>organization|project)/new/$",
-        GroupManagementView.as_view(),
+        GroupFormView.as_view(),
         name="group-create",
     ),
     re_path(
-        r"^(?P<group_type>organization|project)/(?P<group_id>[\w\d_\s]+)/edit$",
+        r"^(?P<group_type>organization|project)/(?P<group_id>[\w\d_\s]+)/manage$",
         GroupManagementView.as_view(),
+        name="group-management",
+    ),
+    re_path(
+        r"^(?P<group_type>organization|project)/(?P<group_id>[\w\d_\s]+)/edit$",
+        GroupFormView.as_view(),
         name="group-edit",
+    ),
+    re_path(
+        r"^(?P<group_type>organization|project)/(?P<group_id>[\w\d_\s]+)/tables$",
+        GroupTablesView.as_view(),
+        name="group-tables",
     ),
     re_path(
         r"^(?P<group_type>organization|project)/(?P<group_id>[\w\d_\s]+)/members$",

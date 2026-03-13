@@ -5,92 +5,87 @@ SPDX-FileCopyrightText: 2026 Hendrik Huyskens <https://github.com/henhuy> © Rei
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
-<section class="profile-category htmxComponentGroupMembership">
-  <h2 class="profile-category__heading profile-category__heading--border-btm">
-    <span class="profile-category__heading--sm">
-      <div class="member-count">
-        {{ group.member_count }} member{{ group.member_count | pluralize }}
+<h2 class="profile-category__heading profile-category__heading--border-btm">
+  <span class="profile-category__heading--sm">
+    <div class="member-count">
+      {{ group.member_count }} member{{ group.member_count | pluralize }}
+    </div>
+  </span>
+</h2>
+<div class="profile-category__members">
+  {% for membership in memberships %}
+    {% if is_admin %}
+      <div class="profile-category__member">
+        <div class="profile-category__profile-name">{{ membership.user.name }}</div>
+        <div class="profile-category__member-status">
+          <form hx-post="{% url 'login:group-membership' group_id=group.id group_type=group_type %}"
+                hx-trigger="change"
+                hx-target=".htmxComponentGroupMembership">
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="alter_user" />
+            <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
+            <select aria-label="Group member's status" name="selected_value">
+              {% for value, choice in choices %}
+                <option value="{{ value }}"
+                        {% if membership.level == value %}selected="selected"{% endif %}>
+                  {{ choice }}
+                </option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
       </div>
-    </span>
-  </h2>
-  <div class="profile-category__members">
-    {% for membership in memberships %}
-      {% if is_admin %}
-        <div class="profile-category__member">
-          <div class="profile-category__profile-name">{{ membership.user.name }}</div>
-          <div class="profile-category__member-status">
-            <form hx-post="{% url 'login:group-membership' group_id=group.id group_type=group_type %}"
-                  hx-trigger="change"
-                  hx-target=".htmxComponentGroupMembership"
-                  hx-swap="outerHTML">
-              {% csrf_token %}
-              <input type="hidden" name="mode" value="alter_user" />
-              <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
-              <select aria-label="Group member's status" name="selected_value">
-                {% for value, choice in choices %}
-                  <option value="{{ value }}"
-                          {% if membership.level == value %}selected="selected"{% endif %}>
-                    {{ choice }}
-                  </option>
-                {% endfor %}
-              </select>
-            </form>
-          </div>
+    {% else %}
+      <div class="profile-category__member">
+        <div class="profile-category__profile-name">{{ membership.user.name }}</div>
+        <div class="profile-category__member-status">
+          {% for value, choice in choices %}
+            <div>
+              {% if membership.level == value %}{{ choice }}{% endif %}
+            </div>
+          {% endfor %}
         </div>
-      {% else %}
-        <div class="profile-category__member">
-          <div class="profile-category__profile-name">{{ membership.user.name }}</div>
-          <div class="profile-category__member-status">
-            {% for value, choice in choices %}
-              <div>
-                {% if membership.level == value %}{{ choice }}{% endif %}
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      {% endif %}
-      {% if can_delete or is_admin %}
-        <form hx-post="{% url 'login:group-membership' group_id=group.id group_type=group_type %}"
-              hx-target=".htmxComponentGroupMembership"
-              hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ group.name }} and retract all permissions?"
-              hx-swap="outerHTML">
-          {% csrf_token %}
-          <input type="hidden" name="mode" value="remove_user" />
-          <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
-          <input type="submit" class="btn btn-danger" value="Remove user" />
-        </form>
-      {% endif %}
-    {% endfor %}
-    {% if error_message %}
-      <div style="display: block; color: red;">{{ error_message }}</div>
+      </div>
     {% endif %}
-    <div class="htmxComponentGroupMembership">
-      <div class="profile-category__member-invite">
-        <form id="invite-form"
-              hx-post="{% url 'login:group-membership' group_id=group.id group_type=group_type %}"
-              hx-target=".htmxComponentGroupMembership"
-              hx-swap="outerHTML">
-          {% csrf_token %}
-          <input type="hidden" name="mode" value="add_user" />
-          <input class="form-control"
-                 id="username-input"
-                 name="name"
-                 type="text"
-                 placeholder="Add a user" />
-        </form>
-        <button form="invite-form" type="submit" value="Submit">
-          <svg xmlns="http://www.w3.org/2000/svg"
-               width="14"
-               height="14"
-               fill="currentColor"
-               class="bi bi-plus"
-               viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-          </svg>
-          Invite member
-        </button>
-        <b>Note:</b> Users have to log in on the OEP at least once in order to be registered.
-      </div>
+    {% if can_delete or is_admin %}
+      <form hx-post="{% url 'login:group-membership' group_id=group.id group_type=group_type %}"
+            hx-target=".htmxComponentGroupMembership"
+            hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ group.name }} and retract all permissions?">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="remove_user" />
+        <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
+        <input type="submit" class="btn btn-danger" value="Remove user" />
+      </form>
+    {% endif %}
+  {% endfor %}
+  {% if error_message %}
+    <div style="display: block; color: red;">{{ error_message }}</div>
+  {% endif %}
+  <div class="htmxComponentGroupMembership">
+    <div class="profile-category__member-invite">
+      <form id="invite-form"
+            hx-post="{% url 'login:group-membership' group_id=group.id group_type=group_type %}"
+            hx-target=".htmxComponentGroupMembership">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="add_user" />
+        <input class="form-control"
+               id="username-input"
+               name="name"
+               type="text"
+               placeholder="Add a user" />
+      </form>
+      <button form="invite-form" type="submit" value="Submit">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="14"
+             height="14"
+             fill="currentColor"
+             class="bi bi-plus"
+             viewBox="0 0 16 16">
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+        </svg>
+        Invite member
+      </button>
+      <b>Note:</b> Users have to log in on the OEP at least once in order to be registered.
     </div>
   </div>
-</section>
+</div>

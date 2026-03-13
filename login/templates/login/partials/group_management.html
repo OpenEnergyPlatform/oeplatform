@@ -9,11 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 {% load static %}
 <div class="htmxReplacementBox">
   <div class="backlink">
-    <a href=""
-       hx-get="{% url 'login:group-list' group_type=group_type %}"
-       hx-target=".htmxReplacementBox"
-       hx-push-url="{% url 'login:organizations' request.user.id %}"
-       hx-push-state>
+    <a href="{% if group_type == 'organization' %}{% url 'login:organizations' request.user.id %}{% else %}{% url 'login:projects' request.user.id %}{% endif %}">
       <svg width="14"
            height="14"
            fill="currentColor"
@@ -26,10 +22,22 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     </a>
   </div>
   <!-- Group creation / editing form: name and description -->
-  {% include 'login/partials/group_form.html' %}
+  <section class="profile-category htmxFormComponent"
+           hx-get="{% url 'login:group-edit' group_id=group.id group_type=group_type %}"
+           hx-trigger="load">
+    Loading {{ group_type }}
+  </section>
   {% if group %}
-    {% include 'login/partials/group_tables.html' %}
-    {% include 'login/partials/group_members.html' %}
+    <section class="profile-category htmxFormComponent"
+             hx-get="{% url 'login:group-tables' group_id=group.id group_type=group_type %}"
+             hx-trigger="load">
+      Loading tables
+    </section>
+    <section class="profile-category htmxComponentGroupMembership"
+             hx-get="{% url 'login:group-membership' group_id=group.id group_type=group_type %}"
+             hx-trigger="load">
+      Loading members
+    </section>
     <section class="profile-category">
       <div class="profile-category__danger">
         <h2 class="profile-category__heading profile-category__heading--border-btm">

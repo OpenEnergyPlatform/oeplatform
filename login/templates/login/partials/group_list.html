@@ -57,8 +57,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   <button class="profile-category__btn profile-category__btn--add"
           hx-get="{% url 'login:group-create' group_type=group_type %}"
           hx-target=".htmxReplacementBox"
-          hx-push-url="true"
-          hx-push-state>
+          hx-push-url="true">
     <svg xmlns="http://www.w3.org/2000/svg"
          width="16"
          height="16"
@@ -102,10 +101,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                     </div>
                   </div>
                   <button class="group-card__btn  group-card__btn--edit"
-                          hx-get="{% url 'login:group-edit' group_id=membership.group.id group_type=group_type %}"
+                          hx-get="{% url 'login:group-management' group_id=membership.group.id group_type=group_type %}"
                           hx-target=".htmxReplacementBox"
-                          hx-push-url="true"
-                          hx-push-state>Edit</button>
+                          hx-push-url="true">Edit</button>
                 </div>
               </div>
             </div>

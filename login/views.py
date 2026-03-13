@@ -400,64 +400,45 @@ class GroupManagementView(View, LoginRequiredMixin):
         :param group_id: An group id
         :return: Profile renderer
         """
+        group = Group.objects.get(id=group_id) if group_id else None
+        membership = get_object_or_404(Membership, group=group, user=request.user)
+
+        if membership.level < WRITE_PERM:
+            raise PermissionDenied
+        is_admin = membership.level == ADMIN_PERM
+
+        return render(
+            request,
+            "login/partials/group_management.html",
+            {
+                "group": group,
+                "group_type": group_type,
+                "is_admin": is_admin,
+            },
+        )
+
+
+class GroupFormView(LoginRequiredMixin, TemplateView):
+    template_name = "login/partials/group_form.html"
+
+    def get(self, request, group_type: str, group_id: int | None = None):
         if group_type == "organization":
             form_class = OrganizationForm
             model = Organization
         else:
             form_class = ProjectForm
             model = Project
-        is_admin = False
-        can_delete = False
-        can_edit = False
-        group = None
-        memberships = None
-        if group_id:
-            group = model.objects.get(id=group_id)
-            membership = get_object_or_404(Membership, group=group, user=request.user)
-            memberships = Membership.objects.filter(group=group)
 
-            # In case the group is down to one member make sure
-            # the remaining user gets admin permissions
-            if len(group.memberships.all()) == 1:
-                membership.level = ADMIN_PERM
-                membership.save()
-
-            if membership.level < WRITE_PERM:
-                raise PermissionDenied
-            elif membership.level == ADMIN_PERM:
-                is_admin = True
-            elif membership.level == DELETE_PERM:
-                can_delete = True
-            elif membership.level == WRITE_PERM:
-                can_edit = WRITE_PERM
-
-            form = form_class(instance=group)
-        else:
-            form = form_class()
-
-        group_tables = None
-        if group:
-            group_tables = get_tables_for_group(group=group)
-
-        # Redirect if the request is not triggered using htmx methods
-        if "HX-Request" not in request.headers:
-            if group_type == "organization":
-                return redirect("login:organizations", user_id=request.user.id)
-            return redirect("login:projects", user_id=request.user.id)
+        group = model.objects.get(id=group_id) if group_id else None
+        form = form_class(instance=group)
 
         return render(
             request,
-            "login/partials/group_management.html",
+            "login/partials/group_form.html",
             {
-                "form": form,
                 "group": group,
                 "group_type": group_type,
-                "memberships": memberships,
-                "choices": Membership.choices,
-                "group_tables": group_tables,
-                "is_admin": is_admin,
-                "can_delete": can_delete,
-                "can_edit": can_edit,
+                "form": form,
             },
         )
 
@@ -470,10 +451,9 @@ class GroupManagementView(View, LoginRequiredMixin):
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :param group_id: An group id
+        :param group_type: Type of the group (currently organization or project)
         :return: Profile renderer
         """
-        self.form_is_valid = False
-        user = request.user.id
         if group_type == "organization":
             form_class = OrganizationForm
             model = Organization
@@ -524,10 +504,22 @@ class GroupManagementView(View, LoginRequiredMixin):
             response = HttpResponse()
             # response["profile_user"] = user
             if group_type == "organization":
-                response["HX-Redirect"] = f"/user/profile/{user}/organizations"
+                response["HX-Redirect"] = (
+                    f"/user/profile/{request.user.id}/organizations"
+                )
             else:
-                response["HX-Redirect"] = f"/user/profile/{user}/projects"
+                response["HX-Redirect"] = f"/user/profile/{request.user.id}/projects"
             return response
+
+
+class GroupTablesView(TemplateView, LoginRequiredMixin):
+    template_name = "login/partials/group_tables.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        group = Group.objects.get(id=self.kwargs["group_id"])
+        context["group_tables"] = get_tables_for_group(group=group)
+        return context
 
 
 class GroupMembersView(TemplateView, LoginRequiredMixin):
@@ -538,18 +530,22 @@ class GroupMembersView(TemplateView, LoginRequiredMixin):
         context = super(GroupMembersView, self).get_context_data(**kwargs)
 
         group = get_object_or_404(Group, pk=self.kwargs["group_id"])
-        is_admin = False
         membership = Membership.objects.filter(
             group=group, user=self.request.user
         ).first()
+
+        is_admin = False
+        can_delete = False
         if membership:
             is_admin = membership.level >= ADMIN_PERM
+            can_delete = membership.level == DELETE_PERM
 
         context["group"] = group
         context["group_type"] = self.kwargs["group_type"]
         context["memberships"] = Membership.objects.filter(group=group)
         context["choices"] = Membership.choices
         context["is_admin"] = is_admin
+        context["can_delete"] = can_delete
         return context
 
     def post(self, request, group_id: int, group_type: str):
