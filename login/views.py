@@ -344,7 +344,7 @@ class SettingsView(View):
 ###########################################################################
 
 
-class GroupsView(TemplateView):
+class UserGroupsView(TemplateView):
     template_name = "login/user_groups.html"
     group_type: str = None
 
@@ -368,7 +368,7 @@ class GroupsView(TemplateView):
         return self.render_to_response(context)
 
 
-class GroupListView(LoginRequiredMixin, TemplateView):
+class UserGroupListView(LoginRequiredMixin, TemplateView):
     template_name = "login/partials/user_group_list.html"
 
     @method_decorator(never_cache)
@@ -392,7 +392,7 @@ class GroupListView(LoginRequiredMixin, TemplateView):
         return self.render_to_response(context)
 
 
-class GroupManagementView(TemplateView, LoginRequiredMixin):
+class UserGroupManagementView(TemplateView, LoginRequiredMixin):
     template_name = "login/partials/user_group_management.html"
 
     @method_decorator(never_cache)
@@ -419,7 +419,7 @@ class GroupManagementView(TemplateView, LoginRequiredMixin):
         return self.render_to_response(context)
 
 
-class GroupFormView(LoginRequiredMixin, TemplateView):
+class UserGroupFormView(LoginRequiredMixin, TemplateView):
     template_name = "login/partials/user_group_form.html"
 
     def get(self, request, group_type: str, group_id: int | None = None):
@@ -499,7 +499,7 @@ class GroupFormView(LoginRequiredMixin, TemplateView):
             return response
 
 
-class GroupTablesView(TemplateView, LoginRequiredMixin):
+class UserGroupTablesView(TemplateView, LoginRequiredMixin):
     template_name = "login/partials/user_group_tables.html"
 
     def get_context_data(self, **kwargs):
@@ -547,12 +547,12 @@ class GroupTablesView(TemplateView, LoginRequiredMixin):
         return self.render_to_response(context)
 
 
-class GroupMembersView(TemplateView, LoginRequiredMixin):
+class UserGroupMembersView(TemplateView, LoginRequiredMixin):
     template_name = "login/partials/user_group_members.html"
 
     def get_context_data(self, **kwargs):
         """Render context."""
-        context = super(GroupMembersView, self).get_context_data(**kwargs)
+        context = super(UserGroupMembersView, self).get_context_data(**kwargs)
 
         group = get_object_or_404(Group, pk=self.kwargs["group_id"])
         membership = Membership.objects.filter(
@@ -647,7 +647,7 @@ class GroupMembersView(TemplateView, LoginRequiredMixin):
 
 
 @login_required
-def group_leave_view(request, group_id: int):
+def user_group_leave_view(request, group_id: int):
     """ """
     user: OepUser = request.user
     user_id: int = request.user.id
@@ -677,7 +677,7 @@ def group_leave_view(request, group_id: int):
 
 
 @login_required
-def group_delete_view(request, group_id: int):
+def user_group_delete_view(request, group_id: int):
     """View to delete an group."""
     group = get_object_or_404(Group, id=group_id)
     membership = get_object_or_404(Membership, group=group, user=request.user)
