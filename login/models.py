@@ -296,8 +296,8 @@ class myuser(AbstractBaseUser, PermissionHolder):
         direct_memberships = self.table_permissions.all().prefetch_related("table")
         return direct_memberships
 
-    def get_organizations_queryset(self) -> QuerySet["Organization"]:
-        return Organization.objects.filter(memberships__user=self)
+    def get_groups_queryset(self) -> QuerySet["Organization"]:
+        return Group.objects.filter(memberships__user=self)
 
     def get_tables_queryset(
         self, min_permission_level: int = NO_PERM
@@ -306,7 +306,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
         combine filter (OR) of table with direct permissions
         and with group permissions
         """
-        organizations = self.get_organizations_queryset()
+        groups = self.get_groups_queryset()
 
         return (
             dataedit_models.Table.objects.filter(
@@ -316,7 +316,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
             )
             | dataedit_models.Table.objects.filter(
                 # tables where user isin a group that has GroupPermission
-                grouppermission_set__holder__in=organizations,
+                grouppermission_set__holder__in=groups,
                 grouppermission_set__level__gte=min_permission_level,
             )
         ).distinct()
@@ -334,7 +334,11 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
         # Check permissions of all groups and choose least restrictive one
         group_perm_levels = (
-            membership.group.organization.get_table_permission_level(table)
+            (
+                membership.group.organization.get_table_permission_level(table)
+                if hasattr(membership.group, "organization")
+                else membership.group.project.get_table_permission_level(table)
+            )
             for membership in self.memberships.all()
         )
 

@@ -4,11 +4,9 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
-from django.contrib.auth.models import Group
-
-from login.models import GroupPermission, UserPermission
+from login.models import UserPermission
 from login.models import myuser as User
 from login.permissions import ADMIN_PERM
 
@@ -19,22 +17,6 @@ if TYPE_CHECKING:
 ###############################################################
 # Utilities mainly used for the Group Management profile page #
 ###############################################################
-
-
-def get_tables_for_group(group: Group) -> List["Table"]:
-    """
-    Get all tables assigned to a group
-    """
-
-    group_table_relation = GroupPermission.objects.filter(
-        holder_id=group.pk
-    ).prefetch_related("table")
-
-    group_tables = []
-
-    for rel in group_table_relation:
-        group_tables.append(rel.table)
-    return group_tables
 
 
 def assign_table_holder(user: User, table: "Table") -> None:

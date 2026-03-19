@@ -929,6 +929,38 @@ def usrprop_api_view(request: Request) -> JsonLikeResponse:
 
 @never_cache
 @api_exception
+def tableprop_api_view(request: Request) -> JsonLikeResponse:
+    """
+    Return all tables where this user is a member that match
+    the current query. The query is input by the User.
+    """
+    try:
+        user = login_models.myuser.objects.get(id=request.user.id)
+    except login_models.myuser.DoesNotExist:
+        raise Http404
+
+    query = request.GET.get("name", None)
+    if not query:
+        return JsonResponse([], safe=False)
+
+    user_table_permissions = user.get_table_memberships()
+
+    # Assuming 'name' is the field you want to search against
+    similar_tables = (
+        Table.objects.annotate(
+            similarity=TrigramSimilarity("name", query),
+        )
+        .filter(
+            similarity__gt=0.2,  # Adjust the threshold as needed
+            id__in=[permission.table.pk for permission in user_table_permissions],
+        )
+        .order_by("-similarity")[:5]
+    ).values_list("name", flat=True)
+    return JsonResponse(list(similar_tables), safe=False)
+
+
+@never_cache
+@api_exception
 def groupprop_api_view(request: Request) -> JsonLikeResponse:
     """
     Return all groups where this user is a member that match
@@ -947,18 +979,18 @@ def groupprop_api_view(request: Request) -> JsonLikeResponse:
     groups = [g.group for g in user_groups]
 
     # Assuming 'name' is the field you want to search against
-    similar_organizations = (
+    similar_groups = (
         Group.objects.annotate(
             similarity=TrigramSimilarity("name", query),
         )
         .filter(
             similarity__gt=0.2,  # Adjust the threshold as needed
-            id__in=[organization.pk for organization in groups],
+            id__in=[group.pk for group in groups],
         )
         .order_by("-similarity")[:5]
     )
 
-    group_names = [group.name for group in similar_organizations]
+    group_names = [group.name for group in similar_groups]
 
     return JsonResponse(group_names, safe=False)
 

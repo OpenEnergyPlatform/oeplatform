@@ -9,12 +9,71 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 <h2 class="profile-category__heading profile-category__heading--border-btm">
   Related Tables
 </h2>
-{% if group_tables %}
+{% if group_table_permissions %}
   <div class="profile-category__group_table">
-    {% for table in group_tables %}<div>- {{ table.name }}</div>{% endfor %}
+    {% for permission in group_table_permissions %}
+      <div>
+        {{ permission.table.name }}
+        <form class="form-inline" style="display:inline-block">
+          {% csrf_token %}
+          <input type="hidden" name="mode" value="alter_table" />
+          <input type="hidden" name="name" value="{{ permission.table.name }}" />
+          <select class="form-control"
+                  id="level"
+                  name="level"
+                  hx-post="{% url 'login:group-tables' group_id=group.id group_type=group_type %}"
+                  hx-target=".htmxComponentGroupTables"
+                  hx-trigger="change">
+            {% for value, choice in choices %}
+              <option value="{{ value }}"
+                      {% if permission.level == value %}selected="selected"{% endif %}>
+                {{ choice }}
+              </option>
+            {% endfor %}
+          </select>
+        </form>
+        <form hx-post="{% url 'login:group-tables' group_id=group.id group_type=group_type %}"
+              hx-target=".htmxComponentGroupTables"
+              style="display:inline-block;
+                     float:right"
+              hx-confirm="Are you sure you want to remove {{ permission.table.name }} from {{ group_type }} and retract all permissions?">
+          {% csrf_token %}
+          <input type="hidden" name="mode" value="remove_table" />
+          <input type="hidden" name="name" value="{{ permission.table.name }}" />
+          <input type="submit" class="btn btn-danger" value="Remove table" />
+        </form>
+      </div>
+    {% endfor %}
   </div>
 {% else %}
   <div class="profile-category__no_group_table">
     No tables are assigned to this {{ group_type }}.
   </div>
 {% endif %}
+<div class="profile-category__member-invite">
+  <form id="table-form"
+        hx-post="{% url 'login:group-tables' group_id=group.id group_type=group_type %}"
+        hx-target=".htmxComponentGroupTables">
+    {% csrf_token %}
+    <input class="form-control"
+           id="table-input"
+           name="name"
+           type="text"
+           placeholder="Add a table" />
+    <input type="hidden" name="mode" value="add_table" />
+  </form>
+  {% if error_message %}
+    <div style="display: block; color: red;">{{ error_message }}</div>
+  {% endif %}
+  <button form="table-form" type="submit" value="Submit">
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="14"
+         height="14"
+         fill="currentColor"
+         class="bi bi-plus"
+         viewBox="0 0 16 16">
+      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+    </svg>
+    Add table
+  </button>
+</div>

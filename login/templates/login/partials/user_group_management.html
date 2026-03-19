@@ -28,7 +28,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     Loading {{ group_type }}
   </section>
   {% if group %}
-    <section class="profile-category htmxFormComponent"
+    <section class="profile-category profile-category__members htmxComponentGroupTables"
              hx-get="{% url 'login:group-tables' group_id=group.id group_type=group_type %}"
              hx-trigger="load">
       Loading tables

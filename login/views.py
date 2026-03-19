@@ -41,12 +41,18 @@ from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
 import login.permissions
+from api.utils import table_or_404
 from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
 from login.forms import EditUserForm, OrganizationForm, ProjectForm
-from login.models import Membership, Organization, Project
+from login.models import (
+    GroupPermission,
+    Membership,
+    Organization,
+    Project,
+    TablePermission,
+)
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
-from login.utils import get_tables_for_group
 
 # Pagination
 ITEMS_PER_PAGE = 8
@@ -499,8 +505,46 @@ class GroupTablesView(TemplateView, LoginRequiredMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         group = Group.objects.get(id=self.kwargs["group_id"])
-        context["group_tables"] = get_tables_for_group(group=group)
+        context["group_table_permissions"] = GroupPermission.objects.filter(
+            holder_id=group.pk
+        ).prefetch_related("table")
+        context["group"] = group
+        context["group_type"] = self.kwargs["group_type"]
+        context["choices"] = TablePermission.choices
         return context
+
+    def post(self, request, group_id=None, group_type=None):
+        mode = request.POST["mode"]
+        if mode is None:
+            return HttpResponseNotAllowed(
+                "Post request required field 'mode' not specified!"
+            )
+        group = get_object_or_404(Group, pk=group_id)
+        table_name = request.POST.get("name")
+        table = table_or_404(table=table_name)
+        user_permissions = table.userpermission_set.filter(
+            holder=request.user, level__gt=WRITE_PERM
+        ).first()
+        error_msg = None
+        if user_permissions is None:
+            error_msg = "No permission to add this table."
+            context = self.get_context_data()
+            context["error_message"] = error_msg
+            return self.render_to_response(context)
+
+        if mode == "add_table":
+            p, _ = GroupPermission.objects.get_or_create(holder=group, table=table)
+            p.save()
+        elif mode == "remove_table":
+            GroupPermission.objects.get(holder=group, table=table).delete()
+        elif mode == "alter_table":
+            permission = GroupPermission.objects.get(holder=group, table=table)
+            permission.level = request.POST["level"]
+            permission.save()
+
+        context = self.get_context_data()
+        context["error_message"] = error_msg
+        return self.render_to_response(context)
 
 
 class GroupMembersView(TemplateView, LoginRequiredMixin):

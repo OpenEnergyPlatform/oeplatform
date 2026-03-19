@@ -24,4 +24,104 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   {% compress js %}
     <script src="{% static 'ontology/htmx.js' %}"></script>
   {% endcompress %}
+  <script>
+    /*
+     * Handle user autocomplete and add client side form validation.
+     */
+    $(function () {
+      let validSelection = false;
+      let autocompleteSource = []; // This will be filled with your autocomplete data
+
+      function initAutocomplete() {
+        $("#username-input").autocomplete({
+          source: function (request, response) {
+            $.ajax({
+              url: "{% url 'api:usrprop' %}",
+              dataType: "json",
+              data: { name: request.term },
+              success: function (data) {
+                autocompleteSource = data; // Assuming 'data' is an array of strings
+                response(data);
+              },
+            });
+          },
+          select: function (event, ui) {
+            validSelection = true;
+          },
+        });
+
+        $("#username-input").on("input", function () {
+          validSelection = false;
+        });
+      }
+
+      initAutocomplete();
+
+      $(document).on("htmx:afterSwap", function (evt) {
+        if ($(evt.detail.target).hasClass("htmxComponentGroupMembership")) {
+          initAutocomplete();
+        }
+      });
+
+      $(document).on("submit", "#invite-form", function (e) {
+        var inputValue = $("#username-input").val();
+        if (!validSelection || !autocompleteSource.includes(inputValue)) {
+          e.preventDefault(); // Prevent form submission
+          alert(
+            "Please select a valid user name from the list that appears after you start typing."
+          );
+        }
+      });
+    });
+  </script>
+  <script>
+    /*
+     * Handle table autocomplete and add client side form validation.
+     */
+    $(function () {
+      let validSelection = false;
+      let autocompleteSource = []; // This will be filled with your autocomplete data
+
+      function initAutocomplete() {
+        $("#table-input").autocomplete({
+          source: function (request, response) {
+            $.ajax({
+              url: "{% url 'api:tableprop' %}",
+              dataType: "json",
+              data: { name: request.term },
+              success: function (data) {
+                autocompleteSource = data; // Assuming 'data' is an array of strings
+                response(data);
+              },
+            });
+          },
+          select: function (event, ui) {
+            validSelection = true;
+          },
+        });
+
+        $("#table-input").on("input", function () {
+          validSelection = false;
+        });
+      }
+
+      initAutocomplete();
+
+      $(document).on("htmx:afterSwap", function (evt) {
+        if ($(evt.detail.target).hasClass("htmxComponentGroupTables")) {
+          initAutocomplete();
+        }
+      });
+
+      $(document).on("submit", "#table-form", function (e) {
+        var inputValue = $("#table-input").val();
+        if (!validSelection || !autocompleteSource.includes(inputValue)) {
+          e.preventDefault(); // Prevent form submission
+          alert(
+            "Please select a valid table name from the list that appears after you start typing."
+          );
+        }
+      });
+    });
+  </script>
 {% endblock after-body-bottom-js %}
