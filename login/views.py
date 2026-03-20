@@ -52,7 +52,7 @@ from login.models import (
 )
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
-from login.services import create_group, edit_group, get_group_form
+from login.services import create_group, delete_group, edit_group, get_group_form
 
 # Pagination
 ITEMS_PER_PAGE = 8
@@ -676,12 +676,7 @@ def user_group_leave_view(request, group_id: int):
 @login_required
 def user_group_delete_view(request, group_id: int):
     """View to delete an group."""
-    group = get_object_or_404(Group, id=group_id)
-    membership = get_object_or_404(Membership, group=group, user=request.user)
-    if membership.level < login.permissions.ADMIN_PERM:
-        raise PermissionDenied
-    group_type = "organization" if hasattr(group, "organization") else "project"
-    group.delete()
+    group = delete_group(request.user, group_id)
     messages.add_message(
         request,
         level=messages.INFO,
@@ -689,6 +684,7 @@ def user_group_delete_view(request, group_id: int):
         extra_tags="primary",
     )
     response = HttpResponse()
+    group_type = "organization" if hasattr(group, "organization") else "project"
     response["HX-Redirect"] = f"/user/profile/{request.user.id}/{group_type}s"
     return response
 

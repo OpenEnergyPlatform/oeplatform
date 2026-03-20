@@ -36,3 +36,11 @@ def edit_group(user: myuser, form) -> Group:
     if membership.level < ADMIN_PERM:
         raise PermissionDenied
     return form.save()
+
+
+def delete_group(user: myuser, group_id: int) -> None:
+    group = get_object_or_404(Group, id=group_id)
+    membership = get_object_or_404(Membership, group=group, user=user)
+    if membership.level < ADMIN_PERM:
+        raise PermissionDenied
+    group.delete()

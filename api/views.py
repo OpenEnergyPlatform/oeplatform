@@ -169,7 +169,7 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_table_name
 from dataedit.models import Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
-from login.services import create_group, edit_group, get_group_form
+from login.services import create_group, delete_group, edit_group, get_group_form
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
     execute_sparql_query,
@@ -907,6 +907,7 @@ class GroupAPIView(APIView):
 
     @api_exception
     def get(self, request, group_type: str, group: str):
+        """View group data."""
         if group_type == "organization":
             group = get_object_or_404(login_models.Organization, name=group)
             return JsonResponse(
@@ -945,6 +946,16 @@ class GroupAPIView(APIView):
 
         group_form = get_group_form(group_type, payload_query, group.id)
         edit_group(request.user, group_form)
+        return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
+
+    @api_exception
+    def delete(self, request, group_type: str, group: str):
+        """Delete group"""
+        group = Group.objects.filter(name=group).first()
+        if group is None:
+            raise APIError("Group does not exist", status.HTTP_404_NOT_FOUND)
+
+        delete_group(request.user, group.id)
         return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
 
 
