@@ -1,0 +1,25 @@
+<!--
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2026 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+{% extends "base/base.html" %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% load compress %}
+{% block main-content-body %}
+  <div class="group-management">
+    <h2>Organizations</h2>
+    {% for group in organizations %}
+      {% include "login/partials/group_item.html" %}
+    {% endfor %}
+  </div>
+  <div class="group-management">
+    <h2>Projects</h2>
+    {% for group in projects %}
+      {% include "login/partials/group_item.html" %}
+    {% endfor %}
+  </div>
+{% endblock main-content-body %}

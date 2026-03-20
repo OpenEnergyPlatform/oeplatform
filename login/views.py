@@ -36,8 +36,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
-from django.views.generic import RedirectView, TemplateView, View
-from django.views.generic.edit import DeleteView
+from django.views.generic import DeleteView, RedirectView, TemplateView, View
 from rest_framework.authtoken.models import Token
 
 import login.permissions
@@ -342,6 +341,18 @@ class SettingsView(View):
 ###########################################################################
 #            Group related views & partial views for htmx          #
 ###########################################################################
+
+
+class GroupsView(TemplateView):
+    template_name = "login/groups.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["organizations"] = Organization.objects.prefetch_related(
+            "memberships"
+        ).all()
+        context["projects"] = Project.objects.prefetch_related("memberships").all()
+        return context
 
 
 class UserGroupsView(TemplateView):

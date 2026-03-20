@@ -21,6 +21,7 @@ from django.urls import path, re_path
 from base.views import handler404
 from login.views import (
     EditUserView,
+    GroupsView,
     ReviewsView,
     SettingsView,
     TablesView,
@@ -69,6 +70,11 @@ urlpatterns = [
             template_name="account/custom_password_reset_complete.html"
         ),
         name="password_reset_complete",
+    ),
+    re_path(
+        r"^groups$",
+        GroupsView.as_view(),
+        name="groups",
     ),
     re_path(r"^profile/(?P<user_id>[\d]+)/edit$", EditUserView.as_view(), name="edit"),
     re_path(
