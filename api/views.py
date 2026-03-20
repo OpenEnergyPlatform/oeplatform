@@ -48,10 +48,11 @@ from django.contrib.auth.models import Group
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Q
 from django.http import Http404, HttpRequest, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
-from rest_framework import generics, status
+from rest_framework import generics, permissions, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -147,6 +148,8 @@ from api.parser import (
 from api.serializers import (
     EnergyframeworkSerializer,
     EnergymodelSerializer,
+    OrganizationSerializer,
+    ProjectSerializer,
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
@@ -166,6 +169,7 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_table_name
 from dataedit.models import Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
+from login.services import create_group, edit_group, get_group_form
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
     execute_sparql_query,
@@ -885,6 +889,63 @@ class TableRowsAPIView(APIView):
 
         cursor = sessions.load_cursor_from_context(request_data_dict(request))
         execute_sqla(query, cursor)
+
+
+class GroupAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_authenticators(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return []
+        return super().get_authenticators()
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return []
+        return super().get_permissions()
+
+    @api_exception
+    def get(self, request, group_type: str, group: str):
+        if group_type == "organization":
+            group = get_object_or_404(login_models.Organization, name=group)
+            return JsonResponse(
+                OrganizationSerializer(group).data, status=status.HTTP_200_OK
+            )
+        else:
+            group = get_object_or_404(login_models.Project, name=group)
+            return JsonResponse(
+                ProjectSerializer(group).data, status=status.HTTP_200_OK
+            )
+
+    @api_exception
+    def put(self, request, group_type: str, group: str):
+        """Create group"""
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict["query"]
+        payload_query["name"] = group
+
+        if Group.objects.filter(name=group).exists():
+            raise APIError("Group already exists", status.HTTP_409_CONFLICT)
+
+        group_form = get_group_form(group_type, payload_query)
+        create_group(request.user, group_form)
+        return JsonResponse({}, status=status.HTTP_201_CREATED)
+
+    @api_exception
+    def post(self, request, group_type: str, group: str):
+        """Edit group"""
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict["query"]
+        payload_query["name"] = group
+
+        group = Group.objects.filter(name=group).first()
+        if group is None:
+            raise APIError("Group does not exist", status.HTTP_404_NOT_FOUND)
+
+        group_form = get_group_form(group_type, payload_query, group.id)
+        edit_group(request.user, group_form)
+        return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
 
 
 @api_exception

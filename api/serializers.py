@@ -10,6 +10,7 @@ from django.urls import reverse
 from rest_framework import serializers
 
 from dataedit.models import Table
+from login.models import GroupPermission, Membership, Organization, Project
 from modelview.models import Energyframework, Energymodel
 from oeplatform.settings import URL
 
@@ -164,3 +165,57 @@ class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
             raise serializers.ValidationError("Dataset names must be unique.")
 
         return value
+
+
+class GroupMembersSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = Membership
+        fields = ["user"]
+
+
+class GroupTablesSerializer(serializers.ModelSerializer):
+    table = serializers.StringRelatedField()
+
+    class Meta:
+        model = GroupPermission
+        fields = ["table"]
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    memberships = GroupMembersSerializer(many=True)
+    table_permissions = GroupTablesSerializer(many=True)
+
+    class Meta:
+        model = Organization
+        fields = [
+            "name",
+            "acronym",
+            "description",
+            "image",
+            "homepage",
+            "memberships",
+            "table_permissions",
+        ]
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    memberships = GroupMembersSerializer(many=True)
+    table_permissions = GroupTablesSerializer(many=True)
+
+    class Meta:
+        model = Project
+        fields = [
+            "name",
+            "acronym",
+            "description",
+            "image",
+            "homepage",
+            "grant_number",
+            "funding_agency",
+            "contact",
+            "keywords",
+            "memberships",
+            "table_permissions",
+        ]

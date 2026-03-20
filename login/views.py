@@ -52,6 +52,7 @@ from login.models import (
 )
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
+from login.services import create_group, edit_group, get_group_form
 
 # Pagination
 ITEMS_PER_PAGE = 8
@@ -463,15 +464,7 @@ class UserGroupFormView(LoginRequiredMixin, TemplateView):
         :param group_type: Type of the group (currently organization or project)
         :return: Profile renderer
         """
-        if group_type == "organization":
-            form_class = OrganizationForm
-            model = Organization
-        else:
-            form_class = ProjectForm
-            model = Project
-        group = model.objects.get(id=group_id) if group_id else None
-
-        form = form_class(request.POST, instance=group)
+        form = get_group_form(group_type, request.POST, group_id)
         context = {
             "form": form,
             "group_type": group_type,
@@ -482,17 +475,10 @@ class UserGroupFormView(LoginRequiredMixin, TemplateView):
 
         # status = 201
         if group_id:
-            membership = get_object_or_404(Membership, group=group, user=request.user)
-            if membership.level < ADMIN_PERM:
-                raise PermissionDenied
-            context["group"] = form.save()
+            context["group"] = edit_group(request.user, form)
             return self.render_to_response(context)
         else:
-            group = form.save()
-            membership = Membership.objects.create(
-                user=request.user, group=group, level=ADMIN_PERM
-            )
-            membership.save()
+            create_group(request.user, form)
             messages.add_message(
                 request,
                 level=messages.INFO,

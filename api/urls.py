@@ -51,6 +51,7 @@ from api.views import (
     AllTableSizesAPIView,
     EnergyframeworkFactsheetListAPIView,
     EnergymodelFactsheetListAPIView,
+    GroupAPIView,
     ManageOekgScenarioDatasetsAPIView,
     OekgSparqlAPIView,
     ScenarioDataTablesListAPIView,
@@ -117,6 +118,15 @@ urlpatterns_v0_schema_table = [
         r"^(?P<table>[\w\d_\s]+)/rowcount$",
         table_approx_row_count_view,
         name="approx-row-count",
+    ),
+]
+
+# all endpoints referring to groups
+urlpatterns_v0_group = [
+    re_path(
+        r"^(?P<group_type>organization|project)/(?P<group>[\w\d_\s]+)/$",
+        GroupAPIView.as_view(),
+        name="api_group",
     ),
 ]
 
@@ -262,6 +272,7 @@ urlpatterns_v0 = [
         include(urlpatterns_v0_schema_table),
     ),
     path("tables/", include(urlpatterns_v0_schema_table)),
+    path("groups/", include(urlpatterns_v0_group)),
     path("advanced/", include(urlpatterns_v0_advanced)),
     re_path(
         r"^oekg/sparql/?$",
