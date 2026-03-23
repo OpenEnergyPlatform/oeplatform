@@ -172,7 +172,7 @@ class GroupMembersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Membership
-        fields = ["user"]
+        fields = ["user", "level"]
 
 
 class GroupTablesSerializer(serializers.ModelSerializer):

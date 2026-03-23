@@ -52,6 +52,7 @@ from api.views import (
     EnergyframeworkFactsheetListAPIView,
     EnergymodelFactsheetListAPIView,
     GroupAPIView,
+    GroupMemberAPIView,
     ManageOekgScenarioDatasetsAPIView,
     OekgSparqlAPIView,
     ScenarioDataTablesListAPIView,
@@ -127,6 +128,12 @@ urlpatterns_v0_group = [
         r"^(?P<group_type>organization|project)/(?P<group>[\w\d_\s]+)/$",
         GroupAPIView.as_view(),
         name="api_group",
+    ),
+    re_path(
+        r"^(?P<group_type>organization|project)/(?P<group>[\w\d_\s]+)/"
+        r"member/(?P<member>[\w\d_\s]+)/$",
+        GroupMemberAPIView.as_view(),
+        name="api_group_member",
     ),
 ]
 

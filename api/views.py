@@ -169,6 +169,7 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import assert_valid_table_name
 from dataedit.models import Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
+from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
 from login.services import create_group, delete_group, edit_group, get_group_form
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -956,6 +957,96 @@ class GroupAPIView(APIView):
             raise APIError("Group does not exist", status.HTTP_404_NOT_FOUND)
 
         delete_group(request.user, group.id)
+        return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
+
+
+class GroupMemberAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_user_and_member(self, group_name: str, member_name: str):
+        group = Group.objects.filter(name=group_name).first()
+        if group is None:
+            raise APIError("Group does not exist", status.HTTP_404_NOT_FOUND)
+
+        member = login_models.myuser.objects.filter(name=member_name).first()
+        if member is None:
+            raise APIError("User does not exist", status.HTTP_404_NOT_FOUND)
+        return group, member
+
+    @api_exception
+    def post(self, request, group_type: str, group: str, member: str):
+        """Add member to group."""
+        group, member = self.get_user_and_member(group, member)
+
+        request_membership = get_object_or_404(
+            login_models.Membership, group=group, user=request.user
+        )
+        if request_membership.level < WRITE_PERM:
+            raise APIError(
+                "No permission to add a user to this group",
+                status.HTTP_405_METHOD_NOT_ALLOWED,
+            )
+
+        membership, _ = login_models.Membership.objects.get_or_create(
+            group=group, user=member
+        )
+        membership.save()
+
+        return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
+
+    @api_exception
+    def put(self, request, group_type: str, group: str, member: str):
+        """Alter member role in group"""
+        group, member = self.get_user_and_member(group, member)
+
+        request_membership = get_object_or_404(
+            login_models.Membership, group=group, user=request.user
+        )
+        if request_membership.level < ADMIN_PERM:
+            raise APIError(
+                "No permission to alter user role in this group",
+                status.HTTP_405_METHOD_NOT_ALLOWED,
+            )
+
+        membership = login_models.Membership.objects.filter(
+            group=group, user=member
+        ).first()
+        if membership is None:
+            raise APIError(
+                "User is not member of this group", status.HTTP_404_NOT_FOUND
+            )
+
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict["query"]
+        membership.level = payload_query["level"]
+        membership.save()
+
+        return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
+
+    @api_exception
+    def delete(self, request, group_type: str, group: str, member: str):
+        """Remove member of group"""
+        group, member = self.get_user_and_member(group, member)
+
+        request_membership = get_object_or_404(
+            login_models.Membership, group=group, user=request.user
+        )
+        if request_membership.level < DELETE_PERM:
+            raise APIError(
+                "No permission to remove user from in this group",
+                status.HTTP_405_METHOD_NOT_ALLOWED,
+            )
+
+        membership = login_models.Membership.objects.filter(
+            group=group, user=member
+        ).first()
+        if membership is None:
+            raise APIError(
+                "User is not member of this group", status.HTTP_404_NOT_FOUND
+            )
+
+        membership.delete()
         return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
 
 
