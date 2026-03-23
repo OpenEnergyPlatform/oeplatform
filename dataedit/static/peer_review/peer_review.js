@@ -222,17 +222,32 @@ export function cancelPeerReview() {
 
 export function checkReviewComplete() {
   const fields = getAllFieldsAndValues();
+  let allComplete = true;
+
   for (let field of fields) {
+    // 1. Get the current state (ok, rejected, suggestion, or null)
     const fieldState = getFieldState(field.fieldName);
-    const reviewed = current_review["reviews"].find((review) => review.key === field.fieldName);
-    if (!reviewed && fieldState !== 'ok' && fieldState !== 'rejected' && !isEmptyValue(field.fieldValue)) {
-      $('#submit_summary').addClass('disabled');
-      return;
+
+    // 2. Check if the value is essentially empty
+    const isEmpty = isEmptyValue(field.fieldValue);
+
+    // 3. Logic: If it is NOT empty, it MUST have a valid state.
+    //    If it is empty, we ignore it (it counts as complete).
+    if (!isEmpty && fieldState !== 'ok' && fieldState !== 'rejected' && fieldState !== 'suggestion') {
+      allComplete = false;
+      break; 
     }
   }
-  $('#submit_summary').removeClass('disabled');
-  if (!window.clientSideReviewFinished) {
-    showToast("Success", "You have reviewed all fields and can submit the review to get feedback!", 'success');
+
+  const submitButton = $('#submit_summary');
+  
+  if (allComplete) {
+    submitButton.removeClass('disabled');
+    if (!window.clientSideReviewFinished) {
+        showToast("Success", "You have reviewed all fields and can submit the review to get feedback!", 'success');
+    }
+  } else {
+    submitButton.addClass('disabled');
   }
 }
 

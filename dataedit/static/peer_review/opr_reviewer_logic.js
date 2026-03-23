@@ -66,7 +66,7 @@ export function checkFieldStates() {
         if (!isEmptyValue(fieldValue)) {
             const fieldState = getFieldState(fieldName);
 
-            if (fieldState !== 'ok' && fieldState !== 'rejected') {
+            if (fieldState !== 'ok' && fieldState !== 'rejected' && fieldState !== 'suggestion') {
                 return false;
             }
         }

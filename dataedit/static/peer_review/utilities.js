@@ -37,7 +37,18 @@ export function sendJson(method, url, data, success, error) {
 }
 
 export function isEmptyValue(value) {
-    return !value || value === '' || value === 'None' || value === 'null';
+    if (value === null || value === undefined) return true;
+    
+    // Convert to string and trim whitespace
+    const s = String(value).trim();
+    
+    return (
+        s === '' || 
+        s === 'None' || 
+        s === 'null' || 
+        s === '[]' || 
+        s === '{}'
+    );
 }
 
 export function getErrorMsg(response) {

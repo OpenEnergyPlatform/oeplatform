@@ -110,12 +110,28 @@ function click_field(fieldKey, fieldValue, category) {
   const fieldState = getFieldState(fieldKey);
   
   // Enable/Disable buttons based on state
+    // 2. Logic to Enable/Disable buttons
+  // If it's empty, buttons MUST be disabled, regardless of previous state (unless you want to allow un-reviewing, but generally empty = no action)
   const buttons = ["ok-button", "rejected-button", "suggestion-button"];
-  if (fieldState) {
-      buttons.forEach(btn => document.getElementById(btn).disabled = false);
-  } else {
-      buttons.forEach(btn => document.getElementById(btn).disabled = isEmpty);
-  }
+  
+  buttons.forEach(btn => {
+      const el = document.getElementById(btn);
+      if (isEmpty) {
+          el.disabled = true; // Force disable if empty
+      } else {
+          // If not empty, disable if no state is selected yet? 
+          // Actually, in the original code, buttons were enabled if a state existed. 
+          // But usually, you want buttons enabled so you CAN select a state.
+          // Let's assume buttons should be enabled if the field has content.
+          el.disabled = false;
+      }
+  });
+
+  // 3. Handle empty field messages
+  // We need to escape the selector for jQuery/querySelector because keys can have dots
+  const safeFieldKey = CSS.escape(fieldKey); // Native JS escape
+  // Or manually if you prefer: fieldKey.replace(/(:|\.|\[|\]|,|=|@)/g, "\\$1");
+  
 
   // Handle empty field messages
   const fieldElementForMsg = document.querySelector(`.field[data-fieldkey="${fieldKey}"]`);
@@ -149,9 +165,9 @@ function click_field(fieldKey, fieldValue, category) {
 }
 
 function updateFieldColor(fieldKey, state) {
-    const safeId = '#field_' + fieldKey.replace(/\./g, "\\.");
-    $(safeId).removeClass('field-ok field-suggestion field-rejected');
-    $(safeId).addClass(`field-${state}`);
+  const safeId = '#field_' + fieldKey.replace(/\./g, "\\.");
+  $(safeId).removeClass('field-ok field-suggestion field-rejected');
+  $(safeId).addClass(`field-${state}`);
 }
 
 function saveEntrancesForReviewer() {
