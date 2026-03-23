@@ -9,6 +9,7 @@ from login.models import (
     Membership,
     Organization,
     Project,
+    UserPermission,
 )
 from login.models import myuser as User
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
@@ -282,4 +283,133 @@ class GroupMemberAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertFalse(
             Membership.objects.filter(user=self.user_to_add, group=self.org).exists()
+        )
+
+
+class GroupTableAPITests(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_with_perm = User.objects.create_user(
+            name="user_with_perm", email="perm@test.com", affiliation="test"
+        )
+        cls.token_with_perm = Token.objects.get(user=cls.user_with_perm)
+
+        cls.user_no_perm = User.objects.create_user(
+            name="user_no_perm", email="noperm@test.com", affiliation="test"
+        )
+        cls.token_no_perm = Token.objects.get(user=cls.user_no_perm)
+
+        cls.user_write_perm = User.objects.create_user(
+            name="user_write_perm", email="writeperm@test.com", affiliation="test"
+        )
+        cls.token_write_perm = Token.objects.get(user=cls.user_write_perm)
+
+        cls.table = Table.objects.create(name="test_table")
+        UserPermission.objects.create(
+            holder=cls.user_with_perm, table=cls.table, level=DELETE_PERM
+        )
+        UserPermission.objects.create(
+            holder=cls.user_write_perm, table=cls.table, level=WRITE_PERM
+        )
+
+        cls.org = Organization.objects.create(name="table_test_org")
+
+    def set_token(self, token):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+
+    def test_add_table_to_group(self):
+        """Test adding a table to a group via POST."""
+        url = reverse(
+            "api:api_group_table",
+            kwargs={
+                "group_type": "organization",
+                "group": self.org.name,
+                "table": self.table.name,
+            },
+        )
+
+        # Unauthorized
+        self.client.credentials()
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Authorized but no permission on table
+        self.set_token(self.token_no_perm)
+        response = self.client.post(url)
+        # login/services.py raises PermissionDenied
+        # api/views.py catches it and raises APIError(str(e), 405)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        # Authorized with WRITE_PERM on table (not enough, needs > WRITE_PERM)
+        self.set_token(self.token_write_perm)
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        # Authorized with DELETE_PERM on table
+        self.set_token(self.token_with_perm)
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertTrue(
+            GroupPermission.objects.filter(holder=self.org, table=self.table).exists()
+        )
+
+    def test_alter_table_in_group(self):
+        """Test altering table role in group via PUT."""
+        GroupPermission.objects.create(
+            holder=self.org, table=self.table, level=WRITE_PERM
+        )
+        url = reverse(
+            "api:api_group_table",
+            kwargs={
+                "group_type": "organization",
+                "group": self.org.name,
+                "table": self.table.name,
+            },
+        )
+        payload = {"query": {"level": DELETE_PERM}}
+
+        # Authorized with DELETE_PERM on table can alter
+        self.set_token(self.token_with_perm)
+        response = self.client.put(url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        gp = GroupPermission.objects.get(holder=self.org, table=self.table)
+        self.assertEqual(gp.level, DELETE_PERM)
+
+        # Table not in group
+        other_table = Table.objects.create(name="other_table")
+        # Need permission for other_table too
+        UserPermission.objects.create(
+            holder=self.user_with_perm, table=other_table, level=DELETE_PERM
+        )
+        url_other = reverse(
+            "api:api_group_table",
+            kwargs={
+                "group_type": "organization",
+                "group": self.org.name,
+                "table": other_table.name,
+            },
+        )
+        response = self.client.put(url_other, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_remove_table_from_group(self):
+        """Test removing table from group via DELETE."""
+        GroupPermission.objects.get_or_create(
+            holder=self.org, table=self.table, level=WRITE_PERM
+        )
+        url = reverse(
+            "api:api_group_table",
+            kwargs={
+                "group_type": "organization",
+                "group": self.org.name,
+                "table": self.table.name,
+            },
+        )
+
+        # Authorized with DELETE_PERM on table can remove
+        self.set_token(self.token_with_perm)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertFalse(
+            GroupPermission.objects.filter(holder=self.org, table=self.table).exists()
         )

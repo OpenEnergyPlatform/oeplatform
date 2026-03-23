@@ -46,6 +46,7 @@ import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.postgres.search import TrigramSimilarity
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404, HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -170,7 +171,15 @@ from api.validators.identifier import assert_valid_table_name
 from dataedit.models import Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
-from login.services import create_group, delete_group, edit_group, get_group_form
+from login.services import (
+    add_table_to_group,
+    alter_table_in_group,
+    create_group,
+    delete_group,
+    edit_group,
+    get_group_form,
+    remove_table_from_group,
+)
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
     execute_sparql_query,
@@ -1047,6 +1056,65 @@ class GroupMemberAPIView(APIView):
             )
 
         membership.delete()
+        return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
+
+
+class GroupTableAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_group_and_table(self, group_name: str, table_name: str):
+        group = Group.objects.filter(name=group_name).first()
+        if group is None:
+            raise APIError("Group does not exist", status.HTTP_404_NOT_FOUND)
+
+        table = Table.objects.filter(name=table_name).first()
+        if table is None:
+            raise APIError("Table does not exist", status.HTTP_404_NOT_FOUND)
+        return group, table
+
+    @api_exception
+    def post(self, request, group_type: str, group: str, table: str):
+        """Add table to group."""
+        group, table = self.get_group_and_table(group, table)
+
+        try:
+            add_table_to_group(request.user, group, table)
+        except PermissionDenied as e:
+            raise APIError(str(e), status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
+
+    @api_exception
+    def put(self, request, group_type: str, group: str, table: str):
+        """Alter table role in group"""
+        group, table = self.get_group_and_table(group, table)
+
+        request_data_dict = get_request_data_dict(request)
+        payload_query = request_data_dict["query"]
+        level = payload_query["level"]
+
+        try:
+            alter_table_in_group(request.user, group, table, level)
+        except PermissionDenied as e:
+            raise APIError(str(e), status.HTTP_405_METHOD_NOT_ALLOWED)
+        except login_models.GroupPermission.DoesNotExist:
+            raise APIError("Table is not in this group", status.HTTP_404_NOT_FOUND)
+
+        return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
+
+    @api_exception
+    def delete(self, request, group_type: str, group: str, table: str):
+        """Remove table from group"""
+        group, table = self.get_group_and_table(group, table)
+
+        try:
+            remove_table_from_group(request.user, group, table)
+        except PermissionDenied as e:
+            raise APIError(str(e), status.HTTP_405_METHOD_NOT_ALLOWED)
+        except login_models.GroupPermission.DoesNotExist:
+            raise APIError("Table is not in this group", status.HTTP_404_NOT_FOUND)
+
         return JsonResponse({}, status=status.HTTP_202_ACCEPTED)
 
 

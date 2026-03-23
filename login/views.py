@@ -52,7 +52,15 @@ from login.models import (
 )
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
-from login.services import create_group, delete_group, edit_group, get_group_form
+from login.services import (
+    add_table_to_group,
+    alter_table_in_group,
+    create_group,
+    delete_group,
+    edit_group,
+    get_group_form,
+    remove_table_from_group,
+)
 
 # Pagination
 ITEMS_PER_PAGE = 8
@@ -519,25 +527,17 @@ class UserGroupTablesView(TemplateView, LoginRequiredMixin):
         group = get_object_or_404(Group, pk=group_id)
         table_name = request.POST.get("name")
         table = table_or_404(table=table_name)
-        user_permissions = table.userpermission_set.filter(
-            holder=request.user, level__gt=WRITE_PERM
-        ).first()
         error_msg = None
-        if user_permissions is None:
-            error_msg = "No permission to add this table."
-            context = self.get_context_data()
-            context["error_message"] = error_msg
-            return self.render_to_response(context)
 
-        if mode == "add_table":
-            p, _ = GroupPermission.objects.get_or_create(holder=group, table=table)
-            p.save()
-        elif mode == "remove_table":
-            GroupPermission.objects.get(holder=group, table=table).delete()
-        elif mode == "alter_table":
-            permission = GroupPermission.objects.get(holder=group, table=table)
-            permission.level = request.POST["level"]
-            permission.save()
+        try:
+            if mode == "add_table":
+                add_table_to_group(request.user, group, table)
+            elif mode == "remove_table":
+                remove_table_from_group(request.user, group, table)
+            elif mode == "alter_table":
+                alter_table_in_group(request.user, group, table, request.POST["level"])
+        except (PermissionDenied, GroupPermission.DoesNotExist) as e:
+            error_msg = str(e)
 
         context = self.get_context_data()
         context["error_message"] = error_msg
