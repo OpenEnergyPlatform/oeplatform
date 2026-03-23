@@ -1,3 +1,8 @@
+__license__ = """
+SPDX-FileCopyrightText: 2026 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.authtoken.models import Token
