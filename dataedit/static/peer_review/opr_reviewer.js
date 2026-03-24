@@ -96,7 +96,7 @@ function deletePeerReview() {
 }
 
 function click_field(fieldKey, fieldValue, category) {
-  const isEmpty = isEmptyValue(fieldValue);
+  const isEmpty = isEmptyValue(fieldValue) || fieldValue === '0';
   const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
 
   switchCategoryTab(category);

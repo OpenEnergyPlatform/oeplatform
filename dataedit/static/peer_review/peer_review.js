@@ -225,17 +225,12 @@ export function checkReviewComplete() {
   let allComplete = true;
 
   for (let field of fields) {
-    // 1. Get the current state (ok, rejected, suggestion, or null)
     const fieldState = getFieldState(field.fieldName);
+    const isEmpty = isEmptyValue(field.fieldValue) || field.fieldValue === '0';
 
-    // 2. Check if the value is essentially empty
-    const isEmpty = isEmptyValue(field.fieldValue);
-
-    // 3. Logic: If it is NOT empty, it MUST have a valid state.
-    //    If it is empty, we ignore it (it counts as complete).
     if (!isEmpty && fieldState !== 'ok' && fieldState !== 'rejected' && fieldState !== 'suggestion') {
       allComplete = false;
-      break; 
+      break;
     }
   }
 

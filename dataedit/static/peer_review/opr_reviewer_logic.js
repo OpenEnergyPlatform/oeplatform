@@ -64,7 +64,7 @@ export function checkFieldStates() {
 
     for (const { fieldName, fieldValue } of allFields) {
         if (!isEmptyValue(fieldValue)) {
-            const fieldState = getFieldState(fieldName);
+            const fieldState = getFieldState(fieldName)  || fieldValue === '0';
 
             if (fieldState !== 'ok' && fieldState !== 'rejected' && fieldState !== 'suggestion') {
                 return false;

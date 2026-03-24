@@ -385,17 +385,17 @@ export function updateSubmitButtonColor() {
 
 export function updateTabProgressIndicatorClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license'];
-
   tabNames.forEach(tabName => {
     const tab = document.getElementById(`${tabName}-tab`);
     if (!tab) return;
 
     const fieldsInTab = Array.from(document.querySelectorAll(`#${tabName} .field`));
 
-    const allReviewed = fieldsInTab.every(field => {
+    const allReviewed = fieldsInTab.length === 0 || fieldsInTab.every(field => {
       const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
       const fieldState = getFieldState(field.id.replace('field_', ''));
-      return isEmptyValue(fieldValue) || ['ok', 'suggestion', 'rejected'].includes(fieldState);
+      const effectivelyEmpty = isEmptyValue(fieldValue) || fieldValue === '0';
+      return effectivelyEmpty || ['ok', 'suggestion', 'rejected'].includes(fieldState);
     });
 
     tab.classList.toggle('status--done', allReviewed);
