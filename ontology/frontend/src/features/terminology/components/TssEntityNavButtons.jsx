@@ -27,7 +27,7 @@ export default function TssEntityNavButtons({ iri, ontologyId, onNavigate }) {
     // Fetch Children
     const { data: children, isLoading: loadingChildren } = useQuery(
         ["entityChildren", ontologyId, iri],
-        () => fetch(`${baseUrl}/children`).then((res) => (res.ok ? res.json() : null)),
+        () => fetch(`${baseUrl}/hierarchicalChildren`).then((res) => (res.ok ? res.json() : null)),
         { enabled: !!iri }
     );
 
