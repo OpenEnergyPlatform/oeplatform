@@ -1,3 +1,4 @@
+// ontology/frontend/src/features/terminology/components/TssEntityNavButtons.jsx
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -6,56 +7,46 @@ import { useQuery } from "react-query";
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from "@elastic/eui";
 import { useTssConfig } from "../hooks/useTssConfig";
 
-export default function TssEntityNavButtons({ iri, ontologyId, onNavigate }) {
+export default function TssEntityNavButtons({ iri, ontologyId, entityType = "class", onNavigate }) {
     const { apiBase } = useTssConfig();
 
-    // URL-encode the IRI as required by the TIB API path
     const encodedIri = encodeURIComponent(encodeURIComponent(iri));
 
-    // Construct base URL (handle global vs specific ontology routing)
-    const baseUrl = ontologyId
-        ? `${apiBase}ontologies/${ontologyId}/terms/${encodedIri}`
-        : `${apiBase}terms/${encodedIri}`;
+    // Map the entity type to the correct API path segment
+    const typePath = entityType === "property" ? "properties"
+        : entityType === "individual" ? "individuals"
+            : "terms";
 
-    // Fetch Parents
+    const baseUrl = ontologyId
+        ? `${apiBase}ontologies/${ontologyId}/${typePath}/${encodedIri}`
+        : `${apiBase}${typePath}/${encodedIri}`;
+
     const { data: parents, isLoading: loadingParents } = useQuery(
-        ["entityParents", ontologyId, iri],
+        ["entityParents", ontologyId, iri, entityType],
         () => fetch(`${baseUrl}/parents`).then((res) => (res.ok ? res.json() : null)),
         { enabled: !!iri }
     );
 
-    // Fetch Children
     const { data: children, isLoading: loadingChildren } = useQuery(
-        ["entityChildren", ontologyId, iri],
+        ["entityChildren", ontologyId, iri, entityType],
         () => fetch(`${baseUrl}/hierarchicalChildren`).then((res) => (res.ok ? res.json() : null)),
         { enabled: !!iri }
     );
 
-    // Extract the arrays from the HAL JSON response format
-    const parentTerms = parents?._embedded?.terms || [];
-    const childTerms = children?._embedded?.terms || [];
+    const parentTerms = parents?._embedded?.terms || parents?._embedded?.properties || parents?._embedded?.individuals || [];
+    const childTerms = children?._embedded?.terms || children?._embedded?.properties || children?._embedded?.individuals || [];
 
-    if (loadingParents || loadingChildren) {
-        return <EuiLoadingSpinner size="m" />;
-    }
-
-    if (parentTerms.length === 0 && childTerms.length === 0) {
-        return null; // Don't render anything if no hierarchy exists
-    }
+    if (loadingParents || loadingChildren) return <EuiLoadingSpinner size="m" />;
+    if (parentTerms.length === 0 && childTerms.length === 0) return null;
 
     return (
         <EuiFlexGroup wrap responsive={false} gutterSize="s" alignItems="center">
-            {/* Parents (Up) */}
             {parentTerms.length > 0 && (
                 <EuiFlexItem grow={false}>
                     <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
                         {parentTerms.map((parent) => (
                             <EuiFlexItem key={parent.iri} grow={false}>
-                                <EuiButton
-                                    size="s"
-                                    iconType="arrowUp"
-                                    onClick={() => onNavigate(parent)}
-                                >
+                                <EuiButton size="s" iconType="arrowUp" onClick={() => onNavigate(parent)}>
                                     {parent.label || parent.short_form}
                                 </EuiButton>
                             </EuiFlexItem>
@@ -64,25 +55,16 @@ export default function TssEntityNavButtons({ iri, ontologyId, onNavigate }) {
                 </EuiFlexItem>
             )}
 
-            {/* Separator if both exist */}
             {parentTerms.length > 0 && childTerms.length > 0 && (
-                <EuiFlexItem grow={false}>
-                    <EuiText color="subdued" size="s">|</EuiText>
-                </EuiFlexItem>
+                <EuiFlexItem grow={false}><EuiText color="subdued" size="s">|</EuiText></EuiFlexItem>
             )}
 
-            {/* Children (Down) */}
             {childTerms.length > 0 && (
                 <EuiFlexItem grow={false}>
                     <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
                         {childTerms.map((child) => (
                             <EuiFlexItem key={child.iri} grow={false}>
-                                <EuiButton
-                                    size="s"
-                                    iconType="arrowDown"
-                                    iconSide="right"
-                                    onClick={() => onNavigate(child)}
-                                >
+                                <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={() => onNavigate(child)}>
                                     {child.label || child.short_form}
                                 </EuiButton>
                             </EuiFlexItem>
