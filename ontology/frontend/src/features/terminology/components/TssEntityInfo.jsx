@@ -9,22 +9,28 @@ import { useTssConfig } from "../hooks/useTssConfig";
 export default function TssEntityInfo({
     iri,
     ontologyId,
-    entityType = "class", // Now automatically passed down from the page
+    entityType = "class",
     onNavigateToEntity,
-    onNavigateToOntology
+    onNavigateToOntology,
+    activeLang
 }) {
-    const { apiBase, ontology: configOntology } = useTssConfig();
+    // We still grab config values, but we will let the local activeLang override the config lang
+    const { apiBase, ontology: configOntology, lang: configLang } = useTssConfig();
     const activeOntology = ontologyId || configOntology;
+
+    // Prioritize the dropdown selection, fallback to the global config
+    const currentLang = activeLang || configLang;
+    const parameter = currentLang ? `lang=${encodeURIComponent(currentLang)}` : "";
 
     return (
         <EntityInfoWidget
             api={apiBase}
-            ontologyId={activeOntology} // ALWAYS use the ontology context!
+            ontologyId={activeOntology}
             iri={iri}
             entityType={entityType}
             hasTitle={false}
             showBadges={true}
-            parameter=""
+            parameter={parameter} // <--- PASS IT HERE
             onNavigateToDisambiguate={() => { }}
             onNavigateToEntity={onNavigateToEntity || (() => { })}
             onNavigateToOntology={onNavigateToOntology || (() => { })}

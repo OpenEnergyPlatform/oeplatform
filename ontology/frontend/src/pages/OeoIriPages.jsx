@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import {
   EuiPageTemplate, EuiPanel, EuiSpacer, EuiTitle,
-  EuiFlexGroup, EuiFlexItem, EuiButton, EuiBadge, EuiLoadingSpinner, EuiText
+  EuiFlexGroup, EuiFlexItem, EuiButton, EuiBadge, EuiLoadingSpinner, EuiText, EuiSelect
 } from "@elastic/eui";
 
 import TssEntityInfo from "../features/terminology/components/TssEntityInfo";
@@ -28,7 +28,10 @@ function resolveIri(ontology, shortForm) {
 export default function OeoIriPages() {
   const { ontology, short_form } = useParams();
   const navigate = useNavigate();
-  const { apiBase } = useTssConfig();
+  const { apiBase, lang } = useTssConfig();
+
+  // Local state for the language dropdown
+  const [activeLang, setActiveLang] = useState(lang || "en");
 
   // Redirect interceptor for "ugly" URLs
   useEffect(() => {
@@ -46,14 +49,14 @@ export default function OeoIriPages() {
   const fetchIri = isCleanShortForm ? resolveIri(ontology, short_form) : "";
   const displayIri = isCleanShortForm ? `https://openenergyplatform.org/ontology/${ontology}/${short_form}` : "";
 
-  // --- SUPERCHARGED QUERY: Detects Type, Label, AND Elucidation/Description ---
+  // --- SUPERCHARGED QUERY ---
   const { data: entityData, isLoading: loadingData } = useQuery(
-    ["entityData", short_form, fetchIri],
+    ["entityData", short_form, fetchIri, activeLang],
     async () => {
       const fallback = { type: "class", label: short_form, description: null };
       if (!short_form || !fetchIri) return fallback;
 
-      // 1. Ask Search API to figure out the entity type
+      // 1. Search API (Mainly used to reliably figure out the type: class/property/individual)
       const searchRes = await fetch(`${apiBase}search?q=${short_form}&ontology=${ontology || "oeo"}&exact=true`);
       let derivedType = "class";
       let extractedLabel = short_form;
@@ -75,7 +78,7 @@ export default function OeoIriPages() {
         }
       }
 
-      // 2. Ask the specific Entity API for the full metadata to extract Elucidation/Definition
+      // 2. Entity API (This STRICTLY obeys ?lang= and is used to grab the translated label & description)
       const typePath = derivedType === "property" ? "properties"
         : derivedType === "individual" ? "individuals"
           : "terms";
@@ -83,16 +86,18 @@ export default function OeoIriPages() {
 
       let bestDescription = null;
       try {
-        const entityRes = await fetch(`${apiBase}ontologies/${ontology || "oeo"}/${typePath}/${encodedIri}`);
+        const entityRes = await fetch(`${apiBase}ontologies/${ontology || "oeo"}/${typePath}/${encodedIri}?lang=${activeLang}`);
         if (entityRes.ok) {
           const entityJson = await entityRes.json();
-          extractedLabel = entityJson.label || extractedLabel; // refine label if available
 
-          // Check for standard description first
+          // CRITICAL FIX: Overwrite the Search API label with the translated Entity API label!
+          if (entityJson.label) {
+            extractedLabel = entityJson.label;
+          }
+
           if (entityJson.description && entityJson.description.length > 0) {
             bestDescription = entityJson.description[0];
           }
-          // If empty, hunt for BFO's "elucidation" or standard "definition" in annotations
           else if (entityJson.annotation) {
             const eluc = entityJson.annotation["elucidation"] || entityJson.annotation["IAO_0000600"];
             const def = entityJson.annotation["definition"] || entityJson.annotation["IAO_0000115"];
@@ -118,7 +123,6 @@ export default function OeoIriPages() {
   const entityLabel = entityData?.label || short_form;
   const entityDescription = entityData?.description;
 
-  // Unified Handler for clicks inside the widgets
   const handleNavigateToEntity = (...args) => {
     let iri = "";
     if (args.length >= 3) {
@@ -187,20 +191,34 @@ export default function OeoIriPages() {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton
-              href={`/viewer/oeo/?iri=${encodeURIComponent(fetchIri)}&type=${encodeURIComponent(entityType)}`}
-              iconType="visMapCoordinate"
-              size="s"
-              fill
-            >
-              Explore this term in OEO Viewer
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  options={[
+                    { value: 'en', text: 'EN' },
+                    { value: 'de', text: 'DE' },
+                  ]}
+                  value={activeLang}
+                  onChange={(e) => setActiveLang(e.target.value)}
+                  compressed
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  href={`/viewer/oeo/?iri=${encodeURIComponent(fetchIri)}&type=${encodeURIComponent(entityType)}`}
+                  iconType="visMapCoordinate"
+                  size="s"
+                  fill
+                >
+                  Explore this term in OEO Viewer
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />
 
-        {/* --- HEADER SUMMARY SECTION --- */}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -225,7 +243,6 @@ export default function OeoIriPages() {
             <EuiSpacer size="s" />
             <TssIriWidget iri={displayIri} />
 
-            {/* Custom Description Block replacing TssDescription */}
             {entityDescription && (
               <>
                 <EuiSpacer size="l" />
@@ -242,14 +259,15 @@ export default function OeoIriPages() {
 
         <EuiSpacer size="l" />
 
-        {/* --- DETAILED METADATA SECTION --- */}
         <EuiPanel paddingSize="l">
           <EuiTitle size="s"><h3>Entity Information</h3></EuiTitle>
           <EuiSpacer size="s" />
+
           <TssEntityInfo
             iri={fetchIri}
             ontologyId={ontology}
             entityType={entityType}
+            activeLang={activeLang} // <--- PASSING LANG HERE
             onNavigateToEntity={handleNavigateToEntity}
             onNavigateToOntology={handleNavigateToOntology}
           />
@@ -258,10 +276,12 @@ export default function OeoIriPages() {
 
           <EuiTitle size="s"><h3>Relations & Hierarchy</h3></EuiTitle>
           <EuiSpacer size="s" />
+
           <TssEntityRelations
             iri={fetchIri}
             ontologyId={ontology}
             entityType={entityType === "individual" ? "individual" : "term"}
+            activeLang={activeLang} // <--- PASSING LANG HERE
             onNavigateToEntity={handleNavigateToEntity}
             onNavigateToOntology={handleNavigateToOntology}
           />
