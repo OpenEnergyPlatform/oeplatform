@@ -13,7 +13,6 @@ import TssEntityInfo from "../features/terminology/components/TssEntityInfo";
 import TssEntityRelations from "../features/terminology/components/TssEntityRelations";
 import TssIriWidget from "../features/terminology/components/TssIriWidget";
 import TssEntityNavButtons from "../features/terminology/components/TssEntityNavButtons";
-import TssDescription from "../features/terminology/components/TssDescription";
 import { useTssConfig } from "../features/terminology/hooks/useTssConfig";
 
 function resolveIri(ontology, shortForm) {
@@ -31,7 +30,7 @@ export default function OeoIriPages() {
   const navigate = useNavigate();
   const { apiBase } = useTssConfig();
 
-  // Redirect interceptor for "ugly" URLs from Search Widget
+  // Redirect interceptor for "ugly" URLs
   useEffect(() => {
     if (!short_form) return;
     const decoded = decodeURIComponent(short_form);
@@ -47,36 +46,77 @@ export default function OeoIriPages() {
   const fetchIri = isCleanShortForm ? resolveIri(ontology, short_form) : "";
   const displayIri = isCleanShortForm ? `https://openenergyplatform.org/ontology/${ontology}/${short_form}` : "";
 
-  // --- AUTO-DETECT ENTITY TYPE FOR THE INFO WIDGET ---
-  const { data: entityType, isLoading: loadingType } = useQuery(
-    ["entityType", short_form],
+  // --- SUPERCHARGED QUERY: Detects Type, Label, AND Elucidation/Description ---
+  const { data: entityData, isLoading: loadingData } = useQuery(
+    ["entityData", short_form, fetchIri],
     async () => {
-      if (!short_form) return "class"; // fallback
+      const fallback = { type: "class", label: short_form, description: null };
+      if (!short_form || !fetchIri) return fallback;
 
-      // We query the search index specifically for this exact short_form
-      const res = await fetch(`${apiBase}search?q=${short_form}&ontology=${ontology || "oeo"}&exact=true`);
-      if (!res.ok) return "class";
+      // 1. Ask Search API to figure out the entity type
+      const searchRes = await fetch(`${apiBase}search?q=${short_form}&ontology=${ontology || "oeo"}&exact=true`);
+      let derivedType = "class";
+      let extractedLabel = short_form;
 
-      const data = await res.json();
-      const docs = data.response?.docs || [];
+      if (searchRes.ok) {
+        const searchData = await searchRes.json();
+        const match = (searchData.response?.docs || []).find(d => {
+          const sf = Array.isArray(d.short_form) ? d.short_form[0] : d.short_form;
+          return sf === short_form;
+        });
 
-      // Find the exact match
-      const match = docs.find(d => {
-        const sf = Array.isArray(d.short_form) ? d.short_form[0] : d.short_form;
-        return sf === short_form;
-      });
-
-      if (match && match.type) {
-        const types = Array.isArray(match.type) ? match.type : [match.type];
-
-        // The backend returns various property types (objectproperty, dataproperty, etc.)
-        if (types.includes("individual")) return "individual";
-        if (types.some(t => t.includes("property"))) return "property";
+        if (match) {
+          extractedLabel = Array.isArray(match.label) ? match.label[0] : match.label;
+          if (match.type) {
+            const types = Array.isArray(match.type) ? match.type : [match.type];
+            if (types.includes("individual")) derivedType = "individual";
+            else if (types.some(t => t.includes("property"))) derivedType = "property";
+          }
+        }
       }
-      return "class"; // Default fallback (which the TSS library often calls "term")
+
+      // 2. Ask the specific Entity API for the full metadata to extract Elucidation/Definition
+      const typePath = derivedType === "property" ? "properties"
+        : derivedType === "individual" ? "individuals"
+          : "terms";
+      const encodedIri = encodeURIComponent(encodeURIComponent(fetchIri));
+
+      let bestDescription = null;
+      try {
+        const entityRes = await fetch(`${apiBase}ontologies/${ontology || "oeo"}/${typePath}/${encodedIri}`);
+        if (entityRes.ok) {
+          const entityJson = await entityRes.json();
+          extractedLabel = entityJson.label || extractedLabel; // refine label if available
+
+          // Check for standard description first
+          if (entityJson.description && entityJson.description.length > 0) {
+            bestDescription = entityJson.description[0];
+          }
+          // If empty, hunt for BFO's "elucidation" or standard "definition" in annotations
+          else if (entityJson.annotation) {
+            const eluc = entityJson.annotation["elucidation"] || entityJson.annotation["IAO_0000600"];
+            const def = entityJson.annotation["definition"] || entityJson.annotation["IAO_0000115"];
+
+            if (eluc && eluc.length > 0) bestDescription = eluc[0];
+            else if (def && def.length > 0) bestDescription = def[0];
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to fetch detailed entity description", e);
+      }
+
+      return {
+        type: derivedType,
+        label: extractedLabel || short_form,
+        description: bestDescription
+      };
     },
-    { enabled: !!short_form }
+    { enabled: !!short_form && !!fetchIri }
   );
+
+  const entityType = entityData?.type || "class";
+  const entityLabel = entityData?.label || short_form;
+  const entityDescription = entityData?.description;
 
   // Unified Handler for clicks inside the widgets
   const handleNavigateToEntity = (...args) => {
@@ -121,8 +161,7 @@ export default function OeoIriPages() {
     }
   };
 
-  // Show a spinner while we figure out if it's a class, property, or individual
-  if (loadingType) {
+  if (loadingData) {
     return (
       <EuiPageTemplate paddingSize="m">
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: "50vh" }}>
@@ -142,7 +181,7 @@ export default function OeoIriPages() {
             <TssEntityNavButtons
               iri={fetchIri}
               ontologyId={ontology}
-              entityType={entityType} // Passes the correct type down to fix the API paths
+              entityType={entityType}
               onNavigate={handleNavigateToEntity}
             />
           </EuiFlexItem>
@@ -161,36 +200,52 @@ export default function OeoIriPages() {
 
         <EuiSpacer size="l" />
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
+        {/* --- HEADER SUMMARY SECTION --- */}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+          <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l">
-                  <h1 style={{ color: "#0071c1" }}>{short_form}</h1>
+                  <h1 style={{ color: "#0071c1", margin: 0 }}>{entityLabel}</h1>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {/* Visual indicator replaces the old tabs! */}
                 <EuiBadge color={entityType === "property" ? "warning" : entityType === "individual" ? "secondary" : "primary"}>
                   {entityType.toUpperCase()}
                 </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
+            <EuiText size="s" color="subdued">
+              <strong>Ontology:</strong> {(ontology || "oeo").toUpperCase()} &nbsp;&bull;&nbsp; <strong>ID:</strong> {short_form}
+            </EuiText>
+
             <EuiSpacer size="s" />
             <TssIriWidget iri={displayIri} />
+
+            {/* Custom Description Block replacing TssDescription */}
+            {entityDescription && (
+              <>
+                <EuiSpacer size="l" />
+                <EuiText>
+                  <p style={{ fontSize: "16px", lineHeight: "1.5" }}>
+                    {entityDescription}
+                  </p>
+                </EuiText>
+              </>
+            )}
+
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
 
+        {/* --- DETAILED METADATA SECTION --- */}
         <EuiPanel paddingSize="l">
           <EuiTitle size="s"><h3>Entity Information</h3></EuiTitle>
           <EuiSpacer size="s" />
-
-          <TssDescription iri={fetchIri} ontologyId={ontology} />
-          <EuiSpacer size="m" />
-
-          {/* THE WIDGET NOW KNOWS EXACTLY WHAT IT IS LOADING */}
           <TssEntityInfo
             iri={fetchIri}
             ontologyId={ontology}
@@ -203,7 +258,6 @@ export default function OeoIriPages() {
 
           <EuiTitle size="s"><h3>Relations & Hierarchy</h3></EuiTitle>
           <EuiSpacer size="s" />
-
           <TssEntityRelations
             iri={fetchIri}
             ontologyId={ontology}
