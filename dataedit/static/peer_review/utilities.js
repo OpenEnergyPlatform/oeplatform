@@ -51,6 +51,19 @@ export function isEmptyValue(value) {
     );
 }
 
+const BOUNDING_BOX_FIELDS = [
+  'extent.boundingBox.0',
+  'extent.boundingBox.1',
+  'extent.boundingBox.2',
+  'extent.boundingBox.3',
+];
+
+export function isEffectivelyEmpty(fieldKey, fieldValue) {
+  if (isEmptyValue(fieldValue)) return true;
+  if (BOUNDING_BOX_FIELDS.includes(fieldKey) && String(fieldValue).trim() === '0') return true;
+  return false;
+}
+
 export function getErrorMsg(response) {
   try {
     if (response.responseJSON && response.responseJSON.error) {

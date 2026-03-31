@@ -27,11 +27,9 @@ import { check_if_review_finished } from './opr_reviewer_logic.js';
 import { getFieldState, setGetFieldState, updateClientStateDict } from "./state_current_review.js";
 import { switchCategoryTab, selectNextField, updatePercentageDisplay } from "./navigation.js";
 import { renderSummaryPageFields, updateTabProgressIndicatorClasses } from "./summary.js";
-import { isEmptyValue } from "./utilities.js";
-
-window.clientSideReviewFinished = window.clientSideReviewFinished ?? false;
+import {isEmptyValue, isEffectivelyEmpty} from "./utilities.js";window.clientSideReviewFinished = window.clientSideReviewFinished ?? false;
 let initialReviewerSuggestions = {};
-
+window.clientSideReviewFinished = window.clientSideReviewFinished ?? false;
 export function initReviewer() {
   initializeEventBindings(saveEntrancesForReviewer);
 
@@ -96,7 +94,7 @@ function deletePeerReview() {
 }
 
 function click_field(fieldKey, fieldValue, category) {
-  const isEmpty = isEmptyValue(fieldValue) || fieldValue === '0';
+  const isEmpty = isEffectivelyEmpty(fieldKey, fieldValue);
   const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
 
   switchCategoryTab(category);

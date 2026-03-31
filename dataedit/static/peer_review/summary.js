@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import {current_review, selectedState} from "./peer_review.js";
 import {getFieldState} from "./state_current_review.js";
-import {isEmptyValue} from "./utilities.js";
-import {updatePercentageDisplay} from "./navigation.js";
-
+import {isEmptyValue, isEffectivelyEmpty, sendJson} from "./utilities.js";
+import { updatePercentageDisplay } from "./navigation.js";
 export function renderSummaryPageFields() {
   const acceptedFields = [];
   const suggestingFields = [];
@@ -32,7 +31,7 @@ export function renderSummaryPageFields() {
 
       const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
 
-      if (isEmptyValue(fieldValue)) {
+      if (isEffectivelyEmpty(field_id, fieldValue)) {
         emptyFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
       } else if (fieldState === 'ok') {
         acceptedFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
@@ -392,9 +391,10 @@ export function updateTabProgressIndicatorClasses() {
     const fieldsInTab = Array.from(document.querySelectorAll(`#${tabName} .field`));
 
     const allReviewed = fieldsInTab.length === 0 || fieldsInTab.every(field => {
+      const fieldKey = field.id.replace('field_', '');
       const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
-      const fieldState = getFieldState(field.id.replace('field_', ''));
-      const effectivelyEmpty = isEmptyValue(fieldValue) || fieldValue === '0';
+      const fieldState = getFieldState(fieldKey);
+      const effectivelyEmpty = isEffectivelyEmpty(fieldKey, fieldValue);
       return effectivelyEmpty || ['ok', 'suggestion', 'rejected'].includes(fieldState);
     });
 

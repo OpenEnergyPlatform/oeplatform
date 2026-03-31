@@ -4,7 +4,7 @@
 import { check_if_review_finished } from './opr_reviewer_logic.js';
 import { renderSummaryPageFields, updateSubmitButtonColor, updateTabProgressIndicatorClasses } from "./summary.js";
 import { selectNextField, updatePercentageDisplay } from "./navigation.js";
-import { isEmptyValue, sendJson, getCookie, getErrorMsg } from "./utilities.js";
+import {isEmptyValue, isEffectivelyEmpty, sendJson, getCookie, getErrorMsg} from "./utilities.js";
 import { getFieldState, updateClientStateDict } from "./state_current_review.js";
 
 // Re-export utilities for other modules
@@ -226,7 +226,7 @@ export function checkReviewComplete() {
 
   for (let field of fields) {
     const fieldState = getFieldState(field.fieldName);
-    const isEmpty = isEmptyValue(field.fieldValue) || field.fieldValue === '0';
+    const isEmpty = isEffectivelyEmpty(field.fieldName, field.fieldValue);
 
     if (!isEmpty && fieldState !== 'ok' && fieldState !== 'rejected' && fieldState !== 'suggestion') {
       allComplete = false;
