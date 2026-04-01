@@ -644,6 +644,7 @@
                    role="tabpanel"
                    aria-labelledby="license-tab">
                 <div class="review__items">
+                  <p class="review__items-cat">License 1</p>
                   {# Flat license fields #}
                   {% for item in meta.license.flat %}
                     <div id="field_{{ item.field|default:'undefined' }}"
