@@ -62,7 +62,7 @@ export function renderSummaryPageFields() {
       continue;
     }
 
-    if (isEmptyValue(fieldValue)) {
+    if (isEffectivelyEmpty(field_id, fieldValue)) {
       emptyFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
     } else if (fieldState === 'ok') {
       acceptedFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
@@ -103,7 +103,7 @@ export function renderSummaryPageFields() {
       if (
         !found &&
         fieldState !== 'ok' &&
-        !isEmptyValue(fieldValue) &&
+        !isEffectivelyEmpty(field_id, fieldValue) &&
         !processedFields.has(uniqueFieldIdentifier)
       ) {
         missingFields.push({ fieldName, fieldValue, fieldCategory, fieldSuggestion });
@@ -412,10 +412,11 @@ export function updateTabClasses() {
     let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
    let allReviewed = fields.every(field => {
-      let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
-      let fieldState = getFieldState(field.id.replace('field_', ''));
-      return isEmptyValue(fieldValue) || ['ok', 'suggest', 'rejected'].includes(fieldState);
-    });
+  let fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+  let fieldId = field.id.replace('field_', '');
+  let fieldState = getFieldState(fieldId);
+  return isEffectivelyEmpty(fieldId, fieldValue) || ['ok', 'suggestion', 'rejected'].includes(fieldState);
+});
 
     if (allReviewed) {
       tab.classList.add('status');
