@@ -6,7 +6,7 @@ import { HierarchyWidget } from "@ts4nfdi/terminology-service-suite";
 import { useTssConfig } from "../hooks/useTssConfig";
 
 export default function TssHierarchy({
-  iri,
+  iri, // This is the currently selected entity we want to highlight
   ontologyId,
   apiUrl,
   backendType = "ols",
@@ -44,11 +44,17 @@ export default function TssHierarchy({
       apiUrl={resolvedApiUrl}
       backendType={backendType}
       entityType={entityType}
-      iri={iri || ""}
+
+      // 1. Force 'iri' to be empty so the widget ALWAYS loads the full ontology from the top
+      iri=""
+
+      // 2. Pass your selected term into 'targetIri' to expand and highlight it in the tree
+      targetIri={iri || ""}
+
       ontologyId={resolvedOntologyId}
       parameter={mergedParameter}
-      keepExpansionStates={keepExpansionStates} // Check if hierarchy will show all
-      showSiblingsOnInit={showSiblingsOnInit} // Check if hierarchy will show all
+      keepExpansionStates={keepExpansionStates}
+      showSiblingsOnInit={showSiblingsOnInit}
       useLegacy={useLegacy}
       includeObsoleteEntities={includeObsoleteEntities}
       wrap={wrap}
