@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import {current_review, getAllFieldsAndValues, getErrorMsg, showToast} from "./peer_review.js";
-import {isEmptyValue, sendJson} from "./utilities.js";
-import {getFieldState} from "./state_current_review.js";
+import {isEmptyValue, isEffectivelyEmpty, sendJson} from "./utilities.js";import {getFieldState} from "./state_current_review.js";
 export function finishPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
 
@@ -61,12 +60,12 @@ export function check_if_review_finished() {
 
 export function checkFieldStates() {
     const allFields = getAllFieldsAndValues();
-
     for (const { fieldName, fieldValue } of allFields) {
-        if (!isEmptyValue(fieldValue)) {
+        console.log(fieldName, fieldValue)
+        if (!isEffectivelyEmpty(fieldName, fieldValue)) {
             const fieldState = getFieldState(fieldName);
 
-            if (fieldState !== 'ok' && fieldState !== 'rejected') {
+            if (fieldState !== 'ok' && fieldState !== 'rejected' && fieldState !== 'suggestion') {
                 return false;
             }
         }
