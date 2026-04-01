@@ -540,6 +540,7 @@
                    role="tabpanel"
                    aria-labelledby="source-tab">
                 <div class="review__items">
+                  <p class="review__items-cat">Source 1</p>
                   {# Flat source fields #}
                   {% for item in meta.source.flat %}
                     <div id="field_{{ item.field|default:'undefined' }}"
@@ -558,120 +559,15 @@
                       </p>
                     </div>
                   {% endfor %}
-                  {# Grouped source fields #}
-                  <div class="accordion" id="sourceAccordion">
-                    {% for group_key, group in meta.source.grouped.items %}
-                      <div class="accordion-item">
-                        <h2 class="accordion-header" id="heading-source-{{ forloop.counter }}">
-                          <button class="accordion-button collapsed"
-                                  type="button"
-                                  data-bs-toggle="collapse"
-                                  data-bs-target="#collapse-source-{{ forloop.counter }}"
-                                  aria-expanded="false">
-                            {{ group_key }}
-                          </button>
-                        </h2>
-                        <div id="collapse-source-{{ forloop.counter }}"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#sourceAccordion">
-                          <div class="accordion-body">
-                            {% for item in group.flat %}
-                              <div id="field_{{ item.field|default:'undefined' }}"
-                                   class="field review__item"
-                                   data-fieldkey="{{ item.field|default:'' }}"
-                                   data-fieldvalue="{{ item.value|default:'' }}"
-                                   data-category="source">
-                                <p class="review__item-content">
-                                  <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                  <span class="value">{{ item.newValue|default:item.value }}</span>
-                                  <span id="reviewerSuggestion_{{ item.field }}"
-                                        class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                  <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                  <br>
-                                  <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                </p>
-                              </div>
-                            {% endfor %}
-                            {% if group.grouped %}
-                              <div class="accordion" id="sourceInnerAccordion_{{ group_key|slugify }}">
-                                {% for sub_key, sub_items in group.grouped.items %}
-                                  <div class="accordion-item">
-                                    <h2 class="accordion-header"
-                                        id="heading-source-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                      <button class="accordion-button collapsed"
-                                              type="button"
-                                              data-bs-toggle="collapse"
-                                              data-bs-target="#collapse-source-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                              aria-expanded="false">
-                                        {{ sub_key }}
-                                      </button>
-                                    </h2>
-                                    <div id="collapse-source-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                         class="accordion-collapse collapse"
-                                         data-bs-parent="#sourceInnerAccordion_{{ group_key|slugify }}">
-                                      <div class="accordion-body">
-                                        {% for item in sub_items.flat %}
-                                          <div id="field_{{ item.field|default:'undefined' }}"
-                                               class="field review__item"
-                                               data-fieldkey="{{ item.field|default:'' }}"
-                                               data-fieldvalue="{{ item.value|default:'' }}"
-                                               data-category="source">
-                                            <p class="review__item-content">
-                                              <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                              <span class="value">{{ item.newValue|default:item.value }}</span>
-                                              <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                              <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                              <br>
-                                              <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                            </p>
-                                          </div>
-                                        {% endfor %}
-                                      </div>
-                                    </div>
-                                  </div>
-                                {% endfor %}
-                              </div>
-                            {% endif %}
-                          </div>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-              <div class="tab-pane fade"
-                   id="license"
-                   role="tabpanel"
-                   aria-labelledby="license-tab">
-                <div class="review__items">
-                  <p class="review__items-cat">License 1</p>
-                  {# Flat license fields #}
-                  {% for item in meta.license.flat %}
-                    <div id="field_{{ item.field|default:'undefined' }}"
-                         class="field review__item"
-                         data-fieldkey="{{ item.field|default:'' }}"
-                         data-fieldvalue="{{ item.value|default:'' }}"
-                         data-category="license">
-                      <p class="review__item-content">
-                        <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                        <span class="value">{{ item.newValue|default:item.value }}</span>
-                        <span id="reviewerSuggestion_{{ item.field }}"
-                              class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                        <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                        <br>
-                        <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                      </p>
-                    </div>
-                  {% endfor %}
-                  {# Grouped license fields - outer accordion level removed #}
-                  {% for group_key, group in meta.license.grouped.items %}
-                    {# Flat items within group #}
+                  {# Grouped source fields — outer accordion removed, content rendered directly #}
+                  {% for group_key, group in meta.source.grouped.items %}
+                    {# Render the group's flat fields directly #}
                     {% for item in group.flat %}
                       <div id="field_{{ item.field|default:'undefined' }}"
                            class="field review__item"
                            data-fieldkey="{{ item.field|default:'' }}"
                            data-fieldvalue="{{ item.value|default:'' }}"
-                           data-category="license">
+                           data-category="source">
                         <p class="review__item-content">
                           <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
                           <span class="value">{{ item.newValue|default:item.value }}</span>
@@ -683,31 +579,31 @@
                         </p>
                       </div>
                     {% endfor %}
-                    {# Inner accordion shown directly #}
+                    {# Render the group's inner accordion directly (these are the individual sources) #}
                     {% if group.grouped %}
-                      <div class="accordion" id="licenseInnerAccordion_{{ group_key|slugify }}">
+                      <div class="accordion" id="sourceInnerAccordion_{{ group_key|slugify }}">
                         {% for sub_key, sub_items in group.grouped.items %}
                           <div class="accordion-item">
                             <h2 class="accordion-header"
-                                id="heading-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
+                                id="heading-source-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
                               <button class="accordion-button collapsed"
                                       type="button"
                                       data-bs-toggle="collapse"
-                                      data-bs-target="#collapse-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
+                                      data-bs-target="#collapse-source-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
                                       aria-expanded="false">
                                 {{ sub_key }}
                               </button>
                             </h2>
-                            <div id="collapse-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
+                            <div id="collapse-source-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
                                  class="accordion-collapse collapse"
-                                 data-bs-parent="#licenseInnerAccordion_{{ group_key|slugify }}">
+                                 data-bs-parent="#sourceInnerAccordion_{{ group_key|slugify }}">
                               <div class="accordion-body">
                                 {% for item in sub_items.flat %}
                                   <div id="field_{{ item.field|default:'undefined' }}"
                                        class="field review__item"
                                        data-fieldkey="{{ item.field|default:'' }}"
                                        data-fieldvalue="{{ item.value|default:'' }}"
-                                       data-category="license">
+                                       data-category="source">
                                     <p class="review__item-content">
                                       <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
                                       <span class="value">{{ item.newValue|default:item.value }}</span>
@@ -727,123 +623,212 @@
                   {% endfor %}
                 </div>
               </div>
-              <div class="tab-pane fade"
-                   id="summary"
-                   role="tabpanel"
-                   aria-labelledby="summary-tab"></div>
+            </div>
+            <div class="tab-pane fade"
+                 id="license"
+                 role="tabpanel"
+                 aria-labelledby="license-tab">
+              <div class="review__items">
+                <p class="review__items-cat">License 1</p>
+                {# Flat license fields #}
+                {% for item in meta.license.flat %}
+                  <div id="field_{{ item.field|default:'undefined' }}"
+                       class="field review__item"
+                       data-fieldkey="{{ item.field|default:'' }}"
+                       data-fieldvalue="{{ item.value|default:'' }}"
+                       data-category="license">
+                    <p class="review__item-content">
+                      <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
+                      <span id="reviewerSuggestion_{{ item.field }}"
+                            class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
+                      <br>
+                      <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                    </p>
+                  </div>
+                {% endfor %}
+                {# Grouped license fields - outer accordion level removed #}
+                {% for group_key, group in meta.license.grouped.items %}
+                  {# Flat items within group #}
+                  {% for item in group.flat %}
+                    <div id="field_{{ item.field|default:'undefined' }}"
+                         class="field review__item"
+                         data-fieldkey="{{ item.field|default:'' }}"
+                         data-fieldvalue="{{ item.value|default:'' }}"
+                         data-category="license">
+                      <p class="review__item-content">
+                        <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
+                        <span class="value">{{ item.newValue|default:item.value }}</span>
+                        <span id="reviewerSuggestion_{{ item.field }}"
+                              class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                        <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
+                        <br>
+                        <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                      </p>
+                    </div>
+                  {% endfor %}
+                  {# Inner accordion shown directly #}
+                  {% if group.grouped %}
+                    <div class="accordion" id="licenseInnerAccordion_{{ group_key|slugify }}">
+                      {% for sub_key, sub_items in group.grouped.items %}
+                        <div class="accordion-item">
+                          <h2 class="accordion-header"
+                              id="heading-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
+                            <button class="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
+                                    aria-expanded="false">
+                              {{ sub_key }}
+                            </button>
+                          </h2>
+                          <div id="collapse-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
+                               class="accordion-collapse collapse"
+                               data-bs-parent="#licenseInnerAccordion_{{ group_key|slugify }}">
+                            <div class="accordion-body">
+                              {% for item in sub_items.flat %}
+                                <div id="field_{{ item.field|default:'undefined' }}"
+                                     class="field review__item"
+                                     data-fieldkey="{{ item.field|default:'' }}"
+                                     data-fieldvalue="{{ item.value|default:'' }}"
+                                     data-category="license">
+                                  <p class="review__item-content">
+                                    <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
+                                    <span class="value">{{ item.newValue|default:item.value }}</span>
+                                    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                                    <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
+                                    <br>
+                                    <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                  </p>
+                                </div>
+                              {% endfor %}
+                            </div>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            <div class="tab-pane fade"
+                 id="summary"
+                 role="tabpanel"
+                 aria-labelledby="summary-tab"></div>
+          </div>
+        </div>
+        <div class="review__controls">
+          <div class="review__box">
+            <div id="field-descriptions-json" style="display: none;">
+              {{ field_descriptions_json }}
+            </div>
+            <div class="review__description" id="review-info">
+              <button type="button" data-bs-toggle="modal" data-bs-target="#myModal">
+                Open Peer Review process <i class="fas fa-info-circle" style="color: #2972A6;"></i>
+              </button>
+            </div>
+            <div class="review__btn-nav">
+              <button type="button" onclick="selectPreviousField()">
+                <span class="btn__icon">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
+                  </svg>
+                </span>
+              </button>
+              <button type="button" onclick="selectNextField()">
+                <span class="btn__icon">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
+                  </svg>
+                </span>
+              </button>
+            </div>
+            <div id="field-descriptions"></div>
+            <div class="flex-reviewer" id="review-window">
+              <h2 id="review-field-name" style="display:none"></h2>
+              <div class="review__btns" role="group">
+                <div class="review__btn review__btn--success">
+                  <button type="button" id="ok-button" value="ok" onclick="selectState('ok');">
+                    <span class="btn__icon">
+                      <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="m22.28,3.75c-.31,0-.6.14-.81.36l-13.4,13.4-5.66-4.37h0c-.25-.19-.56-.28-.87-.24-.31.04-.59.2-.79.45s-.28.56-.23.88c.04.31.21.59.46.78l6.48,5.01c.47.36,1.14.32,1.55-.1l14.14-14.14c.35-.34.46-.86.26-1.31-.19-.45-.64-.73-1.13-.71h0Z" />
+                      </svg>
+                    </span>
+                    <span>Accept</span>
+                  </button>
+                </div>
+                <div class="review__btn review__btn--suggested">
+                  <button type="button"
+                          id="suggestion-button"
+                          value="suggestion"
+                          onclick="selectState('suggestion');">
+                    <span class="btn__icon">
+                      <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="m10.6,17.92c-.01-.37-.02-.65-.02-.83,0-1.09.15-2.03.46-2.82.23-.59.59-1.19,1.09-1.8.37-.44,1.04-1.08,1.99-1.93.96-.85,1.58-1.52,1.87-2.03.29-.5.43-1.05.43-1.65,0-1.08-.42-2.02-1.26-2.84-.84-.81-1.88-1.22-3.1-1.22s-2.17.37-2.95,1.11c-.79.74-1.31,1.9-1.56,3.47l-2.85-.34c.26-2.1,1.02-3.72,2.29-4.84,1.27-1.12,2.94-1.68,5.03-1.68,2.21,0,3.97.6,5.28,1.8,1.31,1.2,1.97,2.65,1.97,4.36,0,.98-.23,1.89-.69,2.72-.46.83-1.36,1.85-2.71,3.03-.9.8-1.49,1.39-1.77,1.77-.28.38-.48.82-.61,1.31-.14.49-.21,1.29-.23,2.4h-2.67Zm-.17,5.56v-3.16h3.15v3.16h-3.15Z" />
+                      </svg>
+                    </span>
+                    <span>Suggest</span>
+                  </button>
+                </div>
+                <div class="review__btn review__btn--denied">
+                  <button type="button"
+                          id="rejected-button"
+                          value="rejected"
+                          onclick="selectState('rejected');">
+                    <span class="btn__icon">
+                      <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="m13.46,12.41L22.94,2.92c.4-.4.4-1.06,0-1.46s-1.06-.4-1.46,0l-9.49,9.48L2.52,1.46c-.4-.4-1.06-.4-1.46,0-.4.4-.4,1.06,0,1.46l9.47,9.48L1.06,21.87c-.4.4-.4,1.06,0,1.46.2.2.47.3.73.3s.53-.1.73-.3l9.47-9.47,9.47,9.48c.2.2.47.3.73.3s.53-.1.73-.3c.4-.4.4-1.06,0-1.46l-9.47-9.48Z" />
+                      </svg>
+                    </span>
+                    <span>Deny</span>
+                  </button>
+                </div>
+              </div>
+              <div id="explanation-container" class="review__explanation"></div>
+              <div class="d-none review__remarks" id="reviewer_remarks">
+                <div class="review__field" id="field-value">
+                  <label for="valuearea" class="form-label">Your value suggestion*</label>
+                  <textarea class="form-control" id="valuearea" rows="2"></textarea>
+                </div>
+                <div class="review__field review__field--nolabel" id="field-comment">
+                  <label for="commentarea" class="form-label"></label>
+                  <textarea class="form-control"
+                            id="commentarea"
+                            rows="2"
+                            placeholder="Comment here if you want to explain your suggestion"></textarea>
+                </div>
+                <button type="button"
+                        class="btn btn-warning review__field-save"
+                        id="submitButton">Save comment/new value</button>
+              </div>
+              <div class="d-none review__comments" id="reviewer_comments">
+                <div class="review__field review__field--nolabel" id="field-comment">
+                  <label for="comments" class="form-label"></label>
+                  <textarea class="form-control"
+                            id="comments"
+                            rows="2"
+                            placeholder="Comment here if you want to explain your suggestion"></textarea>
+                </div>
+                <button type="button"
+                        class="btn btn-warning review__field-save"
+                        id="submitCommentButton">Save comment</button>
+              </div>
             </div>
           </div>
-          <div class="review__controls">
-            <div class="review__box">
-              <div id="field-descriptions-json" style="display: none;">
-                {{ field_descriptions_json }}
-              </div>
-              <div class="review__description" id="review-info">
-                <button type="button" data-bs-toggle="modal" data-bs-target="#myModal">
-                  Open Peer Review process <i class="fas fa-info-circle" style="color: #2972A6;"></i>
-                </button>
-              </div>
-              <div class="review__btn-nav">
-                <button type="button" onclick="selectPreviousField()">
-                  <span class="btn__icon">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
-                    </svg>
-                  </span>
-                </button>
-                <button type="button" onclick="selectNextField()">
-                  <span class="btn__icon">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
-                    </svg>
-                  </span>
-                </button>
-              </div>
-              <div id="field-descriptions"></div>
-              <div class="flex-reviewer" id="review-window">
-                <h2 id="review-field-name" style="display:none"></h2>
-                <div class="review__btns" role="group">
-                  <div class="review__btn review__btn--success">
-                    <button type="button" id="ok-button" value="ok" onclick="selectState('ok');">
-                      <span class="btn__icon">
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="m22.28,3.75c-.31,0-.6.14-.81.36l-13.4,13.4-5.66-4.37h0c-.25-.19-.56-.28-.87-.24-.31.04-.59.2-.79.45s-.28.56-.23.88c.04.31.21.59.46.78l6.48,5.01c.47.36,1.14.32,1.55-.1l14.14-14.14c.35-.34.46-.86.26-1.31-.19-.45-.64-.73-1.13-.71h0Z" />
-                        </svg>
-                      </span>
-                      <span>Accept</span>
-                    </button>
-                  </div>
-                  <div class="review__btn review__btn--suggested">
-                    <button type="button"
-                            id="suggestion-button"
-                            value="suggestion"
-                            onclick="selectState('suggestion');">
-                      <span class="btn__icon">
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="m10.6,17.92c-.01-.37-.02-.65-.02-.83,0-1.09.15-2.03.46-2.82.23-.59.59-1.19,1.09-1.8.37-.44,1.04-1.08,1.99-1.93.96-.85,1.58-1.52,1.87-2.03.29-.5.43-1.05.43-1.65,0-1.08-.42-2.02-1.26-2.84-.84-.81-1.88-1.22-3.1-1.22s-2.17.37-2.95,1.11c-.79.74-1.31,1.9-1.56,3.47l-2.85-.34c.26-2.1,1.02-3.72,2.29-4.84,1.27-1.12,2.94-1.68,5.03-1.68,2.21,0,3.97.6,5.28,1.8,1.31,1.2,1.97,2.65,1.97,4.36,0,.98-.23,1.89-.69,2.72-.46.83-1.36,1.85-2.71,3.03-.9.8-1.49,1.39-1.77,1.77-.28.38-.48.82-.61,1.31-.14.49-.21,1.29-.23,2.4h-2.67Zm-.17,5.56v-3.16h3.15v3.16h-3.15Z" />
-                        </svg>
-                      </span>
-                      <span>Suggest</span>
-                    </button>
-                  </div>
-                  <div class="review__btn review__btn--denied">
-                    <button type="button"
-                            id="rejected-button"
-                            value="rejected"
-                            onclick="selectState('rejected');">
-                      <span class="btn__icon">
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="m13.46,12.41L22.94,2.92c.4-.4.4-1.06,0-1.46s-1.06-.4-1.46,0l-9.49,9.48L2.52,1.46c-.4-.4-1.06-.4-1.46,0-.4.4-.4,1.06,0,1.46l9.47,9.48L1.06,21.87c-.4.4-.4,1.06,0,1.46.2.2.47.3.73.3s.53-.1.73-.3l9.47-9.47,9.47,9.48c.2.2.47.3.73.3s.53-.1.73-.3c.4-.4.4-1.06,0-1.46l-9.47-9.48Z" />
-                        </svg>
-                      </span>
-                      <span>Deny</span>
-                    </button>
-                  </div>
-                </div>
-                <div id="explanation-container" class="review__explanation"></div>
-                <div class="d-none review__remarks" id="reviewer_remarks">
-                  <div class="review__field" id="field-value">
-                    <label for="valuearea" class="form-label">Your value suggestion*</label>
-                    <textarea class="form-control" id="valuearea" rows="2"></textarea>
-                  </div>
-                  <div class="review__field review__field--nolabel" id="field-comment">
-                    <label for="commentarea" class="form-label"></label>
-                    <textarea class="form-control"
-                              id="commentarea"
-                              rows="2"
-                              placeholder="Comment here if you want to explain your suggestion"></textarea>
-                  </div>
-                  <button type="button"
-                          class="btn btn-warning review__field-save"
-                          id="submitButton">Save comment/new value</button>
-                </div>
-                <div class="d-none review__comments" id="reviewer_comments">
-                  <div class="review__field review__field--nolabel" id="field-comment">
-                    <label for="comments" class="form-label"></label>
-                    <textarea class="form-control"
-                              id="comments"
-                              rows="2"
-                              placeholder="Comment here if you want to explain your suggestion"></textarea>
-                  </div>
-                  <button type="button"
-                          class="btn btn-warning review__field-save"
-                          id="submitCommentButton">Save comment</button>
-                </div>
-              </div>
+          <div class="review__infos">
+            <div>
+              Dataset uploaded by <a href="#">bmlancien</a> on <span class="review__infos--date">2022-09-19</span>
             </div>
-            <div class="review__infos">
-              <div>
-                Dataset uploaded by <a href="#">bmlancien</a> on <span class="review__infos--date">2022-09-19</span>
-              </div>
-              <div>
-                <span class="review__infos--review-number">0</span> review
-              </div>
+            <div>
+              <span class="review__infos--review-number">0</span> review
             </div>
           </div>
         </div>
       </div>
     </div>
-  </main>
+  </div>
+</main>
 {% endblock main %}
 {% block after-body-bottom-js %}
   <script type="text/javascript">
