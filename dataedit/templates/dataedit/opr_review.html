@@ -662,85 +662,68 @@
                       </p>
                     </div>
                   {% endfor %}
-                  {# Grouped license fields #}
-                  <div class="accordion" id="licenseAccordion">
-                    {% for group_key, group in meta.license.grouped.items %}
-                      <div class="accordion-item">
-                        <h2 class="accordion-header" id="heading-license-{{ forloop.counter }}">
-                          <button class="accordion-button collapsed"
-                                  type="button"
-                                  data-bs-toggle="collapse"
-                                  data-bs-target="#collapse-license-{{ forloop.counter }}"
-                                  aria-expanded="false">
-                            {{ group_key }}
-                          </button>
-                        </h2>
-                        <div id="collapse-license-{{ forloop.counter }}"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#licenseAccordion">
-                          <div class="accordion-body">
-                            {% for item in group.flat %}
-                              <div id="field_{{ item.field|default:'undefined' }}"
-                                   class="field review__item"
-                                   data-fieldkey="{{ item.field|default:'' }}"
-                                   data-fieldvalue="{{ item.value|default:'' }}"
-                                   data-category="license">
-                                <p class="review__item-content">
-                                  <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                  <span class="value">{{ item.newValue|default:item.value }}</span>
-                                  <span id="reviewerSuggestion_{{ item.field }}"
-                                        class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                  <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                  <br>
-                                  <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                </p>
-                              </div>
-                            {% endfor %}
-                            {% if group.grouped %}
-                              <div class="accordion" id="licenseInnerAccordion_{{ group_key|slugify }}">
-                                {% for sub_key, sub_items in group.grouped.items %}
-                                  <div class="accordion-item">
-                                    <h2 class="accordion-header"
-                                        id="heading-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                      <button class="accordion-button collapsed"
-                                              type="button"
-                                              data-bs-toggle="collapse"
-                                              data-bs-target="#collapse-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                              aria-expanded="false">
-                                        {{ sub_key }}
-                                      </button>
-                                    </h2>
-                                    <div id="collapse-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                         class="accordion-collapse collapse"
-                                         data-bs-parent="#licenseInnerAccordion_{{ group_key|slugify }}">
-                                      <div class="accordion-body">
-                                        {% for item in sub_items.flat %}
-                                          <div id="field_{{ item.field|default:'undefined' }}"
-                                               class="field review__item"
-                                               data-fieldkey="{{ item.field|default:'' }}"
-                                               data-fieldvalue="{{ item.value|default:'' }}"
-                                               data-category="license">
-                                            <p class="review__item-content">
-                                              <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                              <span class="value">{{ item.newValue|default:item.value }}</span>
-                                              <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                              <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                              <br>
-                                              <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                            </p>
-                                          </div>
-                                        {% endfor %}
-                                      </div>
-                                    </div>
+                  {# Grouped license fields - outer accordion level removed #}
+                  {% for group_key, group in meta.license.grouped.items %}
+                    {# Flat items within group #}
+                    {% for item in group.flat %}
+                      <div id="field_{{ item.field|default:'undefined' }}"
+                           class="field review__item"
+                           data-fieldkey="{{ item.field|default:'' }}"
+                           data-fieldvalue="{{ item.value|default:'' }}"
+                           data-category="license">
+                        <p class="review__item-content">
+                          <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
+                          <span class="value">{{ item.newValue|default:item.value }}</span>
+                          <span id="reviewerSuggestion_{{ item.field }}"
+                                class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                          <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
+                          <br>
+                          <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                        </p>
+                      </div>
+                    {% endfor %}
+                    {# Inner accordion shown directly #}
+                    {% if group.grouped %}
+                      <div class="accordion" id="licenseInnerAccordion_{{ group_key|slugify }}">
+                        {% for sub_key, sub_items in group.grouped.items %}
+                          <div class="accordion-item">
+                            <h2 class="accordion-header"
+                                id="heading-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
+                              <button class="accordion-button collapsed"
+                                      type="button"
+                                      data-bs-toggle="collapse"
+                                      data-bs-target="#collapse-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
+                                      aria-expanded="false">
+                                {{ sub_key }}
+                              </button>
+                            </h2>
+                            <div id="collapse-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
+                                 class="accordion-collapse collapse"
+                                 data-bs-parent="#licenseInnerAccordion_{{ group_key|slugify }}">
+                              <div class="accordion-body">
+                                {% for item in sub_items.flat %}
+                                  <div id="field_{{ item.field|default:'undefined' }}"
+                                       class="field review__item"
+                                       data-fieldkey="{{ item.field|default:'' }}"
+                                       data-fieldvalue="{{ item.value|default:'' }}"
+                                       data-category="license">
+                                    <p class="review__item-content">
+                                      <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
+                                      <span class="value">{{ item.newValue|default:item.value }}</span>
+                                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                                      <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
+                                      <br>
+                                      <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                    </p>
                                   </div>
                                 {% endfor %}
                               </div>
-                            {% endif %}
+                            </div>
                           </div>
-                        </div>
+                        {% endfor %}
                       </div>
-                    {% endfor %}
-                  </div>
+                    {% endif %}
+                  {% endfor %}
                 </div>
               </div>
               <div class="tab-pane fade"
