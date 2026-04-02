@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -71,8 +72,9 @@ export default function TssMetadata({
       entityType={entityType}
       iri={iri}
       parameter={mergedParameter}
-      useLegacy={useLegacy}
       termLink=""
+      initialSelectedTab="graphview"
+      enableComparisonMode={true}
       {...finalTabs}
       {...callbackProps}
     />
