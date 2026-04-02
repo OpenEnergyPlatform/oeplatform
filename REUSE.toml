@@ -846,7 +846,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "login/templates/login/partials/user_partial_tables.html"
+path = "login/templates/login/partials/group_component_invite_user.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -854,11 +854,11 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "login/templates/login/partials/group_component_invite_user.html"
+path = "login/templates/login/partials/tables_sections.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
-  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
