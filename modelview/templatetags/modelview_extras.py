@@ -52,9 +52,7 @@ def checktable(model, label, prefix, suffixes, separator="_"):
                         {2}
                     </table>
                 </td>
-            </tr>""".format(
-        label, header, ""
-    )
+            </tr>""".format(label, header, "")
 
 
 @register.simple_tag

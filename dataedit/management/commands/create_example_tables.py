@@ -115,7 +115,7 @@ class Command(BaseCommand):
                 Table.create_with_oedb_table(
                     name=table_name,
                     is_sandbox=True,  # tests ALWAYS in sandbox
-                    user=user,  # type:ignore
+                    user=user,  # type: ignore
                     column_definitions=column_defs,
                     constraints_definitions=constraint_defs,
                 )

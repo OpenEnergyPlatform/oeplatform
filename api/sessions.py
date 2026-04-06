@@ -54,7 +54,7 @@ class SessionContext:
                 )
 
         engine = _get_engine()
-        self.connection: DBAPIConnection = engine.connect().connection  # type:ignore
+        self.connection: DBAPIConnection = engine.connect().connection  # type: ignore
         if connection_id is None:
             connection_id = _add_entry(self, _SESSION_CONTEXTS)
         elif connection_id not in _SESSION_CONTEXTS:

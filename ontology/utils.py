@@ -59,7 +59,7 @@ def collect_modules(path):
                 # Execute the SPARQL query for comment
                 comment_results: Iterable[ResultRow] = g.query(
                     comment_query
-                )  # type:ignore
+                )  # type: ignore
 
                 # Update the comment in the modules dictionary if found
                 for row in comment_results:
@@ -78,7 +78,7 @@ def collect_modules(path):
                     # Execute the SPARQL query for description
                     description_results: Iterable[ResultRow] = g.query(
                         description_query
-                    )  # type:ignore
+                    )  # type: ignore
 
                     # Update the comment in the modules dictionary if found
                     for row in description_results:
@@ -93,28 +93,22 @@ def read_oeo_context_information(path, file, ontology=None):
     g = Graph()
     g.parse(Ontology_URI.as_posix())
 
-    q_global = g.query(
-        """
+    q_global = g.query("""
         SELECT DISTINCT ?s ?o
         WHERE { ?s rdfs:subClassOf ?o
         filter(!isBlank(?o))
         }
-        """
-    )
+        """)
 
-    q_label: Iterable[ResultRow] = g.query(
-        """
+    q_label: Iterable[ResultRow] = g.query("""
         SELECT DISTINCT ?s ?o
         WHERE { ?s rdfs:label ?o }
-        """
-    )  # type:ignore
+        """)  # type: ignore
 
-    q_main_description: Iterable[ResultRow] = g.query(
-        """
+    q_main_description: Iterable[ResultRow] = g.query("""
         SELECT ?s ?o
         WHERE { ?s dc:description ?o }
-        """
-    )  # type:ignore
+        """)  # type: ignore
 
     classes_name = {}
     for row in q_label:
@@ -127,19 +121,15 @@ def read_oeo_context_information(path, file, ontology=None):
             ontology_description = row.o
 
     if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
-        q_definition: Iterable[ResultRow] = g.query(
-            """
+        q_definition: Iterable[ResultRow] = g.query("""
             SELECT DISTINCT ?s ?o
             WHERE { ?s obo:IAO_0000115 ?o }
-            """
-        )  # type:ignore
+            """)  # type: ignore
 
-        q_note: Iterable[ResultRow] = g.query(
-            """
+        q_note: Iterable[ResultRow] = g.query("""
             SELECT DISTINCT ?s ?o
             WHERE { ?s obo:IAO_0000116 ?o }
-            """
-        )  # type:ignore
+            """)  # type: ignore
 
         classes_definitions = defaultdict(list)
         for row in q_definition:

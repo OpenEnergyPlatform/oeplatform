@@ -19,10 +19,10 @@ from login.models import myuser as User
 
 class TestUtils(TestCase):
     def test_user_get_tables_queryset(self):
-        user_a: User = User.objects.create_user(  # type:ignore
+        user_a: User = User.objects.create_user(  # type: ignore
             name="A", email="a@test.test", affiliation="test"
         )
-        user_b: User = User.objects.create_user(  # type:ignore
+        user_b: User = User.objects.create_user(  # type: ignore
             name="B", email="b@test.test", affiliation="test"
         )
 

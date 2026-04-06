@@ -876,5 +876,5 @@ def metadata_review_badge_indicator_icon_file_view(request, user_id, table_name)
     return render(
         request,
         "login/partials/badge_icon.html",
-        context=context,  # type:ignore (we have Literals in type signature)
+        context=context,  # type: ignore (we have Literals in type signature)
     )
