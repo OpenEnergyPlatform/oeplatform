@@ -1001,7 +1001,7 @@ def __change_rows(
 
     sa_table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
 
-    pks = [c for c in sa_table.columns if c.primary_key]  # type:ignore
+    pks = [c for c in sa_table.columns if c.primary_key]  # type: ignore
 
     inserts = []
     cursor = load_cursor_from_context(context)
@@ -1333,11 +1333,11 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
     engine = _get_engine()
 
     artificial_connection = False
-    connection: DBAPIConnection = engine.raw_connection()  # type:ignore TODO
+    connection: DBAPIConnection = engine.raw_connection()  # type: ignore TODO
 
     if cursor is None:
         artificial_connection = True
-        cursor = cast(AbstractCursor, connection.cursor())  # type:ignore TODO
+        cursor = cast(AbstractCursor, connection.cursor())  # type: ignore TODO
 
     try:
         columns = list(describe_columns(table_obj).keys())
@@ -1545,7 +1545,7 @@ def set_table_metadata(table: str, metadata):
     # ---------------------------------------
 
     django_table_obj = Table.objects.get(name=table)
-    django_table_obj.oemetadata = metadata_obj  # type:ignore
+    django_table_obj.oemetadata = metadata_obj  # type: ignore
     django_table_obj.save()
 
     # ---------------------------------------
@@ -1570,8 +1570,7 @@ def get_single_table_size(table_obj: Table) -> dict | None:
     Return size details for one table or None if not found.
     """
 
-    sql = text(
-        """
+    sql = text("""
         SELECT
             :schema AS table_schema,
             :table  AS table_name,
@@ -1581,8 +1580,7 @@ def get_single_table_size(table_obj: Table) -> dict | None:
             pg_size_pretty(pg_relation_size(format('%I.%I', :schema, :table)))       AS table_pretty,
             pg_size_pretty(pg_indexes_size(format('%I.%I', :schema, :table)))        AS index_pretty,
             pg_size_pretty(pg_total_relation_size(format('%I.%I', :schema, :table))) AS total_pretty
-    """  # noqa: E501
-    )
+    """)  # noqa: E501
 
     sess = _create_oedb_session()
     try:
@@ -1605,8 +1603,7 @@ def list_table_sizes() -> list[dict]:
     List table sizes
     """
     oedb_schema = SCHEMA_DATA
-    sql = text(
-        f"""
+    sql = text(f"""
         SELECT
             table_schema,
             table_name,
@@ -1618,8 +1615,7 @@ def list_table_sizes() -> list[dict]:
         WHERE table_schema='{oedb_schema}'
           AND table_type = 'BASE TABLE'
         ORDER BY pg_total_relation_size(format('%I.%I', table_schema, table_name)) DESC
-    """  # noqa: E501
-    )
+    """)  # noqa: E501
 
     sess = _create_oedb_session()
     try:
@@ -1637,14 +1633,12 @@ def list_table_sizes() -> list[dict]:
 
 
 def table_has_row_with_id(table: Table, id: int | str, id_col: str = "id") -> bool:
-    query = text(
-        f"""
+    query = text(f"""
         SELECT count(*)
         FROM "{table.oedb_schema}"."{table.name}"
         WHERE {id_col} = :id
         ;
-    """
-    )
+    """)
 
     engine = _get_engine()
     with engine.connect() as conn:
@@ -1656,13 +1650,11 @@ def table_has_row_with_id(table: Table, id: int | str, id_col: str = "id") -> bo
 
 
 def table_get_row_count(table: Table) -> int:
-    query = text(
-        f"""
+    query = text(f"""
         SELECT count(*)
         FROM "{table.oedb_schema}"."{table.name}"
         ;
-    """
-    )
+    """)
 
     engine = _get_engine()
     with engine.connect() as conn:
@@ -1689,14 +1681,12 @@ def table_get_approx_row_count(table: Table, precise_below: int = 0) -> int:
     # table name. but its validated by constraints
     # on django table.name field
 
-    query = text(
-        f"""
+    query = text(f"""
         SELECT reltuples::bigint AS approx_row_count
         FROM pg_class
         WHERE oid = '"{table.oedb_schema}"."{table.name}"'::regclass
         ;
-    """
-    )
+    """)
 
     with engine.connect() as conn:
         resp = _execute(conn, query)
@@ -2118,7 +2108,7 @@ def _execute(
     *args,
     **kwargs,
 ) -> ResultProxy:
-    response = con.execute(sql, *args, **kwargs)  # type:ignore
+    response = con.execute(sql, *args, **kwargs)  # type: ignore
     # Note: cast is only for type checking,
     # should disappear once we migrate to sqlalchemy >= 1.4
     response = cast(ResultProxy, response)

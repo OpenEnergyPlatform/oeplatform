@@ -52,7 +52,7 @@ def bundle_scenarios_filter(bundle_uri: Union[str, URIRef], return_format=JSON) 
 
     sparql.setReturnFormat(return_format)
     sparql.setQuery(sparql_query)
-    return sparql.query().convert()  # type:ignore (if json, convert() -> dict)
+    return sparql.query().convert()  # type: ignore (if json, convert() -> dict)
 
 
 def scenario_in_bundle(bundle_uuid: UUID, scenario_uuid: UUID) -> bool:
@@ -72,7 +72,7 @@ def scenario_in_bundle(bundle_uuid: UUID, scenario_uuid: UUID) -> bool:
     sparql.setReturnFormat(JSON)
     response: dict = (
         sparql.query().convert()
-    )  # type:ignore (if json, convert() -> dict)
+    )  # type: ignore (if json, convert() -> dict)
 
     return response.get(
         "boolean", False
@@ -100,7 +100,7 @@ def dataset_exists(scenario_uuid: UUID, dataset_url: str) -> bool:
     sparql.setReturnFormat(JSON)
     response: dict = (
         sparql.query().convert()
-    )  # type:ignore (if json, convert() -> dict)
+    )  # type: ignore (if json, convert() -> dict)
 
     return response.get("boolean", False)  # Returns True if dataset exists
 
@@ -147,7 +147,7 @@ def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig) -> bool:
         response = sparql_wrapper_update.query()
         http_response: HTTPResponse = (
             response.response
-        )  # type:ignore (according to documentation)
+        )  # type: ignore (according to documentation)
         if not http_response.status == 200:
             return False  # Return False if any query fails
     except Exception as e:
@@ -307,7 +307,7 @@ def scenario_bundle_filter_oekg(criteria: dict, return_format=JSON) -> dict:
     # Run query
     sparql.setReturnFormat(return_format)
     sparql.setQuery(query_structure)
-    return sparql.query().convert()  # type:ignore (if json, convert() -> dict)
+    return sparql.query().convert()  # type: ignore (if json, convert() -> dict)
 
 
 # --- filter helpers (reusable) -------------------------------------
@@ -480,7 +480,7 @@ def list_factsheets_oekg(criteria: dict, return_format=JSON) -> dict:
 
     sparql.setReturnFormat(return_format)
     sparql.setQuery(sparql_query)
-    return sparql.query().convert()  # type:ignore (if json, convert() -> dict)
+    return sparql.query().convert()  # type: ignore (if json, convert() -> dict)
 
 
 def normalize_factsheets_rows(res_json: dict) -> list[dict]:

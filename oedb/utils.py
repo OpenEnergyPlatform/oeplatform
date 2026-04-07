@@ -132,14 +132,14 @@ class _OedbTable:
             metadata = MetaData(bind=_get_engine())
 
         key = f"{self._validated_schema_name}.{self._validated_table_name}"
-        if key not in metadata.tables:  # type:ignore
+        if key not in metadata.tables:  # type: ignore
             SATable(
                 self._validated_table_name,
                 metadata,
                 autoload=True,
                 schema=self._validated_schema_name,
             )
-        return metadata.tables[key]  # type:ignore
+        return metadata.tables[key]  # type: ignore
 
     def _execute(self, query, requires_permission: int = ADMIN_PERM):
         if self._permission_level < requires_permission:
@@ -163,7 +163,7 @@ class _OedbMainTable(_OedbTable):
             *constraints_definitions,
             schema=self._validated_schema_name,
         )
-        sa_table.create(self._engine)  # type:ignore
+        sa_table.create(self._engine)  # type: ignore
         return sa_table
 
 

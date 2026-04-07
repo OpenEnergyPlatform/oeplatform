@@ -36,7 +36,7 @@ def get_urlpattern_params(pattern: URLPattern) -> list[str]:
     if isinstance(pattern2, RegexPattern):
         regex = re.compile(
             # TODO: better way than using protected attribute?
-            pattern2._regex  # type:ignore
+            pattern2._regex  # type: ignore
         )
         return list(regex.groupindex.keys())
     elif isinstance(pattern2, RoutePattern):

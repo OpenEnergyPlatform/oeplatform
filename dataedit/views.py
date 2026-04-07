@@ -728,7 +728,7 @@ class TableDataView(View):
 
         opr_result_context = {}
         if reviews.exists():
-            latest_review: PeerReview = reviews.last()  # type:ignore (reviews.exists())
+            latest_review: PeerReview = reviews.last()  # type: ignore (reviews.exists())
             opr_manager.update_open_since(opr=latest_review)
             current_reviewer = opr_manager.load(latest_review).current_reviewer
             opr_context.update(
@@ -1545,8 +1545,8 @@ class TablePeerReviewView(LoginRequiredMixin, View):
 
                 # Set new review values and update existing review
                 active_peer_review.review = merged_review_data
-                active_peer_review.reviewer = user  # type:ignore TODO why type warning?
-                active_peer_review.contributor = contributor  # type:ignore TODO
+                active_peer_review.reviewer = user  # type: ignore TODO why type warning?
+                active_peer_review.contributor = contributor  # type: ignore TODO
                 active_peer_review.update(review_type=review_post_type)
         else:
             error_msg = (
