@@ -9,16 +9,19 @@ import { useTssConfig } from "../hooks/useTssConfig";
 export default function TssEntityRelations({
     iri,
     ontologyId,
-    entityType = "term", // "term" often works best for relations to show instances too
+    entityType = "term",
     onNavigateToEntity,
-    onNavigateToOntology
+    onNavigateToOntology,
+    activeLang
 }) {
-    const { apiBase, ontology: configOntology, lang } = useTssConfig();
+    const { apiBase, ontology: configOntology, lang: configLang } = useTssConfig();
     const activeOntology = ontologyId || configOntology;
 
+    const currentLang = activeLang || configLang;
+
     const mergedParameter = useMemo(() => {
-        return lang ? `lang=${encodeURIComponent(lang)}` : "";
-    }, [lang]);
+        return currentLang ? `lang=${encodeURIComponent(currentLang)}` : "";
+    }, [currentLang]);
 
     const callbackProps = {
         ...(onNavigateToEntity ? { onNavigateToEntity } : {}),
@@ -33,9 +36,8 @@ export default function TssEntityRelations({
             entityType={entityType}
             hasTitle={false}
             showBadges={true}
-            parameter={mergedParameter}
+            parameter={mergedParameter} // <--- PASS IT HERE
             termLink=""
-
             onNavigateToDisambiguate={() => { }}
             {...callbackProps}
         />

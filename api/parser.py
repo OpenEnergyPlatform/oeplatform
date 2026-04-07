@@ -128,7 +128,7 @@ def get_column_definition_query(d: dict) -> Column:
 
     if d.get("character_maximum_length"):
         max_len = int(d["character_maximum_length"])
-        dt = dt(max_len)  # type:ignore
+        dt = dt(max_len)  # type: ignore
 
     _assert_valid_identifier_name(name)
     c = Column(name, dt, *args, **kwargs)
@@ -483,11 +483,11 @@ def _parse_from_item(d):
         on_clause = None
         if "on" in d:
             on_clause = parse_condition(d["on"])
-        sa_table = left.join(  # type:ignore
+        sa_table = left.join(  # type: ignore
             right,
             onclause=on_clause,
-            isouter=is_outer,  # type:ignore
-            full=full,  # type:ignore
+            isouter=is_outer,  # type: ignore
+            full=full,  # type: ignore
         )
     else:
         raise APIError("Unknown from-item: " + dtype)

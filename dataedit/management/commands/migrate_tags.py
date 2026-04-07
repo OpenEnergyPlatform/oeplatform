@@ -30,13 +30,11 @@ class Command(BaseCommand):
             color,
             usage_tracked_since,
         ) in con.execute(
-            text(
-                """
+            text("""
                 select
                 id, name_normalized, usage_count, name, color, usage_tracked_since
                 from public.tags
-                """
-            )
+                """)
         ).fetchall():
             tag_names[id] = name_normalized
             # convert to timezone aware
@@ -51,15 +49,11 @@ class Command(BaseCommand):
                 usage_tracked_since=usage_tracked_since,
             )
 
-        for table_name, tag_id in con.execute(
-            text(
-                """
+        for table_name, tag_id in con.execute(text("""
                 select
                 table_name, tag
                 from public.table_tags
-                """
-            )
-        ).fetchall():
+                """)).fetchall():
             table = TableOEP.objects.filter(name=table_name).first()
             if not table:
                 print(f"Warning: table does not exist: {table_name}")

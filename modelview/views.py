@@ -149,7 +149,7 @@ def model_to_csv_view(request, sheettype):
         tag_ids = tag_ids.split(",")
 
     header = list(
-        field.attname  # type:ignore because hasattr(field, "attname")
+        field.attname  # type: ignore because hasattr(field, "attname")
         for field in c._meta.get_fields()
         if hasattr(field, "attname")
     )

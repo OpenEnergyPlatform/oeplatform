@@ -1,7 +1,7 @@
+// ontology/frontend/src/features/terminology/components/TssEntityInfo.jsx
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// ontology/frontend/src/features/terminology/components/TssEntityInfo.jsx
 import React from "react";
 import { EntityInfoWidget } from "@ts4nfdi/terminology-service-suite";
 import { useTssConfig } from "../hooks/useTssConfig";
@@ -9,26 +9,28 @@ import { useTssConfig } from "../hooks/useTssConfig";
 export default function TssEntityInfo({
     iri,
     ontologyId,
-    entityType = "class", // Default, but can be overridden
+    entityType = "class",
     onNavigateToEntity,
-    onNavigateToOntology
+    onNavigateToOntology,
+    activeLang
 }) {
-    const { apiBase, ontology: configOntology } = useTssConfig();
-    // const activeOntology = ontologyId || configOntology;
+    // We still grab config values, but we will let the local activeLang override the config lang
+    const { apiBase, ontology: configOntology, lang: configLang } = useTssConfig();
+    const activeOntology = ontologyId || configOntology;
 
-    // Check if it's an external term by looking at the IRI
-    const isExternal = iri.includes("purl.obolibrary.org");
+    // Prioritize the dropdown selection, fallback to the global config
+    const currentLang = activeLang || configLang;
+    const parameter = currentLang ? `lang=${encodeURIComponent(currentLang)}` : "";
 
     return (
         <EntityInfoWidget
             api={apiBase}
-            ontologyId={isExternal ? "" : ontologyId}
+            ontologyId={activeOntology}
             iri={iri}
             entityType={entityType}
-            hasTitle={false} // We handle the title in the page layout
+            hasTitle={false}
             showBadges={true}
-            // useLegacy={true}
-            parameter=""
+            parameter={parameter} // <--- PASS IT HERE
             onNavigateToDisambiguate={() => { }}
             onNavigateToEntity={onNavigateToEntity || (() => { })}
             onNavigateToOntology={onNavigateToOntology || (() => { })}
