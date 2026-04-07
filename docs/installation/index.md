@@ -4,7 +4,6 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: CC0-1.0
 -->
 
-
 # Installation
 
 This section provides detailed information on how to install for development
@@ -24,9 +23,9 @@ find two main options to install everything:
 Production deployments without containerization solutions like docker tend to be
 very specific and depend on your infrastructure.
 
-You will also find additional setup steps to help you troubleshoot common issues, 
-write well-formatted, quality-checked code, and easily start contributing to the 
-oeplatform.
+You will also find additional setup steps to help you troubleshoot common
+issues, write well-formatted, quality-checked code, and easily start
+contributing to the oeplatform.
 
 ## Guides
 
