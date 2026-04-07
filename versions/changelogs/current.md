@@ -25,7 +25,7 @@ SPDX-License-Identifier: CC0-1.0
 - Add a Option to select the Language on the OEO Entity Pages. This only shows
   the german / english synonym if available for an entity
   [(#2277)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
- 
+
 - Add Dataset rest-api and metadata based concept as specified in oemetadata /
   frictionless
   ([#2071](https://github.com/OpenEnergyPlatform/oeplatform/pull/2071))
@@ -35,7 +35,6 @@ SPDX-License-Identifier: CC0-1.0
   - Datasets and assigned Resources are stored in the django database using a
     m:n relation with tables to read the oemetadata.
   - Rest api implementation
-
 
 ### Bugs
 
