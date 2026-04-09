@@ -134,6 +134,7 @@ from api.helper import (
     require_delete_permission,
     require_write_permission,
     stream,
+    sync_api_metadata_columns,
     update_tags_from_keywords,
 )
 from api.parser import (
@@ -205,11 +206,15 @@ class TableMetadataAPIView(APIView):
 
         if not error and metadata is not None:
             metadata = try_convert_metadata_to_v2(metadata)
+
+            # Enforce database schema and clean artifacts
+            metadata = sync_api_metadata_columns(metadata, table_obj)
+
+            # Now validate the beautifully cleaned and synced metadata
             metadata, error = try_validate_metadata(metadata)
 
         if metadata is not None:
             # update/sync keywords with tags before saving metadata
-            # TODO make this iter over all resources
             keywords = metadata["resources"][0].get("keywords", []) or []
             metadata["resources"][0]["keywords"] = update_tags_from_keywords(
                 table=table_obj.name, keywords=keywords
@@ -219,8 +224,11 @@ class TableMetadataAPIView(APIView):
             metadata.pop("connection_id", None)
             metadata.pop("cursor_id", None)
 
+            # Save the reconciled metadata to the database
             set_table_metadata(table=table_obj.name, metadata=metadata)
-            return JsonResponse(raw_input)
+
+            # Return the cleaned metadata
+            return JsonResponse(metadata)
         else:
             raise APIError(error)
 
