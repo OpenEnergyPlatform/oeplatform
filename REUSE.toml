@@ -2688,6 +2688,15 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
+path = "dataedit/templates/partials/review_item_snippet.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+
+[[annotations]]
 path = "oedb/script.py.mako"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"

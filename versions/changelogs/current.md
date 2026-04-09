@@ -50,6 +50,11 @@ SPDX-License-Identifier: CC0-1.0
   Individuals. The API path is now correctly set
   [(#2237)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
 
+- Cleanup incomplete updates to the OpenPeerReview. Some parts of the code are
+  incomplete due to a messi code refactoring where some code snippets have been
+  lost due to merge conflicts in commits that are not pushed to remote.
+  [(#2289)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2289)
+
 ## Documentation updates
 
 ## Code Quality

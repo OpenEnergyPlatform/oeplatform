@@ -728,7 +728,7 @@ class TableDataView(View):
 
         opr_result_context = {}
         if reviews.exists():
-            latest_review: PeerReview = reviews.last()  # type: ignore (reviews.exists())
+            latest_review: PeerReview = reviews.last()  # type: ignore (reviews.exists()) # noqa: E501
             opr_manager.update_open_since(opr=latest_review)
             current_reviewer = opr_manager.load(latest_review).current_reviewer
             opr_context.update(
@@ -1495,7 +1495,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
         table_obj = table_or_404(table=table)
 
-        context = {}
+        # context = {}
         user: login_models.myuser = request.user  # type: ignore
 
         # get the review data and additional application metadata
@@ -1545,7 +1545,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
 
                 # Set new review values and update existing review
                 active_peer_review.review = merged_review_data
-                active_peer_review.reviewer = user  # type: ignore TODO why type warning?
+                active_peer_review.reviewer = user  # type: ignore TODO warning?
                 active_peer_review.contributor = contributor  # type: ignore TODO
                 active_peer_review.update(review_type=review_post_type)
         else:
@@ -1574,7 +1574,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
 
             # TODO: also update reviewFinished in review datamodel json
 
-        return render(request, "dataedit/opr_review.html", context=context)
+        return JsonResponse({"status": "success"}, status=200)
 
 
 class TablePeerRreviewContributorView(TablePeerReviewView):
@@ -1637,12 +1637,12 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
                     "url_table": reverse(
                         "dataedit:view", kwargs={"table": table_obj.name}
                     ),
-                    "topic": table_obj.topics,
+                    # "topic": table_obj.topics,
                     "table": table_obj.name,
                 }
             ),
             "table": table_obj.name,
-            "topic": table_obj.topics,
+            # "topic": table_obj.topics,
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
@@ -1667,7 +1667,7 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         # table_obj = table_or_404(table=table)
         # TODO: why unused argument "table"?
 
-        context = {}
+        # context = {}
         if request.method == "POST":
             review_data = json.loads(request.body)
             review_post_type = review_data.get("reviewType")
@@ -1681,4 +1681,4 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             current_opr.review = merged_review
             current_opr.update(review_type=review_post_type)
 
-        return render(request, "dataedit/opr_contributor.html", context=context)
+        return JsonResponse({"status": "success"}, status=200)
