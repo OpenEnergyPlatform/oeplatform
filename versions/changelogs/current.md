@@ -26,6 +26,10 @@ SPDX-License-Identifier: CC0-1.0
   the german / english synonym if available for an entity
   [(#2277)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
 
+- The metadata api now also syncs the data schema documented in the metadata
+  with the table schema available in the database
+  [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)
+
 ### Bugs
 
 - Reviewer&Contributor page: calculation of percentage of progress of reviewed
@@ -54,6 +58,11 @@ SPDX-License-Identifier: CC0-1.0
   incomplete due to a messi code refactoring where some code snippets have been
   lost due to merge conflicts in commits that are not pushed to remote.
   [(#2289)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2289)
+
+- Fixed a bug in the oemetaBuilder tool that removed `isAbout` and
+  `valueReference` entries and added unwanted properties when the users submits
+  the Editor form
+  [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)
 
 ## Documentation updates
 
