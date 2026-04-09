@@ -1495,7 +1495,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
         table_obj = table_or_404(table=table)
 
-        context = {}
+        # context = {}
         user: login_models.myuser = request.user  # type: ignore
 
         # get the review data and additional application metadata
@@ -1574,7 +1574,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
 
             # TODO: also update reviewFinished in review datamodel json
 
-        return render(request, "dataedit/opr_review.html", context=context)
+        return JsonResponse({"status": "success"}, status=200)
 
 
 class TablePeerRreviewContributorView(TablePeerReviewView):
@@ -1667,7 +1667,7 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         # table_obj = table_or_404(table=table)
         # TODO: why unused argument "table"?
 
-        context = {}
+        # context = {}
         if request.method == "POST":
             review_data = json.loads(request.body)
             review_post_type = review_data.get("reviewType")
@@ -1681,4 +1681,4 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             current_opr.review = merged_review
             current_opr.update(review_type=review_post_type)
 
-        return render(request, "dataedit/opr_contributor.html", context=context)
+        return JsonResponse({"status": "success"}, status=200)
