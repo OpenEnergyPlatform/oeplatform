@@ -66,6 +66,7 @@ from api.actions import (
     table_get_row_count,
 )
 from api.error import APIError
+from api.helper import get_column_description
 from api.utils import table_or_404, table_or_404_from_dict
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
@@ -76,7 +77,6 @@ from dataedit.helper import (
     edit_tag,
     find_tables,
     get_cancle_state,
-    get_column_description,
     get_page,
     merge_field_reviews,
     process_review_data,
