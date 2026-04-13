@@ -13,6 +13,9 @@ SPDX-License-Identifier: CC0-1.0
 - Create tables_sections.html, delete user_partial_tables
   [(#2248)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2248)
 
+- Update fetch call for oeo-search api to be relative
+  [(#2293)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2293)
+
 ### Features
 
 - Build search field to search in the user's tables
