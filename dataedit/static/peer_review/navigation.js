@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { getCategoryToTabIdMapping, makeFieldList, selectField } from "./peer_review.js";
+import { isEmptyValue, isEffectivelyEmpty, sendJson } from "./utilities.js";
 
 export function updateTabProgress() {
   const allFields = document.querySelectorAll('.review__item');
@@ -48,13 +49,37 @@ export function switchCategoryTab(category) {
 }
 
 export function selectNextField() {
-  var fieldList = makeFieldList();
-  var next = fieldList.indexOf('field_' + window.selectedField) + 1;
-  selectField(fieldList, next);
+  const fieldList = makeFieldList();
+  const currentIndex = fieldList.indexOf('field_' + window.selectedField);
+
+  for (let i = currentIndex + 1; i < fieldList.length; i++) {
+    const fieldElement = document.getElementById(fieldList[i]);
+    if (!fieldElement) continue;
+
+    const fieldKey = fieldElement.dataset.fieldkey;
+    const fieldValue = fieldElement.dataset.fieldvalue;
+
+    if (!isEffectivelyEmpty(fieldKey, fieldValue)) {
+      selectField(fieldList, i);
+      return;
+    }
+  }
 }
 
 export function selectPreviousField() {
-  var fieldList = makeFieldList();
-  var prev = fieldList.indexOf('field_' + window.selectedField) - 1;
-  selectField(fieldList, prev);
+  const fieldList = makeFieldList();
+  const currentIndex = fieldList.indexOf('field_' + window.selectedField);
+
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const fieldElement = document.getElementById(fieldList[i]);
+    if (!fieldElement) continue;
+
+    const fieldKey = fieldElement.dataset.fieldkey;
+    const fieldValue = fieldElement.dataset.fieldvalue;
+
+    if (!isEffectivelyEmpty(fieldKey, fieldValue)) {
+      selectField(fieldList, i);
+      return;
+    }
+  }
 }
