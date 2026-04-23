@@ -774,6 +774,7 @@ for row in result.json():
     `;
     });
 
+    {% if has_metadata %}
     document.addEventListener("DOMContentLoaded", function () {
       var button = document.getElementById("opr-button-start");
       if (button) {
@@ -810,5 +811,14 @@ for row in result.json():
         });
       }
     });
+     {% if not opr.is_finished and user.is_authenticated %}
+     {% endif %}
+      {% else %}
+  <div class="alert alert-variant--warning alert-variant--sm alert-variant--center">
+        <span class="alert-variant__content">
+            Metadata is empty. Open Peer Review is not available.
+        </span>
+    </div>
+{% endif %}
   </script>
 {% endblock after-body-bottom-js %}

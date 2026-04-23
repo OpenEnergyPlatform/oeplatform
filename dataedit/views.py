@@ -98,6 +98,49 @@ from oeplatform.settings import (
     TOPIC_SCENARIO,
 )
 
+
+def has_valid_metadata(metadata: dict) -> bool:
+    """
+    Check if metadata has any non-empty fields.
+    Returns True if at least one field has a meaningful value.
+
+    Args:
+        metadata: The OEMetadata dictionary
+
+    Returns:
+        bool: True if valid metadata exists, False otherwise
+    """
+    if not metadata:
+        return False
+
+    def check_value(val):
+        """Check if a value is considered non-empty."""
+        if val is None:
+            return False
+        if isinstance(val, str):
+            return val.strip() not in ("", "None", "null")
+        if isinstance(val, (list, dict)):
+            return len(val) > 0
+        return True
+
+    def traverse(obj):
+        """Recursively traverse the metadata structure."""
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                # Skip certain keys that are always present but not meaningful
+                if key in ("@id", "@context", "metaMetadata"):
+                    continue
+                if check_value(value) or traverse(value):
+                    return True
+        elif isinstance(obj, list):
+            for item in obj:
+                if check_value(item) or traverse(item):
+                    return True
+        return False
+
+    return traverse(metadata)
+
+
 ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
 
 
@@ -718,12 +761,13 @@ class TableDataView(View):
         opr_manager = PeerReviewManager()
         reviews = opr_manager.filter_opr_by_table(table=table)
 
+        # Check if metadata has any valid (non-empty) fields
+        has_metadata = has_valid_metadata(metadata)
+
         opr_context = {
             "contributor": PeerReviewManager.load_contributor(table=table),
             "reviewer": PeerReviewManager.load_reviewer(table=table),
-            "opr_enabled": True,
-            # oemetadata
-            # is not None,  # check if the table has the metadata
+            "opr_enabled": has_metadata,  # Only enable if metadata exists
         }
 
         opr_result_context = {}
@@ -783,6 +827,7 @@ class TableDataView(View):
             "opr": opr_context,
             "opr_result": opr_result_context,
             "embargo_time_left": embargo_time_left,
+            "has_metadata": has_metadata,
         }
 
         return render(request, "dataedit/dataview.html", context=context_dict)
