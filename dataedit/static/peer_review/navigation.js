@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2025 Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { getCategoryToTabIdMapping, makeFieldList, selectField } from "./peer_review.js";
