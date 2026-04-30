@@ -333,13 +333,7 @@
         This feature is not yet complete and currently is only available for
         testing and feedback purposes.
       </div>
-      {% if not has_metadata %}
-        <div class="alert alert-warning" role="alert">
-          <strong>No metadata available.</strong> Therefore an open peer review is not possible.
-          <br />
-          Please add metadata to this table before requesting a review.
-        </div>
-      {% else %}
+      {% if has_metadata %}
         {% if not opr.reviewer %}
           <div class="alert alert-variant--warning alert-variant--sm alert-variant--center"
                role="alert">
@@ -478,6 +472,12 @@
             </div>
           {% endif %}
         {% endif %}
+      {% else %}
+        <div class="alert alert-variant--warning alert-variant--sm alert-variant--center">
+          <span class="alert-variant__content">
+            No metadata available. Therefore an Open Peer Review is not possible.
+          </span>
+        </div>
       {% endif %}
     </div>
   </div>
