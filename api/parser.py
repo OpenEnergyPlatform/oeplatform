@@ -39,9 +39,7 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy import types as sa_types
-from sqlalchemy import (
-    util,
-)
+from sqlalchemy import util
 from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.schema import Sequence
