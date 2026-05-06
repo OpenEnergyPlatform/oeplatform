@@ -13,6 +13,12 @@ SPDX-License-Identifier: CC0-1.0
 - Create tables_sections.html, delete user_partial_tables
   [(#2248)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2248)
 
+- Updated the quantitative scenario comparison app to work with the updated OEKG
+  and OEO, this update includes a refactor of the code and we now use E-Charts
+  as graph library. The App is still a early access prototype which is actively
+  refined with new data sources .
+  [(#2307)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2307)
+
 ### Features
 
 - Build search field to search in the user's tables
