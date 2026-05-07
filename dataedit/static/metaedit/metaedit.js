@@ -1,8 +1,17 @@
+/* eslint-disable max-len */
+/*
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+*/
+/* eslint-enable max-len */
 
-// e.preventDefault(), e.stopPropagation(), t.saveJSON()
+"use strict";
 
-
-var MetaEdit = function(config) {
+window.MetaEdit = function (config) {
   /*
     TODO: consolidate functions (same as in wizard and other places)
     */
@@ -31,7 +40,7 @@ var MetaEdit = function(config) {
     var token = getCsrfToken();
     return $.ajax({
       url: url,
-      headers: {"X-CSRFToken": token},
+      headers: { "X-CSRFToken": token },
       data_type: "json",
       cache: false,
       contentType: "application/json; charset=utf-8",
@@ -43,21 +52,21 @@ var MetaEdit = function(config) {
     });
   }
 
-
   function fixSchema(json) {
     /* recursively remove null types */
     function fixRecursive(elem) {
-      Object.keys(elem).map(function(key) {
+      Object.keys(elem).map(function (key) {
         var prop = elem[key];
         prop.title = prop.title || key[0].toLocaleUpperCase() + key.slice(1);
-        if (prop.type == 'array') {
-          // prop.items = prop.items || {};
-          prop.items.title = prop.items.title || key[0].toLocaleUpperCase() + key.slice(1); // missing title, otherwise the form label is just "item 1, ..."
-          fixRecursive({"": prop.items});
-        } else if (prop.type == 'object') {
+        if (prop.type == "array") {
+          /* missing title, otherwise the form label is just "item 1, ..." */
+          prop.items.title =
+            prop.items.title || key[0].toLocaleUpperCase() + key.slice(1);
+          fixRecursive({ "": prop.items });
+        } else if (prop.type == "object") {
           // prop.properties = prop.properties || {};
           fixRecursive(prop.properties);
-        } else if (typeof prop.type == 'object') {
+        } else if (typeof prop.type == "object") {
           // find and remove "null"
           var index = prop.type.indexOf("null");
           if (index >= 0) {
@@ -73,149 +82,225 @@ var MetaEdit = function(config) {
     fixRecursive(json.properties);
 
     // make some readonly
+    var fieldProperties =
+      json.properties.resources.items.properties.schema.properties.fields.items
+        .properties;
     if (config.standalone == false) {
-      json.properties.id.readonly = true;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
+      json.properties["@id"].readOnly = false;
+      fieldProperties.name.readOnly = true;
+      fieldProperties.type.readOnly = true;
     } else {
-      json.properties.id.readonly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = false;
-      json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = false;
+      json.properties["@context"].options = { hidden: true };
+      json.properties["@id"].readOnly = false;
+      json.properties.resources.items.properties["@id"].readOnly = false;
+      json.properties.resources.items.properties.path.readOnly = false;
+      fieldProperties.nullable.readOnly = false;
+      fieldProperties.name.readOnly = false;
+      fieldProperties.type.readOnly = false;
     }
 
+    // remove some: TODO: but make sure fields are not lost
+    // json.properties.resources.items.properties.embargoPeriod = false;
+
     // hide some
-    json.properties.resources.items.properties.profile.options = {hidden: true};
-    json.properties.resources.items.properties.encoding.options = {hidden: true};
-    json.properties.resources.items.properties.dialect.options = {hidden: true};
-    json.properties.review.options = {hidden: true};
-    json.properties.metaMetadata.options = {hidden: true};
+    json.properties.resources.items.properties.embargoPeriod.options = {
+      hidden: true,
+    };
+    json.properties.resources.items.properties.type.options = { hidden: true };
+    json.properties.resources.items.properties.encoding.options = {
+      hidden: true,
+    };
+    json.properties.resources.items.properties.dialect.options = {
+      hidden: true,
+    };
+    // json.properties.resources.items.properties.review.options = {hidden: true};
+    json.properties.metaMetadata.options = { hidden: true };
 
     // add formats
-    json.properties.publicationDate.format = 'date';
-    json.properties.temporal.properties.referenceDate.format = 'date';
-    json.properties.context.properties.homepage.format = 'url';
+    // json.properties.context.properties.homepage.format = 'url'; // uri or url???
 
     json["options"] = {
-      "disable_edit_json": false, // show only for entire form
+      disable_edit_json: false, // show only for entire form
     };
 
     if (config.standalone == false) {
-      json["title"] = "Metadata for " + config.table;
+      json["title"] = "Metadata for the Dataset: " + config.table;
     } else {
-      json["title"] = "Create new Metadata";
+      json["title"] = "Create new Metadata for your Dataset";
     }
 
+    // add names to resources categories
+    json.properties.resources.items.basicCategoryTitle = "General";
 
     return json;
   }
 
   function fixData(json) {
-    // MUST have ID
-    json["id"] = config["url_table_id"];
+    json = json || {};
 
-    // MUST have one resource with name == id == tablename
-    json["resources"] = json["resources"] || [{}];
-    json["resources"][0]["name"] = json["resources"][0]["name"] || config.table;
+    // Required top-level fields
+    json["@context"] =
+      json["@context"] ||
+      // eslint-disable-next-line max-len
+      "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json";
 
-    // auto set / correct columns
-    json["resources"][0]["schema"] = json["resources"][0]["schema"] || {};
-    json["resources"][0]["schema"]["fields"] = json["resources"][0]["schema"]["fields"] || [];
-    var fieldsByName = {};
-    json["resources"][0]["schema"]["fields"].map(function(field) {
-      fieldsByName[field.name] = field;
+    json.metaMetadata = json.metaMetadata || {};
+    if (!json.metaMetadata.metadataVersion) {
+      json.metaMetadata.metadataVersion = "OEMetadata-2.0.4";
+    }
+
+    // Ensure one resource
+    json.resources = json.resources || [{}];
+    const resource = json.resources[0];
+    resource.name = resource.name || config.table;
+    resource.path = resource.path || config.url_table_id;
+
+    // Ensure schema object exists
+    resource.schema = resource.schema || {};
+    resource.schema.fields = resource.schema.fields || [];
+
+    // Rebuild fields with merging and renaming
+    const existingFields = resource.schema.fields;
+    const fieldMap = new Map();
+
+    // Add existing fields to a map for quick lookup
+    existingFields.forEach((field) => {
+      if (field.name) fieldMap.set(field.name, field);
     });
 
-    json["resources"][0]["schema"]["fields"] = [];
-    config.columns.map(function(column) {
-      var field = fieldsByName[column.name] || {name: column.name};
-      field.type = field.type || column.data_type;
-      json["resources"][0]["schema"]["fields"].push(field);
-    });
+    // Prepare updated fields array
+    const updatedFields = config.columns.map((col) => {
+      const existing = fieldMap.get(col.name) || {};
 
+      // Determine nullable status
+      let isNullable =
+        existing.nullable !== undefined ? existing.nullable : true;
 
-    // add empty value for all missing so they show up in editor
-    // these will be removed at the end
-    function fixRecursive(schemaProps, elemObject, path) {
-      // is object ?
-      if (typeof elemObject != 'object' || $.isArray(elemObject)) {
-        return;
+      // Force 'id' column to never be nullable ---
+      if (col.name === "id") {
+        isNullable = false;
       }
-      // for each key: fill missing (recursively)
-      Object.keys(schemaProps).map(function(key) {
-        var prop = schemaProps[key];
-        // console.log(path + '.' + key, prop.type)
-        if (prop.type == 'object') {
-          elemObject[key] = elemObject[key] || {};
-          fixRecursive(prop.properties, elemObject[key], path + '.' + key);
-        } else if (prop.type == 'array') {
-          elemObject[key] = elemObject[key] || [];
-          // if non empty array
-          if ($.isArray(elemObject[key]) && elemObject[key].length > 0) {
-            elemObject[key].map(function(elem, i) {
-              fixRecursive(prop.items.properties, elem, path + '.' + key + '.' + i);
-            });
+      // -----------------------------------------------------
+
+      return {
+        // Preserves human annotations (isAbout, valueReference) ---
+        ...existing,
+        // --------------------------------------------------------------------
+        name: col.name,
+        type: col.data_type || existing.type || null,
+        description: existing.description ?? null,
+        unit: existing.unit ?? null,
+        nullable: isNullable, // Use our strictly evaluated nullable flag
+      };
+    });
+
+    // Set updated field list (removes stale fields)
+    resource.schema.fields = updatedFields;
+
+    // Fill missing top-level fields recursively based on schema
+    function fillMissingFromSchema(schemaProps, target) {
+      Object.entries(schemaProps).forEach(([key, prop]) => {
+        if (target[key] === undefined) {
+          if (prop.type === "object") {
+            target[key] = {};
+            if (prop.properties) {
+              fillMissingFromSchema(prop.properties, target[key]);
+            }
+          } else if (prop.type === "array") {
+            target[key] = [];
+            if (prop.items?.type === "object" && prop.items.properties) {
+              const obj = {};
+              fillMissingFromSchema(prop.items.properties, obj);
+              target[key].push(obj);
+            }
+          } else {
+            target[key] = null;
           }
-        } else { // value
-          if (elemObject[key] === undefined) {
-            // console.log('adding empty value: ' + path + '.' + key)
-            elemObject[key] = null;
-          }
+        } else if (
+          prop.type === "object" &&
+          typeof target[key] === "object" &&
+          prop.properties
+        ) {
+          fillMissingFromSchema(prop.properties, target[key]);
+        } else if (
+          prop.type === "array" &&
+          Array.isArray(target[key]) &&
+          prop.items?.properties
+        ) {
+          target[key].forEach((item) => {
+            if (typeof item === "object") {
+              fillMissingFromSchema(prop.items.properties, item);
+            }
+          });
         }
       });
     }
 
-    fixRecursive(config.schema.properties, json, 'root');
+    fillMissingFromSchema(config.schema.properties, json);
+
+    // Fix boundingBox in each resource if needed
+    if (Array.isArray(json.resources)) {
+      json.resources.forEach((resource) => {
+        const bboxPath = resource?.spatial?.extent?.boundingBox;
+        if (
+          !Array.isArray(bboxPath) ||
+          bboxPath.length !== 4 ||
+          bboxPath.some((val) => typeof val !== "number")
+        ) {
+          if (!resource.spatial) resource.spatial = {};
+          if (!resource.spatial.extent) resource.spatial.extent = {};
+          resource.spatial.extent.boundingBox = [0, 0, 0, 0]; // fallback valid default
+        }
+
+        // Scrub the schema-injected 'openModalButton' ---
+
+        // 1. Scrub from top-level Subject array
+        if (Array.isArray(resource.subject)) {
+          resource.subject.forEach((subItem) => {
+            delete subItem.openModalButton;
+          });
+        }
+
+        // 2. Scrub from Field annotations (isAbout, valueReference)
+        if (resource.schema && Array.isArray(resource.schema.fields)) {
+          resource.schema.fields.forEach((field) => {
+            // Scrub from isAbout
+            if (Array.isArray(field.isAbout)) {
+              field.isAbout.forEach((aboutItem) => {
+                delete aboutItem.openModalButton;
+              });
+            }
+            // Scrub from valueReference
+            if (Array.isArray(field.valueReference)) {
+              field.valueReference.forEach((refItem) => {
+                delete refItem.openModalButton;
+              });
+            }
+          });
+        }
+        // ------------------------------------------------------------
+      });
+    }
 
     return json;
   }
 
   function getErrorMsg(x) {
     try {
-      x = 'Upload failed: ' + JSON.parse(x.responseJSON).reason;
+      x = "Upload failed: " + JSON.parse(x.responseJSON).reason;
     } catch (e) {
       x = x.statusText;
     }
     return x;
   }
 
-  function convertDescriptionIntoPopover() {
-    function convert(descr, label) {
-      var description = $(descr).text(); // get description text
-      if (description && label) {
-        label
-            .attr('data-bs-content', description)
-            .attr('title', label.text())
-            .attr('data-bs-toggle', 'popover')
-            .popover({
-              placement: 'top',
-              trigger: 'hover',
-              template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>',
-            });
-        descr.addClass('d-none');
-      }
-    }
-
-    // headings
-    config.form.find('.card-title').parent().find('>p').not('.d-none').each(function(i, e) {
-      convert($(e), $(e).parent().find('>.card-title>label'));
-    });
-
-    // inputs
-    config.form.find('.form-group>.form-text').not('.d-none').each(function(_i, e) {
-      convert($(e), $(e).parent().find('>label'));
-    });
-
-    // remove button groups
-    config.form.find('.btn-group').removeClass('btn-group');
-  }
-
   // Function to recursively convert empty strings to null
   function convertEmptyStringsToNull(obj) {
     for (var key in obj) {
       if (obj.hasOwnProperty(key)) {
-        if (typeof obj[key] === 'string' && obj[key] === '') {
+        if (typeof obj[key] === "string" && obj[key] === "") {
           obj[key] = null;
-        } else if (typeof obj[key] === 'object') {
+        } else if (typeof obj[key] === "object") {
           convertEmptyStringsToNull(obj[key]);
         }
       }
@@ -224,21 +309,21 @@ var MetaEdit = function(config) {
 
   function bindButtons() {
     // download
-    $('#metaedit-download').bind('click', function downloadMetadata() {
+    $("#metaedit-download").bind("click", function downloadMetadata() {
       var json = config.editor.getValue();
       // create data url
       convertEmptyStringsToNull(json);
       console.log(json);
       json = JSON.stringify(json, null, 1);
-      blob = new Blob([json], {type: "application/json"}),
-      dataUrl = URL.createObjectURL(blob);
+      ((blob = new Blob([json], { type: "application/json" })),
+        (dataUrl = URL.createObjectURL(blob)));
       // create link
       var a = document.createElement("a");
       document.body.appendChild(a);
       // assign url and click
       a.style = "display: none";
       a.href = dataUrl;
-      a.download = config.table + '.metadata.json';
+      a.download = config.table + ".metadata.json";
       a.click();
       // cleanup
       URL.revokeObjectURL(dataUrl);
@@ -246,55 +331,57 @@ var MetaEdit = function(config) {
     });
 
     // submit
-    $('#metaedit-submit').bind('click', function sumbmitMetadata() {
-      $('#metaedit-submitting').removeClass('d-none');
+    $("#metaedit-submit").bind("click", function sumbmitMetadata() {
+      $("#metaedit-submitting").removeClass("d-none");
       // config.editor.remove_empty_properties = true;
       var json = config.editor.getValue();
       convertEmptyStringsToNull(json);
       json = fixData(json);
       json = JSON.stringify(json);
-      sendJson("POST", config.url_api_meta, json).then(function() {
-        window.location = config.url_view_table;
-      }).catch(function(err) {
-        // TODO evaluate error, show user message
-        $('#metaedit-submitting').addClass('d-none');
-        alert(getErrorMsg(err));
-      });
+      sendJson("POST", config.url_api_meta, json)
+        .then(function () {
+          window.location = config.url_view_table;
+        })
+        .catch(function (err) {
+          // TODO evaluate error, show user message
+          $("#metaedit-submitting").addClass("d-none");
+          alert(getErrorMsg(err));
+        });
     });
 
     // Cancel
-    $('#metaedit-cancel').bind('click', function cancel() {
+    $("#metaedit-cancel").bind("click", function cancel() {
       window.location = config.cancle_url;
     });
   }
 
   (function init() {
-    $('#metaedit-loading').removeClass('d-none');
+    $("#metaedit-loading").removeClass("d-none");
 
-    config.form = $('#metaedit-form');
+    config.form = $("#metaedit-form");
 
-    // check if the editor should be initialized with metadata from table or as standalone withou any initial data
+    /* check if the editor should be initialized with metadata from table
+    or as standalone without any initial data*/
     if (config.standalone == false) {
       $.when(
-          $.getJSON(config.url_api_meta),
-          $.getJSON('/static/metaedit/schema.json'),
-      ).done(function(data, schema) {
+        $.getJSON(config.url_api_meta),
+        $.getJSON("/static/metaedit/schema.json")
+      ).done(function (data, schema) {
         config.schema = fixSchema(schema[0]);
         config.initialData = fixData(data[0]);
 
-
-        /*  https://github.com/json-editor/json-editor */
-        options = {
+        /* https://github.com/json-editor/json-editor */
+        const options = {
           startval: config.initialData,
           schema: config.schema,
-          theme: 'bootstrap5',
-          iconlib: 'fontawesome5',
-          mode: 'form',
+          theme: "bootstrap5",
+          iconlib: "fontawesome5",
+          mode: "form",
           compact: true,
           disable_collapse: true,
           prompt_before_delete: false,
           object_layout: "normal",
-          disable_properties: false,
+          disable_properties: true,
           disable_edit_json: true,
           disable_array_delete_last_row: true,
           disable_array_delete_all_rows: true,
@@ -302,95 +389,124 @@ var MetaEdit = function(config) {
           array_controls_top: true,
           no_additional_properties: true,
           required_by_default: false,
-          remove_empty_properties: false, // don't remove, otherwise the metadata will not pass the validation on the server
+          /* keep remove_empty_properties: false
+          otherwise the metadata will not pass  the validation on the server */
+          remove_empty_properties: false,
           show_errors: "interaction",
         };
 
         config.editor = new JSONEditor(config.form[0], options);
 
         /* patch labels */
-        var mainEditBox = config.form.find('.je-object__controls').first();
-        mainEditBox.find('.json-editor-btntype-save').text('Apply');
-        mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
-        mainEditBox.find('.json-editor-btntype-cancel').text('Close');
-        mainEditBox.find('.json-editor-btntype-editjson').text('Edit raw JSON');
+        var mainEditBox = config.form.find(".je-object__controls").first();
+        mainEditBox.find(".json-editor-btntype-save").text("Apply");
+        mainEditBox.find(".json-editor-btntype-copy").text("Copy to Clipboard");
+        mainEditBox.find(".json-editor-btntype-cancel").text("Close");
+        mainEditBox.find(".json-editor-btntype-editjson").text("Edit raw JSON");
 
         bindButtons();
 
         // convertDescriptionIntoPopover();
         // check for new items in dom
-        (new MutationObserver(function(_mutationsList, _observer) {
+        new MutationObserver(function (_mutationsList, _observer) {
           // convertDescriptionIntoPopover()
-        })).observe(config.form[0], {attributes: false, childList: true, subtree: true});
+        }).observe(config.form[0], {
+          attributes: false,
+          childList: true,
+          subtree: true,
+        });
 
         // all done
-        $('#metaedit-loading').addClass('d-none');
-        $('#metaedit-icon').removeClass('d-none');
-        $('#metaedit-controls').removeClass('d-none');
+        $("#metaedit-loading").addClass("d-none");
+        $("#metaedit-icon").removeClass("d-none");
+        $("#metaedit-controls").removeClass("d-none");
 
         // TODO catch init error
 
         window.JSONEditor.defaults.callbacks = {
-          "autocomplete": {
-            "search_name": function search(jseditor_editor, input) {
-              var url = "https://openenergyplatform.org/api/oeo-search?query=" + input;
+          autocomplete: {
+            search_name: function search(jseditor_editor, input) {
+              var url =
+                "https://openenergyplatform.org/api/oeo-search?query=" + input;
 
-              return new Promise(function(resolve) {
+              return new Promise(function (resolve) {
                 fetch(url, {
-                  mode: 'cors',
-                }).then(function(response) {
-                  return response.json();
-                }).then(function(data) {
-                  resolve(data["docs"]);
-                });
+                  mode: "cors",
+                })
+                  .then(function (response) {
+                    return response.json();
+                  })
+                  .then(function (data) {
+                    resolve(data["docs"]);
+                  });
               });
             },
-            "renderResult_name": function(jseditor_editor, result, props) {
-              return ['<li ' + props + '>',
-                '<div class="eiao-object-snippet">' + result.label + '<small>' + '<span style="color:green">' + ' : ' + result.definition + '</span></div>',
-                '</li>'].join('');
+            renderResult_name: function (jseditor_editor, result, props) {
+              return [
+                "<li " + props + ">",
+                '<div class="eiao-object-snippet">' +
+                  result.label +
+                  "<small>" +
+                  '<span style="color:green">' +
+                  " : " +
+                  result.definition +
+                  "</span></div>",
+                "</li>",
+              ].join("");
             },
-            "getResultValue_name": function getResultValue(jseditor_editor, result) {
-              selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
+            getResultValue_name: function getResultValue(
+              jseditor_editor,
+              result
+            ) {
+              let selected_value = String(result.label).replace(/<\/?b>/gi, ""); // Remove <b> tags if present
 
-              let path = String(jseditor_editor.path).replace("name", "path");
+              let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
-              path_uri.setValue(String(result.resource));
+
+              // Check if the editor exists before setting value to avoid other errors
+              if (path_uri) {
+                path_uri.setValue(String(result.resource));
+              }
 
               return selected_value;
             },
           },
-          "button": {
-            "openModalAction": function openOeoExtPlugin(jseditor, e) {
+          button: {
+            openModalAction: function openOeoExtPlugin(jseditor, e) {
               // Perform the HTMX request or any other desired action
-             
-              htmx.ajax('GET', createUrl, {
-                target: '.modal-body',
-                swap: 'innerHTML',
-                trigger: 'click'
+              var targetUrl = config.create_url;
+
+              if (!targetUrl) {
+                console.error("MetaEdit Error: config.create_url is missing!");
+                return;
+              }
+              htmx.ajax("GET", targetUrl, {
+                target: ".modal-body",
+                swap: "innerHTML",
+                trigger: "click",
               });
-              $('#formModal').modal('show');
-            }
-          }
+              $("#formModal").modal("show");
+            },
+          },
         };
       });
     } else {
-      $.when(
-          $.getJSON('/static/metaedit/schema.json'),
-      ).done(function(schema) {
+      $.when($.getJSON("/static/metaedit/schema.json")).done(function (schema) {
         config.schema = fixSchema(schema);
 
-        standalone_options = {
+        const standalone_options = {
           schema: config.schema,
-          theme: 'bootstrap5',
-          iconlib: 'fontawesome5',
-          mode: 'form',
+          // eslint-disable-next-line max-len
+          // startval: {"@context": "https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/production/oemetadata/latest/context.json"},
+          theme: "bootstrap5",
+          iconlib: "fontawesome5",
+          mode: "form",
           compact: true,
           // remove_button_labels: true,
           disable_collapse: true,
           prompt_before_delete: false,
           object_layout: "normal",
-          disable_properties: false,
+          disable_properties: true,
           disable_edit_json: true,
           disable_array_delete_last_row: true,
           disable_array_delete_all_rows: true,
@@ -398,79 +514,111 @@ var MetaEdit = function(config) {
           array_controls_top: true,
           no_additional_properties: true,
           required_by_default: false,
-          remove_empty_properties: false, // don't remove, otherwise the metadata will not pass the validation on the server
+          /* keep remove_empty_properties: false, 
+          otherwise the metadata will not pass the validation on the server */
+          remove_empty_properties: false,
         };
         config.editor = new JSONEditor(config.form[0], standalone_options);
 
         /* patch labels */
-        var mainEditBox = config.form.find('.je-object__controls').first();
-        mainEditBox.find('.json-editor-btntype-save').text('Apply');
-        mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
-        mainEditBox.find('.json-editor-btntype-cancel').text('Close');
-        mainEditBox.find('.json-editor-btntype-editjson').text('Edit raw JSON');
+        var mainEditBox = config.form.find(".je-object__controls").first();
+        mainEditBox.find(".json-editor-btntype-save").text("Apply");
+        mainEditBox.find(".json-editor-btntype-copy").text("Copy to Clipboard");
+        mainEditBox.find(".json-editor-btntype-cancel").text("Close");
+        mainEditBox.find(".json-editor-btntype-editjson").text("Edit raw JSON");
 
         bindButtons();
 
         // convertDescriptionIntoPopover();
         // check for new items in dom
-        (new MutationObserver(function(_mutationsList, _observer) {
+        new MutationObserver(function (_mutationsList, _observer) {
           // convertDescriptionIntoPopover()
-        })).observe(config.form[0], {attributes: false, childList: true, subtree: true});
+        }).observe(config.form[0], {
+          attributes: false,
+          childList: true,
+          subtree: true,
+        });
 
         // all done
-        $('#metaedit-loading').addClass('d-none');
-        $('#metaedit-icon').removeClass('d-none');
-        $('#metaedit-controls').removeClass('d-none');
+        $("#metaedit-loading").addClass("d-none");
+        $("#metaedit-icon").removeClass("d-none");
+        $("#metaedit-controls").removeClass("d-none");
 
         // TODO catch init error
 
         window.JSONEditor.defaults.callbacks = {
-          "autocomplete": {
-            "search_name": function search(jseditor_editor, input) {
-              var url = "https://openenergyplatform.org/api/oeo-search?query=" + input;
+          autocomplete: {
+            search_name: function search(jseditor_editor, input) {
+              var url =
+                "https://openenergyplatform.org/api/oeo-search?query=" + input;
 
-              return new Promise(function(resolve) {
+              return new Promise(function (resolve) {
                 fetch(url, {
-                  mode: 'cors',
-                }).then(function(response) {
-                  return response.json();
-                }).then(function(data) {
-                  resolve(data["docs"]);
-                });
+                  mode: "cors",
+                })
+                  .then(function (response) {
+                    return response.json();
+                  })
+                  .then(function (data) {
+                    resolve(data["docs"]);
+                  });
               });
             },
-            "renderResult_name": function(jseditor_editor, result, props) {
-              return ['<li ' + props + '>',
-                '<div class="eiao-object-snippet">' + result.label + '<small>' + '<span style="color:green">' + ' : ' + result.definition + '</span></div>',
-                '</li>'].join('');
+            renderResult_name: function (jseditor_editor, result, props) {
+              return [
+                "<li " + props + ">",
+                '<div class="eiao-object-snippet">' +
+                  result.label +
+                  "<small>" +
+                  '<span style="color:green">' +
+                  " : " +
+                  result.definition +
+                  "</span></div>",
+                "</li>",
+              ].join("");
             },
-            "getResultValue_name": function getResultValue(jseditor_editor, result) {
-              selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
+            getResultValue_name: function getResultValue(
+              jseditor_editor,
+              result
+            ) {
+              let selected_value = String(result.label).replace(/<\/?b>/gi, "");
 
-              let path = String(jseditor_editor.path).replace("name", "path");
+              let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
-              path_uri.setValue(String(result.resource));
+
+              // Check if the editor exists before setting value to avoid other errors
+              if (path_uri) {
+                path_uri.setValue(String(result.resource));
+              }
 
               return selected_value;
             },
           },
-          "button": {
-            "openModalAction": function openOeoExtPlugin(jseditor, e) {
+          button: {
+            openModalAction: function openOeoExtPlugin(jseditor, e) {
               // Perform the HTMX request or any other desired action
+              var targetUrl = config.create_url;
 
-              htmx.ajax('GET', createUrl, {
-                target: '.modal-body',
-                swap: 'innerHTML',
-                trigger: 'click'
+              if (!targetUrl) {
+                console.error("MetaEdit Error: config.create_url is missing!");
+                return;
+              }
+
+              htmx.ajax("GET", targetUrl, {
+                target: ".modal-body",
+                swap: "innerHTML",
+                trigger: "click",
               });
-              $('#formModal').modal('show');
-            }
-          }
+              $("#formModal").modal("show");
+            },
+          },
         };
       });
     }
   })();
 
-
   return config;
 };
+
+/* notify inline code that MetaEdit is loaded */
+window.dispatchEvent(new Event("MetaEdit:ready"));

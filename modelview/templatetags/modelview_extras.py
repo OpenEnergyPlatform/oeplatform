@@ -1,14 +1,22 @@
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 quentinpeyras <https://github.com/quentinpeyras>
+SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 from django import template
 from django.contrib.postgres.forms.array import SimpleArrayField
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 
 register = template.Library()
-
-
-@register.simple_tag
-def prnt(x):
-    print(x)
 
 
 @register.filter
@@ -44,9 +52,7 @@ def checktable(model, label, prefix, suffixes, separator="_"):
                         {2}
                     </table>
                 </td>
-            </tr>""".format(
-        label, header, ""
-    )
+            </tr>""".format(label, header, "")
 
 
 @register.simple_tag
@@ -111,7 +117,7 @@ def get_verbose_field_name(instance, field_name):
 @register.simple_tag
 def get_field(instance, field_name):
     field = instance.__dict__[field_name]
-    if type(field) == list:
+    if isinstance(field, list):
         field = ", ".join(field)
     return field
 

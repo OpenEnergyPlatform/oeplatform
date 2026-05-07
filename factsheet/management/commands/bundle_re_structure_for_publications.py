@@ -1,31 +1,21 @@
-import os
+"""
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import subprocess as sp
-from rdflib import Graph, RDFS, URIRef
-import json
-from rdflib.namespace import XSD, Namespace
-from collections import defaultdict
+import uuid
 
 from django.core.management.base import BaseCommand
-from django.conf import settings
-from django.apps import apps
-
-import json
-import os
-import sys
-import uuid
-from pathlib import Path
-
-from rdflib import RDF, XSD, BNode, ConjunctiveGraph, Graph, Literal, URIRef
+from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
-from rdflib.namespace import XSD, Namespace
+from rdflib.namespace import Namespace
 from rdflib.plugins.stores import sparqlstore
-from rest_framework import status
+from SPARQLWrapper import SPARQLWrapper
 
-from SPARQLWrapper import JSON, SPARQLWrapper
-
-
-#query_endpoint = "http://oekb.iks.cs.ovgu.de:3030/oekg_main/query"
-#update_endpoint = "http://oekb.iks.cs.ovgu.de:3030/oekg_main/update"
+# query_endpoint = "http://oekb.iks.cs.ovgu.de:3030/oekg_main/query"
+# update_endpoint = "http://oekb.iks.cs.ovgu.de:3030/oekg_main/update"
 
 query_endpoint = "http://localhost:3030/ds/query"
 update_endpoint = "http://localhost:3030/ds/update"
@@ -37,13 +27,13 @@ store.open((query_endpoint, update_endpoint))
 oekg = Graph(store, identifier=default)
 
 
-OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
+OEO = Namespace("https://openenergyplatform.org/ontology/oeo/")
 OBO = Namespace("http://purl.obolibrary.org/obo/")
 DC = Namespace("http://purl.org/dc/terms/")
 RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 NPG = Namespace("http://ns.nature.com/terms/")
 SCHEMA = Namespace("https://schema.org/")
-OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
+OEKG = Namespace("https://openenergyplatform.org/ontology/oekg/")
 DBO = Namespace("http://dbpedia.org/ontology/")
 
 oekg.bind("OEO", OEO)
@@ -62,7 +52,6 @@ def execute(cmd, cwd):
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         all_bundles_uids = []
         for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00010252)):
@@ -70,32 +59,38 @@ class Command(BaseCommand):
             all_bundles_uids.append(uid)
 
         for uid in all_bundles_uids:
-            bundle_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
+            bundle_URI = URIRef("https://openenergyplatform.org/ontology/oekg/" + uid)
 
             if (bundle_URI, OEKG["report_title"], None) in oekg:
-
                 publication_uuid = str(uuid.uuid4())
                 publications_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/publication/" + publication_uuid
-                            )
+                    "https://openenergyplatform.org/ontology/oekg/publication/"
+                    + publication_uuid
+                )
 
-                oekg.add((publications_URI, OEKG["publication_uuid"], Literal(publication_uuid)))
+                oekg.add(
+                    (
+                        publications_URI,
+                        OEO.OEO_00390095,
+                        Literal(publication_uuid),
+                    )
+                )
 
                 for s, p, o in oekg.triples((bundle_URI, OEKG["report_title"], None)):
-                    oekg.add(
-                        (publications_URI, RDFS.label, o)
-                        )
+                    oekg.add((publications_URI, RDFS.label, o))
 
-                for s, p, o in oekg.triples((bundle_URI, OEKG["date_of_publication"], None)):
+                for s, p, o in oekg.triples((bundle_URI, OEO.OEO_00390096, None)):
                     oekg.add(
                         (
                             publications_URI,
-                            OEKG["date_of_publication"],
+                            OEO.OEO_00390096,
                             o,
                         )
                     )
 
-                for s, p, o in oekg.triples((bundle_URI, OEKG["place_of_publication"], None)):
+                for s, p, o in oekg.triples(
+                    (bundle_URI, OEKG["place_of_publication"], None)
+                ):
                     oekg.add(
                         (
                             publications_URI,
@@ -104,23 +99,31 @@ class Command(BaseCommand):
                         )
                     )
 
-                for s, p, o in oekg.triples((bundle_URI, OEKG["link_to_study"], None)):
+                for s, p, o in oekg.triples((bundle_URI, OEO.OEO_00390078, None)):
                     oekg.add(
                         (
                             publications_URI,
-                            OEKG["link_to_study"],
+                            OEO.OEO_00390078,
                             o,
                         )
                     )
 
                 for s, p, o in oekg.triples((bundle_URI, OEKG["doi"], None)):
-                    oekg.add((publications_URI, OEKG["doi"], o))
+                    oekg.add((publications_URI, OEO.OEO_00390098, o))
 
                 for s, p, o in oekg.triples((bundle_URI, OEO.OEO_00000506, None)):
                     oekg.add((publications_URI, OEO.OEO_00000506, o))
 
-                oekg.add((bundle_URI, OEKG["has_publication"], publications_URI))
+                oekg.add((bundle_URI, OBO.BFO_0000051, publications_URI))
 
-                print("The bundle with id {id} has been updated to handle multiple publications!".format(id = uid))
+                print(
+                    "The bundle with id {id} has been updated to handle multiple publications!".format(  # noqa:E501
+                        id=uid
+                    )
+                )
             else:
-                print("The bundle with id {id} did not have any publication!".format(id = uid))
+                print(
+                    "The bundle with id {id} did not have any publication!".format(
+                        id=uid
+                    )
+                )

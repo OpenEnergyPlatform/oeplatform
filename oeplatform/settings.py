@@ -8,21 +8,118 @@ https://docs.djangoproject.com/en/1.8/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
-"""
+
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Santosch Mutyala <https://github.com/smutyala1at>
+SPDX-FileCopyrightText: 2025 Tu Phan Ngoc <RL-INSTITUT\tuphan.ngoc@rli-nb-65.rl-institut.local> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Venkatesh Murugadas <venkatesh.murugadas@st.ovgu.de> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from pathlib import Path
 
-try:
-    from .securitysettings import *  # noqa
-except ImportError:
-    import logging
-    import os
+from oeplatform.securitysettings import (
+    ALLOWED_HOSTS,
+    ANON_CONNECTION_LIMIT,
+    BASE_DIR,
+    CONTACT_ADDRESSES,
+    CORS_ORIGIN_ALLOW_ALL,
+    DATABASES,
+    DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL,
+    DEBUG,
+    DEFAULT_FROM_EMAIL,
+    DJANGO_VITE,
+    EMAIL_BACKEND,
+    EMAIL_PORT,
+    LOGGING,
+    MEDIA_ROOT,
+    MEDIA_URL,
+    OEKG_SPARQL_ENDPOINT_URL,
+    ONTOLOGY_FOLDER,
+    ONTOLOGY_ROOT,
+    ONTOP_SPARQL_ENDPOINT_URL,
+    RDF_DATABASES,
+    SCHEMA_DATA,
+    SCHEMA_DEFAULT_TEST_SANDBOX,
+    SECRET_KEY,
+    SILENCED_SYSTEM_CHECKS,
+    SOCIALACCOUNT_PROVIDERS,
+    STATIC_ROOT,
+    STATIC_URL,
+    STATICFILES_DIRS,
+    TIME_OUT,
+    URL,
+    USE_DOCKER,
+    USER_CONNECTION_LIMIT,
+    VITE_DEV_SERVER_URL,
+    dbhost,
+    dbname,
+    dbpasswd,
+    dbport,
+    dbuser,
+)
 
-    logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
-    SECRET_KEY = os.environ.get("SECRET_KEY", "0")
-    DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
-    URL = os.environ.get("URL")
+__all__ = [  # mark imports as "used"
+    "ALLOWED_HOSTS",
+    "ANON_CONNECTION_LIMIT",
+    "BASE_DIR",
+    "CONTACT_ADDRESSES",
+    "CORS_ORIGIN_ALLOW_ALL",
+    "DATABASES",
+    "DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL",
+    "DEBUG",
+    "DEFAULT_FROM_EMAIL",
+    "DJANGO_VITE",
+    "EMAIL_BACKEND",
+    "EMAIL_PORT",
+    "LOGGING",
+    "MEDIA_ROOT",
+    "MEDIA_URL",
+    "OEKG_SPARQL_ENDPOINT_URL",
+    "ONTOLOGY_FOLDER",
+    "ONTOLOGY_ROOT",
+    "ONTOP_SPARQL_ENDPOINT_URL",
+    "RDF_DATABASES",
+    "SCHEMA_DATA",
+    "SCHEMA_DEFAULT_TEST_SANDBOX",
+    "SECRET_KEY",
+    "SILENCED_SYSTEM_CHECKS",
+    "SOCIALACCOUNT_PROVIDERS",
+    "STATIC_ROOT",
+    "STATIC_URL",
+    "STATICFILES_DIRS",
+    "TIME_OUT",
+    "URL",
+    "USE_DOCKER",
+    "USER_CONNECTION_LIMIT",
+    "VITE_DEV_SERVER_URL",
+    "dbhost",
+    "dbname",
+    "dbpasswd",
+    "dbport",
+    "dbuser",
+]
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -41,9 +138,14 @@ INSTALLED_APPS = (
     "django_bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
+    "django_vite",
     "modelview",
     "modelview.templatetags.modelview_extras",
     "login",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.openid_connect",
     "base",
     "base.templatetags.base_tags",
     "widget_tweaks",
@@ -74,10 +176,10 @@ MIDDLEWARE = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 )
 
 ROOT_URLCONF = "oeplatform.urls"
@@ -86,6 +188,7 @@ EXTERNAL_URLS = {
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
+    "tutorials_api_upload": "https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/",  # noqa E501
     "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
     "tutorials_wizard": "https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/",  # noqa E501
     "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
@@ -97,8 +200,94 @@ EXTERNAL_URLS = {
     "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
     "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
     "spdx_licenses": "https://spdx.github.io/license-list-data/",
-    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md",  # noqa E501
+    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
     "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
+    "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
+    "github_openenergyplatform": "https://github.com/OpenEnergyPlatform",
+    "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
+    "open_plan": "https://open-plan-tool.org/",
+    "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
+    "tutorials_index": "https://openenergyplatform.github.io/academy/",
+    "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
+    "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
+    "tutorials_api_upload": "https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/",  # noqa E501
+    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
+    "tutorials_wizard": "https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/",  # noqa E501
+    "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
+    "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
+    "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
+    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
+    "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
+    "compendium": "https://openenergyplatform.github.io/organisation/",
+    "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
+    "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
+    "spdx_licenses": "https://spdx.github.io/license-list-data/",
+    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
+    "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
+    "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
+    "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
+    "open_plan": "https://open-plan-tool.org/",
+    "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
+    "creativecommons_licenses_by_3_0_de": "http://creativecommons.org/licenses/by/3.0/de/",  # noqa:E501
+    "iks_cs_ovgu_iks": "http://iks.cs.ovgu.de/IKS.html",
+    "reiner_lemoine_institut_en": "http://reiner-lemoine-institut.de/en/",
+    "dgs_berlin": "https://www.dgs-berlin.de/",
+    "znes_flensburg": "http://www.znes-flensburg.de/",
+    "creativecommons_licenses_by_3_0_de_deed_en": "https://creativecommons.org/licenses/by/3.0/de/deed.en",  # noqa:E501
+    "doi_10_1016_j_egyai_2021_100074": "https://doi.org/10.1016/j.egyai.2021.100074",
+    "en_wikipedia_wiki_open_science": "https://en.wikipedia.org/wiki/Open_science",
+    "forum_openmod_initiative": "https://forum.openmod-initiative.org/",
+    "github_openenergyplatform_oekg": "https://github.com/OpenEnergyPlatform/oekg",
+    "github_openenergyplatform_oemetadata": "https://github.com/OpenEnergyPlatform/oemetadata",  # noqa:E501
+    "github_openenergyplatform_oemetadata_production_oemetadata": "https://github.com/OpenEnergyPlatform/oemetadata/blob/production/oemetadata/latest/metadata_key_description.md",  # noqa:E501
+    "github_openenergyplatform_oeplatform": "https://github.com/OpenEnergyPlatform/oeplatform",  # noqa:E501
+    "github_openenergyplatform_oeplatform_develop_contributing": "https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md",  # noqa:E501
+    "github_openenergyplatform_oeplatform_discussions_1268": "https://github.com/OpenEnergyPlatform/oeplatform/discussions/1268",  # noqa:E501
+    "github_openenergyplatform_oeplatform_issues": "https://github.com/OpenEnergyPlatform/oeplatform/issues",  # noqa:E501
+    "github_openenergyplatform_oeplatform_issues_568": "https://github.com/OpenEnergyPlatform/oeplatform/issues/568",  # noqa:E501
+    "github_openenergyplatform_ontology": "https://github.com/OpenEnergyPlatform/ontology",  # noqa:E501
+    "github_openenergyplatform_ontology_dev_contributing": "https://github.com/OpenEnergyPlatform/ontology/blob/dev/CONTRIBUTING.md",  # noqa:E501
+    "github_openenergyplatform_ontology_releases": "https://github.com/OpenEnergyPlatform/ontology/releases",  # noqa:E501
+    "github_openenergyplatform_ontology_wiki_welcome__how_to_participate": "https://github.com/OpenEnergyPlatform/ontology/wiki/Welcome!-How-to-participate",  # noqa:E501
+    "github_openenergyplatform_tutorial_open_data_licenses_ipynb": "https://github.com/OpenEnergyPlatform/tutorial/blob/master/other/tutorial_open-data-licenses.ipynb",  # noqa:E501
+    "i_creativecommons_l_by_3_0_de_88x31_png": "https://i.creativecommons.org/l/by/3.0/de/88x31.png",  # noqa:E501
+    "infai": "https://infai.org/",
+    "nfdi4energy": "https://nfdi4energy.uol.de/",
+    "openenergyplatform_github_academy_courses_05_ontology": "https://openenergyplatform.github.io/academy/courses/05_ontology/",  # noqa:E501
+    "openenergyplatform_github_organisation_family_members": "https://openenergyplatform.github.io/organisation/family_members/",  # noqa:E501
+    "openenergyplatform_github_organisation_family_members_templates_metadata": "https://openenergyplatform.github.io/organisation/family_members/templates-and-specification/open-energy-metadata/",  # noqa:E501
+    "openmod_initiative": "https://openmod-initiative.org/",
+    "reiner_lemoine_institut": "https://reiner-lemoine-institut.de/",
+    "unpkg__trevoreyre_autocomplete_js": "https://unpkg.com/@trevoreyre/autocomplete-js",  # noqa:E501
+    "unpkg__trevoreyre_autocomplete_js_dist_style_css": "https://unpkg.com/@trevoreyre/autocomplete-js/dist/style.css",  # noqa:E501
+    "unpkg_htmx_org_1_7_0_dist_htmx_js": "https://unpkg.com/htmx.org@1.7.0/dist/htmx.js",  # noqa:E501
+    "wiki_openmod_initiative_wiki_category_glossary": "https://wiki.openmod-initiative.org/wiki/Category:Glossary",  # noqa:E501
+    "dlr": "https://www.dlr.de/",
+    "dlr_tt": "https://www.dlr.de/tt/",
+    "enargus_pub_bscw_cgi__op_enargus_eps2_q__2201180818_1_22": "https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201180818/1%22",  # noqa:E501
+    "enargus_pub_bscw_cgi__op_enargus_eps2_q__2201186899_1_22": "https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201186899/1%22",  # noqa:E501
+    "enargus_pub_bscw_cgi__op_enargus_eps2_q__2201227101_1_22": "https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201227101/1%22",  # noqa:E501
+    "enargus_pub_bscw_cgi_26_op_enargus_eps2_m_0_v_10_p_0_s_0_q_03ei1051c": "https://www.enargus.de/pub/bscw.cgi/26?op=enargus.eps2&m=0&v=10&p=0&s=0&q=03EI1051C",  # noqa:E501
+    "enargus_pub_bscw_cgi_26_op_enargus_eps2_m_0_v_10_p_0_s_0_q_sedos": "https://www.enargus.de/pub/bscw.cgi/26?op=enargus.eps2&m=0&v=10&p=0&s=0&q=SEDOS",  # noqa:E501
+    "fin_ovgu": "https://www.fin.ovgu.de/",
+    "fkie_fraunhofer": "https://www.fkie.fraunhofer.de/",
+    "fortiss": "https://www.fortiss.org/",
+    "fz_juelich_de": "https://www.fz-juelich.de",
+    "fz_juelich_iek_iek_3": "https://www.fz-juelich.de/iek/iek-3/",
+    "go_fair_fair_principles": "https://www.go-fair.org/fair-principles/",
+    "hereon": "https://www.hereon.de/",
+    "iee_fraunhofer_en": "https://www.iee.fraunhofer.de/en.html",
+    "ier_uni_stuttgart": "https://www.ier.uni-stuttgart.de/",
+    "informatik_uni_osnabrueck_institut_fuer_informatik": "https://www.uni-osnabrueck.de/fb6/informatik",  # noqa:E501
+    "oeko": "https://www.oeko.de/",
+    "oeko_en": "https://www.oeko.de/en/",
+    "offis": "https://www.offis.de/",
+    "pik_potsdam": "https://www.pik-potsdam.de/",
+    "ptj": "https://www.ptj.de",
+    "tib_eu_de": "https://www.tib.eu/de/",
+    "uni_flensburg_en": "https://www.uni-flensburg.de/en/",
+    "cdn_github_cards_widget": "//cdn.jsdelivr.net/github-cards/latest/widget.js",
+    "technoportal": "https://technoportal.hevs.ch/ontologies/OEO",
 }
 
 # Kept this separate for now to avoid messing with the other list ...
@@ -109,15 +298,6 @@ DOCUMENTATION_LINKS = {
     "oemetabuilder": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/features/metaBuilder/",  # noqa:E501
     "oekg_api": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oekg-api/",  # noqa:E501
 }
-
-
-def external_urls_context_processor(request):
-    """Define hard coded external urls here.
-    Use in templates like this: {{ EXTERNAL_URLS.<name_of_url> }}
-    Also, you may want to add an icon indicating external links, e.g.
-    """
-    return {"EXTERNAL_URLS": EXTERNAL_URLS}
-
 
 SITE_ID = 1
 
@@ -132,7 +312,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "oeplatform.settings.external_urls_context_processor",
+                "oeplatform.context_processors.external_urls",
+                "oeplatform.context_processors.allauth_settings",
             ]
         },
     }
@@ -144,42 +325,14 @@ GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
-# from security settings
-try:
-    ONTOLOGY_FOLDER  # noqa F405
-except NameError:
-    ONTOLOGY_FOLDER = "/tmp"
 
-# from security settings
-try:
-    BASE_DIR  # noqa F405
-except NameError:
-    BASE_DIR = ""
-
-# from security settings
-try:
-    MEDIA_ROOT  # noqa F405
-except NameError:
-    MEDIA_ROOT = "/media"
-
-try:
-    ONTOLOGY_ROOT  # noqa F405
-except NameError:
-    if BASE_DIR:
-        ONTOLOGY_ROOT = Path(BASE_DIR, ONTOLOGY_FOLDER)
-
-if ONTOLOGY_ROOT:
-    OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
-    OPEN_ENERGY_ONTOLOGY_FOLDER = Path(
-        ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME  # noqa:F405
-    )
-    OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME = "oeo-full.owl"
-
-if MEDIA_ROOT:
-    OEO_EXT_PATH = Path(MEDIA_ROOT, "oeo_ext")
-    OEO_EXT_NAME = "oeox"
-    OEO_EXT_OWL_NAME = "oeo_ext.owl"
-    OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
+OPEN_ENERGY_ONTOLOGY_NAME = "oeo"
+OPEN_ENERGY_ONTOLOGY_FOLDER = Path(ONTOLOGY_ROOT) / OPEN_ENERGY_ONTOLOGY_NAME
+OPEN_ENERGY_ONTOLOGY_FULL_OWL_NAME = "oeo-full.owl"
+OEO_EXT_PATH = Path(MEDIA_ROOT) / "oeo_ext"
+OEO_EXT_NAME = "oeox"
+OEO_EXT_OWL_NAME = "oeo_ext.owl"
+OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -198,8 +351,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 AUTH_USER_MODEL = "login.myuser"
-LOGIN_URL = "/user/login"
-LOGIN_REDIRECT_URL = "/"
+# https://docs.djangoproject.com/en/dev/ref/settings/#login-url
+LOGIN_URL = "account_login"
+# https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
+LOGIN_REDIRECT_URL = "login:redirect"
+# LOGIN_REDIRECT_URL = "/"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -212,8 +368,10 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
     "axes.backends.AxesBackend",
-    # custom class extenging Django ModelBackend for login with username OR email
+    "django.contrib.auth.backends.ModelBackend",
+    # custom class extending Django ModelBackend for login with username OR email
     "login.backends.ModelBackendWithEmail",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
@@ -230,3 +388,64 @@ COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 COMPRESS_REBUILD_TIMEOUT = 0
 COMPRESS_MTIME_DELAY = 0
+COMPRESS_FILTERS = {
+    # do not minify js, we do it with parcel
+    # and it can create problems with react
+    "js": [],
+    # we minify with parcel, but we need to pass it
+    # through CssAbsoluteFilter to resolve linked fonts
+    "css": [
+        "compressor.filters.css_default.CssAbsoluteFilter",
+    ],
+}
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "name"
+ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # requires ACCOUNT_EMAIL_REQUIRED = True
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+ACCOUNT_ADAPTER = "login.adapters.AccountAdapter"
+# https://django-allauth.readthedocs.io/en/latest/forms.html
+ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
+ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_ALLOW_REGISTRATION = True
+ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
+# ACCOUNT_SIGNUP_FORM_CLASS = {"login.forms.CreateUserForm"}
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+
+
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+SOCIALACCOUNT_ADAPTER = "login.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_EMAIL_VERIFICATION = "optional"
+# https://django-allauth.readthedocs.io/en/latest/forms.html
+# SOCIALACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+# axes login throttling
+AXES_ENABLED = not DEBUG
+AXES_FAILURE_LIMIT = 5  # Number of allowed attempts
+AXES_COOLOFF_TIME = 1  # Lockout period in hours
+AXES_ONLY_USER_FAILURES = True  # Only track failures per user
+
+CAPTCHA_IMAGE_SIZE = (300, 80)  # width, height in pixels
+CAPTCHA_FONT_SIZE = 52
+
+# dynamic variable to check if code is run in test or not
+IS_TEST = "test" in sys.argv
+IS_SANDBOX = IS_TEST
+SCHEMA_DEFAULT = SCHEMA_DEFAULT_TEST_SANDBOX if IS_SANDBOX else SCHEMA_DATA
+
+
+USE_ONTOP = bool(ONTOP_SPARQL_ENDPOINT_URL)
+USE_LOEP = bool(DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL)
+
+
+# when running approximate (fast) row count: if number is below this
+# we get the precise row count (slow)
+APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW = 100000
+PSEUDO_TOPIC_DRAFT = "draft"
+TOPIC_SCENARIO = "scenario"

@@ -1,4 +1,15 @@
+"""
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 from rest_framework.permissions import BasePermission
+
+NO_PERM = 0
+WRITE_PERM = 4
+DELETE_PERM = 8
+ADMIN_PERM = 12
 
 
 class CanEditScenarioBundle(BasePermission):

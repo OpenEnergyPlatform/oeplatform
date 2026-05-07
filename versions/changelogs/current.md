@@ -1,35 +1,75 @@
+<!--
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Changes to the oeplatform code
 
 ## Changes
 
-- Open-Peer-Review [(#1800)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1800)
- - Removed state suggestions for accepted fields. 
- - Updated recursive_update function to handle deletion and overwriting of suggested/rejected values.
- - Removed value requirements for "deny" buttons in certain actions.
+- Create tables_sections.html, delete user_partial_tables
+  [(#2248)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2248)
 
-- Change sparql endpoint for OEKG to use the http post method to match the expected usage. The OEKG API is also extended to return data in common rdf/graph formats like tutle or json ld [(#1928)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1928).
+- Updated the quantitative scenario comparison app to work with the updated OEKG
+  and OEO, this update includes a refactor of the code and we now use E-Charts
+  as graph library. The App is still a early access prototype which is actively
+  refined with new data sources .
+  [(#2307)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2307)
 
-## Features
+### Features
 
-- Open-Peer-Review [(#1800)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1800)
- - Added a new button Save Comments for adding comments to rejected fields.
- - Display functionality for add_comment fields was implemented for rejected items.
- - Enabled active ok button functionality without page reload for unreviewed fields.
+- Build search field to search in the user's tables
+  [(#2248)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2248)
 
+- Update the Graph Vie WIdget on the OEO Viewer page and enable the graph
+  comparison feature
+  [(#2277)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
 
-## Bugs
+- Add a Option to select the Language on the OEO Entity Pages. This only shows
+  the german / english synonym if available for an entity
+  [(#2277)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
 
-- Open-Peer-Review [(#1800)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1800):
- - Fixed bug with displaying the same field twice.
- - Addressed an issue with missing fields for "suggest/deny" and status in specific contexts.
- - Disabled unnecessary "ok/deny" buttons for reviewer-rejected fields.
- - Corrected metadata updates by removing functionality for rejected fields in PeerReview & Table tables.
- - Resolved issue where the status label showed "Missing" instead of "Pending" on submission.
- - Fixed display issues with empty fields when there were two statuses. 
+- The metadata api now also syncs the data schema documented in the metadata
+  with the table schema available in the database
+  [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)
 
-- Fix outdated service url to send requests to the LEOP from the oemetaBuilder and oeo-extended features[(#1938)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1938).
+### Bugs
 
+- Reviewer&Contributor page: calculation of percentage of progress of reviewed
+  fields takes into account empty fields
+  [(#1386)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1386)
+
+- Refactored the OEO Viewer layout to better organize hierarchy, metadata, and
+  graph widgets, including improved mobile responsiveness and also adapt to the
+  oeo inferred version which is now served by the TIB-TS (OLSv4 System)
+  [(#2237)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
+
+- Update the Hierarchy Widget to Expand and highlight the currently selected
+  Entity in the OEO Viewer
+  [(#2237)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
+
+- On the OEO Entity page the Entity type is now automatically detected to stream
+  line the user experience as users do not have to check the type manually - we
+  now also show the type of the entity
+  [(#2237)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
+
+- Fixed a bug in the TIB-TS api when the user navigates to ObjectProperties /
+  Individuals. The API path is now correctly set
+  [(#2237)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
+
+- Cleanup incomplete updates to the OpenPeerReview. Some parts of the code are
+  incomplete due to a messi code refactoring where some code snippets have been
+  lost due to merge conflicts in commits that are not pushed to remote.
+  [(#2289)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2289)
+
+- Fixed a bug in the oemetaBuilder tool that removed `isAbout` and
+  `valueReference` entries and added unwanted properties when the users submits
+  the Editor form
+  [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)
 
 ## Documentation updates
 
-- Updated documentation to simplify usage of vendor software swagger ui and update the documentation on scenario bundles. Add documentation on how to use the updated OEKG web API [(#1928)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1928).
+## Code Quality

@@ -1,0 +1,1127 @@
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg
+// SPDX-FileCopyrightText: 2025 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import Box from '@mui/material/Box';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+// import Paper from '@mui/material/Paper';
+import { visuallyHidden } from '@mui/utils';
+import styled from '@mui/material/styles/styled';
+
+import { tableCellClasses } from '@mui/material/TableCell';
+import Button from '@mui/material/Button';
+import { Link } from 'react-router-dom';
+// import VisibilityIcon from '@mui/icons-material/Visibility';
+// import ViewComfyAltIcon from '@mui/icons-material/ViewComfyAlt';
+import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
+import ReplayIcon from '@mui/icons-material/Replay';
+import Chip from '@mui/material/Chip';
+// import ReadMoreIcon from '@mui/icons-material/ReadMore';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import Collapse from '@mui/material/Collapse';
+import IconButton from '@mui/material/IconButton';
+import axios from 'axios';
+import conf from "../conf.json";
+// import SelectAllIcon from '@mui/icons-material/SelectAll';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import AddIcon from '@mui/icons-material/Add';
+// import RuleIcon from '@mui/icons-material/Rule';
+import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
+import Tooltip from '@mui/material/Tooltip';
+import Stack from '@mui/material/Stack';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+// import ArrowCircleRightOutlinedIcon from '@mui/icons-material/ArrowCircleRightOutlined';
+import FormatListBulletedOutlinedIcon from '@mui/icons-material/FormatListBulletedOutlined';
+import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.jsx';
+import { CardItem, CardHeader, CardBody, CardRow } from '../styles/oep-theme/components/cardView.jsx';
+import '../styles/App.css';
+import variables from '../styles/oep-theme/variables.js';
+// import palette from '../styles/oep-theme/palette.js';
+import CSRFToken from './csrfToken.js';
+// import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
+import FactsheetFilterDialog from './FactsheetFilterDialog.jsx';
+import FilterFeedbackBanner from './filterFeedbackBanner';
+
+
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: "#04678fa8",
+    color: theme.palette.common.white,
+    fontSize: 16,
+    fontWeight: 600,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+    border: 0,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
+
+function getStringValForSort(x, order) {
+  if (Array.isArray(x) && x.length > 0) {
+    x.sort(); /* still does not work if x is array of objects */
+    if (order === "desc") {
+      x = x[x.length - 1]; /* take last element */
+    } else {
+      x = x[0];/* take first element */
+    }
+  }
+  /* make lowercase string */
+  return `${x}`.toLowerCase()
+}
+
+function descendingComparator(a, b, orderBy, order) {
+  const valB = getStringValForSort(b[orderBy], order);
+  const valA = getStringValForSort(a[orderBy], order);
+
+
+  if (valB < valA) {
+    return -1;
+  }
+  if (valB > valA) {
+    return 1;
+  }
+  return 0;
+}
+
+function getComparator(order, orderBy) {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy, order)
+    : (a, b) => -descendingComparator(a, b, orderBy, order);
+}
+
+function stableSort(array, comparator) {
+  const stabilizedThis = array.map((el, index) => [el, index]);
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) {
+      return order;
+    }
+    return a[1] - b[1];
+  });
+  return stabilizedThis.map((el) => el[0]);
+}
+
+/**
+
+possible cells:
+
+{
+  "uid": "string",
+  "acronym": "string",
+  "study_name": "string",
+  "abstract": "string",
+  "institutions": "array[string]",
+  "funding_sources": "array",
+  "models": "array",
+  "frameworks": "array",
+  "collected_scenario_publication_dates": "array[string]",
+  "scenarios": "array[{label,abstract,full_name,uid}]"
+}
+
+ */
+const headCells = [
+  {
+    id: 'study_name',
+    numeric: false,
+    disablePadding: true,
+    label: 'Study name',
+    align: 'left'
+  },
+  {
+    id: 'acronym',
+    numeric: true,
+    disablePadding: false,
+    label: 'Acronym',
+    align: 'left'
+  },
+  {
+    id: 'scenarios',
+    numeric: true,
+    disablePadding: false,
+    label: 'Scenarios',
+    align: 'left'
+  },
+  {
+    id: 'collected_scenario_publication_dates',
+    numeric: true,
+    disablePadding: false,
+    label: 'Year of publication',
+    align: 'left'
+  },
+
+  /* dont create header for more_details so that we dont
+   show sorting arrows
+
+  {
+    id: 'more_details',
+    numeric: true,
+    disablePadding: false,
+    label: '',
+    align: 'right'
+  },
+  */
+
+];
+
+function EnhancedTableHead(props) {
+  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
+    props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
+
+
+  return (
+    <TableHead>
+      <TableRow>
+        {headCells.map((headCell) => (
+          <StyledTableCell
+            variant="light"
+            key={headCell.id}
+            align={headCell.align}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
+            sortDirection={orderBy === headCell.id ? order : false}
+            sx={{ paddingLeft: "20px" }}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </Box>
+              ) : null}
+            </TableSortLabel>
+          </StyledTableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
+}
+
+EnhancedTableHead.propTypes = {
+  numSelected: PropTypes.number.isRequired,
+  handleOpenQuery: PropTypes.func,
+  handleReset: PropTypes.func,
+  filterApplied: PropTypes.bool,
+  onRequestSort: PropTypes.func.isRequired,
+  onSelectAllClick: PropTypes.func.isRequired,
+  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+  orderBy: PropTypes.string.isRequired,
+  rowCount: PropTypes.number.isRequired,
+};
+
+function EnhancedTableToolbar(props) {
+  const {
+    numSelected,
+    handleOpenQuery,
+    handleShowAll,
+    handleOpenAspectsOfComparison,
+    handleChangeView,
+    alignment,
+    selected,
+    logged_in,
+    filterApplied,
+    handleReset,
+    searchText,
+    setSearchText,
+  } = props;
+
+  return (
+    <div>
+      <Grid
+        container
+        display="flex"
+        flexDirection="row"
+        justifyContent="center"
+        sx={{ py: 2 }}
+      >
+        <Grid
+          item
+          lg={6}
+          sx={{ borderLeft: variables.border.light, px: 2 }}
+        >
+          <Typography variant="body2">
+            <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020227">Scenario bundles</a> weave together important information about one or more <a href="http://openenergyplatform.org/ontology/oeo/OEO_00000364">scenarios</a>. They inform about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020011">studies</a> made based on a scenario, including publications (= <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020012">study report</a>).
+          </Typography>
+          <Typography variant="body2">
+            If there is quantitative <a href="http://openenergyplatform.org/ontology/oeo/OEO_00030029">input data</a> and / or <a href="https://openenergyplatform.org/ontology/oeo/OEO_00020013">output data</a> available on the OEP, the scenario bundles can link to that data, too.
+            They can also inform about <a href="http://openenergyplatform.org/ontology/oeo/OEO_00020353">models</a> (if available as a <a href="https://openenergyplatform.org/factsheets/models/">model factsheet</a>) and frameworks (if available as a <a href="https://openenergyplatform.org/factsheets/frameworks/">framework factsheet</a>) that were used to project a scenario into the future (= <a href="http://openenergyplatform.org/ontology/oeo/OEO_00010262">scenario projection</a>).
+          </Typography>
+          <Typography variant="body2">
+            In a nutshell: A scenario bundle provides you with all relevant information to understand a scenario's context and to ease a potential re-use of quantitative data for your own purposes.
+          </Typography>
+          <Typography variant="body2">
+            The scenario bundles are stored in the Open Energy Knowledge Graph (OEKG). The OEKG can be queried using the SPARQL language. We provide a <a href="/oekg/gui/">User Interface</a> to simplify this rather technical task.
+            If you want to send your own SPARQL query you can do this by send a request to the http-api endpoint.
+          </Typography>
+        </Grid>
+      </Grid>
+      <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
+        <Grid container justifyContent="space-between" spacing={2}>
+
+          {/* LEFT: buttons */}
+          <Grid item xs={12} md={4}>
+            <Button
+              variant="outlined"
+              size="small"
+              key="Query"
+              sx={{ marginLeft: '8px' }}
+              onClick={handleOpenQuery}
+              startIcon={<FilterAltOutlinedIcon />}
+            >
+              Search
+            </Button>
+
+            <Button
+              disabled={!filterApplied && !searchText.trim()}
+              size="small"
+              key="resetFilterButton"
+              sx={{ marginLeft: '8px' }}
+              startIcon={<ReplayIcon />}
+              onClick={handleReset}
+            >
+              Reset
+            </Button>
+
+            <Tooltip title="Compare">
+              {numSelected > 1 ? (
+                <Link
+                  to={`scenario-bundles/compare/${[...selected].join('&')}`}
+                  onClick={() => this.forceUpdate}
+                  style={{ color: 'white' }}
+                >
+                  <Button
+                    size="small"
+                    style={{ marginLeft: '5px', color: 'white', textTransform: 'none' }}
+                    variant="contained"
+                    key="compareScenariosBtn"
+                    startIcon={<CompareArrowsIcon />}
+                  >
+                    Compare scenarios
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  size="small"
+                  style={{ marginLeft: '5px', color: 'white', textTransform: 'none' }}
+                  variant="contained"
+                  key="compareScenariosBtn"
+                  startIcon={<CompareArrowsIcon />}
+                  onClick={handleOpenAspectsOfComparison}
+                >
+                  Compare scenarios
+                </Button>
+              )}
+            </Tooltip>
+          </Grid>
+
+          {/* MIDDLE: quick search */}
+          <Grid item xs={12} md={4}>
+            <TextField
+              size="small"
+              fullWidth
+              placeholder="Filter by study name or acronym…"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchText ? (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      aria-label="clear search"
+                      onClick={() => setSearchText('')}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
+              }}
+            />
+          </Grid>
+
+          {/* RIGHT: view toggle + create */}
+          <Grid item xs={6} md={2}>
+            <ToggleButtonGroup
+              color="primary"
+              value={alignment}
+              exclusive
+              onChange={handleChangeView}
+              aria-label="Platform"
+              size="small"
+            >
+              <ToggleButton value="list"><FormatListBulletedOutlinedIcon />List</ToggleButton>
+              <ToggleButton value="cards"><ViewAgendaOutlinedIcon />Cards</ToggleButton>
+            </ToggleButtonGroup>
+          </Grid>
+
+          <Grid item xs={6} md={2}>
+            <HtmlTooltip
+              style={{ marginLeft: '10px' }}
+              placement="top"
+              title={
+                <React.Fragment>
+                  <div>
+                    <b>{logged_in === "NOT_LOGGED_IN" ? "Please login first!" : "Create a new Scenario Bundle!"}</b>
+                  </div>
+                </React.Fragment>
+              }
+            >
+              <span>
+                <Button
+                  disabled={logged_in === "NOT_LOGGED_IN"}
+                  component={Link}
+                  variant="contained"
+                  size="small"
+                  className="linkButton"
+                  to={`scenario-bundles/id/new`}
+                  onClick={() => this.forceUpdate}
+                >
+                  <AddIcon />
+                  Create new
+                </Button>
+              </span>
+            </HtmlTooltip>
+          </Grid>
+
+        </Grid>
+      </Toolbar>
+    </div>
+  );
+}
+
+EnhancedTableToolbar.propTypes = {
+  numSelected: PropTypes.number.isRequired,
+  searchText: PropTypes.string.isRequired,
+  setSearchText: PropTypes.func.isRequired,
+};
+
+
+export default function CustomTable(props) {
+  const { factsheets } = props;
+  /* insitially sort by date (newest first) */
+  const [order, setOrder] = useState('desc');
+  const [orderBy, setOrderBy] = useState('collected_scenario_publication_dates');
+  const [selected, setSelected] = useState(new Set());
+  const [page, setPage] = useState(0);
+  const [dense, setDense] = useState(false);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [open, setOpen] = useState([]);
+  const [openQuery, setOpenQuery] = useState(false);
+  const [openScenarioComparisonMessage, setOpenScenarioComparisonMessage] = useState(false);
+  const [selectedInstitution, setSelectedInstitution] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
+  const [selectedAuthors, setSelectedAuthors] = useState([]);
+  const [authors, setAuthors] = useState([]);
+  const [fundingSources, setFundingSources] = useState([]);
+  const [selectedFundingSource, setSelectedFundingSource] = useState([]);
+  const [startDateOfPublication, setStartDateOfPublication] = useState(null);
+  const [endDateOfPublication, setEndDateOfPublication] = useState(null);
+  const [selectedStudyKeywords, setSelectedStudyKewords] = useState([]);
+  const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
+  const [selectedAspects, setSelectedAspects] = useState([]);
+  const [alignment, setAlignment] = React.useState('list');
+
+  const [logged_in, setLogged_in] = React.useState('');
+
+  const [scenarioYearTouched, setScenarioYearTouched] = useState(false);
+  const [publicationDateTouched, setPublicationDateTouched] = useState(false);
+
+  const [filteredFactsheets, setFilteredFactsheets] = useState([]);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackType, setFeedbackType] = useState(''); // 'noFilters' or 'noResults'
+  const [filterApplied, setFilterApplied] = useState(false);
+
+  const [searchText, setSearchText] = useState('');
+
+  const handleChangeView = (event, newAlignment) => {
+    if (newAlignment !== null) {
+      setAlignment(newAlignment);
+    }
+  };
+
+
+  const baseData = React.useMemo(
+    () => (filterApplied ? filteredFactsheets : factsheets),
+    [filterApplied, filteredFactsheets, factsheets]
+  );
+
+  const data = React.useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return baseData;
+
+    return baseData.filter((row) => {
+      const study = String(row.study_name ?? '').toLowerCase();
+      const acr = String(row.acronym ?? '').toLowerCase();
+      return study.includes(q) || acr.includes(q);
+    });
+  }, [baseData, searchText]);
+
+
+
+  const [openBackDrop, setOpenBackDrop] = useState(false);
+
+  const handleClose = () => {
+    setOpenBackDrop(false);
+  };
+
+
+  const handleRequestSort = (event, property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      setSelected(new Set(data.map((n) => n.study_name)));
+    } else {
+      setSelected(new Set());
+    }
+  };
+
+  const handleClick = (event, name) => {
+    const newSelected = new Set(selected);
+    if (newSelected.has(name)) newSelected.delete(name);
+    else newSelected.add(name);
+
+    setSelected(newSelected);
+
+  };
+
+  const handleChangePage = (event, newPage) => setPage(newPage);
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  useEffect(() => {
+    setPage(0);
+  }, [data, rowsPerPage]);
+
+
+  const handleOpenQuery = (event) => {
+    setOpenQuery(true);
+  };
+
+  const handleOpenAspectsOfComparison = (event) => {
+    if (selected.size < 2) {
+      setOpenScenarioComparisonMessage(true);
+    }
+  };
+
+  const handleCloseAspectsForComparison = (event) => {
+    setOpenScenarioComparisonMessage(false);
+  };
+
+  const handleShowAll = () => {
+    // show all factsheets again
+    setFilteredFactsheets([]);
+    setFilterApplied(false);
+    setFeedbackOpen(false);
+    setPage(0);
+  };
+
+  const handleCloseQuery = (event) => {
+    setOpenQuery(false);
+  };
+
+  const handleReset = () => {
+    setOpenQuery(false);
+    setSelectedAuthors([]);
+    setSelectedInstitution([]);
+    setSelectedFundingSource([]);
+    setSelectedStudyKewords([]);
+    setScenarioYearValue([2000, 2200]);
+    setStartDateOfPublication(null);
+    setEndDateOfPublication(null);
+    setScenarioYearTouched(false);
+    setPublicationDateTouched(false);
+    setFilteredFactsheets([]);
+    setFilterApplied(false);
+    setFeedbackOpen(false);
+  };
+
+  const getOrganization = async () => {
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00030022' } });
+    return data;
+  };
+
+  const getAuthors = async () => {
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    return data;
+  };
+
+  const getFundingSources = async () => {
+    const { data } = await axios.get(conf.toep + `scenario-bundles/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
+    return data;
+  };
+
+  const getLoggedInStatus = async () => {
+    const { data } = await axios.get(conf.toep + `scenario-bundles/is_logged_in/`);
+    return data;
+  };
+
+  useEffect(() => {
+    getOrganization().then((data) => {
+      const tmp = [];
+      data.map((item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }));
+      setInstitutions(tmp);
+    });
+  }, []);
+
+  useEffect(() => {
+    getAuthors().then((data) => {
+      const tmp = [];
+      data.map((item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }))
+      setAuthors(tmp);
+    });
+  }, []);
+
+  useEffect(() => {
+    getFundingSources().then((data) => {
+      const tmp = [];
+      data.map((item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }))
+      setFundingSources(tmp);
+    });
+  }, []);
+
+  useEffect(() => {
+    getLoggedInStatus().then((data) => {
+      setLogged_in(data);
+    });
+  }, []);
+
+
+  const handleConfirmQuery = () => {
+    const isFilterEmpty =
+      selectedInstitution.length === 0 &&
+      selectedAuthors.length === 0 &&
+      selectedFundingSource.length === 0 &&
+      selectedStudyKeywords.length === 0 &&
+      !scenarioYearTouched &&
+      !publicationDateTouched;
+
+    if (isFilterEmpty) {
+      // Case A: No filters selected → show banner inside dialog
+      setFeedbackType('noFilters');
+      setFeedbackOpen(true);
+      return;
+    }
+
+    // Filters selected – proceed to query
+    setOpenBackDrop(true);
+
+    const criteria = {};
+    if (selectedInstitution.length > 0) {
+      criteria.institutions = selectedInstitution.map(i => 'OEKG:' + i.iri);
+    }
+    if (selectedAuthors.length > 0) {
+      criteria.authors = selectedAuthors.map(i => 'OEKG:' + i.iri);
+    }
+    if (selectedFundingSource.length > 0) {
+      criteria.fundingSource = selectedFundingSource.map(i => 'OEKG:' + i.iri);
+    }
+    if (selectedStudyKeywords.length > 0) {
+      criteria.studyKeywords = selectedStudyKeywords;
+    }
+    if (scenarioYearTouched) {
+      criteria.scenarioYearValue = scenarioYearValue;
+    }
+    if (publicationDateTouched) {
+      criteria.startDateOfPublication = startDateOfPublication;
+      criteria.endDateOfPublication = endDateOfPublication;
+    }
+
+    axios.post(conf.toep + conf.oekgQueryFilter,
+      { criteria },
+      { headers: { 'X-CSRFToken': CSRFToken() } }
+    ).then(response => {
+      const filteredResultList = response.data;
+      const filteredStudyAcronyms = filteredResultList.map(i => i.study_acronym?.value);
+      const newFactsheetsList = factsheets.filter(item => filteredStudyAcronyms.includes(item.acronym));
+      setFilteredFactsheets(newFactsheetsList);
+
+      if (newFactsheetsList.length === 0) {
+        // Case B: Filters were set but no results → close dialog + show banner outside
+        setFeedbackType('noResults');
+        setFeedbackOpen(true);
+        setOpenQuery(false);
+        setFilterApplied(true);
+      } else {
+        // Case C: Results found → update + close dialog
+        setFeedbackOpen(false);
+        setOpenQuery(false);
+        setFilterApplied(true);
+      }
+
+      setOpenBackDrop(false);
+    }).catch(err => {
+      console.error("Query failed:", err);
+      setOpenBackDrop(false);
+    });
+  };
+
+
+  const isSelected = (name) => selected.has(name);
+
+  // // Avoid a layout jump when reaching the last page with empty rows.
+  // const emptyRows =
+  //   page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+
+  const visibleRows = React.useMemo(() => {
+    return stableSort(data, getComparator(order, orderBy)).slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [data, order, orderBy, page, rowsPerPage]);
+
+
+  const renderRows = (rs) => {
+    // const rowsToRender = filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
+    return <TableBody >
+      {rs.map((row, index) => {
+        const isItemSelected = isSelected(row.study_name);
+        const labelId = `enhanced-table-checkbox-${index}`;
+        return (
+          <React.Fragment key={row.uid}>
+            <StyledTableRow
+              hover
+              role="checkbox"
+              aria-checked={isItemSelected}
+              tabIndex={-1}
+              key={row.study_name}
+              selected={isItemSelected}
+              sx={{ cursor: 'pointer', height: '60px' }}
+            >
+              <TableCell style={{ width: '400px' }}>
+                <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
+                  <Typography variant="body1" style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}><b style={{ fontSize: '16px' }}>{row.study_name}</b></Typography>
+                </Link>
+              </TableCell >
+              <TableCell style={{ width: '100px' }}>
+                <Link to={`scenario-bundles/id/${row.uid}`} onClick={() => this.forceUpdate} >
+                  <Typography variant="subtitle1" gutterBottom style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}>
+                    {row.acronym}
+                  </Typography>
+                </Link>
+              </TableCell>
+              <TableCell style={{ width: '300px', padding: "5px" }}>
+                {row.scenarios.map((v) => (
+                  <HtmlTooltip
+                    key={v.uid}
+                    style={{ marginLeft: '10px' }}
+                    placement="top"
+                    title={
+                      <React.Fragment>
+                        <div>
+                          <b>Full name:</b> {v.full_name}
+                          <Divider style={{ marginTop: '10px', marginBottom: '10px' }} />
+                          <b>Abstract:</b> {v.abstract}
+                        </div>
+                      </React.Fragment>
+                    }
+                  >
+                    <Chip size="small" color="primary" label={v.label} variant={selected.has(v.uid) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '4px' }} onClick={(event) => handleClick(event, v.uid)} />
+                  </HtmlTooltip>
+                ))}
+              </TableCell>
+
+              <TableCell style={{ width: '100px' }}>
+                {row.collected_scenario_publication_dates.length === 0 ? (
+                  <Typography
+                    variant="subtitle1"
+                    gutterBottom
+                    style={{ marginTop: '2px' }}
+                  >
+                    None
+                  </Typography>
+                ) : (
+                  row.collected_scenario_publication_dates.map(
+                    (date_of_publication, idx) => (
+                      <Typography
+                        key={date_of_publication ?? idx}
+                        variant="subtitle1"
+                        gutterBottom
+                        style={{ marginTop: '2px' }}
+                      >
+                        {date_of_publication
+                          ? String(date_of_publication).substring(0, 4)
+                          : 'None'}
+                      </Typography>
+                    )
+                  )
+                )}
+              </TableCell>
+
+              <TableCell style={{ width: '40px' }}>
+                <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
+                  <IconButton
+                    aria-label="expand row"
+                    size="small"
+                    onClick={() => open.includes(index) ? setOpen((prevOpen) => prevOpen.filter((i) => i !== index)) : setOpen((prevOpen) => [...prevOpen, index])}
+                  >
+                    {open.includes(index) ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                  </IconButton>
+                </Stack>
+              </TableCell >
+
+            </StyledTableRow>
+            <TableRow >
+              <TableCell colSpan={8} >
+                <Collapse in={open.includes(index)} timeout="auto" unmountOnExit>
+                  <Box>
+                    <Grid container
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      paddingLeft="30px"
+                      paddingRight="100px"
+                      paddingBottom="10px"
+                    >
+                      <Grid item xs={12}>
+                        <p><b>Abstract: </b> {row.abstract}</p>
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <b>Institutions: </b>{row.institutions.map((v) => (
+                          <span key={v}> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                        ))}
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <b>Funding sources: </b>{row.funding_sources.map((v) => (
+                          <span key={v}> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                        ))}
+                      </Grid>
+
+                      <Grid item xs={12} >
+                        <b>Models and frameworks: </b>{row.models.map((v) => (
+                          <span key={v}> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                        ))}
+                        {row.frameworks.map((v) => (
+                          <span key={v}> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                        ))}
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Collapse>
+              </TableCell>
+            </TableRow>
+          </React.Fragment>
+        );
+      })}
+    </TableBody>
+
+  }
+
+  const renderCards = (rs) => {
+    const rowsToRender = rs; // already paged + sorted
+
+    return (
+      <Grid
+        container
+        justifyContent="space-between"
+        alignItems="flex-start"
+        direction="row"
+        sx={{ pb: 6 }}
+      >
+        {rowsToRender.map((row, index) => {
+          // (optional) if you end up needing these again, you can keep them
+          // const isItemSelected = isSelected(row.study_name);
+          // const labelId = `enhanced-table-checkbox-${index}`;
+
+          return (
+            <CardItem key={row.uid ?? index}>
+              <CardHeader>
+                <Link to={`scenario-bundles/id/${row.uid}`}>
+                  {row.acronym}
+                </Link>
+              </CardHeader>
+
+              <CardBody>
+                <CardRow
+                  rowKey="Acronym"
+                  rowValue={
+                    <Link to={`scenario-bundles/id/${row.uid}`}>
+                      <Typography variant="link">{row.acronym}</Typography>
+                    </Link>
+                  }
+                />
+
+                {!!row.collected_scenario_publication_dates?.length && (
+                  <CardRow
+                    rowKey="Year of publication"
+                    rowValue={row.collected_scenario_publication_dates
+                      .map((d) => (d ? String(d).substring(0, 4) : 'None'))
+                      .join(' • ')}
+                  />
+                )}
+
+                <CardRow rowKey="Abstract" rowValue={row.abstract} />
+
+                <CardRow
+                  rowKey="Institutions"
+                  rowValue={row.institutions.map((v) => (
+                    <span key={v}>
+                      <span>{v}</span>
+                      <span><b className="separator-dot"> . </b></span>
+                    </span>
+                  ))}
+                />
+
+                <CardRow
+                  rowKey="Funding sources"
+                  rowValue={row.funding_sources.map((v) => (
+                    <span key={v}>
+                      <span>{v}</span>
+                      <span><b className="separator-dot"> . </b></span>
+                    </span>
+                  ))}
+                />
+
+                <CardRow
+                  rowKey="Models and frameworks"
+                  rowValue={
+                    <>
+                      {row.models.map((v) => (
+                        <span key={v}>
+                          <span>{v}</span>
+                          <span><b className="separator-dot"> . </b></span>
+                        </span>
+                      ))}
+                      {row.frameworks.map((v) => (
+                        <span key={v}>
+                          <span>{v}</span>
+                          <span><b className="separator-dot"> . </b></span>
+                        </span>
+                      ))}
+                    </>
+                  }
+                />
+
+                <CardRow
+                  rowKey="Scenarios"
+                  rowValue={row.scenarios.map((v) => (
+                    <HtmlTooltip
+                      key={v.uid}
+                      style={{ marginLeft: '10px' }}
+                      placement="top"
+                      title={
+                        <div>
+                          <b>Full name: </b>{v.full_name}
+                          <Divider sx={{ mt: 1, mb: 1 }} />
+                          <b>Abstract:</b> {v.abstract}
+                        </div>
+                      }
+                    >
+                      <Chip
+                        size="small"
+                        color="primary"
+                        label={v.label}
+                        variant={selected.has(v.uid) ? 'filled' : 'outlined'}
+                        sx={{ ml: 0.5, mt: 0.5 }}
+                        onClick={(event) => handleClick(event, v.uid)}
+                      />
+                    </HtmlTooltip>
+                  ))}
+                />
+              </CardBody>
+            </CardItem>
+          );
+        })}
+      </Grid>
+    );
+  };
+
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <BreadcrumbsNavGrid subheaderContent="Overview" />
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={openBackDrop}
+        onClick={handleClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Dialog
+        maxWidth="md"
+        open={openScenarioComparisonMessage}
+        aria-labelledby="responsive-dialog-title"
+        style={{ height: '85vh', overflow: 'auto' }}
+      >
+        <DialogTitle id="responsive-dialog-title">
+          <b> Please select scenarios for comparison. </b>
+        </DialogTitle >
+        <DialogContent>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={handleCloseAspectsForComparison}  >
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+      <FactsheetFilterDialog
+        open={openQuery}
+        onClose={handleCloseQuery}
+        onConfirm={handleConfirmQuery}
+        institutions={institutions}
+        authors={authors}
+        fundingSources={fundingSources}
+        selectedInstitution={selectedInstitution}
+        selectedAuthors={selectedAuthors}
+        selectedFundingSource={selectedFundingSource}
+        startDateOfPublication={startDateOfPublication}
+        endDateOfPublication={endDateOfPublication}
+        scenarioYearValue={scenarioYearValue}
+        selectedStudyKeywords={selectedStudyKeywords}
+        setSelectedInstitution={setSelectedInstitution}
+        setSelectedAuthors={setSelectedAuthors}
+        setSelectedFundingSource={setSelectedFundingSource}
+        setStartDateOfPublication={(val) => {
+          setStartDateOfPublication(val);
+          setPublicationDateTouched(true);
+        }}
+        setEndDateOfPublication={(val) => {
+          setEndDateOfPublication(val);
+          setPublicationDateTouched(true);
+        }}
+        setScenarioYearValue={(val) => {
+          setScenarioYearValue(val);
+          setScenarioYearTouched(true);
+        }}
+        setSelectedStudyKewords={setSelectedStudyKewords}
+        defaultStartDate="2000"
+        defaultEndDate="2050"
+        defaultScenarioYearRange={[2000, 2200]}
+        feedbackOpen={feedbackType === 'noFilters' && feedbackOpen}
+        feedbackType={feedbackType}
+        setFeedbackOpen={setFeedbackOpen}
+        setFeedbackType={setFeedbackType}
+      />
+
+
+      <Container maxWidth="xl">
+
+        <EnhancedTableToolbar
+          logged_in={logged_in}
+          numSelected={selected.size}
+          selected={selected}
+          alignment={alignment}
+          handleChangeView={handleChangeView}
+          handleOpenQuery={handleOpenQuery}
+          handleShowAll={handleShowAll}
+          handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}
+          filterApplied={filterApplied}
+          handleReset={handleReset}
+          searchText={searchText}
+          setSearchText={setSearchText}
+        />
+
+        {feedbackType === 'noResults' && feedbackOpen && (
+          <Box sx={{ mx: 2, mb: 2 }}>
+            <FilterFeedbackBanner
+              open={feedbackOpen}
+              onClose={() => setFeedbackOpen(false)}
+              type={feedbackType}
+            />
+          </Box>
+        )}
+        <TablePagination
+          rowsPerPageOptions={[5, 15, 25, 50]}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+        {alignment === "list" && data.length > 0 && (
+          <>
+            <TableContainer>
+              <Table
+                sx={{ minWidth: 1400 }}
+                aria-labelledby="tableTitle"
+                size={dense ? 'small' : 'medium'}
+              >
+                <EnhancedTableHead
+                  numSelected={selected.size}
+                  order={order}
+                  orderBy={orderBy}
+                  onSelectAllClick={handleSelectAllClick}
+                  onRequestSort={handleRequestSort}
+                  rowCount={data.length}
+                />
+                {renderRows(visibleRows)}
+              </Table>
+            </TableContainer>
+
+
+          </>
+        )}
+
+        {/* CARDS VIEW */}
+
+        {alignment === "cards" && data.length > 0 && (renderCards(visibleRows))}
+      </Container>
+    </Box>
+
+  );
+}

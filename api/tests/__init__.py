@@ -1,25 +1,42 @@
+"""
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
 import json
 
 from django.test import Client, TestCase
 from rest_framework.authtoken.models import Token
 
-from api import actions
-from login.models import myuser
-
-from .utils import load_content_as_json
+from api.tests.utils import load_content_as_json
+from login.models import DELETE_PERM, myuser
+from oedb.utils import _OedbSchema
+from oeplatform.settings import IS_TEST, SCHEMA_DEFAULT_TEST_SANDBOX
 
 
 class APITestCase(TestCase):
-    test_schema = "test"
     test_table = "test_table"
 
     @classmethod
-    def setUpClass(cls):
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS {cls.test_schema} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA {cls.test_schema}")
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS _{cls.test_schema} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA _{cls.test_schema}")
+    def empty_test_schema(cls):
+        schema = _OedbSchema(validated_schema_name=SCHEMA_DEFAULT_TEST_SANDBOX)
+        metaschema = schema.get_meta_schema()
+        for oedb_table in metaschema.get_oedb_tables(permission_level=DELETE_PERM):
+            oedb_table.drop_if_exists()
+        for oedb_table in schema.get_oedb_tables(permission_level=DELETE_PERM):
+            oedb_table.drop_if_exists()
 
+    @classmethod
+    def setUpClass(cls):
+        # ensure IS_TEST is set correctly
+        if not IS_TEST:
+            raise Exception("IS_TEST is not True")
         super(APITestCase, cls).setUpClass()
         cls.user, _ = myuser.objects.get_or_create(
             name="MrTest",
@@ -31,10 +48,7 @@ class APITestCase(TestCase):
         cls.token = Token.objects.get(user=cls.user)
 
         cls.other_user, _ = myuser.objects.get_or_create(
-            name="NotMrTest",
-            email="notmrtest@test.com",
-            did_agree=True,
-            is_mail_verified=True,
+            name="NotMrTest", email="notmrtest@test.com", did_agree=True
         )
         cls.other_user.save()
         cls.other_token = Token.objects.get(user=cls.other_user)
@@ -69,24 +83,25 @@ class APITestCase(TestCase):
     def api_req(
         self,
         method: str,
-        table: str = None,
-        schema: str = None,
-        path: str = None,
-        data: dict = None,
+        table: str | None = None,
+        path: str | None = None,
+        url: str | None = None,
+        data: dict | None = None,
         auth=None,
-        exp_code: int = None,
+        exp_code: int | None = None,
         exp_res=None,
-    ):
-        path = path or ""
-        if path.startswith("/"):
-            assert not table and not schema
-            url = f"/api/v0{path}"
-        else:
-            table = table or self.test_table
-            schema = schema or self.test_schema
-            url = f"/api/v0/schema/{schema}/tables/{table}/{path}"
+        params: dict | None = None,
+    ) -> dict:
+        if not url:
+            path = path or ""
+            if path.startswith("/"):
+                assert not table
+                url = f"/api/v0{path}"
+            else:
+                table = table or self.test_table
+                url = f"/api/v0/tables/{table}/{path}"
 
-        data = json.dumps(data) if data else ""  # IMPORTANT: keep empty string
+        str_data = json.dumps(data) if data else ""  # IMPORTANT: keep empty string
 
         method = method.lower()
         if auth is None:
@@ -101,9 +116,10 @@ class APITestCase(TestCase):
 
         resp = request(
             path=url,
-            data=data,
+            data=str_data,
             content_type="application/json",
             HTTP_AUTHORIZATION=auth,
+            params=params,
         )
 
         try:
@@ -118,11 +134,13 @@ class APITestCase(TestCase):
                 exp_code = 200
 
         if not isinstance(exp_code, (list, tuple)):
-            exp_code = [exp_code]
+            exp_codes = [exp_code]
+        else:
+            exp_codes = list(exp_code)
 
         self.assertTrue(
-            resp.status_code in exp_code,
-            f"Status {resp.status_code} not in {exp_code}: {json_resp}",
+            resp.status_code in exp_codes,
+            f"Status {resp.status_code} not in {exp_codes}: {json_resp}",
         )
 
         if exp_res:
@@ -130,26 +148,34 @@ class APITestCase(TestCase):
                 json_resp = json_resp["data"]
             self.assertEqualJson(exp_res, json_resp)
 
+        if not json_resp:
+            # always return dict
+            json_resp = {}
+
         return json_resp
 
-    def create_table(
-        self, structure=None, data=None, schema=None, table=None, exp_code=201
-    ):
+    def create_table(self, structure=None, data=None, table=None, exp_code=201):
         # default structure
         structure = structure or {"columns": [{"name": "id", "data_type": "bigint"}]}
-        self.api_req("put", table, schema, data={"query": structure})
+        params = {"is_sandbox": True}  # IMPORTANT when creating tables in tests
+        self.api_req(
+            "put",
+            table,
+            data={"query": structure},
+            params=params,
+            exp_code=exp_code,
+        )
         if data:
             self.api_req(
                 "post",
                 table,
-                schema,
                 "rows/new",
                 data={"query": data},
-                exp_code=exp_code,
+                exp_code=201,
             )
 
-    def drop_table(self, schema=None, table=None, exp_code=200):
-        self.api_req("delete", table, schema, exp_code=exp_code)
+    def drop_table(self, table=None, exp_code=200):
+        self.api_req("delete", table, exp_code=exp_code)
 
 
 class APITestCaseWithTable(APITestCase):
@@ -189,8 +215,9 @@ class APITestCaseWithTable(APITestCase):
 
     def setUp(self) -> None:
         super().setUp()
+        self.empty_test_schema()
         self.create_table(structure=self.test_structure, data=self.test_data)
 
     def tearDown(self) -> None:
+        self.empty_test_schema()
         super().tearDown()
-        self.drop_table()

@@ -18,6 +18,7 @@ local
 .Python
 env/
 env-*
+.venv/
 /env
 build/
 develop-eggs/
@@ -51,6 +52,7 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+.vite_cache
 nosetests.xml
 coverage.xml
 *,cover
@@ -88,8 +90,15 @@ apache*
 
 .DS_Store
 
+# Docker
+.node_modules_stamp
+.vite
+docker/serviceConfigs/ontop/postgresql.jar
+
 # Deployment files
 docker/oeplatform_data
+docker/data
+assets/
 
 **/node_modules
 oep-website/oeo_viewer/client/node_modules
@@ -108,3 +117,11 @@ site/
 # Jenna fuseki graph db installation
 /apache-jena-fuseki*/
 /apache-jena-fuseki*.tar.gz*
+
+# NPM & VITE
+patches/
+
+# other git repos
+oedialect/
+oep-client/
+saio/

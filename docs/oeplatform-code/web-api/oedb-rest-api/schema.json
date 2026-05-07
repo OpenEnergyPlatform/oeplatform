@@ -88,9 +88,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "post": {
         "operationId": "createTable",
@@ -138,9 +136,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "put": {
         "operationId": "updateTable",
@@ -188,9 +184,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "delete": {
         "operationId": "destroyTable",
@@ -220,9 +214,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/meta/": {
@@ -262,9 +254,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Meta"
-        ]
+        "tags": ["Schema: Meta"]
       },
       "post": {
         "operationId": "createMetadata",
@@ -312,9 +302,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Meta"
-        ]
+        "tags": ["Schema: Meta"]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/columns/{column}": {
@@ -360,9 +348,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "post": {
         "operationId": "createColumn",
@@ -419,9 +405,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "put": {
         "operationId": "updateColumn",
@@ -478,9 +462,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/id/{id}/column/{column}/": {
@@ -535,9 +517,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "post": {
         "operationId": "createFields",
@@ -603,9 +583,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "put": {
         "operationId": "updateFields",
@@ -671,9 +649,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/indexes/{index}": {
@@ -719,9 +695,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "post": {
         "operationId": "createIndex",
@@ -778,9 +752,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "put": {
         "operationId": "updateIndex",
@@ -837,9 +809,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/rows/{row_id}": {
@@ -885,9 +855,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "post": {
         "operationId": "createRows",
@@ -944,9 +912,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "put": {
         "operationId": "updateRows",
@@ -1003,9 +969,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "delete": {
         "operationId": "destroyRows",
@@ -1044,9 +1008,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/rows/new": {
@@ -1086,9 +1048,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "post": {
         "operationId": "createRow",
@@ -1136,9 +1096,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "put": {
         "operationId": "updateRow",
@@ -1186,9 +1144,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       },
       "delete": {
         "operationId": "destroyRow",
@@ -1218,9 +1174,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Table"
-        ]
+        "tags": ["Schema: Table"]
       }
     },
     "/api/v0/advanced/connection/close_all": {
@@ -1241,9 +1195,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Connection"
-        ]
+        "tags": ["Advanced: Connection"]
       }
     },
     "/api/v0/factsheet/frameworks/": {
@@ -1266,9 +1218,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Factsheet"
-        ]
+        "tags": ["Factsheet"]
       }
     },
     "/api/v0/factsheet/models/": {
@@ -1291,9 +1241,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Factsheet"
-        ]
+        "tags": ["Factsheet"]
       }
     },
     "/api/v0/datasets/list_all/scenario/": {
@@ -1316,9 +1264,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Datasets"
-        ]
+        "tags": ["Datasets"]
       }
     },
     "/api/v0/schema/{schema}/tables/{table}/move/{to_schema}/": {
@@ -1377,9 +1323,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Meta"
-        ]
+        "tags": ["Schema: Meta"]
       }
     },
     "/api/v0/advanced/search": {
@@ -1410,9 +1354,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/insert": {
@@ -1443,9 +1385,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/delete": {
@@ -1476,9 +1416,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/update": {
@@ -1509,9 +1447,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/info": {
@@ -1542,9 +1478,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/has_schema": {
@@ -1575,9 +1509,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/has_table": {
@@ -1608,9 +1540,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/has_sequence": {
@@ -1641,9 +1571,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/has_type": {
@@ -1674,9 +1602,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/get_schema_names": {
@@ -1707,9 +1633,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/get_table_names": {
@@ -1740,9 +1664,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/get_view_names": {
@@ -1773,9 +1695,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/get_view_definition": {
@@ -1806,9 +1726,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/get_columns": {
@@ -1839,9 +1757,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/get_pk_constraint": {
@@ -1872,9 +1788,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/get_foreign_keys": {
@@ -1905,9 +1819,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/get_indexes": {
@@ -1938,9 +1850,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/get_unique_constraints": {
@@ -1971,9 +1881,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/connection/open": {
@@ -2004,9 +1912,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Connection"
-        ]
+        "tags": ["Advanced: Connection"]
       }
     },
     "/api/v0/advanced/connection/close": {
@@ -2037,9 +1943,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Connection"
-        ]
+        "tags": ["Advanced: Connection"]
       }
     },
     "/api/v0/advanced/connection/commit": {
@@ -2070,9 +1974,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Connection"
-        ]
+        "tags": ["Advanced: Connection"]
       }
     },
     "/api/v0/advanced/connection/rollback": {
@@ -2103,9 +2005,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Connection"
-        ]
+        "tags": ["Advanced: Connection"]
       }
     },
     "/api/v0/advanced/cursor/open": {
@@ -2136,9 +2036,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Cursor"
-        ]
+        "tags": ["Advanced: Cursor"]
       }
     },
     "/api/v0/advanced/cursor/close": {
@@ -2169,9 +2067,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Cursor"
-        ]
+        "tags": ["Advanced: Cursor"]
       }
     },
     "/api/v0/advanced/cursor/fetch_one": {
@@ -2202,9 +2098,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Cursor"
-        ]
+        "tags": ["Advanced: Cursor"]
       }
     },
     "/api/v0/advanced/cursor/fetch_many": {
@@ -2235,9 +2129,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Cursor"
-        ]
+        "tags": ["Advanced: Cursor"]
       }
     },
     "/api/v0/advanced/cursor/fetch_all": {
@@ -2268,9 +2160,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Cursor"
-        ]
+        "tags": ["Advanced: Cursor"]
       }
     },
     "/api/v0/advanced/set_isolation_level": {
@@ -2301,9 +2191,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/get_isolation_level": {
@@ -2334,9 +2222,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced"
-        ]
+        "tags": ["Advanced"]
       }
     },
     "/api/v0/advanced/do_begin_twophase": {
@@ -2367,9 +2253,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Two phase"
-        ]
+        "tags": ["Advanced: Two phase"]
       }
     },
     "/api/v0/advanced/do_prepare_twophase": {
@@ -2400,9 +2284,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Two phase"
-        ]
+        "tags": ["Advanced: Two phase"]
       }
     },
     "/api/v0/advanced/do_rollback_twophase": {
@@ -2433,9 +2315,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Two phase"
-        ]
+        "tags": ["Advanced: Two phase"]
       }
     },
     "/api/v0/advanced/do_commit_twophase": {
@@ -2466,9 +2346,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Two phase"
-        ]
+        "tags": ["Advanced: Two phase"]
       }
     },
     "/api/v0/advanced/do_recover_twophase": {
@@ -2499,9 +2377,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Advanced: Two phase"
-        ]
+        "tags": ["Advanced: Two phase"]
       }
     },
     "/api/v0/schema/{schema}/sequences/{sequence}/": {
@@ -2551,9 +2427,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Sequences"
-        ]
+        "tags": ["Schema: Sequences"]
       },
       "delete": {
         "operationId": "destroySequence",
@@ -2583,9 +2457,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Schema: Sequences"
-        ]
+        "tags": ["Schema: Sequences"]
       }
     }
   },
@@ -2614,9 +2486,7 @@
             "readOnly": true
           }
         },
-        "required": [
-          "model_name"
-        ]
+        "required": ["model_name"]
       },
       "Energymodel": {
         "type": "object",
@@ -2641,9 +2511,7 @@
             "readOnly": true
           }
         },
-        "required": [
-          "model_name"
-        ]
+        "required": ["model_name"]
       },
       "ScenarioDataTables": {
         "type": "object",
@@ -2661,9 +2529,7 @@
             "readOnly": true
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       }
     }
   }
