@@ -1,5 +1,8 @@
-// SPDX-FileCopyrightText: 2025 Reiner Lemoine Institut
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2023 Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2024 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+// // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {
   hideReviewerOptions,
