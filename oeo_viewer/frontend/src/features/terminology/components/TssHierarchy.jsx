@@ -1,40 +1,31 @@
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-
 import React, { useMemo } from "react";
 import { HierarchyWidget } from "@ts4nfdi/terminology-service-suite";
 import { useTssConfig } from "../hooks/useTssConfig";
 
-/**
- * Props you can still override at call-site:
- * - iri
- * - ontologyId (defaults to config.ontology)
- * - apiUrl (defaults to config.apiBase)
- * - backendType ('ols' | ...)
- * - entityType ('class' | 'term'), defaults to 'class'
- * - parameter (extra query params)
- * - apiKey
- * - onNavigateToEntity / onNavigateToOntology
- */
 export default function TssHierarchy({
-  iri,
+  iri, // This is the currently selected entity we want to highlight
   ontologyId,
   apiUrl,
   backendType = "ols",
   entityType = "class",
   parameter = "",
   apiKey = "",
+  keepExpansionStates,
+  showSiblingsOnInit,
+  useLegacy,
+  includeObsoleteEntities,
+  wrap,
   onNavigateToEntity,
   onNavigateToOntology,
 }) {
   const { apiBase, ontology, lang } = useTssConfig();
 
-  // Resolve from config (no casing changes)
   const resolvedApiUrl = apiUrl ?? apiBase;
   const resolvedOntologyId = ontologyId ?? ontology ?? "OEO";
 
-  // Merge extra params (+ lang)
   const mergedParameter = useMemo(() => {
     const parts = [];
     if (parameter) parts.push(parameter.replace(/^&+/, ""));
@@ -42,7 +33,6 @@ export default function TssHierarchy({
     return parts.join("&");
   }, [parameter, lang]);
 
-  // Only include callbacks if actually provided
   const callbackProps = {
     ...(onNavigateToEntity ? { onNavigateToEntity } : {}),
     ...(onNavigateToOntology ? { onNavigateToOntology } : {}),
@@ -54,9 +44,20 @@ export default function TssHierarchy({
       apiUrl={resolvedApiUrl}
       backendType={backendType}
       entityType={entityType}
-      iri={iri || ""}              // empty string = none selected
+
+      // 1. Force 'iri' to be empty so the widget ALWAYS loads the full ontology from the top
+      iri=""
+
+      // 2. Pass your selected term into 'targetIri' to expand and highlight it in the tree
+      targetIri={iri || ""}
+
       ontologyId={resolvedOntologyId}
       parameter={mergedParameter}
+      keepExpansionStates={keepExpansionStates}
+      showSiblingsOnInit={showSiblingsOnInit}
+      useLegacy={useLegacy}
+      includeObsoleteEntities={includeObsoleteEntities}
+      wrap={wrap}
       {...callbackProps}
     />
   );

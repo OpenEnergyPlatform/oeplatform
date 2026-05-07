@@ -2,28 +2,20 @@
 
 __license__ = """
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
 SPDX-FileCopyrightText: 2025 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
@@ -74,6 +66,7 @@ from api.actions import (
     table_get_row_count,
 )
 from api.error import APIError
+from api.helper import get_column_description
 from api.utils import table_or_404, table_or_404_from_dict
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
@@ -84,7 +77,6 @@ from dataedit.helper import (
     edit_tag,
     find_tables,
     get_cancle_state,
-    get_column_description,
     get_page,
     merge_field_reviews,
     process_review_data,
@@ -114,7 +106,11 @@ class StandaloneMetaEditView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         context_dict = {
             "config": json.dumps(
-                {"cancle_url": get_cancle_state(self.request), "standalone": True}
+                {
+                    "cancle_url": get_cancle_state(self.request),
+                    "standalone": True,
+                    "create_url": reverse("oeo_ext:oeo-ext-plugin-ui-create"),
+                }
             ),
             "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
             "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
@@ -725,14 +721,14 @@ class TableDataView(View):
         opr_context = {
             "contributor": PeerReviewManager.load_contributor(table=table),
             "reviewer": PeerReviewManager.load_reviewer(table=table),
-            "opr_enabled": False,
+            "opr_enabled": True,
             # oemetadata
             # is not None,  # check if the table has the metadata
         }
 
         opr_result_context = {}
         if reviews.exists():
-            latest_review: PeerReview = reviews.last()  # type:ignore (reviews.exists())
+            latest_review: PeerReview = reviews.last()  # type: ignore (reviews.exists()) # noqa: E501
             opr_manager.update_open_since(opr=latest_review)
             current_reviewer = opr_manager.load(latest_review).current_reviewer
             opr_context.update(
@@ -1037,6 +1033,7 @@ class TableMetaEditView(LoginRequiredMixin, View):
                         "api:api_table_meta",
                         kwargs={"table": table},
                     ),
+                    "create_url": reverse("oeo_ext:oeo-ext-plugin-ui-create"),
                     "url_view_table": reverse("dataedit:view", kwargs={"table": table}),
                     "cancle_url": get_cancle_state(self.request),
                     "standalone": False,
@@ -1130,77 +1127,190 @@ class TablePeerReviewView(LoginRequiredMixin, View):
 
     def sort_in_category(self, table: str, oemetadata):
         """
-        Group flattened OEMetadata v2 fields into thematic buckets and attach
-        placeholders required by the review UI.
+                Groups OEMetadata v2 fields by top categories and
+                creates a two-level grouping of lists
+                (accordion-within-an-accordion) for general,
+                source, license, and spatial/temporal.
 
-        Each entry has six keys:
-        {
-          "field": "<dot-path>",
-          "label": "<display label without 'resources.<idx>.'>",
-          "value": "<current value>",
-          "newValue": "",
-          "reviewer_suggestion": "",
-          "suggestion_comment": ""
-        }
+        Category Exit:
+                {"flat":    [ { field, value, label, display_field, newValue,
+                 reviewer_suggestion, suggestion_comment,
+                   ... } ],
+                  "grouped": { "<Name N>": { "flat":[...], "grouped":{ "<Sub N>":[...]
+                  } }, ... }
+                }
         """
+
+        def _plus_one_if_digit(txt: str) -> str:
+            return str(int(txt) + 1) if str(txt).isdigit() else txt
 
         flattened = self.parse_keys(oemetadata)
         flattened = [
-            item for item in flattened if item["field"].startswith("resources.")
+            x for x in flattened if str(x.get("field", "")).startswith("resources.")
         ]
 
-        bucket_map = {
-            "spatial": "spatial",
-            "temporal": "temporal",
-            "sources": "source",
-            "licenses": "license",
-        }
-
-        def make_label(dot_path: str) -> str:
-            # remove leading resources.<idx>.
-            trimmed = re.sub(r"^resources\.[0-9]+\.", "", dot_path)
-            parts = trimmed.split(".")
-            out = []
-            for p in parts:
-                if p in {"@id", "@type"}:
-                    out.append(p)
-                else:
-                    out.append(p.replace("_", " "))
-            if out:
-                out[0] = out[0][:1].upper() + out[0][1:]
-            return " ".join(out)
-
-        tmp = defaultdict(list)
-
+        base_items = []
         for item in flattened:
-            raw_key = item["field"]
-            parts = raw_key.split(".")
-
-            if parts[0] == "resources" and len(parts) >= 3:
-                root = parts[2]
+            raw = item["field"]
+            parts = raw.split(".")
+            if len(parts) >= 3 and parts[0] == "resources" and parts[1].isdigit():
+                trimmed = ".".join(parts[2:])
             else:
-                root = parts[0]
+                trimmed = raw
 
-            bucket = bucket_map.get(root, "general")
+            lbl_parts = [p.replace("_", " ") for p in trimmed.split(".")]
+            if lbl_parts:
+                lbl_parts[0] = lbl_parts[0][:1].upper() + lbl_parts[0][1:]
+            label = " ".join(lbl_parts)
 
-            tmp[bucket].append(
+            base_items.append(
                 {
-                    "field": raw_key,
-                    "label": make_label(raw_key),
-                    "value": item["value"],
+                    "field": trimmed,
+                    "label": label,
+                    "value": item.get("value", ""),
                     "newValue": "",
                     "reviewer_suggestion": "",
                     "suggestion_comment": "",
+                    "additional_comment": item.get("additional_comment", ""),
                 }
             )
 
-        return {
-            "general": tmp["general"],
-            "spatial": tmp["spatial"],
-            "temporal": tmp["temporal"],
-            "source": tmp["source"],
-            "license": tmp["license"],
-        }
+        main_categories = defaultdict(list)
+        for itm in base_items:
+            root = itm["field"].split(".")[0] if "." in itm["field"] else itm["field"]
+            cat = {
+                "spatial": "spatial",
+                "temporal": "temporal",
+                "sources": "source",
+                "licenses": "license",
+            }.get(root, "general")
+            main_categories[cat].append(itm)
+
+        def extract_index(prefix: str) -> int:
+            m = re.search(r"(?:\.|\s)([0-9]+)$", prefix or "")
+            return int(m.group(1)) if m else -1
+
+        def group_index_only(items):
+            """First index occurrence: name.0.* → 'Name 1';
+            otherwise, group by the first token."""
+            result = {"flat": [], "grouped": defaultdict(list)}
+            for itm in items:
+                field = itm["field"]
+                m = re.match(r"^([^.]+)\.([0-9]+)(?:\.(.*))?$", field)
+                if m:
+                    list_name, idx, tail = (
+                        m.group(1),
+                        int(m.group(2)),
+                        m.group(3) or "value",
+                    )
+                    disp_prefix = f"{list_name.capitalize()} {idx + 1}"
+                    enriched = dict(itm)
+                    enriched["display_field"] = tail
+                    enriched["display_prefix"] = disp_prefix
+                    enriched["display_index"] = str(idx + 1)
+                    result["grouped"][disp_prefix].append(enriched)
+                elif "." in field:
+                    group_key = field.split(".")[0]
+                    enriched = dict(itm)
+                    enriched["display_field"] = ".".join(field.split(".")[1:])
+                    enriched["display_prefix"] = group_key
+                    enriched.pop("display_index", None)
+                    result["grouped"][group_key].append(enriched)
+                else:
+                    enriched = dict(itm)
+                    enriched["display_field"] = field
+                    enriched.pop("display_index", None)
+                    result["flat"].append(enriched)
+            result["grouped"] = dict(
+                sorted(result["grouped"].items(), key=lambda kv: extract_index(kv[0]))
+            )
+            return result
+
+        def nest_sublist_groups(items_for_one_parent):
+            from collections import defaultdict
+
+            grouped_map = defaultdict(lambda: {"flat": [], "grouped": {}})
+            flat = []
+
+            for itm in items_for_one_parent:
+                field = itm["field"]
+                m = re.match(r"^([^.]+)\.([0-9]+)(?:\.(.*))?$", field)
+                if m:
+                    head, idx, tail = m.group(1), int(m.group(2)), m.group(3)
+                    e = dict(itm)
+                    e["display_field"] = tail if (tail and tail.strip()) else str(idx)
+                    e["display_prefix"] = head
+                    e.pop("display_index", None)
+                    grouped_map[head.capitalize()]["flat"].append(e)
+                else:
+                    e = dict(itm)
+                    trimmed = ".".join(field.split(".")[1:]) if "." in field else field
+                    e["display_field"] = _plus_one_if_digit(trimmed)
+                    flat.append(e)
+
+            grouped = dict(sorted(grouped_map.items(), key=lambda kv: kv[0]))
+            return {"flat": flat, "grouped": grouped}
+
+        def _strip_cat_prefix(items, cat_name):
+            """spatial.extent.name → extent.name; temporal.period.start →
+            period.start"""
+            out = []
+            for it in items:
+                f = it["field"]
+                if f.startswith(cat_name + "."):
+                    trimmed = f[len(cat_name) + 1 :]
+                    e = dict(it)
+                    e["field"] = trimmed
+                    out.append(e)
+                else:
+                    out.append(it)
+            return out
+
+        def _group_spatiotemporal(items, cat_name):
+            """Level 1: by the first token AFTER
+            'spatial.'/'temporal.'
+            Level 2: as usual – separate the '<name>.<idx>.*'
+            lists into nested sections.
+            """
+
+            stripped = _strip_cat_prefix(items, cat_name)
+
+            first = group_index_only(stripped)
+
+            nested_grouped = {}
+            for gkey, gitems in first["grouped"].items():
+                nested_grouped[gkey.capitalize()] = nest_sublist_groups(gitems)
+
+            return {"flat": first["flat"], "grouped": nested_grouped}
+
+        grouped_meta = {}
+        for cat, items in main_categories.items():
+            if cat == "spatial":
+                grouped = _group_spatiotemporal(items, "spatial")
+            elif cat == "temporal":
+                grouped = _group_spatiotemporal(items, "temporal")
+            elif cat == "source":
+                first = group_index_only(items)
+                nested_grouped = {
+                    k: nest_sublist_groups(v) for k, v in first["grouped"].items()
+                }
+                grouped = {"flat": first["flat"], "grouped": nested_grouped}
+            elif cat == "license":
+                first = group_index_only(items)
+                nested_grouped = {
+                    k: nest_sublist_groups(v) for k, v in first["grouped"].items()
+                }
+                grouped = {"flat": first["flat"], "grouped": nested_grouped}
+            else:
+                # general (как было у вас)
+                grouped = group_index_only(items)
+
+            grouped_meta[cat] = {"flat": grouped["flat"], "grouped": grouped["grouped"]}
+
+        for k in ("general", "spatial", "temporal", "source", "license"):
+            grouped_meta.setdefault(k, {"flat": [], "grouped": {}})
+
+        return grouped_meta
 
     def get_all_field_descriptions(self, json_schema, prefix=""):
         """
@@ -1275,7 +1385,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
 
         table_obj = table_or_404(table=table)
-        topic = table_obj.topics
+        topic = list(table_obj.topics.values_list("name", flat=True))
 
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
@@ -1385,7 +1495,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
         table_obj = table_or_404(table=table)
 
-        context = {}
+        # context = {}
         user: login_models.myuser = request.user  # type: ignore
 
         # get the review data and additional application metadata
@@ -1435,8 +1545,8 @@ class TablePeerReviewView(LoginRequiredMixin, View):
 
                 # Set new review values and update existing review
                 active_peer_review.review = merged_review_data
-                active_peer_review.reviewer = user  # type:ignore TODO why type warning?
-                active_peer_review.contributor = contributor  # type:ignore TODO
+                active_peer_review.reviewer = user  # type: ignore TODO warning?
+                active_peer_review.contributor = contributor  # type: ignore TODO
                 active_peer_review.update(review_type=review_post_type)
         else:
             error_msg = (
@@ -1464,7 +1574,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
 
             # TODO: also update reviewFinished in review datamodel json
 
-        return render(request, "dataedit/opr_review.html", context=context)
+        return JsonResponse({"status": "success"}, status=200)
 
 
 class TablePeerRreviewContributorView(TablePeerReviewView):
@@ -1527,12 +1637,12 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
                     "url_table": reverse(
                         "dataedit:view", kwargs={"table": table_obj.name}
                     ),
-                    "topic": table_obj.topics,
+                    # "topic": table_obj.topics,
                     "table": table_obj.name,
                 }
             ),
             "table": table_obj.name,
-            "topic": table_obj.topics,
+            # "topic": table_obj.topics,
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
@@ -1557,7 +1667,7 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         # table_obj = table_or_404(table=table)
         # TODO: why unused argument "table"?
 
-        context = {}
+        # context = {}
         if request.method == "POST":
             review_data = json.loads(request.body)
             review_post_type = review_data.get("reviewType")
@@ -1571,4 +1681,4 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             current_opr.review = merged_review
             current_opr.update(review_type=review_post_type)
 
-        return render(request, "dataedit/opr_contributor.html", context=context)
+        return JsonResponse({"status": "success"}, status=200)

@@ -172,12 +172,25 @@ window.MetaEdit = function (config) {
     const updatedFields = config.columns.map((col) => {
       const existing = fieldMap.get(col.name) || {};
 
+      // Determine nullable status
+      let isNullable =
+        existing.nullable !== undefined ? existing.nullable : true;
+
+      // Force 'id' column to never be nullable ---
+      if (col.name === "id") {
+        isNullable = false;
+      }
+      // -----------------------------------------------------
+
       return {
+        // Preserves human annotations (isAbout, valueReference) ---
+        ...existing,
+        // --------------------------------------------------------------------
         name: col.name,
         type: col.data_type || existing.type || null,
         description: existing.description ?? null,
         unit: existing.unit ?? null,
-        nullable: existing.nullable !== undefined ? existing.nullable : true,
+        nullable: isNullable, // Use our strictly evaluated nullable flag
       };
     });
 
@@ -224,6 +237,7 @@ window.MetaEdit = function (config) {
     }
 
     fillMissingFromSchema(config.schema.properties, json);
+
     // Fix boundingBox in each resource if needed
     if (Array.isArray(json.resources)) {
       json.resources.forEach((resource) => {
@@ -237,6 +251,34 @@ window.MetaEdit = function (config) {
           if (!resource.spatial.extent) resource.spatial.extent = {};
           resource.spatial.extent.boundingBox = [0, 0, 0, 0]; // fallback valid default
         }
+
+        // Scrub the schema-injected 'openModalButton' ---
+
+        // 1. Scrub from top-level Subject array
+        if (Array.isArray(resource.subject)) {
+          resource.subject.forEach((subItem) => {
+            delete subItem.openModalButton;
+          });
+        }
+
+        // 2. Scrub from Field annotations (isAbout, valueReference)
+        if (resource.schema && Array.isArray(resource.schema.fields)) {
+          resource.schema.fields.forEach((field) => {
+            // Scrub from isAbout
+            if (Array.isArray(field.isAbout)) {
+              field.isAbout.forEach((aboutItem) => {
+                delete aboutItem.openModalButton;
+              });
+            }
+            // Scrub from valueReference
+            if (Array.isArray(field.valueReference)) {
+              field.valueReference.forEach((refItem) => {
+                delete refItem.openModalButton;
+              });
+            }
+          });
+        }
+        // ------------------------------------------------------------
       });
     }
 
@@ -328,7 +370,7 @@ window.MetaEdit = function (config) {
         config.schema = fixSchema(schema[0]);
         config.initialData = fixData(data[0]);
 
-        /*  https://github.com/json-editor/json-editor */
+        /* https://github.com/json-editor/json-editor */
         const options = {
           startval: config.initialData,
           schema: config.schema,
@@ -416,13 +458,15 @@ window.MetaEdit = function (config) {
               jseditor_editor,
               result
             ) {
-              selected_value = String(result.label)
-                .replaceAll("<B>", "")
-                .replaceAll("</B>", "");
+              let selected_value = String(result.label).replace(/<\/?b>/gi, ""); // Remove <b> tags if present
 
               let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
-              path_uri.setValue(String(result.resource));
+
+              // Check if the editor exists before setting value to avoid other errors
+              if (path_uri) {
+                path_uri.setValue(String(result.resource));
+              }
 
               return selected_value;
             },
@@ -430,8 +474,13 @@ window.MetaEdit = function (config) {
           button: {
             openModalAction: function openOeoExtPlugin(jseditor, e) {
               // Perform the HTMX request or any other desired action
+              var targetUrl = config.create_url;
 
-              htmx.ajax("GET", createUrl, {
+              if (!targetUrl) {
+                console.error("MetaEdit Error: config.create_url is missing!");
+                return;
+              }
+              htmx.ajax("GET", targetUrl, {
                 target: ".modal-body",
                 swap: "innerHTML",
                 trigger: "click",
@@ -532,13 +581,15 @@ window.MetaEdit = function (config) {
               jseditor_editor,
               result
             ) {
-              selected_value = String(result.label)
-                .replaceAll("<B>", "")
-                .replaceAll("</B>", "");
+              let selected_value = String(result.label).replace(/<\/?b>/gi, "");
 
               let path = String(jseditor_editor.path).replace("name", "@id");
               let path_uri = config.editor.getEditor(path);
-              path_uri.setValue(String(result.resource));
+
+              // Check if the editor exists before setting value to avoid other errors
+              if (path_uri) {
+                path_uri.setValue(String(result.resource));
+              }
 
               return selected_value;
             },
@@ -546,8 +597,14 @@ window.MetaEdit = function (config) {
           button: {
             openModalAction: function openOeoExtPlugin(jseditor, e) {
               // Perform the HTMX request or any other desired action
+              var targetUrl = config.create_url;
 
-              htmx.ajax("GET", createUrl, {
+              if (!targetUrl) {
+                console.error("MetaEdit Error: config.create_url is missing!");
+                return;
+              }
+
+              htmx.ajax("GET", targetUrl, {
                 target: ".modal-body",
                 swap: "innerHTML",
                 trigger: "click",

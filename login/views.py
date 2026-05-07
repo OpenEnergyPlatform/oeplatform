@@ -22,7 +22,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import F
+from django.db.models import F, Q
 from django.http import (
     HttpResponse,
     HttpResponseForbidden,
@@ -58,10 +58,11 @@ ITEMS_PER_PAGE = 8
 
 
 class TablesView(View):
-    @method_decorator(never_cache)
-    def get(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
+
+    def _get_filtered_tables(self, user, search_query=""):
+        """Return filtered querysets for draft and published tables."""
         tables_set = user.get_tables_queryset(min_permission_level=WRITE_PERM)
+
         draft_tables = tables_set.filter(is_publish=False).order_by(
             F("date_updated").desc(nulls_last=True), "human_readable_name"
         )
@@ -69,11 +70,28 @@ class TablesView(View):
             F("date_updated").desc(nulls_last=True), "human_readable_name"
         )
 
+        if search_query:
+
+            q_filter = Q(name__icontains=search_query) | Q(
+                human_readable_name__icontains=search_query
+            )
+            draft_tables = draft_tables.filter(q_filter)
+            published_tables = published_tables.filter(q_filter)
+
+        return draft_tables, published_tables
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        search_query = request.GET.get("search", "").strip()
+        has_search_param = "search" in request.GET
+
+        draft_tables, published_tables = self._get_filtered_tables(user, search_query)
+
         # Paginate tables
         published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)
         draft_paginator = Paginator(draft_tables, ITEMS_PER_PAGE)
 
-        # Check if the request contains a page
         published_page = request.GET.get("published_page", 1)
         published_page_obj = published_paginator.get_page(published_page)
 
@@ -87,12 +105,15 @@ class TablesView(View):
             "topics": [t.name for t in Topic.objects.all()],
             "draft_page": draft_page,
             "published_page": published_page,
+            "search_query": search_query,
         }
 
-        # TODO: Fix this is_ajax as it is outdated according to django documentation ...
-        # provide better api endpoint for http requests via HTMX
-        if "HX-Request" in request.headers:
-            return render(request, "login/partials/user_partial_tables.html", context)
+        if "HX-Request" in request.headers and not has_search_param:
+            return render(
+                request,
+                "login/partials/tables_sections.html",
+                context,
+            )
         else:
             return render(request, "login/user_tables.html", context)
 
@@ -855,5 +876,5 @@ def metadata_review_badge_indicator_icon_file_view(request, user_id, table_name)
     return render(
         request,
         "login/partials/badge_icon.html",
-        context=context,  # type:ignore (we have Literals in type signature)
+        context=context,  # type: ignore (we have Literals in type signature)
     )

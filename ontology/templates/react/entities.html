@@ -1,0 +1,53 @@
+<!-- SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "base/base-wide-react.html" %}
+{% load django_bootstrap5 %}
+{% load django_vite %}
+{% load static %}
+{% block title %}
+  {% if term_id %}
+    {{ term_id }}
+  {% else %}
+    Search
+  {% endif %}
+{% endblock %}
+{% block site-header %}
+  <div class="main-header">
+    <h1 class="main-header__title">
+      <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
+           width="16"
+           height="16"
+           alt="OEO" />
+      Ontology
+    </h1>
+    <div class="main-header__wizard">
+      <a href="{% url 'ontology:index' %}">Overview</a> /
+      {% if term_id %}
+        <a href="{% url 'ontology:ontology-entity-search' ontology_id %}">
+          {{ ontology_id|upper }} Search
+        </a>
+        / Entity
+      {% else %}
+        {{ ontology_id|upper }} Search
+      {% endif %}
+    </div>
+  </div>
+{% endblock site-header %}
+{% block after-head %}
+  {% vite_react_refresh nonce="{{ request.csp_nonce }}" %}
+  {% vite_asset "ontology/frontend/src/index.jsx" %}
+{% endblock after-head %}
+{% block main-right-sidebar-content %}
+{% endblock main-right-sidebar-content %}
+{% block main-content %}
+  <div id="main"
+       class="eui-isolation-wrapper"
+       style="width: 100%;
+              min-height: 80vh">
+    <div class="d-flex justify-content-center p-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading React App...</span>
+      </div>
+    </div>
+  </div>
+{% endblock %}
