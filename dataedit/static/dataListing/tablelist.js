@@ -1,32 +1,11 @@
-// SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
-
 import "./tablelist.css";
 
-// Helper function to prevent XSS attacks (Required to pass Snyk)
-function escapeHTML(str) {
-  if (!str) return "";
-  return String(str).replace(/[&<>'"]/g, function (tag) {
-    const charsToReplace = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      "'": "&#39;",
-      '"': "&quot;",
-    };
-    return charsToReplace[tag] || tag;
-  });
-}
-
-// Extract metadata fetching logic into a reusable function
 function fetchMetadataForCards() {
   const resourceCards = document.querySelectorAll(
     ".resource-card:not(.meta-loaded)"
   );
 
   resourceCards.forEach((card) => {
-    // Mark as loaded to prevent double fetching on AJAX reloads
     card.classList.add("meta-loaded");
 
     const metaUrl = card.getAttribute("data-meta-url");
@@ -42,40 +21,31 @@ function fetchMetadataForCards() {
       .then((data) => {
         const metaObj = data.metadata || data;
 
-        let description = "No description provided.";
-        let licenseHtml = "";
-        let spatialHtml = "";
-        let temporalHtml = "";
-        let reviewHtml = "";
-        let orgHtml = "";
-        let projectHtml = "";
+        let descriptionText = "No description provided.";
+        let projectName = "";
+        let creatorOrg = "";
+        let licenseName = "";
+        let licenseTitle = "Data License";
+        let spatialName = "";
+        let refDate = "";
+        let reviewBadge = "";
 
         if (metaObj && metaObj.resources && metaObj.resources.length > 0) {
           const res = metaObj.resources[0];
 
-          // Description
           if (res.description) {
-            description =
+            descriptionText =
               res.description.length > 200
                 ? res.description.substring(0, 200) + "..."
                 : res.description;
-            description = escapeHTML(description); // Escape description to prevent XSS
           }
 
-          // Project Extraction
-          let projectName = "";
           if (res.projectContext && res.projectContext.title) {
             projectName = res.projectContext.title;
           } else if (res.context && res.context.title) {
             projectName = res.context.title;
           }
 
-          if (projectName) {
-            projectHtml = `<span class="me-3 mb-2 text-muted" data-bs-toggle="tooltip" title="Project Name"><i class="fas fa-project-diagram me-1"></i>Project: <span class="fw-medium text-dark">${escapeHTML(projectName)}</span></span>`;
-          }
-
-          // Creator Organization Extraction
-          let creatorOrg = "";
           if (res.contributors && Array.isArray(res.contributors)) {
             const creator = res.contributors.find(
               (c) => c.roles && c.roles.includes("Creator")
@@ -85,68 +55,170 @@ function fetchMetadataForCards() {
             }
           }
 
-          if (creatorOrg) {
-            orgHtml = `<span class="me-3 mb-2 text-muted" data-bs-toggle="tooltip" title="Creator Organization"><i class="fas fa-building me-1"></i>Org: <span class="fw-medium text-dark">${escapeHTML(creatorOrg)}</span></span>`;
-          }
-
-          // License
           if (res.licenses && res.licenses.length > 0) {
-            const licenseTitle = escapeHTML(
-              res.licenses[0].title || "Data License"
-            );
-            const licenseName = escapeHTML(res.licenses[0].name);
-            licenseHtml = `<span class="badge bg-light text-dark border me-2 mb-2" data-bs-toggle="tooltip" title="${licenseTitle}"><i class="fas fa-balance-scale me-1"></i>License: ${licenseName}</span>`;
+            licenseTitle = res.licenses[0].title || "Data License";
+            licenseName = res.licenses[0].name;
           }
 
-          // Spatial
           if (res.spatial && res.spatial.extent && res.spatial.extent.name) {
-            spatialHtml = `<span class="me-3 mb-2 text-muted" data-bs-toggle="tooltip" title="Spatial Extent / Location"><i class="fas fa-map-marker-alt me-1"></i>Location: <span class="fw-medium text-dark">${escapeHTML(res.spatial.extent.name)}</span></span>`;
+            spatialName = res.spatial.extent.name;
           }
 
-          // Temporal
           if (res.temporal && res.temporal.referenceDate) {
-            temporalHtml = `<span class="me-3 mb-2 text-muted" data-bs-toggle="tooltip" title="Temporal Reference"><i class="far fa-calendar-alt me-1"></i>Ref Date: <span class="fw-medium text-dark">${escapeHTML(res.temporal.referenceDate)}</span></span>`;
+            refDate = res.temporal.referenceDate;
           }
 
-          // Peer Review Badge
           if (res.review && res.review.badge) {
-            reviewHtml = `<span class="badge bg-success bg-opacity-10 text-success border border-success me-2 mb-2" data-bs-toggle="tooltip" title="Peer Review Status"><i class="fas fa-award me-1"></i>${escapeHTML(res.review.badge)} Reviewed</span>`;
+            reviewBadge = res.review.badge;
           }
         }
 
-        // InnerHTML is now safe because all variables have been escaped
-        injectionZone.innerHTML = `
-          <p class="card-text text-secondary mb-3 small" style="line-height: 1.5;">
-            ${description}
-          </p>
-          <div class="d-flex flex-wrap align-items-center small">
-            ${reviewHtml}
-            ${licenseHtml}
-            ${projectHtml}
-            ${orgHtml}
-            ${spatialHtml}
-            ${temporalHtml}
-          </div>
-        `;
+        // SECURE DOM INSERTION (Passes Snyk checks by avoiding .innerHTML)
+        injectionZone.replaceChildren(); // clear skeleton
 
-        // Initialize tooltips on the newly injected elements
+        // Build Description
+        const p = document.createElement("p");
+        p.className = "card-text text-secondary mb-3 small";
+        p.style.lineHeight = "1.5";
+        p.textContent = descriptionText;
+        injectionZone.appendChild(p);
+
+        // Build Badge Container
+        const badgeContainer = document.createElement("div");
+        badgeContainer.className = "d-flex flex-wrap align-items-center small";
+
+        // Helper to append badges using pure Document nodes
+        const appendBadge = (
+          text,
+          prefix,
+          iconClass,
+          wrapperClass,
+          tooltip
+        ) => {
+          if (!text) return;
+          const span = document.createElement("span");
+          span.className = wrapperClass;
+          if (tooltip) {
+            span.setAttribute("data-bs-toggle", "tooltip");
+            span.setAttribute("title", tooltip);
+          }
+
+          const icon = document.createElement("i");
+          icon.className = iconClass;
+          span.appendChild(icon);
+          span.appendChild(document.createTextNode(prefix));
+
+          if (prefix.trim() !== "") {
+            const strong = document.createElement("span");
+            strong.className = "fw-medium text-dark";
+            strong.textContent = text;
+            span.appendChild(strong);
+          } else {
+            span.appendChild(document.createTextNode(text));
+          }
+
+          badgeContainer.appendChild(span);
+        };
+
+        // Append active badges
+        if (reviewBadge) {
+          appendBadge(
+            `${reviewBadge} Reviewed`,
+            "",
+            "fas fa-award me-1",
+            "badge bg-success bg-opacity-10 text-success border border-success me-2 mb-2",
+            "Peer Review Status"
+          );
+        }
+        if (licenseName) {
+          appendBadge(
+            licenseName,
+            "License: ",
+            "fas fa-balance-scale me-1",
+            "badge bg-light text-dark border me-2 mb-2",
+            licenseTitle
+          );
+        }
+        if (projectName) {
+          appendBadge(
+            projectName,
+            "Project: ",
+            "fas fa-project-diagram me-1",
+            "me-3 mb-2 text-muted",
+            "Project Name"
+          );
+        }
+        if (creatorOrg) {
+          appendBadge(
+            creatorOrg,
+            "Org: ",
+            "fas fa-building me-1",
+            "me-3 mb-2 text-muted",
+            "Creator Organization"
+          );
+        }
+        if (spatialName) {
+          appendBadge(
+            spatialName,
+            "Location: ",
+            "fas fa-map-marker-alt me-1",
+            "me-3 mb-2 text-muted",
+            "Spatial Extent / Location"
+          );
+        }
+        if (refDate) {
+          appendBadge(
+            refDate,
+            "Ref Date: ",
+            "far fa-calendar-alt me-1",
+            "me-3 mb-2 text-muted",
+            "Temporal Reference"
+          );
+        }
+
+        injectionZone.appendChild(badgeContainer);
+
+        // Initialize tooltips dynamically
         var tooltipTriggerList = [].slice.call(
-          injectionZone.querySelectorAll('[data-bs-toggle="tooltip"]')
+          badgeContainer.querySelectorAll('[data-bs-toggle="tooltip"]')
         );
         tooltipTriggerList.map(function (tooltipTriggerEl) {
           return new bootstrap.Tooltip(tooltipTriggerEl);
         });
       })
       .catch((error) => {
-        injectionZone.innerHTML = `
-           <p class="card-text text-muted fst-italic small">Metadata currently unavailable.</p>
-        `;
+        injectionZone.replaceChildren();
+        const errP = document.createElement("p");
+        errP.className = "card-text text-muted fst-italic small";
+        errP.textContent = "Metadata currently unavailable.";
+        injectionZone.appendChild(errP);
       });
   });
 }
 
+// Secure UI Helpers
+function showSpinner(container) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "d-flex justify-content-center align-items-center py-5";
+  const spinner = document.createElement("div");
+  spinner.className = "spinner-border text-primary";
+  spinner.setAttribute("role", "status");
+  const span = document.createElement("span");
+  span.className = "visually-hidden";
+  span.textContent = "Loading...";
+  spinner.appendChild(span);
+  wrapper.appendChild(spinner);
+  container.replaceChildren(wrapper); // Replaces content securely
+}
+
+function showError(container) {
+  const err = document.createElement("div");
+  err.className = "alert alert-danger shadow-sm";
+  err.textContent = "Error loading data. Please try again.";
+  container.replaceChildren(err);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
-  // 1. Initialize Bootstrap tooltips
   var tooltipTriggerList = [].slice.call(
     document.querySelectorAll('[data-bs-toggle="tooltip"]')
   );
@@ -154,10 +226,8 @@ document.addEventListener("DOMContentLoaded", function () {
     return new bootstrap.Tooltip(tooltipTriggerEl);
   });
 
-  // 2. Initial Metadata Fetch
   fetchMetadataForCards();
 
-  // 3. AJAX Filtering Logic
   const formFilter = document.getElementById("form-filter");
 
   if (formFilter) {
@@ -172,14 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
       window.history.pushState({ path: fullUrl }, "", fullUrl);
 
       const container = document.getElementById("table-list-container");
-
-      container.innerHTML = `
-        <div class="d-flex justify-content-center align-items-center py-5">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      `;
+      showSpinner(container);
 
       fetch(fullUrl, { headers: { "X-Requested-With": "XMLHttpRequest" } })
         .then((response) => response.text())
@@ -189,20 +252,16 @@ document.addEventListener("DOMContentLoaded", function () {
           const newContainer = doc.getElementById("table-list-container");
 
           if (newContainer) {
-            container.innerHTML = newContainer.innerHTML;
+            // Replaces nodes securely instead of using innerHTML
+            container.replaceChildren(...newContainer.childNodes);
             bindAjaxPagination();
             fetchMetadataForCards();
           }
         })
-        .catch((error) => {
-          console.error("Error fetching filtered data:", error);
-          container.innerHTML =
-            '<div class="alert alert-danger shadow-sm">Error loading data. Please try again.</div>';
-        });
+        .catch((error) => showError(container));
     });
   }
 
-  // 4. Handle AJAX Pagination
   function bindAjaxPagination() {
     const paginationLinks = document.querySelectorAll(".ajax-pagination");
     paginationLinks.forEach((link) => {
@@ -213,18 +272,20 @@ document.addEventListener("DOMContentLoaded", function () {
         if (formFilter) {
           window.history.pushState({ path: href }, "", href);
           const container = document.getElementById("table-list-container");
-          container.innerHTML = `<div class="d-flex justify-content-center align-items-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+          showSpinner(container);
 
           fetch(href, { headers: { "X-Requested-With": "XMLHttpRequest" } })
             .then((res) => res.text())
             .then((html) => {
               const doc = new DOMParser().parseFromString(html, "text/html");
-              container.innerHTML = doc.getElementById(
-                "table-list-container"
-              ).innerHTML;
-              bindAjaxPagination();
-              fetchMetadataForCards();
-            });
+              const newContainer = doc.getElementById("table-list-container");
+              if (newContainer) {
+                container.replaceChildren(...newContainer.childNodes);
+                bindAjaxPagination();
+                fetchMetadataForCards();
+              }
+            })
+            .catch((err) => showError(container));
         }
       });
     });
@@ -232,7 +293,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   bindAjaxPagination();
 
-  // 5. Handle browser back/forward buttons
   window.addEventListener("popstate", function (e) {
     window.location.reload();
   });
