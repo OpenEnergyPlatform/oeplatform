@@ -1,8 +1,9 @@
 # Docker based installation
 
-!!! Warning "🚧"
-
-    This section is still new and might change. The information presented here is tested by the developer and is currently rolled out within our team and close collaborators. Any suggestions are welcome and can be added in this GitHub discussion.
+This Guide walks you thru the steps required to setup the oeplatform
+infrastructure on your local computer for development purposes using the docker
+software. This way you can automatically (using a single command) install the
+oeplatform service infrastructure.
 
 !!! Info "Manual installation"
 

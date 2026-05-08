@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2025 Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 export function updateClientStateDict(fieldKey, state) {
   window.state_dict = window.state_dict ?? {};
