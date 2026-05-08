@@ -86,97 +86,96 @@
         <div class="card mb-3 border-0 shadow-sm resource-card"
              data-table-name="{{ table.name }}"
              data-meta-url="{% url 'api:api_table_meta' table=table.name %}">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <h5 class="card-title mb-1">
-                  <a href="{% url 'dataedit:view' table=table.name %}"
-                     class="text-decoration-none text-dark fw-bold table-link">
-                    {% if table.human_readable_name %}
-                      {{ table.human_readable_name }}
-                    {% else %}
-                      {{ table.name }}
-                    {% endif %}
-                  </a>
-                </h5>
-                <div class="text-muted small">
-                  <i class="fas fa-table me-1"></i> Table &bull;
-                  <span class="font-monospace text-secondary">{{ table.name }}</span>
-                </div>
-              </div>
-              <div class="d-flex flex-column align-items-end flex-shrink-0 ms-3">
+          <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start mb-3 gap-3">
+            <div class="text-break pe-sm-2">
+              <h5 class="card-title mb-1">
                 <a href="{% url 'dataedit:view' table=table.name %}"
-                   class="btn btn-sm btn-outline-primary rounded-pill px-4">View</a>
-                {% if table.date_updated %}
-                  <span class="text-secondary small mt-2 fw-medium bg-light border rounded px-2 py-1 text-nowrap"
-                        data-bs-toggle="tooltip"
-                        title="Last Updated">
-                    <i class="far fa-clock me-1 text-primary"></i>{{ table.date_updated.date.isoformat }}
-                  </span>
-                {% endif %}
-              </div>
-            </div>
-            <div class="mb-3">
-              {% for tag in table.tags.all %}
-                <a href="{% url 'dataedit:tables-in-topic' topic=topic %}?query=&tags={{ tag.pk }}"
-                   class="badge bg-light text-dark text-decoration-none border fw-normal me-1 tag-badge"
-                   style="border-color: #dee2e6 !important">
-                  <span class="d-inline-block rounded-circle me-1 align-middle"
-                        style="width: 8px;
-                               height: 8px;
-                               background-color: {{ tag.color_hex }}"></span>
-                  {{ tag.name }}
+                   class="text-decoration-none text-dark fw-bold table-link">
+                  {% if table.human_readable_name %}
+                    {{ table.human_readable_name }}
+                  {% else %}
+                    {{ table.name }}
+                  {% endif %}
                 </a>
-              {% endfor %}
-            </div>
-            <div class="metadata-injection-zone">
-              <p class="card-text placeholder-glow mb-2">
-                <span class="placeholder col-7"></span>
-                <span class="placeholder col-4"></span>
-                <span class="placeholder col-6"></span>
-              </p>
-              <div class="d-flex gap-3 text-muted small placeholder-glow mt-3">
-                <span class="placeholder col-2"></span>
-                <span class="placeholder col-2"></span>
+              </h5>
+              <div class="text-muted small">
+                <i class="fas fa-table me-1"></i> Table &bull;
+                <span class="font-monospace text-secondary">{{ table.name }}</span>
               </div>
+            </div>
+            <div class="d-flex flex-row flex-sm-column align-items-center align-items-sm-end flex-shrink-0 flex-wrap gap-2">
+              <a href="{% url 'dataedit:view' table=table.name %}"
+                 class="btn btn-sm btn-outline-primary rounded-pill px-4">View</a>
+              {% if table.date_updated %}
+                <span class="text-secondary small fw-medium bg-light border rounded px-2 py-1 text-nowrap"
+                      data-bs-toggle="tooltip"
+                      title="Last Updated">
+                  <i class="far fa-clock me-1 text-primary"></i>{{ table.date_updated.date.isoformat }}
+                </span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="mb-3">
+            {% for tag in table.tags.all %}
+              <a href="{% url 'dataedit:tables-in-topic' topic=topic %}?query=&tags={{ tag.pk }}"
+                 class="badge bg-light text-dark text-decoration-none border fw-normal me-1 tag-badge"
+                 style="border-color: #dee2e6 !important">
+                <span class="d-inline-block rounded-circle me-1 align-middle"
+                      style="width: 8px;
+                             height: 8px;
+                             background-color: {{ tag.color_hex }}"></span>
+                {{ tag.name }}
+              </a>
+            {% endfor %}
+          </div>
+          <div class="metadata-injection-zone">
+            <p class="card-text placeholder-glow mb-2">
+              <span class="placeholder col-7"></span>
+              <span class="placeholder col-4"></span>
+              <span class="placeholder col-6"></span>
+            </p>
+            <div class="d-flex gap-3 text-muted small placeholder-glow mt-3">
+              <span class="placeholder col-2"></span>
+              <span class="placeholder col-2"></span>
             </div>
           </div>
         </div>
-      {% empty %}
-        <div class="alert alert-info border-0 shadow-sm">
-          <i class="fas fa-info-circle me-2"></i> No tables found in this topic matching your filters.
-        </div>
-      {% endfor %}
-      {% if tables_paginated.paginator.count > 0 %}
-        <div class="d-flex flex-column align-items-center mt-4 mb-5">
-          {% if tables_paginated.has_other_pages %}
-            <nav aria-label="Table navigation bottom">
-              <ul class="pagination justify-content-center mb-2">
-                {% if tables_paginated.has_previous %}
-                  <li class="page-item">
-                    <a class="page-link shadow-sm ajax-pagination"
-                       href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}">Previous</a>
-                  </li>
-                {% endif %}
-                <li class="page-item active">
-                  <span class="page-link shadow-sm">{{ tables_paginated.number }} of {{ tables_paginated.paginator.num_pages }}</span>
+      </div>
+    {% empty %}
+      <div class="alert alert-info border-0 shadow-sm">
+        <i class="fas fa-info-circle me-2"></i> No tables found in this topic matching your filters.
+      </div>
+    {% endfor %}
+    {% if tables_paginated.paginator.count > 0 %}
+      <div class="d-flex flex-column align-items-center mt-4 mb-5">
+        {% if tables_paginated.has_other_pages %}
+          <nav aria-label="Table navigation bottom">
+            <ul class="pagination justify-content-center mb-2">
+              {% if tables_paginated.has_previous %}
+                <li class="page-item">
+                  <a class="page-link shadow-sm ajax-pagination"
+                     href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}">Previous</a>
                 </li>
-                {% if tables_paginated.has_next %}
-                  <li class="page-item">
-                    <a class="page-link shadow-sm ajax-pagination"
-                       href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}">Next</a>
-                  </li>
-                {% endif %}
-              </ul>
-            </nav>
-          {% endif %}
-          <span class="text-muted small">
-            Showing {{ tables_paginated.start_index }} to {{ tables_paginated.end_index }} of {{ tables_paginated.paginator.count }} results
-          </span>
-        </div>
-      {% endif %}
-    </div>
+              {% endif %}
+              <li class="page-item active">
+                <span class="page-link shadow-sm">{{ tables_paginated.number }} of {{ tables_paginated.paginator.num_pages }}</span>
+              </li>
+              {% if tables_paginated.has_next %}
+                <li class="page-item">
+                  <a class="page-link shadow-sm ajax-pagination"
+                     href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}">Next</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+        <span class="text-muted small">
+          Showing {{ tables_paginated.start_index }} to {{ tables_paginated.end_index }} of {{ tables_paginated.paginator.count }} results
+        </span>
+      </div>
+    {% endif %}
   </div>
+</div>
 {% endblock %}
 {% block after-body-bottom-js %}
   {{ block.super }}
