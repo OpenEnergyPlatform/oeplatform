@@ -1,4 +1,6 @@
 {% extends "dataedit/filter.html" %}
+{% load static %}
+{% load django_vite %}
 {% block title %}- {{ topic }}{% endblock %}
 {% block site-header %}
   <div class="main-header">
@@ -19,65 +21,123 @@
 {% endblock site-header %}
 {% block data_content %}
   {% load dataedit.taghandler %}
-  <table id="tables" class="table table-hover table-bordered">
-    <thead>
-      <tr class="table-primary">
-        <th>Name</th>
-        <th>Tags</th>
-      </tr>
-    </thead>
-    <tbody>
+  <div class="d-flex mb-3 mt-4">
+    <div class="btn-group shadow-sm" role="group" aria-label="View toggle">
+      <input type="radio"
+             class="btn-check"
+             name="viewToggle"
+             id="toggleTables"
+             autocomplete="off"
+             checked>
+      <label class="btn btn-outline-primary" for="toggleTables">Tables</label>
+      <span class="d-inline-block"
+            tabindex="0"
+            data-bs-toggle="tooltip"
+            title="Dataset view is coming soon!">
+        <input type="radio"
+               class="btn-check"
+               name="viewToggle"
+               id="toggleDatasets"
+               autocomplete="off"
+               disabled>
+        <label class="btn btn-outline-primary"
+               style="pointer-events: none"
+               for="toggleDatasets">Datasets</label>
+      </span>
+    </div>
+  </div>
+  <div id="table-list-container">
+    <div class="oep-resource-list">
       {% for table in tables_paginated %}
-        <tr>
-          <td onclick="window.open('{% url 'dataedit:view' table=table.name %}', name='_blank')">
-            {% if table.human_readable_name %}
-              {{ table.human_readable_name }}
-            {% else %}
-              {{ table.name }}
-            {% endif %}
-            {% if table.date_updated %}
-              <span class="text-muted mx-3">{{ table.date_updated.date.isoformat }}</span>
-            {% endif %}
-          </td>
-          <td>
-            {% for tag in table.tags.all %}
-              <a class="btn tag"
-                 href="{% url 'dataedit:tables-in-topic' topic=topic %}?query=&tags={{ tag.pk }}"
-                 style="background:{{ tag.color_hex }};
-                        color:{% readable_text_color tag.color_hex %}">{{ tag.name }}</a>
-            {% endfor %}
-          </td>
-        </tr>
+        <div class="card mb-3 border-0 shadow-sm resource-card"
+             data-table-name="{{ table.name }}"
+             data-meta-url="{% url 'api:api_table_meta' table=table.name %}">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 class="card-title mb-1">
+                  <a href="{% url 'dataedit:view' table=table.name %}"
+                     class="text-decoration-none text-dark fw-bold table-link">
+                    {% if table.human_readable_name %}
+                      {{ table.human_readable_name }}
+                    {% else %}
+                      {{ table.name }}
+                    {% endif %}
+                  </a>
+                </h5>
+                <div class="text-muted small">
+                  <i class="fas fa-table me-1"></i> Table &bull;
+                  <span class="font-monospace text-secondary">{{ table.name }}</span>
+                </div>
+              </div>
+              <div class="d-flex flex-column align-items-end flex-shrink-0 ms-3">
+                <a href="{% url 'dataedit:view' table=table.name %}"
+                   class="btn btn-sm btn-outline-primary rounded-pill px-4">View</a>
+                {% if table.date_updated %}
+                  <span class="text-secondary small mt-2 fw-medium bg-light border rounded px-2 py-1 text-nowrap"
+                        data-bs-toggle="tooltip"
+                        title="Last Updated">
+                    <i class="far fa-clock me-1 text-primary"></i>{{ table.date_updated.date.isoformat }}
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="mb-3">
+              {% for tag in table.tags.all %}
+                <a href="{% url 'dataedit:tables-in-topic' topic=topic %}?query=&tags={{ tag.pk }}"
+                   class="badge bg-light text-dark text-decoration-none border fw-normal me-1 tag-badge"
+                   style="border-color: #dee2e6 !important">
+                  <span class="d-inline-block rounded-circle me-1 align-middle"
+                        style="width: 8px;
+                               height: 8px;
+                               background-color: {{ tag.color_hex }}"></span>
+                  {{ tag.name }}
+                </a>
+              {% endfor %}
+            </div>
+            <div class="metadata-injection-zone">
+              <p class="card-text placeholder-glow mb-2">
+                <span class="placeholder col-7"></span>
+                <span class="placeholder col-4"></span>
+                <span class="placeholder col-6"></span>
+              </p>
+              <div class="d-flex gap-3 text-muted small placeholder-glow mt-3">
+                <span class="placeholder col-2"></span>
+                <span class="placeholder col-2"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="alert alert-info border-0 shadow-sm">
+          <i class="fas fa-info-circle me-2"></i> No tables found in this topic matching your filters.
+        </div>
       {% endfor %}
-      <!-- pagination navigation, similar to the one in user_tables.html -->
-      <nav class="pagination-nav">
-        <span class="current">
-          Page {{ tables_paginated.number }} of
-          {{ tables_paginated.paginator.num_pages }}.
-        </span>
-        <ul>
-          {% if tables_paginated.has_previous %}
-            <li class="page-item">
-              <a class="page-link"
-                 href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}"
-                 tabindex="-1"
-                 aria-disabled="true">Previous</a>
+      {% if tables_paginated.has_other_pages %}
+        <nav aria-label="Table navigation" class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if tables_paginated.has_previous %}
+              <li class="page-item">
+                <a class="page-link shadow-sm ajax-pagination"
+                   href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}">Previous</a>
+              </li>
+            {% endif %}
+            <li class="page-item active">
+              <span class="page-link shadow-sm">{{ tables_paginated.number }} of {{ tables_paginated.paginator.num_pages }}</span>
             </li>
-          {% endif %}
-          <li class="page-item active">
-            <a class="page-link"
-               href="?{{ params_wo_page }}&page={{ tables_paginated.number }}">
-              {{ tables_paginated.number }}
-            </a>
-          </li>
-          {% if tables_paginated.has_next %}
-            <li class="page-item">
-              <a class="page-link"
-                 href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}">Next</a>
-            </li>
-          {% endif %}
-        </ul>
-      </nav>
-    </tbody>
-  </table>
+            {% if tables_paginated.has_next %}
+              <li class="page-item">
+                <a class="page-link shadow-sm ajax-pagination"
+                   href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}">Next</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+{% block after-body-bottom-js %}
+  {{ block.super }}
+  {% vite_asset 'dataedit/static/dataListing/tablelist.js' %}
 {% endblock %}
