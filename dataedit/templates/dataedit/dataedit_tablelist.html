@@ -22,7 +22,7 @@
 {% block data_content %}
   {% load dataedit.taghandler %}
   <div id="table-list-container">
-    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3 mt-4">
       <div class="btn-group shadow-sm" role="group" aria-label="View toggle">
         <input type="radio"
                class="btn-check"
@@ -46,33 +46,63 @@
                  for="toggleDatasets">Datasets</label>
         </span>
       </div>
-      {% if tables_paginated.has_other_pages %}
-        <nav aria-label="Table navigation top">
-          <ul class="pagination pagination-sm mb-0">
-            {% if tables_paginated.has_previous %}
-              <li class="page-item">
-                <a class="page-link shadow-sm ajax-pagination"
-                   href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}"
-                   aria-label="Previous">
-                  <span aria-hidden="true">&laquo;</span>
-                </a>
-              </li>
+      <div class="d-flex align-items-center flex-wrap gap-3">
+        {% if tables_paginated.paginator.count > 0 %}
+          <div class="d-flex flex-column align-items-center mt-4 mb-5">
+            {% if tables_paginated.has_other_pages %}
+              <nav aria-label="Table navigation bottom">
+                <ul class="pagination justify-content-center mb-2">
+                  {% if tables_paginated.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link shadow-sm ajax-pagination"
+                         href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}">Previous</a>
+                    </li>
+                  {% endif %}
+                  <li class="page-item active">
+                    <span class="page-link shadow-sm">{{ tables_paginated.number }} of {{ tables_paginated.paginator.num_pages }}</span>
+                  </li>
+                  {% if tables_paginated.has_next %}
+                    <li class="page-item">
+                      <a class="page-link shadow-sm ajax-pagination"
+                         href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}">Next</a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
             {% endif %}
-            <li class="page-item active">
-              <span class="page-link shadow-sm">{{ tables_paginated.number }} / {{ tables_paginated.paginator.num_pages }}</span>
-            </li>
-            {% if tables_paginated.has_next %}
-              <li class="page-item">
-                <a class="page-link shadow-sm ajax-pagination"
-                   href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}"
-                   aria-label="Next">
-                  <span aria-hidden="true">&raquo;</span>
-                </a>
+            <span class="text-muted small">
+              Showing {{ tables_paginated.start_index }} to {{ tables_paginated.end_index }} of {{ tables_paginated.paginator.count }} results
+            </span>
+          </div>
+        {% endif %}
+        {% if tables_paginated.has_other_pages %}
+          <nav aria-label="Table navigation top">
+            <ul class="pagination pagination-sm mb-0">
+              {% if tables_paginated.has_previous %}
+                <li class="page-item">
+                  <a class="page-link shadow-sm ajax-pagination"
+                     href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}"
+                     aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+              {% endif %}
+              <li class="page-item active">
+                <span class="page-link shadow-sm">{{ tables_paginated.number }} / {{ tables_paginated.paginator.num_pages }}</span>
               </li>
-            {% endif %}
-          </ul>
-        </nav>
-      {% endif %}
+              {% if tables_paginated.has_next %}
+                <li class="page-item">
+                  <a class="page-link shadow-sm ajax-pagination"
+                     href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}"
+                     aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      </div>
     </div>
     <div class="oep-resource-list">
       {% for table in tables_paginated %}
