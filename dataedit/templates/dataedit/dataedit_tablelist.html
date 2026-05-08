@@ -21,32 +21,59 @@
 {% endblock site-header %}
 {% block data_content %}
   {% load dataedit.taghandler %}
-  <div class="d-flex mb-3 mt-4">
-    <div class="btn-group shadow-sm" role="group" aria-label="View toggle">
-      <input type="radio"
-             class="btn-check"
-             name="viewToggle"
-             id="toggleTables"
-             autocomplete="off"
-             checked>
-      <label class="btn btn-outline-primary" for="toggleTables">Tables</label>
-      <span class="d-inline-block"
-            tabindex="0"
-            data-bs-toggle="tooltip"
-            title="Dataset view is coming soon!">
+  <div id="table-list-container">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
+      <div class="btn-group shadow-sm" role="group" aria-label="View toggle">
         <input type="radio"
                class="btn-check"
                name="viewToggle"
-               id="toggleDatasets"
+               id="toggleTables"
                autocomplete="off"
-               disabled>
-        <label class="btn btn-outline-primary"
-               style="pointer-events: none"
-               for="toggleDatasets">Datasets</label>
-      </span>
+               checked>
+        <label class="btn btn-outline-primary" for="toggleTables">Tables</label>
+        <span class="d-inline-block"
+              tabindex="0"
+              data-bs-toggle="tooltip"
+              title="Dataset view is coming soon!">
+          <input type="radio"
+                 class="btn-check"
+                 name="viewToggle"
+                 id="toggleDatasets"
+                 autocomplete="off"
+                 disabled>
+          <label class="btn btn-outline-primary"
+                 style="pointer-events: none"
+                 for="toggleDatasets">Datasets</label>
+        </span>
+      </div>
+      {% if tables_paginated.has_other_pages %}
+        <nav aria-label="Table navigation top">
+          <ul class="pagination pagination-sm mb-0">
+            {% if tables_paginated.has_previous %}
+              <li class="page-item">
+                <a class="page-link shadow-sm ajax-pagination"
+                   href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}"
+                   aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+            {% endif %}
+            <li class="page-item active">
+              <span class="page-link shadow-sm">{{ tables_paginated.number }} / {{ tables_paginated.paginator.num_pages }}</span>
+            </li>
+            {% if tables_paginated.has_next %}
+              <li class="page-item">
+                <a class="page-link shadow-sm ajax-pagination"
+                   href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}"
+                   aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
     </div>
-  </div>
-  <div id="table-list-container">
     <div class="oep-resource-list">
       {% for table in tables_paginated %}
         <div class="card mb-3 border-0 shadow-sm resource-card"
@@ -114,7 +141,7 @@
         </div>
       {% endfor %}
       {% if tables_paginated.has_other_pages %}
-        <nav aria-label="Table navigation" class="mt-4">
+        <nav aria-label="Table navigation bottom" class="mt-4">
           <ul class="pagination justify-content-center">
             {% if tables_paginated.has_previous %}
               <li class="page-item">
