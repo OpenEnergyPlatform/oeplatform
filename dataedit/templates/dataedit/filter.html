@@ -1,123 +1,13 @@
 {% extends "dataedit/base_fullwidth.html" %}
 {% load static %}
 {% block after-head %}
-  <!-- Latest compiled and minified CSS -->
   <link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet" />
-  <!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
   <link href="{% static 'database/css/database-enhancements.css' %}"
         rel="stylesheet" />
 {% endblock after-head %}
 {% block main-top-bar-filter %}
-  <!-- TODO looks out of place -->
-  <div class="controls-container controls-container--horizontal">
-    {% load dataedit.taghandler %}
-    {% get_tags as all_tags %}
-    <div class="controls-container__filters">
-      <form id="form-filter" action="{{ request.path }}" method="get">
-        <div class="controls-container__input">
-          <label for="filterInputText" class="form-label">Filters</label>
-          <!-- TODO down this displayed as a button and looks bad .. but popup is nice -->
-          <button type="button"
-                  class="btn btn-outline-light"
-                  data-bs-toggle="popover"
-                  data-trigger="focus"
-                  title="How to use search and filter"
-                  {% if not tables %} data-bs-content="Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata. If you filter for multiple Tags, only topics containing tables with all selected Tags will be displayed. To see all topics and tables again use the reset filter button." {% else %} data-bs-content="Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata." {% endif %}
-                  style="margin-left: 10px">
-            <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
-          </button>
-          <!-- TODO up this displayed as a button and looks bad .. but popup is nice -->
-          <input id="search-filter"
-                 type="text"
-                 name="query"
-                 placeholder="Search text..."
-                 value="{% firstof query '' %}"
-                 class="form-control" />
-        </div>
-        <div id="tags">
-          <select id="tag-select"
-                  name="tags"
-                  class="form-control controls-container__tags selectpicker"
-                  multiple
-                  data-live-search="true"
-                  title="Click and search all Tags..."
-                  data-style="btn-outline-primary"
-                  data-width="auto"
-                  data-selected-text-format="values"
-                  data-actions-box="true"
-                  iconBase="fa">
-            {% for t in all_tags %}
-              <option data-content='<i class="fa fa-circle" style="color: {{ t.color_hex }};"></i> {{ t.name }}' value="{{ t.pk }}"
-                {% if t.pk in tags %}selected{% endif %}
-                >{{ t.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <button type="button"
-                class="btn btn-link controls-container__reset"
-                onclick="reset_filter()">
-          <span class="btn__icon">
-            <svg width="16"
-                 height="16"
-                 version="1.1"
-                 fill="currentColor"
-                 viewBox="0 0 16 16"
-                 xmlns="http://www.w3.org/2000/svg">
-              <path d="m14,9c0,3.31-2.69,6-6,6s-6-2.69-6-6h1c0,2.76,2.24,5,5,5s5-2.24,5-5-2.24-5-5-5h-3.6l1.48,2.22-.83.55-2.19-3.28L5.12.22l.82.57-1.53,2.22h3.58c3.31,0,6,2.69,6,6Z" />
-            </svg>
-          </span>
-          <span class="btn__text">Reset</span>
-        </button>
-        <a class="btn btn-link controls-container__create-tags"
-           href="{% url 'dataedit:tags' %}">
-          <span class="btn__icon">
-            <svg width="16"
-                 height="16"
-                 version="1.1"
-                 fill="currentColor"
-                 viewBox="0 0 16 16"
-                 xmlns="http://www.w3.org/2000/svg">
-              <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z" />
-            </svg>
-          </span>
-          <span class="btn__text">New Tags</span>
-        </a>
-      </form>
-    </div>
-    <div class="controls-container__btns">
-      <div>
-        <a class="btn btn-primary" href="{% url 'dataedit:oemetabuilder' %}">OEMetaBuilder</a>
-        <a href="{{ doc_oem_builder_link }}"
-           target="_blank"
-           data-bs-toggle="popover"
-           data-bs-trigger="hover"
-           title="OEMetaBuilder"
-           data-bs-content="Click to open the documentation for the OEMetaBuilder.">
-          <i class="fas fa-info-circle"></i>
-        </a>
-      </div>
-      {% if user.is_authenticated %}
-        <div>
-          <button type="button"
-                  class="btn btn-outline-primary"
-                  onclick="redirectToLink('{% url 'login:tables' user.pk %}')">
-            <span class="btn__icon">
-              <svg width="16"
-                   height="16"
-                   version="1.1"
-                   fill="currentColor"
-                   viewBox="0 0 16 16"
-                   xmlns="http://www.w3.org/2000/svg">
-                <path d="m16,1v1H0v-1h16ZM0,8h16v-1H0v1Zm0,6h16v-1H0v1Z" />
-              </svg>
-            </span>
-            <span class="btn__text">View my tables</span>
-          </button>
-        </div>
-      {% endif %}
-    </div>
-  </div>
-  <!-- Enhanced Info Section -->
+  {% load dataedit.taghandler %}
+  {% get_tags as all_tags %}
   <div class="database-info-section mb-4">
     <div class="info-banner" id="infoBanner">
       <div class="info-banner__content">
@@ -167,32 +57,27 @@
               <h6 class="info-section__subtitle">How to Navigate:</h6>
               <ul class="info-section__list">
                 <li>
-                  <strong>Browse Topics:</strong> Click on any topic card below
-                  to explore available datasets
+                  <strong>Browse Topics:</strong> Click on any topic card below to explore available datasets
                 </li>
                 <li>
-                  <strong>Use Filters:</strong> Utilize the search and tag
-                  filters above to find specific data
+                  <strong>Use Filters:</strong> Utilize the search and tag filters above to find specific data
                 </li>
                 <li>
-                  <strong>Draft Data:</strong> The draft section contains
-                  user-contributed data awaiting review
+                  <strong>Draft Data:</strong> The draft section contains user-contributed data awaiting review
                 </li>
                 <li>
-                  <strong>Publish Data:</strong> Once the license of a dataset
-                  qualifies as open data you can publish your data into any
-                  topic suitable for the data
+                  <strong>Publish Data:</strong> Once the license of a dataset qualifies as open data you can publish your data into any topic suitable for the data
                 </li>
                 <li>
-                  <strong>Scenario Data:</strong> The scenario section contains
-                  reviewed input or output data stemming from modelling work.
-                  These datasets can be linked in the scenario bundles section
-                  and they are used to enable quantitative comparisons across
-                  bundles.
+                  <strong>Scenario Data:</strong> The scenario section contains reviewed input or output data stemming from modelling work. These datasets can be linked in the scenario bundles section and they are used to enable quantitative comparisons across bundles.
                 </li>
                 <li>
-                  <strong>Quality Indicators:</strong> Tags enhance data
-                  findability, source type, and review status
+                  <strong>Quality Indicators:</strong> Tags enhance data findability, source type, and review status
+                </li>
+                <li>
+                  <strong>Metadata Standard:</strong> We use the comprehensive <a href="https://github.com/OpenEnergyPlatform/oemetadata"
+    target="_blank"
+    rel="noopener noreferrer">OEMetadata specification</a> to describe datasets. You can build your own JSON metadata using the standalone OEMetaBuilder tool below.
                 </li>
               </ul>
             </div>
@@ -210,7 +95,7 @@
           </div>
           <div class="info-section__actions mt-3">
             <a href="{% url 'dataedit:wizard_create' %}"
-               class="btn btn-success btn-sm">
+               class="btn btn-success btn-sm me-2 mb-2">
               <svg width="14"
                    height="14"
                    fill="currentColor"
@@ -222,7 +107,7 @@
               Contribute Data
             </a>
             <a href="{{ EXTERNAL_URLS.tutorials_api_upload }}"
-               class="btn btn-outline-secondary btn-sm me-2">
+               class="btn btn-outline-secondary btn-sm me-2 mb-2">
               <svg width="14"
                    height="14"
                    fill="currentColor"
@@ -232,52 +117,101 @@
               </svg>
               API Access
             </a>
+            <a href="{% url 'dataedit:oemetabuilder' %}"
+               class="btn btn-outline-primary btn-sm me-2 mb-2">
+              <i class="fas fa-file-code me-1"></i> OEMetaBuilder
+            </a>
+            {% if request.user.is_authenticated %}
+              <a href="{% url 'login:tables' user_id=request.user.id %}"
+                 class="btn btn-outline-dark btn-sm me-2 mb-2">
+                <i class="fas fa-list me-1"></i> My Tables
+              </a>
+            {% endif %}
           </div>
         </div>
       </div>
     </div>
   </div>
+  <div class="filter-section mb-4 p-3 bg-white rounded shadow-sm border">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 fw-bold text-secondary">
+        <i class="fas fa-filter me-2"></i>Filter & Search
+      </h5>
+      <button type="button"
+              class="btn btn-sm btn-outline-secondary rounded-pill"
+              data-bs-toggle="popover"
+              data-bs-trigger="focus"
+              title="How to use search and filter"
+              data-bs-content="{% if not tables %}Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata. If you filter for multiple Tags, only topics containing tables with all selected Tags will be displayed. To see all topics and tables again use the Reset button.{% else %}Search results show tables containing the selected tags and/or matching the searched string in their name or description.{% endif %}">
+        <i class="fas fa-question-circle me-1"></i> Help
+      </button>
+    </div>
+    <form id="form-filter"
+          action="{{ request.path }}"
+          method="get"
+          class="w-100">
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-5">
+          <label for="search-filter" class="form-label small fw-bold text-muted mb-1">
+            Search Text
+          </label>
+          <div class="input-group shadow-sm">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="fas fa-search"></i></span>
+            <input type="text"
+                   class="form-control border-start-0 ps-0"
+                   name="query"
+                   id="search-filter"
+                   placeholder="Search tables... (Press Enter for quick-search)"
+                   value="{% if query and query != 'None' %}{{ query }}{% endif %}">
+          </div>
+        </div>
+        <div class="col-12 col-md-5">
+          <label for="tag-select" class="form-label small fw-bold text-muted mb-1">
+            Filter by Tags
+          </label>
+          <div id="tags" class="shadow-sm rounded bg-white w-100">
+            <select id="tag-select"
+                    name="tags"
+                    class="form-control controls-container__tags selectpicker"
+                    multiple
+                    data-live-search="true"
+                    title="Click and search all Tags..."
+                    data-style="btn-outline-primary"
+                    data-width="100%"
+                    data-selected-text-format="values"
+                    data-actions-box="true"
+                    iconBase="fa">
+              {% for t in all_tags %}
+                <option data-content='<i class="fa fa-circle" style="color: {{ t.color_hex }};"></i> {{ t.name }}' value="{{ t.pk }}"
+                  {% if t.pk in tags %}selected{% endif %}
+                  >{{ t.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="col-12 col-md-2 d-flex flex-wrap flex-md-nowrap gap-2 justify-content-md-end">
+          <button type="submit"
+                  class="btn btn-primary shadow-sm flex-grow-1 flex-md-grow-0 text-nowrap">
+            <i class="fas fa-search me-1"></i> Search
+          </button>
+          <a href="{{ request.path }}"
+             id="reset-filter-btn"
+             class="btn btn-outline-danger shadow-sm flex-grow-1 flex-md-grow-0 text-nowrap {% if query and query != 'None' or tags %}{% else %}d-none{% endif %}"
+             title="Reset search and filters">
+            <i class="fas fa-undo me-1"></i> Reset
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
 {% endblock main-top-bar-filter %}
+{% block data_content %}
+{% endblock data_content %}
 {% block after-body-bottom-js %}
-  <!-- Latest compiled and minified JavaScript -->
+  {{ block.super }}
   <script src="{% static 'js/bootstrap-select.min.js' %}"></script>
-  <!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
-  <script src="{% static 'js/activate-bootstrap-popover.js' %}"></script>
   <script>
-    function reset_filter() {
-      location.href = "{{ request.path }}";
-    }
-
-    // belongs to dataedit_topiclist.hmtl
-    function open_wizzard() {
-      location.href = "{% url 'dataedit:wizard_create' %}";
-    }
-
-    /* update filter when changing selection */
-    /*
-    $('#tag-select').on('change', function (e) {
-        $("#form-filter").submit();
-    });
-    */
-    /* update filter when closing tag select dropdown */
-    $("#tag-select").on("hide.bs.select", function (e) {
-      $("#form-filter").submit();
-    });
-    /* also update filter if leave search field */
-    $("#search-filter").on("blur", function (e) {
-      $("#form-filter").submit();
-    });
-    /* also update filter on key=Enter in search field */
-    $("#search-filter").on("keydown", function (e) {
-      if (e.keyCode == 13) {
-        $("#form-filter").submit();
-      }
-    });
-
-    function redirectToLink(link) {
-      window.location.href = link;
-    }
-
+    // Database Info Banner Toggle
     function toggleInfoSection() {
       const content = document.getElementById("infoContent");
       const toggle = document.getElementById("infoToggle");
@@ -295,5 +229,29 @@
           '<path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />';
       }
     }
+
+    // Filter Initialization
+    $(document).ready(function() {
+      // Initialize the Bootstrap Select Picker
+      $("#tag-select").selectpicker();
+
+      // Initialize the Bootstrap Help Popover
+      var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+      var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
+      });
+
+      // Fix for the "AJAX Disconnect" - Manually show/hide the reset button on search submission
+      $("#form-filter").on("submit", function() {
+        const hasQuery = $("#search-filter").val().trim() !== "";
+        const hasTags = $("#tag-select").val() && $("#tag-select").val().length > 0;
+
+        if (hasQuery || hasTags) {
+          $("#reset-filter-btn").removeClass("d-none");
+        } else {
+          $("#reset-filter-btn").addClass("d-none");
+        }
+      });
+    });
   </script>
 {% endblock after-body-bottom-js %}
