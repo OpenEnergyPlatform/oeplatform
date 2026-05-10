@@ -166,8 +166,16 @@ function extractCardData(rawData) {
 function getReadableSize(sizeObj) {
   if (!sizeObj) return "";
 
-  // Postgres allocates 8192 bytes (1 page) for a newly created empty table
-  if (sizeObj.table_bytes <= 8192 || sizeObj.total_bytes === 0) return "Empty";
+  // Postgres allocates at least 8192 bytes (1 page) for a newly created empty table.
+  // However, tables with a few rows of massive data (like geometries/polygons)
+  // push data into TOAST tables. This keeps table_bytes at 8192, but total_bytes becomes huge.
+  // We now only mark it "Empty" if BOTH the main table AND the total size are extremely small (<= 32 KB).
+  if (
+    sizeObj.total_bytes === 0 ||
+    (sizeObj.table_bytes <= 8192 && sizeObj.total_bytes <= 32768)
+  ) {
+    return "Empty";
+  }
 
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
