@@ -248,11 +248,9 @@ class MetadataAPIView(APIView):
 
         if metadata is not None:
             # update/sync keywords with tags before saving metadata
-<<<<<<< feature-1971-add-oep-datasets
             # oemetadata v2 introduces datasets which are not relevant on a table level
             # always query for metadata["resources"][0]
-=======
->>>>>>> develop
+
             keywords = metadata["resources"][0].get("keywords", []) or []
             metadata["resources"][0]["keywords"] = update_tags_from_keywords(
                 table=table_obj.name, keywords=keywords
