@@ -172,7 +172,7 @@ function getReadableSize(sizeObj) {
   // We now only mark it "Empty" if BOTH the main table AND the total size are extremely small (<= 32 KB).
   if (
     sizeObj.total_bytes === 0 ||
-    (sizeObj.table_bytes <= 8192 && sizeObj.total_bytes <= 32768)
+    (sizeObj.table_bytes <= 8192 && sizeObj.total_bytes <= 8192)
   ) {
     return "Empty";
   }
