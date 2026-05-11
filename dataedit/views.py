@@ -13,7 +13,6 @@ SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner L
 SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
 SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
@@ -79,7 +78,11 @@ from dataedit.helper import (
     recursive_update,
     update_keywords_from_tags,
 )
-from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
+from dataedit.metadata import (
+    has_valid_filled_metadata,
+    load_metadata_from_db,
+    save_metadata_to_db,
+)
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
@@ -93,49 +96,6 @@ from oeplatform.settings import (
     PSEUDO_TOPIC_DRAFT,
     TOPIC_SCENARIO,
 )
-
-
-def has_valid_metadata(metadata: dict) -> bool:
-    """
-    Check if metadata has any non-empty fields.
-    Returns True if at least one field has a meaningful value.
-
-    Args:
-        metadata: The OEMetadata dictionary
-
-    Returns:
-        bool: True if valid metadata exists, False otherwise
-    """
-    if not metadata:
-        return False
-
-    def check_value(val):
-        """Check if a value is considered non-empty."""
-        if val is None:
-            return False
-        if isinstance(val, str):
-            return val.strip() not in ("", "None", "null")
-        if isinstance(val, (list, dict)):
-            return len(val) > 0
-        return True
-
-    def traverse(obj):
-        """Recursively traverse the metadata structure."""
-        if isinstance(obj, dict):
-            for key, value in obj.items():
-                # Skip certain keys that are always present but not meaningful
-                if key in ("@id", "@context", "metaMetadata"):
-                    continue
-                if check_value(value) or traverse(value):
-                    return True
-        elif isinstance(obj, list):
-            for item in obj:
-                if check_value(item) or traverse(item):
-                    return True
-        return False
-
-    return traverse(metadata)
-
 
 ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
 
@@ -758,7 +718,7 @@ class TableDataView(View):
         reviews = opr_manager.filter_opr_by_table(table=table)
 
         # Check if metadata has any valid (non-empty) fields
-        has_metadata = has_valid_metadata(metadata)
+        has_metadata = has_valid_filled_metadata(metadata)
 
         opr_context = {
             "contributor": PeerReviewManager.load_contributor(table=table),

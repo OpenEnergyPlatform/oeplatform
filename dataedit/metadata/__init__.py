@@ -1,15 +1,12 @@
 """
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
@@ -95,3 +92,77 @@ def load_metadata_from_db(table: str) -> dict:
         validate_metadata(metadata, check_license=False)
 
     return metadata
+
+
+def has_valid_filled_metadata(metadata: dict) -> bool:
+    """
+    Check if metadata has been meaningfully filled beyond the default fields
+    that are automatically populated by load_metadata_from_db.
+
+    The default fields set by load_metadata_from_db are:
+        - "name": table name
+        - "resources": [{"name": table name}]
+        - "metaMetadata": from OEMETADATA_V20_TEMPLATE
+
+    Returns False if metadata is empty or only contains these default fields.
+    Returns True if at least one additional field has a meaningful value.
+
+    Args:
+        metadata: The OEMetadata dictionary
+
+    Returns:
+        bool: True if metadata has been filled beyond defaults, False otherwise
+    """
+    if not metadata:
+        return False
+
+    # Keys that are considered "default" / auto-filled and should be ignored
+    DEFAULT_ONLY_KEYS = {"name", "metaMetadata"}
+
+    def check_value(val):
+        """Check if a value is considered non-empty."""
+        if val is None:
+            return False
+        if isinstance(val, str):
+            return val.strip() not in ("", "None", "null")
+        if isinstance(val, (list, dict)):
+            return len(val) > 0
+        return True
+
+    def is_default_resources(resources):
+        """
+        Check if resources only contains the default minimal entry
+        set by load_metadata_from_db: [{"name": <table_name>}]
+        """
+        if not isinstance(resources, list):
+            return False
+        if len(resources) != 1:
+            # More than one resource means user has added content
+            return False
+
+        resource = resources[0]
+        if not isinstance(resource, dict):
+            return False
+
+        # Default resource only has "name" key
+        return set(resource.keys()) == {"name"}
+
+    def traverse(obj):
+        """Recursively traverse the metadata structure."""
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if key in DEFAULT_ONLY_KEYS:
+                    continue
+                if key == "resources":
+                    # Only skip if it matches the default minimal resources structure
+                    if is_default_resources(value):
+                        continue
+                if check_value(value) or traverse(value):
+                    return True
+        elif isinstance(obj, list):
+            for item in obj:
+                if check_value(item) or traverse(item):
+                    return True
+        return False
+
+    return traverse(metadata)
