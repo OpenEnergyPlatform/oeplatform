@@ -44,6 +44,8 @@ from api.actions import (
     assert_permission,
     close_cursor,
     close_raw_connection,
+    describe_columns,
+    describe_constraints,
     load_cursor_from_context,
     load_session_from_context,
     open_cursor,
@@ -392,3 +394,166 @@ def get_request_data_dict(request: Request) -> dict:
     if isinstance(request.data, dict):
         return request.data
     raise TypeError(type(request.data))
+
+
+def get_column_description(table_obj: Table):
+    """Return list of column descriptions:
+    [{
+       "name": str,
+       "data_type": str,
+       "is_nullable": bool,
+       "is_pk": bool
+    }]
+
+    """
+
+    def get_datatype_str(column_def):
+        """get single string sql type definition.
+
+        We want the data type definition to be a simple string, e.g. decimal(10, 6)
+        or varchar(128), so we need to combine the various fields
+        (type, numeric_precision, numeric_scale, ...)
+        """
+        # for reverse validation, see also api.parser.parse_type(dt_string)
+        dt = column_def["data_type"].lower()
+        precisions = None
+        if dt.startswith("character"):
+            if dt == "character varying":
+                dt = "varchar"
+            else:
+                dt = "char"
+            precisions = [column_def["character_maximum_length"]]
+        elif dt.endswith(" without time zone"):  # this is the default
+            dt = dt.replace(" without time zone", "")
+        elif re.match("(numeric|decimal)", dt):
+            precisions = [column_def["numeric_precision"], column_def["numeric_scale"]]
+        elif dt == "interval":
+            precisions = [column_def["interval_precision"]]
+        elif re.match(".*int", dt) and re.match(
+            "nextval", column_def.get("column_default") or ""
+        ):
+            # dt = dt.replace('int', 'serial')
+            pass
+        elif dt.startswith("double"):
+            dt = "float"
+        if precisions:  # remove None
+            precisions = [x for x in precisions if x is not None]
+        if precisions:
+            dt += "(%s)" % ", ".join(str(x) for x in precisions)
+        return dt
+
+    def get_pk_fields(constraints):
+        """Get the column names that make up the primary key
+        from the constraints definitions.
+
+        NOTE: Currently, the wizard to create tables only supports
+            single fields primary keys (which is advisable anyways)
+        """
+        pk_fields = []
+        for _name, constraint in constraints.items():
+            if constraint.get("constraint_type") == "PRIMARY KEY":
+                m = re.match(
+                    r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition") or ""
+                )
+                if m:
+                    # "f1, f2" -> ["f1", "f2"]
+                    pk_fields = [x.strip() for x in m.groups()[0].split(",")]
+        return pk_fields
+
+    _columns = describe_columns(table_obj)
+    _constraints = describe_constraints(table_obj)
+    pk_fields = get_pk_fields(_constraints)
+    # order by ordinal_position
+    columns = []
+    for name, col in sorted(
+        _columns.items(), key=lambda kv: int(kv[1]["ordinal_position"])
+    ):
+        columns.append(
+            {
+                "name": name,
+                "data_type": get_datatype_str(col),
+                "is_nullable": col["is_nullable"],
+                "is_pk": name in pk_fields,
+                "unit": None,
+                "description": None,
+            }
+        )
+    return columns
+
+
+def sync_api_metadata_columns(metadata: dict, table_obj: Table) -> dict:
+    """
+    Enforces that the metadata 'fields' exactly match the physical database columns,
+    while preserving human annotations (isAbout, valueReference, etc.).
+    """
+    # 1. Get the physical truths from the database
+    physical_columns = get_column_description(table_obj)
+
+    # Ensure resources array exists safely
+    if not metadata.get("resources"):
+        metadata["resources"] = [{}]
+    resource = metadata["resources"][0]
+
+    if "schema" not in resource:
+        resource["schema"] = {}
+
+    # 2. Extract incoming fields from the API payload
+    incoming_fields = resource["schema"].get("fields", [])
+
+    # Create a fast lookup dict by column name
+    incoming_fields_lookup = {
+        field.get("name"): field
+        for field in incoming_fields
+        if isinstance(field, dict) and field.get("name")
+    }
+
+    updated_fields = []
+
+    # 3. Iterate through physical database columns (The Source of Truth)
+    for db_col in physical_columns:
+        col_name = db_col["name"]
+
+        # Grab the incoming human data if it exists, otherwise empty dict
+        incoming_col = incoming_fields_lookup.get(col_name, {})
+
+        # Ensure 'id' is strictly not nullable
+        is_nullable = db_col["is_nullable"]
+        if col_name == "id":
+            is_nullable = False
+
+        # Start with a copy of the incoming column to preserve all human annotations
+        # (isAbout, valueReference, description, unit, etc.)
+        merged_col = incoming_col.copy()
+
+        # Overwrite physical constraints strictly based on the database
+        merged_col.update(
+            {
+                "name": col_name,
+                "type": db_col["data_type"],
+                "nullable": is_nullable,
+            }
+        )
+
+        # Ensure default keys exist if they weren't in the incoming payload
+        merged_col.setdefault("description", None)
+        merged_col.setdefault("unit", None)
+
+        # --- ARTIFACT SCRUBBER ---
+        # Just in case a user copy-pasted raw JSON from the UI into an API tool,
+        # we scrub the UI-only 'openModalButton' to keep the DB clean.
+        if isinstance(merged_col.get("isAbout"), list):
+            for item in merged_col["isAbout"]:
+                item.pop("openModalButton", None)
+
+        if isinstance(merged_col.get("valueReference"), list):
+            for item in merged_col["valueReference"]:
+                item.pop("openModalButton", None)
+
+        updated_fields.append(merged_col)
+
+    # 4. Overwrite the payload's fields with our perfectly reconciled list
+    # Note: Because we iterate over `physical_columns`, any "phantom" columns
+    # that were in the JSON but not in the DB are automatically dropped!
+    resource["schema"]["fields"] = updated_fields
+
+    return metadata

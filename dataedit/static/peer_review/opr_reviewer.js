@@ -1,5 +1,8 @@
-// SPDX-FileCopyrightText: 2025 Reiner Lemoine Institut
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2023 Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2024 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+// // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {
   hideReviewerOptions,
@@ -29,6 +32,12 @@ import { switchCategoryTab, selectNextField, updatePercentageDisplay } from "./n
 import { renderSummaryPageFields, updateTabProgressIndicatorClasses } from "./summary.js";
 import {isEmptyValue, isEffectivelyEmpty} from "./utilities.js";window.clientSideReviewFinished = window.clientSideReviewFinished ?? false;
 let initialReviewerSuggestions = {};
+document.addEventListener('DOMContentLoaded', function() {
+  initializeEmptyFields();
+});
+window.addEventListener('load', function() {
+  initializeEmptyFields();
+})
 window.clientSideReviewFinished = window.clientSideReviewFinished ?? false;
 export function initReviewer() {
   initializeEventBindings(saveEntrancesForReviewer);
@@ -76,6 +85,42 @@ export function initReviewer() {
   }
 }
 
+function initializeEmptyFields() {
+  const allFields = document.querySelectorAll(".field");
+
+  allFields.forEach(fieldEl => {
+    const fieldKey = fieldEl.dataset.fieldkey;
+    const fieldValue = fieldEl.dataset.fieldvalue;
+
+    const isEmpty = isEffectivelyEmpty(fieldKey, fieldValue);
+
+    if (isEmpty) {
+      // Grey out
+      const labelEl = fieldEl.querySelector('.key');
+      const valueEl = fieldEl.querySelector('.value');
+
+      if (labelEl) labelEl.style.color = '#6c757d';
+      if (valueEl) valueEl.style.color = '#6c757d';
+
+      // Add explanation message
+      const safeKey = fieldKey.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+      if (!document.getElementById(`explanation_${safeKey}`)) {
+        const explanationElement = document.createElement('p');
+        explanationElement.id = `explanation_${safeKey}`;
+        explanationElement.classList.add('explanation', 'text-muted', 'mt-1');
+        explanationElement.innerText = 'Field is empty. Reviewing is not possible.';
+        fieldEl.appendChild(explanationElement);
+      }
+
+      // Disable clicking completely
+      fieldEl.style.pointerEvents = "none";
+      fieldEl.style.cursor = "not-allowed";
+      fieldEl.style.opacity = "0.7";
+    }
+  });
+}
+
 function deletePeerReview() {
   if (!confirm("Are you sure?")) return;
   const json = JSON.stringify({ 
@@ -97,6 +142,9 @@ function click_field(fieldKey, fieldValue, category) {
   const isEmpty = isEffectivelyEmpty(fieldKey, fieldValue);
   const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
 
+    if (isEmpty) {
+    return; // Exit early, don't allow interaction
+  }
   switchCategoryTab(category);
   setSelectedField(fieldKey);
   setselectedFieldValue(fieldValue);
@@ -112,17 +160,9 @@ function click_field(fieldKey, fieldValue, category) {
   // If it's empty, buttons MUST be disabled, regardless of previous state (unless you want to allow un-reviewing, but generally empty = no action)
   const buttons = ["ok-button", "rejected-button", "suggestion-button"];
   
-  buttons.forEach(btn => {
-      const el = document.getElementById(btn);
-      if (isEmpty) {
-          el.disabled = true; // Force disable if empty
-      } else {
-          // If not empty, disable if no state is selected yet? 
-          // Actually, in the original code, buttons were enabled if a state existed. 
-          // But usually, you want buttons enabled so you CAN select a state.
-          // Let's assume buttons should be enabled if the field has content.
-          el.disabled = false;
-      }
+    buttons.forEach(btn => {
+    const el = document.getElementById(btn);
+    el.disabled = false; // Enable buttons since we know field is not empty
   });
 
   // 3. Handle empty field messages

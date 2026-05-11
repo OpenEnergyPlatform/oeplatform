@@ -69,6 +69,7 @@ export default defineConfig({
         ontology: resolve("./ontology/frontend/src/index.jsx"),
         wizard: resolve("./dataedit/static/wizard/wizard.js"),
         metaedit: resolve("./dataedit/static/metaedit/metaedit.js"),
+        tablelist: resolve("./dataedit/static/dataListing/tablelist.js"),
       },
     },
   },

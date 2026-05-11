@@ -20,7 +20,6 @@ from django.http import HttpRequest, JsonResponse
 import api.parser
 from api.actions import (
     describe_columns,
-    describe_constraints,
     get_column_changes,
     get_constraints_changes,
     set_table_metadata,
@@ -505,91 +504,6 @@ def update_keywords_from_tags(table: Table) -> None:
     metadata["resources"][0]["keywords"] = keywords
 
     set_table_metadata(table=table.name, metadata=metadata)
-
-
-def get_column_description(table_obj: Table):
-    """Return list of column descriptions:
-    [{
-       "name": str,
-       "data_type": str,
-       "is_nullable': bool,
-       "is_pk": bool
-    }]
-
-    """
-
-    def get_datatype_str(column_def):
-        """get single string sql type definition.
-
-        We want the data type definition to be a simple string, e.g. decimal(10, 6)
-        or varchar(128), so we need to combine the various fields
-        (type, numeric_precision, numeric_scale, ...)
-        """
-        # for reverse validation, see also api.parser.parse_type(dt_string)
-        dt = column_def["data_type"].lower()
-        precisions = None
-        if dt.startswith("character"):
-            if dt == "character varying":
-                dt = "varchar"
-            else:
-                dt = "char"
-            precisions = [column_def["character_maximum_length"]]
-        elif dt.endswith(" without time zone"):  # this is the default
-            dt = dt.replace(" without time zone", "")
-        elif re.match("(numeric|decimal)", dt):
-            precisions = [column_def["numeric_precision"], column_def["numeric_scale"]]
-        elif dt == "interval":
-            precisions = [column_def["interval_precision"]]
-        elif re.match(".*int", dt) and re.match(
-            "nextval", column_def.get("column_default") or ""
-        ):
-            # dt = dt.replace('int', 'serial')
-            pass
-        elif dt.startswith("double"):
-            dt = "float"
-        if precisions:  # remove None
-            precisions = [x for x in precisions if x is not None]
-        if precisions:
-            dt += "(%s)" % ", ".join(str(x) for x in precisions)
-        return dt
-
-    def get_pk_fields(constraints):
-        """Get the column names that make up the primary key
-        from the constraints definitions.
-
-        NOTE: Currently, the wizard to create tables only supports
-            single fields primary keys (which is advisable anyways)
-        """
-        pk_fields = []
-        for _name, constraint in constraints.items():
-            if constraint.get("constraint_type") == "PRIMARY KEY":
-                m = re.match(
-                    r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition") or ""
-                )
-                if m:
-                    # "f1, f2" -> ["f1", "f2"]
-                    pk_fields = [x.strip() for x in m.groups()[0].split(",")]
-        return pk_fields
-
-    _columns = describe_columns(table_obj)
-    _constraints = describe_constraints(table_obj)
-    pk_fields = get_pk_fields(_constraints)
-    # order by ordinal_position
-    columns = []
-    for name, col in sorted(
-        _columns.items(), key=lambda kv: int(kv[1]["ordinal_position"])
-    ):
-        columns.append(
-            {
-                "name": name,
-                "data_type": get_datatype_str(col),
-                "is_nullable": col["is_nullable"],
-                "is_pk": name in pk_fields,
-                "unit": None,
-                "description": None,
-            }
-        )
-    return columns
 
 
 def get_cancle_state(request):
