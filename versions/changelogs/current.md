@@ -36,6 +36,11 @@ SPDX-License-Identifier: CC0-1.0
   with the table schema available in the database
   [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)
 
+- Add new java script functionality for enhanced fetching of additional
+  information from table metadata and reworked table listing UI to show table
+  listing cards with additional information
+  [(#2311)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2311)
+
 ### Bugs
 
 - Reviewer&Contributor page: calculation of percentage of progress of reviewed
@@ -69,6 +74,10 @@ SPDX-License-Identifier: CC0-1.0
   `valueReference` entries and added unwanted properties when the users submits
   the Editor form
   [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)
+
+- Fixed a bug in OEO loading module that was made visible by OEO version 2.12.0
+  as there was a new metadata owl file introduced which can not be parsed with
+  rdflib [(#2311)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2311)
 
 ## Documentation updates
 
