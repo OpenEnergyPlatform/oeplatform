@@ -1,0 +1,86 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Podman Compose production stack.
+# Run from the repository root:
+#   podman-compose -f podman/podman-compose.yaml up -d
+
+volumes:
+  pgdata:
+  fuseki_databases:
+  oeplatform_ontologies:
+  oeplatform_media:
+
+services:
+  postgres:
+    image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${OEP_PORT_POSTGRES:-5432}:5432"
+
+  # TODO: load oeo_ext.owl into Fuseki as a named graph so it is queryable via
+  # SPARQL alongside the base OEO. See GitHub issue #<TBD>.
+  fuseki:
+    image: stain/jena-fuseki:5.1.0
+    container_name: fuseki
+    environment:
+      ADMIN_PASSWORD: ${FUSEKI_ADMIN_PASSWORD}
+      FUSEKI_DATASET_1: ${FUSEKI_DATASET_1}
+    volumes:
+      - fuseki_databases:/home/fuseki/databases
+    restart: unless-stopped
+    ports:
+      - "${OEP_PORT_FUSEKI:-3030}:3030"
+
+  oeplatform:
+    build:
+      context: ..
+      dockerfile: podman/Dockerfile
+    container_name: oeplatform
+    ports:
+      - "${OEP_PORT_WEB:-8080}:80"
+    environment:
+      OEP_DJANGO_USER: ${OEP_DJANGO_USER}
+      OEP_DB_PW: ${OEP_DB_PW}
+      OEP_DJANGO_HOST: ${OEP_DJANGO_HOST}
+      OEP_DJANGO_NAME: ${OEP_DJANGO_NAME}
+      LOCAL_DB_USER: ${LOCAL_DB_USER}
+      LOCAL_DB_PASSWORD: ${LOCAL_DB_PASSWORD}
+      LOCAL_DB_NAME: ${LOCAL_DB_NAME}
+      LOCAL_DB_HOST: ${LOCAL_DB_HOST}
+    volumes:
+      - oeplatform_ontologies:/app/ontologies
+      - oeplatform_media:/app/media
+    depends_on:
+      - postgres
+
+  ontop:
+    build:
+      context: ../docker
+      dockerfile: Dockerfile.ontop
+    container_name: ontop
+    ports:
+      - "${OEP_PORT_ONTOP:-8081}:8080"
+    environment:
+      ONTOP_MAPPING_FILE: "/opt/ontop-config/mapping.obda"
+      ONTOP_OWL_FILE: "/opt/ontop-config/ontology.owl"
+      ONTOP_PROPERTIES_FILE: "/opt/ontop-config/ontop.properties"
+    volumes:
+      - ../docker/serviceConfigs/ontop:/opt/ontop-config
+    depends_on:
+      - postgres
+
+  lookup:
+    restart: unless-stopped
+    image: dbpedia/lookup:dev
+    container_name: loep_lookup
+    ports:
+      - "${OEP_PORT_LOOKUP:-3004}:8082"
+    volumes:
+      - ../docker/data/index/:/index
+      - ../docker/serviceConfigs/lookup/config.yaml:/resources/config.yml
