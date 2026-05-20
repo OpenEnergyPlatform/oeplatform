@@ -7,7 +7,7 @@
 #
 # NOTE: The Volume= path below must point to your actual repo checkout.
 #       Update /opt/oeplatform to match your deployment path, or symlink it:
-#         sudo ln -s /your/repo/path /opt/oeplatform
+#         sudo ln -s /your/actual/repo/path /opt/oeplatform
 
 [Unit]
 Description=OEPlatform Ontop SPARQL endpoint
@@ -16,7 +16,7 @@ After=oep-postgres.service
 [Container]
 Image=localhost/oep-ontop:latest
 ContainerName=ontop
-Volume=/opt/oeplatform/docker/serviceConfigs/ontop:/opt/ontop-config:ro
+Volume=/opt/oeplatform/podman/serviceConfigs/ontop:/opt/ontop-config:ro
 Environment=ONTOP_MAPPING_FILE=/opt/ontop-config/mapping.obda
 Environment=ONTOP_OWL_FILE=/opt/ontop-config/ontology.owl
 Environment=ONTOP_PROPERTIES_FILE=/opt/ontop-config/ontop.properties

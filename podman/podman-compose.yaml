@@ -71,7 +71,7 @@ services:
       ONTOP_OWL_FILE: "/opt/ontop-config/ontology.owl"
       ONTOP_PROPERTIES_FILE: "/opt/ontop-config/ontop.properties"
     volumes:
-      - ../docker/serviceConfigs/ontop:/opt/ontop-config
+      - ./serviceConfigs/ontop:/opt/ontop-config
     depends_on:
       - postgres
 

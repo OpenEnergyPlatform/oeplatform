@@ -1,0 +1,4 @@
+# These files must be provided manually — never committed to version control.
+ontology.owl
+postgresql.jar
+ontop.properties
